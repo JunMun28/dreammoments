@@ -6,7 +6,7 @@ export const Route = createFileRoute('/login')({
   component: Login,
 });
 
-function Login() {
+export function Login() {
   const googleTitleId = useId();
 
   const handleGoogleLogin = async () => {

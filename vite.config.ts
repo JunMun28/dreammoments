@@ -5,6 +5,11 @@ import viteReact from '@vitejs/plugin-react'
 import viteTsConfigPaths from 'vite-tsconfig-paths'
 import tailwindcss from '@tailwindcss/vite'
 import { nitro } from 'nitro/vite'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { alias } from 'drizzle-orm/gel-core'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const config = defineConfig({
   plugins: [
@@ -18,9 +23,16 @@ const config = defineConfig({
     tanstackStart(),
     viteReact(),
   ],
+  resolve: {
+    alias: {
+      react: path.resolve(__dirname, './node_modules/react'),
+      'react-dom': path.resolve(__dirname, './node_modules/react-dom'),
+    },
+    dedupe: ['react', 'react-dom'],
+  },
   test: {
-    environment: 'node',
-    include: ['src/**/*.test.ts'],
+    environment: 'jsdom',
+    include: ['src/**/*.test.{ts,tsx}'],
   },
 })
 
