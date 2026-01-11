@@ -8,6 +8,7 @@ import {
   sessionsRelations,
   invitationsRelations,
 } from './schema'
+import { getTableName } from 'drizzle-orm'
 
 describe('Database Schema', () => {
   describe('users table', () => {
@@ -16,7 +17,7 @@ describe('Database Schema', () => {
     })
 
     it('should have correct table name', () => {
-      expect(users._.name).toBe('users')
+      expect(getTableName(users)).toBe('users')
     })
 
     it('should have required columns', () => {
@@ -32,7 +33,7 @@ describe('Database Schema', () => {
     })
 
     it('should have correct table name', () => {
-      expect(loginCodes._.name).toBe('login_codes')
+      expect(getTableName(loginCodes)).toBe('login_codes')
     })
 
     it('should have required columns', () => {
@@ -50,7 +51,7 @@ describe('Database Schema', () => {
     })
 
     it('should have correct table name', () => {
-      expect(sessions._.name).toBe('sessions')
+      expect(getTableName(sessions)).toBe('sessions')
     })
 
     it('should have required columns', () => {
@@ -67,7 +68,7 @@ describe('Database Schema', () => {
     })
 
     it('should have correct table name', () => {
-      expect(invitations._.name).toBe('invitations')
+      expect(getTableName(invitations)).toBe('invitations')
     })
 
     it('should have couple info columns', () => {
