@@ -112,3 +112,23 @@
      ```
      VITE_NEON_AUTH_URL=https://ep-xxx.neonauth.{region}.aws.neon.tech/{database}/auth
      ```
+
+---
+
+## 2026-01-11: Session Hook Exports (AUTH-002-T2)
+
+**Completed:** Export useSession, getSession, signOut from auth client
+
+**Changes:**
+- `src/lib/auth.ts`: Added exports for useSession hook, getSession method, signOut method with JSDoc
+- `src/lib/auth.test.ts`: Added 4 tests verifying exports from authClient
+
+**Decisions:**
+- useSession is directly from BetterAuthReactAdapter (not a wrapper) for simplicity
+- Exported getSession for non-React contexts (server functions, utilities)
+- Exported signOut for logout functionality (AUTH-003-T1 prerequisite)
+
+**Verification:**
+- 4/4 auth.test.ts tests pass
+- Biome check passes for auth files
+- Pre-existing TS errors in drizzle.config.ts, neon-vite-plugin.ts, demo routes - not from auth changes
