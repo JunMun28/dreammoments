@@ -38,3 +38,27 @@
 - `pnpm tsc --noEmit` checks on modified files passed.
 - `pnpm run lint` checks on modified files passed (fixed SVG a11y).
 - Client build (`vite build`) passed for new routes.
+
+## 2026-01-11: Auth Server Functions (AUTH-001-T3, AUTH-001-T5, AUTH-002-T3)
+
+**Completed:** Core auth server functions for magic code login + session management
+
+**Changes:**
+- `src/lib/auth-server.ts`: Server functions (generateLoginCode, verifyLoginCode, createSession, validateSession, invalidateSession)
+- `src/lib/auth-server.test.ts`: TDD tests w/ mocked drizzle (8 tests)
+
+**Decisions:**
+- 6-digit codes w/ 10min expiry for login
+- 30-day session expiry
+- Email normalized to lowercase
+- Discriminated union return type for verifyLoginCode (success/error)
+- Used drizzle-orm queries w/ proper joins for session validation
+
+**Notes:**
+- Pre-existing TS errors in drizzle.config.ts, neon-vite-plugin.ts, demo routes - not blocking auth feature
+- TDD approach: wrote tests first, then implementation
+
+**Verification:**
+- 50/50 tests pass
+- No TS errors in auth-server files
+- Biome lint passes for auth-server files
