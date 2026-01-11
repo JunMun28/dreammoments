@@ -40,4 +40,4 @@ Identify the highest priority task from progress.txt and PRD.md. Work on ONLY ON
 # TERMINATION
 If, while implementing the feature, you notice that all work is complete, output <promise>COMPLETE</promise>."
 
-claude --permission-mode acceptEdits "$prompt"
+claude --dangerously-skip-permissions --chrome --permission-mode acceptEdits "$prompt"
