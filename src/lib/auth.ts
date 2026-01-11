@@ -1,8 +1,22 @@
-import { createAuthClient } from '@neondatabase/auth';
-import { BetterAuthReactAdapter } from '@neondatabase/auth/react';
+import { createAuthClient } from "@neondatabase/auth";
+import { BetterAuthReactAdapter } from "@neondatabase/auth/react";
 
-// Create the auth client
-// Note: VITE_AUTH_BASE_URL should be set in .env if not using the default origin
-export const authClient = createAuthClient(import.meta.env.VITE_AUTH_BASE_URL || 'http://localhost:3000', {
-  adapter: BetterAuthReactAdapter(),
+/**
+ * Neon Auth client for authentication.
+ *
+ * Requires VITE_NEON_AUTH_URL environment variable to be set.
+ * Get this URL from your Neon Console's Auth Configuration tab.
+ * Format: https://ep-xxx.neonauth.{region}.aws.neon.tech/{database}/auth
+ */
+const authUrl = import.meta.env.VITE_NEON_AUTH_URL;
+
+if (!authUrl) {
+	console.warn(
+		"VITE_NEON_AUTH_URL is not set. Authentication will not work. " +
+			"Set this in your .env.local file with the URL from Neon Console.",
+	);
+}
+
+export const authClient = createAuthClient(authUrl || "", {
+	adapter: BetterAuthReactAdapter(),
 });

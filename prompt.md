@@ -20,8 +20,8 @@ Identify the highest priority task from progress.txt and PRD.md. Work on ONLY ON
 3. **Verify** (Run ALL before committing):
    - TypeScript: \`npm run typecheck\` (must pass with no errors)
    - Tests: \`npm run test\` (must pass)
-   - Lint: \`npm run lint\` (must pass)
-   - UI: use playwright MCP to verify UI changes
+   - Check: \`npm run check\` (must pass)
+   - UI (if UI changes): use playwright MCP to verify UI changes AND run \`npm run test:e2e\` (must pass)
    - Database: run \`db:push\` and check for any migration issues
    *Do NOT commit if any feedback loop fails. Fix issues first.*
 

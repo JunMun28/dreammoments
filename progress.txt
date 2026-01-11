@@ -62,3 +62,24 @@
 - 50/50 tests pass
 - No TS errors in auth-server files
 - Biome lint passes for auth-server files
+
+## 2026-01-11: Fix Auth Client Configuration (AUTH-001-T4)
+
+**Completed:** Fixed Neon Auth client to use correct env var + documented callback handling
+
+**Changes:**
+- `src/lib/auth.ts`: Updated to use VITE_NEON_AUTH_URL env var, added warning if not set
+
+**Decisions:**
+- Neon Auth is a managed service - no local API callback route needed (removed attempt)
+- Client connects directly to Neon's auth service URL from Console
+- Added descriptive warning message when env var missing to aid debugging
+
+**Notes:**
+- AUTH-001-T4 task description misleading - Neon Auth handles OAuth callbacks server-side
+- Requires VITE_NEON_AUTH_URL from Neon Console Auth Configuration tab
+- AUTH-001-T1 (enable Neon Auth in Console + configure Google OAuth) must be done first
+
+**Verification:**
+- 50/50 tests pass
+- Biome check passes for src/lib/auth.ts

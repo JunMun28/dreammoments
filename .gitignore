@@ -16,3 +16,6 @@ todos.json
 coverage
 playwright-report
 test-results
+
+post-log.json
+pre-log.json
