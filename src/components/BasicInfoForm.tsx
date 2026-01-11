@@ -1,12 +1,14 @@
 import { useForm } from "@tanstack/react-form";
 import { useId } from "react";
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export interface BasicInfoFormValues {
 	partner1Name: string;
 	partner2Name: string;
+	weddingDate?: Date;
 }
 
 interface BasicInfoFormProps {
@@ -22,11 +24,13 @@ export function BasicInfoForm({
 }: BasicInfoFormProps) {
 	const partner1Id = useId();
 	const partner2Id = useId();
+	const weddingDateId = useId();
 
 	const form = useForm({
 		defaultValues: {
 			partner1Name: initialValues?.partner1Name ?? "",
 			partner2Name: initialValues?.partner2Name ?? "",
+			weddingDate: initialValues?.weddingDate,
 		},
 		onSubmit: async ({ value }) => {
 			await onSubmit(value);
@@ -85,6 +89,28 @@ export function BasicInfoForm({
 							onChange={(e) => field.handleChange(e.target.value)}
 							onBlur={field.handleBlur}
 							placeholder="Enter second partner's name"
+						/>
+					</div>
+				)}
+			</form.Field>
+
+			<form.Field
+				name="weddingDate"
+				listeners={{
+					onChange: () => {
+						if (onChange) {
+							onChange(form.state.values);
+						}
+					},
+				}}
+			>
+				{(field) => (
+					<div>
+						<Label htmlFor={weddingDateId}>Wedding Date</Label>
+						<DatePicker
+							value={field.state.value}
+							onChange={(date) => field.handleChange(date)}
+							placeholder="Select wedding date"
 						/>
 					</div>
 				)}

@@ -10,17 +10,22 @@ describe("BasicInfoForm", () => {
 		cleanup();
 	});
 
-	it("renders partner name inputs", () => {
+	it("renders partner name inputs and wedding date picker", () => {
 		render(<BasicInfoForm onSubmit={vi.fn()} />);
 
 		expect(screen.getByLabelText(/partner 1/i)).toBeDefined();
 		expect(screen.getByLabelText(/partner 2/i)).toBeDefined();
+		// Use getAllByText since both label and placeholder contain "wedding date"
+		const weddingDateElements = screen.getAllByText(/wedding date/i);
+		expect(weddingDateElements.length).toBeGreaterThan(0);
 	});
 
-	it("accepts initial values", () => {
+	it("accepts initial values including wedding date", () => {
+		const weddingDate = new Date(2026, 5, 15); // June 15, 2026
 		const initialValues: BasicInfoFormValues = {
 			partner1Name: "Alice",
 			partner2Name: "Bob",
+			weddingDate,
 		};
 
 		render(<BasicInfoForm onSubmit={vi.fn()} initialValues={initialValues} />);
@@ -34,6 +39,8 @@ describe("BasicInfoForm", () => {
 
 		expect(partner1Input.value).toBe("Alice");
 		expect(partner2Input.value).toBe("Bob");
+		// Check that the date is displayed
+		expect(screen.getByText(/June 15, 2026/i)).toBeDefined();
 	});
 
 	it("calls onSubmit with form values when submitted", async () => {
@@ -50,6 +57,7 @@ describe("BasicInfoForm", () => {
 			expect(handleSubmit).toHaveBeenCalledWith({
 				partner1Name: "Alice",
 				partner2Name: "Bob",
+				weddingDate: undefined,
 			});
 		});
 	});
