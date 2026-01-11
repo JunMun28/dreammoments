@@ -10,10 +10,22 @@ if [ -z "$1" ]; then
   exit 1
 fi
 
+echo "========================================="
+echo "Starting afk-ralph.sh"
+echo "Total iterations: $1"
+echo "========================================="
+echo ""
+
 # For each iteration, run Claude Code with the following prompt.
 # This prompt is basic, we'll expand it later.
 for ((i=1; i<=$1; i++)); do
-  result=$(docker sandbox run claude --chrome --dangerously-skip-permissions --permission-mode acceptEdits -p \
+  echo "----------------------------------------"
+  echo "Iteration $i of $1"
+  echo "----------------------------------------"
+  echo "Running Claude Code..."
+  echo ""
+  
+  result=$(claude --chrome --dangerously-skip-permissions --permission-mode acceptEdits -p \
 "@PRD.md @progress.txt
 
 # OBJECTIVE
@@ -54,14 +66,26 @@ Identify the highest priority task from progress.txt and PRD.md. Work on ONLY ON
 # TERMINATION
 If, while implementing the feature, you notice that all work is complete, output <promise>COMPLETE</promise>.")
 
-  echo "$result"
+  echo ""
+  echo "Claude Code execution completed for iteration $i"
+  echo "Checking for completion signal..."
+  echo ""
 
   if [[ "$result" == *"<promise>COMPLETE</promise>"* ]]; then
-    echo "PRD complete, exiting."
+    echo "========================================="
+    echo "✓ PRD complete! Exiting."
+    echo "========================================="
     ~/.claude/notify-email.sh
     exit 0
   fi
+  
+  echo "Iteration $i finished. Continuing to next iteration..."
+  echo ""
 done
 
 # All iterations completed, send notification
+echo "========================================="
+echo "All $1 iterations completed."
+echo "Sending notification..."
+echo "========================================="
 ~/.claude/notify-email.sh
