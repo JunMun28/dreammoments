@@ -83,3 +83,32 @@
 **Verification:**
 - 50/50 tests pass
 - Biome check passes for src/lib/auth.ts
+
+---
+
+## Pending: AUTH-001-T1 (Manual Console Setup Required)
+
+**Task:** Enable Neon Auth in Neon Console and configure Google OAuth provider
+
+**Reference:** https://neon.com/docs/auth/guides/setup-oauth#production-setup
+
+**Development Mode:**
+- Google OAuth works with shared credentials for dev/testing (no config needed)
+
+**Production Setup Steps:**
+1. **Google Cloud Console:**
+   - Create OAuth 2.0 credentials at https://console.cloud.google.com/apis/credentials
+   - Set authorized redirect URI to Neon's callback URL
+   - Copy Client ID and Client Secret
+
+2. **Neon Console:**
+   - Go to Project → Settings → Auth
+   - Enable Neon Auth if not already enabled
+   - Add Google OAuth credentials (Client ID + Secret)
+   - Copy the Auth URL for VITE_NEON_AUTH_URL
+
+3. **Environment:**
+   - Add to `.env.local`:
+     ```
+     VITE_NEON_AUTH_URL=https://ep-xxx.neonauth.{region}.aws.neon.tech/{database}/auth
+     ```
