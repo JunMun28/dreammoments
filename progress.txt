@@ -192,3 +192,22 @@
 - 50/50 tests pass (reduced from 64 - removed 14 custom auth tests)
 - typecheck passes
 - biome check passes
+
+## 2026-01-11: User Sync Function (AUTH-001-T5)
+
+**Completed:** syncUserFromNeonAuth function to link Neon Auth users to local users table
+
+**Changes:**
+- `src/lib/user-sync.ts`: New function that creates/updates local user from Neon Auth session
+- `src/lib/user-sync.test.ts`: 6 unit tests (create, return existing, update email, validation, lowercase)
+
+**Decisions:**
+- Simple function (not server function) - will be called from route loaders/server fns
+- Creates new user if neonAuthId not found, updates email if changed
+- Email normalized to lowercase for consistency
+- Uses Drizzle ORM for type-safe queries
+
+**Verification:**
+- 56/56 tests pass
+- typecheck passes
+- biome check passes

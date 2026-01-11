@@ -90,7 +90,7 @@
         {
           "id": "AUTH-001-T5",
           "task": "Sync neon_auth.users to local users table on first login (optional)",
-          "done": false
+          "done": true
         },
         {
           "id": "AUTH-001-T6",
