@@ -57,6 +57,21 @@ const getData = createServerFn({ method: 'GET' })
 - Tailwind CSS 4.0 with Vite plugin (styles in `src/styles.css`)
 - New York style, zinc color palette
 
+## Code Principles
+
+**This codebase will outlive you.** Every shortcut becomes someone else's burden. Every hack compounds into technical debt that slows the whole team down.
+
+You are not just writing code. You are shaping the future of this project. The patterns you establish will be copied. The corners you cut will be cut again.
+
+**Fight entropy. Leave the codebase better than you found it.**
+
+- Write clear, readable code over clever code
+- Extract reusable logic into well-named functions and hooks
+- Keep components focused (single responsibility)
+- Handle errors gracefully with user-friendly messages
+- Add types for all function parameters and return values
+- Test critical paths (auth, data mutations, payments)
+
 ## Code Style
 
 - **Package manager:** pnpm (required)

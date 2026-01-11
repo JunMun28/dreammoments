@@ -59,6 +59,14 @@
         "Enter code on verification screen",
         "Successfully authenticated and redirected to dashboard/builder"
       ],
+      "tasks": [
+        { "id": "AUTH-001-T1", "task": "Create email input form with Zod validation", "done": false },
+        { "id": "AUTH-001-T2", "task": "Create login codes DB table (code, email, expiresAt, usedAt)", "done": false },
+        { "id": "AUTH-001-T3", "task": "Implement code generation server function (6-digit, 10min expiry)", "done": false },
+        { "id": "AUTH-001-T4", "task": "Integrate Resend for email delivery with branded template", "done": false },
+        { "id": "AUTH-001-T5", "task": "Create code verification form and server function", "done": false },
+        { "id": "AUTH-001-T6", "task": "Create/update user record and establish session on successful verify", "done": false }
+      ],
       "passes": false
     },
     {
@@ -72,6 +80,12 @@
         "Navigate to app - user remains authenticated",
         "Session cookie is secure and httpOnly"
       ],
+      "tasks": [
+        { "id": "AUTH-002-T1", "task": "Create sessions DB table (id, userId, expiresAt, createdAt)", "done": false },
+        { "id": "AUTH-002-T2", "task": "Configure secure httpOnly cookie with appropriate maxAge", "done": false },
+        { "id": "AUTH-002-T3", "task": "Create session validation middleware/helper for protected routes", "done": false },
+        { "id": "AUTH-002-T4", "task": "Implement session refresh on activity (sliding expiration)", "done": false }
+      ],
       "passes": false
     },
     {
@@ -84,6 +98,11 @@
         "Session is cleared",
         "Redirected to home page",
         "Protected routes are no longer accessible"
+      ],
+      "tasks": [
+        { "id": "AUTH-003-T1", "task": "Create logout server function to invalidate session in DB", "done": false },
+        { "id": "AUTH-003-T2", "task": "Clear session cookie on client", "done": false },
+        { "id": "AUTH-003-T3", "task": "Redirect to home page after logout", "done": false }
       ],
       "passes": false
     },
@@ -100,6 +119,15 @@
         "Enter venue name and address",
         "Changes reflect in live preview immediately"
       ],
+      "tasks": [
+        { "id": "BLDR-001-T1", "task": "Create invitations DB table with couple info fields", "done": false },
+        { "id": "BLDR-001-T2", "task": "Build basic info form with partner names inputs", "done": false },
+        { "id": "BLDR-001-T3", "task": "Add date picker component (shadcn calendar)", "done": false },
+        { "id": "BLDR-001-T4", "task": "Add time picker component", "done": false },
+        { "id": "BLDR-001-T5", "task": "Add venue name and address fields", "done": false },
+        { "id": "BLDR-001-T6", "task": "Implement autosave with debounce on field changes", "done": false },
+        { "id": "BLDR-001-T7", "task": "Wire form state to preview component via context/props", "done": false }
+      ],
       "passes": false
     },
     {
@@ -115,6 +143,14 @@
         "Delete a schedule block",
         "Schedule displays correctly in preview"
       ],
+      "tasks": [
+        { "id": "BLDR-002-T1", "task": "Create schedule_blocks DB table (invitationId, title, time, description, order)", "done": false },
+        { "id": "BLDR-002-T2", "task": "Build schedule block list component with add button", "done": false },
+        { "id": "BLDR-002-T3", "task": "Create block editor form (title, time picker, description)", "done": false },
+        { "id": "BLDR-002-T4", "task": "Implement drag-and-drop reordering (or arrow buttons)", "done": false },
+        { "id": "BLDR-002-T5", "task": "Add delete block with confirmation", "done": false },
+        { "id": "BLDR-002-T6", "task": "Render schedule blocks in preview component", "done": false }
+      ],
       "passes": false
     },
     {
@@ -129,6 +165,13 @@
         "Edit and delete individual notes",
         "Notes display in preview"
       ],
+      "tasks": [
+        { "id": "BLDR-003-T1", "task": "Add notes JSON field to invitations table (or separate notes table)", "done": false },
+        { "id": "BLDR-003-T2", "task": "Build notes list component with add/edit/delete", "done": false },
+        { "id": "BLDR-003-T3", "task": "Create note editor (title + description or single text field)", "done": false },
+        { "id": "BLDR-003-T4", "task": "Implement reordering for notes", "done": false },
+        { "id": "BLDR-003-T5", "task": "Render notes section in preview component", "done": false }
+      ],
       "passes": false
     },
     {
@@ -142,6 +185,13 @@
         "Preview updates with new accent color on buttons, links, accents",
         "Color is saved and persists on refresh"
       ],
+      "tasks": [
+        { "id": "BLDR-004-T1", "task": "Add accentColor field to invitations table", "done": false },
+        { "id": "BLDR-004-T2", "task": "Create color picker component with preset swatches", "done": false },
+        { "id": "BLDR-004-T3", "task": "Add custom hex input option", "done": false },
+        { "id": "BLDR-004-T4", "task": "Apply accent color via CSS custom properties in preview", "done": false },
+        { "id": "BLDR-004-T5", "task": "Persist color selection on change", "done": false }
+      ],
       "passes": false
     },
     {
@@ -154,6 +204,13 @@
         "Choose from available font pairings (heading + body)",
         "Preview updates with selected fonts",
         "Font selection persists on save"
+      ],
+      "tasks": [
+        { "id": "BLDR-005-T1", "task": "Define font pairing presets (3-5 options with Google Fonts)", "done": false },
+        { "id": "BLDR-005-T2", "task": "Add fontPairing field to invitations table", "done": false },
+        { "id": "BLDR-005-T3", "task": "Create font selector dropdown with preview text", "done": false },
+        { "id": "BLDR-005-T4", "task": "Dynamically load selected Google Fonts", "done": false },
+        { "id": "BLDR-005-T5", "task": "Apply fonts via CSS custom properties in preview", "done": false }
       ],
       "passes": false
     },
@@ -169,6 +226,14 @@
         "Hero image displays in preview",
         "Can replace existing hero image"
       ],
+      "tasks": [
+        { "id": "BLDR-006-T1", "task": "Add heroImageUrl field to invitations table", "done": false },
+        { "id": "BLDR-006-T2", "task": "Create file input with drag-drop zone", "done": false },
+        { "id": "BLDR-006-T3", "task": "Client-side image resize/compress before upload", "done": false },
+        { "id": "BLDR-006-T4", "task": "Implement server function to handle upload (store in R2 or local)", "done": false },
+        { "id": "BLDR-006-T5", "task": "Display upload progress indicator", "done": false },
+        { "id": "BLDR-006-T6", "task": "Show hero image in preview with replace option", "done": false }
+      ],
       "passes": false
     },
     {
@@ -180,6 +245,13 @@
         "All builder changes reflect in preview in real-time",
         "Preview can be toggled between mobile and desktop views",
         "Preview shows accurate representation of final invitation"
+      ],
+      "tasks": [
+        { "id": "BLDR-007-T1", "task": "Create InvitationPreview component that renders full invitation", "done": false },
+        { "id": "BLDR-007-T2", "task": "Wire preview to builder form state (React context or props)", "done": false },
+        { "id": "BLDR-007-T3", "task": "Add mobile/desktop viewport toggle button", "done": false },
+        { "id": "BLDR-007-T4", "task": "Style preview container with responsive iframe or width constraints", "done": false },
+        { "id": "BLDR-007-T5", "task": "Ensure preview updates on every form change without flicker", "done": false }
       ],
       "passes": false
     },
