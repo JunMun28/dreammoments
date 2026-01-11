@@ -173,3 +173,22 @@
 - 64/64 tests pass (6 new LogoutButton tests)
 - typecheck passes
 - biome check passes
+
+## 2026-01-11: Remove Deprecated Custom Auth Tables (AUTH-001-T6, AUTH-002-T4)
+
+**Completed:** Removed loginCodes and sessions tables + auth-server.ts (Neon Auth manages auth)
+
+**Changes:**
+- `src/db/schema.ts`: Removed loginCodes, sessions tables + sessionsRelations; added neonAuthId to users
+- `src/db/schema.test.ts`: Removed tests for loginCodes/sessions; added neonAuthId test
+- Deleted `src/lib/auth-server.ts` and `src/lib/auth-server.test.ts` (custom auth no longer needed)
+
+**Decisions:**
+- Neon Auth manages sessions/auth in neon_auth schema - custom tables are redundant
+- Added neonAuthId column to users table to link local users to neon_auth.users.id
+- Kept users table for app-specific data (invitations FK), separate from neon_auth.users
+
+**Verification:**
+- 50/50 tests pass (reduced from 64 - removed 14 custom auth tests)
+- typecheck passes
+- biome check passes

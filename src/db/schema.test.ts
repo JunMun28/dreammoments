@@ -3,9 +3,6 @@ import { describe, expect, it } from "vitest";
 import {
 	invitations,
 	invitationsRelations,
-	loginCodes,
-	sessions,
-	sessionsRelations,
 	users,
 	usersRelations,
 } from "./schema";
@@ -25,40 +22,9 @@ describe("Database Schema", () => {
 			expect(users.email).toBeDefined();
 			expect(users.createdAt).toBeDefined();
 		});
-	});
 
-	describe("loginCodes table", () => {
-		it("should export loginCodes table", () => {
-			expect(loginCodes).toBeDefined();
-		});
-
-		it("should have correct table name", () => {
-			expect(getTableName(loginCodes)).toBe("login_codes");
-		});
-
-		it("should have required columns", () => {
-			expect(loginCodes.id).toBeDefined();
-			expect(loginCodes.email).toBeDefined();
-			expect(loginCodes.code).toBeDefined();
-			expect(loginCodes.expiresAt).toBeDefined();
-			expect(loginCodes.usedAt).toBeDefined();
-		});
-	});
-
-	describe("sessions table", () => {
-		it("should export sessions table", () => {
-			expect(sessions).toBeDefined();
-		});
-
-		it("should have correct table name", () => {
-			expect(getTableName(sessions)).toBe("sessions");
-		});
-
-		it("should have required columns", () => {
-			expect(sessions.id).toBeDefined();
-			expect(sessions.userId).toBeDefined();
-			expect(sessions.expiresAt).toBeDefined();
-			expect(sessions.createdAt).toBeDefined();
+		it("should have neonAuthId column for Neon Auth linking", () => {
+			expect(users.neonAuthId).toBeDefined();
 		});
 	});
 
@@ -100,10 +66,6 @@ describe("Database Schema", () => {
 	describe("relations", () => {
 		it("should export usersRelations", () => {
 			expect(usersRelations).toBeDefined();
-		});
-
-		it("should export sessionsRelations", () => {
-			expect(sessionsRelations).toBeDefined();
 		});
 
 		it("should export invitationsRelations", () => {

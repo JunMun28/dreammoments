@@ -2,7 +2,6 @@ import { relations } from "drizzle-orm";
 import {
 	date,
 	pgTable,
-	serial,
 	text,
 	time,
 	timestamp,
@@ -11,33 +10,13 @@ import {
 
 // ============================================================================
 // USERS - Couples who create wedding invitations
+// Note: Authentication is managed by Neon Auth (neon_auth schema).
+// This table stores application-specific user data, linked via neonAuthId.
 // ============================================================================
 export const users = pgTable("users", {
 	id: uuid().primaryKey().defaultRandom(),
+	neonAuthId: text("neon_auth_id").unique(), // Links to neon_auth.users.id
 	email: text().notNull().unique(),
-	createdAt: timestamp("created_at").defaultNow(),
-});
-
-// ============================================================================
-// LOGIN CODES - Email magic link verification codes
-// ============================================================================
-export const loginCodes = pgTable("login_codes", {
-	id: serial().primaryKey(),
-	email: text().notNull(),
-	code: text().notNull(), // 6-digit verification code
-	expiresAt: timestamp("expires_at").notNull(),
-	usedAt: timestamp("used_at"),
-});
-
-// ============================================================================
-// SESSIONS - User authentication sessions
-// ============================================================================
-export const sessions = pgTable("sessions", {
-	id: uuid().primaryKey().defaultRandom(),
-	userId: uuid("user_id")
-		.notNull()
-		.references(() => users.id, { onDelete: "cascade" }),
-	expiresAt: timestamp("expires_at").notNull(),
 	createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -78,15 +57,7 @@ export const invitations = pgTable("invitations", {
 // RELATIONS
 // ============================================================================
 export const usersRelations = relations(users, ({ many }) => ({
-	sessions: many(sessions),
 	invitations: many(invitations),
-}));
-
-export const sessionsRelations = relations(sessions, ({ one }) => ({
-	user: one(users, {
-		fields: [sessions.userId],
-		references: [users.id],
-	}),
 }));
 
 export const invitationsRelations = relations(invitations, ({ one }) => ({

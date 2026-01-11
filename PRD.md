@@ -95,7 +95,7 @@
         {
           "id": "AUTH-001-T6",
           "task": "Remove deprecated login_codes table and custom auth code",
-          "done": false
+          "done": true
         }
       ],
       "passes": false
@@ -130,7 +130,7 @@
         {
           "id": "AUTH-002-T4",
           "task": "Remove deprecated custom sessions table (Neon Auth manages this)",
-          "done": false
+          "done": true
         }
       ],
       "passes": false
