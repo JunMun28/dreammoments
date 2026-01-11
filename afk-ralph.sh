@@ -25,7 +25,7 @@ for ((i=1; i<=$1; i++)); do
   echo "Running Claude Code..."
   echo ""
   
-  result=$(claude --chrome --dangerously-skip-permissions --permission-mode acceptEdits -p \
+  result=$(claude -p \
 "@PRD.md @progress.txt
 
 # OBJECTIVE
