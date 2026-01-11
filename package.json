@@ -7,6 +7,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "format": "biome format",
     "lint": "biome lint",
     "check": "biome check",
@@ -52,6 +54,7 @@
   "devDependencies": {
     "@biomejs/biome": "2.2.4",
     "@neondatabase/vite-plugin-postgres": "^0.6.0",
+    "@playwright/test": "^1.57.0",
     "@tanstack/devtools-vite": "^0.3.11",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.2.0",

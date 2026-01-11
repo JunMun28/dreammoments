@@ -11,29 +11,34 @@ import { alias } from 'drizzle-orm/gel-core'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-const config = defineConfig({
-  plugins: [
-    devtools(),
-    nitro(),
-    // this is the plugin that enables path aliases
-    viteTsConfigPaths({
-      projects: ['./tsconfig.json'],
-    }),
-    tailwindcss(),
-    tanstackStart(),
-    viteReact(),
-  ],
-  resolve: {
-    alias: {
-      react: path.resolve(__dirname, './node_modules/react'),
-      'react-dom': path.resolve(__dirname, './node_modules/react-dom'),
+const config = defineConfig(({ mode }) => {
+  const isTest = mode === 'test'
+  return {
+    plugins: [
+      devtools(),
+      nitro(),
+      // this is the plugin that enables path aliases
+      viteTsConfigPaths({
+        projects: ['./tsconfig.json'],
+      }),
+      tailwindcss(),
+      tanstackStart(),
+      viteReact(),
+    ],
+    resolve: {
+      alias: {
+        ...(isTest && {
+          react: path.resolve(__dirname, './node_modules/react'),
+          'react-dom': path.resolve(__dirname, './node_modules/react-dom'),
+        }),
+      },
+      dedupe: ['react', 'react-dom'],
     },
-    dedupe: ['react', 'react-dom'],
-  },
-  test: {
-    environment: 'jsdom',
-    include: ['src/**/*.test.{ts,tsx}'],
-  },
+    test: {
+      environment: 'jsdom',
+      include: ['src/**/*.test.{ts,tsx}'],
+    },
+  }
 })
 
 export default config
