@@ -187,7 +187,7 @@
         {
           "id": "BLDR-001-T2",
           "task": "Build basic info form with partner names inputs",
-          "done": false
+          "done": true
         },
         {
           "id": "BLDR-001-T3",

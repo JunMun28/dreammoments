@@ -211,3 +211,28 @@
 - 56/56 tests pass
 - typecheck passes
 - biome check passes
+
+## 2026-01-11: Basic Info Form Component (BLDR-001-T2)
+
+**Completed:** BasicInfoForm component with partner name inputs
+
+**Changes:**
+- `src/components/BasicInfoForm.tsx`: TanStack Form-based component w/ partner1Name, partner2Name fields
+- `src/components/BasicInfoForm.test.tsx`: 5 tests (render, initial values, onSubmit, onChange, disabled during submit)
+- `package.json`: Added `@testing-library/user-event` dev dependency
+
+**Decisions:**
+- Used TanStack Form (useForm) directly rather than custom useAppForm hook for cleaner component isolation
+- Used useId() for unique IDs per lint rules (no hardcoded element IDs)
+- Component accepts initialValues, onSubmit, onChange props for flexibility
+- onChange fires on each field change to support live preview (BLDR-007)
+- Submit button disabled during submission to prevent double-submit
+
+**Notes:**
+- Tests use native assertions (toBeDefined, value checks) instead of jest-dom matchers - matches existing codebase pattern
+- Component is standalone and can be integrated into builder route
+
+**Verification:**
+- 61/61 tests pass
+- typecheck passes
+- biome check passes
