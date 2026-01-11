@@ -198,7 +198,7 @@
         {
           "id": "BLDR-001-T4",
           "task": "Add time picker component",
-          "done": false
+          "done": true
         },
         {
           "id": "BLDR-001-T5",

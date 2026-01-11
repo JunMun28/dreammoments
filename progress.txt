@@ -260,3 +260,29 @@
 - 67/67 tests pass
 - typecheck passes
 - biome check passes
+
+## 2026-01-11: Time Picker Component (BLDR-001-T4)
+
+**Completed:** TimePicker component for wedding time selection
+
+**Changes:**
+- `src/components/ui/time-picker.tsx`: TimePicker component with hour/minute/AM-PM selects
+- `src/components/ui/time-picker.test.tsx`: 7 unit tests
+- `src/components/BasicInfoForm.tsx`: Added weddingTime field with TimePicker
+- `src/components/BasicInfoForm.test.tsx`: Updated tests for wedding time
+
+**Decisions:**
+- 12-hour format with AM/PM selector (user-friendly)
+- Value stored in 24-hour format "HH:mm" (DB standard)
+- Hour (1-12), Minute (00-55 in 5-min increments), Period (AM/PM)
+- Used existing shadcn/ui Select component
+- Clock icon from lucide-react for visual clarity
+
+**Notes:**
+- Radix-ui Select tests with user-event have jsdom limitations (hasPointerCapture)
+- Tests focus on render state + value display rather than interaction
+
+**Verification:**
+- 74/74 tests pass
+- typecheck passes
+- biome check passes

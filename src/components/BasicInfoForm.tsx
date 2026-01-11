@@ -4,11 +4,14 @@ import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { TimePicker } from "@/components/ui/time-picker";
 
 export interface BasicInfoFormValues {
 	partner1Name: string;
 	partner2Name: string;
 	weddingDate?: Date;
+	/** Time in 24-hour format "HH:mm" */
+	weddingTime?: string;
 }
 
 interface BasicInfoFormProps {
@@ -25,12 +28,14 @@ export function BasicInfoForm({
 	const partner1Id = useId();
 	const partner2Id = useId();
 	const weddingDateId = useId();
+	const weddingTimeId = useId();
 
 	const form = useForm({
 		defaultValues: {
 			partner1Name: initialValues?.partner1Name ?? "",
 			partner2Name: initialValues?.partner2Name ?? "",
 			weddingDate: initialValues?.weddingDate,
+			weddingTime: initialValues?.weddingTime,
 		},
 		onSubmit: async ({ value }) => {
 			await onSubmit(value);
@@ -111,6 +116,27 @@ export function BasicInfoForm({
 							value={field.state.value}
 							onChange={(date) => field.handleChange(date)}
 							placeholder="Select wedding date"
+						/>
+					</div>
+				)}
+			</form.Field>
+
+			<form.Field
+				name="weddingTime"
+				listeners={{
+					onChange: () => {
+						if (onChange) {
+							onChange(form.state.values);
+						}
+					},
+				}}
+			>
+				{(field) => (
+					<div>
+						<Label htmlFor={weddingTimeId}>Wedding Time</Label>
+						<TimePicker
+							value={field.state.value}
+							onChange={(time) => field.handleChange(time)}
 						/>
 					</div>
 				)}

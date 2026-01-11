@@ -10,7 +10,7 @@ describe("BasicInfoForm", () => {
 		cleanup();
 	});
 
-	it("renders partner name inputs and wedding date picker", () => {
+	it("renders partner name inputs, wedding date picker, and time picker", () => {
 		render(<BasicInfoForm onSubmit={vi.fn()} />);
 
 		expect(screen.getByLabelText(/partner 1/i)).toBeDefined();
@@ -18,14 +18,17 @@ describe("BasicInfoForm", () => {
 		// Use getAllByText since both label and placeholder contain "wedding date"
 		const weddingDateElements = screen.getAllByText(/wedding date/i);
 		expect(weddingDateElements.length).toBeGreaterThan(0);
+		// Check for wedding time label
+		expect(screen.getByText(/wedding time/i)).toBeDefined();
 	});
 
-	it("accepts initial values including wedding date", () => {
+	it("accepts initial values including wedding date and time", () => {
 		const weddingDate = new Date(2026, 5, 15); // June 15, 2026
 		const initialValues: BasicInfoFormValues = {
 			partner1Name: "Alice",
 			partner2Name: "Bob",
 			weddingDate,
+			weddingTime: "14:30", // 2:30 PM
 		};
 
 		render(<BasicInfoForm onSubmit={vi.fn()} initialValues={initialValues} />);
@@ -41,6 +44,9 @@ describe("BasicInfoForm", () => {
 		expect(partner2Input.value).toBe("Bob");
 		// Check that the date is displayed
 		expect(screen.getByText(/June 15, 2026/i)).toBeDefined();
+		// Check that the time picker has 3 comboboxes (hour, minute, period)
+		const comboboxes = screen.getAllByRole("combobox");
+		expect(comboboxes.length).toBe(3);
 	});
 
 	it("calls onSubmit with form values when submitted", async () => {
@@ -58,6 +64,7 @@ describe("BasicInfoForm", () => {
 				partner1Name: "Alice",
 				partner2Name: "Bob",
 				weddingDate: undefined,
+				weddingTime: undefined,
 			});
 		});
 	});
