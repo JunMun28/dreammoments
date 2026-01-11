@@ -84,6 +84,7 @@
         },
         {
           "id": "AUTH-001-T4",
+
           "task": "Set up OAuth callback route to handle Neon Auth response",
           "done": false
         },
@@ -192,7 +193,7 @@
         {
           "id": "BLDR-001-T3",
           "task": "Add date picker component (shadcn calendar)",
-          "done": false
+          "done": true
         },
         {
           "id": "BLDR-001-T4",

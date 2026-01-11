@@ -236,3 +236,27 @@
 - 61/61 tests pass
 - typecheck passes
 - biome check passes
+
+## 2026-01-11: Date Picker Component (BLDR-001-T3)
+
+**Completed:** DatePicker component with calendar UI for wedding date selection
+
+**Changes:**
+- `src/components/ui/calendar.tsx`: Calendar component using react-day-picker
+- `src/components/ui/popover.tsx`: Popover wrapper component (radix-ui)
+- `src/components/ui/date-picker.tsx`: DatePicker component composing calendar + popover
+- `src/components/ui/date-picker.test.tsx`: 6 unit tests
+- `src/components/BasicInfoForm.tsx`: Added weddingDate field with DatePicker
+- `src/components/BasicInfoForm.test.tsx`: Updated tests for wedding date
+- `package.json`: Added react-day-picker, @radix-ui/react-popover deps
+
+**Decisions:**
+- Used shadcn calendar pattern (react-day-picker + radix popover)
+- DatePicker closes automatically after date selection
+- Wedding date is optional (undefined allowed)
+- Format: "Month Day, Year" (e.g. "June 15, 2026")
+
+**Verification:**
+- 67/67 tests pass
+- typecheck passes
+- biome check passes
