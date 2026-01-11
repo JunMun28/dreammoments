@@ -132,3 +132,23 @@
 - 4/4 auth.test.ts tests pass
 - Biome check passes for auth files
 - Pre-existing TS errors in drizzle.config.ts, neon-vite-plugin.ts, demo routes - not from auth changes
+
+## 2026-01-11: Protected Route Component (AUTH-002-T3)
+
+**Completed:** ProtectedRoute wrapper component for auth-protected pages
+
+**Changes:**
+- `src/components/ProtectedRoute.tsx`: Component that wraps protected content
+- `src/components/ProtectedRoute.test.tsx`: 5 unit tests for loading/auth/redirect states
+- Fixed formatting (spaces→tabs) to pass biome check
+
+**Decisions:**
+- Component-based approach (not route middleware) for flexibility
+- Uses useSession hook from auth client
+- Configurable redirectTo (default "/login") and loadingFallback props
+- Returns null while redirecting to prevent flash of content
+
+**Verification:**
+- 58/58 tests pass (5 new ProtectedRoute tests)
+- typecheck passes
+- biome check passes
