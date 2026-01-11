@@ -21,11 +21,11 @@ Identify the highest priority task from progress.txt and PRD.md. Work on ONLY ON
    - use TDD approach to write tests for new features.
 
 3. **Verify** (Run ALL before committing):
-   - TypeScript: \`npm run typecheck\` (must pass with no errors)
-   - Tests: \`npm run test\` (must pass)
-   - Check: \`npm run check\` (must pass)
-   - UI (if UI changes): use playwright MCP to verify UI changes AND run \`npm run test:e2e\` (must pass)
-   - Database: run \`db:push\` and check for any migration issues
+   - TypeScript: \`pnpm run typecheck\` (must pass with no errors)
+   - Tests: \`pnpm run test\` (must pass)
+   - Check: \`pnpm run check\` (must pass)
+   - UI (if UI changes): use playwright MCP to verify UI changes AND run \`pnpm run test:e2e\` (must pass)
+   - Database: run \`pnpm run db:push\` and check for any migration issues
    *Do NOT commit if any feedback loop fails. Fix issues first.*
 
 4. **Document**: Append to \`progress.txt\`:

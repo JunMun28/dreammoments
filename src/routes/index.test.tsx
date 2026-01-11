@@ -1,17 +1,18 @@
 // @vitest-environment jsdom
-import { describe, it, expect, afterEach } from 'vitest'
-import { render, screen, cleanup } from '@testing-library/react'
-import { App } from './index'
 
-describe('Index Route', () => {
-  afterEach(() => {
-    cleanup()
-  })
+import { cleanup, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it } from "vitest";
+import { App } from "./index";
 
-  it('renders correctly', () => {
-    render(<App />)
-    expect(screen.getByText('TANSTACK')).toBeDefined()
-    expect(screen.getByText('START')).toBeDefined()
-    expect(screen.getByText('Powerful Server Functions')).toBeDefined()
-  })
-})
+describe("Index Route", () => {
+	afterEach(() => {
+		cleanup();
+	});
+
+	it("renders correctly", () => {
+		render(<App />);
+		expect(screen.getByText("TANSTACK")).toBeDefined();
+		expect(screen.getByText("START")).toBeDefined();
+		expect(screen.getByText("Powerful Server Functions")).toBeDefined();
+	});
+});

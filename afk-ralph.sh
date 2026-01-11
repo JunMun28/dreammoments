@@ -58,6 +58,10 @@ If, while implementing the feature, you notice that all work is complete, output
 
   if [[ "$result" == *"<promise>COMPLETE</promise>"* ]]; then
     echo "PRD complete, exiting."
+    ~/.claude/notify-email.sh
     exit 0
   fi
 done
+
+# All iterations completed, send notification
+~/.claude/notify-email.sh
