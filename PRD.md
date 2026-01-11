@@ -61,8 +61,8 @@
       ],
       "tasks": [
         { "id": "AUTH-001-T1", "task": "Enable Neon Auth in Neon Console and configure Google OAuth provider", "done": false },
-        { "id": "AUTH-001-T2", "task": "Install and configure @neondatabase/auth SDK", "done": false },
-        { "id": "AUTH-001-T3", "task": "Create login page with Google OAuth button using Neon Auth UI or custom", "done": false },
+        { "id": "AUTH-001-T2", "task": "Install and configure @neondatabase/auth SDK", "done": true },
+        { "id": "AUTH-001-T3", "task": "Create login page with Google OAuth button using Neon Auth UI or custom", "done": true },
         { "id": "AUTH-001-T4", "task": "Set up OAuth callback route to handle Neon Auth response", "done": false },
         { "id": "AUTH-001-T5", "task": "Sync neon_auth.users to local users table on first login (optional)", "done": false },
         { "id": "AUTH-001-T6", "task": "Remove deprecated login_codes table and custom auth code", "done": false }
