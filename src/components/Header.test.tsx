@@ -16,9 +16,16 @@ vi.mock("lucide-react", () => ({
 	Network: () => <div data-testid="icon-network" />,
 	SquareFunction: () => <div data-testid="icon-square-function" />,
 	StickyNote: () => <div data-testid="icon-sticky-note" />,
+	LogOut: () => <div data-testid="icon-logout" />,
 }));
 
-// Mock Link from tanstack router
+// Mock auth module for LogoutButton
+vi.mock("../lib/auth", () => ({
+	useSession: () => ({ isPending: false, data: null }),
+	signOut: vi.fn(),
+}));
+
+// Mock Link and useNavigate from tanstack router
 vi.mock("@tanstack/react-router", () => ({
 	Link: ({
 		to,
@@ -35,6 +42,7 @@ vi.mock("@tanstack/react-router", () => ({
 			{children}
 		</a>
 	),
+	useNavigate: () => vi.fn(),
 }));
 
 describe("Header component", () => {

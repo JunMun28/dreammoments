@@ -152,3 +152,24 @@
 - 58/58 tests pass (5 new ProtectedRoute tests)
 - typecheck passes
 - biome check passes
+
+## 2026-01-11: Logout Functionality (AUTH-003-T1, AUTH-003-T2, AUTH-003-T3)
+
+**Completed:** LogoutButton component with signOut, state clear, and redirect
+
+**Changes:**
+- `src/components/LogoutButton.tsx`: New component calling signOut() + navigate to home
+- `src/components/LogoutButton.test.tsx`: 6 tests (render states, signOut call, redirect, disabled during logout)
+- `src/components/Header.tsx`: Added LogoutButton to header (right side, flex-1 on logo)
+- `src/components/Header.test.tsx`: Added mocks for auth + useNavigate for LogoutButton
+
+**Decisions:**
+- LogoutButton only renders when authenticated (returns null otherwise)
+- Uses useState for isLoggingOut to disable button during signOut
+- Redirect to "/" after signOut (configurable later if needed)
+- Placed in Header component for global visibility
+
+**Verification:**
+- 64/64 tests pass (6 new LogoutButton tests)
+- typecheck passes
+- biome check passes

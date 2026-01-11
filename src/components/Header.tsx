@@ -12,6 +12,7 @@ import {
 	X,
 } from "lucide-react";
 import { useState } from "react";
+import { LogoutButton } from "./LogoutButton";
 
 export default function Header() {
 	const [isOpen, setIsOpen] = useState(false);
@@ -30,7 +31,7 @@ export default function Header() {
 				>
 					<Menu size={24} />
 				</button>
-				<h1 className="ml-4 text-xl font-semibold">
+				<h1 className="ml-4 text-xl font-semibold flex-1">
 					<Link to="/">
 						<img
 							src="/tanstack-word-logo-white.svg"
@@ -39,6 +40,7 @@ export default function Header() {
 						/>
 					</Link>
 				</h1>
+				<LogoutButton />
 			</header>
 
 			<aside

@@ -150,17 +150,17 @@
         {
           "id": "AUTH-003-T1",
           "task": "Implement logout button calling Neon Auth signOut()",
-          "done": false
+          "done": true
         },
         {
           "id": "AUTH-003-T2",
           "task": "Clear local state/context on logout",
-          "done": false
+          "done": true
         },
         {
           "id": "AUTH-003-T3",
           "task": "Redirect to home page after logout",
-          "done": false
+          "done": true
         }
       ],
       "passes": false
