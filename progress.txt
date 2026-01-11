@@ -1,0 +1,17 @@
+
+## 2026-01-11: Core Database Schema (AUTH-001-T2, AUTH-002-T1, BLDR-001-T1)
+
+**Completed:** Foundational DB schema for MVP auth + invitations
+
+**Changes:**
+- `src/db/schema.ts`: users, loginCodes, sessions, invitations tables w/ relations
+- `src/db/schema.test.ts`: unit tests for table exports + structure
+- `vite.config.ts`: added vitest test config
+
+**Decisions:**
+- Used uuid PKs (defaultRandom) for security + distribution
+- Sessions use foreign key cascade delete to users
+- Invitations store theme config inline (accentColor, fontPairing, templateId)
+- loginCodes uses serial PK + usedAt nullable for tracking
+
+**Verification:** tsc --noEmit passes for schema.ts, biome lint passes

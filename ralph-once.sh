@@ -1,40 +1,42 @@
 #!/bin/bash
 
-claude --permission-mode acceptEdits "@PRD.md @progress.txt \
-1. Decide which task to work on next. \
-This should be the one YOU decide has the highest priority, \
-- not necessarily the first in the list. \
-2. Check any feedback loops, such as types and tests. \
-3. Append your progress to the progress.txt file. \
-4. Make a git commit of that feature. \
-ONLY WORK ON A SINGLE FEATURE. \
-If, while implementing the feature, you notice that all work \
-is complete, output <promise>COMPLETE</promise>. \
----\
-Keep changes small and focused:\
-- One logical change per commit\
-- If a task feels too large, break it into subtasks\
-- Prefer multiple small commits over one large commit\
-- Run feedback loops after each change, not at the end\
-Quality over speed. Small steps compound into big progress.\
----\
-When choosing the next task, prioritize in this order:\
-1. Architectural decisions and core abstractions\
-2. Integration points between modules\
-3. Unknown unknowns and spike work\
-4. Standard features and implementation\
-5. Polish, cleanup, and quick wins\
-Fail fast on risky work. Save easy wins for later.\
----\
-Before committing, run ALL feedback loops:\
-1. TypeScript: npm run typecheck (must pass with no errors)\
-2. Tests: npm run test (must pass)\
-3. Lint: npm run lint (must pass)\
-Do NOT commit if any feedback loop fails. Fix issues first.\
----\
-After completing each task, append to progress.txt:\
-- Task completed and PRD item reference\
-- Key decisions made and reasoning\
-- Files changed\
-- Any blockers or notes for next iteration\
-Keep entries concise. Sacrifice grammar for the sake of concision. This file helps future iterations skip exploration."
+prompt="@PRD.md @progress.txt
+
+# OBJECTIVE
+Identify the highest priority task from progress.txt and PRD.md. Work on ONLY ONE task.
+
+# WORKFLOW
+1. **Select Task**: Prioritize in this order:
+   1. Architectural decisions and core abstractions
+   2. Integration points between modules
+   3. Unknown unknowns and spike work
+   4. Standard features and implementation
+   5. Polish, cleanup, and quick wins
+
+2. **Implement**: 
+   - Keep changes small and focused (one logical change per commit).
+   - If a task feels too large, break it into subtasks.
+   - Run feedback loops after each change, not at the end.
+   - Quality over speed.
+
+3. **Verify** (Run ALL before committing):
+   - TypeScript: \`npm run typecheck\` (must pass with no errors)
+   - Tests: \`npm run test\` (must pass)
+   - Lint: \`npm run lint\` (must pass)
+   - UI: use playwright MCP to verify UI changes
+   - Database: run \`db:push\` and check for any migration issues
+   *Do NOT commit if any feedback loop fails. Fix issues first.*
+
+4. **Document**: Append to \`progress.txt\`:
+   - Task completed and PRD item reference
+   - Key decisions made and reasoning
+   - Files changed
+   - Any blockers or notes for next iteration
+   *Keep entries concise. Sacrifice grammar for the sake of concision.*
+
+5. **Commit**: Make a git commit of that feature.
+
+# TERMINATION
+If, while implementing the feature, you notice that all work is complete, output <promise>COMPLETE</promise>."
+
+claude --permission-mode acceptEdits "$prompt"

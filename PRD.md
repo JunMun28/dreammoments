@@ -6,7 +6,7 @@
 {
   "project": "DreamMoments",
   "description": "Wedding invitation builder + RSVP management + Photo sharing platform",
-  "techStack": ["TanStack Start", "React 19", "Neon PostgreSQL", "Drizzle ORM", "Tailwind CSS"],
+  "techStack": ["TanStack Start", "React 19", "Neon PostgreSQL", "Neon Auth", "Drizzle ORM", "Tailwind CSS"],
   "features": [
     {
       "id": "TMPL-001",
@@ -51,21 +51,21 @@
       "id": "AUTH-001",
       "category": "Authentication",
       "phase": "mvp",
-      "description": "Couple login via email magic code",
+      "description": "Couple login via Google OAuth (Neon Auth)",
       "stepsToVerify": [
-        "Click login button",
-        "Enter valid email address",
-        "Receive email with login code (via Resend)",
-        "Enter code on verification screen",
-        "Successfully authenticated and redirected to dashboard/builder"
+        "Click 'Sign in with Google' button",
+        "Google OAuth popup or redirect opens",
+        "User authorizes DreamMoments app",
+        "Successfully authenticated and redirected to dashboard/builder",
+        "User record created/synced in neon_auth schema"
       ],
       "tasks": [
-        { "id": "AUTH-001-T1", "task": "Create email input form with Zod validation", "done": false },
-        { "id": "AUTH-001-T2", "task": "Create login codes DB table (code, email, expiresAt, usedAt)", "done": false },
-        { "id": "AUTH-001-T3", "task": "Implement code generation server function (6-digit, 10min expiry)", "done": false },
-        { "id": "AUTH-001-T4", "task": "Integrate Resend for email delivery with branded template", "done": false },
-        { "id": "AUTH-001-T5", "task": "Create code verification form and server function", "done": false },
-        { "id": "AUTH-001-T6", "task": "Create/update user record and establish session on successful verify", "done": false }
+        { "id": "AUTH-001-T1", "task": "Enable Neon Auth in Neon Console and configure Google OAuth provider", "done": false },
+        { "id": "AUTH-001-T2", "task": "Install and configure @neondatabase/auth SDK", "done": false },
+        { "id": "AUTH-001-T3", "task": "Create login page with Google OAuth button using Neon Auth UI or custom", "done": false },
+        { "id": "AUTH-001-T4", "task": "Set up OAuth callback route to handle Neon Auth response", "done": false },
+        { "id": "AUTH-001-T5", "task": "Sync neon_auth.users to local users table on first login (optional)", "done": false },
+        { "id": "AUTH-001-T6", "task": "Remove deprecated login_codes table and custom auth code", "done": false }
       ],
       "passes": false
     },
@@ -73,18 +73,18 @@
       "id": "AUTH-002",
       "category": "Authentication",
       "phase": "mvp",
-      "description": "Session management with persistent login",
+      "description": "Session management via Neon Auth",
       "stepsToVerify": [
-        "Login successfully",
+        "Login successfully via Google OAuth",
         "Close browser and reopen",
         "Navigate to app - user remains authenticated",
-        "Session cookie is secure and httpOnly"
+        "Session managed by Neon Auth (neon_auth.sessions)"
       ],
       "tasks": [
-        { "id": "AUTH-002-T1", "task": "Create sessions DB table (id, userId, expiresAt, createdAt)", "done": false },
-        { "id": "AUTH-002-T2", "task": "Configure secure httpOnly cookie with appropriate maxAge", "done": false },
-        { "id": "AUTH-002-T3", "task": "Create session validation middleware/helper for protected routes", "done": false },
-        { "id": "AUTH-002-T4", "task": "Implement session refresh on activity (sliding expiration)", "done": false }
+        { "id": "AUTH-002-T1", "task": "Configure Neon Auth session settings in Console/SDK", "done": false },
+        { "id": "AUTH-002-T2", "task": "Create useSession hook or context to access current user", "done": false },
+        { "id": "AUTH-002-T3", "task": "Create protected route wrapper/middleware using Neon Auth session", "done": false },
+        { "id": "AUTH-002-T4", "task": "Remove deprecated custom sessions table (Neon Auth manages this)", "done": false }
       ],
       "passes": false
     },
@@ -92,16 +92,16 @@
       "id": "AUTH-003",
       "category": "Authentication",
       "phase": "mvp",
-      "description": "Logout functionality",
+      "description": "Logout functionality via Neon Auth",
       "stepsToVerify": [
         "While authenticated, click logout",
-        "Session is cleared",
+        "Neon Auth session is invalidated",
         "Redirected to home page",
         "Protected routes are no longer accessible"
       ],
       "tasks": [
-        { "id": "AUTH-003-T1", "task": "Create logout server function to invalidate session in DB", "done": false },
-        { "id": "AUTH-003-T2", "task": "Clear session cookie on client", "done": false },
+        { "id": "AUTH-003-T1", "task": "Implement logout button calling Neon Auth signOut()", "done": false },
+        { "id": "AUTH-003-T2", "task": "Clear local state/context on logout", "done": false },
         { "id": "AUTH-003-T3", "task": "Redirect to home page after logout", "done": false }
       ],
       "passes": false
@@ -120,7 +120,7 @@
         "Changes reflect in live preview immediately"
       ],
       "tasks": [
-        { "id": "BLDR-001-T1", "task": "Create invitations DB table with couple info fields", "done": false },
+        { "id": "BLDR-001-T1", "task": "Create invitations DB table with couple info fields", "done": true },
         { "id": "BLDR-001-T2", "task": "Build basic info form with partner names inputs", "done": false },
         { "id": "BLDR-001-T3", "task": "Add date picker component (shadcn calendar)", "done": false },
         { "id": "BLDR-001-T4", "task": "Add time picker component", "done": false },
