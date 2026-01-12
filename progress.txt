@@ -359,3 +359,23 @@
 - 104/104 tests pass (20 new tests)
 - typecheck passes
 - biome check passes
+
+## 2026-01-12: Schedule Blocks DB Table (BLDR-002-T1)
+
+**Completed:** Created schedule_blocks database table for wedding timeline events
+
+**Changes:**
+- `src/db/schema.ts`: Added scheduleBlocks table + scheduleBlocksRelations, updated invitationsRelations
+- `src/db/schema.test.ts`: Added 7 tests for scheduleBlocks table + 1 test for scheduleBlocksRelations
+
+**Decisions:**
+- UUID PK with defaultRandom() (consistent w/ other tables)
+- Foreign key to invitations with cascade delete
+- title is required (text.notNull()), time/description are optional
+- order integer field (default 0) for drag-drop reordering (BLDR-002-T4)
+- Timestamps: createdAt, updatedAt (defaultNow)
+
+**Verification:**
+- 111/111 tests pass (7 new schema tests)
+- typecheck passes
+- biome check passes

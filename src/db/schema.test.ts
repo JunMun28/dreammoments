@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import {
 	invitations,
 	invitationsRelations,
+	scheduleBlocks,
+	scheduleBlocksRelations,
 	users,
 	usersRelations,
 } from "./schema";
@@ -63,6 +65,36 @@ describe("Database Schema", () => {
 		});
 	});
 
+	describe("scheduleBlocks table", () => {
+		it("should export scheduleBlocks table", () => {
+			expect(scheduleBlocks).toBeDefined();
+		});
+
+		it("should have correct table name", () => {
+			expect(getTableName(scheduleBlocks)).toBe("schedule_blocks");
+		});
+
+		it("should have required columns", () => {
+			expect(scheduleBlocks.id).toBeDefined();
+			expect(scheduleBlocks.invitationId).toBeDefined();
+			expect(scheduleBlocks.title).toBeDefined();
+		});
+
+		it("should have optional content columns", () => {
+			expect(scheduleBlocks.time).toBeDefined();
+			expect(scheduleBlocks.description).toBeDefined();
+		});
+
+		it("should have order column for sequencing", () => {
+			expect(scheduleBlocks.order).toBeDefined();
+		});
+
+		it("should have timestamp columns", () => {
+			expect(scheduleBlocks.createdAt).toBeDefined();
+			expect(scheduleBlocks.updatedAt).toBeDefined();
+		});
+	});
+
 	describe("relations", () => {
 		it("should export usersRelations", () => {
 			expect(usersRelations).toBeDefined();
@@ -70,6 +102,10 @@ describe("Database Schema", () => {
 
 		it("should export invitationsRelations", () => {
 			expect(invitationsRelations).toBeDefined();
+		});
+
+		it("should export scheduleBlocksRelations", () => {
+			expect(scheduleBlocksRelations).toBeDefined();
 		});
 	});
 });

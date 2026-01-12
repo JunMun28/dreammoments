@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import {
 	date,
+	integer,
 	pgTable,
 	text,
 	time,
@@ -54,15 +55,45 @@ export const invitations = pgTable("invitations", {
 });
 
 // ============================================================================
+// SCHEDULE BLOCKS - Timeline events for the wedding (ceremony, reception, etc.)
+// ============================================================================
+export const scheduleBlocks = pgTable("schedule_blocks", {
+	id: uuid().primaryKey().defaultRandom(),
+	invitationId: uuid("invitation_id")
+		.notNull()
+		.references(() => invitations.id, { onDelete: "cascade" }),
+
+	// Block content
+	title: text().notNull(),
+	time: time(),
+	description: text(),
+
+	// Ordering
+	order: integer().notNull().default(0),
+
+	// Timestamps
+	createdAt: timestamp("created_at").defaultNow(),
+	updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// ============================================================================
 // RELATIONS
 // ============================================================================
 export const usersRelations = relations(users, ({ many }) => ({
 	invitations: many(invitations),
 }));
 
-export const invitationsRelations = relations(invitations, ({ one }) => ({
+export const invitationsRelations = relations(invitations, ({ one, many }) => ({
 	user: one(users, {
 		fields: [invitations.userId],
 		references: [users.id],
+	}),
+	scheduleBlocks: many(scheduleBlocks),
+}));
+
+export const scheduleBlocksRelations = relations(scheduleBlocks, ({ one }) => ({
+	invitation: one(invitations, {
+		fields: [scheduleBlocks.invitationId],
+		references: [invitations.id],
 	}),
 }));
