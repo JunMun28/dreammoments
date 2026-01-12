@@ -1,9 +1,20 @@
-import { Pencil, Plus } from "lucide-react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import {
 	ScheduleBlockEditor,
 	type ScheduleBlockEditorValues,
 } from "@/components/ScheduleBlockEditor";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
 	type ScheduleBlock,
@@ -26,12 +37,17 @@ export function formatBlockTime(time: string | undefined): string {
 interface ScheduleBlockItemProps {
 	block: ScheduleBlock;
 	onEdit: () => void;
+	onDelete: () => void;
 }
 
 /**
  * Individual schedule block item display
  */
-function ScheduleBlockItem({ block, onEdit }: ScheduleBlockItemProps) {
+function ScheduleBlockItem({
+	block,
+	onEdit,
+	onDelete,
+}: ScheduleBlockItemProps) {
 	return (
 		<div
 			className="rounded-lg border bg-card p-4"
@@ -51,16 +67,50 @@ function ScheduleBlockItem({ block, onEdit }: ScheduleBlockItemProps) {
 						</p>
 					)}
 				</div>
-				<Button
-					type="button"
-					variant="ghost"
-					size="icon"
-					onClick={onEdit}
-					data-testid={`edit-block-${block.id}`}
-					aria-label={`Edit ${block.title}`}
-				>
-					<Pencil className="h-4 w-4" />
-				</Button>
+				<div className="flex gap-1">
+					<Button
+						type="button"
+						variant="ghost"
+						size="icon"
+						onClick={onEdit}
+						data-testid={`edit-block-${block.id}`}
+						aria-label={`Edit ${block.title}`}
+					>
+						<Pencil className="h-4 w-4" />
+					</Button>
+					<AlertDialog>
+						<AlertDialogTrigger asChild>
+							<Button
+								type="button"
+								variant="ghost"
+								size="icon"
+								data-testid={`delete-block-${block.id}`}
+								aria-label={`Delete ${block.title}`}
+							>
+								<Trash2 className="h-4 w-4 text-destructive" />
+							</Button>
+						</AlertDialogTrigger>
+						<AlertDialogContent>
+							<AlertDialogHeader>
+								<AlertDialogTitle>Delete Event</AlertDialogTitle>
+								<AlertDialogDescription>
+									Are you sure you want to delete "{block.title}"? This action
+									cannot be undone.
+								</AlertDialogDescription>
+							</AlertDialogHeader>
+							<AlertDialogFooter>
+								<AlertDialogCancel>Cancel</AlertDialogCancel>
+								<AlertDialogAction
+									onClick={onDelete}
+									className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+									data-testid={`confirm-delete-${block.id}`}
+								>
+									Delete
+								</AlertDialogAction>
+							</AlertDialogFooter>
+						</AlertDialogContent>
+					</AlertDialog>
+				</div>
 			</div>
 		</div>
 	);
@@ -76,8 +126,12 @@ function ScheduleBlockItem({ block, onEdit }: ScheduleBlockItemProps) {
  * ```
  */
 export function ScheduleBlockList() {
-	const { invitation, addScheduleBlock, updateScheduleBlock } =
-		useInvitationBuilder();
+	const {
+		invitation,
+		addScheduleBlock,
+		updateScheduleBlock,
+		deleteScheduleBlock,
+	} = useInvitationBuilder();
 	const blocks = invitation.scheduleBlocks ?? [];
 
 	// Track which block is being edited (null = none, "new" = adding new)
@@ -149,6 +203,7 @@ export function ScheduleBlockList() {
 								key={block.id}
 								block={block}
 								onEdit={() => setEditingId(block.id)}
+								onDelete={() => deleteScheduleBlock(block.id)}
 							/>
 						),
 					)}

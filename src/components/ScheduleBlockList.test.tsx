@@ -188,4 +188,75 @@ describe("ScheduleBlockList", () => {
 		expect(blockTitles[1].textContent).toBe("Cocktails");
 		expect(blockTitles[2].textContent).toBe("Reception");
 	});
+
+	it("shows delete button on each block", () => {
+		renderWithProvider({
+			...mockInitialData,
+			scheduleBlocks: mockScheduleBlocks,
+		});
+
+		expect(screen.getByTestId("delete-block-1")).toBeDefined();
+		expect(screen.getByTestId("delete-block-2")).toBeDefined();
+	});
+
+	it("shows confirmation dialog when delete button clicked", () => {
+		renderWithProvider({
+			...mockInitialData,
+			scheduleBlocks: mockScheduleBlocks,
+		});
+
+		act(() => {
+			screen.getByTestId("delete-block-1").click();
+		});
+
+		// Confirmation dialog should appear
+		expect(screen.getByText("Delete Event")).toBeDefined();
+		expect(
+			screen.getByText(/Are you sure you want to delete "Ceremony"/),
+		).toBeDefined();
+		expect(screen.getByText("Cancel")).toBeDefined();
+		expect(screen.getByTestId("confirm-delete-1")).toBeDefined();
+	});
+
+	it("deletes block when confirm is clicked", () => {
+		renderWithProvider({
+			...mockInitialData,
+			scheduleBlocks: mockScheduleBlocks,
+		});
+
+		// Click delete button
+		act(() => {
+			screen.getByTestId("delete-block-1").click();
+		});
+
+		// Click confirm
+		act(() => {
+			screen.getByTestId("confirm-delete-1").click();
+		});
+
+		// Block should be removed
+		expect(screen.queryByText("Ceremony")).toBeNull();
+		expect(screen.getByText("Reception")).toBeDefined();
+	});
+
+	it("keeps block when cancel is clicked in confirmation dialog", () => {
+		renderWithProvider({
+			...mockInitialData,
+			scheduleBlocks: mockScheduleBlocks,
+		});
+
+		// Click delete button
+		act(() => {
+			screen.getByTestId("delete-block-1").click();
+		});
+
+		// Click cancel
+		act(() => {
+			screen.getByText("Cancel").click();
+		});
+
+		// Block should still exist
+		expect(screen.getByText("Ceremony")).toBeDefined();
+		expect(screen.getByText("Reception")).toBeDefined();
+	});
 });
