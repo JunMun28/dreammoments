@@ -330,3 +330,32 @@
 - 84/84 tests pass (10 new useAutosave tests)
 - typecheck passes
 - biome check passes
+
+## 2026-01-12: Wire Form State to Preview (BLDR-001-T7)
+
+**Completed:** Context + preview component to connect form state to live preview
+
+**Changes:**
+- `src/contexts/InvitationBuilderContext.tsx`: React context for sharing invitation data between form/preview
+- `src/contexts/InvitationBuilderContext.test.tsx`: 5 tests for context provider/hook
+- `src/components/InvitationPreview.tsx`: Preview component w/ glassmorphism styling, date/time formatting
+- `src/components/InvitationPreview.test.tsx`: 15 tests (8 component + 7 format helpers)
+- `src/components/InvitationBuilder.tsx`: Layout component wiring form → context → preview + autosave
+
+**Decisions:**
+- Context owns state (not controlled) for cleaner architecture
+- InvitationData extends BasicInfoFormValues w/ id + theme fields (templateId, accentColor, fontPairing, heroImageUrl)
+- Preview uses glassmorphism card per requirements.md Section 14 guidelines
+- Form onChange updates context, preview reads from context reactively
+- AutosaveIndicator component shows idle/saving/saved/error states
+- Responsive layout: form left, preview right (hidden on mobile)
+
+**Notes:**
+- InvitationBuilder integrates useAutosave hook for persistence
+- Preview shows placeholder text when fields empty for better UX
+- formatDate/formatTime helpers exported for reuse
+
+**Verification:**
+- 104/104 tests pass (20 new tests)
+- typecheck passes
+- biome check passes
