@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import {
 	invitations,
 	invitationsRelations,
+	notes,
+	notesRelations,
 	scheduleBlocks,
 	scheduleBlocksRelations,
 	users,
@@ -95,6 +97,35 @@ describe("Database Schema", () => {
 		});
 	});
 
+	describe("notes table", () => {
+		it("should export notes table", () => {
+			expect(notes).toBeDefined();
+		});
+
+		it("should have correct table name", () => {
+			expect(getTableName(notes)).toBe("notes");
+		});
+
+		it("should have required columns", () => {
+			expect(notes.id).toBeDefined();
+			expect(notes.invitationId).toBeDefined();
+			expect(notes.content).toBeDefined();
+		});
+
+		it("should have optional title column", () => {
+			expect(notes.title).toBeDefined();
+		});
+
+		it("should have order column for sequencing", () => {
+			expect(notes.order).toBeDefined();
+		});
+
+		it("should have timestamp columns", () => {
+			expect(notes.createdAt).toBeDefined();
+			expect(notes.updatedAt).toBeDefined();
+		});
+	});
+
 	describe("relations", () => {
 		it("should export usersRelations", () => {
 			expect(usersRelations).toBeDefined();
@@ -106,6 +137,10 @@ describe("Database Schema", () => {
 
 		it("should export scheduleBlocksRelations", () => {
 			expect(scheduleBlocksRelations).toBeDefined();
+		});
+
+		it("should export notesRelations", () => {
+			expect(notesRelations).toBeDefined();
 		});
 	});
 });

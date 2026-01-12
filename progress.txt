@@ -491,3 +491,24 @@
 - 160/160 tests pass (10 new tests)
 - typecheck passes
 - biome check passes
+
+## 2026-01-12: Notes Table Database Schema (BLDR-003-T1)
+
+**Completed:** Created notes database table for FAQ/dress code/kids policy items
+
+**Changes:**
+- `src/db/schema.ts`: Added notes table + notesRelations, updated invitationsRelations
+- `src/db/schema.test.ts`: Added 7 tests for notes table + 1 test for notesRelations
+
+**Decisions:**
+- Separate table (not JSON field) for consistency w/ scheduleBlocks pattern
+- Allows individual CRUD + reordering (BLDR-003-T4)
+- title optional (for simple notes vs FAQ-style title+content)
+- content required (the actual note text)
+- order integer (default 0) for reordering
+- FK to invitations w/ cascade delete
+
+**Verification:**
+- 167/167 tests pass (7 new schema tests)
+- typecheck passes
+- biome check passes

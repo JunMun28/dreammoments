@@ -77,6 +77,27 @@ export const scheduleBlocks = pgTable("schedule_blocks", {
 });
 
 // ============================================================================
+// NOTES - FAQ/Notes items for dress code, kids policy, etc.
+// ============================================================================
+export const notes = pgTable("notes", {
+	id: uuid().primaryKey().defaultRandom(),
+	invitationId: uuid("invitation_id")
+		.notNull()
+		.references(() => invitations.id, { onDelete: "cascade" }),
+
+	// Note content
+	title: text(),
+	content: text().notNull(),
+
+	// Ordering
+	order: integer().notNull().default(0),
+
+	// Timestamps
+	createdAt: timestamp("created_at").defaultNow(),
+	updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// ============================================================================
 // RELATIONS
 // ============================================================================
 export const usersRelations = relations(users, ({ many }) => ({
@@ -89,11 +110,19 @@ export const invitationsRelations = relations(invitations, ({ one, many }) => ({
 		references: [users.id],
 	}),
 	scheduleBlocks: many(scheduleBlocks),
+	notes: many(notes),
 }));
 
 export const scheduleBlocksRelations = relations(scheduleBlocks, ({ one }) => ({
 	invitation: one(invitations, {
 		fields: [scheduleBlocks.invitationId],
+		references: [invitations.id],
+	}),
+}));
+
+export const notesRelations = relations(notes, ({ one }) => ({
+	invitation: one(invitations, {
+		fields: [notes.invitationId],
 		references: [invitations.id],
 	}),
 }));
