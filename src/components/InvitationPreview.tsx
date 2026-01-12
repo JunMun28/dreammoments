@@ -1,4 +1,5 @@
 import { CalendarDays, Clock, MapPin } from "lucide-react";
+import type { ScheduleBlock } from "@/contexts/InvitationBuilderContext";
 import { useInvitationBuilder } from "@/contexts/InvitationBuilderContext";
 
 /**
@@ -24,6 +25,35 @@ function formatTime(time: string | undefined): string {
 	return `${displayHours}:${minutes.toString().padStart(2, "0")} ${period}`;
 }
 
+interface ScheduleBlockPreviewProps {
+	block: ScheduleBlock;
+}
+
+/**
+ * Individual schedule block display for preview
+ */
+function ScheduleBlockPreview({ block }: ScheduleBlockPreviewProps) {
+	return (
+		<div
+			className="flex gap-4 text-stone-600"
+			data-testid={`preview-block-${block.id}`}
+		>
+			{block.time && (
+				<div className="flex items-center gap-1 text-sm font-medium whitespace-nowrap">
+					<Clock className="h-3 w-3" />
+					<span>{formatTime(block.time)}</span>
+				</div>
+			)}
+			<div className="flex-1">
+				<p className="font-medium">{block.title}</p>
+				{block.description && (
+					<p className="text-sm text-stone-500">{block.description}</p>
+				)}
+			</div>
+		</div>
+	);
+}
+
 /**
  * Preview component that renders the wedding invitation.
  * Consumes InvitationBuilderContext for real-time updates.
@@ -38,11 +68,18 @@ export function InvitationPreview() {
 		weddingTime,
 		venueName,
 		venueAddress,
+		scheduleBlocks,
 	} = invitation;
 
 	const hasNames = partner1Name || partner2Name;
 	const hasDateOrTime = weddingDate || weddingTime;
 	const hasVenue = venueName || venueAddress;
+
+	// Sort schedule blocks by order for display
+	const sortedBlocks = [...(scheduleBlocks ?? [])].sort(
+		(a, b) => a.order - b.order,
+	);
+	const hasSchedule = sortedBlocks.length > 0;
 
 	return (
 		<div className="relative h-full min-h-[400px] overflow-hidden rounded-lg bg-gradient-to-br from-stone-100 to-stone-200 p-8">
@@ -112,6 +149,24 @@ export function InvitationPreview() {
 					) : (
 						<p className="text-sm italic text-stone-400">
 							Venue details will appear here
+						</p>
+					)}
+				</div>
+
+				{/* Schedule section */}
+				<div className="mt-8 border-t border-stone-200 pt-6">
+					<p className="mb-4 text-center text-xs uppercase tracking-widest text-stone-400">
+						Schedule of Events
+					</p>
+					{hasSchedule ? (
+						<div className="space-y-4" data-testid="preview-schedule-blocks">
+							{sortedBlocks.map((block) => (
+								<ScheduleBlockPreview key={block.id} block={block} />
+							))}
+						</div>
+					) : (
+						<p className="text-center text-sm italic text-stone-400">
+							Event schedule will appear here
 						</p>
 					)}
 				</div>

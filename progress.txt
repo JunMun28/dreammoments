@@ -448,3 +448,24 @@
 - 143/143 tests pass (4 new tests)
 - typecheck passes
 - biome check passes
+
+## 2026-01-12: Render Schedule Blocks in Preview (BLDR-002-T6)
+
+**Completed:** Display schedule blocks in InvitationPreview component
+
+**Changes:**
+- `src/components/InvitationPreview.tsx`: Added ScheduleBlockPreview sub-component + schedule section between venue and RSVP
+- `src/components/InvitationPreview.test.tsx`: Added 6 tests for schedule preview (placeholder, blocks display, time format, sorting, no-time block)
+
+**Decisions:**
+- Schedule section positioned between venue and RSVP (logical flow)
+- ScheduleBlockPreview shows time (formatted 12h) + title + description
+- Blocks sorted by order field for consistent display
+- Placeholder "Event schedule will appear here" when no blocks
+- Reused formatTime helper already in component (same format as wedding time)
+- data-testid attributes for testing sorted order
+
+**Verification:**
+- 148/148 tests pass (6 new tests)
+- typecheck passes
+- biome check passes

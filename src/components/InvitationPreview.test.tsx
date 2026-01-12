@@ -89,6 +89,114 @@ describe("InvitationPreview", () => {
 
 		expect(screen.getByText("RSVP")).toBeDefined();
 	});
+
+	it("shows schedule placeholder when no blocks", () => {
+		renderWithContext(emptyData);
+
+		expect(screen.getByText("Event schedule will appear here")).toBeDefined();
+	});
+
+	it("displays schedule blocks when provided", () => {
+		const dataWithSchedule: InvitationData = {
+			...fullData,
+			scheduleBlocks: [
+				{
+					id: "block-1",
+					title: "Ceremony",
+					time: "14:00",
+					description: "Main Chapel",
+					order: 0,
+				},
+				{
+					id: "block-2",
+					title: "Reception",
+					time: "16:00",
+					description: "Garden Pavilion",
+					order: 1,
+				},
+			],
+		};
+
+		renderWithContext(dataWithSchedule);
+
+		expect(screen.getByText("Ceremony")).toBeDefined();
+		expect(screen.getByText("Main Chapel")).toBeDefined();
+		expect(screen.getByText("Reception")).toBeDefined();
+		expect(screen.getByText("Garden Pavilion")).toBeDefined();
+	});
+
+	it("formats schedule block time in 12-hour format", () => {
+		const dataWithSchedule: InvitationData = {
+			...fullData,
+			scheduleBlocks: [
+				{
+					id: "block-1",
+					title: "Ceremony",
+					time: "14:00",
+					order: 0,
+				},
+			],
+		};
+
+		renderWithContext(dataWithSchedule);
+
+		// 14:00 should display as 2:00 PM
+		expect(screen.getByText("2:00 PM")).toBeDefined();
+	});
+
+	it("displays schedule blocks sorted by order", () => {
+		const dataWithSchedule: InvitationData = {
+			...fullData,
+			scheduleBlocks: [
+				{
+					id: "block-2",
+					title: "Reception",
+					order: 1,
+				},
+				{
+					id: "block-1",
+					title: "Ceremony",
+					order: 0,
+				},
+				{
+					id: "block-3",
+					title: "Dinner",
+					order: 2,
+				},
+			],
+		};
+
+		renderWithContext(dataWithSchedule);
+
+		const container = screen.getByTestId("preview-schedule-blocks");
+		const blocks = container.querySelectorAll(
+			"[data-testid^='preview-block-']",
+		);
+
+		// Should be in order: Ceremony, Reception, Dinner
+		expect(blocks[0].getAttribute("data-testid")).toBe("preview-block-block-1");
+		expect(blocks[1].getAttribute("data-testid")).toBe("preview-block-block-2");
+		expect(blocks[2].getAttribute("data-testid")).toBe("preview-block-block-3");
+	});
+
+	it("displays schedule block without time", () => {
+		const dataWithSchedule: InvitationData = {
+			...fullData,
+			scheduleBlocks: [
+				{
+					id: "block-1",
+					title: "TBD Event",
+					description: "Time to be announced",
+					order: 0,
+				},
+			],
+		};
+
+		renderWithContext(dataWithSchedule);
+
+		expect(screen.getByText("TBD Event")).toBeDefined();
+		expect(screen.getByText("Time to be announced")).toBeDefined();
+	});
 });
 
 describe("formatDate", () => {
