@@ -23,35 +23,43 @@ pnpm db:studio           # Open Drizzle Studio GUI
 ## Architecture
 
 ### Routing (TanStack Router)
+
 - File-based routing in `src/routes/`
 - `__root.tsx` is the root layout
 - API routes use `server: { handlers: { GET, POST } }` pattern
 - Route loaders fetch data before render via `loader:` function
 
 ### Server Functions
+
 Use `createServerFn()` for type-safe server-client RPC:
+
 ```typescript
-const getData = createServerFn({ method: 'GET' })
-  .handler(async () => { /* runs on server */ })
+const getData = createServerFn({ method: "GET" }).handler(async () => {
+  /* runs on server */
+});
 ```
 
 ### Data Fetching
+
 - TanStack Query for client state management with caching
 - Server functions for direct RPC calls
 - SSR integration via `@tanstack/react-router-ssr-query`
 
 ### Database
+
 - PostgreSQL with Neon Serverless (`@neondatabase/serverless`)
 - Drizzle ORM with schema at `src/db/schema.ts`
 - Database client at `src/db.ts`
-- Requires `VITE_DATABASE_URL` in `.env.local`
+- Requires `DATABASE_URL` in `.env.local`
 
 ### Forms
+
 - TanStack React Form with Zod validation
 - Custom `useAppForm` hook at `src/hooks/demo.form.ts`
 - Reusable form components at `src/components/demo.FormComponents.tsx`
 
 ### UI Components
+
 - shadcn/ui components in `src/components/ui/`
 - Install new components: `pnpm dlx shadcn@latest add <component>`
 - Tailwind CSS 4.0 with Vite plugin (styles in `src/styles.css`)
