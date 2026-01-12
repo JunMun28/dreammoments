@@ -213,7 +213,7 @@
         {
           "id": "BLDR-001-T7",
           "task": "Wire form state to preview component via context/props",
-          "done": false
+          "done": true
         }
       ],
       "passes": false
