@@ -240,12 +240,12 @@
         {
           "id": "BLDR-002-T2",
           "task": "Build schedule block list component with add button",
-          "done": false
+          "done": true
         },
         {
           "id": "BLDR-002-T3",
           "task": "Create block editor form (title, time picker, description)",
-          "done": false
+          "done": true
         },
         {
           "id": "BLDR-002-T4",
@@ -255,7 +255,7 @@
         {
           "id": "BLDR-002-T5",
           "task": "Add delete block with confirmation",
-          "done": false
+          "done": true
         },
         {
           "id": "BLDR-002-T6",
