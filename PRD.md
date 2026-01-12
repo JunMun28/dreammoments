@@ -203,7 +203,7 @@
         {
           "id": "BLDR-001-T5",
           "task": "Add venue name and address fields",
-          "done": false
+          "done": true
         },
         {
           "id": "BLDR-001-T6",

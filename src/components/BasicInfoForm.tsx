@@ -12,6 +12,8 @@ export interface BasicInfoFormValues {
 	weddingDate?: Date;
 	/** Time in 24-hour format "HH:mm" */
 	weddingTime?: string;
+	venueName?: string;
+	venueAddress?: string;
 }
 
 interface BasicInfoFormProps {
@@ -29,6 +31,8 @@ export function BasicInfoForm({
 	const partner2Id = useId();
 	const weddingDateId = useId();
 	const weddingTimeId = useId();
+	const venueNameId = useId();
+	const venueAddressId = useId();
 
 	const form = useForm({
 		defaultValues: {
@@ -36,6 +40,8 @@ export function BasicInfoForm({
 			partner2Name: initialValues?.partner2Name ?? "",
 			weddingDate: initialValues?.weddingDate,
 			weddingTime: initialValues?.weddingTime,
+			venueName: initialValues?.venueName ?? "",
+			venueAddress: initialValues?.venueAddress ?? "",
 		},
 		onSubmit: async ({ value }) => {
 			await onSubmit(value);
@@ -137,6 +143,54 @@ export function BasicInfoForm({
 						<TimePicker
 							value={field.state.value}
 							onChange={(time) => field.handleChange(time)}
+						/>
+					</div>
+				)}
+			</form.Field>
+
+			<form.Field
+				name="venueName"
+				listeners={{
+					onChange: () => {
+						if (onChange) {
+							onChange(form.state.values);
+						}
+					},
+				}}
+			>
+				{(field) => (
+					<div>
+						<Label htmlFor={venueNameId}>Venue Name</Label>
+						<Input
+							id={venueNameId}
+							value={field.state.value}
+							onChange={(e) => field.handleChange(e.target.value)}
+							onBlur={field.handleBlur}
+							placeholder="Enter venue name"
+						/>
+					</div>
+				)}
+			</form.Field>
+
+			<form.Field
+				name="venueAddress"
+				listeners={{
+					onChange: () => {
+						if (onChange) {
+							onChange(form.state.values);
+						}
+					},
+				}}
+			>
+				{(field) => (
+					<div>
+						<Label htmlFor={venueAddressId}>Venue Address</Label>
+						<Input
+							id={venueAddressId}
+							value={field.state.value}
+							onChange={(e) => field.handleChange(e.target.value)}
+							onBlur={field.handleBlur}
+							placeholder="Enter venue address"
 						/>
 					</div>
 				)}
