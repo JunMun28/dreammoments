@@ -469,3 +469,25 @@
 - 150/150 tests pass (7 new tests)
 - typecheck passes
 - biome check passes
+
+## 2026-01-12: Schedule Block Reordering with Arrow Buttons (BLDR-002-T4)
+
+**Completed:** Implement reordering schedule blocks via up/down arrow buttons
+
+**Changes:**
+- `src/contexts/InvitationBuilderContext.tsx`: Added moveScheduleBlock(id, direction) function that swaps order values
+- `src/contexts/InvitationBuilderContext.test.tsx`: Added 4 tests for move up/down + bounds checking
+- `src/components/ScheduleBlockList.tsx`: Added ChevronUp/ChevronDown buttons per block with disabled states
+- `src/components/ScheduleBlockList.test.tsx`: Added 7 tests for reorder buttons UI
+
+**Decisions:**
+- Used arrow buttons instead of drag-and-drop (simpler, more accessible, no extra deps)
+- moveScheduleBlock swaps order values of adjacent blocks in sorted order
+- Up button disabled for first block, down button disabled for last block
+- Buttons placed in left column, compact (h-6 w-6) for clean UI
+- Disabled state updates correctly after reordering
+
+**Verification:**
+- 160/160 tests pass (10 new tests)
+- typecheck passes
+- biome check passes

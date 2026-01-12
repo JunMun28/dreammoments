@@ -47,6 +47,8 @@ interface InvitationBuilderContextValue {
 	updateScheduleBlock: (id: string, updates: Partial<ScheduleBlock>) => void;
 	/** Delete a schedule block */
 	deleteScheduleBlock: (id: string) => void;
+	/** Move a schedule block up or down in order */
+	moveScheduleBlock: (id: string, direction: "up" | "down") => void;
 }
 
 const InvitationBuilderContext =
@@ -124,6 +126,43 @@ export function InvitationBuilderProvider({
 		});
 	}, []);
 
+	const moveScheduleBlock = useCallback(
+		(id: string, direction: "up" | "down") => {
+			setInvitation((prev) => {
+				const blocks = prev.scheduleBlocks ?? [];
+				if (blocks.length < 2) return prev;
+
+				// Sort blocks by order to find adjacent blocks
+				const sorted = [...blocks].sort((a, b) => a.order - b.order);
+				const currentIndex = sorted.findIndex((b) => b.id === id);
+				if (currentIndex === -1) return prev;
+
+				// Determine target index
+				const targetIndex =
+					direction === "up" ? currentIndex - 1 : currentIndex + 1;
+
+				// Check bounds
+				if (targetIndex < 0 || targetIndex >= sorted.length) return prev;
+
+				// Swap order values
+				const currentBlock = sorted[currentIndex];
+				const targetBlock = sorted[targetIndex];
+				const currentOrder = currentBlock.order;
+				const targetOrder = targetBlock.order;
+
+				return {
+					...prev,
+					scheduleBlocks: blocks.map((b) => {
+						if (b.id === currentBlock.id) return { ...b, order: targetOrder };
+						if (b.id === targetBlock.id) return { ...b, order: currentOrder };
+						return b;
+					}),
+				};
+			});
+		},
+		[],
+	);
+
 	return (
 		<InvitationBuilderContext.Provider
 			value={{
@@ -134,6 +173,7 @@ export function InvitationBuilderProvider({
 				addScheduleBlock,
 				updateScheduleBlock,
 				deleteScheduleBlock,
+				moveScheduleBlock,
 			}}
 		>
 			{children}
