@@ -9,6 +9,18 @@ import type { BasicInfoFormValues } from "@/components/BasicInfoForm";
 import type { AutosaveStatus } from "@/hooks/useAutosave";
 
 /**
+ * Schedule block data for wedding timeline events
+ */
+export interface ScheduleBlock {
+	id: string;
+	title: string;
+	/** Time in 24-hour format "HH:mm" */
+	time?: string;
+	description?: string;
+	order: number;
+}
+
+/**
  * Extended invitation data including DB fields not in BasicInfoFormValues
  */
 export interface InvitationData extends BasicInfoFormValues {
@@ -17,6 +29,7 @@ export interface InvitationData extends BasicInfoFormValues {
 	accentColor?: string;
 	fontPairing?: string;
 	heroImageUrl?: string;
+	scheduleBlocks?: ScheduleBlock[];
 }
 
 interface InvitationBuilderContextValue {
@@ -28,6 +41,12 @@ interface InvitationBuilderContextValue {
 	autosaveStatus: AutosaveStatus;
 	/** Set autosave status (called by autosave hook) */
 	setAutosaveStatus: (status: AutosaveStatus) => void;
+	/** Add a new schedule block */
+	addScheduleBlock: (block: Omit<ScheduleBlock, "id" | "order">) => void;
+	/** Update an existing schedule block */
+	updateScheduleBlock: (id: string, updates: Partial<ScheduleBlock>) => void;
+	/** Delete a schedule block */
+	deleteScheduleBlock: (id: string) => void;
 }
 
 const InvitationBuilderContext =
@@ -36,6 +55,13 @@ const InvitationBuilderContext =
 interface InvitationBuilderProviderProps {
 	children: ReactNode;
 	initialData: InvitationData;
+}
+
+/**
+ * Generate a simple unique ID for new schedule blocks
+ */
+function generateBlockId(): string {
+	return `block-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
 /**
@@ -56,6 +82,48 @@ export function InvitationBuilderProvider({
 		[],
 	);
 
+	const addScheduleBlock = useCallback(
+		(block: Omit<ScheduleBlock, "id" | "order">) => {
+			setInvitation((prev) => {
+				const blocks = prev.scheduleBlocks ?? [];
+				const maxOrder =
+					blocks.length > 0 ? Math.max(...blocks.map((b) => b.order)) : -1;
+				const newBlock: ScheduleBlock = {
+					...block,
+					id: generateBlockId(),
+					order: maxOrder + 1,
+				};
+				return { ...prev, scheduleBlocks: [...blocks, newBlock] };
+			});
+		},
+		[],
+	);
+
+	const updateScheduleBlock = useCallback(
+		(id: string, updates: Partial<ScheduleBlock>) => {
+			setInvitation((prev) => {
+				const blocks = prev.scheduleBlocks ?? [];
+				return {
+					...prev,
+					scheduleBlocks: blocks.map((b) =>
+						b.id === id ? { ...b, ...updates } : b,
+					),
+				};
+			});
+		},
+		[],
+	);
+
+	const deleteScheduleBlock = useCallback((id: string) => {
+		setInvitation((prev) => {
+			const blocks = prev.scheduleBlocks ?? [];
+			return {
+				...prev,
+				scheduleBlocks: blocks.filter((b) => b.id !== id),
+			};
+		});
+	}, []);
+
 	return (
 		<InvitationBuilderContext.Provider
 			value={{
@@ -63,6 +131,9 @@ export function InvitationBuilderProvider({
 				updateInvitation,
 				autosaveStatus,
 				setAutosaveStatus,
+				addScheduleBlock,
+				updateScheduleBlock,
+				deleteScheduleBlock,
 			}}
 		>
 			{children}

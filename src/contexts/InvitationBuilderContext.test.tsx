@@ -10,8 +10,17 @@ import {
 
 // Test consumer component
 function TestConsumer() {
-	const { invitation, updateInvitation, autosaveStatus, setAutosaveStatus } =
-		useInvitationBuilder();
+	const {
+		invitation,
+		updateInvitation,
+		autosaveStatus,
+		setAutosaveStatus,
+		addScheduleBlock,
+		updateScheduleBlock,
+		deleteScheduleBlock,
+	} = useInvitationBuilder();
+
+	const blocks = invitation.scheduleBlocks ?? [];
 
 	return (
 		<div>
@@ -19,6 +28,10 @@ function TestConsumer() {
 			<span data-testid="partner2">{invitation.partner2Name}</span>
 			<span data-testid="venue">{invitation.venueName}</span>
 			<span data-testid="status">{autosaveStatus}</span>
+			<span data-testid="block-count">{blocks.length}</span>
+			<span data-testid="block-titles">
+				{blocks.map((b) => b.title).join(",")}
+			</span>
 			<button
 				type="button"
 				onClick={() => updateInvitation({ partner1Name: "Updated" })}
@@ -27,6 +40,32 @@ function TestConsumer() {
 			</button>
 			<button type="button" onClick={() => setAutosaveStatus("saving")}>
 				Set Saving
+			</button>
+			<button
+				type="button"
+				onClick={() => addScheduleBlock({ title: "Ceremony", time: "14:00" })}
+			>
+				Add Block
+			</button>
+			<button
+				type="button"
+				onClick={() => {
+					if (blocks.length > 0) {
+						updateScheduleBlock(blocks[0].id, { title: "Updated Ceremony" });
+					}
+				}}
+			>
+				Update Block
+			</button>
+			<button
+				type="button"
+				onClick={() => {
+					if (blocks.length > 0) {
+						deleteScheduleBlock(blocks[0].id);
+					}
+				}}
+			>
+				Delete Block
 			</button>
 		</div>
 	);
@@ -110,5 +149,82 @@ describe("InvitationBuilderContext", () => {
 		);
 
 		consoleSpy.mockRestore();
+	});
+
+	it("adds schedule block with generated id and order", () => {
+		render(
+			<InvitationBuilderProvider initialData={mockInitialData}>
+				<TestConsumer />
+			</InvitationBuilderProvider>,
+		);
+
+		expect(screen.getByTestId("block-count").textContent).toBe("0");
+
+		act(() => {
+			screen.getByText("Add Block").click();
+		});
+
+		expect(screen.getByTestId("block-count").textContent).toBe("1");
+		expect(screen.getByTestId("block-titles").textContent).toBe("Ceremony");
+	});
+
+	it("assigns sequential order to new blocks", () => {
+		render(
+			<InvitationBuilderProvider initialData={mockInitialData}>
+				<TestConsumer />
+			</InvitationBuilderProvider>,
+		);
+
+		act(() => {
+			screen.getByText("Add Block").click();
+		});
+
+		act(() => {
+			screen.getByText("Add Block").click();
+		});
+
+		expect(screen.getByTestId("block-count").textContent).toBe("2");
+	});
+
+	it("updates schedule block by id", () => {
+		render(
+			<InvitationBuilderProvider initialData={mockInitialData}>
+				<TestConsumer />
+			</InvitationBuilderProvider>,
+		);
+
+		act(() => {
+			screen.getByText("Add Block").click();
+		});
+
+		expect(screen.getByTestId("block-titles").textContent).toBe("Ceremony");
+
+		act(() => {
+			screen.getByText("Update Block").click();
+		});
+
+		expect(screen.getByTestId("block-titles").textContent).toBe(
+			"Updated Ceremony",
+		);
+	});
+
+	it("deletes schedule block by id", () => {
+		render(
+			<InvitationBuilderProvider initialData={mockInitialData}>
+				<TestConsumer />
+			</InvitationBuilderProvider>,
+		);
+
+		act(() => {
+			screen.getByText("Add Block").click();
+		});
+
+		expect(screen.getByTestId("block-count").textContent).toBe("1");
+
+		act(() => {
+			screen.getByText("Delete Block").click();
+		});
+
+		expect(screen.getByTestId("block-count").textContent).toBe("0");
 	});
 });

@@ -379,3 +379,27 @@
 - 111/111 tests pass (7 new schema tests)
 - typecheck passes
 - biome check passes
+
+## 2026-01-12: Schedule Block List Component (BLDR-002-T2)
+
+**Completed:** Schedule block list component with add button
+
+**Changes:**
+- `src/contexts/InvitationBuilderContext.tsx`: Added ScheduleBlock interface + addScheduleBlock/updateScheduleBlock/deleteScheduleBlock methods
+- `src/contexts/InvitationBuilderContext.test.tsx`: Added 4 tests for schedule block CRUD methods
+- `src/components/ScheduleBlockList.tsx`: New component displaying schedule blocks with "Add Event" button
+- `src/components/ScheduleBlockList.test.tsx`: 13 tests (5 formatBlockTime + 8 component tests)
+
+**Decisions:**
+- ScheduleBlock interface: id, title, time?, description?, order
+- Context owns schedule block state (consistent with basic info pattern)
+- generateBlockId() creates unique IDs with timestamp + random suffix
+- Blocks sorted by order field for display
+- Empty state shows helpful message w/ call-to-action
+- formatBlockTime helper converts 24h→12h format (e.g., "14:00"→"2:00 PM")
+- onAddClick prop allows custom handler, defaults to adding "New Event" block
+
+**Verification:**
+- 128/128 tests pass (17 new tests)
+- typecheck passes
+- biome check passes
