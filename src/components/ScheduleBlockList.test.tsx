@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { act, cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import {
 	InvitationBuilderProvider,
 	type InvitationData,
@@ -61,11 +61,10 @@ describe("ScheduleBlockList", () => {
 
 	const renderWithProvider = (
 		initialData: InvitationData = mockInitialData,
-		props: { onAddClick?: () => void } = {},
 	) => {
 		return render(
 			<InvitationBuilderProvider initialData={initialData}>
-				<ScheduleBlockList {...props} />
+				<ScheduleBlockList />
 			</InvitationBuilderProvider>,
 		);
 	};
@@ -116,26 +115,58 @@ describe("ScheduleBlockList", () => {
 		expect(screen.getByText("Garden")).toBeDefined();
 	});
 
-	it("calls onAddClick when add button is clicked", () => {
-		const onAddClick = vi.fn();
-		renderWithProvider(mockInitialData, { onAddClick });
-
-		act(() => {
-			screen.getByTestId("add-schedule-block-button").click();
-		});
-
-		expect(onAddClick).toHaveBeenCalledTimes(1);
-	});
-
-	it("adds default block when add is clicked without onAddClick handler", () => {
+	it("shows editor when add button is clicked", () => {
 		renderWithProvider(mockInitialData);
 
 		act(() => {
 			screen.getByTestId("add-schedule-block-button").click();
 		});
 
-		expect(screen.queryByTestId("empty-schedule-message")).toBeNull();
-		expect(screen.getByText("New Event")).toBeDefined();
+		expect(screen.getByTestId("schedule-block-editor")).toBeDefined();
+		expect(screen.getByTestId("block-title-input")).toBeDefined();
+	});
+
+	it("disables add button while editor is open", () => {
+		renderWithProvider(mockInitialData);
+
+		const addButton = screen.getByTestId(
+			"add-schedule-block-button",
+		) as HTMLButtonElement;
+		expect(addButton.disabled).toBe(false);
+
+		act(() => {
+			addButton.click();
+		});
+
+		expect(addButton.disabled).toBe(true);
+	});
+
+	it("shows edit button on each block", () => {
+		renderWithProvider({
+			...mockInitialData,
+			scheduleBlocks: mockScheduleBlocks,
+		});
+
+		expect(screen.getByTestId("edit-block-1")).toBeDefined();
+		expect(screen.getByTestId("edit-block-2")).toBeDefined();
+	});
+
+	it("shows editor when edit button is clicked", () => {
+		renderWithProvider({
+			...mockInitialData,
+			scheduleBlocks: mockScheduleBlocks,
+		});
+
+		act(() => {
+			screen.getByTestId("edit-block-1").click();
+		});
+
+		// Editor should be shown with block data
+		expect(screen.getByTestId("schedule-block-editor")).toBeDefined();
+		const titleInput = screen.getByTestId(
+			"block-title-input",
+		) as HTMLInputElement;
+		expect(titleInput.value).toBe("Ceremony");
 	});
 
 	it("sorts blocks by order", () => {
