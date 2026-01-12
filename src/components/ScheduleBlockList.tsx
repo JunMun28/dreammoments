@@ -1,4 +1,9 @@
-import { Plus } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
+import { useState } from "react";
+import {
+	ScheduleBlockEditor,
+	type ScheduleBlockEditorValues,
+} from "@/components/ScheduleBlockEditor";
 import { Button } from "@/components/ui/button";
 import {
 	type ScheduleBlock,
@@ -20,12 +25,13 @@ export function formatBlockTime(time: string | undefined): string {
 
 interface ScheduleBlockItemProps {
 	block: ScheduleBlock;
+	onEdit: () => void;
 }
 
 /**
  * Individual schedule block item display
  */
-function ScheduleBlockItem({ block }: ScheduleBlockItemProps) {
+function ScheduleBlockItem({ block, onEdit }: ScheduleBlockItemProps) {
 	return (
 		<div
 			className="rounded-lg border bg-card p-4"
@@ -45,14 +51,19 @@ function ScheduleBlockItem({ block }: ScheduleBlockItemProps) {
 						</p>
 					)}
 				</div>
+				<Button
+					type="button"
+					variant="ghost"
+					size="icon"
+					onClick={onEdit}
+					data-testid={`edit-block-${block.id}`}
+					aria-label={`Edit ${block.title}`}
+				>
+					<Pencil className="h-4 w-4" />
+				</Button>
 			</div>
 		</div>
 	);
-}
-
-interface ScheduleBlockListProps {
-	/** Callback when add button is clicked */
-	onAddClick?: () => void;
 }
 
 /**
@@ -61,23 +72,36 @@ interface ScheduleBlockListProps {
  *
  * @example
  * ```tsx
- * <ScheduleBlockList onAddClick={() => setShowAddForm(true)} />
+ * <ScheduleBlockList />
  * ```
  */
-export function ScheduleBlockList({ onAddClick }: ScheduleBlockListProps) {
-	const { invitation, addScheduleBlock } = useInvitationBuilder();
+export function ScheduleBlockList() {
+	const { invitation, addScheduleBlock, updateScheduleBlock } =
+		useInvitationBuilder();
 	const blocks = invitation.scheduleBlocks ?? [];
+
+	// Track which block is being edited (null = none, "new" = adding new)
+	const [editingId, setEditingId] = useState<string | null>(null);
 
 	// Sort blocks by order
 	const sortedBlocks = [...blocks].sort((a, b) => a.order - b.order);
 
 	const handleAddClick = () => {
-		if (onAddClick) {
-			onAddClick();
-		} else {
-			// Default behavior: add a new empty block
-			addScheduleBlock({ title: "New Event" });
-		}
+		setEditingId("new");
+	};
+
+	const handleSaveNew = (values: ScheduleBlockEditorValues) => {
+		addScheduleBlock(values);
+		setEditingId(null);
+	};
+
+	const handleSaveEdit = (id: string, values: ScheduleBlockEditorValues) => {
+		updateScheduleBlock(id, values);
+		setEditingId(null);
+	};
+
+	const handleCancel = () => {
+		setEditingId(null);
 	};
 
 	return (
@@ -89,6 +113,7 @@ export function ScheduleBlockList({ onAddClick }: ScheduleBlockListProps) {
 					variant="outline"
 					size="sm"
 					onClick={handleAddClick}
+					disabled={editingId !== null}
 					data-testid="add-schedule-block-button"
 				>
 					<Plus className="h-4 w-4" />
@@ -96,7 +121,12 @@ export function ScheduleBlockList({ onAddClick }: ScheduleBlockListProps) {
 				</Button>
 			</div>
 
-			{sortedBlocks.length === 0 ? (
+			{/* New block editor */}
+			{editingId === "new" && (
+				<ScheduleBlockEditor onSave={handleSaveNew} onCancel={handleCancel} />
+			)}
+
+			{sortedBlocks.length === 0 && editingId !== "new" ? (
 				<p
 					className="text-sm text-muted-foreground py-4 text-center"
 					data-testid="empty-schedule-message"
@@ -106,9 +136,22 @@ export function ScheduleBlockList({ onAddClick }: ScheduleBlockListProps) {
 				</p>
 			) : (
 				<div className="space-y-3" data-testid="schedule-block-list">
-					{sortedBlocks.map((block) => (
-						<ScheduleBlockItem key={block.id} block={block} />
-					))}
+					{sortedBlocks.map((block) =>
+						editingId === block.id ? (
+							<ScheduleBlockEditor
+								key={block.id}
+								block={block}
+								onSave={(values) => handleSaveEdit(block.id, values)}
+								onCancel={handleCancel}
+							/>
+						) : (
+							<ScheduleBlockItem
+								key={block.id}
+								block={block}
+								onEdit={() => setEditingId(block.id)}
+							/>
+						),
+					)}
 				</div>
 			)}
 		</div>

@@ -403,3 +403,27 @@
 - 128/128 tests pass (17 new tests)
 - typecheck passes
 - biome check passes
+
+## 2026-01-12: Schedule Block Editor Form (BLDR-002-T3)
+
+**Completed:** Block editor form (title, time picker, description) with inline editing
+
+**Changes:**
+- `src/components/ScheduleBlockEditor.tsx`: New form component for creating/editing schedule blocks
+- `src/components/ScheduleBlockEditor.test.tsx`: 9 tests (render, initial values, save, cancel, validation)
+- `src/components/ScheduleBlockList.tsx`: Integrated editor with inline add/edit mode, edit button per block
+- `src/components/ScheduleBlockList.test.tsx`: Updated tests for new editing behavior
+
+**Decisions:**
+- Inline editing: click "Add Event" or edit button shows editor in place
+- Only one editor open at a time (add OR edit, not both)
+- Title required, time/description optional
+- Trims whitespace on save, empty description → undefined
+- Reuses TimePicker from ui components for time selection
+- Edit button (Pencil icon) on each block for quick access
+- Add button disabled while editor is open to prevent confusion
+
+**Verification:**
+- 139/139 tests pass (11 new/updated tests)
+- typecheck passes
+- biome check passes
