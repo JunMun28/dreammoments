@@ -1,4 +1,4 @@
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import {
 	ScheduleBlockEditor,
@@ -38,6 +38,10 @@ interface ScheduleBlockItemProps {
 	block: ScheduleBlock;
 	onEdit: () => void;
 	onDelete: () => void;
+	onMoveUp: () => void;
+	onMoveDown: () => void;
+	isFirst: boolean;
+	isLast: boolean;
 }
 
 /**
@@ -47,6 +51,10 @@ function ScheduleBlockItem({
 	block,
 	onEdit,
 	onDelete,
+	onMoveUp,
+	onMoveDown,
+	isFirst,
+	isLast,
 }: ScheduleBlockItemProps) {
 	return (
 		<div
@@ -54,6 +62,33 @@ function ScheduleBlockItem({
 			data-testid={`schedule-block-${block.id}`}
 		>
 			<div className="flex items-start justify-between gap-2">
+				{/* Reorder buttons */}
+				<div className="flex flex-col gap-0.5">
+					<Button
+						type="button"
+						variant="ghost"
+						size="icon"
+						className="h-6 w-6"
+						onClick={onMoveUp}
+						disabled={isFirst}
+						data-testid={`move-up-${block.id}`}
+						aria-label={`Move ${block.title} up`}
+					>
+						<ChevronUp className="h-4 w-4" />
+					</Button>
+					<Button
+						type="button"
+						variant="ghost"
+						size="icon"
+						className="h-6 w-6"
+						onClick={onMoveDown}
+						disabled={isLast}
+						data-testid={`move-down-${block.id}`}
+						aria-label={`Move ${block.title} down`}
+					>
+						<ChevronDown className="h-4 w-4" />
+					</Button>
+				</div>
 				<div className="flex-1 min-w-0">
 					<h4 className="font-medium text-foreground">{block.title}</h4>
 					{block.time && (
@@ -131,6 +166,7 @@ export function ScheduleBlockList() {
 		addScheduleBlock,
 		updateScheduleBlock,
 		deleteScheduleBlock,
+		moveScheduleBlock,
 	} = useInvitationBuilder();
 	const blocks = invitation.scheduleBlocks ?? [];
 
@@ -190,7 +226,7 @@ export function ScheduleBlockList() {
 				</p>
 			) : (
 				<div className="space-y-3" data-testid="schedule-block-list">
-					{sortedBlocks.map((block) =>
+					{sortedBlocks.map((block, index) =>
 						editingId === block.id ? (
 							<ScheduleBlockEditor
 								key={block.id}
@@ -204,6 +240,10 @@ export function ScheduleBlockList() {
 								block={block}
 								onEdit={() => setEditingId(block.id)}
 								onDelete={() => deleteScheduleBlock(block.id)}
+								onMoveUp={() => moveScheduleBlock(block.id, "up")}
+								onMoveDown={() => moveScheduleBlock(block.id, "down")}
+								isFirst={index === 0}
+								isLast={index === sortedBlocks.length - 1}
 							/>
 						),
 					)}

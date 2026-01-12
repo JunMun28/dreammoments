@@ -250,7 +250,7 @@
         {
           "id": "BLDR-002-T4",
           "task": "Implement drag-and-drop reordering (or arrow buttons)",
-          "done": false
+          "done": true
         },
         {
           "id": "BLDR-002-T5",

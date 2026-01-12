@@ -18,9 +18,11 @@ function TestConsumer() {
 		addScheduleBlock,
 		updateScheduleBlock,
 		deleteScheduleBlock,
+		moveScheduleBlock,
 	} = useInvitationBuilder();
 
 	const blocks = invitation.scheduleBlocks ?? [];
+	const sortedBlocks = [...blocks].sort((a, b) => a.order - b.order);
 
 	return (
 		<div>
@@ -31,6 +33,9 @@ function TestConsumer() {
 			<span data-testid="block-count">{blocks.length}</span>
 			<span data-testid="block-titles">
 				{blocks.map((b) => b.title).join(",")}
+			</span>
+			<span data-testid="sorted-block-titles">
+				{sortedBlocks.map((b) => b.title).join(",")}
 			</span>
 			<button
 				type="button"
@@ -46,6 +51,18 @@ function TestConsumer() {
 				onClick={() => addScheduleBlock({ title: "Ceremony", time: "14:00" })}
 			>
 				Add Block
+			</button>
+			<button
+				type="button"
+				onClick={() => addScheduleBlock({ title: "Reception", time: "18:00" })}
+			>
+				Add Reception
+			</button>
+			<button
+				type="button"
+				onClick={() => addScheduleBlock({ title: "Dinner", time: "20:00" })}
+			>
+				Add Dinner
 			</button>
 			<button
 				type="button"
@@ -66,6 +83,36 @@ function TestConsumer() {
 				}}
 			>
 				Delete Block
+			</button>
+			<button
+				type="button"
+				onClick={() => {
+					if (sortedBlocks.length > 0) {
+						moveScheduleBlock(sortedBlocks[0].id, "down");
+					}
+				}}
+			>
+				Move First Down
+			</button>
+			<button
+				type="button"
+				onClick={() => {
+					if (sortedBlocks.length > 1) {
+						moveScheduleBlock(sortedBlocks[1].id, "up");
+					}
+				}}
+			>
+				Move Second Up
+			</button>
+			<button
+				type="button"
+				onClick={() => {
+					if (sortedBlocks.length > 0) {
+						moveScheduleBlock(sortedBlocks[0].id, "up");
+					}
+				}}
+			>
+				Move First Up
 			</button>
 		</div>
 	);
@@ -226,5 +273,125 @@ describe("InvitationBuilderContext", () => {
 		});
 
 		expect(screen.getByTestId("block-count").textContent).toBe("0");
+	});
+
+	it("moves schedule block down in order", () => {
+		render(
+			<InvitationBuilderProvider initialData={mockInitialData}>
+				<TestConsumer />
+			</InvitationBuilderProvider>,
+		);
+
+		// Add two blocks
+		act(() => {
+			screen.getByText("Add Block").click(); // Ceremony
+		});
+		act(() => {
+			screen.getByText("Add Reception").click(); // Reception
+		});
+
+		expect(screen.getByTestId("sorted-block-titles").textContent).toBe(
+			"Ceremony,Reception",
+		);
+
+		// Move first block down
+		act(() => {
+			screen.getByText("Move First Down").click();
+		});
+
+		expect(screen.getByTestId("sorted-block-titles").textContent).toBe(
+			"Reception,Ceremony",
+		);
+	});
+
+	it("moves schedule block up in order", () => {
+		render(
+			<InvitationBuilderProvider initialData={mockInitialData}>
+				<TestConsumer />
+			</InvitationBuilderProvider>,
+		);
+
+		// Add two blocks
+		act(() => {
+			screen.getByText("Add Block").click(); // Ceremony
+		});
+		act(() => {
+			screen.getByText("Add Reception").click(); // Reception
+		});
+
+		expect(screen.getByTestId("sorted-block-titles").textContent).toBe(
+			"Ceremony,Reception",
+		);
+
+		// Move second block up
+		act(() => {
+			screen.getByText("Move Second Up").click();
+		});
+
+		expect(screen.getByTestId("sorted-block-titles").textContent).toBe(
+			"Reception,Ceremony",
+		);
+	});
+
+	it("does not move block beyond bounds (up at top)", () => {
+		render(
+			<InvitationBuilderProvider initialData={mockInitialData}>
+				<TestConsumer />
+			</InvitationBuilderProvider>,
+		);
+
+		// Add two blocks
+		act(() => {
+			screen.getByText("Add Block").click();
+		});
+		act(() => {
+			screen.getByText("Add Reception").click();
+		});
+
+		expect(screen.getByTestId("sorted-block-titles").textContent).toBe(
+			"Ceremony,Reception",
+		);
+
+		// Try to move first block up (already at top)
+		act(() => {
+			screen.getByText("Move First Up").click();
+		});
+
+		// Order should not change
+		expect(screen.getByTestId("sorted-block-titles").textContent).toBe(
+			"Ceremony,Reception",
+		);
+	});
+
+	it("handles move with three or more blocks", () => {
+		render(
+			<InvitationBuilderProvider initialData={mockInitialData}>
+				<TestConsumer />
+			</InvitationBuilderProvider>,
+		);
+
+		// Add three blocks
+		act(() => {
+			screen.getByText("Add Block").click(); // Ceremony
+		});
+		act(() => {
+			screen.getByText("Add Reception").click(); // Reception
+		});
+		act(() => {
+			screen.getByText("Add Dinner").click(); // Dinner
+		});
+
+		expect(screen.getByTestId("sorted-block-titles").textContent).toBe(
+			"Ceremony,Reception,Dinner",
+		);
+
+		// Move first block down
+		act(() => {
+			screen.getByText("Move First Down").click();
+		});
+
+		expect(screen.getByTestId("sorted-block-titles").textContent).toBe(
+			"Reception,Ceremony,Dinner",
+		);
 	});
 });

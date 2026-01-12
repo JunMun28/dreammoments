@@ -259,4 +259,124 @@ describe("ScheduleBlockList", () => {
 		expect(screen.getByText("Ceremony")).toBeDefined();
 		expect(screen.getByText("Reception")).toBeDefined();
 	});
+
+	it("shows move up and move down buttons on each block", () => {
+		renderWithProvider({
+			...mockInitialData,
+			scheduleBlocks: mockScheduleBlocks,
+		});
+
+		expect(screen.getByTestId("move-up-1")).toBeDefined();
+		expect(screen.getByTestId("move-down-1")).toBeDefined();
+		expect(screen.getByTestId("move-up-2")).toBeDefined();
+		expect(screen.getByTestId("move-down-2")).toBeDefined();
+	});
+
+	it("disables move up button for first block", () => {
+		renderWithProvider({
+			...mockInitialData,
+			scheduleBlocks: mockScheduleBlocks,
+		});
+
+		const moveUpFirst = screen.getByTestId("move-up-1") as HTMLButtonElement;
+		const moveDownFirst = screen.getByTestId(
+			"move-down-1",
+		) as HTMLButtonElement;
+
+		// First block: up disabled, down enabled
+		expect(moveUpFirst.disabled).toBe(true);
+		expect(moveDownFirst.disabled).toBe(false);
+	});
+
+	it("disables move down button for last block", () => {
+		renderWithProvider({
+			...mockInitialData,
+			scheduleBlocks: mockScheduleBlocks,
+		});
+
+		const moveUpLast = screen.getByTestId("move-up-2") as HTMLButtonElement;
+		const moveDownLast = screen.getByTestId("move-down-2") as HTMLButtonElement;
+
+		// Last block: up enabled, down disabled
+		expect(moveUpLast.disabled).toBe(false);
+		expect(moveDownLast.disabled).toBe(true);
+	});
+
+	it("moves block down when move down button is clicked", () => {
+		renderWithProvider({
+			...mockInitialData,
+			scheduleBlocks: mockScheduleBlocks,
+		});
+
+		// Verify initial order
+		const list = screen.getByTestId("schedule-block-list");
+		let blockTitles = list.querySelectorAll("h4");
+		expect(blockTitles[0].textContent).toBe("Ceremony");
+		expect(blockTitles[1].textContent).toBe("Reception");
+
+		// Move first block down
+		act(() => {
+			screen.getByTestId("move-down-1").click();
+		});
+
+		// Verify new order
+		blockTitles = screen
+			.getByTestId("schedule-block-list")
+			.querySelectorAll("h4");
+		expect(blockTitles[0].textContent).toBe("Reception");
+		expect(blockTitles[1].textContent).toBe("Ceremony");
+	});
+
+	it("moves block up when move up button is clicked", () => {
+		renderWithProvider({
+			...mockInitialData,
+			scheduleBlocks: mockScheduleBlocks,
+		});
+
+		// Verify initial order
+		const list = screen.getByTestId("schedule-block-list");
+		let blockTitles = list.querySelectorAll("h4");
+		expect(blockTitles[0].textContent).toBe("Ceremony");
+		expect(blockTitles[1].textContent).toBe("Reception");
+
+		// Move second block up
+		act(() => {
+			screen.getByTestId("move-up-2").click();
+		});
+
+		// Verify new order
+		blockTitles = screen
+			.getByTestId("schedule-block-list")
+			.querySelectorAll("h4");
+		expect(blockTitles[0].textContent).toBe("Reception");
+		expect(blockTitles[1].textContent).toBe("Ceremony");
+	});
+
+	it("updates disabled state after reordering", () => {
+		renderWithProvider({
+			...mockInitialData,
+			scheduleBlocks: mockScheduleBlocks,
+		});
+
+		// Initially block 1 is first, so move-up is disabled
+		const moveUpFirst = screen.getByTestId("move-up-1") as HTMLButtonElement;
+		expect(moveUpFirst.disabled).toBe(true);
+
+		// Move block 1 down (so block 2 becomes first)
+		act(() => {
+			screen.getByTestId("move-down-1").click();
+		});
+
+		// Now block 1 is last, so its move-up should be enabled
+		const moveUpBlock1AfterMove = screen.getByTestId(
+			"move-up-1",
+		) as HTMLButtonElement;
+		expect(moveUpBlock1AfterMove.disabled).toBe(false);
+
+		// And block 2 is now first, so its move-up should be disabled
+		const moveUpBlock2AfterMove = screen.getByTestId(
+			"move-up-2",
+		) as HTMLButtonElement;
+		expect(moveUpBlock2AfterMove.disabled).toBe(true);
+	});
 });
