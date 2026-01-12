@@ -235,7 +235,7 @@
         {
           "id": "BLDR-002-T1",
           "task": "Create schedule_blocks DB table (invitationId, title, time, description, order)",
-          "done": false
+          "done": true
         },
         {
           "id": "BLDR-002-T2",
