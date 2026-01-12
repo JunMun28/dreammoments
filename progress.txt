@@ -491,3 +491,33 @@
 - 160/160 tests pass (10 new tests)
 - typecheck passes
 - biome check passes
+
+## 2026-01-13: Notes/FAQ Section (BLDR-003-T1 through T5)
+
+**Completed:** Full notes/FAQ feature for wedding invitations
+
+**Changes:**
+- `src/db/schema.ts`: Added notes table + notesRelations, updated invitationsRelations
+- `src/db/schema.test.ts`: Added 7 tests for notes table structure
+- `src/contexts/InvitationBuilderContext.tsx`: Added Note interface + notes to InvitationData + note CRUD methods (add, update, delete, move)
+- `src/contexts/InvitationBuilderContext.test.tsx`: Added 5 tests for note CRUD operations
+- `src/components/NoteEditor.tsx`: New form component for creating/editing notes (title + description)
+- `src/components/NoteEditor.test.tsx`: 7 tests (render, initial values, save, cancel, validation)
+- `src/components/NoteList.tsx`: New component displaying notes with add/edit/delete/reorder functionality
+- `src/components/NoteList.test.tsx`: 14 tests for note list UI and interactions
+- `src/components/InvitationPreview.tsx`: Added "Things to Know" section displaying notes
+- `src/components/InvitationPreview.test.tsx`: Added 7 tests for notes section + sortNotesByOrder helper
+
+**Decisions:**
+- Separate notes table (not JSON) for consistency with scheduleBlocks pattern
+- Note interface: id, title, description?, order - simpler than scheduleBlock (no time field)
+- NoteEditor is standalone form component, NoteList handles state management
+- Reorder via up/down arrows (same pattern as schedule blocks)
+- AlertDialog confirmation for delete
+- Notes displayed in "Things to Know" section (centered text, description below title)
+- Section placed between Schedule and RSVP in preview
+
+**Verification:**
+- 200/200 tests pass (40 new tests)
+- typecheck passes
+- biome check passes (pre-existing formatting issues in src/db.ts, vite.config.ts - not from this work)

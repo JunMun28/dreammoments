@@ -1,5 +1,6 @@
 import { CalendarDays, Clock, MapPin } from "lucide-react";
 import {
+	type Note,
 	type ScheduleBlock,
 	useInvitationBuilder,
 } from "@/contexts/InvitationBuilderContext";
@@ -35,6 +36,13 @@ function sortBlocksByOrder(blocks: ScheduleBlock[]): ScheduleBlock[] {
 }
 
 /**
+ * Sorts notes by order field
+ */
+function sortNotesByOrder(notes: Note[]): Note[] {
+	return [...notes].sort((a, b) => a.order - b.order);
+}
+
+/**
  * Preview component that renders the wedding invitation.
  * Consumes InvitationBuilderContext for real-time updates.
  */
@@ -49,10 +57,14 @@ export function InvitationPreview() {
 		venueName,
 		venueAddress,
 		scheduleBlocks,
+		notes,
 	} = invitation;
 
 	const sortedBlocks = scheduleBlocks ? sortBlocksByOrder(scheduleBlocks) : [];
 	const hasSchedule = sortedBlocks.length > 0;
+
+	const sortedNotes = notes ? sortNotesByOrder(notes) : [];
+	const hasNotes = sortedNotes.length > 0;
 
 	const hasNames = partner1Name || partner2Name;
 	const hasDateOrTime = weddingDate || weddingTime;
@@ -168,6 +180,31 @@ export function InvitationPreview() {
 					)}
 				</div>
 
+				{/* Notes */}
+				<div className="mt-8 border-t border-stone-200 pt-6">
+					<p className="mb-4 text-center text-xs uppercase tracking-widest text-stone-400">
+						Things to Know
+					</p>
+					{hasNotes ? (
+						<div className="space-y-4">
+							{sortedNotes.map((note) => (
+								<div key={note.id} className="text-center">
+									<p className="font-medium text-stone-700">{note.title}</p>
+									{note.description && (
+										<p className="mt-1 text-sm text-stone-500">
+											{note.description}
+										</p>
+									)}
+								</div>
+							))}
+						</div>
+					) : (
+						<p className="text-center text-sm italic text-stone-400">
+							Notes and FAQ will appear here
+						</p>
+					)}
+				</div>
+
 				{/* RSVP section placeholder */}
 				<div className="mt-10 border-t border-stone-200 pt-6 text-center">
 					<p className="mb-3 text-xs uppercase tracking-widest text-stone-400">
@@ -180,4 +217,4 @@ export function InvitationPreview() {
 	);
 }
 
-export { formatDate, formatTime, sortBlocksByOrder };
+export { formatDate, formatTime, sortBlocksByOrder, sortNotesByOrder };

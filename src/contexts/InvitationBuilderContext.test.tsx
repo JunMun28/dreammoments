@@ -19,10 +19,17 @@ function TestConsumer() {
 		updateScheduleBlock,
 		deleteScheduleBlock,
 		moveScheduleBlock,
+		addNote,
+		updateNote,
+		deleteNote,
+		moveNote,
 	} = useInvitationBuilder();
 
 	const blocks = invitation.scheduleBlocks ?? [];
 	const sortedBlocks = [...blocks].sort((a, b) => a.order - b.order);
+
+	const notes = invitation.notes ?? [];
+	const sortedNotes = [...notes].sort((a, b) => a.order - b.order);
 
 	return (
 		<div>
@@ -36,6 +43,13 @@ function TestConsumer() {
 			</span>
 			<span data-testid="sorted-block-titles">
 				{sortedBlocks.map((b) => b.title).join(",")}
+			</span>
+			<span data-testid="note-count">{notes.length}</span>
+			<span data-testid="note-titles">
+				{notes.map((n) => n.title).join(",")}
+			</span>
+			<span data-testid="sorted-note-titles">
+				{sortedNotes.map((n) => n.title).join(",")}
 			</span>
 			<button
 				type="button"
@@ -113,6 +127,62 @@ function TestConsumer() {
 				}}
 			>
 				Move First Up
+			</button>
+			<button
+				type="button"
+				onClick={() =>
+					addNote({ title: "Dress Code", description: "Black tie optional" })
+				}
+			>
+				Add Dress Code Note
+			</button>
+			<button
+				type="button"
+				onClick={() =>
+					addNote({ title: "Kids Policy", description: "Adults only" })
+				}
+			>
+				Add Kids Policy Note
+			</button>
+			<button
+				type="button"
+				onClick={() => {
+					if (notes.length > 0) {
+						updateNote(notes[0].id, { title: "Updated Dress Code" });
+					}
+				}}
+			>
+				Update Note
+			</button>
+			<button
+				type="button"
+				onClick={() => {
+					if (notes.length > 0) {
+						deleteNote(notes[0].id);
+					}
+				}}
+			>
+				Delete Note
+			</button>
+			<button
+				type="button"
+				onClick={() => {
+					if (sortedNotes.length > 0) {
+						moveNote(sortedNotes[0].id, "down");
+					}
+				}}
+			>
+				Move First Note Down
+			</button>
+			<button
+				type="button"
+				onClick={() => {
+					if (sortedNotes.length > 1) {
+						moveNote(sortedNotes[1].id, "up");
+					}
+				}}
+			>
+				Move Second Note Up
 			</button>
 		</div>
 	);
@@ -392,6 +462,124 @@ describe("InvitationBuilderContext", () => {
 
 		expect(screen.getByTestId("sorted-block-titles").textContent).toBe(
 			"Reception,Ceremony,Dinner",
+		);
+	});
+
+	// Note CRUD tests
+	it("adds note with generated id and order", () => {
+		render(
+			<InvitationBuilderProvider initialData={mockInitialData}>
+				<TestConsumer />
+			</InvitationBuilderProvider>,
+		);
+
+		expect(screen.getByTestId("note-count").textContent).toBe("0");
+
+		act(() => {
+			screen.getByText("Add Dress Code Note").click();
+		});
+
+		expect(screen.getByTestId("note-count").textContent).toBe("1");
+		expect(screen.getByTestId("note-titles").textContent).toBe("Dress Code");
+	});
+
+	it("updates note by id", () => {
+		render(
+			<InvitationBuilderProvider initialData={mockInitialData}>
+				<TestConsumer />
+			</InvitationBuilderProvider>,
+		);
+
+		act(() => {
+			screen.getByText("Add Dress Code Note").click();
+		});
+
+		expect(screen.getByTestId("note-titles").textContent).toBe("Dress Code");
+
+		act(() => {
+			screen.getByText("Update Note").click();
+		});
+
+		expect(screen.getByTestId("note-titles").textContent).toBe(
+			"Updated Dress Code",
+		);
+	});
+
+	it("deletes note by id", () => {
+		render(
+			<InvitationBuilderProvider initialData={mockInitialData}>
+				<TestConsumer />
+			</InvitationBuilderProvider>,
+		);
+
+		act(() => {
+			screen.getByText("Add Dress Code Note").click();
+		});
+
+		expect(screen.getByTestId("note-count").textContent).toBe("1");
+
+		act(() => {
+			screen.getByText("Delete Note").click();
+		});
+
+		expect(screen.getByTestId("note-count").textContent).toBe("0");
+	});
+
+	it("moves note down in order", () => {
+		render(
+			<InvitationBuilderProvider initialData={mockInitialData}>
+				<TestConsumer />
+			</InvitationBuilderProvider>,
+		);
+
+		// Add two notes
+		act(() => {
+			screen.getByText("Add Dress Code Note").click();
+		});
+		act(() => {
+			screen.getByText("Add Kids Policy Note").click();
+		});
+
+		expect(screen.getByTestId("sorted-note-titles").textContent).toBe(
+			"Dress Code,Kids Policy",
+		);
+
+		// Move first note down
+		act(() => {
+			screen.getByText("Move First Note Down").click();
+		});
+
+		expect(screen.getByTestId("sorted-note-titles").textContent).toBe(
+			"Kids Policy,Dress Code",
+		);
+	});
+
+	it("moves note up in order", () => {
+		render(
+			<InvitationBuilderProvider initialData={mockInitialData}>
+				<TestConsumer />
+			</InvitationBuilderProvider>,
+		);
+
+		// Add two notes
+		act(() => {
+			screen.getByText("Add Dress Code Note").click();
+		});
+		act(() => {
+			screen.getByText("Add Kids Policy Note").click();
+		});
+
+		expect(screen.getByTestId("sorted-note-titles").textContent).toBe(
+			"Dress Code,Kids Policy",
+		);
+
+		// Move second note up
+		act(() => {
+			screen.getByText("Move Second Note Up").click();
+		});
+
+		expect(screen.getByTestId("sorted-note-titles").textContent).toBe(
+			"Kids Policy,Dress Code",
 		);
 	});
 });

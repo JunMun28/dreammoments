@@ -2,7 +2,7 @@
 
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
-import type { ScheduleBlock } from "@/contexts/InvitationBuilderContext";
+import type { Note, ScheduleBlock } from "@/contexts/InvitationBuilderContext";
 import {
 	InvitationBuilderProvider,
 	type InvitationData,
@@ -12,6 +12,7 @@ import {
 	formatTime,
 	InvitationPreview,
 	sortBlocksByOrder,
+	sortNotesByOrder,
 } from "./InvitationPreview";
 
 // Wrapper to provide context
@@ -216,5 +217,118 @@ describe("sortBlocksByOrder", () => {
 		sortBlocksByOrder(blocks);
 		expect(blocks[0].id).toBe(original[0].id);
 		expect(blocks[1].id).toBe(original[1].id);
+	});
+});
+
+describe("sortNotesByOrder", () => {
+	it("sorts notes by order field ascending", () => {
+		const notes: Note[] = [
+			{ id: "3", title: "Third", order: 2 },
+			{ id: "1", title: "First", order: 0 },
+			{ id: "2", title: "Second", order: 1 },
+		];
+		const sorted = sortNotesByOrder(notes);
+		expect(sorted[0].title).toBe("First");
+		expect(sorted[1].title).toBe("Second");
+		expect(sorted[2].title).toBe("Third");
+	});
+
+	it("returns empty array for empty input", () => {
+		expect(sortNotesByOrder([])).toEqual([]);
+	});
+
+	it("does not mutate original array", () => {
+		const notes: Note[] = [
+			{ id: "2", title: "Second", order: 1 },
+			{ id: "1", title: "First", order: 0 },
+		];
+		const original = [...notes];
+		sortNotesByOrder(notes);
+		expect(notes[0].id).toBe(original[0].id);
+		expect(notes[1].id).toBe(original[1].id);
+	});
+});
+
+describe("InvitationPreview notes section", () => {
+	afterEach(() => {
+		cleanup();
+	});
+
+	const baseData: InvitationData = {
+		id: "test-123",
+		partner1Name: "Alice",
+		partner2Name: "Bob",
+	};
+
+	it("shows notes placeholder when no notes exist", () => {
+		render(
+			<InvitationBuilderProvider initialData={baseData}>
+				<InvitationPreview />
+			</InvitationBuilderProvider>,
+		);
+
+		expect(screen.getByText("Things to Know")).toBeDefined();
+		expect(screen.getByText("Notes and FAQ will appear here")).toBeDefined();
+	});
+
+	it("displays notes when provided", () => {
+		const dataWithNotes: InvitationData = {
+			...baseData,
+			notes: [
+				{
+					id: "1",
+					title: "Dress Code",
+					description: "Black tie optional",
+					order: 0,
+				},
+				{ id: "2", title: "Parking", order: 1 },
+			],
+		};
+		render(
+			<InvitationBuilderProvider initialData={dataWithNotes}>
+				<InvitationPreview />
+			</InvitationBuilderProvider>,
+		);
+
+		expect(screen.getByText("Things to Know")).toBeDefined();
+		expect(screen.getByText("Dress Code")).toBeDefined();
+		expect(screen.getByText("Black tie optional")).toBeDefined();
+		expect(screen.getByText("Parking")).toBeDefined();
+	});
+
+	it("displays notes sorted by order", () => {
+		const dataWithNotes: InvitationData = {
+			...baseData,
+			notes: [
+				{ id: "2", title: "Parking", order: 2 },
+				{ id: "1", title: "Dress Code", order: 0 },
+				{ id: "3", title: "Kids Policy", order: 1 },
+			],
+		};
+		render(
+			<InvitationBuilderProvider initialData={dataWithNotes}>
+				<InvitationPreview />
+			</InvitationBuilderProvider>,
+		);
+
+		// Get all note titles and check order
+		const noteTitles = screen.getAllByText(/Dress Code|Parking|Kids Policy/);
+		expect(noteTitles[0].textContent).toBe("Dress Code");
+		expect(noteTitles[1].textContent).toBe("Kids Policy");
+		expect(noteTitles[2].textContent).toBe("Parking");
+	});
+
+	it("displays note without description when description is undefined", () => {
+		const dataWithNotes: InvitationData = {
+			...baseData,
+			notes: [{ id: "1", title: "No Description Note", order: 0 }],
+		};
+		render(
+			<InvitationBuilderProvider initialData={dataWithNotes}>
+				<InvitationPreview />
+			</InvitationBuilderProvider>,
+		);
+
+		expect(screen.getByText("No Description Note")).toBeDefined();
 	});
 });

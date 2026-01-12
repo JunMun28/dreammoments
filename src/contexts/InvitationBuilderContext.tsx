@@ -21,6 +21,16 @@ export interface ScheduleBlock {
 }
 
 /**
+ * Note data for wedding notes/FAQ items (dress code, kids policy, etc.)
+ */
+export interface Note {
+	id: string;
+	title: string;
+	description?: string;
+	order: number;
+}
+
+/**
  * Extended invitation data including DB fields not in BasicInfoFormValues
  */
 export interface InvitationData extends BasicInfoFormValues {
@@ -30,6 +40,7 @@ export interface InvitationData extends BasicInfoFormValues {
 	fontPairing?: string;
 	heroImageUrl?: string;
 	scheduleBlocks?: ScheduleBlock[];
+	notes?: Note[];
 }
 
 interface InvitationBuilderContextValue {
@@ -49,6 +60,14 @@ interface InvitationBuilderContextValue {
 	deleteScheduleBlock: (id: string) => void;
 	/** Move a schedule block up or down in order */
 	moveScheduleBlock: (id: string, direction: "up" | "down") => void;
+	/** Add a new note */
+	addNote: (note: Omit<Note, "id" | "order">) => void;
+	/** Update an existing note */
+	updateNote: (id: string, updates: Partial<Note>) => void;
+	/** Delete a note */
+	deleteNote: (id: string) => void;
+	/** Move a note up or down in order */
+	moveNote: (id: string, direction: "up" | "down") => void;
 }
 
 const InvitationBuilderContext =
@@ -64,6 +83,13 @@ interface InvitationBuilderProviderProps {
  */
 function generateBlockId(): string {
 	return `block-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+/**
+ * Generate a simple unique ID for new notes
+ */
+function generateNoteId(): string {
+	return `note-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
 /**
@@ -163,6 +189,74 @@ export function InvitationBuilderProvider({
 		[],
 	);
 
+	const addNote = useCallback((note: Omit<Note, "id" | "order">) => {
+		setInvitation((prev) => {
+			const notes = prev.notes ?? [];
+			const maxOrder =
+				notes.length > 0 ? Math.max(...notes.map((n) => n.order)) : -1;
+			const newNote: Note = {
+				...note,
+				id: generateNoteId(),
+				order: maxOrder + 1,
+			};
+			return { ...prev, notes: [...notes, newNote] };
+		});
+	}, []);
+
+	const updateNote = useCallback((id: string, updates: Partial<Note>) => {
+		setInvitation((prev) => {
+			const notes = prev.notes ?? [];
+			return {
+				...prev,
+				notes: notes.map((n) => (n.id === id ? { ...n, ...updates } : n)),
+			};
+		});
+	}, []);
+
+	const deleteNote = useCallback((id: string) => {
+		setInvitation((prev) => {
+			const notes = prev.notes ?? [];
+			return {
+				...prev,
+				notes: notes.filter((n) => n.id !== id),
+			};
+		});
+	}, []);
+
+	const moveNote = useCallback((id: string, direction: "up" | "down") => {
+		setInvitation((prev) => {
+			const notes = prev.notes ?? [];
+			if (notes.length < 2) return prev;
+
+			// Sort notes by order to find adjacent notes
+			const sorted = [...notes].sort((a, b) => a.order - b.order);
+			const currentIndex = sorted.findIndex((n) => n.id === id);
+			if (currentIndex === -1) return prev;
+
+			// Determine target index
+			const targetIndex =
+				direction === "up" ? currentIndex - 1 : currentIndex + 1;
+
+			// Check bounds
+			if (targetIndex < 0 || targetIndex >= sorted.length) return prev;
+
+			// Swap order values
+			const currentNote = sorted[currentIndex];
+			const targetNote = sorted[targetIndex];
+			const currentOrder = currentNote.order;
+			const targetOrder = targetNote.order;
+
+			return {
+				...prev,
+				notes: notes.map((n) => {
+					if (n.id === currentNote.id) return { ...n, order: targetOrder };
+					if (n.id === targetNote.id) return { ...n, order: currentOrder };
+					return n;
+				}),
+			};
+		});
+	}, []);
+
 	return (
 		<InvitationBuilderContext.Provider
 			value={{
@@ -174,6 +268,10 @@ export function InvitationBuilderProvider({
 				updateScheduleBlock,
 				deleteScheduleBlock,
 				moveScheduleBlock,
+				addNote,
+				updateNote,
+				deleteNote,
+				moveNote,
 			}}
 		>
 			{children}
