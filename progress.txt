@@ -427,3 +427,24 @@
 - 139/139 tests pass (11 new/updated tests)
 - typecheck passes
 - biome check passes
+
+## 2026-01-12: Delete Block with Confirmation (BLDR-002-T5)
+
+**Completed:** Add delete button to schedule blocks with confirmation dialog
+
+**Changes:**
+- `src/components/ui/alert-dialog.tsx`: Added shadcn alert-dialog component for confirmation
+- `src/components/ScheduleBlockList.tsx`: Added Trash2 icon delete button + AlertDialog confirmation per block
+- `src/components/ScheduleBlockList.test.tsx`: Added 4 tests for delete button, dialog, confirm/cancel behavior
+
+**Decisions:**
+- Used radix-ui AlertDialog via shadcn for accessible confirmation modal
+- Delete button (Trash2 icon) with destructive color styling
+- Confirmation shows block title in message for clarity
+- Cancel closes dialog and keeps block; Confirm deletes block
+- Already had deleteScheduleBlock in context - just needed UI wiring
+
+**Verification:**
+- 143/143 tests pass (4 new tests)
+- typecheck passes
+- biome check passes
