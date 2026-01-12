@@ -286,3 +286,21 @@
 - 74/74 tests pass
 - typecheck passes
 - biome check passes
+
+## 2026-01-12: Venue Name and Address Fields (BLDR-001-T5)
+
+**Completed:** Added venue name and address fields to BasicInfoForm
+
+**Changes:**
+- `src/components/BasicInfoForm.tsx`: Added venueName, venueAddress to interface + form fields
+- `src/components/BasicInfoForm.test.tsx`: Updated tests to verify venue field rendering, initial values, and submit
+
+**Decisions:**
+- Venue fields are optional strings (same pattern as existing fields)
+- Used Input components with labels matching other form fields
+- Fields support onChange for live preview (BLDR-007 integration)
+
+**Verification:**
+- 74/74 tests pass
+- typecheck passes
+- biome check passes
