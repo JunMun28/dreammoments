@@ -25,7 +25,7 @@ for ((i=1; i<=$1; i++)); do
   echo "Running Claude Code..."
   echo ""
   
-  result=$(claude -p \
+  result=$(claude --dangerously-skip-permissions --chrome --permission-mode acceptEdits -p \
 "@PRD.md @progress.txt \
 \
 # OBJECTIVE \
@@ -70,7 +70,7 @@ If, while implementing the feature, you notice that all work is complete, output
   echo "Claude Code execution completed for iteration $i"
   echo "Checking for completion signal..."
   echo ""
-
+  echo "Result: $result"
   if [[ "$result" == *"<promise>COMPLETE</promise>"* ]]; then
     echo "========================================="
     echo "✓ PRD complete! Exiting."
