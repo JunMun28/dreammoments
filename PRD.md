@@ -208,7 +208,7 @@
         {
           "id": "BLDR-001-T6",
           "task": "Implement autosave with debounce on field changes",
-          "done": false
+          "done": true
         },
         {
           "id": "BLDR-001-T7",

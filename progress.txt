@@ -304,3 +304,29 @@
 - 74/74 tests pass
 - typecheck passes
 - biome check passes
+
+## 2026-01-12: Autosave with Debounce (BLDR-001-T6)
+
+**Completed:** Implemented autosave hook with debounce for persisting builder form changes
+
+**Changes:**
+- `src/lib/invitation-server.ts`: Server functions updateInvitation (POST) and getInvitation (GET)
+- `src/hooks/useAutosave.ts`: Generic autosave hook with debounce, status tracking, error handling
+- `src/hooks/useAutosave.test.ts`: 10 unit tests for debounce, status, errors, manual save
+
+**Decisions:**
+- useAutosave is generic (not invitation-specific) for reuse across builder
+- Default debounce delay 1000ms, configurable via `delay` prop
+- Status states: idle, saving, saved, error - supports UI feedback
+- Skips first render to avoid saving initial values
+- Uses ref to capture latest data for save (avoids stale closure in setTimeout)
+- Server function uses TanStack Start createServerFn with inputValidator
+
+**Notes:**
+- Server function not tested with DB mock - relies on type safety + integration tests
+- Hook can be integrated into BasicInfoForm parent component
+
+**Verification:**
+- 84/84 tests pass (10 new useAutosave tests)
+- typecheck passes
+- biome check passes
