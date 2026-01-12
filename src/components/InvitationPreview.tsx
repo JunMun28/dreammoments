@@ -1,5 +1,8 @@
 import { CalendarDays, Clock, MapPin } from "lucide-react";
-import { useInvitationBuilder } from "@/contexts/InvitationBuilderContext";
+import {
+	type ScheduleBlock,
+	useInvitationBuilder,
+} from "@/contexts/InvitationBuilderContext";
 
 /**
  * Formats a Date to a readable string like "June 15, 2026"
@@ -25,6 +28,13 @@ function formatTime(time: string | undefined): string {
 }
 
 /**
+ * Sorts schedule blocks by order field
+ */
+function sortBlocksByOrder(blocks: ScheduleBlock[]): ScheduleBlock[] {
+	return [...blocks].sort((a, b) => a.order - b.order);
+}
+
+/**
  * Preview component that renders the wedding invitation.
  * Consumes InvitationBuilderContext for real-time updates.
  */
@@ -38,7 +48,11 @@ export function InvitationPreview() {
 		weddingTime,
 		venueName,
 		venueAddress,
+		scheduleBlocks,
 	} = invitation;
+
+	const sortedBlocks = scheduleBlocks ? sortBlocksByOrder(scheduleBlocks) : [];
+	const hasSchedule = sortedBlocks.length > 0;
 
 	const hasNames = partner1Name || partner2Name;
 	const hasDateOrTime = weddingDate || weddingTime;
@@ -116,6 +130,44 @@ export function InvitationPreview() {
 					)}
 				</div>
 
+				{/* Schedule */}
+				<div className="mt-8 border-t border-stone-200 pt-6">
+					<p className="mb-4 text-center text-xs uppercase tracking-widest text-stone-400">
+						Schedule
+					</p>
+					{hasSchedule ? (
+						<div className="space-y-4">
+							{sortedBlocks.map((block) => (
+								<div key={block.id} className="flex gap-4 text-left">
+									{/* Time column */}
+									<div className="w-20 shrink-0 text-right">
+										{block.time ? (
+											<span className="text-sm font-medium text-stone-600">
+												{formatTime(block.time)}
+											</span>
+										) : (
+											<span className="text-sm text-stone-400">—</span>
+										)}
+									</div>
+									{/* Content column */}
+									<div className="flex-1">
+										<p className="font-medium text-stone-700">{block.title}</p>
+										{block.description && (
+											<p className="mt-1 text-sm text-stone-500">
+												{block.description}
+											</p>
+										)}
+									</div>
+								</div>
+							))}
+						</div>
+					) : (
+						<p className="text-center text-sm italic text-stone-400">
+							Schedule events will appear here
+						</p>
+					)}
+				</div>
+
 				{/* RSVP section placeholder */}
 				<div className="mt-10 border-t border-stone-200 pt-6 text-center">
 					<p className="mb-3 text-xs uppercase tracking-widest text-stone-400">
@@ -128,4 +180,4 @@ export function InvitationPreview() {
 	);
 }
 
-export { formatDate, formatTime };
+export { formatDate, formatTime, sortBlocksByOrder };

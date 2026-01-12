@@ -2,11 +2,17 @@
 
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
+import type { ScheduleBlock } from "@/contexts/InvitationBuilderContext";
 import {
 	InvitationBuilderProvider,
 	type InvitationData,
 } from "@/contexts/InvitationBuilderContext";
-import { formatDate, formatTime, InvitationPreview } from "./InvitationPreview";
+import {
+	formatDate,
+	formatTime,
+	InvitationPreview,
+	sortBlocksByOrder,
+} from "./InvitationPreview";
 
 // Wrapper to provide context
 function renderWithContext(invitationData: InvitationData) {
@@ -89,6 +95,66 @@ describe("InvitationPreview", () => {
 
 		expect(screen.getByText("RSVP")).toBeDefined();
 	});
+
+	it("shows schedule placeholder when no blocks exist", () => {
+		renderWithContext(emptyData);
+
+		expect(screen.getByText("Schedule")).toBeDefined();
+		expect(screen.getByText("Schedule events will appear here")).toBeDefined();
+	});
+
+	it("displays schedule blocks when provided", () => {
+		const dataWithBlocks: InvitationData = {
+			...fullData,
+			scheduleBlocks: [
+				{ id: "1", title: "Ceremony", time: "14:00", order: 0 },
+				{
+					id: "2",
+					title: "Reception",
+					time: "16:00",
+					description: "Grand Hall",
+					order: 1,
+				},
+			],
+		};
+		renderWithContext(dataWithBlocks);
+
+		expect(screen.getByText("Schedule")).toBeDefined();
+		expect(screen.getByText("Ceremony")).toBeDefined();
+		expect(screen.getByText("2:00 PM")).toBeDefined();
+		expect(screen.getByText("Reception")).toBeDefined();
+		expect(screen.getByText("4:00 PM")).toBeDefined();
+		expect(screen.getByText("Grand Hall")).toBeDefined();
+	});
+
+	it("displays blocks sorted by order", () => {
+		const dataWithBlocks: InvitationData = {
+			...fullData,
+			scheduleBlocks: [
+				{ id: "2", title: "Reception", time: "16:00", order: 2 },
+				{ id: "1", title: "Ceremony", time: "14:00", order: 0 },
+				{ id: "3", title: "Dinner", time: "18:00", order: 1 },
+			],
+		};
+		renderWithContext(dataWithBlocks);
+
+		// Get all block titles and check order
+		const blockTitles = screen.getAllByText(/Ceremony|Reception|Dinner/);
+		expect(blockTitles[0].textContent).toBe("Ceremony");
+		expect(blockTitles[1].textContent).toBe("Dinner");
+		expect(blockTitles[2].textContent).toBe("Reception");
+	});
+
+	it("displays dash when block has no time", () => {
+		const dataWithBlocks: InvitationData = {
+			...fullData,
+			scheduleBlocks: [{ id: "1", title: "Photos", order: 0 }],
+		};
+		renderWithContext(dataWithBlocks);
+
+		expect(screen.getByText("Photos")).toBeDefined();
+		expect(screen.getByText("—")).toBeDefined();
+	});
 });
 
 describe("formatDate", () => {
@@ -121,5 +187,34 @@ describe("formatTime", () => {
 
 	it("returns empty string for undefined", () => {
 		expect(formatTime(undefined)).toBe("");
+	});
+});
+
+describe("sortBlocksByOrder", () => {
+	it("sorts blocks by order field ascending", () => {
+		const blocks: ScheduleBlock[] = [
+			{ id: "3", title: "Third", order: 2 },
+			{ id: "1", title: "First", order: 0 },
+			{ id: "2", title: "Second", order: 1 },
+		];
+		const sorted = sortBlocksByOrder(blocks);
+		expect(sorted[0].title).toBe("First");
+		expect(sorted[1].title).toBe("Second");
+		expect(sorted[2].title).toBe("Third");
+	});
+
+	it("returns empty array for empty input", () => {
+		expect(sortBlocksByOrder([])).toEqual([]);
+	});
+
+	it("does not mutate original array", () => {
+		const blocks: ScheduleBlock[] = [
+			{ id: "2", title: "Second", order: 1 },
+			{ id: "1", title: "First", order: 0 },
+		];
+		const original = [...blocks];
+		sortBlocksByOrder(blocks);
+		expect(blocks[0].id).toBe(original[0].id);
+		expect(blocks[1].id).toBe(original[1].id);
 	});
 });

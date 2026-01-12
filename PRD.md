@@ -260,7 +260,7 @@
         {
           "id": "BLDR-002-T6",
           "task": "Render schedule blocks in preview component",
-          "done": false
+          "done": true
         }
       ],
       "passes": false
