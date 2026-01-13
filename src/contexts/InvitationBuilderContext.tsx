@@ -47,7 +47,9 @@ interface InvitationBuilderContextValue {
 	/** Current invitation data */
 	invitation: InvitationData;
 	/** Update invitation data (triggers preview update) */
-	updateInvitation: (updates: Partial<BasicInfoFormValues>) => void;
+	updateInvitation: (
+		updates: Partial<Omit<InvitationData, "scheduleBlocks" | "notes">>,
+	) => void;
 	/** Current autosave status */
 	autosaveStatus: AutosaveStatus;
 	/** Set autosave status (called by autosave hook) */
@@ -104,7 +106,7 @@ export function InvitationBuilderProvider({
 	const [autosaveStatus, setAutosaveStatus] = useState<AutosaveStatus>("idle");
 
 	const updateInvitation = useCallback(
-		(updates: Partial<BasicInfoFormValues>) => {
+		(updates: Partial<Omit<InvitationData, "scheduleBlocks" | "notes">>) => {
 			setInvitation((prev) => ({ ...prev, ...updates }));
 		},
 		[],

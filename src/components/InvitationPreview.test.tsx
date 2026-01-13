@@ -8,8 +8,10 @@ import {
 	type InvitationData,
 } from "@/contexts/InvitationBuilderContext";
 import {
+	DEFAULT_ACCENT_COLOR,
 	formatDate,
 	formatTime,
+	getAccentColorStyle,
 	InvitationPreview,
 	sortBlocksByOrder,
 	sortNotesByOrder,
@@ -330,5 +332,68 @@ describe("InvitationPreview notes section", () => {
 		);
 
 		expect(screen.getByText("No Description Note")).toBeDefined();
+	});
+});
+
+describe("getAccentColorStyle", () => {
+	it("returns CSS custom properties with provided color", () => {
+		const style = getAccentColorStyle("#ff5500") as Record<string, string>;
+		expect(style["--accent-color"]).toBe("#ff5500");
+	});
+
+	it("uses default color when undefined", () => {
+		const style = getAccentColorStyle(undefined) as Record<string, string>;
+		expect(style["--accent-color"]).toBe(DEFAULT_ACCENT_COLOR);
+	});
+
+	it("uses default color when empty string", () => {
+		const style = getAccentColorStyle("") as Record<string, string>;
+		expect(style["--accent-color"]).toBe(DEFAULT_ACCENT_COLOR);
+	});
+});
+
+describe("DEFAULT_ACCENT_COLOR", () => {
+	it("is a valid hex color", () => {
+		expect(DEFAULT_ACCENT_COLOR).toMatch(/^#[0-9a-f]{6}$/i);
+	});
+});
+
+describe("InvitationPreview accent color", () => {
+	afterEach(() => {
+		cleanup();
+	});
+
+	const baseData: InvitationData = {
+		id: "test-123",
+		partner1Name: "Alice",
+		partner2Name: "Bob",
+	};
+
+	it("applies accent color CSS custom property to root element", () => {
+		const dataWithColor: InvitationData = {
+			...baseData,
+			accentColor: "#9caf88",
+		};
+		const { container } = render(
+			<InvitationBuilderProvider initialData={dataWithColor}>
+				<InvitationPreview />
+			</InvitationBuilderProvider>,
+		);
+
+		const rootDiv = container.firstChild as HTMLElement;
+		expect(rootDiv.style.getPropertyValue("--accent-color")).toBe("#9caf88");
+	});
+
+	it("uses default accent color when not provided", () => {
+		const { container } = render(
+			<InvitationBuilderProvider initialData={baseData}>
+				<InvitationPreview />
+			</InvitationBuilderProvider>,
+		);
+
+		const rootDiv = container.firstChild as HTMLElement;
+		expect(rootDiv.style.getPropertyValue("--accent-color")).toBe(
+			DEFAULT_ACCENT_COLOR,
+		);
 	});
 });
