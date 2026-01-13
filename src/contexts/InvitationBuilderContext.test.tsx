@@ -23,6 +23,13 @@ function TestConsumer() {
 		updateNote,
 		deleteNote,
 		moveNote,
+		addGuestGroup,
+		updateGuestGroup,
+		deleteGuestGroup,
+		addGuest,
+		updateGuest,
+		deleteGuest,
+		setGuestGroups,
 	} = useInvitationBuilder();
 
 	const blocks = invitation.scheduleBlocks ?? [];
@@ -30,6 +37,9 @@ function TestConsumer() {
 
 	const notes = invitation.notes ?? [];
 	const sortedNotes = [...notes].sort((a, b) => a.order - b.order);
+
+	const guestGroups = invitation.guestGroups ?? [];
+	const totalGuests = guestGroups.reduce((sum, g) => sum + g.guests.length, 0);
 
 	return (
 		<div>
@@ -183,6 +193,113 @@ function TestConsumer() {
 				}}
 			>
 				Move Second Note Up
+			</button>
+			{/* Guest group displays */}
+			<span data-testid="group-count">{guestGroups.length}</span>
+			<span data-testid="group-names">
+				{guestGroups.map((g) => g.name).join(",")}
+			</span>
+			<span data-testid="guest-count">{totalGuests}</span>
+			{/* Guest group buttons */}
+			<button
+				type="button"
+				onClick={() =>
+					addGuestGroup({
+						id: "group-1",
+						name: "Family",
+						rsvpToken: "token-1",
+						guests: [],
+					})
+				}
+			>
+				Add Family Group
+			</button>
+			<button
+				type="button"
+				onClick={() =>
+					addGuestGroup({
+						id: "group-2",
+						name: "Friends",
+						rsvpToken: "token-2",
+						guests: [],
+					})
+				}
+			>
+				Add Friends Group
+			</button>
+			<button
+				type="button"
+				onClick={() => {
+					if (guestGroups.length > 0) {
+						updateGuestGroup(guestGroups[0].id, { name: "Close Family" });
+					}
+				}}
+			>
+				Rename First Group
+			</button>
+			<button
+				type="button"
+				onClick={() => {
+					if (guestGroups.length > 0) {
+						deleteGuestGroup(guestGroups[0].id);
+					}
+				}}
+			>
+				Delete First Group
+			</button>
+			<button
+				type="button"
+				onClick={() => {
+					if (guestGroups.length > 0) {
+						addGuest(guestGroups[0].id, {
+							id: "guest-1",
+							name: "John Doe",
+							email: "john@example.com",
+						});
+					}
+				}}
+			>
+				Add Guest
+			</button>
+			<button
+				type="button"
+				onClick={() => {
+					if (guestGroups.length > 0 && guestGroups[0].guests.length > 0) {
+						updateGuest(guestGroups[0].id, guestGroups[0].guests[0].id, {
+							name: "Jane Doe",
+						});
+					}
+				}}
+			>
+				Update Guest
+			</button>
+			<button
+				type="button"
+				onClick={() => {
+					if (guestGroups.length > 0 && guestGroups[0].guests.length > 0) {
+						deleteGuest(guestGroups[0].id, guestGroups[0].guests[0].id);
+					}
+				}}
+			>
+				Delete Guest
+			</button>
+			<button
+				type="button"
+				onClick={() =>
+					setGuestGroups([
+						{
+							id: "bulk-1",
+							name: "Bulk Group",
+							rsvpToken: "bulk-token",
+							guests: [
+								{ id: "b-guest-1", name: "Bulk Guest 1" },
+								{ id: "b-guest-2", name: "Bulk Guest 2" },
+							],
+						},
+					])
+				}
+			>
+				Set Bulk Groups
 			</button>
 		</div>
 	);
@@ -581,5 +698,155 @@ describe("InvitationBuilderContext", () => {
 		expect(screen.getByTestId("sorted-note-titles").textContent).toBe(
 			"Kids Policy,Dress Code",
 		);
+	});
+
+	// Guest Group CRUD tests
+	it("adds guest group", () => {
+		render(
+			<InvitationBuilderProvider initialData={mockInitialData}>
+				<TestConsumer />
+			</InvitationBuilderProvider>,
+		);
+
+		expect(screen.getByTestId("group-count").textContent).toBe("0");
+
+		act(() => {
+			screen.getByText("Add Family Group").click();
+		});
+
+		expect(screen.getByTestId("group-count").textContent).toBe("1");
+		expect(screen.getByTestId("group-names").textContent).toBe("Family");
+	});
+
+	it("updates guest group name", () => {
+		render(
+			<InvitationBuilderProvider initialData={mockInitialData}>
+				<TestConsumer />
+			</InvitationBuilderProvider>,
+		);
+
+		act(() => {
+			screen.getByText("Add Family Group").click();
+		});
+
+		expect(screen.getByTestId("group-names").textContent).toBe("Family");
+
+		act(() => {
+			screen.getByText("Rename First Group").click();
+		});
+
+		expect(screen.getByTestId("group-names").textContent).toBe("Close Family");
+	});
+
+	it("deletes guest group", () => {
+		render(
+			<InvitationBuilderProvider initialData={mockInitialData}>
+				<TestConsumer />
+			</InvitationBuilderProvider>,
+		);
+
+		act(() => {
+			screen.getByText("Add Family Group").click();
+		});
+
+		expect(screen.getByTestId("group-count").textContent).toBe("1");
+
+		act(() => {
+			screen.getByText("Delete First Group").click();
+		});
+
+		expect(screen.getByTestId("group-count").textContent).toBe("0");
+	});
+
+	it("adds guest to a group", () => {
+		render(
+			<InvitationBuilderProvider initialData={mockInitialData}>
+				<TestConsumer />
+			</InvitationBuilderProvider>,
+		);
+
+		act(() => {
+			screen.getByText("Add Family Group").click();
+		});
+
+		expect(screen.getByTestId("guest-count").textContent).toBe("0");
+
+		act(() => {
+			screen.getByText("Add Guest").click();
+		});
+
+		expect(screen.getByTestId("guest-count").textContent).toBe("1");
+	});
+
+	it("updates a guest", () => {
+		render(
+			<InvitationBuilderProvider initialData={mockInitialData}>
+				<TestConsumer />
+			</InvitationBuilderProvider>,
+		);
+
+		act(() => {
+			screen.getByText("Add Family Group").click();
+		});
+		act(() => {
+			screen.getByText("Add Guest").click();
+		});
+
+		act(() => {
+			screen.getByText("Update Guest").click();
+		});
+
+		// Guest count should remain same
+		expect(screen.getByTestId("guest-count").textContent).toBe("1");
+	});
+
+	it("deletes a guest", () => {
+		render(
+			<InvitationBuilderProvider initialData={mockInitialData}>
+				<TestConsumer />
+			</InvitationBuilderProvider>,
+		);
+
+		act(() => {
+			screen.getByText("Add Family Group").click();
+		});
+		act(() => {
+			screen.getByText("Add Guest").click();
+		});
+
+		expect(screen.getByTestId("guest-count").textContent).toBe("1");
+
+		act(() => {
+			screen.getByText("Delete Guest").click();
+		});
+
+		expect(screen.getByTestId("guest-count").textContent).toBe("0");
+	});
+
+	it("sets guest groups for bulk import", () => {
+		render(
+			<InvitationBuilderProvider initialData={mockInitialData}>
+				<TestConsumer />
+			</InvitationBuilderProvider>,
+		);
+
+		// Add some existing groups first
+		act(() => {
+			screen.getByText("Add Family Group").click();
+		});
+		act(() => {
+			screen.getByText("Add Friends Group").click();
+		});
+
+		expect(screen.getByTestId("group-count").textContent).toBe("2");
+
+		// Replace with bulk import
+		act(() => {
+			screen.getByText("Set Bulk Groups").click();
+		});
+
+		expect(screen.getByTestId("group-count").textContent).toBe("1");
+		expect(screen.getByTestId("group-names").textContent).toBe("Bulk Group");
+		expect(screen.getByTestId("guest-count").textContent).toBe("2");
 	});
 });

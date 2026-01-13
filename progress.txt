@@ -800,3 +800,38 @@
 - 401/401 tests pass (20 new tests)
 - typecheck passes
 - biome check passes
+
+## 2026-01-14: Guest Group Management (GUEST-004)
+
+**Completed:** Guest group server functions + context state + management components
+
+**Changes:**
+- `src/lib/guest-server.ts`: Server functions for guest group/guest CRUD (createGuestGroup, updateGuestGroup, deleteGuestGroup, createGuest, updateGuest, deleteGuest, importGuestsFromCsv, getGuestGroupsWithGuests)
+- `src/lib/guest-server.test.ts`: 23 tests for all server functions w/ mocked DB
+- `src/contexts/InvitationBuilderContext.tsx`: Added Guest/GuestGroup interfaces + guestGroups state + 7 guest group operations (addGuestGroup, updateGuestGroup, deleteGuestGroup, addGuest, updateGuest, deleteGuest, setGuestGroups)
+- `src/contexts/InvitationBuilderContext.test.tsx`: Added 7 tests for guest group context operations
+- `src/components/GuestGroupEditor.tsx`: Form for creating/editing guest group names
+- `src/components/GuestGroupEditor.test.tsx`: 8 tests for group editor
+- `src/components/GuestEditor.tsx`: Form for creating/editing individual guests (name, email, phone)
+- `src/components/GuestEditor.test.tsx`: 10 tests for guest editor
+- `src/components/GuestGroupList.tsx`: Full guest group management UI w/ collapsible groups, add/edit/delete, RSVP link copy
+
+**Decisions:**
+- generateRsvpToken() uses crypto.randomBytes(16).toString("hex") for secure 32-char tokens
+- Context manages local state; server callbacks optional for persistence (component works standalone)
+- Collapsible group UI pattern - expand/collapse for better UX with many groups
+- RSVP URL format: /rsvp#t=<TOKEN>
+- GuestEditor validates email format (simple regex), name required, phone optional
+- AlertDialog confirmation for delete operations
+- Badge component shows guest count per group
+- Components follow existing patterns from NoteList/ScheduleBlockList
+
+**Notes:**
+- Internal functions extracted for testability (createServerFn wrapper calls internal)
+- Form components use onClick instead of form onSubmit for jsdom test compatibility
+- Pre-existing import order issues fixed by biome --fix
+
+**Verification:**
+- 449/449 tests pass (48 new tests)
+- typecheck passes
+- biome check passes

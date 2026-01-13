@@ -31,6 +31,26 @@ export interface Note {
 }
 
 /**
+ * Guest data for individual guests in a group
+ */
+export interface Guest {
+	id: string;
+	name: string;
+	email?: string;
+	phone?: string;
+}
+
+/**
+ * Guest group data with RSVP token for per-group RSVP links
+ */
+export interface GuestGroup {
+	id: string;
+	name: string;
+	rsvpToken: string;
+	guests: Guest[];
+}
+
+/**
  * Extended invitation data including DB fields not in BasicInfoFormValues
  */
 export interface InvitationData extends BasicInfoFormValues {
@@ -41,6 +61,7 @@ export interface InvitationData extends BasicInfoFormValues {
 	heroImageUrl?: string;
 	scheduleBlocks?: ScheduleBlock[];
 	notes?: Note[];
+	guestGroups?: GuestGroup[];
 }
 
 interface InvitationBuilderContextValue {
@@ -48,7 +69,9 @@ interface InvitationBuilderContextValue {
 	invitation: InvitationData;
 	/** Update invitation data (triggers preview update) */
 	updateInvitation: (
-		updates: Partial<Omit<InvitationData, "scheduleBlocks" | "notes">>,
+		updates: Partial<
+			Omit<InvitationData, "scheduleBlocks" | "notes" | "guestGroups">
+		>,
 	) => void;
 	/** Current autosave status */
 	autosaveStatus: AutosaveStatus;
@@ -70,6 +93,27 @@ interface InvitationBuilderContextValue {
 	deleteNote: (id: string) => void;
 	/** Move a note up or down in order */
 	moveNote: (id: string, direction: "up" | "down") => void;
+	/** Add a new guest group */
+	addGuestGroup: (group: GuestGroup) => void;
+	/** Update an existing guest group */
+	updateGuestGroup: (
+		id: string,
+		updates: Partial<Omit<GuestGroup, "guests">>,
+	) => void;
+	/** Delete a guest group */
+	deleteGuestGroup: (id: string) => void;
+	/** Add a guest to a group */
+	addGuest: (groupId: string, guest: Guest) => void;
+	/** Update a guest */
+	updateGuest: (
+		groupId: string,
+		guestId: string,
+		updates: Partial<Guest>,
+	) => void;
+	/** Delete a guest */
+	deleteGuest: (groupId: string, guestId: string) => void;
+	/** Set all guest groups (for bulk import) */
+	setGuestGroups: (groups: GuestGroup[]) => void;
 }
 
 const InvitationBuilderContext =
@@ -106,7 +150,11 @@ export function InvitationBuilderProvider({
 	const [autosaveStatus, setAutosaveStatus] = useState<AutosaveStatus>("idle");
 
 	const updateInvitation = useCallback(
-		(updates: Partial<Omit<InvitationData, "scheduleBlocks" | "notes">>) => {
+		(
+			updates: Partial<
+				Omit<InvitationData, "scheduleBlocks" | "notes" | "guestGroups">
+			>,
+		) => {
 			setInvitation((prev) => ({ ...prev, ...updates }));
 		},
 		[],
@@ -259,6 +307,91 @@ export function InvitationBuilderProvider({
 		});
 	}, []);
 
+	// Guest group operations
+	const addGuestGroup = useCallback((group: GuestGroup) => {
+		setInvitation((prev) => {
+			const groups = prev.guestGroups ?? [];
+			return { ...prev, guestGroups: [...groups, group] };
+		});
+	}, []);
+
+	const updateGuestGroup = useCallback(
+		(id: string, updates: Partial<Omit<GuestGroup, "guests">>) => {
+			setInvitation((prev) => {
+				const groups = prev.guestGroups ?? [];
+				return {
+					...prev,
+					guestGroups: groups.map((g) =>
+						g.id === id ? { ...g, ...updates } : g,
+					),
+				};
+			});
+		},
+		[],
+	);
+
+	const deleteGuestGroup = useCallback((id: string) => {
+		setInvitation((prev) => {
+			const groups = prev.guestGroups ?? [];
+			return {
+				...prev,
+				guestGroups: groups.filter((g) => g.id !== id),
+			};
+		});
+	}, []);
+
+	const addGuest = useCallback((groupId: string, guest: Guest) => {
+		setInvitation((prev) => {
+			const groups = prev.guestGroups ?? [];
+			return {
+				...prev,
+				guestGroups: groups.map((g) =>
+					g.id === groupId ? { ...g, guests: [...g.guests, guest] } : g,
+				),
+			};
+		});
+	}, []);
+
+	const updateGuest = useCallback(
+		(groupId: string, guestId: string, updates: Partial<Guest>) => {
+			setInvitation((prev) => {
+				const groups = prev.guestGroups ?? [];
+				return {
+					...prev,
+					guestGroups: groups.map((g) =>
+						g.id === groupId
+							? {
+									...g,
+									guests: g.guests.map((guest) =>
+										guest.id === guestId ? { ...guest, ...updates } : guest,
+									),
+								}
+							: g,
+					),
+				};
+			});
+		},
+		[],
+	);
+
+	const deleteGuest = useCallback((groupId: string, guestId: string) => {
+		setInvitation((prev) => {
+			const groups = prev.guestGroups ?? [];
+			return {
+				...prev,
+				guestGroups: groups.map((g) =>
+					g.id === groupId
+						? { ...g, guests: g.guests.filter((guest) => guest.id !== guestId) }
+						: g,
+				),
+			};
+		});
+	}, []);
+
+	const setGuestGroups = useCallback((groups: GuestGroup[]) => {
+		setInvitation((prev) => ({ ...prev, guestGroups: groups }));
+	}, []);
+
 	return (
 		<InvitationBuilderContext.Provider
 			value={{
@@ -274,6 +407,13 @@ export function InvitationBuilderProvider({
 				updateNote,
 				deleteNote,
 				moveNote,
+				addGuestGroup,
+				updateGuestGroup,
+				deleteGuestGroup,
+				addGuest,
+				updateGuest,
+				deleteGuest,
+				setGuestGroups,
 			}}
 		>
 			{children}
