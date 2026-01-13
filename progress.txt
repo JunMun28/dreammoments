@@ -772,3 +772,31 @@
 - 381/381 tests pass (35 new tests)
 - typecheck passes
 - biome check passes
+
+## 2026-01-14: Guest Import Preview Component (GUEST-002, GUEST-003)
+
+**Completed:** GuestImportPreview component with error display + preview table
+
+**Changes:**
+- `src/components/GuestImportPreview.tsx`: New component displaying parsed CSV data w/ validation errors, guest table, summary stats, confirm/cancel actions
+- `src/components/GuestImportPreview.test.tsx`: 20 tests for rendering, error display, action buttons, empty state
+- `src/components/ui/badge.tsx`: Added shadcn Badge component for group display
+
+**Decisions:**
+- Combines GUEST-002 (error reporting) and GUEST-003 (preview before import) into single component
+- Displays validation errors with row numbers and field info in destructive-styled section
+- Preview table shows name, group (as Badge), email, phone columns
+- Summary stats: total guests count + unique groups count
+- Confirm button disabled when no valid rows or loading
+- Empty state shows "No guests to import" message
+- Keys use composite values (row+field for errors, index+name+group for rows) to avoid array index warnings
+
+**Notes:**
+- This completes the UI for GUEST-002 and GUEST-003
+- Integration with guest management route needed for full GUEST-003 verification
+- GUEST-004 (per-group organization) and GUEST-005 (manual editing) still pending
+
+**Verification:**
+- 401/401 tests pass (20 new tests)
+- typecheck passes
+- biome check passes
