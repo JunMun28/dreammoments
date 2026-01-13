@@ -9,45 +9,23 @@ import {
 	Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getAllTemplates } from "@/lib/template-data";
 
 export const Route = createFileRoute("/")({ component: HomePage });
 
-// Template preview data (will be replaced with actual templates from DB later)
-const templatePreviews = [
-	{
-		id: "classic-elegance",
-		name: "Classic Elegance",
-		description: "Timeless serif typography with delicate flourishes",
-		accentColor: "#b76e79",
-		preview: {
-			partner1: "Sarah",
-			partner2: "Michael",
-			date: "June 15, 2026",
-		},
-	},
-	{
-		id: "modern-romance",
-		name: "Modern Romance",
-		description: "Clean lines meet romantic script accents",
-		accentColor: "#8b9f82",
-		preview: {
-			partner1: "Emily",
-			partner2: "James",
-			date: "September 21, 2026",
-		},
-	},
-	{
-		id: "garden-whimsy",
-		name: "Garden Whimsy",
-		description: "Playful script with botanical touches",
-		accentColor: "#9aadbf",
-		preview: {
-			partner1: "Olivia",
-			partner2: "Daniel",
-			date: "May 8, 2026",
-		},
-	},
-];
+// Get templates from shared data source
+const templates = getAllTemplates();
+
+/**
+ * Format date for display in template card preview
+ */
+function formatPreviewDate(date: Date): string {
+	return date.toLocaleDateString("en-US", {
+		month: "long",
+		day: "numeric",
+		year: "numeric",
+	});
+}
 
 const features = [
 	{
@@ -155,10 +133,12 @@ export function HomePage() {
 
 					{/* Template Cards */}
 					<div className="grid gap-8 md:grid-cols-3">
-						{templatePreviews.map((template) => (
-							<div
+						{templates.map((template) => (
+							<Link
 								key={template.id}
-								className="group cursor-pointer overflow-hidden rounded-xl border border-stone-200 bg-white/70 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.05)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)]"
+								to="/templates/$templateId"
+								params={{ templateId: template.id }}
+								className="group block overflow-hidden rounded-xl border border-stone-200 bg-white/70 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.05)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)]"
 							>
 								{/* Preview Card */}
 								<div
@@ -176,14 +156,14 @@ export function HomePage() {
 											You are invited
 										</p>
 										<p className="mb-2 text-xl font-light text-stone-800">
-											{template.preview.partner1}
+											{template.preview.partner1Name}
 											<span
 												className="mx-2"
 												style={{ color: template.accentColor }}
 											>
 												&
 											</span>
-											{template.preview.partner2}
+											{template.preview.partner2Name}
 										</p>
 										<div
 											className="mx-auto mb-2 h-px w-12"
@@ -194,7 +174,9 @@ export function HomePage() {
 												className="h-3 w-3"
 												style={{ color: template.accentColor }}
 											/>
-											<span>{template.preview.date}</span>
+											<span>
+												{formatPreviewDate(template.preview.weddingDate)}
+											</span>
 										</div>
 									</div>
 								</div>
@@ -208,7 +190,7 @@ export function HomePage() {
 										{template.description}
 									</p>
 								</div>
-							</div>
+							</Link>
 						))}
 					</div>
 

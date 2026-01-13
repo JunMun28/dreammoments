@@ -26,7 +26,7 @@
         "Each template shows a preview thumbnail and name",
         "Templates can be browsed without any login prompt"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "TMPL-002",
@@ -39,7 +39,7 @@
         "Preview shows all sections (header, schedule, RSVP area)",
         "Preview is responsive on mobile and desktop"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "TMPL-003",

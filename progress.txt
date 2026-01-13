@@ -632,3 +632,29 @@
 - 286/286 tests pass (16 new tests)
 - typecheck passes
 - biome check passes
+
+## 2026-01-13: Template Preview System (TMPL-001, TMPL-002)
+
+**Completed:** Full template preview system for browsing templates without login
+
+**Changes:**
+- `src/lib/template-data.ts`: Centralized template definitions w/ sample wedding data (couple names, date, time, venue, schedule, notes)
+- `src/lib/template-data.test.ts`: 17 tests for template data structure and helper functions
+- `src/components/TemplatePreview.tsx`: Standalone preview component that accepts props (not context-dependent)
+- `src/components/TemplatePreview.test.tsx`: 17 tests for formatDate, formatTime, and component rendering
+- `src/routes/templates.$templateId.tsx`: New route for full template preview page w/ viewport toggle and CTA buttons
+- `src/routes/index.tsx`: Updated home page to use shared template data, template cards now link to preview page
+
+**Decisions:**
+- Created TemplateData interface w/ full preview data (partner names, weddingDate, weddingTime, venue, scheduleBlocks, notes)
+- 3 initial templates: Classic Elegance, Modern Romance, Garden Whimsy - each w/ distinct color and font pairings
+- TemplatePreview is props-based (unlike InvitationPreview which uses context) - allows use in preview pages w/o builder context
+- Template cards on home page are now clickable Link components to /templates/$templateId
+- Template preview page has header w/ back button, viewport toggle, and "Use This Template" CTA
+- "Use This Template" button passes template ID as search param to login page (for TMPL-003 flow)
+- notFoundComponent for invalid template IDs displays friendly error
+
+**Verification:**
+- 320/320 tests pass (34 new tests)
+- typecheck passes
+- biome check passes
