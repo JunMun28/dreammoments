@@ -98,6 +98,44 @@ export const notes = pgTable("notes", {
 });
 
 // ============================================================================
+// GUEST GROUPS - Groups of guests (Family, Friends, Colleagues, etc.)
+// Each group gets its own RSVP link via rsvpToken
+// ============================================================================
+export const guestGroups = pgTable("guest_groups", {
+	id: uuid().primaryKey().defaultRandom(),
+	invitationId: uuid("invitation_id")
+		.notNull()
+		.references(() => invitations.id, { onDelete: "cascade" }),
+
+	// Group details
+	name: text().notNull(),
+	rsvpToken: text("rsvp_token").notNull().unique(), // For /rsvp#t=<TOKEN> links
+
+	// Timestamps
+	createdAt: timestamp("created_at").defaultNow(),
+	updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// ============================================================================
+// GUESTS - Individual guests belonging to a group
+// ============================================================================
+export const guests = pgTable("guests", {
+	id: uuid().primaryKey().defaultRandom(),
+	groupId: uuid("group_id")
+		.notNull()
+		.references(() => guestGroups.id, { onDelete: "cascade" }),
+
+	// Guest details
+	name: text().notNull(),
+	email: text(),
+	phone: text(),
+
+	// Timestamps
+	createdAt: timestamp("created_at").defaultNow(),
+	updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// ============================================================================
 // RELATIONS
 // ============================================================================
 export const usersRelations = relations(users, ({ many }) => ({
@@ -111,6 +149,7 @@ export const invitationsRelations = relations(invitations, ({ one, many }) => ({
 	}),
 	scheduleBlocks: many(scheduleBlocks),
 	notes: many(notes),
+	guestGroups: many(guestGroups),
 }));
 
 export const scheduleBlocksRelations = relations(scheduleBlocks, ({ one }) => ({
@@ -124,5 +163,20 @@ export const notesRelations = relations(notes, ({ one }) => ({
 	invitation: one(invitations, {
 		fields: [notes.invitationId],
 		references: [invitations.id],
+	}),
+}));
+
+export const guestGroupsRelations = relations(guestGroups, ({ one, many }) => ({
+	invitation: one(invitations, {
+		fields: [guestGroups.invitationId],
+		references: [invitations.id],
+	}),
+	guests: many(guests),
+}));
+
+export const guestsRelations = relations(guests, ({ one }) => ({
+	group: one(guestGroups, {
+		fields: [guests.groupId],
+		references: [guestGroups.id],
 	}),
 }));

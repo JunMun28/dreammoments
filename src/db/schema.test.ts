@@ -1,6 +1,10 @@
 import { getTableName } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
 import {
+	guestGroups,
+	guestGroupsRelations,
+	guests,
+	guestsRelations,
 	invitations,
 	invitationsRelations,
 	notes,
@@ -126,6 +130,57 @@ describe("Database Schema", () => {
 		});
 	});
 
+	describe("guestGroups table", () => {
+		it("should export guestGroups table", () => {
+			expect(guestGroups).toBeDefined();
+		});
+
+		it("should have correct table name", () => {
+			expect(getTableName(guestGroups)).toBe("guest_groups");
+		});
+
+		it("should have required columns", () => {
+			expect(guestGroups.id).toBeDefined();
+			expect(guestGroups.invitationId).toBeDefined();
+			expect(guestGroups.name).toBeDefined();
+		});
+
+		it("should have RSVP token column for unique group links", () => {
+			expect(guestGroups.rsvpToken).toBeDefined();
+		});
+
+		it("should have timestamp columns", () => {
+			expect(guestGroups.createdAt).toBeDefined();
+			expect(guestGroups.updatedAt).toBeDefined();
+		});
+	});
+
+	describe("guests table", () => {
+		it("should export guests table", () => {
+			expect(guests).toBeDefined();
+		});
+
+		it("should have correct table name", () => {
+			expect(getTableName(guests)).toBe("guests");
+		});
+
+		it("should have required columns", () => {
+			expect(guests.id).toBeDefined();
+			expect(guests.groupId).toBeDefined();
+			expect(guests.name).toBeDefined();
+		});
+
+		it("should have optional contact columns", () => {
+			expect(guests.email).toBeDefined();
+			expect(guests.phone).toBeDefined();
+		});
+
+		it("should have timestamp columns", () => {
+			expect(guests.createdAt).toBeDefined();
+			expect(guests.updatedAt).toBeDefined();
+		});
+	});
+
 	describe("relations", () => {
 		it("should export usersRelations", () => {
 			expect(usersRelations).toBeDefined();
@@ -141,6 +196,14 @@ describe("Database Schema", () => {
 
 		it("should export notesRelations", () => {
 			expect(notesRelations).toBeDefined();
+		});
+
+		it("should export guestGroupsRelations", () => {
+			expect(guestGroupsRelations).toBeDefined();
+		});
+
+		it("should export guestsRelations", () => {
+			expect(guestsRelations).toBeDefined();
 		});
 	});
 });

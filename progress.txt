@@ -715,3 +715,30 @@
 - 334/334 tests pass (7 new tests)
 - typecheck passes
 - biome check passes
+
+## 2026-01-13: Guest Management Schema Foundation (GUEST-001 through GUEST-005 prerequisite)
+
+**Completed:** Database schema for guest groups and guests tables - foundation for all GUEST-* features
+
+**Changes:**
+- `src/db/schema.ts`: Added guestGroups table (id, invitationId, name, rsvpToken) + guests table (id, groupId, name, email?, phone?)
+- `src/db/schema.ts`: Added guestGroupsRelations, guestsRelations, updated invitationsRelations
+- `src/db/schema.test.ts`: Added 12 tests for new tables + relations
+- `drizzle.config.ts`: Fixed SSL connection for Neon (added sslmode=require to URL)
+
+**Decisions:**
+- guestGroups has unique rsvpToken for per-group RSVP links (/rsvp#t=TOKEN) - supports RSVP-001
+- guests belongs to guestGroups with cascade delete
+- guests has optional email/phone for contact info from CSV import
+- UUID PKs consistent with other tables
+- rsvpToken is .unique() to ensure no collisions
+
+**Notes:**
+- This is architectural foundation - GUEST-001 (CSV upload) and other GUEST features depend on this schema
+- Schema pushed to Neon DB successfully
+
+**Verification:**
+- 346/346 tests pass (12 new schema tests)
+- typecheck passes
+- biome check passes
+- db:push successful
