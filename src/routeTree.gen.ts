@@ -15,6 +15,7 @@ import { Route as TemplatesTemplateIdRouteImport } from './routes/templates.$tem
 import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
 import { Route as DemoNeonRouteImport } from './routes/demo/neon'
 import { Route as DemoDrizzleRouteImport } from './routes/demo/drizzle'
+import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as ApiUploadHeroImageRouteImport } from './routes/api.upload-hero-image'
 import { Route as ApiRemoveHeroImageRouteImport } from './routes/api.remove-hero-image'
 import { Route as DemoStartServerFuncsRouteImport } from './routes/demo/start.server-funcs'
@@ -56,6 +57,11 @@ const DemoNeonRoute = DemoNeonRouteImport.update({
 const DemoDrizzleRoute = DemoDrizzleRouteImport.update({
   id: '/demo/drizzle',
   path: '/demo/drizzle',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiUploadHeroImageRoute = ApiUploadHeroImageRouteImport.update({
@@ -124,6 +130,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/api/remove-hero-image': typeof ApiRemoveHeroImageRoute
   '/api/upload-hero-image': typeof ApiUploadHeroImageRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/demo/drizzle': typeof DemoDrizzleRoute
   '/demo/neon': typeof DemoNeonRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
@@ -144,6 +151,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/api/remove-hero-image': typeof ApiRemoveHeroImageRoute
   '/api/upload-hero-image': typeof ApiUploadHeroImageRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/demo/drizzle': typeof DemoDrizzleRoute
   '/demo/neon': typeof DemoNeonRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
@@ -165,6 +173,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/api/remove-hero-image': typeof ApiRemoveHeroImageRoute
   '/api/upload-hero-image': typeof ApiUploadHeroImageRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/demo/drizzle': typeof DemoDrizzleRoute
   '/demo/neon': typeof DemoNeonRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
@@ -187,6 +196,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/api/remove-hero-image'
     | '/api/upload-hero-image'
+    | '/auth/callback'
     | '/demo/drizzle'
     | '/demo/neon'
     | '/demo/tanstack-query'
@@ -207,6 +217,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/api/remove-hero-image'
     | '/api/upload-hero-image'
+    | '/auth/callback'
     | '/demo/drizzle'
     | '/demo/neon'
     | '/demo/tanstack-query'
@@ -227,6 +238,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/api/remove-hero-image'
     | '/api/upload-hero-image'
+    | '/auth/callback'
     | '/demo/drizzle'
     | '/demo/neon'
     | '/demo/tanstack-query'
@@ -248,6 +260,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   ApiRemoveHeroImageRoute: typeof ApiRemoveHeroImageRoute
   ApiUploadHeroImageRoute: typeof ApiUploadHeroImageRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
   DemoDrizzleRoute: typeof DemoDrizzleRoute
   DemoNeonRoute: typeof DemoNeonRoute
   DemoTanstackQueryRoute: typeof DemoTanstackQueryRoute
@@ -306,6 +319,13 @@ declare module '@tanstack/react-router' {
       path: '/demo/drizzle'
       fullPath: '/demo/drizzle'
       preLoaderRoute: typeof DemoDrizzleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/upload-hero-image': {
@@ -400,6 +420,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   ApiRemoveHeroImageRoute: ApiRemoveHeroImageRoute,
   ApiUploadHeroImageRoute: ApiUploadHeroImageRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
   DemoDrizzleRoute: DemoDrizzleRoute,
   DemoNeonRoute: DemoNeonRoute,
   DemoTanstackQueryRoute: DemoTanstackQueryRoute,

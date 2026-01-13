@@ -84,9 +84,8 @@
         },
         {
           "id": "AUTH-001-T4",
-
           "task": "Set up OAuth callback route to handle Neon Auth response",
-          "done": false
+          "done": true
         },
         {
           "id": "AUTH-001-T5",

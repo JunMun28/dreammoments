@@ -1,19 +1,44 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useSearch } from "@tanstack/react-router";
 import { useId } from "react";
 import { authClient } from "../lib/auth";
 
+interface LoginSearch {
+	redirect?: string;
+	template?: string;
+}
+
 export const Route = createFileRoute("/login")({
 	component: Login,
+	validateSearch: (search: Record<string, unknown>): LoginSearch => ({
+		redirect: typeof search.redirect === "string" ? search.redirect : undefined,
+		template: typeof search.template === "string" ? search.template : undefined,
+	}),
 });
 
 export function Login() {
 	const googleTitleId = useId();
+	const search = useSearch({ from: "/login" });
 
 	const handleGoogleLogin = async () => {
 		try {
+			// Build callback URL with redirect param if present
+			let callbackURL = "/auth/callback";
+			const params = new URLSearchParams();
+
+			if (search.redirect) {
+				params.set("redirect", search.redirect);
+			} else if (search.template) {
+				// If coming from template preview, redirect to builder with template
+				params.set("redirect", `/builder?template=${search.template}`);
+			}
+
+			if (params.toString()) {
+				callbackURL += `?${params.toString()}`;
+			}
+
 			await authClient.signIn.social({
 				provider: "google",
-				callbackURL: "/",
+				callbackURL,
 			});
 		} catch (error) {
 			console.error("Login failed:", error);

@@ -658,3 +658,31 @@
 - 320/320 tests pass (34 new tests)
 - typecheck passes
 - biome check passes
+
+## 2026-01-13: OAuth Callback Route (AUTH-001-T4)
+
+**Completed:** OAuth callback route to handle Neon Auth response + user sync
+
+**Changes:**
+- `src/routes/auth.callback.tsx`: New route that handles OAuth callback, checks session, syncs user to local DB, redirects
+- `src/routes/auth.callback.test.tsx`: 4 tests (loading, success redirect, no session redirect, sync error)
+- `src/routes/login.tsx`: Updated to route through /auth/callback with redirect params (supports template selection flow)
+- `src/routes/login.test.tsx`: Updated tests for new callback URL pattern, added redirect param tests
+
+**Decisions:**
+- Callback route at /auth/callback (standard OAuth pattern)
+- Uses getSession() to check if Neon Auth established session after OAuth
+- Syncs user via syncUserFromNeonAuth() on successful auth
+- Supports redirect param for post-login destination
+- Supports template param for TMPL-003 flow (template → login → builder)
+- Error state shows message + link back to login
+
+**Notes:**
+- AUTH-001-T1 (Neon Console config) still required for production - this is manual setup
+- Neon Auth handles OAuth exchange server-side, callback just validates session
+- Integrates with existing user-sync.ts for local DB user record
+
+**Verification:**
+- 327/327 tests pass (7 new tests)
+- typecheck passes
+- biome check passes
