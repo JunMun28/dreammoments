@@ -602,3 +602,33 @@
 - 270/270 tests pass (10 new tests)
 - typecheck passes
 - biome check passes
+
+## 2026-01-13: Hero Image Upload Feature (BLDR-006-T1 through T6)
+
+**Completed:** Full hero image upload feature with drag-drop, compression, and preview
+
+**Changes:**
+- `src/components/ui/image-upload.tsx`: New ImageUpload component w/ drag-drop zone, file validation, client-side compression to WebP
+- `src/components/ui/image-upload.test.tsx`: 16 tests for validation + component behavior
+- `src/components/ui/progress.tsx`: Added shadcn Progress component for upload indicator
+- `src/hooks/useImageUpload.ts`: Custom hook for upload with XHR progress tracking + remove functionality
+- `src/routes/api.upload-hero-image.ts`: POST API route for multipart image upload, saves to public/uploads/hero-images/
+- `src/routes/api.remove-hero-image.ts`: POST API route to clear hero image from invitation
+- `src/components/HeroImageSection.tsx`: Builder section integrating ImageUpload with context + error messages
+- `src/components/InvitationPreview.tsx`: Updated to display hero image with gradient overlay
+- `src/components/InvitationBuilder.tsx`: Added HeroImageSection between Basic Info and Theme sections
+
+**Decisions:**
+- BLDR-006-T1 already done (heroImageUrl field exists in schema from initial setup)
+- Client-side compression: Canvas API resizes to max 2048px, converts to WebP at 85% quality
+- XHR for upload (not fetch) to enable progress tracking via upload.onprogress
+- Local file storage in public/uploads/hero-images/ (can swap for R2 later)
+- File validation: JPG, PNG, WebP only, 5MB max (configurable)
+- Hero image in preview: Full-width with gradient fade to background
+- Mobile preview: h-48 hero height; Desktop preview: h-64 hero height
+- Used biome-ignore for div[role="button"] in drag-drop zone (semantic button doesn't support drag events)
+
+**Verification:**
+- 286/286 tests pass (16 new tests)
+- typecheck passes
+- biome check passes

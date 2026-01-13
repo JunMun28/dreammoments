@@ -7,6 +7,7 @@ import {
 import { type AutosaveStatus, useAutosave } from "@/hooks/useAutosave";
 import { cn } from "@/lib/utils";
 import { BasicInfoForm, type BasicInfoFormValues } from "./BasicInfoForm";
+import { HeroImageSection } from "./HeroImageSection";
 import { InvitationPreview } from "./InvitationPreview";
 import { ThemeSection } from "./ThemeSection";
 import { type ViewportMode, ViewportToggle } from "./ui/viewport-toggle";
@@ -131,6 +132,11 @@ function InvitationBuilderContent({
 					<div className="rounded-lg border bg-card p-6">
 						<h2 className="mb-6 text-lg font-semibold">Basic Information</h2>
 						<BuilderForm onSave={onSave} />
+					</div>
+
+					<div className="rounded-lg border bg-card p-6">
+						<h2 className="mb-6 text-lg font-semibold">Hero Image</h2>
+						<HeroImageSection />
 					</div>
 
 					<div className="rounded-lg border bg-card p-6">

@@ -14,6 +14,8 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
 import { Route as DemoNeonRouteImport } from './routes/demo/neon'
 import { Route as DemoDrizzleRouteImport } from './routes/demo/drizzle'
+import { Route as ApiUploadHeroImageRouteImport } from './routes/api.upload-hero-image'
+import { Route as ApiRemoveHeroImageRouteImport } from './routes/api.remove-hero-image'
 import { Route as DemoStartServerFuncsRouteImport } from './routes/demo/start.server-funcs'
 import { Route as DemoStartApiRequestRouteImport } from './routes/demo/start.api-request'
 import { Route as DemoFormSimpleRouteImport } from './routes/demo/form.simple'
@@ -48,6 +50,16 @@ const DemoNeonRoute = DemoNeonRouteImport.update({
 const DemoDrizzleRoute = DemoDrizzleRouteImport.update({
   id: '/demo/drizzle',
   path: '/demo/drizzle',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiUploadHeroImageRoute = ApiUploadHeroImageRouteImport.update({
+  id: '/api/upload-hero-image',
+  path: '/api/upload-hero-image',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiRemoveHeroImageRoute = ApiRemoveHeroImageRouteImport.update({
+  id: '/api/remove-hero-image',
+  path: '/api/remove-hero-image',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DemoStartServerFuncsRoute = DemoStartServerFuncsRouteImport.update({
@@ -104,6 +116,8 @@ const DemoStartSsrDataOnlyRoute = DemoStartSsrDataOnlyRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/api/remove-hero-image': typeof ApiRemoveHeroImageRoute
+  '/api/upload-hero-image': typeof ApiUploadHeroImageRoute
   '/demo/drizzle': typeof DemoDrizzleRoute
   '/demo/neon': typeof DemoNeonRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
@@ -121,6 +135,8 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/api/remove-hero-image': typeof ApiRemoveHeroImageRoute
+  '/api/upload-hero-image': typeof ApiUploadHeroImageRoute
   '/demo/drizzle': typeof DemoDrizzleRoute
   '/demo/neon': typeof DemoNeonRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
@@ -139,6 +155,8 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/api/remove-hero-image': typeof ApiRemoveHeroImageRoute
+  '/api/upload-hero-image': typeof ApiUploadHeroImageRoute
   '/demo/drizzle': typeof DemoDrizzleRoute
   '/demo/neon': typeof DemoNeonRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
@@ -158,6 +176,8 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/api/remove-hero-image'
+    | '/api/upload-hero-image'
     | '/demo/drizzle'
     | '/demo/neon'
     | '/demo/tanstack-query'
@@ -175,6 +195,8 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/api/remove-hero-image'
+    | '/api/upload-hero-image'
     | '/demo/drizzle'
     | '/demo/neon'
     | '/demo/tanstack-query'
@@ -192,6 +214,8 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/login'
+    | '/api/remove-hero-image'
+    | '/api/upload-hero-image'
     | '/demo/drizzle'
     | '/demo/neon'
     | '/demo/tanstack-query'
@@ -210,6 +234,8 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
+  ApiRemoveHeroImageRoute: typeof ApiRemoveHeroImageRoute
+  ApiUploadHeroImageRoute: typeof ApiUploadHeroImageRoute
   DemoDrizzleRoute: typeof DemoDrizzleRoute
   DemoNeonRoute: typeof DemoNeonRoute
   DemoTanstackQueryRoute: typeof DemoTanstackQueryRoute
@@ -260,6 +286,20 @@ declare module '@tanstack/react-router' {
       path: '/demo/drizzle'
       fullPath: '/demo/drizzle'
       preLoaderRoute: typeof DemoDrizzleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/upload-hero-image': {
+      id: '/api/upload-hero-image'
+      path: '/api/upload-hero-image'
+      fullPath: '/api/upload-hero-image'
+      preLoaderRoute: typeof ApiUploadHeroImageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/remove-hero-image': {
+      id: '/api/remove-hero-image'
+      path: '/api/remove-hero-image'
+      fullPath: '/api/remove-hero-image'
+      preLoaderRoute: typeof ApiRemoveHeroImageRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demo/start/server-funcs': {
@@ -338,6 +378,8 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
+  ApiRemoveHeroImageRoute: ApiRemoveHeroImageRoute,
+  ApiUploadHeroImageRoute: ApiUploadHeroImageRoute,
   DemoDrizzleRoute: DemoDrizzleRoute,
   DemoNeonRoute: DemoNeonRoute,
   DemoTanstackQueryRoute: DemoTanstackQueryRoute,

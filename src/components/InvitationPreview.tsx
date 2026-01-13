@@ -101,6 +101,7 @@ export function InvitationPreview({
 		notes,
 		accentColor,
 		fontPairing,
+		heroImageUrl,
 	} = invitation;
 
 	// Memoize accent color style to avoid recalculating on every render
@@ -163,17 +164,39 @@ export function InvitationPreview({
 			className={cn(
 				"relative overflow-hidden rounded-lg bg-gradient-to-br from-stone-100 to-stone-200 transition-all duration-300",
 				isMobile
-					? "mx-auto max-w-[375px] min-h-[667px] p-4"
-					: "h-full min-h-[400px] p-8",
+					? "mx-auto max-w-[375px] min-h-[667px]"
+					: "h-full min-h-[400px]",
 			)}
 			style={combinedStyle}
 			data-viewport={viewportMode}
 		>
+			{/* Hero image */}
+			{heroImageUrl && (
+				<div
+					className={cn("relative overflow-hidden", isMobile ? "h-48" : "h-64")}
+					data-testid="hero-image-container"
+				>
+					<img
+						src={heroImageUrl}
+						alt="Wedding hero"
+						className="h-full w-full object-cover"
+					/>
+					<div className="absolute inset-0 bg-gradient-to-b from-transparent to-stone-100/80" />
+				</div>
+			)}
+
 			{/* Glassmorphism card */}
 			<div
 				className={cn(
 					"relative mx-auto rounded-xl border border-white/40 bg-white/70 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] backdrop-blur-md",
 					isMobile ? "max-w-full p-4" : "max-w-md p-8",
+					heroImageUrl
+						? isMobile
+							? "-mt-8 mx-4"
+							: "-mt-16 mx-8"
+						: isMobile
+							? "m-4"
+							: "m-8",
 				)}
 				style={{ fontFamily: "var(--font-body)" }}
 			>

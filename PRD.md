@@ -402,32 +402,32 @@
         {
           "id": "BLDR-006-T1",
           "task": "Add heroImageUrl field to invitations table",
-          "done": false
+          "done": true
         },
         {
           "id": "BLDR-006-T2",
           "task": "Create file input with drag-drop zone",
-          "done": false
+          "done": true
         },
         {
           "id": "BLDR-006-T3",
           "task": "Client-side image resize/compress before upload",
-          "done": false
+          "done": true
         },
         {
           "id": "BLDR-006-T4",
           "task": "Implement server function to handle upload (store in R2 or local)",
-          "done": false
+          "done": true
         },
         {
           "id": "BLDR-006-T5",
           "task": "Display upload progress indicator",
-          "done": false
+          "done": true
         },
         {
           "id": "BLDR-006-T6",
           "task": "Show hero image in preview with replace option",
-          "done": false
+          "done": true
         }
       ],
       "passes": false
