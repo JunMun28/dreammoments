@@ -742,3 +742,33 @@
 - typecheck passes
 - biome check passes
 - db:push successful
+
+## 2026-01-14: CSV File Upload for Guest Import (GUEST-001)
+
+**Completed:** CSV parser utility + CsvUpload component for guest list import
+
+**Changes:**
+- `src/lib/csv-parser.ts`: CSV parsing utility w/ file validation (type, size), row validation (name required, email format), quoted value handling
+- `src/lib/csv-parser.test.ts`: 25 tests for validateCsvFile, validateGuestRow, parseCsvContent
+- `src/components/ui/csv-upload.tsx`: CsvUpload component w/ drag-drop zone, file validation, FileReader integration
+- `src/components/ui/csv-upload.test.tsx`: 10 tests for component behavior
+
+**Decisions:**
+- CSV must have "name" column (required), "group" optional (defaults to "Ungrouped")
+- Optional columns: email, phone
+- Client-side validation: max 1MB file size, CSV type or .csv extension
+- Email validation uses simple regex (catches common issues)
+- Quoted values with commas supported ("Doe, John")
+- CRLF and LF line endings handled
+- Case-insensitive header matching (Name, NAME, name all work)
+- Row errors collected and returned separately from valid rows
+
+**Notes:**
+- This covers GUEST-001 (CSV file upload) - GUEST-002 (validation with error reporting) partially covered
+- GUEST-003 (preview before import) needs GuestImportPreview component
+- Integration with guest management UI deferred to GUEST-004/GUEST-005
+
+**Verification:**
+- 381/381 tests pass (35 new tests)
+- typecheck passes
+- biome check passes
