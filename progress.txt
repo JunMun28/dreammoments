@@ -577,3 +577,25 @@
 - 260/260 tests pass (28 new tests)
 - typecheck passes
 - biome check passes
+
+## 2026-01-13: Integrate Schedule & Notes into Builder (BLDR-002, BLDR-003)
+
+**Completed:** Integrated ScheduleBlockList and NoteList components into InvitationBuilder
+
+**Changes:**
+- `src/components/InvitationBuilder.tsx`: Added ScheduleBlockList and NoteList to form panel
+
+**Decisions:**
+- Placed Schedule before Notes, Notes before Theme (logical flow: basic info → timeline → notes → styling)
+- Components use their own h3 headers within card containers (no extra wrapper headings)
+- Components were already built (BLDR-002, BLDR-003) but not integrated - this was an integration gap
+
+**Notes:**
+- ScheduleBlockList and NoteList already use InvitationBuilderContext, so they work immediately
+- Preview already renders schedule blocks and notes (added in BLDR-002-T6, BLDR-003-T5)
+- Autosave captures schedule/note changes via context subscription
+
+**Verification:**
+- 260/260 tests pass (no new tests needed - existing tests cover components)
+- typecheck passes
+- biome check passes

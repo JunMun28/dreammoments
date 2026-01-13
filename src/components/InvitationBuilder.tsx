@@ -8,6 +8,8 @@ import { type AutosaveStatus, useAutosave } from "@/hooks/useAutosave";
 import { cn } from "@/lib/utils";
 import { BasicInfoForm, type BasicInfoFormValues } from "./BasicInfoForm";
 import { InvitationPreview } from "./InvitationPreview";
+import { NoteList } from "./NoteList";
+import { ScheduleBlockList } from "./ScheduleBlockList";
 import { ThemeSection } from "./ThemeSection";
 
 interface InvitationBuilderProps {
@@ -129,6 +131,14 @@ function InvitationBuilderContent({
 					<div className="rounded-lg border bg-card p-6">
 						<h2 className="mb-6 text-lg font-semibold">Basic Information</h2>
 						<BuilderForm onSave={onSave} />
+					</div>
+
+					<div className="rounded-lg border bg-card p-6">
+						<ScheduleBlockList />
+					</div>
+
+					<div className="rounded-lg border bg-card p-6">
+						<NoteList />
 					</div>
 
 					<div className="rounded-lg border bg-card p-6">
