@@ -11,34 +11,34 @@ import viteTsConfigPaths from "vite-tsconfig-paths";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const config = defineConfig(({ mode }) => {
-  const isTest = mode === "test";
-  return {
-    plugins: [
-      devtools(),
-      nitro({
-        preset: "vercel",
-      }),
-      viteTsConfigPaths({
-        projects: ["./tsconfig.json"],
-      }),
-      tailwindcss(),
-      tanstackStart(),
-      viteReact(),
-    ],
-    resolve: {
-      alias: {
-        ...(isTest && {
-          react: path.resolve(__dirname, "./node_modules/react"),
-          "react-dom": path.resolve(__dirname, "./node_modules/react-dom"),
-        }),
-      },
-      dedupe: ["react", "react-dom"],
-    },
-    test: {
-      environment: "jsdom",
-      include: ["src/**/*.test.{ts,tsx}"],
-    },
-  };
+	const isTest = mode === "test";
+	return {
+		plugins: [
+			devtools(),
+			nitro({
+				preset: "vercel",
+			}),
+			viteTsConfigPaths({
+				projects: ["./tsconfig.json"],
+			}),
+			tailwindcss(),
+			tanstackStart(),
+			viteReact(),
+		],
+		resolve: {
+			alias: {
+				...(isTest && {
+					react: path.resolve(__dirname, "./node_modules/react"),
+					"react-dom": path.resolve(__dirname, "./node_modules/react-dom"),
+				}),
+			},
+			dedupe: ["react", "react-dom"],
+		},
+		test: {
+			environment: "jsdom",
+			include: ["src/**/*.test.{ts,tsx}"],
+		},
+	};
 });
 
 export default config;

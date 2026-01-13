@@ -12,10 +12,12 @@ import {
 	formatDate,
 	formatTime,
 	getAccentColorStyle,
+	getFontStyle,
 	InvitationPreview,
 	sortBlocksByOrder,
 	sortNotesByOrder,
 } from "./InvitationPreview";
+import { DEFAULT_FONT_PAIRING_ID, getFontPairingById } from "./ui/font-picker";
 
 // Wrapper to provide context
 function renderWithContext(invitationData: InvitationData) {
@@ -394,6 +396,77 @@ describe("InvitationPreview accent color", () => {
 		const rootDiv = container.firstChild as HTMLElement;
 		expect(rootDiv.style.getPropertyValue("--accent-color")).toBe(
 			DEFAULT_ACCENT_COLOR,
+		);
+	});
+});
+
+describe("getFontStyle", () => {
+	it("returns CSS custom properties with font families", () => {
+		const style = getFontStyle("classic") as Record<string, string>;
+		expect(style["--font-heading"]).toContain("Playfair Display");
+		expect(style["--font-body"]).toContain("Lato");
+	});
+
+	it("uses default pairing when undefined", () => {
+		const style = getFontStyle(undefined) as Record<string, string>;
+		const defaultPairing = getFontPairingById(DEFAULT_FONT_PAIRING_ID);
+		expect(style["--font-heading"]).toContain(defaultPairing.headingFont);
+		expect(style["--font-body"]).toContain(defaultPairing.bodyFont);
+	});
+
+	it("uses default pairing for invalid ID", () => {
+		const style = getFontStyle("nonexistent") as Record<string, string>;
+		const defaultPairing = getFontPairingById(DEFAULT_FONT_PAIRING_ID);
+		expect(style["--font-heading"]).toContain(defaultPairing.headingFont);
+	});
+
+	it("includes fallback font families", () => {
+		const style = getFontStyle("classic") as Record<string, string>;
+		expect(style["--font-heading"]).toContain("serif");
+		expect(style["--font-body"]).toContain("sans-serif");
+	});
+});
+
+describe("InvitationPreview font styles", () => {
+	afterEach(() => {
+		cleanup();
+	});
+
+	const baseData: InvitationData = {
+		id: "test-123",
+		partner1Name: "Alice",
+		partner2Name: "Bob",
+	};
+
+	it("applies font CSS custom properties to root element", () => {
+		const dataWithFont: InvitationData = {
+			...baseData,
+			fontPairing: "whimsical",
+		};
+		const { container } = render(
+			<InvitationBuilderProvider initialData={dataWithFont}>
+				<InvitationPreview />
+			</InvitationBuilderProvider>,
+		);
+
+		const rootDiv = container.firstChild as HTMLElement;
+		expect(rootDiv.style.getPropertyValue("--font-heading")).toContain(
+			"Dancing Script",
+		);
+		expect(rootDiv.style.getPropertyValue("--font-body")).toContain("Poppins");
+	});
+
+	it("uses default font pairing when not provided", () => {
+		const { container } = render(
+			<InvitationBuilderProvider initialData={baseData}>
+				<InvitationPreview />
+			</InvitationBuilderProvider>,
+		);
+
+		const rootDiv = container.firstChild as HTMLElement;
+		const defaultPairing = getFontPairingById(DEFAULT_FONT_PAIRING_ID);
+		expect(rootDiv.style.getPropertyValue("--font-heading")).toContain(
+			defaultPairing.headingFont,
 		);
 	});
 });

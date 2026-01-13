@@ -1,10 +1,11 @@
 import { CalendarDays, Clock, MapPin } from "lucide-react";
-import { type CSSProperties, useMemo } from "react";
+import { type CSSProperties, useEffect, useMemo } from "react";
 import {
 	type Note,
 	type ScheduleBlock,
 	useInvitationBuilder,
 } from "@/contexts/InvitationBuilderContext";
+import { getFontPairingById, getGoogleFontsUrl } from "./ui/font-picker";
 
 /**
  * Formats a Date to a readable string like "June 15, 2026"
@@ -59,6 +60,17 @@ function getAccentColorStyle(accentColor?: string): CSSProperties {
 }
 
 /**
+ * Generates CSS custom properties style object for font families
+ */
+function getFontStyle(fontPairingId?: string): CSSProperties {
+	const pairing = getFontPairingById(fontPairingId);
+	return {
+		"--font-heading": `"${pairing.headingFont}", serif`,
+		"--font-body": `"${pairing.bodyFont}", sans-serif`,
+	} as CSSProperties;
+}
+
+/**
  * Preview component that renders the wedding invitation.
  * Consumes InvitationBuilderContext for real-time updates.
  */
@@ -75,6 +87,7 @@ export function InvitationPreview() {
 		scheduleBlocks,
 		notes,
 		accentColor,
+		fontPairing,
 	} = invitation;
 
 	// Memoize accent color style to avoid recalculating on every render
@@ -82,6 +95,43 @@ export function InvitationPreview() {
 		() => getAccentColorStyle(accentColor),
 		[accentColor],
 	);
+
+	// Memoize font style to avoid recalculating on every render
+	const fontStyle = useMemo(() => getFontStyle(fontPairing), [fontPairing]);
+
+	// Combine all styles
+	const combinedStyle = useMemo(
+		() => ({ ...accentStyle, ...fontStyle }),
+		[accentStyle, fontStyle],
+	);
+
+	// Load Google Fonts for the selected pairing
+	const selectedPairing = useMemo(
+		() => getFontPairingById(fontPairing),
+		[fontPairing],
+	);
+	const fontsUrl = useMemo(
+		() =>
+			getGoogleFontsUrl([
+				selectedPairing.headingFont,
+				selectedPairing.bodyFont,
+			]),
+		[selectedPairing],
+	);
+
+	useEffect(() => {
+		if (!fontsUrl) return;
+
+		// Check if link already exists
+		const existingLink = document.querySelector(`link[href="${fontsUrl}"]`);
+		if (existingLink) return;
+
+		const link = document.createElement("link");
+		link.rel = "stylesheet";
+		link.href = fontsUrl;
+		link.dataset.fontPreview = "true";
+		document.head.appendChild(link);
+	}, [fontsUrl]);
 
 	const sortedBlocks = scheduleBlocks ? sortBlocksByOrder(scheduleBlocks) : [];
 	const hasSchedule = sortedBlocks.length > 0;
@@ -96,10 +146,13 @@ export function InvitationPreview() {
 	return (
 		<div
 			className="relative h-full min-h-[400px] overflow-hidden rounded-lg bg-gradient-to-br from-stone-100 to-stone-200 p-8"
-			style={accentStyle}
+			style={combinedStyle}
 		>
 			{/* Glassmorphism card */}
-			<div className="relative mx-auto max-w-md rounded-xl border border-white/40 bg-white/70 p-8 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] backdrop-blur-md">
+			<div
+				className="relative mx-auto max-w-md rounded-xl border border-white/40 bg-white/70 p-8 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] backdrop-blur-md"
+				style={{ fontFamily: "var(--font-body)" }}
+			>
 				{/* Header accent */}
 				<div className="mb-8 text-center">
 					<p
@@ -113,7 +166,10 @@ export function InvitationPreview() {
 				{/* Couple names */}
 				<div className="mb-8 text-center">
 					{hasNames ? (
-						<h1 className="font-serif text-3xl font-light tracking-wide text-stone-800 md:text-4xl">
+						<h1
+							className="text-3xl font-light tracking-wide text-stone-800 md:text-4xl"
+							style={{ fontFamily: "var(--font-heading)" }}
+						>
 							{partner1Name || "Partner One"}
 							<span
 								className="mx-3 text-2xl"
@@ -124,7 +180,10 @@ export function InvitationPreview() {
 							{partner2Name || "Partner Two"}
 						</h1>
 					) : (
-						<h1 className="font-serif text-3xl font-light italic tracking-wide text-stone-400 md:text-4xl">
+						<h1
+							className="text-3xl font-light italic tracking-wide text-stone-400 md:text-4xl"
+							style={{ fontFamily: "var(--font-heading)" }}
+						>
 							Your Names Here
 						</h1>
 					)}
@@ -268,6 +327,7 @@ export {
 	formatDate,
 	formatTime,
 	getAccentColorStyle,
+	getFontStyle,
 	sortBlocksByOrder,
 	sortNotesByOrder,
 };
