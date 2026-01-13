@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
 	InvitationBuilderProvider,
 	type InvitationData,
@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { BasicInfoForm, type BasicInfoFormValues } from "./BasicInfoForm";
 import { InvitationPreview } from "./InvitationPreview";
 import { ThemeSection } from "./ThemeSection";
+import { type ViewportMode, ViewportToggle } from "./ui/viewport-toggle";
 
 interface InvitationBuilderProps {
 	/** Initial invitation data from server */
@@ -103,6 +104,7 @@ function InvitationBuilderContent({
 	onSave: (data: InvitationData) => Promise<void>;
 }) {
 	const { invitation, setAutosaveStatus } = useInvitationBuilder();
+	const [viewportMode, setViewportMode] = useState<ViewportMode>("desktop");
 
 	const { status } = useAutosave({
 		data: invitation,
@@ -140,8 +142,11 @@ function InvitationBuilderContent({
 				{/* Preview panel */}
 				<div className="hidden lg:block">
 					<div className="sticky top-4">
-						<h2 className="mb-4 text-lg font-semibold">Preview</h2>
-						<InvitationPreview />
+						<div className="mb-4 flex items-center justify-between">
+							<h2 className="text-lg font-semibold">Preview</h2>
+							<ViewportToggle value={viewportMode} onChange={setViewportMode} />
+						</div>
+						<InvitationPreview viewportMode={viewportMode} />
 					</div>
 				</div>
 			</div>

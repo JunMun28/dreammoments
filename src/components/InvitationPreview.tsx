@@ -5,7 +5,9 @@ import {
 	type ScheduleBlock,
 	useInvitationBuilder,
 } from "@/contexts/InvitationBuilderContext";
+import { cn } from "@/lib/utils";
 import { getFontPairingById, getGoogleFontsUrl } from "./ui/font-picker";
+import type { ViewportMode } from "./ui/viewport-toggle";
 
 /**
  * Formats a Date to a readable string like "June 15, 2026"
@@ -70,11 +72,22 @@ function getFontStyle(fontPairingId?: string): CSSProperties {
 	} as CSSProperties;
 }
 
+interface InvitationPreviewProps {
+	/**
+	 * Viewport mode for preview sizing.
+	 * - "desktop": Full width preview (default)
+	 * - "mobile": Constrained width to simulate mobile device
+	 */
+	viewportMode?: ViewportMode;
+}
+
 /**
  * Preview component that renders the wedding invitation.
  * Consumes InvitationBuilderContext for real-time updates.
  */
-export function InvitationPreview() {
+export function InvitationPreview({
+	viewportMode = "desktop",
+}: InvitationPreviewProps) {
 	const { invitation } = useInvitationBuilder();
 
 	const {
@@ -143,14 +156,25 @@ export function InvitationPreview() {
 	const hasDateOrTime = weddingDate || weddingTime;
 	const hasVenue = venueName || venueAddress;
 
+	const isMobile = viewportMode === "mobile";
+
 	return (
 		<div
-			className="relative h-full min-h-[400px] overflow-hidden rounded-lg bg-gradient-to-br from-stone-100 to-stone-200 p-8"
+			className={cn(
+				"relative overflow-hidden rounded-lg bg-gradient-to-br from-stone-100 to-stone-200 transition-all duration-300",
+				isMobile
+					? "mx-auto max-w-[375px] min-h-[667px] p-4"
+					: "h-full min-h-[400px] p-8",
+			)}
 			style={combinedStyle}
+			data-viewport={viewportMode}
 		>
 			{/* Glassmorphism card */}
 			<div
-				className="relative mx-auto max-w-md rounded-xl border border-white/40 bg-white/70 p-8 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] backdrop-blur-md"
+				className={cn(
+					"relative mx-auto rounded-xl border border-white/40 bg-white/70 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] backdrop-blur-md",
+					isMobile ? "max-w-full p-4" : "max-w-md p-8",
+				)}
 				style={{ fontFamily: "var(--font-body)" }}
 			>
 				{/* Header accent */}

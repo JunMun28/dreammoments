@@ -577,3 +577,28 @@
 - 260/260 tests pass (28 new tests)
 - typecheck passes
 - biome check passes
+
+## 2026-01-13: Mobile/Desktop Viewport Toggle (BLDR-007-T3)
+
+**Completed:** Added viewport toggle button to switch preview between mobile and desktop views
+
+**Changes:**
+- `src/components/ui/viewport-toggle.tsx`: New ViewportToggle component w/ mobile/desktop buttons
+- `src/components/ui/viewport-toggle.test.tsx`: 6 tests for toggle button behavior
+- `src/components/InvitationPreview.tsx`: Added viewportMode prop + mobile-specific styling (375px width, 667px height)
+- `src/components/InvitationPreview.test.tsx`: Added 4 tests for viewport mode styling
+- `src/components/InvitationBuilder.tsx`: Added useState for viewportMode + ViewportToggle in preview header
+- `PRD.md`: Marked all BLDR-007 tasks as done (T1-T5 were already implemented previously)
+
+**Decisions:**
+- Mobile viewport: 375px × 667px (iPhone 8 dimensions) - standard mobile testing size
+- Desktop viewport: Full width with min-height 400px
+- Used data-viewport attribute for testing and potential CSS hooks
+- Toggle placed in preview panel header next to "Preview" title
+- Smooth CSS transitions (duration-300) when switching modes
+- Mobile mode uses smaller padding (p-4) vs desktop (p-8)
+
+**Verification:**
+- 270/270 tests pass (10 new tests)
+- typecheck passes
+- biome check passes

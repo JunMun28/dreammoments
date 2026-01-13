@@ -446,27 +446,27 @@
         {
           "id": "BLDR-007-T1",
           "task": "Create InvitationPreview component that renders full invitation",
-          "done": false
+          "done": true
         },
         {
           "id": "BLDR-007-T2",
           "task": "Wire preview to builder form state (React context or props)",
-          "done": false
+          "done": true
         },
         {
           "id": "BLDR-007-T3",
           "task": "Add mobile/desktop viewport toggle button",
-          "done": false
+          "done": true
         },
         {
           "id": "BLDR-007-T4",
           "task": "Style preview container with responsive iframe or width constraints",
-          "done": false
+          "done": true
         },
         {
           "id": "BLDR-007-T5",
           "task": "Ensure preview updates on every form change without flicker",
-          "done": false
+          "done": true
         }
       ],
       "passes": false

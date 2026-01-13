@@ -470,3 +470,63 @@ describe("InvitationPreview font styles", () => {
 		);
 	});
 });
+
+describe("InvitationPreview viewport mode", () => {
+	afterEach(() => {
+		cleanup();
+	});
+
+	const baseData: InvitationData = {
+		id: "test-123",
+		partner1Name: "Alice",
+		partner2Name: "Bob",
+	};
+
+	it("defaults to desktop viewport mode", () => {
+		const { container } = render(
+			<InvitationBuilderProvider initialData={baseData}>
+				<InvitationPreview />
+			</InvitationBuilderProvider>,
+		);
+
+		const rootDiv = container.firstChild as HTMLElement;
+		expect(rootDiv.getAttribute("data-viewport")).toBe("desktop");
+	});
+
+	it("applies desktop styling when viewportMode is desktop", () => {
+		const { container } = render(
+			<InvitationBuilderProvider initialData={baseData}>
+				<InvitationPreview viewportMode="desktop" />
+			</InvitationBuilderProvider>,
+		);
+
+		const rootDiv = container.firstChild as HTMLElement;
+		expect(rootDiv.getAttribute("data-viewport")).toBe("desktop");
+		expect(rootDiv.className).toContain("min-h-[400px]");
+		expect(rootDiv.className).not.toContain("max-w-[375px]");
+	});
+
+	it("applies mobile styling when viewportMode is mobile", () => {
+		const { container } = render(
+			<InvitationBuilderProvider initialData={baseData}>
+				<InvitationPreview viewportMode="mobile" />
+			</InvitationBuilderProvider>,
+		);
+
+		const rootDiv = container.firstChild as HTMLElement;
+		expect(rootDiv.getAttribute("data-viewport")).toBe("mobile");
+		expect(rootDiv.className).toContain("max-w-[375px]");
+		expect(rootDiv.className).toContain("min-h-[667px]");
+	});
+
+	it("applies transition class for smooth mode switching", () => {
+		const { container } = render(
+			<InvitationBuilderProvider initialData={baseData}>
+				<InvitationPreview viewportMode="mobile" />
+			</InvitationBuilderProvider>,
+		);
+
+		const rootDiv = container.firstChild as HTMLElement;
+		expect(rootDiv.className).toContain("transition-all");
+	});
+});
