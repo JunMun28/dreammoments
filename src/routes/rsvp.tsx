@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AlertCircle, Heart, Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
+import { type GuestRsvpData, RsvpForm } from "@/components/RsvpForm";
 import { TemplatePreview } from "@/components/TemplatePreview";
 import { Button } from "@/components/ui/button";
 import { getGuestGroupByToken } from "@/lib/guest-server";
@@ -9,6 +10,11 @@ import {
 	validateGuestSession,
 } from "@/lib/guest-session";
 import { getInvitationWithRelations } from "@/lib/invitation-server";
+import {
+	getGroupRsvpStatus,
+	type RsvpResponseInput,
+	submitRsvp,
+} from "@/lib/rsvp-server";
 
 export const Route = createFileRoute("/rsvp")({
 	component: RsvpPage,
@@ -57,9 +63,11 @@ interface InvitationData {
 type LoadingState = "loading" | "no-token" | "invalid-token" | "ready";
 
 function RsvpPage() {
+	const rsvpSectionId = useId();
 	const [loadingState, setLoadingState] = useState<LoadingState>("loading");
 	const [guestGroup, setGuestGroup] = useState<GuestGroupInfo | null>(null);
 	const [invitation, setInvitation] = useState<InvitationData | null>(null);
+	const [guestsWithRsvp, setGuestsWithRsvp] = useState<GuestRsvpData[]>([]);
 
 	useEffect(() => {
 		async function loadData() {
@@ -80,6 +88,8 @@ function RsvpPage() {
 							invitationId: group.invitationId,
 							guests: group.guests,
 						});
+						// Load RSVP status for the group
+						await loadRsvpStatus(group.id);
 					} else {
 						// Session exists but need to get group info another way
 						// For now, just use the session's group name
@@ -89,6 +99,7 @@ function RsvpPage() {
 							invitationId: sessionResult.invitationId,
 							guests: [],
 						});
+						await loadRsvpStatus(sessionResult.groupId);
 					}
 				} else {
 					// No token in URL but session valid - use session data
@@ -98,6 +109,7 @@ function RsvpPage() {
 						invitationId: sessionResult.invitationId,
 						guests: [],
 					});
+					await loadRsvpStatus(sessionResult.groupId);
 				}
 				return;
 			}
@@ -132,6 +144,7 @@ function RsvpPage() {
 					invitationId: group.invitationId,
 					guests: group.guests,
 				});
+				await loadRsvpStatus(group.id);
 			} else {
 				setGuestGroup({
 					id: exchangeResult.groupId,
@@ -139,6 +152,7 @@ function RsvpPage() {
 					invitationId: exchangeResult.invitationId,
 					guests: [],
 				});
+				await loadRsvpStatus(exchangeResult.groupId);
 			}
 		}
 
@@ -159,8 +173,31 @@ function RsvpPage() {
 			}
 		}
 
+		async function loadRsvpStatus(groupId: string) {
+			try {
+				const status = await getGroupRsvpStatus({ data: { groupId } });
+				setGuestsWithRsvp(status.guests);
+			} catch (error) {
+				console.error("Error loading RSVP status:", error);
+				// Continue without RSVP data - form will still work
+			}
+		}
+
 		loadData();
 	}, []);
+
+	// Handle RSVP submission
+	const handleRsvpSubmit = async (responses: RsvpResponseInput[]) => {
+		if (!guestGroup) return;
+
+		await submitRsvp({ data: { groupId: guestGroup.id, responses } });
+
+		// Reload RSVP status after submission
+		const status = await getGroupRsvpStatus({
+			data: { groupId: guestGroup.id },
+		});
+		setGuestsWithRsvp(status.guests);
+	};
 
 	if (loadingState === "loading") {
 		return <LoadingView />;
@@ -204,22 +241,28 @@ function RsvpPage() {
 				</div>
 			</main>
 
-			{/* Guest group info - will become RSVP form in future PRD items */}
-			<footer className="border-t border-stone-200 bg-white/50 px-6 py-8">
-				<div className="mx-auto max-w-4xl text-center">
-					<p className="mb-2 text-sm uppercase tracking-widest text-stone-500">
-						You're invited as
-					</p>
-					<p className="mb-4 text-xl font-medium text-stone-700">
-						{guestGroup.name}
-					</p>
-					{guestGroup.guests.length > 0 && (
-						<p className="text-sm text-stone-500">
-							{guestGroup.guests.map((g) => g.name).join(", ")}
+			{/* RSVP Form Section */}
+			<section
+				id={rsvpSectionId}
+				className="border-t border-stone-200 bg-white/50 px-6 py-12"
+			>
+				<div className="mx-auto max-w-2xl">
+					<div className="text-center mb-8">
+						<p className="mb-2 text-sm uppercase tracking-widest text-stone-500">
+							You're invited as
 						</p>
-					)}
+						<p className="text-xl font-medium text-stone-700">
+							{guestGroup.name}
+						</p>
+					</div>
+
+					<h2 className="text-2xl font-light text-center mb-8 text-stone-800">
+						Please Respond
+					</h2>
+
+					<RsvpForm guests={guestsWithRsvp} onSubmit={handleRsvpSubmit} />
 				</div>
-			</footer>
+			</section>
 		</div>
 	);
 }

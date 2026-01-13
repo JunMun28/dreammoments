@@ -610,7 +610,7 @@
         "Each attendee can have individual meal preference if applicable",
         "Total headcount is calculated and displayed"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "RSVP-004",

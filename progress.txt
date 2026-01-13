@@ -921,3 +921,36 @@
 - typecheck passes
 - biome check passes
 - db:push successful
+
+## 2026-01-14: Multi-Person RSVP Form (RSVP-003)
+
+**Completed:** Full RSVP form with multi-person support for guest groups
+
+**Changes:**
+- `src/db/schema.ts`: Added rsvpResponses table (id, guestId, attending, mealPreference, dietaryNotes, plusOneCount, plusOneNames, respondedAt, updatedAt) + rsvpResponsesRelations
+- `src/db/schema.test.ts`: Added 8 tests for rsvpResponses table + relations
+- `src/lib/rsvp-server.ts`: New module with RSVP server functions (submitRsvp, getGroupRsvpStatus)
+- `src/lib/rsvp-server.test.ts`: 10 tests for submitRsvpInternal + getGroupRsvpStatusInternal
+- `src/components/RsvpForm.tsx`: New multi-person RSVP form component with attendance, meal preference, dietary notes, plus-one fields
+- `src/components/RsvpForm.test.tsx`: 14 tests for form rendering, interaction, submission
+- `src/routes/rsvp.tsx`: Integrated RsvpForm with session-based data loading
+
+**Decisions:**
+- rsvpResponses table: one row per guest (not per group) - allows individual meal preferences
+- plusOneCount + plusOneNames fields for bringing additional guests
+- Form state managed per-guest with attending null/true/false to track "not yet responded"
+- Submit disabled until all guests have selected attending/declining
+- Success/error message display after submission
+- Total headcount calculated dynamically (guests + plus-ones)
+- Meal options: Chicken, Fish, Beef, Vegetarian, Vegan
+- Radio buttons labeled "Joyfully Accept" / "Regretfully Decline" per wedding convention
+
+**Notes:**
+- Form pre-fills existing responses if guest has already responded (edit capability)
+- RsvpForm is props-based (receives guests array) for testability
+- RSVP route loads guest RSVP status after session validation
+
+**Verification:**
+- 522/522 tests pass (31 new tests)
+- typecheck passes
+- biome check passes

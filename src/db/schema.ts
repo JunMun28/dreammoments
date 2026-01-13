@@ -1,5 +1,6 @@
 import { relations } from "drizzle-orm";
 import {
+	boolean,
 	date,
 	integer,
 	pgTable,
@@ -156,6 +157,31 @@ export const guestSessions = pgTable("guest_sessions", {
 });
 
 // ============================================================================
+// RSVP RESPONSES - Individual RSVP responses per guest
+// Each guest in a group can respond with attendance + meal preference
+// Supports plus-ones (additional attendees not in original guest list)
+// ============================================================================
+export const rsvpResponses = pgTable("rsvp_responses", {
+	id: uuid().primaryKey().defaultRandom(),
+	guestId: uuid("guest_id")
+		.notNull()
+		.references(() => guests.id, { onDelete: "cascade" }),
+
+	// Response details
+	attending: boolean().notNull(), // true = attending, false = not attending
+	mealPreference: text("meal_preference"), // e.g., "chicken", "fish", "vegetarian"
+	dietaryNotes: text("dietary_notes"), // Special dietary requirements
+
+	// Plus-ones (additional attendees for this guest)
+	plusOneCount: integer("plus_one_count").notNull().default(0),
+	plusOneNames: text("plus_one_names"), // Comma-separated names of plus-ones
+
+	// Timestamps
+	respondedAt: timestamp("responded_at").defaultNow(),
+	updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// ============================================================================
 // RELATIONS
 // ============================================================================
 export const usersRelations = relations(users, ({ many }) => ({
@@ -200,11 +226,19 @@ export const guestsRelations = relations(guests, ({ one }) => ({
 		fields: [guests.groupId],
 		references: [guestGroups.id],
 	}),
+	rsvpResponse: one(rsvpResponses),
 }));
 
 export const guestSessionsRelations = relations(guestSessions, ({ one }) => ({
 	group: one(guestGroups, {
 		fields: [guestSessions.groupId],
 		references: [guestGroups.id],
+	}),
+}));
+
+export const rsvpResponsesRelations = relations(rsvpResponses, ({ one }) => ({
+	guest: one(guests, {
+		fields: [rsvpResponses.guestId],
+		references: [guests.id],
 	}),
 }));

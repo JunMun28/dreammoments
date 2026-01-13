@@ -11,6 +11,8 @@ import {
 	invitationsRelations,
 	notes,
 	notesRelations,
+	rsvpResponses,
+	rsvpResponsesRelations,
 	scheduleBlocks,
 	scheduleBlocksRelations,
 	users,
@@ -204,6 +206,37 @@ describe("Database Schema", () => {
 		});
 	});
 
+	describe("rsvpResponses table", () => {
+		it("should export rsvpResponses table", () => {
+			expect(rsvpResponses).toBeDefined();
+		});
+
+		it("should have correct table name", () => {
+			expect(getTableName(rsvpResponses)).toBe("rsvp_responses");
+		});
+
+		it("should have required columns", () => {
+			expect(rsvpResponses.id).toBeDefined();
+			expect(rsvpResponses.guestId).toBeDefined();
+			expect(rsvpResponses.attending).toBeDefined();
+		});
+
+		it("should have meal preference columns", () => {
+			expect(rsvpResponses.mealPreference).toBeDefined();
+			expect(rsvpResponses.dietaryNotes).toBeDefined();
+		});
+
+		it("should have plus-one columns", () => {
+			expect(rsvpResponses.plusOneCount).toBeDefined();
+			expect(rsvpResponses.plusOneNames).toBeDefined();
+		});
+
+		it("should have timestamp columns", () => {
+			expect(rsvpResponses.respondedAt).toBeDefined();
+			expect(rsvpResponses.updatedAt).toBeDefined();
+		});
+	});
+
 	describe("relations", () => {
 		it("should export usersRelations", () => {
 			expect(usersRelations).toBeDefined();
@@ -231,6 +264,10 @@ describe("Database Schema", () => {
 
 		it("should export guestSessionsRelations", () => {
 			expect(guestSessionsRelations).toBeDefined();
+		});
+
+		it("should export rsvpResponsesRelations", () => {
+			expect(rsvpResponsesRelations).toBeDefined();
 		});
 	});
 });

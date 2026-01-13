@@ -16,6 +16,12 @@ vi.mock("@/lib/invitation-server", () => ({
 	getInvitationWithRelations: vi.fn(),
 }));
 
+// Mock rsvp-server to avoid DB dependency
+vi.mock("@/lib/rsvp-server", () => ({
+	getGroupRsvpStatus: vi.fn(),
+	submitRsvp: vi.fn(),
+}));
+
 import { parseTokenFromHash } from "./rsvp";
 
 describe("rsvp route", () => {
