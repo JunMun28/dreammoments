@@ -860,3 +860,32 @@
 - 471/471 tests pass (22 new tests)
 - typecheck passes
 - biome check passes
+
+## 2026-01-14: Per-Group RSVP Link Generation (RSVP-001, RSVP-006)
+
+**Completed:** RSVP link system with token lookup + guest-facing page
+
+**Changes:**
+- `src/lib/guest-server.ts`: Added getGuestGroupByTokenInternal() + getGuestGroupByToken server function
+- `src/lib/guest-server.test.ts`: Added 2 tests for token lookup, updated mock to support .limit() chain
+- `src/routes/rsvp.tsx`: New route handling /rsvp#t=<TOKEN> - parses token, loads invitation, displays preview
+- `src/routes/rsvp.test.tsx`: 6 tests for parseTokenFromHash helper
+- `PRD.md`: Marked RSVP-001 and RSVP-006 as passing
+
+**Decisions:**
+- URL format /rsvp#t=<TOKEN> uses hash (client-side only) - token parsed in useEffect
+- RSVP route loads: 1) guest group by token, 2) invitation by group.invitationId
+- Reuses TemplatePreview component for invitation display (props-based, no context needed)
+- Three loading states: loading, no-token, invalid-token, ready
+- Footer shows guest group name + list of guest names in group
+- RSVP-006 (copy link) already implemented in GuestGroupList from GUEST-004
+
+**Notes:**
+- RSVP form (RSVP-002, RSVP-003, RSVP-004) not yet implemented - currently just displays invitation
+- Token lookup returns invitationId which is used to load full invitation data with relations
+- Guest group info displayed at bottom - placeholder for future RSVP form
+
+**Verification:**
+- 479/479 tests pass (8 new tests)
+- typecheck passes
+- biome check passes

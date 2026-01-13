@@ -547,7 +547,7 @@
         "Token is securely generated and not guessable",
         "Link is accessible from guest management dashboard"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "RSVP-002",
@@ -612,7 +612,7 @@
         "Toast/feedback confirms copy success",
         "Copied link works when pasted in browser"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "RSVP-007",

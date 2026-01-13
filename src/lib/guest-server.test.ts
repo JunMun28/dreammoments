@@ -5,11 +5,20 @@ import {
 	deleteGuestGroupInternal,
 	deleteGuestInternal,
 	generateRsvpToken,
+	getGuestGroupByTokenInternal,
 	getGuestGroupsWithGuestsInternal,
 	importGuestsFromCsvInternal,
 	updateGuestGroupInternal,
 	updateGuestInternal,
 } from "./guest-server";
+
+// Create a chainable mock that returns empty array and supports both .where() and .where().limit()
+const createSelectMock = () => {
+	const emptyArray: unknown[] = [];
+	// Make the array support .limit() so it works as both direct result and chainable
+	(emptyArray as { limit?: () => unknown[] }).limit = () => [];
+	return emptyArray;
+};
 
 // Mock the db module
 vi.mock("@/db/index", () => ({
@@ -33,7 +42,7 @@ vi.mock("@/db/index", () => ({
 		}),
 		select: vi.fn().mockReturnValue({
 			from: vi.fn().mockReturnValue({
-				where: vi.fn().mockReturnValue([]),
+				where: vi.fn().mockImplementation(() => createSelectMock()),
 				leftJoin: vi.fn().mockReturnValue({
 					where: vi.fn().mockResolvedValue([]),
 				}),
@@ -253,6 +262,20 @@ describe("guest-server", () => {
 			await expect(getGuestGroupsWithGuestsInternal("")).rejects.toThrow(
 				"invitationId is required",
 			);
+		});
+	});
+
+	describe("getGuestGroupByTokenInternal", () => {
+		it("requires token", async () => {
+			await expect(getGuestGroupByTokenInternal("")).rejects.toThrow(
+				"token is required",
+			);
+		});
+
+		it("returns null when token not found", async () => {
+			// Mock returns empty array for not found
+			const result = await getGuestGroupByTokenInternal("nonexistent-token");
+			expect(result).toBeNull();
 		});
 	});
 });

@@ -398,3 +398,74 @@ export const getGuestGroupsWithGuests = createServerFn({ method: "GET" })
 	.handler(async ({ data }) => {
 		return getGuestGroupsWithGuestsInternal(data.invitationId);
 	});
+
+// ============================================================================
+// RSVP TOKEN LOOKUP
+// ============================================================================
+
+export interface GuestGroupByToken {
+	id: string;
+	name: string;
+	rsvpToken: string;
+	invitationId: string;
+	guests: {
+		id: string;
+		name: string;
+		email: string | null;
+		phone: string | null;
+	}[];
+}
+
+/**
+ * Internal function to look up a guest group by its RSVP token.
+ * Returns the group with its guests, or null if not found.
+ */
+export async function getGuestGroupByTokenInternal(
+	token: string,
+): Promise<GuestGroupByToken | null> {
+	if (!token) {
+		throw new Error("token is required");
+	}
+
+	// Find the group by token
+	const groupResults = await db
+		.select()
+		.from(guestGroups)
+		.where(eq(guestGroups.rsvpToken, token))
+		.limit(1);
+
+	if (groupResults.length === 0) {
+		return null;
+	}
+
+	const group = groupResults[0];
+
+	// Get the guests in this group
+	const groupGuests = await db
+		.select()
+		.from(guests)
+		.where(eq(guests.groupId, group.id));
+
+	return {
+		id: group.id,
+		name: group.name,
+		rsvpToken: group.rsvpToken,
+		invitationId: group.invitationId,
+		guests: groupGuests.map((g) => ({
+			id: g.id,
+			name: g.name,
+			email: g.email,
+			phone: g.phone,
+		})),
+	};
+}
+
+/**
+ * Server function to get a guest group by its RSVP token.
+ * Used by the /rsvp page to look up the group from the URL token.
+ */
+export const getGuestGroupByToken = createServerFn({ method: "GET" })
+	.inputValidator((input: { token: string }) => input)
+	.handler(async ({ data }) => {
+		return getGuestGroupByTokenInternal(data.token);
+	});

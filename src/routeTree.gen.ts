@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RsvpRouteImport } from './routes/rsvp'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as BuilderRouteImport } from './routes/builder'
 import { Route as IndexRouteImport } from './routes/index'
@@ -30,6 +31,11 @@ import { Route as DemoStartSsrSpaModeRouteImport } from './routes/demo/start.ssr
 import { Route as DemoStartSsrFullSsrRouteImport } from './routes/demo/start.ssr.full-ssr'
 import { Route as DemoStartSsrDataOnlyRouteImport } from './routes/demo/start.ssr.data-only'
 
+const RsvpRoute = RsvpRouteImport.update({
+  id: '/rsvp',
+  path: '/rsvp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -135,6 +141,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/builder': typeof BuilderRoute
   '/login': typeof LoginRoute
+  '/rsvp': typeof RsvpRoute
   '/api/remove-hero-image': typeof ApiRemoveHeroImageRoute
   '/api/upload-hero-image': typeof ApiUploadHeroImageRoute
   '/auth/callback': typeof AuthCallbackRoute
@@ -157,6 +164,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/builder': typeof BuilderRoute
   '/login': typeof LoginRoute
+  '/rsvp': typeof RsvpRoute
   '/api/remove-hero-image': typeof ApiRemoveHeroImageRoute
   '/api/upload-hero-image': typeof ApiUploadHeroImageRoute
   '/auth/callback': typeof AuthCallbackRoute
@@ -180,6 +188,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/builder': typeof BuilderRoute
   '/login': typeof LoginRoute
+  '/rsvp': typeof RsvpRoute
   '/api/remove-hero-image': typeof ApiRemoveHeroImageRoute
   '/api/upload-hero-image': typeof ApiUploadHeroImageRoute
   '/auth/callback': typeof AuthCallbackRoute
@@ -204,6 +213,7 @@ export interface FileRouteTypes {
     | '/'
     | '/builder'
     | '/login'
+    | '/rsvp'
     | '/api/remove-hero-image'
     | '/api/upload-hero-image'
     | '/auth/callback'
@@ -226,6 +236,7 @@ export interface FileRouteTypes {
     | '/'
     | '/builder'
     | '/login'
+    | '/rsvp'
     | '/api/remove-hero-image'
     | '/api/upload-hero-image'
     | '/auth/callback'
@@ -248,6 +259,7 @@ export interface FileRouteTypes {
     | '/'
     | '/builder'
     | '/login'
+    | '/rsvp'
     | '/api/remove-hero-image'
     | '/api/upload-hero-image'
     | '/auth/callback'
@@ -271,6 +283,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BuilderRoute: typeof BuilderRoute
   LoginRoute: typeof LoginRoute
+  RsvpRoute: typeof RsvpRoute
   ApiRemoveHeroImageRoute: typeof ApiRemoveHeroImageRoute
   ApiUploadHeroImageRoute: typeof ApiUploadHeroImageRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
@@ -292,6 +305,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/rsvp': {
+      id: '/rsvp'
+      path: '/rsvp'
+      fullPath: '/rsvp'
+      preLoaderRoute: typeof RsvpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -439,6 +459,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BuilderRoute: BuilderRoute,
   LoginRoute: LoginRoute,
+  RsvpRoute: RsvpRoute,
   ApiRemoveHeroImageRoute: ApiRemoveHeroImageRoute,
   ApiUploadHeroImageRoute: ApiUploadHeroImageRoute,
   AuthCallbackRoute: AuthCallbackRoute,
