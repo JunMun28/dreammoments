@@ -1,234 +1,111 @@
 import { Link } from "@tanstack/react-router";
-import {
-	ChevronDown,
-	ChevronRight,
-	ClipboardType,
-	Database,
-	Home,
-	Menu,
-	Network,
-	SquareFunction,
-	StickyNote,
-	X,
-} from "lucide-react";
+import { Heart, Home, LayoutDashboard, Menu, Settings, X } from "lucide-react";
 import { useState } from "react";
 import { LogoutButton } from "./LogoutButton";
 
 export default function Header() {
 	const [isOpen, setIsOpen] = useState(false);
-	const [groupedExpanded, setGroupedExpanded] = useState<
-		Record<string, boolean>
-	>({});
 
 	return (
 		<>
-			<header className="p-4 flex items-center bg-gray-800 text-white shadow-lg">
+			<header className="flex items-center border-b border-stone-200 bg-white/80 p-4 shadow-sm backdrop-blur-sm">
 				<button
 					type="button"
 					onClick={() => setIsOpen(true)}
-					className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+					className="rounded-lg p-2 text-stone-600 transition-colors hover:bg-stone-100"
 					aria-label="Open menu"
 				>
 					<Menu size={24} />
 				</button>
-				<h1 className="ml-4 text-xl font-semibold flex-1">
-					<Link to="/">
-						<img
-							src="/tanstack-word-logo-white.svg"
-							alt="TanStack Logo"
-							className="h-10"
-						/>
+				<h1 className="ml-4 flex-1">
+					<Link to="/" className="flex items-center gap-2">
+						<Heart className="h-7 w-7 text-rose-400" fill="currentColor" />
+						<span className="text-xl font-light tracking-wide text-stone-800">
+							DreamMoments
+						</span>
 					</Link>
 				</h1>
 				<LogoutButton />
 			</header>
 
+			{/* Backdrop */}
+			{isOpen && (
+				<button
+					type="button"
+					className="fixed inset-0 z-40 cursor-default border-none bg-black/20 backdrop-blur-sm"
+					onClick={() => setIsOpen(false)}
+					onKeyDown={(e) => e.key === "Escape" && setIsOpen(false)}
+					aria-label="Close sidebar"
+					tabIndex={-1}
+				/>
+			)}
+
 			<aside
-				className={`fixed top-0 left-0 h-full w-80 bg-gray-900 text-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${
+				className={`fixed left-0 top-0 z-50 flex h-full w-80 transform flex-col border-r border-stone-200 bg-white shadow-2xl transition-transform duration-300 ease-in-out ${
 					isOpen ? "translate-x-0" : "-translate-x-full"
 				}`}
 			>
-				<div className="flex items-center justify-between p-4 border-b border-gray-700">
-					<h2 className="text-xl font-bold">Navigation</h2>
+				<div className="flex items-center justify-between border-b border-stone-200 p-4">
+					<div className="flex items-center gap-2">
+						<Heart className="h-6 w-6 text-rose-400" fill="currentColor" />
+						<span className="text-lg font-light text-stone-800">
+							DreamMoments
+						</span>
+					</div>
 					<button
 						type="button"
 						onClick={() => setIsOpen(false)}
-						className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+						className="rounded-lg p-2 text-stone-600 transition-colors hover:bg-stone-100"
 						aria-label="Close menu"
 					>
 						<X size={24} />
 					</button>
 				</div>
 
-				<nav className="flex-1 p-4 overflow-y-auto">
+				<nav className="flex-1 overflow-y-auto p-4">
 					<Link
 						to="/"
 						onClick={() => setIsOpen(false)}
-						className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
+						className="mb-2 flex items-center gap-3 rounded-lg p-3 text-stone-600 transition-colors hover:bg-stone-100"
 						activeProps={{
 							className:
-								"flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2",
+								"mb-2 flex items-center gap-3 rounded-lg p-3 bg-rose-50 text-rose-600 transition-colors hover:bg-rose-100",
 						}}
 					>
 						<Home size={20} />
 						<span className="font-medium">Home</span>
 					</Link>
 
-					{/* Demo Links Start */}
-
 					<Link
-						to="/demo/start/server-funcs"
+						to="/login"
 						onClick={() => setIsOpen(false)}
-						className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
+						className="mb-2 flex items-center gap-3 rounded-lg p-3 text-stone-600 transition-colors hover:bg-stone-100"
 						activeProps={{
 							className:
-								"flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2",
+								"mb-2 flex items-center gap-3 rounded-lg p-3 bg-rose-50 text-rose-600 transition-colors hover:bg-rose-100",
 						}}
 					>
-						<SquareFunction size={20} />
-						<span className="font-medium">Start - Server Functions</span>
+						<LayoutDashboard size={20} />
+						<span className="font-medium">Dashboard</span>
 					</Link>
 
-					<Link
-						to="/demo/start/api-request"
-						onClick={() => setIsOpen(false)}
-						className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
-						activeProps={{
-							className:
-								"flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2",
-						}}
-					>
-						<Network size={20} />
-						<span className="font-medium">Start - API Request</span>
-					</Link>
+					<div className="my-4 border-t border-stone-200" />
 
-					<div className="flex flex-row justify-between">
-						<Link
-							to="/demo/start/ssr"
-							onClick={() => setIsOpen(false)}
-							className="flex-1 flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
-							activeProps={{
-								className:
-									"flex-1 flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2",
-							}}
-						>
-							<StickyNote size={20} />
-							<span className="font-medium">Start - SSR Demos</span>
-						</Link>
-						<button
-							type="button"
-							className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
-							onClick={() =>
-								setGroupedExpanded((prev) => ({
-									...prev,
-									StartSSRDemo: !prev.StartSSRDemo,
-								}))
-							}
-						>
-							{groupedExpanded.StartSSRDemo ? (
-								<ChevronDown size={20} />
-							) : (
-								<ChevronRight size={20} />
-							)}
-						</button>
+					<p className="mb-2 px-3 text-xs font-medium uppercase tracking-wider text-stone-400">
+						Coming Soon
+					</p>
+
+					<div className="mb-2 flex cursor-not-allowed items-center gap-3 rounded-lg p-3 text-stone-400">
+						<Settings size={20} />
+						<span className="font-medium">Settings</span>
 					</div>
-					{groupedExpanded.StartSSRDemo && (
-						<div className="flex flex-col ml-4">
-							<Link
-								to="/demo/start/ssr/spa-mode"
-								onClick={() => setIsOpen(false)}
-								className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
-								activeProps={{
-									className:
-										"flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2",
-								}}
-							>
-								<StickyNote size={20} />
-								<span className="font-medium">SPA Mode</span>
-							</Link>
-
-							<Link
-								to="/demo/start/ssr/full-ssr"
-								onClick={() => setIsOpen(false)}
-								className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
-								activeProps={{
-									className:
-										"flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2",
-								}}
-							>
-								<StickyNote size={20} />
-								<span className="font-medium">Full SSR</span>
-							</Link>
-
-							<Link
-								to="/demo/start/ssr/data-only"
-								onClick={() => setIsOpen(false)}
-								className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
-								activeProps={{
-									className:
-										"flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2",
-								}}
-							>
-								<StickyNote size={20} />
-								<span className="font-medium">Data Only</span>
-							</Link>
-						</div>
-					)}
-
-					<Link
-						to="/demo/drizzle"
-						onClick={() => setIsOpen(false)}
-						className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
-						activeProps={{
-							className:
-								"flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2",
-						}}
-					>
-						<Database size={20} />
-						<span className="font-medium">Drizzle</span>
-					</Link>
-
-					<Link
-						to="/demo/form/simple"
-						onClick={() => setIsOpen(false)}
-						className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
-						activeProps={{
-							className:
-								"flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2",
-						}}
-					>
-						<ClipboardType size={20} />
-						<span className="font-medium">Simple Form</span>
-					</Link>
-
-					<Link
-						to="/demo/form/address"
-						onClick={() => setIsOpen(false)}
-						className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
-						activeProps={{
-							className:
-								"flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2",
-						}}
-					>
-						<ClipboardType size={20} />
-						<span className="font-medium">Address Form</span>
-					</Link>
-
-					<Link
-						to="/demo/tanstack-query"
-						onClick={() => setIsOpen(false)}
-						className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors mb-2"
-						activeProps={{
-							className:
-								"flex items-center gap-3 p-3 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition-colors mb-2",
-						}}
-					>
-						<Network size={20} />
-						<span className="font-medium">TanStack Query</span>
-					</Link>
-
-					{/* Demo Links End */}
 				</nav>
+
+				<div className="border-t border-stone-200 p-4">
+					<p className="text-center text-xs text-stone-400">
+						Made with love for couples everywhere
+					</p>
+				</div>
 			</aside>
 		</>
 	);

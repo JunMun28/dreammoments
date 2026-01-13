@@ -9,13 +9,9 @@ vi.mock("lucide-react", () => ({
 	Menu: () => <div data-testid="icon-menu" />,
 	X: () => <div data-testid="icon-x" />,
 	Home: () => <div data-testid="icon-home" />,
-	ChevronDown: () => <div data-testid="icon-chevron-down" />,
-	ChevronRight: () => <div data-testid="icon-chevron-right" />,
-	ClipboardType: () => <div data-testid="icon-clipboard" />,
-	Database: () => <div data-testid="icon-database" />,
-	Network: () => <div data-testid="icon-network" />,
-	SquareFunction: () => <div data-testid="icon-square-function" />,
-	StickyNote: () => <div data-testid="icon-sticky-note" />,
+	Heart: () => <div data-testid="icon-heart" />,
+	LayoutDashboard: () => <div data-testid="icon-dashboard" />,
+	Settings: () => <div data-testid="icon-settings" />,
 	LogOut: () => <div data-testid="icon-logout" />,
 }));
 
@@ -50,10 +46,10 @@ describe("Header component", () => {
 		cleanup();
 	});
 
-	it("renders header with logo and menu button", () => {
+	it("renders header with DreamMoments branding and menu button", () => {
 		render(<Header />);
-		const logo = screen.getByAltText(/TanStack Logo/i);
-		expect(logo).toBeDefined();
+		// Check for DreamMoments branding
+		expect(screen.getAllByText("DreamMoments").length).toBeGreaterThan(0);
 		const menuButton = screen.getByLabelText(/Open menu/i);
 		expect(menuButton).toBeDefined();
 	});
@@ -69,7 +65,7 @@ describe("Header component", () => {
 
 		// Check for navigation links
 		expect(screen.getByText("Home")).toBeDefined();
-		expect(screen.getByText("Drizzle")).toBeDefined();
+		expect(screen.getByText("Dashboard")).toBeDefined();
 	});
 
 	it("closes sidebar when close button is clicked", () => {
@@ -85,21 +81,12 @@ describe("Header component", () => {
 		expect(sidebar.className).toContain("-translate-x-full");
 	});
 
-	it("toggles grouped expanded links", () => {
+	it("shows coming soon section in sidebar", () => {
 		render(<Header />);
 		fireEvent.click(screen.getByLabelText(/Open menu/i));
 
-		// Find shared projects expand button (ChevronRight)
-		const expandButton = screen
-			.getByTestId("icon-chevron-right")
-			.closest("button");
-		expect(expandButton).toBeDefined();
-
-		// Click to expand
-		if (expandButton) fireEvent.click(expandButton);
-
-		// Check if sub-items are visible
-		expect(screen.getByText("Full SSR")).toBeDefined();
-		expect(screen.getByTestId("icon-chevron-down")).toBeDefined();
+		// Check for coming soon section
+		expect(screen.getByText("Coming Soon")).toBeDefined();
+		expect(screen.getByText("Settings")).toBeDefined();
 	});
 });
