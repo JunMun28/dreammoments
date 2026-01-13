@@ -550,3 +550,30 @@
 - 232/232 tests pass (32 new tests)
 - typecheck passes
 - biome check passes (pre-existing formatting issues in src/db.ts, vite.config.ts - not from this work)
+
+## 2026-01-13: Font Selection Feature (BLDR-005-T1 through T5)
+
+**Completed:** Full font pairing selection feature for wedding invitations
+
+**Changes:**
+- `src/components/ui/font-picker.tsx`: New FontPicker component w/ 5 curated font pairings, preview section, Google Fonts loading
+- `src/components/ui/font-picker.test.tsx`: 19 tests for font picker presets, helpers, component rendering
+- `src/components/ThemeSection.tsx`: Added FontPicker to theme customization section
+- `src/components/ThemeSection.test.tsx`: Added 3 tests for font picker integration
+- `src/components/InvitationPreview.tsx`: Added font CSS custom properties (--font-heading, --font-body), dynamic Google Fonts loading
+- `src/components/InvitationPreview.test.tsx`: Added 6 tests for getFontStyle helper + font style application
+- `PRD.md`: Marked BLDR-003 tasks as done (oversight from previous PR), marked BLDR-005 tasks as done
+
+**Decisions:**
+- BLDR-005-T2 already done (fontPairing field exists in schema from initial setup)
+- 5 curated font pairings: Classic Elegance (Playfair Display/Lato), Modern Romantic (Cormorant Garamond/Montserrat), Whimsical Script (Dancing Script/Poppins), Elegant Minimal (Cinzel/Raleway), Rustic Charm (Josefin Slab/Open Sans)
+- Google Fonts loaded dynamically via <link> tag injection (same pattern as font-picker component)
+- CSS custom properties pattern (--font-heading, --font-body) mirrors accent color approach
+- Default font pairing: "classic" (Playfair Display + Lato)
+- Select interaction test skipped due to jsdom/Radix UI scrollIntoView limitation (documented)
+- Preview section in FontPicker shows "Sarah & Michael" sample with both heading and body fonts
+
+**Verification:**
+- 260/260 tests pass (28 new tests)
+- typecheck passes
+- biome check passes

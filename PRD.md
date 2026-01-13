@@ -281,27 +281,27 @@
         {
           "id": "BLDR-003-T1",
           "task": "Add notes JSON field to invitations table (or separate notes table)",
-          "done": false
+          "done": true
         },
         {
           "id": "BLDR-003-T2",
           "task": "Build notes list component with add/edit/delete",
-          "done": false
+          "done": true
         },
         {
           "id": "BLDR-003-T3",
           "task": "Create note editor (title + description or single text field)",
-          "done": false
+          "done": true
         },
         {
           "id": "BLDR-003-T4",
           "task": "Implement reordering for notes",
-          "done": false
+          "done": true
         },
         {
           "id": "BLDR-003-T5",
           "task": "Render notes section in preview component",
-          "done": false
+          "done": true
         }
       ],
       "passes": false
@@ -361,27 +361,27 @@
         {
           "id": "BLDR-005-T1",
           "task": "Define font pairing presets (3-5 options with Google Fonts)",
-          "done": false
+          "done": true
         },
         {
           "id": "BLDR-005-T2",
           "task": "Add fontPairing field to invitations table",
-          "done": false
+          "done": true
         },
         {
           "id": "BLDR-005-T3",
           "task": "Create font selector dropdown with preview text",
-          "done": false
+          "done": true
         },
         {
           "id": "BLDR-005-T4",
           "task": "Dynamically load selected Google Fonts",
-          "done": false
+          "done": true
         },
         {
           "id": "BLDR-005-T5",
           "task": "Apply fonts via CSS custom properties in preview",
-          "done": false
+          "done": true
         }
       ],
       "passes": false

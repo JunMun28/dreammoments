@@ -73,4 +73,24 @@ describe("ThemeSection", () => {
 		const input = screen.getByPlaceholderText("#b76e79") as HTMLInputElement;
 		expect(input.value).toBe("#8fa8c8");
 	});
+
+	it("renders FontPicker with label", () => {
+		renderWithContext(baseData);
+		expect(screen.getByText("Font Style")).toBeDefined();
+	});
+
+	it("displays font style dropdown", () => {
+		renderWithContext(baseData);
+		expect(screen.getByRole("combobox")).toBeDefined();
+	});
+
+	it("shows initial font pairing selection", () => {
+		const dataWithFont: InvitationData = {
+			...baseData,
+			fontPairing: "whimsical",
+		};
+		renderWithContext(dataWithFont);
+
+		expect(screen.getByText("Whimsical Script")).toBeDefined();
+	});
 });
