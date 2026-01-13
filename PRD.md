@@ -321,27 +321,27 @@
         {
           "id": "BLDR-004-T1",
           "task": "Add accentColor field to invitations table",
-          "done": false
+          "done": true
         },
         {
           "id": "BLDR-004-T2",
           "task": "Create color picker component with preset swatches",
-          "done": false
+          "done": true
         },
         {
           "id": "BLDR-004-T3",
           "task": "Add custom hex input option",
-          "done": false
+          "done": true
         },
         {
           "id": "BLDR-004-T4",
           "task": "Apply accent color via CSS custom properties in preview",
-          "done": false
+          "done": true
         },
         {
           "id": "BLDR-004-T5",
           "task": "Persist color selection on change",
-          "done": false
+          "done": true
         }
       ],
       "passes": false
