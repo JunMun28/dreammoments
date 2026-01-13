@@ -1,4 +1,5 @@
 import { CalendarDays, Clock, MapPin } from "lucide-react";
+import { type CSSProperties, useMemo } from "react";
 import {
 	type Note,
 	type ScheduleBlock,
@@ -43,6 +44,21 @@ function sortNotesByOrder(notes: Note[]): Note[] {
 }
 
 /**
+ * Default accent color for the invitation preview
+ */
+const DEFAULT_ACCENT_COLOR = "#b76e79"; // Rose Gold
+
+/**
+ * Generates CSS custom properties style object for accent color
+ */
+function getAccentColorStyle(accentColor?: string): CSSProperties {
+	const color = accentColor || DEFAULT_ACCENT_COLOR;
+	return {
+		"--accent-color": color,
+	} as CSSProperties;
+}
+
+/**
  * Preview component that renders the wedding invitation.
  * Consumes InvitationBuilderContext for real-time updates.
  */
@@ -58,7 +74,14 @@ export function InvitationPreview() {
 		venueAddress,
 		scheduleBlocks,
 		notes,
+		accentColor,
 	} = invitation;
+
+	// Memoize accent color style to avoid recalculating on every render
+	const accentStyle = useMemo(
+		() => getAccentColorStyle(accentColor),
+		[accentColor],
+	);
 
 	const sortedBlocks = scheduleBlocks ? sortBlocksByOrder(scheduleBlocks) : [];
 	const hasSchedule = sortedBlocks.length > 0;
@@ -71,12 +94,18 @@ export function InvitationPreview() {
 	const hasVenue = venueName || venueAddress;
 
 	return (
-		<div className="relative h-full min-h-[400px] overflow-hidden rounded-lg bg-gradient-to-br from-stone-100 to-stone-200 p-8">
+		<div
+			className="relative h-full min-h-[400px] overflow-hidden rounded-lg bg-gradient-to-br from-stone-100 to-stone-200 p-8"
+			style={accentStyle}
+		>
 			{/* Glassmorphism card */}
 			<div className="relative mx-auto max-w-md rounded-xl border border-white/40 bg-white/70 p-8 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] backdrop-blur-md">
 				{/* Header accent */}
 				<div className="mb-8 text-center">
-					<p className="text-muted-foreground text-sm uppercase tracking-widest">
+					<p
+						className="text-sm uppercase tracking-widest"
+						style={{ color: "var(--accent-color)" }}
+					>
 						You are invited to the wedding of
 					</p>
 				</div>
@@ -86,7 +115,12 @@ export function InvitationPreview() {
 					{hasNames ? (
 						<h1 className="font-serif text-3xl font-light tracking-wide text-stone-800 md:text-4xl">
 							{partner1Name || "Partner One"}
-							<span className="mx-3 text-2xl text-stone-400">&</span>
+							<span
+								className="mx-3 text-2xl"
+								style={{ color: "var(--accent-color)" }}
+							>
+								&
+							</span>
 							{partner2Name || "Partner Two"}
 						</h1>
 					) : (
@@ -97,7 +131,10 @@ export function InvitationPreview() {
 				</div>
 
 				{/* Divider */}
-				<div className="mx-auto mb-8 h-px w-24 bg-stone-300" />
+				<div
+					className="mx-auto mb-8 h-px w-24"
+					style={{ backgroundColor: "var(--accent-color)" }}
+				/>
 
 				{/* Date and time */}
 				<div className="mb-6 flex flex-col items-center gap-3">
@@ -144,7 +181,10 @@ export function InvitationPreview() {
 
 				{/* Schedule */}
 				<div className="mt-8 border-t border-stone-200 pt-6">
-					<p className="mb-4 text-center text-xs uppercase tracking-widest text-stone-400">
+					<p
+						className="mb-4 text-center text-xs uppercase tracking-widest"
+						style={{ color: "var(--accent-color)" }}
+					>
 						Schedule
 					</p>
 					{hasSchedule ? (
@@ -182,7 +222,10 @@ export function InvitationPreview() {
 
 				{/* Notes */}
 				<div className="mt-8 border-t border-stone-200 pt-6">
-					<p className="mb-4 text-center text-xs uppercase tracking-widest text-stone-400">
+					<p
+						className="mb-4 text-center text-xs uppercase tracking-widest"
+						style={{ color: "var(--accent-color)" }}
+					>
 						Things to Know
 					</p>
 					{hasNotes ? (
@@ -207,7 +250,10 @@ export function InvitationPreview() {
 
 				{/* RSVP section placeholder */}
 				<div className="mt-10 border-t border-stone-200 pt-6 text-center">
-					<p className="mb-3 text-xs uppercase tracking-widest text-stone-400">
+					<p
+						className="mb-3 text-xs uppercase tracking-widest"
+						style={{ color: "var(--accent-color)" }}
+					>
 						RSVP
 					</p>
 					<p className="text-sm text-stone-500">Please respond by [deadline]</p>
@@ -217,4 +263,11 @@ export function InvitationPreview() {
 	);
 }
 
-export { formatDate, formatTime, sortBlocksByOrder, sortNotesByOrder };
+export {
+	DEFAULT_ACCENT_COLOR,
+	formatDate,
+	formatTime,
+	getAccentColorStyle,
+	sortBlocksByOrder,
+	sortNotesByOrder,
+};

@@ -8,6 +8,7 @@ import { type AutosaveStatus, useAutosave } from "@/hooks/useAutosave";
 import { cn } from "@/lib/utils";
 import { BasicInfoForm, type BasicInfoFormValues } from "./BasicInfoForm";
 import { InvitationPreview } from "./InvitationPreview";
+import { ThemeSection } from "./ThemeSection";
 
 interface InvitationBuilderProps {
 	/** Initial invitation data from server */
@@ -124,9 +125,16 @@ function InvitationBuilderContent({
 
 			<div className="grid h-full gap-8 lg:grid-cols-2">
 				{/* Form panel */}
-				<div className="overflow-y-auto rounded-lg border bg-card p-6">
-					<h2 className="mb-6 text-lg font-semibold">Basic Information</h2>
-					<BuilderForm onSave={onSave} />
+				<div className="space-y-8 overflow-y-auto">
+					<div className="rounded-lg border bg-card p-6">
+						<h2 className="mb-6 text-lg font-semibold">Basic Information</h2>
+						<BuilderForm onSave={onSave} />
+					</div>
+
+					<div className="rounded-lg border bg-card p-6">
+						<h2 className="mb-6 text-lg font-semibold">Theme</h2>
+						<ThemeSection />
+					</div>
 				</div>
 
 				{/* Preview panel */}

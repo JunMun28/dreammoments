@@ -521,3 +521,32 @@
 - 200/200 tests pass (40 new tests)
 - typecheck passes
 - biome check passes (pre-existing formatting issues in src/db.ts, vite.config.ts - not from this work)
+
+## 2026-01-13: Theme Accent Color Customization (BLDR-004-T1 through T5)
+
+**Completed:** Full accent color customization feature for wedding invitations
+
+**Changes:**
+- `src/components/ui/color-picker.tsx`: New ColorPicker component w/ 8 preset swatches + custom hex input
+- `src/components/ui/color-picker.test.tsx`: 20 tests for color picker validation, presets, interaction
+- `src/components/ThemeSection.tsx`: New component wrapping ColorPicker for builder integration
+- `src/components/ThemeSection.test.tsx`: 6 tests for theme section rendering and color selection
+- `src/components/InvitationPreview.tsx`: Added accent color via CSS custom properties (header, divider, section titles)
+- `src/components/InvitationPreview.test.tsx`: Added 6 tests for getAccentColorStyle helper + accent color application
+- `src/components/InvitationBuilder.tsx`: Added Theme section with ColorPicker to builder layout
+- `src/contexts/InvitationBuilderContext.tsx`: Updated updateInvitation to accept theme fields (accentColor, etc.)
+
+**Decisions:**
+- BLDR-004-T1 already done (accentColor field exists in schema from initial setup)
+- 8 curated wedding color presets: Rose Gold, Blush, Sage, Dusty Blue, Champagne, Mauve, Terracotta, Navy
+- Custom hex input with validation + 3-digit→6-digit expansion
+- CSS custom properties pattern (--accent-color) for theme propagation
+- Accent color applied to: invitation header, ampersand, divider, section titles (Schedule, Notes, RSVP)
+- Default accent color: #b76e79 (Rose Gold) when none set
+- Used semantic fieldset element for preset swatches (a11y best practice)
+- ThemeSection is standalone - reuses existing autosave via context
+
+**Verification:**
+- 232/232 tests pass (32 new tests)
+- typecheck passes
+- biome check passes (pre-existing formatting issues in src/db.ts, vite.config.ts - not from this work)
