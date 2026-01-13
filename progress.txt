@@ -835,3 +835,28 @@
 - 449/449 tests pass (48 new tests)
 - typecheck passes
 - biome check passes
+
+## 2026-01-14: Manual Guest List Editing (GUEST-005)
+
+**Completed:** Full guest CRUD functionality with tests and builder integration
+
+**Changes:**
+- `src/components/GuestGroupList.test.tsx`: 22 tests for guest group list component (CRUD, RSVP links, server callbacks)
+- `src/lib/guest-server.ts`: Updated createGuestGroupInternal to return rsvpToken
+- `src/lib/guest-server.test.ts`: Updated test to verify rsvpToken in result
+- `src/components/InvitationBuilder.tsx`: Added GuestManagementSection with server callbacks for guest/group CRUD
+
+**Decisions:**
+- GuestGroupList already had CRUD functionality from GUEST-004 - needed tests and builder integration
+- Server callbacks wired to persist changes to DB (createGuest, updateGuest, deleteGuest, etc.)
+- rsvpToken now returned from server (not generated client-side) - crypto.randomBytes is Node.js-only
+- Prefixed unused groupId params with underscore (_groupId) to satisfy TS strict mode
+
+**Notes:**
+- Components from GUEST-004 already support: add/edit/delete guests, guest count display, confirmation dialogs
+- Guest Management section added to builder between Theme and Preview panels
+
+**Verification:**
+- 471/471 tests pass (22 new tests)
+- typecheck passes
+- biome check passes

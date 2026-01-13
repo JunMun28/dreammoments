@@ -73,7 +73,9 @@ describe("guest-server", () => {
 				name: "Family",
 			});
 
-			expect(result).toEqual({ id: "mock-uuid" });
+			expect(result.id).toBe("mock-uuid");
+			expect(result.rsvpToken).toBeDefined();
+			expect(result.rsvpToken).toMatch(/^[a-f0-9]{32}$/);
 		});
 
 		it("requires invitationId", async () => {

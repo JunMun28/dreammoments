@@ -46,7 +46,7 @@ export async function createGuestGroupInternal(input: CreateGuestGroupInput) {
 		})
 		.returning({ id: guestGroups.id });
 
-	return { id: group.id };
+	return { id: group.id, rsvpToken };
 }
 
 /**

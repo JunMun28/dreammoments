@@ -534,7 +534,7 @@
         "Delete a guest with confirmation",
         "Changes reflect immediately in guest count"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "RSVP-001",

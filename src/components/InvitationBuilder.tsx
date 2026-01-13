@@ -5,8 +5,18 @@ import {
 	useInvitationBuilder,
 } from "@/contexts/InvitationBuilderContext";
 import { type AutosaveStatus, useAutosave } from "@/hooks/useAutosave";
+import {
+	createGuest,
+	createGuestGroup,
+	deleteGuest,
+	deleteGuestGroup,
+	updateGuest,
+	updateGuestGroup,
+} from "@/lib/guest-server";
 import { cn } from "@/lib/utils";
 import { BasicInfoForm, type BasicInfoFormValues } from "./BasicInfoForm";
+import type { GuestEditorValues } from "./GuestEditor";
+import { GuestGroupList } from "./GuestGroupList";
 import { HeroImageSection } from "./HeroImageSection";
 import { InvitationPreview } from "./InvitationPreview";
 import { ThemeSection } from "./ThemeSection";
@@ -96,6 +106,78 @@ function BuilderForm({
 }
 
 /**
+ * Guest management section with server callbacks.
+ */
+function GuestManagementSection() {
+	const { invitation } = useInvitationBuilder();
+
+	const handleGroupCreate = useCallback(
+		async (name: string) => {
+			const result = await createGuestGroup({
+				data: { invitationId: invitation.id, name },
+			});
+			return { id: result.id, rsvpToken: result.rsvpToken };
+		},
+		[invitation.id],
+	);
+
+	const handleGroupUpdate = useCallback(async (id: string, name: string) => {
+		await updateGuestGroup({ data: { id, name } });
+	}, []);
+
+	const handleGroupDelete = useCallback(async (id: string) => {
+		await deleteGuestGroup({ data: { id } });
+	}, []);
+
+	const handleGuestCreate = useCallback(
+		async (groupId: string, guest: GuestEditorValues) => {
+			const result = await createGuest({
+				data: {
+					groupId,
+					name: guest.name,
+					email: guest.email,
+					phone: guest.phone,
+				},
+			});
+			return { id: result.id };
+		},
+		[],
+	);
+
+	const handleGuestUpdate = useCallback(
+		async (_groupId: string, guestId: string, guest: GuestEditorValues) => {
+			await updateGuest({
+				data: {
+					id: guestId,
+					name: guest.name,
+					email: guest.email,
+					phone: guest.phone,
+				},
+			});
+		},
+		[],
+	);
+
+	const handleGuestDelete = useCallback(
+		async (_groupId: string, guestId: string) => {
+			await deleteGuest({ data: { id: guestId } });
+		},
+		[],
+	);
+
+	return (
+		<GuestGroupList
+			onGroupCreate={handleGroupCreate}
+			onGroupUpdate={handleGroupUpdate}
+			onGroupDelete={handleGroupDelete}
+			onGuestCreate={handleGuestCreate}
+			onGuestUpdate={handleGuestUpdate}
+			onGuestDelete={handleGuestDelete}
+		/>
+	);
+}
+
+/**
  * Inner component that manages autosave and renders the layout.
  * Must be inside InvitationBuilderProvider to access context.
  */
@@ -142,6 +224,11 @@ function InvitationBuilderContent({
 					<div className="rounded-lg border bg-card p-6">
 						<h2 className="mb-6 text-lg font-semibold">Theme</h2>
 						<ThemeSection />
+					</div>
+
+					<div className="rounded-lg border bg-card p-6">
+						<h2 className="mb-6 text-lg font-semibold">Guest Management</h2>
+						<GuestManagementSection />
 					</div>
 				</div>
 
