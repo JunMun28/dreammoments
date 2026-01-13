@@ -52,7 +52,7 @@
         "Complete authentication",
         "Selected template is preserved and user lands in builder with that template"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "AUTH-001",

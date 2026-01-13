@@ -686,3 +686,32 @@
 - 327/327 tests pass (7 new tests)
 - typecheck passes
 - biome check passes
+
+## 2026-01-13: Template Selection Persists Through Auth Flow (TMPL-003)
+
+**Completed:** Full template selection flow from browse → login → builder
+
+**Changes:**
+- `src/lib/invitation-server.ts`: Added createInvitationInternal(), getOrCreateInvitationInternal(), getInvitationWithRelations() functions for invitation CRUD with template support
+- `src/lib/invitation-server.test.ts`: 7 unit tests for invitation server functions
+- `src/routes/builder.tsx`: New builder route with auth check, template param handling, invitation loading
+- `PRD.md`: Marked TMPL-003 as passing
+
+**Decisions:**
+- Internal functions extracted for testability (createServerFn wrapper not easily unit testable)
+- getOrCreateInvitationInternal returns existing invitation if user has one (MVP: one invitation per user)
+- Template data (accentColor, fontPairing, scheduleBlocks, notes) copied to invitation on creation
+- Builder route uses loaderDeps pattern to pass search params to loader
+- Auth check in beforeLoad redirects to login with template param preserved
+
+**Flow:**
+1. User on /templates/classic-elegance → clicks "Use This Template"
+2. Navigate to /login?template=classic-elegance
+3. Login constructs callback URL: /auth/callback?redirect=/builder?template=classic-elegance
+4. OAuth completes → callback syncs user → redirects to /builder?template=classic-elegance
+5. Builder route checks auth, creates invitation with template data, renders InvitationBuilder
+
+**Verification:**
+- 334/334 tests pass (7 new tests)
+- typecheck passes
+- biome check passes
