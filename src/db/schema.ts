@@ -136,6 +136,26 @@ export const guests = pgTable("guests", {
 });
 
 // ============================================================================
+// GUEST SESSIONS - Token-based sessions for RSVP (no login required)
+// Created when guest opens RSVP link, stored in cookie for return visits
+// ============================================================================
+export const guestSessions = pgTable("guest_sessions", {
+	id: uuid().primaryKey().defaultRandom(),
+	groupId: uuid("group_id")
+		.notNull()
+		.references(() => guestGroups.id, { onDelete: "cascade" }),
+
+	// Session token stored in cookie
+	sessionToken: text("session_token").notNull().unique(),
+
+	// Expiry (30 days from creation)
+	expiresAt: timestamp("expires_at").notNull(),
+
+	// Timestamps
+	createdAt: timestamp("created_at").defaultNow(),
+});
+
+// ============================================================================
 // RELATIONS
 // ============================================================================
 export const usersRelations = relations(users, ({ many }) => ({
@@ -172,11 +192,19 @@ export const guestGroupsRelations = relations(guestGroups, ({ one, many }) => ({
 		references: [invitations.id],
 	}),
 	guests: many(guests),
+	sessions: many(guestSessions),
 }));
 
 export const guestsRelations = relations(guests, ({ one }) => ({
 	group: one(guestGroups, {
 		fields: [guests.groupId],
+		references: [guestGroups.id],
+	}),
+}));
+
+export const guestSessionsRelations = relations(guestSessions, ({ one }) => ({
+	group: one(guestGroups, {
+		fields: [guestSessions.groupId],
 		references: [guestGroups.id],
 	}),
 }));

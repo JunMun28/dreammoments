@@ -3,10 +3,11 @@ import { AlertCircle, Heart, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { TemplatePreview } from "@/components/TemplatePreview";
 import { Button } from "@/components/ui/button";
+import { getGuestGroupByToken } from "@/lib/guest-server";
 import {
-	type GuestGroupByToken,
-	getGuestGroupByToken,
-} from "@/lib/guest-server";
+	exchangeRsvpTokenForSession,
+	validateGuestSession,
+} from "@/lib/guest-session";
 import { getInvitationWithRelations } from "@/lib/invitation-server";
 
 export const Route = createFileRoute("/rsvp")({
@@ -19,6 +20,13 @@ function parseTokenFromHash(): string | null {
 	const hash = window.location.hash;
 	if (!hash.startsWith("#t=")) return null;
 	return hash.slice(3); // Remove "#t="
+}
+
+interface GuestGroupInfo {
+	id: string;
+	name: string;
+	invitationId: string;
+	guests: Array<{ id: string; name: string }>;
 }
 
 interface InvitationData {
@@ -50,11 +58,51 @@ type LoadingState = "loading" | "no-token" | "invalid-token" | "ready";
 
 function RsvpPage() {
 	const [loadingState, setLoadingState] = useState<LoadingState>("loading");
-	const [guestGroup, setGuestGroup] = useState<GuestGroupByToken | null>(null);
+	const [guestGroup, setGuestGroup] = useState<GuestGroupInfo | null>(null);
 	const [invitation, setInvitation] = useState<InvitationData | null>(null);
 
 	useEffect(() => {
 		async function loadData() {
+			// Step 1: Check for existing session first
+			const sessionResult = await validateGuestSession();
+
+			if (sessionResult.valid) {
+				// Session exists - load invitation data directly
+				await loadInvitationData(sessionResult.invitationId);
+				// Also load guest group info for display
+				const token = parseTokenFromHash();
+				if (token) {
+					const group = await getGuestGroupByToken({ data: { token } });
+					if (group) {
+						setGuestGroup({
+							id: group.id,
+							name: group.name,
+							invitationId: group.invitationId,
+							guests: group.guests,
+						});
+					} else {
+						// Session exists but need to get group info another way
+						// For now, just use the session's group name
+						setGuestGroup({
+							id: sessionResult.groupId,
+							name: sessionResult.groupName,
+							invitationId: sessionResult.invitationId,
+							guests: [],
+						});
+					}
+				} else {
+					// No token in URL but session valid - use session data
+					setGuestGroup({
+						id: sessionResult.groupId,
+						name: sessionResult.groupName,
+						invitationId: sessionResult.invitationId,
+						guests: [],
+					});
+				}
+				return;
+			}
+
+			// Step 2: No valid session - check for RSVP token in URL
 			const token = parseTokenFromHash();
 
 			if (!token) {
@@ -62,21 +110,41 @@ function RsvpPage() {
 				return;
 			}
 
+			// Step 3: Exchange RSVP token for session cookie
+			const exchangeResult = await exchangeRsvpTokenForSession({
+				data: { rsvpToken: token },
+			});
+
+			if (!exchangeResult.success) {
+				setLoadingState("invalid-token");
+				return;
+			}
+
+			// Step 4: Load invitation data using the group's invitation ID
+			await loadInvitationData(exchangeResult.invitationId);
+
+			// Also get full guest group info (with guest names)
+			const group = await getGuestGroupByToken({ data: { token } });
+			if (group) {
+				setGuestGroup({
+					id: group.id,
+					name: group.name,
+					invitationId: group.invitationId,
+					guests: group.guests,
+				});
+			} else {
+				setGuestGroup({
+					id: exchangeResult.groupId,
+					name: exchangeResult.groupName,
+					invitationId: exchangeResult.invitationId,
+					guests: [],
+				});
+			}
+		}
+
+		async function loadInvitationData(invitationId: string) {
 			try {
-				// Look up the guest group by token
-				const group = await getGuestGroupByToken({ data: { token } });
-
-				if (!group) {
-					setLoadingState("invalid-token");
-					return;
-				}
-
-				setGuestGroup(group);
-
-				// Load the invitation data
-				const invitationData = await getInvitationWithRelations(
-					group.invitationId,
-				);
+				const invitationData = await getInvitationWithRelations(invitationId);
 
 				if (!invitationData) {
 					setLoadingState("invalid-token");
@@ -86,7 +154,7 @@ function RsvpPage() {
 				setInvitation(invitationData);
 				setLoadingState("ready");
 			} catch (error) {
-				console.error("Error loading RSVP data:", error);
+				console.error("Error loading invitation data:", error);
 				setLoadingState("invalid-token");
 			}
 		}

@@ -5,6 +5,12 @@ vi.mock("@/lib/guest-server", () => ({
 	getGuestGroupByToken: vi.fn(),
 }));
 
+// Mock guest-session to avoid DB dependency
+vi.mock("@/lib/guest-session", () => ({
+	exchangeRsvpTokenForSession: vi.fn(),
+	validateGuestSession: vi.fn(),
+}));
+
 // Mock invitation-server to avoid DB dependency
 vi.mock("@/lib/invitation-server", () => ({
 	getInvitationWithRelations: vi.fn(),

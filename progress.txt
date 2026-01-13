@@ -881,7 +881,7 @@
 - RSVP-006 (copy link) already implemented in GuestGroupList from GUEST-004
 
 **Notes:**
-- RSVP form (RSVP-002, RSVP-003, RSVP-004) not yet implemented - currently just displays invitation
+- RSVP form (RSVP-003, RSVP-004) not yet implemented - currently just displays invitation
 - Token lookup returns invitationId which is used to load full invitation data with relations
 - Guest group info displayed at bottom - placeholder for future RSVP form
 
@@ -889,3 +889,35 @@
 - 479/479 tests pass (8 new tests)
 - typecheck passes
 - biome check passes
+
+## 2026-01-14: Token-Based Guest Session (RSVP-002)
+
+**Completed:** Guest session system for RSVP authentication without login
+
+**Changes:**
+- `src/db/schema.ts`: Added guestSessions table (id, groupId, sessionToken, expiresAt, createdAt) + guestSessionsRelations
+- `src/db/schema.test.ts`: Added 5 tests for guestSessions table + 1 test for guestSessionsRelations
+- `src/lib/guest-session.ts`: New module with session management functions + server functions
+- `src/lib/guest-session.test.ts`: 7 tests for createGuestSessionInternal, validateGuestSessionInternal, exchangeTokenForSessionInternal
+- `src/routes/rsvp.tsx`: Updated to use session-based flow (validate existing session first, then exchange token)
+- `src/routes/rsvp.test.tsx`: Added mock for @/lib/guest-session module
+
+**Decisions:**
+- Session token generated via crypto.randomBytes(16).toString("hex") - 32-char hex token
+- 30-day session expiry (SESSION_EXPIRY_MS constant)
+- HTTP-only secure cookie via TanStack Start useSession (name: "guest-session")
+- Flow: 1) Check existing session cookie, 2) If no session, parse RSVP token from URL hash, 3) Exchange RSVP token for session
+- Server functions: exchangeRsvpTokenForSession (POST), validateGuestSession (GET)
+- Internal functions extracted for testability (createServerFn wrappers call internal functions)
+- Drizzle join returns snake_case keys (guest_sessions, guest_groups) - handled with destructuring rename
+
+**Notes:**
+- Guest returns to same link → session cookie validates → skips token exchange
+- Session linked to guest group, not individual guest (group-level auth)
+- RSVP-003 (multi-person form), RSVP-004 (edit capability) can build on this session system
+
+**Verification:**
+- 491/491 tests pass (12 new tests)
+- typecheck passes
+- biome check passes
+- db:push successful

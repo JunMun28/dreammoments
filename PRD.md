@@ -560,7 +560,44 @@
         "Guest sees invitation header and RSVP form immediately",
         "No login or signup prompt shown to guest"
       ],
-      "passes": false
+      "tasks": [
+        {
+          "id": "RSVP-002-T1",
+          "task": "Create guest_sessions DB table (id, groupId, sessionToken, expiresAt, createdAt)",
+          "done": true
+        },
+        {
+          "id": "RSVP-002-T2",
+          "task": "Implement createGuestSessionInternal function with 30-day expiry",
+          "done": true
+        },
+        {
+          "id": "RSVP-002-T3",
+          "task": "Implement validateGuestSessionInternal function with expiry check",
+          "done": true
+        },
+        {
+          "id": "RSVP-002-T4",
+          "task": "Implement exchangeTokenForSessionInternal to swap RSVP token for session",
+          "done": true
+        },
+        {
+          "id": "RSVP-002-T5",
+          "task": "Create exchangeRsvpTokenForSession server function with HTTP-only cookie",
+          "done": true
+        },
+        {
+          "id": "RSVP-002-T6",
+          "task": "Create validateGuestSession server function to check existing session",
+          "done": true
+        },
+        {
+          "id": "RSVP-002-T7",
+          "task": "Update RSVP route to use session-based flow (validate existing session, then exchange token)",
+          "done": true
+        }
+      ],
+      "passes": true
     },
     {
       "id": "RSVP-003",

@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import {
 	guestGroups,
 	guestGroupsRelations,
+	guestSessions,
+	guestSessionsRelations,
 	guests,
 	guestsRelations,
 	invitations,
@@ -181,6 +183,27 @@ describe("Database Schema", () => {
 		});
 	});
 
+	describe("guestSessions table", () => {
+		it("should export guestSessions table", () => {
+			expect(guestSessions).toBeDefined();
+		});
+
+		it("should have correct table name", () => {
+			expect(getTableName(guestSessions)).toBe("guest_sessions");
+		});
+
+		it("should have required columns", () => {
+			expect(guestSessions.id).toBeDefined();
+			expect(guestSessions.groupId).toBeDefined();
+			expect(guestSessions.sessionToken).toBeDefined();
+			expect(guestSessions.expiresAt).toBeDefined();
+		});
+
+		it("should have createdAt timestamp", () => {
+			expect(guestSessions.createdAt).toBeDefined();
+		});
+	});
+
 	describe("relations", () => {
 		it("should export usersRelations", () => {
 			expect(usersRelations).toBeDefined();
@@ -204,6 +227,10 @@ describe("Database Schema", () => {
 
 		it("should export guestsRelations", () => {
 			expect(guestsRelations).toBeDefined();
+		});
+
+		it("should export guestSessionsRelations", () => {
+			expect(guestSessionsRelations).toBeDefined();
 		});
 	});
 });
