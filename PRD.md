@@ -662,7 +662,7 @@
         "QR code scans correctly to the RSVP URL",
         "QR includes optional branding/styling"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "DASH-001",

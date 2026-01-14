@@ -1,10 +1,38 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import {
 	InvitationBuilderProvider,
 	type InvitationData,
 } from "@/contexts/InvitationBuilderContext";
 import { GuestGroupList, getRsvpUrl } from "./GuestGroupList";
+
+// Mock qrcode.react
+vi.mock("qrcode.react", () => ({
+	QRCodeSVG: ({ value, size }: { value: string; size: number }) => (
+		<svg data-testid="qr-code-svg" data-value={value} data-size={size}>
+			<title>QR Code</title>
+		</svg>
+	),
+	QRCodeCanvas: ({
+		value,
+		size,
+		id,
+	}: {
+		value: string;
+		size: number;
+		id: string;
+	}) => (
+		<canvas
+			data-testid="qr-code-canvas"
+			data-value={value}
+			data-size={size}
+			id={id}
+		>
+			QR Code
+		</canvas>
+	),
+}));
 
 // Mock navigator.clipboard
 Object.assign(navigator, {
@@ -435,6 +463,73 @@ describe("GuestGroupList", () => {
 			await waitFor(() => {
 				expect(screen.getByText("✓")).toBeDefined();
 			});
+		});
+	});
+
+	describe("QR code generation (RSVP-007)", () => {
+		it("shows QR code button for each guest group", () => {
+			renderWithProvider(
+				createMockInvitation({
+					guestGroups: [
+						{ id: "g1", name: "Family", rsvpToken: "token123", guests: [] },
+					],
+				}),
+			);
+
+			const qrButton = screen.getByRole("button", { name: /qr code/i });
+			expect(qrButton).toBeDefined();
+		});
+
+		it("opens QR code dialog when button clicked", async () => {
+			const user = userEvent.setup();
+			renderWithProvider(
+				createMockInvitation({
+					guestGroups: [
+						{ id: "g1", name: "Family", rsvpToken: "token123", guests: [] },
+					],
+				}),
+			);
+
+			await user.click(screen.getByRole("button", { name: /qr code/i }));
+
+			expect(screen.getByRole("dialog")).toBeDefined();
+			expect(screen.getByText(/QR Code for Family/i)).toBeDefined();
+		});
+
+		it("displays QR code with correct RSVP URL", async () => {
+			const user = userEvent.setup();
+			renderWithProvider(
+				createMockInvitation({
+					guestGroups: [
+						{ id: "g1", name: "Family", rsvpToken: "token456", guests: [] },
+					],
+				}),
+			);
+
+			await user.click(screen.getByRole("button", { name: /qr code/i }));
+
+			const qrCode = screen.getByTestId("qr-code-svg");
+			expect(qrCode.getAttribute("data-value")).toContain("/rsvp#t=token456");
+		});
+
+		it("shows download buttons in QR code dialog", async () => {
+			const user = userEvent.setup();
+			renderWithProvider(
+				createMockInvitation({
+					guestGroups: [
+						{ id: "g1", name: "Family", rsvpToken: "token123", guests: [] },
+					],
+				}),
+			);
+
+			await user.click(screen.getByRole("button", { name: /qr code/i }));
+
+			expect(
+				screen.getByRole("button", { name: /download png/i }),
+			).toBeDefined();
+			expect(
+				screen.getByRole("button", { name: /download svg/i }),
+			).toBeDefined();
 		});
 	});
 

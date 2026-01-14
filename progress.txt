@@ -982,3 +982,34 @@
 - 526/526 tests pass (4 new tests)
 - typecheck passes
 - biome check passes
+
+## 2026-01-14: QR Code Generation for RSVP Links (RSVP-007)
+
+**Completed:** QR code dialog for generating/downloading QR codes for RSVP links
+
+**Changes:**
+- `src/components/ui/qr-code-dialog.tsx`: New QrCodeDialog component w/ QR code display, PNG/SVG download
+- `src/components/ui/qr-code-dialog.test.tsx`: 10 tests for QR code dialog functionality
+- `src/components/ui/dialog.tsx`: Added shadcn dialog component (dependency for QrCodeDialog)
+- `src/components/GuestGroupList.tsx`: Added QrCodeDialog button next to copy link button per group
+- `src/components/GuestGroupList.test.tsx`: Added 4 tests for QR code generation in guest groups
+- `package.json`: Added qrcode.react dependency
+
+**Decisions:**
+- Used qrcode.react library (QRCodeSVG + QRCodeCanvas) for QR code generation
+- QR code size: 256px default (configurable via size prop)
+- Download formats: PNG (via canvas.toDataURL) and SVG (via XMLSerializer)
+- Filename format: rsvp-qr-{group-name-slugified}.{png|svg}
+- QR code dialog shows URL below code for reference
+- Level M error correction for good readability
+
+**Notes:**
+- QR button placed between copy link and edit buttons in guest group header
+- Dialog uses radix-ui Dialog primitive via shadcn
+- Hidden canvas element renders QR for PNG download (canvas.toDataURL)
+- SVG download serializes visible SVG element via XMLSerializer
+
+**Verification:**
+- 540/540 tests pass (14 new tests)
+- typecheck passes
+- biome check passes

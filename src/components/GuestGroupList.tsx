@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { QrCodeDialog } from "@/components/ui/qr-code-dialog";
 import {
 	type Guest,
 	type GuestGroup,
@@ -203,6 +204,10 @@ function GuestGroupItem({
 							<Link className="h-4 w-4" />
 						)}
 					</Button>
+					<QrCodeDialog
+						url={getRsvpUrl(group.rsvpToken)}
+						groupName={group.name}
+					/>
 					<Button
 						type="button"
 						variant="ghost"
