@@ -37,6 +37,11 @@ const config = defineConfig(({ mode }) => {
 		test: {
 			environment: "jsdom",
 			include: ["src/**/*.test.{ts,tsx}"],
+			server: {
+				deps: {
+					inline: ["html-encoding-sniffer", "@exodus/bytes"],
+				},
+			},
 		},
 	};
 });

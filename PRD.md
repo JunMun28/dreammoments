@@ -482,7 +482,7 @@
         "File uploads successfully",
         "Shows parsing progress for large files"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "GUEST-002",
@@ -495,7 +495,7 @@
         "Valid rows are highlighted separately from invalid",
         "User can download error report or fix inline"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "GUEST-003",
@@ -508,7 +508,7 @@
         "User can review before confirming import",
         "Cancel returns to previous state without importing"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "GUEST-004",
@@ -521,7 +521,7 @@
         "Guest list can be filtered by group",
         "Each group gets its own RSVP link"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "GUEST-005",

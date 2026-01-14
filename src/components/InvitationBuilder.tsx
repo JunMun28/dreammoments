@@ -10,6 +10,7 @@ import {
 	createGuestGroup,
 	deleteGuest,
 	deleteGuestGroup,
+	getGuestGroupsWithGuests,
 	updateGuest,
 	updateGuestGroup,
 } from "@/lib/guest-server";
@@ -21,6 +22,7 @@ import {
 import { cn } from "@/lib/utils";
 import { BasicInfoForm, type BasicInfoFormValues } from "./BasicInfoForm";
 import { CsvExportButton } from "./CsvExportButton";
+import { GuestCsvImport, type ImportResult } from "./GuestCsvImport";
 import type { GuestEditorValues } from "./GuestEditor";
 import { GuestGroupList } from "./GuestGroupList";
 import { HeroImageSection } from "./HeroImageSection";
@@ -256,10 +258,50 @@ function RsvpResponseTableSection() {
 }
 
 /**
- * Guest management section with server callbacks.
+ * Guest management section with CSV import and manual CRUD.
  */
 function GuestManagementSection() {
-	const { invitation } = useInvitationBuilder();
+	const { invitation, setGuestGroups } = useInvitationBuilder();
+	const [importKey, setImportKey] = useState(0);
+
+	/**
+	 * Reload guest groups from server after CSV import
+	 */
+	const reloadGuestGroups = useCallback(async () => {
+		try {
+			const groups = await getGuestGroupsWithGuests({
+				data: { invitationId: invitation.id },
+			});
+			// Convert server data to context format
+			const contextGroups = groups.map((g) => ({
+				id: g.id,
+				name: g.name,
+				rsvpToken: g.rsvpToken,
+				guests: g.guests.map((guest) => ({
+					id: guest.id,
+					name: guest.name,
+					email: guest.email ?? undefined,
+					phone: guest.phone ?? undefined,
+				})),
+			}));
+			setGuestGroups(contextGroups);
+		} catch (error) {
+			console.error("Failed to reload guest groups:", error);
+		}
+	}, [invitation.id, setGuestGroups]);
+
+	/**
+	 * Handle successful CSV import
+	 */
+	const handleImportComplete = useCallback(
+		async (_result: ImportResult) => {
+			// Reload guest groups to show imported data
+			await reloadGuestGroups();
+			// Force re-render of import component to reset state
+			setImportKey((prev) => prev + 1);
+		},
+		[reloadGuestGroups],
+	);
 
 	const handleGroupCreate = useCallback(
 		async (name: string) => {
@@ -316,14 +358,36 @@ function GuestManagementSection() {
 	);
 
 	return (
-		<GuestGroupList
-			onGroupCreate={handleGroupCreate}
-			onGroupUpdate={handleGroupUpdate}
-			onGroupDelete={handleGroupDelete}
-			onGuestCreate={handleGuestCreate}
-			onGuestUpdate={handleGuestUpdate}
-			onGuestDelete={handleGuestDelete}
-		/>
+		<div className="space-y-6">
+			{/* CSV Import Section */}
+			<GuestCsvImport
+				key={importKey}
+				invitationId={invitation.id}
+				onImportComplete={handleImportComplete}
+			/>
+
+			{/* Divider */}
+			<div className="relative">
+				<div className="absolute inset-0 flex items-center">
+					<span className="w-full border-t" />
+				</div>
+				<div className="relative flex justify-center text-xs uppercase">
+					<span className="bg-card px-2 text-muted-foreground">
+						or manage manually
+					</span>
+				</div>
+			</div>
+
+			{/* Manual Guest Management */}
+			<GuestGroupList
+				onGroupCreate={handleGroupCreate}
+				onGroupUpdate={handleGroupUpdate}
+				onGroupDelete={handleGroupDelete}
+				onGuestCreate={handleGuestCreate}
+				onGuestUpdate={handleGuestUpdate}
+				onGuestDelete={handleGuestDelete}
+			/>
+		</div>
 	);
 }
 

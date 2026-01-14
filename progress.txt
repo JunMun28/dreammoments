@@ -1130,3 +1130,30 @@
 - 622/622 tests pass (21 new tests)
 - typecheck passes
 - biome check passes
+
+## 2026-01-14: CSV Guest Import Integration (GUEST-001, GUEST-002, GUEST-003)
+
+**Completed:** GuestCsvImport orchestrator component integrating CSV upload → preview → import flow into InvitationBuilder
+
+**Changes:**
+- `src/components/GuestCsvImport.tsx`: New orchestrator component w/ state machine (idle → preview → importing), file validation, error handling
+- `src/components/GuestCsvImport.test.tsx`: 11 tests for component states, file errors, CSV parsing, import confirmation
+- `src/components/InvitationBuilder.tsx`: Added GuestManagementSection with CSV import + manual CRUD, reload after import
+- `package.json`: Downgraded jsdom from ^27.0.0 to ^26.0.0 (ESM compatibility fix)
+
+**Decisions:**
+- GuestCsvImport manages import flow: CsvUpload → GuestImportPreview → importGuestsFromCsv server call
+- Component supports file type validation (.csv), size validation (1MB), and empty file detection
+- State machine pattern: idle, preview, importing states for clear UI transitions
+- onImportComplete callback triggers reload of guest groups via getGuestGroupsWithGuests
+- Key prop reset pattern (importKey) forces component remount after successful import
+
+**Notes:**
+- Fixed jsdom 27 ESM compatibility issue (html-encoding-sniffer requires @exodus/bytes which is ESM-only)
+- Test uses createMockFileList helper instead of DataTransfer (not available in jsdom)
+- Pre-existing flaky timeout test in RsvpResponseFilters (unrelated to this feature)
+
+**Verification:**
+- 633/633 tests pass (11 new tests)
+- typecheck passes
+- biome check passes
