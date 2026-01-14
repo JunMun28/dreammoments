@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
 	InvitationBuilderProvider,
 	type InvitationData,
@@ -27,6 +27,11 @@ import { HeroImageSection } from "./HeroImageSection";
 import { InvitationPreview } from "./InvitationPreview";
 import { RsvpDashboard, type RsvpSummaryData } from "./RsvpDashboard";
 import { RsvpDeadlineSection } from "./RsvpDeadlineSection";
+import {
+	filterResponses,
+	type RsvpFilterState,
+	RsvpResponseFilters,
+} from "./RsvpResponseFilters";
 import { RsvpResponseTable } from "./RsvpResponseTable";
 import { ThemeSection } from "./ThemeSection";
 import { type ViewportMode, ViewportToggle } from "./ui/viewport-toggle";
@@ -180,12 +185,17 @@ function RsvpDashboardSection() {
 
 /**
  * RSVP Response Table section that loads and displays guest responses.
- * Includes CSV export button.
+ * Includes filters and CSV export button.
  */
 function RsvpResponseTableSection() {
 	const { invitation } = useInvitationBuilder();
 	const [responses, setResponses] = useState<GuestResponseRow[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
+	const [filters, setFilters] = useState<RsvpFilterState>({
+		status: "all",
+		groupId: "all",
+		searchQuery: "",
+	});
 
 	// Load guest responses on mount and when invitation changes
 	useEffect(() => {
@@ -208,12 +218,39 @@ function RsvpResponseTableSection() {
 		loadResponses();
 	}, [invitation.id]);
 
+	// Extract unique groups from responses for filter dropdown
+	const groups = useMemo(() => {
+		const groupMap = new Map<string, { id: string; name: string }>();
+		for (const response of responses) {
+			if (!groupMap.has(response.groupId)) {
+				groupMap.set(response.groupId, {
+					id: response.groupId,
+					name: response.groupName,
+				});
+			}
+		}
+		return Array.from(groupMap.values());
+	}, [responses]);
+
+	// Apply filters to responses
+	const filteredResponses = useMemo(
+		() => filterResponses(responses, filters),
+		[responses, filters],
+	);
+
 	return (
 		<div className="space-y-4">
+			<RsvpResponseFilters
+				filters={filters}
+				onFiltersChange={setFilters}
+				groups={groups}
+				resultCount={filteredResponses.length}
+				totalCount={responses.length}
+			/>
 			<div className="flex justify-end">
-				<CsvExportButton responses={responses} />
+				<CsvExportButton responses={filteredResponses} />
 			</div>
-			<RsvpResponseTable responses={responses} isLoading={isLoading} />
+			<RsvpResponseTable responses={filteredResponses} isLoading={isLoading} />
 		</div>
 	);
 }

@@ -1102,3 +1102,31 @@
 - 601/601 tests pass (23 new tests)
 - typecheck passes
 - biome check passes
+
+## 2026-01-14: Filter and Search RSVP Responses (DASH-004)
+
+**Completed:** Filter controls for RSVP response table with status, group, and search filters
+
+**Changes:**
+- `src/components/RsvpResponseFilters.tsx`: New component w/ search input, status dropdown, group dropdown, result count display
+- `src/components/RsvpResponseFilters.test.tsx`: 21 tests for filterResponses logic + component rendering
+- `src/components/InvitationBuilder.tsx`: Integrated filters into RsvpResponseTableSection with filter state management
+
+**Decisions:**
+- filterResponses() combines filters with AND logic (status + group + search)
+- Search is case-insensitive and matches partial guest names
+- Status filter: All Statuses, Attending, Declined, Pending
+- Group filter: All Groups + dynamic group list extracted from responses
+- Result count shows "Showing X of Y guests"
+- Used useId() for unique element IDs per biome lint rules
+- Filtered responses passed to both RsvpResponseTable and CsvExportButton (export respects filters)
+
+**Notes:**
+- Groups extracted from responses via useMemo to avoid re-computation
+- Filter state managed with useState in RsvpResponseTableSection
+- Pre-existing flaky timeout tests in other components (unrelated to this feature)
+
+**Verification:**
+- 622/622 tests pass (21 new tests)
+- typecheck passes
+- biome check passes

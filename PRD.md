@@ -715,7 +715,7 @@
         "Search by guest name",
         "Filters can be combined"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "PHOTO-001",
