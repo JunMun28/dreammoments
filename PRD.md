@@ -215,7 +215,7 @@
           "done": true
         }
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "BLDR-002",
@@ -262,7 +262,7 @@
           "done": true
         }
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "BLDR-003",
@@ -303,7 +303,7 @@
           "done": true
         }
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "BLDR-004",
@@ -343,7 +343,7 @@
           "done": true
         }
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "BLDR-005",
@@ -383,7 +383,7 @@
           "done": true
         }
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "BLDR-006",
@@ -429,7 +429,7 @@
           "done": true
         }
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "BLDR-007",
@@ -468,7 +468,7 @@
           "done": true
         }
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "GUEST-001",

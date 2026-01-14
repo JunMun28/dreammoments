@@ -1157,3 +1157,23 @@
 - 633/633 tests pass (11 new tests)
 - typecheck passes
 - biome check passes
+
+## 2026-01-14: Mark BLDR Features as Passing (BLDR-001 through BLDR-007)
+
+**Completed:** Updated PRD.md to reflect completed status for all Invitation Builder features
+
+**Changes:**
+- `PRD.md`: Changed `passes: false` to `passes: true` for BLDR-001, BLDR-002, BLDR-003, BLDR-004, BLDR-005, BLDR-006, BLDR-007
+
+**Decisions:**
+- All BLDR implementation tasks were marked as done previously but `passes` flag wasn't updated
+- AUTH features (AUTH-001, AUTH-002, AUTH-003) remain `passes: false` because AUTH-001-T1 requires manual Neon Console setup
+
+**Notes:**
+- Flaky async cleanup error in GuestGroupList.test.tsx (radix-ui dialog teardown) - doesn't block tests (633/633 pass)
+- All MVP code implementation is complete - remaining work is manual Neon Console configuration
+
+**Verification:**
+- 633/633 tests pass
+- typecheck passes
+- biome check passes
