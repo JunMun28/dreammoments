@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
 	getGroupRsvpStatusInternal,
+	getInvitationGuestResponsesInternal,
 	getInvitationRsvpSummaryInternal,
 	type SubmitRsvpInput,
 	submitRsvpInternal,
@@ -481,6 +482,260 @@ describe("rsvp-server", () => {
 				totalDeclined: 0,
 				totalPending: 0,
 			});
+		});
+	});
+
+	describe("getInvitationGuestResponsesInternal", () => {
+		it("should throw error if invitationId is missing", async () => {
+			await expect(getInvitationGuestResponsesInternal("")).rejects.toThrow(
+				"invitationId is required",
+			);
+		});
+
+		it("should return empty array when no guest groups exist", async () => {
+			// Mock: no guest groups
+			mockDb.select.mockReturnValueOnce({
+				from: vi.fn().mockReturnValueOnce({
+					where: vi.fn().mockResolvedValueOnce([]),
+				}),
+			});
+
+			const result =
+				await getInvitationGuestResponsesInternal("invitation-123");
+
+			expect(result).toHaveLength(0);
+		});
+
+		it("should return guest responses with group name and timestamps", async () => {
+			const respondedAt = new Date("2026-01-10T14:30:00Z");
+			const updatedAt = new Date("2026-01-11T10:00:00Z");
+
+			// Mock: get guest groups for invitation
+			mockDb.select.mockReturnValueOnce({
+				from: vi.fn().mockReturnValueOnce({
+					where: vi.fn().mockResolvedValueOnce([
+						{
+							id: "group-1",
+							name: "Family",
+							invitationId: "invitation-123",
+							rsvpToken: "token1",
+						},
+					]),
+				}),
+			});
+
+			// Mock: get guests in group
+			mockDb.select.mockReturnValueOnce({
+				from: vi.fn().mockReturnValueOnce({
+					where: vi.fn().mockResolvedValueOnce([
+						{
+							id: "guest-1",
+							name: "John Doe",
+							email: "john@example.com",
+							phone: "555-1234",
+						},
+					]),
+				}),
+			});
+
+			// Mock: get RSVP response for guest
+			mockDb.select.mockReturnValueOnce({
+				from: vi.fn().mockReturnValueOnce({
+					where: vi.fn().mockResolvedValueOnce([
+						{
+							id: "response-1",
+							guestId: "guest-1",
+							attending: true,
+							mealPreference: "chicken",
+							dietaryNotes: "No nuts",
+							plusOneCount: 2,
+							plusOneNames: "Jane, Jimmy",
+							respondedAt,
+							updatedAt,
+						},
+					]),
+				}),
+			});
+
+			const result =
+				await getInvitationGuestResponsesInternal("invitation-123");
+
+			expect(result).toHaveLength(1);
+			expect(result[0]).toEqual({
+				guestId: "guest-1",
+				guestName: "John Doe",
+				email: "john@example.com",
+				phone: "555-1234",
+				groupId: "group-1",
+				groupName: "Family",
+				status: "attending",
+				mealPreference: "chicken",
+				dietaryNotes: "No nuts",
+				plusOneCount: 2,
+				plusOneNames: "Jane, Jimmy",
+				headcount: 3,
+				respondedAt,
+				updatedAt,
+			});
+		});
+
+		it("should return pending status for guests without response", async () => {
+			// Mock: get guest groups
+			mockDb.select.mockReturnValueOnce({
+				from: vi.fn().mockReturnValueOnce({
+					where: vi.fn().mockResolvedValueOnce([
+						{
+							id: "group-1",
+							name: "Friends",
+							invitationId: "inv-1",
+							rsvpToken: "token1",
+						},
+					]),
+				}),
+			});
+
+			// Mock: guests
+			mockDb.select.mockReturnValueOnce({
+				from: vi.fn().mockReturnValueOnce({
+					where: vi
+						.fn()
+						.mockResolvedValueOnce([
+							{ id: "guest-1", name: "Alice", email: null, phone: null },
+						]),
+				}),
+			});
+
+			// Mock: no RSVP response
+			mockDb.select.mockReturnValueOnce({
+				from: vi.fn().mockReturnValueOnce({
+					where: vi.fn().mockResolvedValueOnce([]),
+				}),
+			});
+
+			const result = await getInvitationGuestResponsesInternal("inv-1");
+
+			expect(result[0].status).toBe("pending");
+			expect(result[0].headcount).toBe(0);
+			expect(result[0].respondedAt).toBeNull();
+		});
+
+		it("should return declined status correctly", async () => {
+			const respondedAt = new Date("2026-01-12T09:00:00Z");
+
+			// Mock: get guest groups
+			mockDb.select.mockReturnValueOnce({
+				from: vi.fn().mockReturnValueOnce({
+					where: vi.fn().mockResolvedValueOnce([
+						{
+							id: "group-1",
+							name: "Colleagues",
+							invitationId: "inv-1",
+							rsvpToken: "token1",
+						},
+					]),
+				}),
+			});
+
+			// Mock: guests
+			mockDb.select.mockReturnValueOnce({
+				from: vi.fn().mockReturnValueOnce({
+					where: vi.fn().mockResolvedValueOnce([
+						{
+							id: "guest-1",
+							name: "Bob",
+							email: "bob@work.com",
+							phone: null,
+						},
+					]),
+				}),
+			});
+
+			// Mock: RSVP response - declined
+			mockDb.select.mockReturnValueOnce({
+				from: vi.fn().mockReturnValueOnce({
+					where: vi.fn().mockResolvedValueOnce([
+						{
+							id: "r1",
+							guestId: "guest-1",
+							attending: false,
+							mealPreference: null,
+							dietaryNotes: null,
+							plusOneCount: 0,
+							plusOneNames: null,
+							respondedAt,
+							updatedAt: respondedAt,
+						},
+					]),
+				}),
+			});
+
+			const result = await getInvitationGuestResponsesInternal("inv-1");
+
+			expect(result[0].status).toBe("declined");
+			expect(result[0].headcount).toBe(0);
+			expect(result[0].respondedAt).toEqual(respondedAt);
+		});
+
+		it("should aggregate guests from multiple groups", async () => {
+			// Mock: get multiple guest groups
+			mockDb.select.mockReturnValueOnce({
+				from: vi.fn().mockReturnValueOnce({
+					where: vi.fn().mockResolvedValueOnce([
+						{
+							id: "group-1",
+							name: "Family",
+							invitationId: "inv-1",
+							rsvpToken: "token1",
+						},
+						{
+							id: "group-2",
+							name: "Friends",
+							invitationId: "inv-1",
+							rsvpToken: "token2",
+						},
+					]),
+				}),
+			});
+
+			// Mock: Group 1 guests
+			mockDb.select.mockReturnValueOnce({
+				from: vi.fn().mockReturnValueOnce({
+					where: vi
+						.fn()
+						.mockResolvedValueOnce([
+							{ id: "guest-1", name: "Mom", email: null, phone: null },
+						]),
+				}),
+			});
+			mockDb.select.mockReturnValueOnce({
+				from: vi.fn().mockReturnValueOnce({
+					where: vi.fn().mockResolvedValueOnce([]),
+				}),
+			});
+
+			// Mock: Group 2 guests
+			mockDb.select.mockReturnValueOnce({
+				from: vi.fn().mockReturnValueOnce({
+					where: vi
+						.fn()
+						.mockResolvedValueOnce([
+							{ id: "guest-2", name: "Alice", email: null, phone: null },
+						]),
+				}),
+			});
+			mockDb.select.mockReturnValueOnce({
+				from: vi.fn().mockReturnValueOnce({
+					where: vi.fn().mockResolvedValueOnce([]),
+				}),
+			});
+
+			const result = await getInvitationGuestResponsesInternal("inv-1");
+
+			expect(result).toHaveLength(2);
+			expect(result[0].guestName).toBe("Mom");
+			expect(result[0].groupName).toBe("Family");
+			expect(result[1].guestName).toBe("Alice");
+			expect(result[1].groupName).toBe("Friends");
 		});
 	});
 });

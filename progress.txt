@@ -1044,3 +1044,36 @@
 - 555/555 tests pass (15 new tests)
 - typecheck passes
 - biome check passes
+
+## 2026-01-14: Guest Response Tracking Table (DASH-002)
+
+**Completed:** Guest response tracking table displaying detailed RSVP information in InvitationBuilder
+
+**Changes:**
+- `src/lib/rsvp-server.ts`: Added GuestResponseRow type, getInvitationGuestResponsesInternal() + server function
+- `src/lib/rsvp-server.test.ts`: Added 6 tests for getInvitationGuestResponsesInternal
+- `src/components/RsvpResponseTable.tsx`: New table component w/ guest details, status badges, headcount, meal preferences
+- `src/components/RsvpResponseTable.test.tsx`: 17 tests (formatResponseDate, getStatusBadgeVariant helpers + component)
+- `src/components/ui/badge.tsx`: Added success variant for attending status
+- `src/components/ui/table.tsx`: Added shadcn table component
+- `src/components/InvitationBuilder.tsx`: Added RsvpResponseTableSection that loads guest responses
+
+**Decisions:**
+- GuestResponseRow flattens guest + group + response data for table display
+- Status derived from response: attending/declined/pending
+- Headcount = 1 + plusOneCount for attending, 0 otherwise
+- formatResponseDate helper handles null dates with em-dash
+- getStatusBadgeVariant maps status to badge colors (success/destructive/secondary)
+- Plus-one info displayed in headcount cell with "+N guest(s)" tooltip
+- Table placed in "Response Details" section after RSVP Dashboard
+
+**Notes:**
+- Builds on DASH-001 - dashboard shows aggregates, table shows per-guest details
+- Table columns: Guest (name + dietary notes), Group, Status, Headcount, Meal, Responded
+- Component is props-based (receives responses array) for testability
+- Data loaded on mount and when invitation.id changes
+
+**Verification:**
+- 578/578 tests pass (23 new tests)
+- typecheck passes
+- biome check passes

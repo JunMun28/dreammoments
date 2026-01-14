@@ -13,7 +13,11 @@ import {
 	updateGuest,
 	updateGuestGroup,
 } from "@/lib/guest-server";
-import { getInvitationRsvpSummary } from "@/lib/rsvp-server";
+import {
+	type GuestResponseRow,
+	getInvitationGuestResponses,
+	getInvitationRsvpSummary,
+} from "@/lib/rsvp-server";
 import { cn } from "@/lib/utils";
 import { BasicInfoForm, type BasicInfoFormValues } from "./BasicInfoForm";
 import type { GuestEditorValues } from "./GuestEditor";
@@ -22,6 +26,7 @@ import { HeroImageSection } from "./HeroImageSection";
 import { InvitationPreview } from "./InvitationPreview";
 import { RsvpDashboard, type RsvpSummaryData } from "./RsvpDashboard";
 import { RsvpDeadlineSection } from "./RsvpDeadlineSection";
+import { RsvpResponseTable } from "./RsvpResponseTable";
 import { ThemeSection } from "./ThemeSection";
 import { type ViewportMode, ViewportToggle } from "./ui/viewport-toggle";
 
@@ -173,6 +178,38 @@ function RsvpDashboardSection() {
 }
 
 /**
+ * RSVP Response Table section that loads and displays guest responses.
+ */
+function RsvpResponseTableSection() {
+	const { invitation } = useInvitationBuilder();
+	const [responses, setResponses] = useState<GuestResponseRow[]>([]);
+	const [isLoading, setIsLoading] = useState(true);
+
+	// Load guest responses on mount and when invitation changes
+	useEffect(() => {
+		async function loadResponses() {
+			if (!invitation.id) return;
+
+			setIsLoading(true);
+			try {
+				const data = await getInvitationGuestResponses({
+					data: { invitationId: invitation.id },
+				});
+				setResponses(data);
+			} catch (error) {
+				console.error("Failed to load guest responses:", error);
+			} finally {
+				setIsLoading(false);
+			}
+		}
+
+		loadResponses();
+	}, [invitation.id]);
+
+	return <RsvpResponseTable responses={responses} isLoading={isLoading} />;
+}
+
+/**
  * Guest management section with server callbacks.
  */
 function GuestManagementSection() {
@@ -300,6 +337,11 @@ function InvitationBuilderContent({
 
 					<div className="rounded-lg border bg-card p-6">
 						<RsvpDashboardSection />
+					</div>
+
+					<div className="rounded-lg border bg-card p-6">
+						<h2 className="mb-6 text-lg font-semibold">Response Details</h2>
+						<RsvpResponseTableSection />
 					</div>
 
 					<div className="rounded-lg border bg-card p-6">

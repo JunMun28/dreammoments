@@ -322,3 +322,110 @@ export const getInvitationRsvpSummary = createServerFn({ method: "GET" })
 	.handler(async ({ data }) => {
 		return getInvitationRsvpSummaryInternal(data.invitationId);
 	});
+
+// ============================================================================
+// GET INVITATION GUEST RESPONSES (Response Table)
+// ============================================================================
+
+export type GuestResponseStatus = "attending" | "declined" | "pending";
+
+export interface GuestResponseRow {
+	guestId: string;
+	guestName: string;
+	email: string | null;
+	phone: string | null;
+	groupId: string;
+	groupName: string;
+	status: GuestResponseStatus;
+	mealPreference: string | null;
+	dietaryNotes: string | null;
+	plusOneCount: number;
+	plusOneNames: string | null;
+	headcount: number; // 1 + plusOneCount for attending, 0 otherwise
+	respondedAt: Date | null;
+	updatedAt: Date | null;
+}
+
+/**
+ * Internal function to get detailed guest responses for an invitation.
+ * Returns a flat list of all guests with their RSVP details for table display.
+ */
+export async function getInvitationGuestResponsesInternal(
+	invitationId: string,
+): Promise<GuestResponseRow[]> {
+	if (!invitationId) {
+		throw new Error("invitationId is required");
+	}
+
+	// Get all guest groups for this invitation
+	const groups = await db
+		.select()
+		.from(guestGroups)
+		.where(eq(guestGroups.invitationId, invitationId));
+
+	if (groups.length === 0) {
+		return [];
+	}
+
+	const responses: GuestResponseRow[] = [];
+
+	// Get guests and their responses for each group
+	for (const group of groups) {
+		const groupGuests = await db
+			.select()
+			.from(guests)
+			.where(eq(guests.groupId, group.id));
+
+		for (const guest of groupGuests) {
+			const rsvpResponseRows = await db
+				.select()
+				.from(rsvpResponses)
+				.where(eq(rsvpResponses.guestId, guest.id));
+
+			const rsvpResponse =
+				rsvpResponseRows.length > 0 ? rsvpResponseRows[0] : null;
+
+			let status: GuestResponseStatus;
+			let headcount = 0;
+
+			if (rsvpResponse) {
+				if (rsvpResponse.attending) {
+					status = "attending";
+					headcount = 1 + (rsvpResponse.plusOneCount ?? 0);
+				} else {
+					status = "declined";
+				}
+			} else {
+				status = "pending";
+			}
+
+			responses.push({
+				guestId: guest.id,
+				guestName: guest.name,
+				email: guest.email,
+				phone: guest.phone,
+				groupId: group.id,
+				groupName: group.name,
+				status,
+				mealPreference: rsvpResponse?.mealPreference ?? null,
+				dietaryNotes: rsvpResponse?.dietaryNotes ?? null,
+				plusOneCount: rsvpResponse?.plusOneCount ?? 0,
+				plusOneNames: rsvpResponse?.plusOneNames ?? null,
+				headcount,
+				respondedAt: rsvpResponse?.respondedAt ?? null,
+				updatedAt: rsvpResponse?.updatedAt ?? null,
+			});
+		}
+	}
+
+	return responses;
+}
+
+/**
+ * Server function to get guest responses for table display.
+ */
+export const getInvitationGuestResponses = createServerFn({ method: "GET" })
+	.inputValidator((input: { invitationId: string }) => input)
+	.handler(async ({ data }) => {
+		return getInvitationGuestResponsesInternal(data.invitationId);
+	});

@@ -689,7 +689,7 @@
         "Shows number of attendees per response",
         "Shows any meal preferences or notes"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "DASH-003",
