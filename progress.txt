@@ -1214,3 +1214,21 @@
 - 6/6 E2E tests pass (Chromium)
 - typecheck passes
 - biome check passes
+
+## 2026-01-14: Add Not Found Page Component (Code Quality)
+
+**Completed:** Added notFoundComponent to root route to fix TanStack Router warning
+
+**Changes:**
+- `src/routes/__root.tsx`: Added NotFoundPage component + notFoundComponent config
+
+**Decisions:**
+- Simple centered layout w/ "Page Not Found" heading, helpful message, and "Return Home" link
+- Uses rose-600 button color to match branding
+- Eliminates TanStack Router warning about missing notFoundComponent
+
+**Verification:**
+- 633/633 unit tests pass
+- 6/6 E2E tests pass (no more notFoundComponent warning)
+- typecheck passes
+- biome check passes
