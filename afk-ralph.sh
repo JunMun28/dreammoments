@@ -50,6 +50,7 @@ Identify the highest priority task from progress.txt and PRD.md. Work on ONLY ON
    - TypeScript: \`npm run typecheck\` (must pass with no errors) \
    - Tests: \`npm run test\` (must pass) \
    - Check: \`npm run check\` (must pass) \
+   - Build: \`pnpm run build\` (must pass) \
    - UI (if UI changes): use playwright MCP to verify UI changes AND run \`npm run test:e2e\` (must pass) \
    - Database: run \`db:push\` and check for any migration issues \
    *Do NOT commit if any feedback loop fails. Fix issues first.* \
@@ -64,7 +65,7 @@ Identify the highest priority task from progress.txt and PRD.md. Work on ONLY ON
 5. **Commit**: Make a git commit of that feature. \
 \
 # TERMINATION\
-If, while implementing the feature, you notice that all work is complete, output <promise>COMPLETE</promise>.")
+If, while implementing the feature, you notice that all work is complete(no more passes: false in PRD.md), output <promise>COMPLETE</promise>.")
 
   echo ""
   echo "Claude Code execution completed for iteration $i"
@@ -83,9 +84,13 @@ If, while implementing the feature, you notice that all work is complete, output
   echo ""
 done
 
-# All iterations completed, send notification
+# All iterations completed, push to GitHub
 echo "========================================="
 echo "All $1 iterations completed."
-echo "Sending notification..."
+echo "Pushing to GitHub..."
 echo "========================================="
+git push
+
+# Send notification
+echo "Sending notification..."
 ~/.claude/notify-email.sh
