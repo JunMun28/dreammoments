@@ -623,7 +623,7 @@
         "Guest can modify their RSVP",
         "Updated response replaces previous one"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "RSVP-005",
@@ -636,7 +636,7 @@
         "After deadline, form shows 'RSVP closed' message",
         "Couple can extend deadline if needed"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "RSVP-006",

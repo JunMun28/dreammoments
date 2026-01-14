@@ -19,6 +19,7 @@ import type { GuestEditorValues } from "./GuestEditor";
 import { GuestGroupList } from "./GuestGroupList";
 import { HeroImageSection } from "./HeroImageSection";
 import { InvitationPreview } from "./InvitationPreview";
+import { RsvpDeadlineSection } from "./RsvpDeadlineSection";
 import { ThemeSection } from "./ThemeSection";
 import { type ViewportMode, ViewportToggle } from "./ui/viewport-toggle";
 
@@ -94,6 +95,7 @@ function BuilderForm({
 		weddingTime: invitation.weddingTime,
 		venueName: invitation.venueName,
 		venueAddress: invitation.venueAddress,
+		rsvpDeadline: invitation.rsvpDeadline,
 	};
 
 	return (
@@ -101,6 +103,27 @@ function BuilderForm({
 			initialValues={formInitialValues}
 			onSubmit={handleSubmit}
 			onChange={handleChange}
+		/>
+	);
+}
+
+/**
+ * RSVP settings section with deadline configuration.
+ */
+function RsvpSettingsSection() {
+	const { invitation, updateInvitation } = useInvitationBuilder();
+
+	const handleDeadlineChange = useCallback(
+		(deadline: Date | undefined) => {
+			updateInvitation({ rsvpDeadline: deadline });
+		},
+		[updateInvitation],
+	);
+
+	return (
+		<RsvpDeadlineSection
+			value={invitation.rsvpDeadline}
+			onChange={handleDeadlineChange}
 		/>
 	);
 }
@@ -224,6 +247,11 @@ function InvitationBuilderContent({
 					<div className="rounded-lg border bg-card p-6">
 						<h2 className="mb-6 text-lg font-semibold">Theme</h2>
 						<ThemeSection />
+					</div>
+
+					<div className="rounded-lg border bg-card p-6">
+						<h2 className="mb-6 text-lg font-semibold">RSVP Settings</h2>
+						<RsvpSettingsSection />
 					</div>
 
 					<div className="rounded-lg border bg-card p-6">

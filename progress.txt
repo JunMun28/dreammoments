@@ -954,3 +954,31 @@
 - 522/522 tests pass (31 new tests)
 - typecheck passes
 - biome check passes
+
+## 2026-01-14: RSVP Deadline Display and Enforcement (RSVP-005)
+
+**Completed:** RSVP deadline configuration in builder + display/enforcement on guest RSVP page
+
+**Changes:**
+- `src/components/RsvpDeadlineSection.tsx`: New component with DatePicker for setting RSVP deadline
+- `src/components/RsvpDeadlineSection.test.tsx`: 4 tests (render, deadline display, clear, helper text)
+- `src/components/BasicInfoForm.tsx`: Added rsvpDeadline to BasicInfoFormValues interface + form defaultValues
+- `src/components/InvitationBuilder.tsx`: Added RsvpSettingsSection with RsvpDeadlineSection component
+- `src/routes/rsvp.tsx`: Added deadline display, formatDeadline/isDeadlinePassed helpers, DeadlinePassedView component
+
+**Decisions:**
+- Deadline stored in invitation table (rsvpDeadline column already exists from initial schema)
+- Builder: RsvpDeadlineSection in new "RSVP Settings" collapsible section
+- Guest page: Shows "Please respond by [date]" when deadline is set
+- Deadline check gives guests until end of day (23:59:59.999) on deadline date
+- After deadline: Shows DeadlinePassedView message instead of RsvpForm
+- Uses same DatePicker component as wedding date for consistency
+
+**Notes:**
+- RSVP-005 covers both display (on guest page) and enforcement (form disabled after deadline)
+- Existing autosave handles persistence of rsvpDeadline via context updates
+
+**Verification:**
+- 526/526 tests pass (4 new tests)
+- typecheck passes
+- biome check passes

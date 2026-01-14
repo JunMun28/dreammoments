@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { AlertCircle, Heart, Loader2 } from "lucide-react";
+import { AlertCircle, Calendar, Heart, Loader2 } from "lucide-react";
 import { useEffect, useId, useState } from "react";
 import { type GuestRsvpData, RsvpForm } from "@/components/RsvpForm";
 import { TemplatePreview } from "@/components/TemplatePreview";
@@ -45,6 +45,7 @@ interface InvitationData {
 	accentColor: string | null;
 	fontPairing: string | null;
 	heroImageUrl: string | null;
+	rsvpDeadline: Date | null; // RSVP deadline
 	scheduleBlocks: Array<{
 		id: string;
 		title: string;
@@ -58,6 +59,29 @@ interface InvitationData {
 		description?: string;
 		order: number;
 	}>;
+}
+
+/**
+ * Format a deadline date for display.
+ * e.g., "January 15, 2026"
+ */
+function formatDeadline(date: Date): string {
+	return new Intl.DateTimeFormat("en-US", {
+		month: "long",
+		day: "numeric",
+		year: "numeric",
+	}).format(date);
+}
+
+/**
+ * Check if the deadline has passed.
+ * Compares against end of day to give guests until midnight.
+ */
+function isDeadlinePassed(deadline: Date): boolean {
+	const now = new Date();
+	const deadlineEnd = new Date(deadline);
+	deadlineEnd.setHours(23, 59, 59, 999);
+	return now > deadlineEnd;
 }
 
 type LoadingState = "loading" | "no-token" | "invalid-token" | "ready";
@@ -260,7 +284,23 @@ function RsvpPage() {
 						Please Respond
 					</h2>
 
-					<RsvpForm guests={guestsWithRsvp} onSubmit={handleRsvpSubmit} />
+					{/* Deadline display */}
+					{invitation.rsvpDeadline && (
+						<div className="mb-8 flex items-center justify-center gap-2 text-stone-600">
+							<Calendar className="h-4 w-4" />
+							<span className="text-sm">
+								Please respond by {formatDeadline(invitation.rsvpDeadline)}
+							</span>
+						</div>
+					)}
+
+					{/* RSVP Form or Closed Message */}
+					{invitation.rsvpDeadline &&
+					isDeadlinePassed(invitation.rsvpDeadline) ? (
+						<DeadlinePassedView deadline={invitation.rsvpDeadline} />
+					) : (
+						<RsvpForm guests={guestsWithRsvp} onSubmit={handleRsvpSubmit} />
+					)}
 				</div>
 			</section>
 		</div>
@@ -307,6 +347,23 @@ function InvalidTokenView() {
 			<Button variant="outline" asChild>
 				<Link to="/">Go to DreamMoments</Link>
 			</Button>
+		</div>
+	);
+}
+
+function DeadlinePassedView({ deadline }: { deadline: Date }) {
+	return (
+		<div className="rounded-lg border border-amber-200 bg-amber-50 p-6 text-center">
+			<Calendar className="mx-auto mb-4 h-8 w-8 text-amber-500" />
+			<h3 className="mb-2 text-lg font-medium text-stone-800">
+				RSVP Period Has Ended
+			</h3>
+			<p className="text-stone-600">
+				The deadline to respond was {formatDeadline(deadline)}.
+			</p>
+			<p className="mt-2 text-sm text-stone-500">
+				Please contact the couple directly if you need to update your response.
+			</p>
 		</div>
 	);
 }

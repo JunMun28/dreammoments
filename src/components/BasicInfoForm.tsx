@@ -14,6 +14,8 @@ export interface BasicInfoFormValues {
 	weddingTime?: string;
 	venueName?: string;
 	venueAddress?: string;
+	/** RSVP deadline date */
+	rsvpDeadline?: Date;
 }
 
 interface BasicInfoFormProps {
@@ -42,6 +44,7 @@ export function BasicInfoForm({
 			weddingTime: initialValues?.weddingTime,
 			venueName: initialValues?.venueName ?? "",
 			venueAddress: initialValues?.venueAddress ?? "",
+			rsvpDeadline: initialValues?.rsvpDeadline,
 		},
 		onSubmit: async ({ value }) => {
 			await onSubmit(value);
