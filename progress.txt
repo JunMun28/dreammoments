@@ -1077,3 +1077,28 @@
 - 578/578 tests pass (23 new tests)
 - typecheck passes
 - biome check passes
+
+## 2026-01-14: CSV Export of RSVP Responses (DASH-003)
+
+**Completed:** CSV export button for downloading RSVP response data
+
+**Changes:**
+- `src/lib/csv-export.ts`: New utility module w/ formatCsvValue, generateCsvContent, downloadCsv functions
+- `src/lib/csv-export.test.ts`: 15 tests for CSV formatting, generation, and download
+- `src/components/CsvExportButton.tsx`: New component w/ Export to CSV button, converts GuestResponseRow to CsvExportRow
+- `src/components/CsvExportButton.test.tsx`: 8 tests for button rendering and click behavior
+- `src/components/InvitationBuilder.tsx`: Added CsvExportButton to RsvpResponseTableSection
+
+**Decisions:**
+- CsvExportRow type strips extra fields from GuestResponseRow (guestId, email, phone, groupId, updatedAt)
+- CSV columns: Guest Name, Group, Status, Headcount, Meal Preference, Dietary Notes, Plus-One Count, Plus-One Names, Responded At
+- Status capitalized in export (Attending, Declined, Pending)
+- formatCsvValue handles quoting for commas, quotes, newlines per RFC 4180
+- Dates exported in ISO format for Excel/Google Sheets compatibility
+- Button disabled when no responses to export
+- Default filename: rsvp-responses.csv
+
+**Verification:**
+- 601/601 tests pass (23 new tests)
+- typecheck passes
+- biome check passes

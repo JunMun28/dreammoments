@@ -20,6 +20,7 @@ import {
 } from "@/lib/rsvp-server";
 import { cn } from "@/lib/utils";
 import { BasicInfoForm, type BasicInfoFormValues } from "./BasicInfoForm";
+import { CsvExportButton } from "./CsvExportButton";
 import type { GuestEditorValues } from "./GuestEditor";
 import { GuestGroupList } from "./GuestGroupList";
 import { HeroImageSection } from "./HeroImageSection";
@@ -179,6 +180,7 @@ function RsvpDashboardSection() {
 
 /**
  * RSVP Response Table section that loads and displays guest responses.
+ * Includes CSV export button.
  */
 function RsvpResponseTableSection() {
 	const { invitation } = useInvitationBuilder();
@@ -206,7 +208,14 @@ function RsvpResponseTableSection() {
 		loadResponses();
 	}, [invitation.id]);
 
-	return <RsvpResponseTable responses={responses} isLoading={isLoading} />;
+	return (
+		<div className="space-y-4">
+			<div className="flex justify-end">
+				<CsvExportButton responses={responses} />
+			</div>
+			<RsvpResponseTable responses={responses} isLoading={isLoading} />
+		</div>
+	);
 }
 
 /**

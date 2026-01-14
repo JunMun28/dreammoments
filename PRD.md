@@ -702,7 +702,7 @@
         "Includes guest name, group, status, attendee count, preferences",
         "CSV opens correctly in Excel/Google Sheets"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "DASH-004",
