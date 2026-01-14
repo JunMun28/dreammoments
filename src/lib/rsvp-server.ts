@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { eq } from "drizzle-orm";
 import { db } from "@/db/index";
-import { guests, rsvpResponses } from "@/db/schema";
+import { guestGroups, guests, rsvpResponses } from "@/db/schema";
 
 // ============================================================================
 // TYPES
@@ -227,4 +227,98 @@ export const getGroupRsvpStatus = createServerFn({ method: "GET" })
 	.inputValidator((input: { groupId: string }) => input)
 	.handler(async ({ data }) => {
 		return getGroupRsvpStatusInternal(data.groupId);
+	});
+
+// ============================================================================
+// GET INVITATION RSVP SUMMARY (Dashboard)
+// ============================================================================
+
+export interface GroupRsvpSummary {
+	id: string;
+	name: string;
+	rsvpToken: string;
+	guestCount: number;
+	totalAttending: number;
+	totalDeclined: number;
+	totalPending: number;
+}
+
+export interface InvitationRsvpSummary {
+	totalInvited: number;
+	totalAttending: number;
+	totalDeclined: number;
+	totalPending: number;
+	groups: GroupRsvpSummary[];
+}
+
+/**
+ * Internal function to get RSVP summary for an entire invitation.
+ * Aggregates RSVP status across all guest groups.
+ */
+export async function getInvitationRsvpSummaryInternal(
+	invitationId: string,
+): Promise<InvitationRsvpSummary> {
+	if (!invitationId) {
+		throw new Error("invitationId is required");
+	}
+
+	// Get all guest groups for this invitation
+	const groups = await db
+		.select()
+		.from(guestGroups)
+		.where(eq(guestGroups.invitationId, invitationId));
+
+	if (groups.length === 0) {
+		return {
+			totalInvited: 0,
+			totalAttending: 0,
+			totalDeclined: 0,
+			totalPending: 0,
+			groups: [],
+		};
+	}
+
+	let totalInvited = 0;
+	let totalAttending = 0;
+	let totalDeclined = 0;
+	let totalPending = 0;
+	const groupSummaries: GroupRsvpSummary[] = [];
+
+	// Get RSVP status for each group
+	for (const group of groups) {
+		const groupStatus = await getGroupRsvpStatusInternal(group.id);
+
+		const guestCount = groupStatus.guests.length;
+		totalInvited += guestCount;
+		totalAttending += groupStatus.totalAttending;
+		totalDeclined += groupStatus.totalDeclined;
+		totalPending += groupStatus.totalPending;
+
+		groupSummaries.push({
+			id: group.id,
+			name: group.name,
+			rsvpToken: group.rsvpToken,
+			guestCount,
+			totalAttending: groupStatus.totalAttending,
+			totalDeclined: groupStatus.totalDeclined,
+			totalPending: groupStatus.totalPending,
+		});
+	}
+
+	return {
+		totalInvited,
+		totalAttending,
+		totalDeclined,
+		totalPending,
+		groups: groupSummaries,
+	};
+}
+
+/**
+ * Server function to get RSVP summary for an invitation (dashboard view).
+ */
+export const getInvitationRsvpSummary = createServerFn({ method: "GET" })
+	.inputValidator((input: { invitationId: string }) => input)
+	.handler(async ({ data }) => {
+		return getInvitationRsvpSummaryInternal(data.invitationId);
 	});

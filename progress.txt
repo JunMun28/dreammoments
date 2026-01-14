@@ -1013,3 +1013,34 @@
 - 540/540 tests pass (14 new tests)
 - typecheck passes
 - biome check passes
+
+## 2026-01-14: RSVP Status Overview Dashboard (DASH-001)
+
+**Completed:** RSVP dashboard component displaying summary statistics in InvitationBuilder
+
+**Changes:**
+- `src/lib/rsvp-server.ts`: Added getInvitationRsvpSummaryInternal() function + server function + types (GroupRsvpSummary, InvitationRsvpSummary)
+- `src/lib/rsvp-server.test.ts`: Added 4 tests for getInvitationRsvpSummaryInternal (validation, empty groups, aggregate totals, per-group breakdown)
+- `src/components/RsvpDashboard.tsx`: New dashboard component w/ stat cards (Invited, Attending, Declined, Pending), progress bars, group breakdown
+- `src/components/RsvpDashboard.test.tsx`: 11 tests (calculatePercentage helper + component rendering)
+- `src/components/InvitationBuilder.tsx`: Added RsvpDashboardSection that loads summary data via useEffect
+
+**Decisions:**
+- getInvitationRsvpSummaryInternal aggregates across all guest groups for an invitation
+- Dashboard shows 4 stat cards with color-coded icons (blue=invited, green=attending, red=declined, yellow=pending)
+- Each stat card has percentage calculation + progress bar
+- Group breakdown section shows per-group stats with check/X/clock icons
+- calculatePercentage handles divide-by-zero (returns 0 when total is 0)
+- Loading state shows "Loading RSVP data..." placeholder
+- Dashboard placed between RSVP Settings and Guest Management sections in builder
+
+**Notes:**
+- totalAttending includes plus-ones (guest count + plusOneCount for each attending guest)
+- totalInvited counts guests only (not plus-ones) per existing pattern
+- Component is stateless (receives summary prop) for testability
+- Data loaded on mount and when invitation.id changes
+
+**Verification:**
+- 555/555 tests pass (15 new tests)
+- typecheck passes
+- biome check passes

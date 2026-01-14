@@ -13,12 +13,14 @@ import {
 	updateGuest,
 	updateGuestGroup,
 } from "@/lib/guest-server";
+import { getInvitationRsvpSummary } from "@/lib/rsvp-server";
 import { cn } from "@/lib/utils";
 import { BasicInfoForm, type BasicInfoFormValues } from "./BasicInfoForm";
 import type { GuestEditorValues } from "./GuestEditor";
 import { GuestGroupList } from "./GuestGroupList";
 import { HeroImageSection } from "./HeroImageSection";
 import { InvitationPreview } from "./InvitationPreview";
+import { RsvpDashboard, type RsvpSummaryData } from "./RsvpDashboard";
 import { RsvpDeadlineSection } from "./RsvpDeadlineSection";
 import { ThemeSection } from "./ThemeSection";
 import { type ViewportMode, ViewportToggle } from "./ui/viewport-toggle";
@@ -125,6 +127,48 @@ function RsvpSettingsSection() {
 			value={invitation.rsvpDeadline}
 			onChange={handleDeadlineChange}
 		/>
+	);
+}
+
+/**
+ * RSVP Dashboard section that loads and displays RSVP summary.
+ */
+function RsvpDashboardSection() {
+	const { invitation } = useInvitationBuilder();
+	const [summary, setSummary] = useState<RsvpSummaryData | null>(null);
+	const [isLoading, setIsLoading] = useState(true);
+
+	// Load RSVP summary on mount and when invitation changes
+	useEffect(() => {
+		async function loadSummary() {
+			if (!invitation.id) return;
+
+			setIsLoading(true);
+			try {
+				const data = await getInvitationRsvpSummary({
+					data: { invitationId: invitation.id },
+				});
+				setSummary(data);
+			} catch (error) {
+				console.error("Failed to load RSVP summary:", error);
+			} finally {
+				setIsLoading(false);
+			}
+		}
+
+		loadSummary();
+	}, [invitation.id]);
+
+	const emptySummary: RsvpSummaryData = {
+		totalInvited: 0,
+		totalAttending: 0,
+		totalDeclined: 0,
+		totalPending: 0,
+		groups: [],
+	};
+
+	return (
+		<RsvpDashboard summary={summary ?? emptySummary} isLoading={isLoading} />
 	);
 }
 
@@ -252,6 +296,10 @@ function InvitationBuilderContent({
 					<div className="rounded-lg border bg-card p-6">
 						<h2 className="mb-6 text-lg font-semibold">RSVP Settings</h2>
 						<RsvpSettingsSection />
+					</div>
+
+					<div className="rounded-lg border bg-card p-6">
+						<RsvpDashboardSection />
 					</div>
 
 					<div className="rounded-lg border bg-card p-6">

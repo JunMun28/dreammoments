@@ -676,7 +676,7 @@
         "Shows pending/not responded count",
         "Percentages or visual chart displayed"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "DASH-002",
