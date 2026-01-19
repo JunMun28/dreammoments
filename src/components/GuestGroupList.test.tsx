@@ -450,6 +450,7 @@ describe("GuestGroupList", () => {
 		});
 
 		it("shows checkmark after copying link", async () => {
+			const user = userEvent.setup();
 			renderWithProvider(
 				createMockInvitation({
 					guestGroups: [
@@ -458,10 +459,13 @@ describe("GuestGroupList", () => {
 				}),
 			);
 
-			fireEvent.click(screen.getByTestId("copy-link-g1"));
+			await user.click(screen.getByTestId("copy-link-g1"));
 
 			await waitFor(() => {
-				expect(screen.getByText("✓")).toBeDefined();
+				// After copying, the button's aria-label changes to "Link copied"
+				expect(
+					screen.getByRole("button", { name: "Link copied" }),
+				).toBeDefined();
 			});
 		});
 	});

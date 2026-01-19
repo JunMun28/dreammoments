@@ -65,7 +65,7 @@ Identify the highest priority task from progress.txt and PRD.md. Work on ONLY ON
 5. **Commit**: Make a git commit of that feature. \
 \
 # TERMINATION\
-If, while implementing the feature, you notice that all work is complete(no more passes: false in PRD.md), output <promise>COMPLETE</promise>.")
+If, while implementing the feature, you notice that all work is complete(no more passes: false in PRD.mdx), output <promise>COMPLETE</promise>.")
 
   echo ""
   echo "Claude Code execution completed for iteration $i"

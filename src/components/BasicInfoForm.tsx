@@ -122,6 +122,7 @@ export function BasicInfoForm({
 					<div>
 						<Label htmlFor={weddingDateId}>Wedding Date</Label>
 						<DatePicker
+							id={weddingDateId}
 							value={field.state.value}
 							onChange={(date) => field.handleChange(date)}
 							placeholder="Select wedding date"
@@ -144,8 +145,10 @@ export function BasicInfoForm({
 					<div>
 						<Label htmlFor={weddingTimeId}>Wedding Time</Label>
 						<TimePicker
+							id={weddingTimeId}
 							value={field.state.value}
 							onChange={(time) => field.handleChange(time)}
+							aria-label="Wedding time"
 						/>
 					</div>
 				)}

@@ -309,10 +309,16 @@ function RsvpPage() {
 
 function LoadingView() {
 	return (
-		<div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-stone-50 to-stone-100">
-			<Loader2 className="mb-4 h-8 w-8 animate-spin text-rose-400" />
+		<output
+			className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-stone-50 to-stone-100"
+			aria-live="polite"
+		>
+			<Loader2
+				className="mb-4 h-8 w-8 animate-spin text-rose-400"
+				aria-hidden="true"
+			/>
 			<p className="text-stone-600">Loading invitation...</p>
-		</div>
+		</output>
 	);
 }
 

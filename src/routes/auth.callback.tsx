@@ -9,12 +9,14 @@ import { syncUserFromNeonAuth } from "../lib/user-sync";
 
 interface CallbackSearch {
 	redirect?: string;
+	error?: string;
 }
 
 export const Route = createFileRoute("/auth/callback")({
 	component: AuthCallback,
 	validateSearch: (search: Record<string, unknown>): CallbackSearch => ({
 		redirect: typeof search.redirect === "string" ? search.redirect : undefined,
+		error: typeof search.error === "string" ? search.error : undefined,
 	}),
 });
 

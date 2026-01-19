@@ -1,0 +1,2145 @@
+{
+  "meta": {
+    "project": "DreamMoments",
+    "description": "UI test cases for wedding invitation builder and RSVP management platform",
+    "version": "1.0.0",
+    "lastUpdated": "2025-01-14"
+  },
+  "testSuites": [
+    {
+      "id": "TS-001",
+      "name": "Home Page",
+      "description": "Tests for the landing page and navigation",
+      "testCases": [
+        {
+          "id": "TC-001-001",
+          "name": "Home page renders correctly",
+          "priority": "high",
+          "passes": false,
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/'",
+              "expected": "Home page loads successfully"
+            },
+            {
+              "step": 2,
+              "action": "Verify hero section is visible",
+              "expected": "Hero section with headline and CTA button is displayed"
+            },
+            {
+              "step": 3,
+              "action": "Verify template gallery section is visible",
+              "expected": "'Choose Your Perfect Template' section shows 3 template cards"
+            },
+            {
+              "step": 4,
+              "action": "Verify features section is visible",
+              "expected": "Features section lists platform capabilities"
+            },
+            {
+              "step": 5,
+              "action": "Verify footer is visible",
+              "expected": "Footer with navigation links is displayed"
+            }
+          ]
+        },
+        {
+          "id": "TC-001-002",
+          "name": "CTA button redirects to login",
+          "priority": "high",
+          "passes": false,
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/'",
+              "expected": "Home page loads"
+            },
+            {
+              "step": 2,
+              "action": "Click 'Start Creating' button in hero section",
+              "expected": "User is redirected to '/login'"
+            }
+          ]
+        },
+        {
+          "id": "TC-001-003",
+          "name": "Template cards are clickable",
+          "priority": "medium",
+          "passes": false,
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/'",
+              "expected": "Home page loads"
+            },
+            {
+              "step": 2,
+              "action": "Scroll to template gallery section",
+              "expected": "3 template cards are visible"
+            },
+            {
+              "step": 3,
+              "action": "Click on first template card",
+              "expected": "User is navigated to '/templates/{templateId}'"
+            }
+          ]
+        },
+        {
+          "id": "TC-001-004",
+          "name": "Page is responsive",
+          "priority": "medium",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/' on desktop viewport (1920x1080)",
+              "expected": "Page displays in desktop layout"
+            },
+            {
+              "step": 2,
+              "action": "Resize viewport to tablet (768x1024)",
+              "expected": "Page adapts to tablet layout"
+            },
+            {
+              "step": 3,
+              "action": "Resize viewport to mobile (375x667)",
+              "expected": "Page adapts to mobile layout with hamburger menu if applicable"
+            }
+          ],
+          "passes": false
+        }
+      ]
+    },
+    {
+      "id": "TS-002",
+      "name": "Authentication",
+      "description": "Tests for Google OAuth login and logout flows",
+      "testCases": [
+        {
+          "id": "TC-002-001",
+          "name": "Login page renders correctly",
+          "priority": "high",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/login'",
+              "expected": "Login page loads successfully"
+            },
+            {
+              "step": 2,
+              "action": "Verify Google sign-in button is visible",
+              "expected": "Google OAuth button is displayed"
+            },
+            {
+              "step": 3,
+              "action": "Verify branding/logo is visible",
+              "expected": "DreamMoments branding is displayed"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-002-002",
+          "name": "Google OAuth flow completes successfully",
+          "priority": "critical",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/login'",
+              "expected": "Login page loads"
+            },
+            {
+              "step": 2,
+              "action": "Click 'Sign in with Google' button",
+              "expected": "User is redirected to Google OAuth consent screen"
+            },
+            {
+              "step": 3,
+              "action": "Complete Google sign-in with valid credentials",
+              "expected": "User is redirected to '/auth/callback'"
+            },
+            {
+              "step": 4,
+              "action": "Wait for callback processing",
+              "expected": "User is redirected to '/builder'"
+            },
+            {
+              "step": 5,
+              "action": "Verify user is authenticated",
+              "expected": "User session is active and builder loads with user data"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-002-003",
+          "name": "Login with template parameter preserves selection",
+          "priority": "high",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/login?template=elegant-minimal'",
+              "expected": "Login page loads with template parameter"
+            },
+            {
+              "step": 2,
+              "action": "Complete Google OAuth flow",
+              "expected": "User is authenticated"
+            },
+            {
+              "step": 3,
+              "action": "Verify redirect to builder",
+              "expected": "User lands on '/builder' with 'elegant-minimal' template pre-selected"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-002-004",
+          "name": "Unauthenticated user cannot access builder",
+          "priority": "critical",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Clear all cookies/session",
+              "expected": "User is logged out"
+            },
+            {
+              "step": 2,
+              "action": "Navigate directly to '/builder'",
+              "expected": "User is redirected to '/login'"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-002-005",
+          "name": "OAuth error is handled gracefully",
+          "priority": "medium",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/auth/callback?error=access_denied'",
+              "expected": "Error message is displayed to user"
+            },
+            {
+              "step": 2,
+              "action": "Verify error handling",
+              "expected": "User sees friendly error message with option to retry login"
+            }
+          ],
+          "passes": false
+        }
+      ]
+    },
+    {
+      "id": "TS-003",
+      "name": "Template Preview",
+      "description": "Tests for template preview page functionality",
+      "testCases": [
+        {
+          "id": "TC-003-001",
+          "name": "Template preview page renders correctly",
+          "priority": "high",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/templates/elegant-minimal'",
+              "expected": "Template preview page loads"
+            },
+            {
+              "step": 2,
+              "action": "Verify template name and description are displayed",
+              "expected": "Template metadata is visible"
+            },
+            {
+              "step": 3,
+              "action": "Verify invitation preview with sample data is displayed",
+              "expected": "Preview shows sample couple names, dates, venue"
+            },
+            {
+              "step": 4,
+              "action": "Verify 'Use This Template' button is visible",
+              "expected": "CTA button is prominently displayed"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-003-002",
+          "name": "Viewport toggle switches preview size",
+          "priority": "medium",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/templates/elegant-minimal'",
+              "expected": "Template preview loads in desktop view"
+            },
+            {
+              "step": 2,
+              "action": "Click 'Mobile' viewport toggle",
+              "expected": "Preview switches to mobile dimensions (375px width)"
+            },
+            {
+              "step": 3,
+              "action": "Click 'Tablet' viewport toggle",
+              "expected": "Preview switches to tablet dimensions (768px width)"
+            },
+            {
+              "step": 4,
+              "action": "Click 'Desktop' viewport toggle",
+              "expected": "Preview returns to desktop dimensions"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-003-003",
+          "name": "'Use This Template' redirects to login with template param",
+          "priority": "high",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/templates/romantic-garden'",
+              "expected": "Template preview loads"
+            },
+            {
+              "step": 2,
+              "action": "Click 'Use This Template' button",
+              "expected": "User is redirected to '/login?template=romantic-garden'"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-003-004",
+          "name": "Invalid template ID shows error",
+          "priority": "medium",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/templates/non-existent-template'",
+              "expected": "404 page or error message is displayed"
+            }
+          ],
+          "passes": false
+        }
+      ]
+    },
+    {
+      "id": "TS-004",
+      "name": "Invitation Builder - Basic Information",
+      "description": "Tests for editing basic invitation details",
+      "testCases": [
+        {
+          "id": "TC-004-001",
+          "name": "Builder page loads with existing or new invitation",
+          "priority": "critical",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Login and navigate to '/builder'",
+              "expected": "Builder page loads"
+            },
+            {
+              "step": 2,
+              "action": "Verify left panel (form sections) is visible",
+              "expected": "Form sections accordion is displayed"
+            },
+            {
+              "step": 3,
+              "action": "Verify right panel (live preview) is visible",
+              "expected": "Invitation preview is displayed"
+            },
+            {
+              "step": 4,
+              "action": "Verify Basic Information section is expanded by default",
+              "expected": "Partner names, date, time, venue fields are visible"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-004-002",
+          "name": "Edit partner names",
+          "priority": "high",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder'",
+              "expected": "Builder loads"
+            },
+            {
+              "step": 2,
+              "action": "Enter 'Sarah' in Partner 1 Name field",
+              "expected": "Input accepts text"
+            },
+            {
+              "step": 3,
+              "action": "Enter 'Michael' in Partner 2 Name field",
+              "expected": "Input accepts text"
+            },
+            {
+              "step": 4,
+              "action": "Verify live preview updates",
+              "expected": "Preview shows 'Sarah & Michael'"
+            },
+            {
+              "step": 5,
+              "action": "Wait 1 second for autosave",
+              "expected": "Autosave indicator shows 'Saved'"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-004-003",
+          "name": "Edit wedding date",
+          "priority": "high",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder'",
+              "expected": "Builder loads"
+            },
+            {
+              "step": 2,
+              "action": "Click on Wedding Date picker",
+              "expected": "Date picker calendar opens"
+            },
+            {
+              "step": 3,
+              "action": "Select date: June 15, 2025",
+              "expected": "Date is selected and picker closes"
+            },
+            {
+              "step": 4,
+              "action": "Verify preview shows selected date",
+              "expected": "Preview displays 'June 15, 2025'"
+            },
+            {
+              "step": 5,
+              "action": "Wait for autosave",
+              "expected": "Changes are saved"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-004-004",
+          "name": "Edit wedding time",
+          "priority": "high",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder'",
+              "expected": "Builder loads"
+            },
+            {
+              "step": 2,
+              "action": "Click on Wedding Time picker",
+              "expected": "Time picker opens"
+            },
+            {
+              "step": 3,
+              "action": "Select time: 3:00 PM",
+              "expected": "Time is selected"
+            },
+            {
+              "step": 4,
+              "action": "Verify preview shows selected time",
+              "expected": "Preview displays '3:00 PM'"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-004-005",
+          "name": "Edit venue details",
+          "priority": "high",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder'",
+              "expected": "Builder loads"
+            },
+            {
+              "step": 2,
+              "action": "Enter 'Grand Ballroom' in Venue Name field",
+              "expected": "Input accepts text"
+            },
+            {
+              "step": 3,
+              "action": "Enter '123 Wedding Lane, New York, NY 10001' in Venue Address field",
+              "expected": "Input accepts text"
+            },
+            {
+              "step": 4,
+              "action": "Verify preview updates with venue info",
+              "expected": "Preview shows venue name and address"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-004-006",
+          "name": "Autosave triggers after 1 second of inactivity",
+          "priority": "high",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder'",
+              "expected": "Builder loads"
+            },
+            {
+              "step": 2,
+              "action": "Make any change to a field",
+              "expected": "Autosave indicator shows 'Saving...'"
+            },
+            {
+              "step": 3,
+              "action": "Wait 1 second without making changes",
+              "expected": "Autosave completes"
+            },
+            {
+              "step": 4,
+              "action": "Verify autosave indicator",
+              "expected": "Indicator shows 'Saved' with timestamp"
+            }
+          ],
+          "passes": false
+        }
+      ]
+    },
+    {
+      "id": "TS-005",
+      "name": "Invitation Builder - Hero Image",
+      "description": "Tests for hero image upload functionality",
+      "testCases": [
+        {
+          "id": "TC-005-001",
+          "name": "Upload hero image",
+          "priority": "high",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder'",
+              "expected": "Builder loads"
+            },
+            {
+              "step": 2,
+              "action": "Expand 'Hero Image' section",
+              "expected": "Image upload area is visible"
+            },
+            {
+              "step": 3,
+              "action": "Click upload area or drag image file",
+              "expected": "File picker opens or drop zone highlights"
+            },
+            {
+              "step": 4,
+              "action": "Select a valid image file (JPG/PNG, < 5MB)",
+              "expected": "Upload progress is shown"
+            },
+            {
+              "step": 5,
+              "action": "Wait for upload to complete",
+              "expected": "Image thumbnail is displayed in form"
+            },
+            {
+              "step": 6,
+              "action": "Verify preview shows hero image",
+              "expected": "Preview displays the uploaded image"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-005-002",
+          "name": "Remove hero image",
+          "priority": "medium",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder' with existing hero image",
+              "expected": "Builder loads with image thumbnail"
+            },
+            {
+              "step": 2,
+              "action": "Click 'Remove' button on image",
+              "expected": "Confirmation dialog appears"
+            },
+            {
+              "step": 3,
+              "action": "Confirm removal",
+              "expected": "Image is removed"
+            },
+            {
+              "step": 4,
+              "action": "Verify preview no longer shows image",
+              "expected": "Preview shows default/placeholder"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-005-003",
+          "name": "Reject invalid file type",
+          "priority": "medium",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder'",
+              "expected": "Builder loads"
+            },
+            {
+              "step": 2,
+              "action": "Attempt to upload a non-image file (e.g., .pdf)",
+              "expected": "Error message is displayed"
+            },
+            {
+              "step": 3,
+              "action": "Verify file is rejected",
+              "expected": "'Invalid file type' error shown"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-005-004",
+          "name": "Reject oversized file",
+          "priority": "medium",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder'",
+              "expected": "Builder loads"
+            },
+            {
+              "step": 2,
+              "action": "Attempt to upload an image > 5MB",
+              "expected": "Error message is displayed"
+            },
+            {
+              "step": 3,
+              "action": "Verify file is rejected",
+              "expected": "'File too large' error shown"
+            }
+          ],
+          "passes": false
+        }
+      ]
+    },
+    {
+      "id": "TS-006",
+      "name": "Invitation Builder - Theme",
+      "description": "Tests for theme customization (color, fonts)",
+      "testCases": [
+        {
+          "id": "TC-006-001",
+          "name": "Change accent color",
+          "priority": "high",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder'",
+              "expected": "Builder loads"
+            },
+            {
+              "step": 2,
+              "action": "Expand 'Theme' section",
+              "expected": "Color picker and font picker are visible"
+            },
+            {
+              "step": 3,
+              "action": "Click on color picker",
+              "expected": "Color picker opens"
+            },
+            {
+              "step": 4,
+              "action": "Select a new color (e.g., #B76E79 rose gold)",
+              "expected": "Color is selected"
+            },
+            {
+              "step": 5,
+              "action": "Verify preview updates with new accent color",
+              "expected": "Preview shows new color on buttons, accents"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-006-002",
+          "name": "Change font pairing",
+          "priority": "high",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder'",
+              "expected": "Builder loads"
+            },
+            {
+              "step": 2,
+              "action": "Expand 'Theme' section",
+              "expected": "Font picker is visible"
+            },
+            {
+              "step": 3,
+              "action": "Click on font picker",
+              "expected": "Font options dropdown opens"
+            },
+            {
+              "step": 4,
+              "action": "Select 'Playfair Display + Lato' pairing",
+              "expected": "Font selection is applied"
+            },
+            {
+              "step": 5,
+              "action": "Verify preview updates with new fonts",
+              "expected": "Preview text uses new font pairing"
+            }
+          ],
+          "passes": false
+        }
+      ]
+    },
+    {
+      "id": "TS-007",
+      "name": "Invitation Builder - Schedule Blocks",
+      "description": "Tests for timeline/schedule management",
+      "testCases": [
+        {
+          "id": "TC-007-001",
+          "name": "Add new schedule block",
+          "priority": "high",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder'",
+              "expected": "Builder loads"
+            },
+            {
+              "step": 2,
+              "action": "Expand 'Schedule' section",
+              "expected": "Schedule blocks list is visible"
+            },
+            {
+              "step": 3,
+              "action": "Click 'Add Event' button",
+              "expected": "New schedule block form appears"
+            },
+            {
+              "step": 4,
+              "action": "Enter 'Ceremony' as title",
+              "expected": "Title is entered"
+            },
+            {
+              "step": 5,
+              "action": "Enter '3:00 PM' as time",
+              "expected": "Time is entered"
+            },
+            {
+              "step": 6,
+              "action": "Enter 'Exchange of vows in the garden' as description",
+              "expected": "Description is entered"
+            },
+            {
+              "step": 7,
+              "action": "Click 'Save' or confirm",
+              "expected": "Block is added to list"
+            },
+            {
+              "step": 8,
+              "action": "Verify preview shows new event",
+              "expected": "Timeline in preview includes 'Ceremony'"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-007-002",
+          "name": "Edit existing schedule block",
+          "priority": "medium",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder' with existing schedule blocks",
+              "expected": "Builder loads with schedule"
+            },
+            {
+              "step": 2,
+              "action": "Click edit icon on a schedule block",
+              "expected": "Block enters edit mode"
+            },
+            {
+              "step": 3,
+              "action": "Change title from 'Ceremony' to 'Wedding Ceremony'",
+              "expected": "Title is updated"
+            },
+            {
+              "step": 4,
+              "action": "Save changes",
+              "expected": "Block is updated"
+            },
+            {
+              "step": 5,
+              "action": "Verify preview reflects change",
+              "expected": "Preview shows 'Wedding Ceremony'"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-007-003",
+          "name": "Delete schedule block",
+          "priority": "medium",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder' with existing schedule blocks",
+              "expected": "Builder loads with schedule"
+            },
+            {
+              "step": 2,
+              "action": "Click delete icon on a schedule block",
+              "expected": "Confirmation dialog appears"
+            },
+            {
+              "step": 3,
+              "action": "Confirm deletion",
+              "expected": "Block is removed from list"
+            },
+            {
+              "step": 4,
+              "action": "Verify preview no longer shows deleted event",
+              "expected": "Event is removed from timeline"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-007-004",
+          "name": "Reorder schedule blocks via drag and drop",
+          "priority": "medium",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder' with 3+ schedule blocks",
+              "expected": "Builder loads with multiple events"
+            },
+            {
+              "step": 2,
+              "action": "Drag 'Reception' block above 'Dinner' block",
+              "expected": "Visual feedback during drag"
+            },
+            {
+              "step": 3,
+              "action": "Drop the block in new position",
+              "expected": "Order is updated in list"
+            },
+            {
+              "step": 4,
+              "action": "Verify preview reflects new order",
+              "expected": "Timeline shows reordered events"
+            }
+          ],
+          "passes": false
+        }
+      ]
+    },
+    {
+      "id": "TS-008",
+      "name": "Invitation Builder - Notes",
+      "description": "Tests for notes/FAQ management",
+      "testCases": [
+        {
+          "id": "TC-008-001",
+          "name": "Add new note",
+          "priority": "high",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder'",
+              "expected": "Builder loads"
+            },
+            {
+              "step": 2,
+              "action": "Expand 'Notes' section",
+              "expected": "Notes list is visible"
+            },
+            {
+              "step": 3,
+              "action": "Click 'Add Note' button",
+              "expected": "New note form appears"
+            },
+            {
+              "step": 4,
+              "action": "Enter 'Dress Code' as title",
+              "expected": "Title is entered"
+            },
+            {
+              "step": 5,
+              "action": "Enter 'Cocktail attire requested' as description",
+              "expected": "Description is entered"
+            },
+            {
+              "step": 6,
+              "action": "Save the note",
+              "expected": "Note is added to list"
+            },
+            {
+              "step": 7,
+              "action": "Verify preview shows new note",
+              "expected": "Notes section in preview includes 'Dress Code'"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-008-002",
+          "name": "Edit existing note",
+          "priority": "medium",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder' with existing notes",
+              "expected": "Builder loads with notes"
+            },
+            {
+              "step": 2,
+              "action": "Click edit icon on a note",
+              "expected": "Note enters edit mode"
+            },
+            {
+              "step": 3,
+              "action": "Update description text",
+              "expected": "Text is updated"
+            },
+            {
+              "step": 4,
+              "action": "Save changes",
+              "expected": "Note is updated"
+            },
+            {
+              "step": 5,
+              "action": "Verify preview reflects changes",
+              "expected": "Preview shows updated note"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-008-003",
+          "name": "Delete note",
+          "priority": "medium",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder' with existing notes",
+              "expected": "Builder loads with notes"
+            },
+            {
+              "step": 2,
+              "action": "Click delete icon on a note",
+              "expected": "Confirmation dialog appears"
+            },
+            {
+              "step": 3,
+              "action": "Confirm deletion",
+              "expected": "Note is removed from list"
+            },
+            {
+              "step": 4,
+              "action": "Verify preview no longer shows deleted note",
+              "expected": "Note section updated in preview"
+            }
+          ],
+          "passes": false
+        }
+      ]
+    },
+    {
+      "id": "TS-009",
+      "name": "Guest Management",
+      "description": "Tests for guest groups and individual guest management",
+      "testCases": [
+        {
+          "id": "TC-009-001",
+          "name": "Create new guest group",
+          "priority": "high",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder'",
+              "expected": "Builder loads"
+            },
+            {
+              "step": 2,
+              "action": "Expand 'Guest Management' section",
+              "expected": "Guest groups list is visible"
+            },
+            {
+              "step": 3,
+              "action": "Click 'Add Guest Group' button",
+              "expected": "New group dialog opens"
+            },
+            {
+              "step": 4,
+              "action": "Enter 'Smith Family' as group name",
+              "expected": "Name is entered"
+            },
+            {
+              "step": 5,
+              "action": "Click 'Create' button",
+              "expected": "Group is created"
+            },
+            {
+              "step": 6,
+              "action": "Verify group appears in list",
+              "expected": "'Smith Family' group is visible with unique RSVP token"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-009-002",
+          "name": "Add guest to group",
+          "priority": "high",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder' with existing guest group",
+              "expected": "Builder loads with groups"
+            },
+            {
+              "step": 2,
+              "action": "Click on 'Smith Family' group to expand",
+              "expected": "Group details and guest list shown"
+            },
+            {
+              "step": 3,
+              "action": "Click 'Add Guest' button",
+              "expected": "New guest form appears"
+            },
+            {
+              "step": 4,
+              "action": "Enter 'John Smith' as name",
+              "expected": "Name is entered"
+            },
+            {
+              "step": 5,
+              "action": "Enter 'john@example.com' as email (optional)",
+              "expected": "Email is entered"
+            },
+            {
+              "step": 6,
+              "action": "Enter '555-1234' as phone (optional)",
+              "expected": "Phone is entered"
+            },
+            {
+              "step": 7,
+              "action": "Save the guest",
+              "expected": "Guest is added to group"
+            },
+            {
+              "step": 8,
+              "action": "Verify guest appears under group",
+              "expected": "'John Smith' listed in 'Smith Family' group"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-009-003",
+          "name": "Edit guest details",
+          "priority": "medium",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder' with existing guests",
+              "expected": "Builder loads"
+            },
+            {
+              "step": 2,
+              "action": "Click edit icon on a guest",
+              "expected": "Guest edit form opens"
+            },
+            {
+              "step": 3,
+              "action": "Update guest email",
+              "expected": "Email is updated"
+            },
+            {
+              "step": 4,
+              "action": "Save changes",
+              "expected": "Guest info is saved"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-009-004",
+          "name": "Delete guest from group",
+          "priority": "medium",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder' with existing guests",
+              "expected": "Builder loads"
+            },
+            {
+              "step": 2,
+              "action": "Click delete icon on a guest",
+              "expected": "Confirmation dialog appears"
+            },
+            {
+              "step": 3,
+              "action": "Confirm deletion",
+              "expected": "Guest is removed"
+            },
+            {
+              "step": 4,
+              "action": "Verify guest is no longer in list",
+              "expected": "Guest removed from group"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-009-005",
+          "name": "Delete guest group",
+          "priority": "medium",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder' with existing guest group",
+              "expected": "Builder loads"
+            },
+            {
+              "step": 2,
+              "action": "Click delete icon on guest group",
+              "expected": "Confirmation dialog warns about cascade delete"
+            },
+            {
+              "step": 3,
+              "action": "Confirm deletion",
+              "expected": "Group and all guests are deleted"
+            },
+            {
+              "step": 4,
+              "action": "Verify group is removed",
+              "expected": "Group no longer in list"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-009-006",
+          "name": "View RSVP link for guest group",
+          "priority": "high",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder' with guest group",
+              "expected": "Builder loads"
+            },
+            {
+              "step": 2,
+              "action": "Click 'Copy Link' or link icon on guest group",
+              "expected": "RSVP URL is displayed/copied"
+            },
+            {
+              "step": 3,
+              "action": "Verify URL format",
+              "expected": "URL is in format: https://domain/rsvp#t=<TOKEN>"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-009-007",
+          "name": "View QR code for guest group",
+          "priority": "medium",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder' with guest group",
+              "expected": "Builder loads"
+            },
+            {
+              "step": 2,
+              "action": "Click 'QR Code' icon on guest group",
+              "expected": "QR code dialog opens"
+            },
+            {
+              "step": 3,
+              "action": "Verify QR code is displayed",
+              "expected": "Scannable QR code is visible"
+            },
+            {
+              "step": 4,
+              "action": "Close dialog",
+              "expected": "Dialog closes"
+            }
+          ],
+          "passes": false
+        }
+      ]
+    },
+    {
+      "id": "TS-010",
+      "name": "CSV Guest Import",
+      "description": "Tests for bulk guest import via CSV",
+      "testCases": [
+        {
+          "id": "TC-010-001",
+          "name": "Import guests via CSV - success",
+          "priority": "high",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder'",
+              "expected": "Builder loads"
+            },
+            {
+              "step": 2,
+              "action": "Expand 'Guest Management' section",
+              "expected": "Section visible"
+            },
+            {
+              "step": 3,
+              "action": "Click 'Import CSV' button",
+              "expected": "CSV upload dialog opens"
+            },
+            {
+              "step": 4,
+              "action": "Upload valid CSV file with columns: Group Name, Guest Name, Email, Phone",
+              "expected": "File is uploaded"
+            },
+            {
+              "step": 5,
+              "action": "Verify import preview shows parsed data",
+              "expected": "Preview table shows groups and guests to be imported"
+            },
+            {
+              "step": 6,
+              "action": "Click 'Confirm Import' button",
+              "expected": "Import is processed"
+            },
+            {
+              "step": 7,
+              "action": "Verify new groups/guests appear in list",
+              "expected": "Imported data is visible"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-010-002",
+          "name": "Import CSV with missing columns shows error",
+          "priority": "medium",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder'",
+              "expected": "Builder loads"
+            },
+            {
+              "step": 2,
+              "action": "Click 'Import CSV' button",
+              "expected": "Dialog opens"
+            },
+            {
+              "step": 3,
+              "action": "Upload CSV missing 'Guest Name' column",
+              "expected": "Validation error is shown"
+            },
+            {
+              "step": 4,
+              "action": "Verify error message",
+              "expected": "'Missing required column: Guest Name' or similar"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-010-003",
+          "name": "Cancel CSV import",
+          "priority": "low",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder'",
+              "expected": "Builder loads"
+            },
+            {
+              "step": 2,
+              "action": "Click 'Import CSV' button",
+              "expected": "Dialog opens"
+            },
+            {
+              "step": 3,
+              "action": "Upload valid CSV file",
+              "expected": "Preview is shown"
+            },
+            {
+              "step": 4,
+              "action": "Click 'Cancel' button",
+              "expected": "Dialog closes, no import performed"
+            },
+            {
+              "step": 5,
+              "action": "Verify no new guests added",
+              "expected": "Guest list unchanged"
+            }
+          ],
+          "passes": false
+        }
+      ]
+    },
+    {
+      "id": "TS-011",
+      "name": "RSVP Dashboard",
+      "description": "Tests for RSVP analytics and response tracking",
+      "testCases": [
+        {
+          "id": "TC-011-001",
+          "name": "Dashboard shows correct summary statistics",
+          "priority": "high",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder' with guests and RSVP responses",
+              "expected": "Builder loads"
+            },
+            {
+              "step": 2,
+              "action": "Expand 'RSVP Dashboard' section",
+              "expected": "Summary stats are visible"
+            },
+            {
+              "step": 3,
+              "action": "Verify 'Total Invited' count",
+              "expected": "Count matches total guests across all groups"
+            },
+            {
+              "step": 4,
+              "action": "Verify 'Attending' count",
+              "expected": "Count matches guests with 'attending' response"
+            },
+            {
+              "step": 5,
+              "action": "Verify 'Declined' count",
+              "expected": "Count matches guests with 'declined' response"
+            },
+            {
+              "step": 6,
+              "action": "Verify 'Pending' count",
+              "expected": "Count matches guests without response"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-011-002",
+          "name": "Response table displays guest responses",
+          "priority": "high",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder' with RSVP responses",
+              "expected": "Builder loads"
+            },
+            {
+              "step": 2,
+              "action": "Expand 'Response Details' section",
+              "expected": "Response table is visible"
+            },
+            {
+              "step": 3,
+              "action": "Verify columns: Guest Name, Group, Status, Meal, Plus Ones",
+              "expected": "All columns displayed"
+            },
+            {
+              "step": 4,
+              "action": "Verify each guest's response data is correct",
+              "expected": "Data matches database records"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-011-003",
+          "name": "Filter responses by status",
+          "priority": "medium",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder' with mixed RSVP responses",
+              "expected": "Builder loads"
+            },
+            {
+              "step": 2,
+              "action": "Open 'Response Details' section",
+              "expected": "Table with all responses shown"
+            },
+            {
+              "step": 3,
+              "action": "Click 'Attending' filter",
+              "expected": "Table shows only attending guests"
+            },
+            {
+              "step": 4,
+              "action": "Click 'Declined' filter",
+              "expected": "Table shows only declined guests"
+            },
+            {
+              "step": 5,
+              "action": "Click 'Pending' filter",
+              "expected": "Table shows only guests without response"
+            },
+            {
+              "step": 6,
+              "action": "Click 'All' filter",
+              "expected": "Table shows all guests again"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-011-004",
+          "name": "Export responses to CSV",
+          "priority": "medium",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder' with RSVP responses",
+              "expected": "Builder loads"
+            },
+            {
+              "step": 2,
+              "action": "Open 'Response Details' section",
+              "expected": "Table visible"
+            },
+            {
+              "step": 3,
+              "action": "Apply a filter (e.g., 'Attending')",
+              "expected": "Filtered results shown"
+            },
+            {
+              "step": 4,
+              "action": "Click 'Export CSV' button",
+              "expected": "CSV file downloads"
+            },
+            {
+              "step": 5,
+              "action": "Open downloaded CSV",
+              "expected": "CSV contains filtered guest data"
+            }
+          ],
+          "passes": false
+        }
+      ]
+    },
+    {
+      "id": "TS-012",
+      "name": "Guest RSVP Flow",
+      "description": "Tests for guest-facing RSVP page (token-based)",
+      "testCases": [
+        {
+          "id": "TC-012-001",
+          "name": "RSVP page loads with valid token",
+          "priority": "critical",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/rsvp#t=<VALID_TOKEN>'",
+              "expected": "RSVP page loads"
+            },
+            {
+              "step": 2,
+              "action": "Verify invitation preview is displayed",
+              "expected": "Couple names, date, venue visible"
+            },
+            {
+              "step": 3,
+              "action": "Verify guest group identification",
+              "expected": "'You're invited as: [Group Name]' shown"
+            },
+            {
+              "step": 4,
+              "action": "Verify RSVP form is visible",
+              "expected": "Form with attendance, meal options displayed"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-012-002",
+          "name": "Submit RSVP as attending",
+          "priority": "critical",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/rsvp#t=<VALID_TOKEN>'",
+              "expected": "RSVP page loads"
+            },
+            {
+              "step": 2,
+              "action": "Click 'Attending' button",
+              "expected": "Attending is selected"
+            },
+            {
+              "step": 3,
+              "action": "Select meal preference: 'Vegetarian'",
+              "expected": "Meal is selected"
+            },
+            {
+              "step": 4,
+              "action": "Enter dietary notes: 'No nuts please'",
+              "expected": "Notes entered"
+            },
+            {
+              "step": 5,
+              "action": "Set plus-one count to 1",
+              "expected": "Plus-one count set"
+            },
+            {
+              "step": 6,
+              "action": "Enter plus-one name: 'Jane Smith'",
+              "expected": "Name entered"
+            },
+            {
+              "step": 7,
+              "action": "Click 'Submit RSVP' button",
+              "expected": "Form submits"
+            },
+            {
+              "step": 8,
+              "action": "Verify success message",
+              "expected": "'Your RSVP has been recorded' or similar"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-012-003",
+          "name": "Submit RSVP as declining",
+          "priority": "high",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/rsvp#t=<VALID_TOKEN>'",
+              "expected": "RSVP page loads"
+            },
+            {
+              "step": 2,
+              "action": "Click 'Unable to Attend' or 'Declining' button",
+              "expected": "Declining is selected"
+            },
+            {
+              "step": 3,
+              "action": "Click 'Submit RSVP' button",
+              "expected": "Form submits"
+            },
+            {
+              "step": 4,
+              "action": "Verify success message",
+              "expected": "Response is recorded"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-012-004",
+          "name": "Return visit pre-fills previous response",
+          "priority": "high",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Submit an RSVP as 'Attending' with meal 'Chicken'",
+              "expected": "RSVP saved"
+            },
+            {
+              "step": 2,
+              "action": "Close browser or clear page",
+              "expected": "Page closed"
+            },
+            {
+              "step": 3,
+              "action": "Navigate to '/rsvp#t=<SAME_TOKEN>'",
+              "expected": "RSVP page loads"
+            },
+            {
+              "step": 4,
+              "action": "Verify 'Attending' is pre-selected",
+              "expected": "Attendance matches previous response"
+            },
+            {
+              "step": 5,
+              "action": "Verify 'Chicken' meal is pre-selected",
+              "expected": "Meal matches previous response"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-012-005",
+          "name": "Update existing RSVP response",
+          "priority": "medium",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/rsvp#t=<TOKEN_WITH_EXISTING_RESPONSE>'",
+              "expected": "Page loads with pre-filled data"
+            },
+            {
+              "step": 2,
+              "action": "Change attendance from 'Attending' to 'Declining'",
+              "expected": "Selection updated"
+            },
+            {
+              "step": 3,
+              "action": "Click 'Update RSVP' button",
+              "expected": "Form submits"
+            },
+            {
+              "step": 4,
+              "action": "Verify success message",
+              "expected": "Response updated confirmation"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-012-006",
+          "name": "RSVP page shows error for no token",
+          "priority": "high",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/rsvp' (no token)",
+              "expected": "Error state displayed"
+            },
+            {
+              "step": 2,
+              "action": "Verify error message",
+              "expected": "'RSVP Link Required' message shown"
+            },
+            {
+              "step": 3,
+              "action": "Verify no form is displayed",
+              "expected": "RSVP form is not rendered"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-012-007",
+          "name": "RSVP page shows error for invalid token",
+          "priority": "high",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/rsvp#t=invalid-token-123'",
+              "expected": "Token validation fails"
+            },
+            {
+              "step": 2,
+              "action": "Verify error message",
+              "expected": "'Invalid or Expired Link' message shown"
+            },
+            {
+              "step": 3,
+              "action": "Verify no form is displayed",
+              "expected": "RSVP form is not rendered"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-012-008",
+          "name": "RSVP blocked after deadline",
+          "priority": "high",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Set RSVP deadline to a past date via builder",
+              "expected": "Deadline is in the past"
+            },
+            {
+              "step": 2,
+              "action": "Navigate to '/rsvp#t=<VALID_TOKEN>'",
+              "expected": "RSVP page loads"
+            },
+            {
+              "step": 3,
+              "action": "Verify deadline message",
+              "expected": "'RSVP Period Has Ended' message displayed"
+            },
+            {
+              "step": 4,
+              "action": "Verify form is disabled or hidden",
+              "expected": "Cannot submit new RSVP"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-012-009",
+          "name": "RSVP page is mobile responsive",
+          "priority": "medium",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/rsvp#t=<VALID_TOKEN>' on mobile viewport",
+              "expected": "Page loads"
+            },
+            {
+              "step": 2,
+              "action": "Verify invitation preview is readable",
+              "expected": "Text is legible, layout is mobile-friendly"
+            },
+            {
+              "step": 3,
+              "action": "Verify form elements are touch-friendly",
+              "expected": "Buttons and inputs are large enough to tap"
+            },
+            {
+              "step": 4,
+              "action": "Submit RSVP on mobile",
+              "expected": "Form submits successfully"
+            }
+          ],
+          "passes": false
+        }
+      ]
+    },
+    {
+      "id": "TS-013",
+      "name": "Live Preview",
+      "description": "Tests for the real-time invitation preview in builder",
+      "testCases": [
+        {
+          "id": "TC-013-001",
+          "name": "Preview updates in real-time on form changes",
+          "priority": "high",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder'",
+              "expected": "Builder loads with preview"
+            },
+            {
+              "step": 2,
+              "action": "Type in Partner 1 Name field",
+              "expected": "Preview updates as you type"
+            },
+            {
+              "step": 3,
+              "action": "Change accent color",
+              "expected": "Preview reflects new color immediately"
+            },
+            {
+              "step": 4,
+              "action": "Add a schedule block",
+              "expected": "Preview shows new event in timeline"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-013-002",
+          "name": "Viewport toggle changes preview size",
+          "priority": "medium",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder'",
+              "expected": "Builder loads with desktop preview"
+            },
+            {
+              "step": 2,
+              "action": "Click 'Mobile' viewport toggle",
+              "expected": "Preview shrinks to mobile width (375px)"
+            },
+            {
+              "step": 3,
+              "action": "Verify preview content reflows",
+              "expected": "Layout adapts to mobile view"
+            },
+            {
+              "step": 4,
+              "action": "Click 'Desktop' toggle",
+              "expected": "Preview returns to full width"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-013-003",
+          "name": "Preview shows all invitation sections",
+          "priority": "high",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder' with complete invitation data",
+              "expected": "Builder loads"
+            },
+            {
+              "step": 2,
+              "action": "Scroll through preview",
+              "expected": "Can scroll full invitation"
+            },
+            {
+              "step": 3,
+              "action": "Verify hero image section",
+              "expected": "Hero image visible (if uploaded)"
+            },
+            {
+              "step": 4,
+              "action": "Verify couple names and date",
+              "expected": "Names and date displayed prominently"
+            },
+            {
+              "step": 5,
+              "action": "Verify venue information",
+              "expected": "Venue name and address shown"
+            },
+            {
+              "step": 6,
+              "action": "Verify schedule/timeline section",
+              "expected": "All schedule blocks listed"
+            },
+            {
+              "step": 7,
+              "action": "Verify notes section",
+              "expected": "All notes displayed"
+            }
+          ],
+          "passes": false
+        }
+      ]
+    },
+    {
+      "id": "TS-014",
+      "name": "Error Handling",
+      "description": "Tests for error states and edge cases",
+      "testCases": [
+        {
+          "id": "TC-014-001",
+          "name": "Handle network error during autosave",
+          "priority": "high",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder'",
+              "expected": "Builder loads"
+            },
+            {
+              "step": 2,
+              "action": "Simulate network disconnection",
+              "expected": "Network is offline"
+            },
+            {
+              "step": 3,
+              "action": "Make a change to trigger autosave",
+              "expected": "Autosave attempts"
+            },
+            {
+              "step": 4,
+              "action": "Verify error indicator",
+              "expected": "'Save failed' or retry message shown"
+            },
+            {
+              "step": 5,
+              "action": "Restore network connection",
+              "expected": "Network is back"
+            },
+            {
+              "step": 6,
+              "action": "Verify autosave retries",
+              "expected": "Changes are saved successfully"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-014-002",
+          "name": "Handle 404 for non-existent route",
+          "priority": "medium",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/non-existent-page'",
+              "expected": "404 page is displayed"
+            },
+            {
+              "step": 2,
+              "action": "Verify 404 message",
+              "expected": "'Page not found' message shown"
+            },
+            {
+              "step": 3,
+              "action": "Verify link to home page",
+              "expected": "Navigation link back to '/' available"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-014-003",
+          "name": "Handle session expiration gracefully",
+          "priority": "high",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Login and navigate to '/builder'",
+              "expected": "Builder loads"
+            },
+            {
+              "step": 2,
+              "action": "Manually expire/clear auth cookies",
+              "expected": "Session is invalid"
+            },
+            {
+              "step": 3,
+              "action": "Attempt an action that requires auth",
+              "expected": "Action is rejected"
+            },
+            {
+              "step": 4,
+              "action": "Verify redirect to login",
+              "expected": "User is redirected to '/login'"
+            }
+          ],
+          "passes": false
+        }
+      ]
+    },
+    {
+      "id": "TS-015",
+      "name": "Accessibility",
+      "description": "Tests for accessibility compliance",
+      "testCases": [
+        {
+          "id": "TC-015-001",
+          "name": "Keyboard navigation works throughout app",
+          "priority": "high",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/' using keyboard only",
+              "expected": "Focus is visible"
+            },
+            {
+              "step": 2,
+              "action": "Tab through interactive elements",
+              "expected": "Focus order is logical"
+            },
+            {
+              "step": 3,
+              "action": "Press Enter on 'Start Creating' button",
+              "expected": "Button activates"
+            },
+            {
+              "step": 4,
+              "action": "Navigate builder form with Tab key",
+              "expected": "Can reach all form fields"
+            },
+            {
+              "step": 5,
+              "action": "Submit forms with Enter key",
+              "expected": "Forms submit correctly"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-015-002",
+          "name": "Form labels are properly associated",
+          "priority": "medium",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Inspect Partner 1 Name input",
+              "expected": "Input has associated label"
+            },
+            {
+              "step": 2,
+              "action": "Click on label",
+              "expected": "Focus moves to input"
+            },
+            {
+              "step": 3,
+              "action": "Verify all form inputs have labels",
+              "expected": "All inputs are labeled"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-015-003",
+          "name": "Color contrast meets WCAG standards",
+          "priority": "medium",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Check text contrast on home page",
+              "expected": "Contrast ratio >= 4.5:1 for body text"
+            },
+            {
+              "step": 2,
+              "action": "Check button text contrast",
+              "expected": "Contrast ratio >= 4.5:1"
+            },
+            {
+              "step": 3,
+              "action": "Check form input text contrast",
+              "expected": "Contrast ratio >= 4.5:1"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-015-004",
+          "name": "Screen reader announces page content",
+          "priority": "medium",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Enable screen reader (VoiceOver/NVDA)",
+              "expected": "Screen reader active"
+            },
+            {
+              "step": 2,
+              "action": "Navigate to '/'",
+              "expected": "Page title is announced"
+            },
+            {
+              "step": 3,
+              "action": "Navigate through headings",
+              "expected": "Headings are announced in order"
+            },
+            {
+              "step": 4,
+              "action": "Navigate to builder form",
+              "expected": "Form fields are announced with labels"
+            }
+          ],
+          "passes": false
+        }
+      ]
+    },
+    {
+      "id": "TS-016",
+      "name": "Performance",
+      "description": "Tests for application performance",
+      "testCases": [
+        {
+          "id": "TC-016-001",
+          "name": "Home page loads within acceptable time",
+          "priority": "medium",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Clear browser cache",
+              "expected": "Cache is cleared"
+            },
+            {
+              "step": 2,
+              "action": "Navigate to '/' and measure load time",
+              "expected": "First Contentful Paint < 2 seconds"
+            },
+            {
+              "step": 3,
+              "action": "Verify Largest Contentful Paint",
+              "expected": "LCP < 2.5 seconds"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-016-002",
+          "name": "Builder loads without blocking UI",
+          "priority": "medium",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Login and navigate to '/builder'",
+              "expected": "Builder starts loading"
+            },
+            {
+              "step": 2,
+              "action": "Verify loading state is shown",
+              "expected": "Loading indicator visible"
+            },
+            {
+              "step": 3,
+              "action": "Verify form becomes interactive",
+              "expected": "Form fields are editable within 3 seconds"
+            }
+          ],
+          "passes": false
+        },
+        {
+          "id": "TC-016-003",
+          "name": "Autosave does not block user input",
+          "priority": "medium",
+          "steps": [
+            {
+              "step": 1,
+              "action": "Navigate to '/builder'",
+              "expected": "Builder loads"
+            },
+            {
+              "step": 2,
+              "action": "Type continuously in a text field",
+              "expected": "Typing is smooth"
+            },
+            {
+              "step": 3,
+              "action": "Observe autosave triggering in background",
+              "expected": "No input lag during save"
+            }
+          ],
+          "passes": false
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "totalTestSuites": 16,
+    "totalTestCases": 64,
+    "priorityBreakdown": {
+      "critical": 6,
+      "high": 35,
+      "medium": 21,
+      "low": 2
+    },
+    "coverageAreas": [
+      "Home Page Navigation",
+      "Google OAuth Authentication",
+      "Template Preview and Selection",
+      "Invitation Builder - Basic Information",
+      "Invitation Builder - Hero Image Upload",
+      "Invitation Builder - Theme Customization",
+      "Invitation Builder - Schedule Blocks",
+      "Invitation Builder - Notes",
+      "Guest Group Management",
+      "Individual Guest CRUD",
+      "CSV Guest Import",
+      "RSVP Link and QR Code Generation",
+      "RSVP Dashboard Analytics",
+      "RSVP Response Table and Export",
+      "Guest RSVP Form Submission",
+      "Token-Based Guest Authentication",
+      "RSVP Deadline Enforcement",
+      "Live Preview Updates",
+      "Viewport Responsiveness",
+      "Error Handling",
+      "Accessibility",
+      "Performance"
+    ]
+  }
+}

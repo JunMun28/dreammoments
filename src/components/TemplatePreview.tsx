@@ -181,7 +181,11 @@ export function TemplatePreview({
 				>
 					<img
 						src={heroImageUrl}
-						alt="Wedding hero"
+						alt={
+							partner1Name && partner2Name
+								? `Wedding photo of ${partner1Name} and ${partner2Name}`
+								: "Wedding invitation hero photo"
+						}
 						className="h-full w-full object-cover"
 					/>
 					<div className="absolute inset-0 bg-gradient-to-b from-transparent to-stone-100/80" />

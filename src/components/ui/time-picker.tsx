@@ -9,12 +9,16 @@ import {
 import { cn } from "@/lib/utils";
 
 interface TimePickerProps {
+	/** ID for label association (applied to the container) */
+	id?: string;
 	/** Time value in 24-hour format "HH:mm" (e.g., "14:30") */
 	value?: string;
 	/** Called with time in 24-hour format "HH:mm" */
 	onChange: (time: string) => void;
 	disabled?: boolean;
 	className?: string;
+	/** Accessible label for screen readers */
+	"aria-label"?: string;
 }
 
 /**
@@ -78,10 +82,12 @@ const minutes = Array.from({ length: 12 }, (_, i) =>
 );
 
 export function TimePicker({
+	id,
 	value,
 	onChange,
 	disabled = false,
 	className,
+	"aria-label": ariaLabel,
 }: TimePickerProps) {
 	// Parse value into 12-hour components
 	const parsed = value ? parse24To12(value) : null;
@@ -104,9 +110,15 @@ export function TimePicker({
 		onChange(convertTo24Hour(hour, minute, newPeriod));
 	};
 
+	const labelPrefix = ariaLabel ? `${ariaLabel} ` : "";
+
 	return (
-		<div className={cn("flex items-center gap-2", className)}>
-			<Clock className="h-4 w-4 text-muted-foreground" />
+		<fieldset
+			id={id}
+			className={cn("flex items-center gap-2 border-0 p-0 m-0", className)}
+			aria-label={ariaLabel}
+		>
+			<Clock className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
 
 			{/* Hour select */}
 			<Select
@@ -114,7 +126,7 @@ export function TimePicker({
 				onValueChange={handleHourChange}
 				disabled={disabled}
 			>
-				<SelectTrigger className="w-[70px]">
+				<SelectTrigger className="w-[70px]" aria-label={`${labelPrefix}hour`}>
 					<SelectValue placeholder="Hour" />
 				</SelectTrigger>
 				<SelectContent>
@@ -126,7 +138,9 @@ export function TimePicker({
 				</SelectContent>
 			</Select>
 
-			<span className="text-muted-foreground">:</span>
+			<span className="text-muted-foreground" aria-hidden="true">
+				:
+			</span>
 
 			{/* Minute select */}
 			<Select
@@ -134,7 +148,7 @@ export function TimePicker({
 				onValueChange={handleMinuteChange}
 				disabled={disabled}
 			>
-				<SelectTrigger className="w-[70px]">
+				<SelectTrigger className="w-[70px]" aria-label={`${labelPrefix}minute`}>
 					<SelectValue placeholder="Min" />
 				</SelectTrigger>
 				<SelectContent>
@@ -152,7 +166,10 @@ export function TimePicker({
 				onValueChange={handlePeriodChange}
 				disabled={disabled}
 			>
-				<SelectTrigger className="w-[80px]">
+				<SelectTrigger
+					className="w-[80px]"
+					aria-label={`${labelPrefix}AM or PM`}
+				>
 					<SelectValue placeholder="AM/PM" />
 				</SelectTrigger>
 				<SelectContent>
@@ -160,6 +177,6 @@ export function TimePicker({
 					<SelectItem value="PM">PM</SelectItem>
 				</SelectContent>
 			</Select>
-		</div>
+		</fieldset>
 	);
 }

@@ -29,25 +29,25 @@ function formatPreviewDate(date: Date): string {
 
 const features = [
 	{
-		icon: <Palette className="h-8 w-8" />,
+		icon: <Palette className="h-8 w-8" aria-hidden="true" />,
 		title: "Beautiful Templates",
 		description:
 			"Choose from curated designs, then customize colors, fonts, and every detail to match your style.",
 	},
 	{
-		icon: <Users className="h-8 w-8" />,
+		icon: <Users className="h-8 w-8" aria-hidden="true" />,
 		title: "Easy Guest Management",
 		description:
 			"Import your guest list from CSV, organize by groups, and generate unique RSVP links for each.",
 	},
 	{
-		icon: <Mail className="h-8 w-8" />,
+		icon: <Mail className="h-8 w-8" aria-hidden="true" />,
 		title: "Seamless RSVPs",
 		description:
 			"Guests RSVP instantly via link—no login required. Track responses in real-time from your dashboard.",
 	},
 	{
-		icon: <Camera className="h-8 w-8" />,
+		icon: <Camera className="h-8 w-8" aria-hidden="true" />,
 		title: "Shared Photo Memories",
 		description:
 			"Share a single upload link with all guests. Collect and curate wedding day photos effortlessly.",

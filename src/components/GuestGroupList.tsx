@@ -1,4 +1,5 @@
 import {
+	Check,
 	ChevronDown,
 	ChevronRight,
 	Link,
@@ -195,11 +196,11 @@ function GuestGroupItem({
 						size="icon"
 						className="h-8 w-8"
 						onClick={handleCopyLink}
-						title="Copy RSVP link"
+						aria-label={copied ? "Link copied" : "Copy RSVP link"}
 						data-testid={`copy-link-${group.id}`}
 					>
 						{copied ? (
-							<span className="text-xs text-green-600">✓</span>
+							<Check className="h-4 w-4 text-green-600" />
 						) : (
 							<Link className="h-4 w-4" />
 						)}

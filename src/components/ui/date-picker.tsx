@@ -10,19 +10,25 @@ import {
 import { cn } from "@/lib/utils";
 
 interface DatePickerProps {
+	/** ID for label association */
+	id?: string;
 	value?: Date;
 	onChange: (date: Date | undefined) => void;
 	placeholder?: string;
 	disabled?: boolean;
 	className?: string;
+	/** Accessible label for screen readers */
+	"aria-label"?: string;
 }
 
 export function DatePicker({
+	id,
 	value,
 	onChange,
 	placeholder = "Pick a date",
 	disabled = false,
 	className,
+	"aria-label": ariaLabel,
 }: DatePickerProps) {
 	const [open, setOpen] = useState(false);
 
@@ -35,15 +41,17 @@ export function DatePicker({
 		<Popover open={open} onOpenChange={setOpen}>
 			<PopoverTrigger asChild>
 				<Button
+					id={id}
 					variant="outline"
 					disabled={disabled}
+					aria-label={ariaLabel}
 					className={cn(
 						"w-full justify-start text-left font-normal",
 						!value && "text-muted-foreground",
 						className,
 					)}
 				>
-					<CalendarIcon className="mr-2 h-4 w-4" />
+					<CalendarIcon className="mr-2 h-4 w-4" aria-hidden="true" />
 					{value ? (
 						value.toLocaleDateString("en-US", {
 							month: "long",

@@ -4,86 +4,89 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-DreamMoments is a wedding invitation builder + RSVP management + photo upload platform. Built with TanStack Start (React full-stack framework), PostgreSQL via Neon Serverless, and Drizzle ORM. The design philosophy emphasizes cinematic, luxury aesthetics with glassmorphism patterns.
+DreamMoments is a wedding invitation builder + RSVP management platform. Built with TanStack Start (React full-stack framework), PostgreSQL via Neon Serverless, and Drizzle ORM. The design emphasizes cinematic, luxury aesthetics with glassmorphism patterns.
 
 ## Development Commands
 
 ```bash
 pnpm dev                 # Start dev server on port 3000
 pnpm build               # Production build
-pnpm test                # Run tests with Vitest
-pnpm check               # Run Biome linting + formatting check
-pnpm format              # Auto-format with Biome
-pnpm db:generate         # Generate Drizzle migrations
-pnpm db:migrate          # Run migrations
-pnpm db:push             # Push schema directly to DB
+pnpm test                # Run all tests with Vitest
+pnpm test src/lib/auth   # Run tests matching pattern
+pnpm check               # Biome lint + format check
+pnpm format              # Auto-format with Biome (use --write to apply)
+pnpm db:push             # Push schema changes to DB
 pnpm db:studio           # Open Drizzle Studio GUI
+pnpm test:e2e            # Run Playwright E2E tests
 ```
 
 ## Architecture
 
-### Routing (TanStack Router)
+### Data Flow
 
-- File-based routing in `src/routes/`
-- `__root.tsx` is the root layout
-- API routes use `server: { handlers: { GET, POST } }` pattern
-- Route loaders fetch data before render via `loader:` function
-
-### Server Functions
-
-Use `createServerFn()` for type-safe server-client RPC:
-
-```typescript
-const getData = createServerFn({ method: "GET" }).handler(async () => {
-  /* runs on server */
-});
+```
+Routes (src/routes/) → Server Functions (src/lib/*-server.ts) → Drizzle ORM → Neon PostgreSQL
+         ↓
+    Context (src/contexts/) → Components → UI Components (src/components/ui/)
 ```
 
-### Data Fetching
+### Key Architectural Patterns
 
-- TanStack Query for client state management with caching
-- Server functions for direct RPC calls
-- SSR integration via `@tanstack/react-router-ssr-query`
+**Server Functions** (`src/lib/*-server.ts`): Use `createServerFn()` from TanStack Start for type-safe server-client RPC. Pattern: export internal functions for testability, wrap with createServerFn for HTTP:
 
-### Database
+```typescript
+// Internal function (testable with mocked db)
+export async function doSomethingInternal(input) { ... }
 
-- PostgreSQL with Neon Serverless (`@neondatabase/serverless`)
-- Drizzle ORM with schema at `src/db/schema.ts`
-- Database client at `src/db.ts`
-- Requires `DATABASE_URL` in `.env.local`
+// Server function wrapper
+export const doSomething = createServerFn({ method: "POST" })
+  .inputValidator((input) => input)
+  .handler(async ({ data }) => doSomethingInternal(data));
+```
 
-### Forms
+**Route Loaders**: Routes use `beforeLoad` for auth checks and `loader` for data fetching. The builder route demonstrates the full pattern with auth redirect, user sync, and data loading.
 
-- TanStack React Form with Zod validation
-- Custom `useAppForm` hook at `src/hooks/demo.form.ts`
-- Reusable form components at `src/components/demo.FormComponents.tsx`
+**Context Pattern**: `InvitationBuilderContext` owns builder state (invitation data, schedule blocks, notes, guest groups) and provides CRUD operations. Components read from context for live preview updates.
 
-### UI Components
+### Database Schema (`src/db/schema.ts`)
 
-- shadcn/ui components in `src/components/ui/`
-- Install new components: `pnpm dlx shadcn@latest add <component>`
-- Tailwind CSS 4.0 with Vite plugin (styles in `src/styles.css`)
-- New York style, zinc color palette
+Core entities and their relationships:
 
-## Code Principles
+- `users` → `invitations` (1:many) - couples create invitations
+- `invitations` → `scheduleBlocks`, `notes`, `guestGroups` (1:many) - invitation content
+- `guestGroups` → `guests` → `rsvpResponses` (nested) - RSVP tracking
+- `guestGroups` → `guestSessions` (1:many) - token-based guest auth (no login required)
 
-**This codebase will outlive you.** Every shortcut becomes someone else's burden. Every hack compounds into technical debt that slows the whole team down.
+### Authentication
 
-You are not just writing code. You are shaping the future of this project. The patterns you establish will be copied. The corners you cut will be cut again.
+Two auth systems:
 
-**Fight entropy. Leave the codebase better than you found it.**
+1. **Couple auth**: Neon Auth (Google OAuth) → `neon_auth.users` → synced to local `users` table via `syncUserFromNeonAuth()`
+2. **Guest auth**: Token-based sessions for RSVP (`/rsvp#t=<TOKEN>`) → `guestSessions` table → cookie-based session
 
-- Write clear, readable code over clever code
-- Extract reusable logic into well-named functions and hooks
-- Keep components focused (single responsibility)
-- Handle errors gracefully with user-friendly messages
-- Add types for all function parameters and return values
-- Test critical paths (auth, data mutations, payments)
+### Testing Pattern
+
+Tests are colocated with source files (`*.test.ts` / `*.test.tsx`). Server functions use mocked Drizzle DB:
+
+```typescript
+vi.mock("@/db/index", () => ({
+  db: { select: vi.fn(), insert: vi.fn(), ... }
+}));
+```
 
 ## Code Style
 
 - **Package manager:** pnpm (required)
 - **Formatter/Linter:** Biome (tab indentation, double quotes)
 - **Path aliases:** `@/*` maps to `./src/*`
+- **UI components:** shadcn/ui in `src/components/ui/` - install via `pnpm dlx shadcn@latest add <component>`
+
+## Code Principles
+
+**This codebase will outlive you.** Every shortcut becomes someone else's burden. Fight entropy.
+
+- Write clear, readable code over clever code
+- Extract reusable logic into well-named functions and hooks
+- Keep components focused (single responsibility)
+- Add types for all function parameters and return values
 - Validate inputs with Zod before server operations
-- Use shadcn/ui primitives from `@/components/ui`
