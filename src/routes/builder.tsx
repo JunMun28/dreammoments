@@ -15,15 +15,25 @@ import { syncUserFromNeonAuth } from "@/lib/user-sync";
 
 interface BuilderSearch {
 	template?: string;
+	devBypass?: boolean;
 }
 
 export const Route = createFileRoute("/builder")({
 	component: BuilderPage,
 	validateSearch: (search: Record<string, unknown>): BuilderSearch => ({
 		template: typeof search.template === "string" ? search.template : undefined,
+		devBypass: search.devBypass === "true" || search.devBypass === true,
 	}),
-	loaderDeps: ({ search }) => ({ template: search.template }),
+	loaderDeps: ({ search }) => ({
+		template: search.template,
+		devBypass: search.devBypass,
+	}),
 	beforeLoad: async ({ search }) => {
+		// Dev bypass for UI testing - skip auth check
+		if (search.devBypass) {
+			return { user: null, devBypass: true };
+		}
+
 		// Check authentication
 		const result = await getSession();
 
@@ -38,11 +48,61 @@ export const Route = createFileRoute("/builder")({
 			});
 		}
 
-		return { user: result.data.user };
+		return { user: result.data.user, devBypass: false };
 	},
 	loader: async ({ context, deps }) => {
-		const { user } = context;
+		const { user, devBypass } = context;
 		const { template } = deps;
+
+		// Dev bypass: return mock invitation data for UI testing
+		if (devBypass) {
+			const mockInvitation = {
+				id: "mock-invitation-id",
+				partner1Name: "Sarah",
+				partner2Name: "Michael",
+				weddingDate: new Date("2025-06-15").toISOString(),
+				weddingTime: "15:00",
+				venueName: "Rose Garden Estate",
+				venueAddress: "123 Garden Lane, Beverly Hills, CA 90210",
+				templateId: template ?? "classic-romance",
+				accentColor: "#c084fc",
+				fontPairing: "playfair-lato",
+				heroImageUrl: null,
+				scheduleBlocks: [
+					{
+						id: "sb-1",
+						title: "Ceremony",
+						time: "15:00",
+						description: "Exchange of vows",
+						order: 0,
+					},
+					{
+						id: "sb-2",
+						title: "Cocktail Hour",
+						time: "16:00",
+						description: "Drinks and appetizers",
+						order: 1,
+					},
+					{
+						id: "sb-3",
+						title: "Reception",
+						time: "17:00",
+						description: "Dinner and dancing",
+						order: 2,
+					},
+				],
+				notes: [
+					{ id: "note-1", content: "Black tie optional", order: 0 },
+					{ id: "note-2", content: "Please RSVP by May 1st", order: 1 },
+				],
+			};
+			return { invitation: mockInvitation, devBypass: true };
+		}
+
+		// User is guaranteed to exist when not in dev bypass mode (beforeLoad would have redirected)
+		if (!user) {
+			throw new Error("User should exist when not in dev bypass mode");
+		}
 
 		// Sync user to local database (in case this is their first visit to builder)
 		const localUser = await syncUserFromNeonAuth({
@@ -63,12 +123,12 @@ export const Route = createFileRoute("/builder")({
 			throw new Error("Failed to load invitation");
 		}
 
-		return { invitation };
+		return { invitation, devBypass: false };
 	},
 });
 
 function BuilderPage() {
-	const { invitation } = useLoaderData({ from: "/builder" });
+	const { invitation, devBypass } = useLoaderData({ from: "/builder" });
 
 	// Convert DB invitation to InvitationData format
 	const initialData: InvitationData = {
@@ -90,6 +150,12 @@ function BuilderPage() {
 	};
 
 	const handleSave = async (data: InvitationData) => {
+		// In dev bypass mode, skip actual save (mock data only)
+		if (devBypass) {
+			console.log("[Dev Bypass] Save skipped - mock data mode");
+			return;
+		}
+
 		await updateInvitation({
 			data: {
 				invitationId: data.id,

@@ -97,7 +97,7 @@ export function HomePage() {
 							className="min-w-[200px] bg-rose-500 text-white shadow-lg shadow-rose-500/30 transition-all hover:bg-rose-600 hover:shadow-xl hover:shadow-rose-500/40"
 							asChild
 						>
-							<Link to="/login">
+							<Link to="/builder" search={{ devBypass: true }}>
 								<Sparkles className="mr-2 h-5 w-5" />
 								Start Creating
 							</Link>
@@ -202,7 +202,7 @@ export function HomePage() {
 							className="border-rose-200 text-rose-600 hover:bg-rose-50"
 							asChild
 						>
-							<Link to="/login">
+							<Link to="/builder" search={{ devBypass: true }}>
 								View All Templates
 								<Sparkles className="ml-2 h-4 w-4" />
 							</Link>
@@ -311,7 +311,7 @@ export function HomePage() {
 							className="bg-white text-rose-600 shadow-lg transition-all hover:bg-rose-50"
 							asChild
 						>
-							<Link to="/login">
+							<Link to="/builder" search={{ devBypass: true }}>
 								<Sparkles className="mr-2 h-5 w-5" />
 								Get Started Free
 							</Link>
