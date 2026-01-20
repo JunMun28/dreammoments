@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Heart, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { TemplatePreview } from "@/components/TemplatePreview";
@@ -13,12 +13,8 @@ export const Route = createFileRoute("/templates/$templateId")({
 	component: TemplatePreviewPage,
 	loader: ({ params }) => {
 		const template = getTemplateById(params.templateId);
-		if (!template) {
-			throw notFound();
-		}
-		return { template };
+		return { template: template || null };
 	},
-	notFoundComponent: TemplateNotFound,
 });
 
 function TemplateNotFound() {
@@ -44,6 +40,10 @@ function TemplateNotFound() {
 function TemplatePreviewPage() {
 	const { template } = Route.useLoaderData();
 	const [viewportMode, setViewportMode] = useState<ViewportMode>("desktop");
+
+	if (!template) {
+		return <TemplateNotFound />;
+	}
 
 	const { preview } = template;
 

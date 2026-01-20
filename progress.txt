@@ -1232,3 +1232,57 @@
 - 6/6 E2E tests pass (no more notFoundComponent warning)
 - typecheck passes
 - biome check passes
+
+## 2026-01-20: UI Testing Fixes (TS-001, TS-002, TS-003, TS-012)
+
+**Completed:** Executed browser-based UI tests from ui-test-cases.json and fixed 2 issues
+
+**Test Results:**
+- **TS-001 Home Page (TC-001-001 through TC-001-004):** ALL PASSED
+  - Hero section renders correctly with headline and CTA
+  - Template gallery displays 3 template cards with proper linking
+  - Features section shows "How It Works" steps
+  - Footer displays branding
+  - Responsive layouts verified at desktop (1920x1080), tablet (768x1024), mobile (375x667)
+
+- **TS-002 Authentication (TC-002-001 through TC-002-005):**
+  - Login page renders correctly - PASSED
+  - Unauthenticated user redirects from builder to login - PASSED
+  - OAuth error handling (TC-002-005) - **FIXED**
+
+- **TS-003 Template Preview (TC-003-001 through TC-003-004):**
+  - Template preview page renders correctly - PASSED
+  - Viewport toggle works - PASSED
+  - "Use This Template" redirects to login with template param - PASSED
+  - Invalid template ID shows error (TC-003-004) - **FIXED**
+
+- **TS-012 Guest RSVP Flow (TC-012-006, TC-012-007):**
+  - BLOCKED by pre-existing architectural issue
+  - `ReferenceError: Buffer is not defined` - drizzle-orm/node-postgres being loaded client-side
+  - Server functions with DB imports causing client-side bundling issues
+
+**Changes:**
+- `src/routes/auth.callback.tsx`: Fixed OAuth error handling
+  - Initialize error state from search.error in useState (not in useEffect)
+  - Skip async callback processing when error param is present
+  - Error message displays immediately when ?error=access_denied
+
+- `src/routes/templates.$templateId.tsx`: Fixed invalid template 404 handling
+  - Changed from throwing notFound() to returning null template
+  - Added TemplateNotFound component for friendly error display
+  - Component checks for null template and renders error view
+
+**Decisions:**
+- OAuth error: Initialize state from URL search params in useState for immediate display
+- Template 404: Component-level null check preferred over route-level notFound() for better SSR handling
+- RSVP page issues require deeper architectural fix (separate task to fix server/client code splitting)
+
+**Known Issues:**
+- RSVP page (/rsvp without token) stuck on "Loading invitation..." due to drizzle-orm Buffer error
+- This is a pre-existing architectural issue with server function imports being bundled for client
+
+**Verification:**
+- 633/633 tests pass
+- typecheck passes
+- biome check passes
+- build passes

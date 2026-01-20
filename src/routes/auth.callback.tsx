@@ -23,9 +23,21 @@ export const Route = createFileRoute("/auth/callback")({
 export function AuthCallback() {
 	const navigate = useNavigate();
 	const search = useSearch({ from: "/auth/callback" });
-	const [error, setError] = useState<string | null>(null);
+	const [error, setError] = useState<string | null>(
+		// Check for OAuth error in query params immediately
+		search.error
+			? search.error === "access_denied"
+				? "Access was denied. Please try signing in again."
+				: `Authentication failed: ${search.error}`
+			: null,
+	);
 
 	useEffect(() => {
+		// Skip processing if there's already an error from query params
+		if (search.error) {
+			return;
+		}
+
 		const handleCallback = async () => {
 			try {
 				// Get the session from Neon Auth (it handles OAuth exchange)
@@ -55,7 +67,7 @@ export function AuthCallback() {
 		};
 
 		handleCallback();
-	}, [navigate, search.redirect]);
+	}, [navigate, search.redirect, search.error]);
 
 	if (error) {
 		return (
