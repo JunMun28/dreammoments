@@ -94,17 +94,23 @@ function RsvpPage() {
 	const [guestsWithRsvp, setGuestsWithRsvp] = useState<GuestRsvpData[]>([]);
 
 	useEffect(() => {
+		let isMounted = true;
+
 		async function loadData() {
 			// Step 1: Check for existing session first
 			const sessionResult = await validateGuestSession();
 
+			if (!isMounted) return;
+
 			if (sessionResult.valid) {
 				// Session exists - load invitation data directly
 				await loadInvitationData(sessionResult.invitationId);
+				if (!isMounted) return;
 				// Also load guest group info for display
 				const token = parseTokenFromHash();
 				if (token) {
 					const group = await getGuestGroupByToken({ data: { token } });
+					if (!isMounted) return;
 					if (group) {
 						setGuestGroup({
 							id: group.id,
@@ -151,6 +157,8 @@ function RsvpPage() {
 				data: { rsvpToken: token },
 			});
 
+			if (!isMounted) return;
+
 			if (!exchangeResult.success) {
 				setLoadingState("invalid-token");
 				return;
@@ -158,9 +166,11 @@ function RsvpPage() {
 
 			// Step 4: Load invitation data using the group's invitation ID
 			await loadInvitationData(exchangeResult.invitationId);
+			if (!isMounted) return;
 
 			// Also get full guest group info (with guest names)
 			const group = await getGuestGroupByToken({ data: { token } });
+			if (!isMounted) return;
 			if (group) {
 				setGuestGroup({
 					id: group.id,
@@ -184,6 +194,8 @@ function RsvpPage() {
 			try {
 				const invitationData = await getInvitationWithRelations(invitationId);
 
+				if (!isMounted) return;
+
 				if (!invitationData) {
 					setLoadingState("invalid-token");
 					return;
@@ -193,21 +205,34 @@ function RsvpPage() {
 				setLoadingState("ready");
 			} catch (error) {
 				console.error("Error loading invitation data:", error);
-				setLoadingState("invalid-token");
+				if (isMounted) {
+					setLoadingState("invalid-token");
+				}
 			}
 		}
 
 		async function loadRsvpStatus(groupId: string) {
 			try {
 				const status = await getGroupRsvpStatus({ data: { groupId } });
-				setGuestsWithRsvp(status.guests);
+				if (isMounted) {
+					setGuestsWithRsvp(status.guests);
+				}
 			} catch (error) {
 				console.error("Error loading RSVP status:", error);
 				// Continue without RSVP data - form will still work
 			}
 		}
 
-		loadData();
+		loadData().catch((error) => {
+			console.error("Unexpected error loading RSVP data:", error);
+			if (isMounted) {
+				setLoadingState("invalid-token");
+			}
+		});
+
+		return () => {
+			isMounted = false;
+		};
 	}, []);
 
 	// Handle RSVP submission

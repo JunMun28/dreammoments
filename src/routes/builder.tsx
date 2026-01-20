@@ -29,8 +29,8 @@ export const Route = createFileRoute("/builder")({
 		devBypass: search.devBypass,
 	}),
 	beforeLoad: async ({ search }) => {
-		// Dev bypass for UI testing - skip auth check
-		if (search.devBypass) {
+		// Dev bypass for UI testing - skip auth check (development only)
+		if (search.devBypass && process.env.NODE_ENV !== "production") {
 			return { user: null, devBypass: true };
 		}
 
@@ -54,8 +54,8 @@ export const Route = createFileRoute("/builder")({
 		const { user, devBypass } = context;
 		const { template } = deps;
 
-		// Dev bypass: return mock invitation data for UI testing
-		if (devBypass) {
+		// Dev bypass: return mock invitation data for UI testing (development only)
+		if (devBypass && process.env.NODE_ENV !== "production") {
 			const mockInvitation = {
 				id: "mock-invitation-id",
 				partner1Name: "Sarah",

@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { db } from "@/db/index";
 import { guestGroups, guests, rsvpResponses } from "@/db/schema";
 
@@ -56,6 +56,7 @@ export interface GroupRsvpStatus {
 /**
  * Internal function to submit RSVP responses for a group.
  * Creates new responses or updates existing ones.
+ * Validates that all guests belong to the specified group (authorization).
  */
 export async function submitRsvpInternal(
 	input: SubmitRsvpInput,
@@ -71,24 +72,42 @@ export async function submitRsvpInternal(
 	}
 
 	// Validate all responses have guestId
+	const guestIds: string[] = [];
 	for (const response of responses) {
 		if (!response.guestId) {
 			throw new Error("guestId is required for each response");
 		}
+		guestIds.push(response.guestId);
 	}
+
+	// Authorization: Verify all guests belong to this group (single query)
+	const validGuests = await db
+		.select({ id: guests.id })
+		.from(guests)
+		.where(eq(guests.groupId, groupId));
+
+	const validGuestIds = new Set(validGuests.map((g) => g.id));
+
+	for (const guestId of guestIds) {
+		if (!validGuestIds.has(guestId)) {
+			throw new Error("One or more guests do not belong to this group");
+		}
+	}
+
+	// Batch fetch existing responses (fixes N+1 query)
+	const existingResponsesList = await db
+		.select({ guestId: rsvpResponses.guestId })
+		.from(rsvpResponses)
+		.where(inArray(rsvpResponses.guestId, guestIds));
+
+	const existingGuestIds = new Set(existingResponsesList.map((r) => r.guestId));
 
 	let responsesCreated = 0;
 	let responsesUpdated = 0;
 
 	// Process each response
 	for (const response of responses) {
-		// Check if guest already has a response
-		const existingResponses = await db
-			.select()
-			.from(rsvpResponses)
-			.where(eq(rsvpResponses.guestId, response.guestId));
-
-		if (existingResponses.length > 0) {
+		if (existingGuestIds.has(response.guestId)) {
 			// Update existing response
 			await db
 				.update(rsvpResponses)
@@ -100,23 +119,19 @@ export async function submitRsvpInternal(
 					plusOneNames: response.plusOneNames ?? null,
 					updatedAt: new Date(),
 				})
-				.where(eq(rsvpResponses.guestId, response.guestId))
-				.returning({ id: rsvpResponses.id });
+				.where(eq(rsvpResponses.guestId, response.guestId));
 
 			responsesUpdated++;
 		} else {
 			// Create new response
-			await db
-				.insert(rsvpResponses)
-				.values({
-					guestId: response.guestId,
-					attending: response.attending,
-					mealPreference: response.mealPreference ?? null,
-					dietaryNotes: response.dietaryNotes ?? null,
-					plusOneCount: response.plusOneCount ?? 0,
-					plusOneNames: response.plusOneNames ?? null,
-				})
-				.returning({ id: rsvpResponses.id });
+			await db.insert(rsvpResponses).values({
+				guestId: response.guestId,
+				attending: response.attending,
+				mealPreference: response.mealPreference ?? null,
+				dietaryNotes: response.dietaryNotes ?? null,
+				plusOneCount: response.plusOneCount ?? 0,
+				plusOneNames: response.plusOneNames ?? null,
+			});
 
 			responsesCreated++;
 		}
@@ -168,19 +183,23 @@ export async function getGroupRsvpStatusInternal(
 		};
 	}
 
-	// Get RSVP responses for each guest
+	// Batch fetch all RSVP responses for guests in this group (fixes N+1)
+	const guestIds = groupGuests.map((g) => g.id);
+	const allResponses = await db
+		.select()
+		.from(rsvpResponses)
+		.where(inArray(rsvpResponses.guestId, guestIds));
+
+	// Index responses by guestId for O(1) lookup
+	const responsesByGuestId = new Map(allResponses.map((r) => [r.guestId, r]));
+
 	const guestsWithRsvp: GuestWithRsvp[] = [];
 	let totalAttending = 0;
 	let totalDeclined = 0;
 	let totalPending = 0;
 
 	for (const guest of groupGuests) {
-		const responses = await db
-			.select()
-			.from(rsvpResponses)
-			.where(eq(rsvpResponses.guestId, guest.id));
-
-		const rsvpResponse = responses.length > 0 ? responses[0] : null;
+		const rsvpResponse = responsesByGuestId.get(guest.id) ?? null;
 
 		guestsWithRsvp.push({
 			id: guest.id,

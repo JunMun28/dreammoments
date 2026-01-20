@@ -9,7 +9,7 @@
 // Types
 // ============================================================================
 
-export type CsvFileError = "invalid-type" | "too-large";
+export type CsvFileError = "invalid-type" | "too-large" | "too-many-rows";
 
 export interface CsvFileValidationResult {
 	valid: boolean;
@@ -47,6 +47,7 @@ interface RowValidationResult {
 
 const ACCEPTED_TYPES = ["text/csv", "application/vnd.ms-excel"];
 const DEFAULT_MAX_SIZE_MB = 1; // 1MB should be plenty for guest lists
+const MAX_GUEST_ROWS = 1000; // Limit rows to prevent DoS attacks
 
 // Simple email regex - not exhaustive but catches common issues
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -189,6 +190,21 @@ export function parseCsvContent(content: string): CsvParseResult {
 			success: false,
 			rows: [],
 			errors: [{ row: 0, message: "CSV file is empty" }],
+		};
+	}
+
+	// Check row limit (excluding header row)
+	const dataRowCount = nonEmptyLines.length - 1;
+	if (dataRowCount > MAX_GUEST_ROWS) {
+		return {
+			success: false,
+			rows: [],
+			errors: [
+				{
+					row: 0,
+					message: `CSV file has too many rows (${dataRowCount}). Maximum allowed is ${MAX_GUEST_ROWS}.`,
+				},
+			],
 		};
 	}
 

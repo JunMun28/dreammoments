@@ -133,10 +133,21 @@ interface GuestSessionCookieData {
  * Uses TanStack Start's useSession for secure HTTP-only cookie handling.
  */
 function getGuestSessionCookie() {
+	const sessionSecret = process.env.SESSION_SECRET;
+
+	if (!sessionSecret) {
+		throw new Error(
+			"SESSION_SECRET environment variable is required for secure session handling",
+		);
+	}
+
+	if (sessionSecret.length < 32) {
+		throw new Error("SESSION_SECRET must be at least 32 characters long");
+	}
+
 	return useSession<GuestSessionCookieData>({
 		name: "guest-session",
-		password:
-			process.env.SESSION_SECRET ?? "dreammoments-guest-session-secret-32c",
+		password: sessionSecret,
 		cookie: {
 			secure: process.env.NODE_ENV === "production",
 			sameSite: "lax",

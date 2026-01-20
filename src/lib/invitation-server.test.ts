@@ -1,12 +1,22 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { TemplateData } from "./template-data";
 
-// Mock drizzle/db
+// Mock drizzle/db - use vi.hoisted to define mocks that can be referenced in vi.mock
+const { mockInsert, mockSelect, mockUpdate, mockTransaction } = vi.hoisted(
+	() => ({
+		mockInsert: vi.fn(),
+		mockSelect: vi.fn(),
+		mockUpdate: vi.fn(),
+		mockTransaction: vi.fn(),
+	}),
+);
+
 vi.mock("@/db/index", () => ({
 	db: {
-		insert: vi.fn(),
-		select: vi.fn(),
-		update: vi.fn(),
+		insert: mockInsert,
+		select: mockSelect,
+		update: mockUpdate,
+		transaction: mockTransaction,
 	},
 }));
 
@@ -41,6 +51,15 @@ describe("createInvitationInternal", () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+		// Set up transaction to call callback with mock tx
+		mockTransaction.mockImplementation(async (callback) => {
+			const tx = {
+				insert: mockInsert,
+				select: mockSelect,
+				update: mockUpdate,
+			};
+			return await callback(tx);
+		});
 	});
 
 	describe("without template", () => {

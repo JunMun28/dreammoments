@@ -72,6 +72,7 @@ export interface CreateInvitationInput {
 /**
  * Internal function to create a new invitation.
  * Extracted for testability.
+ * Uses a transaction to ensure atomic creation of invitation with related data.
  */
 export async function createInvitationInternal(input: CreateInvitationInput) {
 	const { userId, templateId } = input;
@@ -79,43 +80,46 @@ export async function createInvitationInternal(input: CreateInvitationInput) {
 	// Get template data if templateId provided
 	const template = templateId ? getTemplateById(templateId) : undefined;
 
-	// Create the invitation
-	const [invitation] = await db
-		.insert(invitations)
-		.values({
-			userId,
-			templateId,
-			accentColor: template?.accentColor,
-			fontPairing: template?.fontPairing,
-		})
-		.returning({ id: invitations.id });
+	// Use transaction to ensure atomic creation of invitation with related data
+	return await db.transaction(async (tx) => {
+		// Create the invitation
+		const [invitation] = await tx
+			.insert(invitations)
+			.values({
+				userId,
+				templateId,
+				accentColor: template?.accentColor,
+				fontPairing: template?.fontPairing,
+			})
+			.returning({ id: invitations.id });
 
-	// If template has schedule blocks, create them
-	if (template?.preview.scheduleBlocks.length) {
-		await db.insert(scheduleBlocks).values(
-			template.preview.scheduleBlocks.map((block) => ({
-				invitationId: invitation.id,
-				title: block.title,
-				time: block.time,
-				description: block.description,
-				order: block.order,
-			})),
-		);
-	}
+		// If template has schedule blocks, create them
+		if (template?.preview.scheduleBlocks.length) {
+			await tx.insert(scheduleBlocks).values(
+				template.preview.scheduleBlocks.map((block) => ({
+					invitationId: invitation.id,
+					title: block.title,
+					time: block.time,
+					description: block.description,
+					order: block.order,
+				})),
+			);
+		}
 
-	// If template has notes, create them
-	if (template?.preview.notes.length) {
-		await db.insert(notes).values(
-			template.preview.notes.map((note) => ({
-				invitationId: invitation.id,
-				title: note.title,
-				description: note.description,
-				order: note.order,
-			})),
-		);
-	}
+		// If template has notes, create them
+		if (template?.preview.notes.length) {
+			await tx.insert(notes).values(
+				template.preview.notes.map((note) => ({
+					invitationId: invitation.id,
+					title: note.title,
+					description: note.description,
+					order: note.order,
+				})),
+			);
+		}
 
-	return { id: invitation.id };
+		return { id: invitation.id };
+	});
 }
 
 /**
@@ -139,6 +143,7 @@ export interface GetOrCreateInvitationInput {
 /**
  * Internal function to get or create invitation for user.
  * Extracted for testability.
+ * Handles race conditions where concurrent requests might try to create duplicates.
  */
 export async function getOrCreateInvitationInternal(
 	input: GetOrCreateInvitationInput,
@@ -157,9 +162,27 @@ export async function getOrCreateInvitationInternal(
 	}
 
 	// Create new invitation with template if provided
-	const result = await createInvitationInternal({ userId, templateId });
+	// Handle race condition: if another request created an invitation between
+	// our check and insert, catch the error and return the existing invitation
+	try {
+		const result = await createInvitationInternal({ userId, templateId });
+		return { id: result.id, isNew: true };
+	} catch (error) {
+		// Re-check for existing invitation in case of race condition
+		const retryResult = await db
+			.select()
+			.from(invitations)
+			.where(eq(invitations.userId, userId))
+			.limit(1);
 
-	return { id: result.id, isNew: true };
+		if (retryResult.length > 0) {
+			// Another request created the invitation - return it
+			return { id: retryResult[0].id, isNew: false };
+		}
+
+		// If still no invitation exists, it was a different error - rethrow
+		throw error;
+	}
 }
 
 /**
