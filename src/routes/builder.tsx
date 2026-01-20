@@ -5,13 +5,9 @@ import {
 } from "@tanstack/react-router";
 import { InvitationBuilder } from "@/components/InvitationBuilder";
 import type { InvitationData } from "@/contexts/InvitationBuilderContext";
-import { getSession } from "@/lib/auth";
-import {
-	getInvitationWithRelations,
-	getOrCreateInvitationInternal,
-	updateInvitation,
-} from "@/lib/invitation-server";
-import { syncUserFromNeonAuth } from "@/lib/user-sync";
+
+// Note: Server modules are dynamically imported in loader/beforeLoad/handlers
+// to prevent drizzle-orm from being bundled for the client
 
 interface BuilderSearch {
 	template?: string;
@@ -24,6 +20,9 @@ export const Route = createFileRoute("/builder")({
 	}),
 	loaderDeps: ({ search }) => ({ template: search.template }),
 	beforeLoad: async ({ search }) => {
+		// Dynamic import to avoid bundling on client
+		const { getSession } = await import("@/lib/auth");
+
 		// Check authentication
 		const result = await getSession();
 
@@ -41,6 +40,11 @@ export const Route = createFileRoute("/builder")({
 		return { user: result.data.user };
 	},
 	loader: async ({ context, deps }) => {
+		// Dynamic imports to avoid bundling on client
+		const { syncUserFromNeonAuth } = await import("@/lib/user-sync");
+		const { getOrCreateInvitationInternal, getInvitationWithRelations } =
+			await import("@/lib/invitation-server");
+
 		const { user } = context;
 		const { template } = deps;
 
@@ -90,6 +94,8 @@ function BuilderPage() {
 	};
 
 	const handleSave = async (data: InvitationData) => {
+		// Dynamic import to avoid bundling drizzle-orm on client
+		const { updateInvitation } = await import("@/lib/invitation-server");
 		await updateInvitation({
 			data: {
 				invitationId: data.id,

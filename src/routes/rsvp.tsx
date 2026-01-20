@@ -4,17 +4,8 @@ import { useEffect, useId, useState } from "react";
 import { type GuestRsvpData, RsvpForm } from "@/components/RsvpForm";
 import { TemplatePreview } from "@/components/TemplatePreview";
 import { Button } from "@/components/ui/button";
-import { getGuestGroupByToken } from "@/lib/guest-server";
-import {
-	exchangeRsvpTokenForSession,
-	validateGuestSession,
-} from "@/lib/guest-session";
-import { getInvitationWithRelations } from "@/lib/invitation-server";
-import {
-	getGroupRsvpStatus,
-	type RsvpResponseInput,
-	submitRsvp,
-} from "@/lib/rsvp-server";
+// Type-only imports are safe - erased at compile time
+import type { RsvpResponseInput } from "@/lib/rsvp-server";
 
 export const Route = createFileRoute("/rsvp")({
 	component: RsvpPage,
@@ -95,6 +86,11 @@ function RsvpPage() {
 
 	useEffect(() => {
 		async function loadData() {
+			// Dynamic imports to avoid bundling server code on client
+			const { validateGuestSession, exchangeRsvpTokenForSession } =
+				await import("@/lib/guest-session");
+			const { getGuestGroupByToken } = await import("@/lib/guest-server");
+
 			// Step 1: Check for existing session first
 			const sessionResult = await validateGuestSession();
 
@@ -182,6 +178,10 @@ function RsvpPage() {
 
 		async function loadInvitationData(invitationId: string) {
 			try {
+				// Dynamic import to avoid bundling server code on client
+				const { getInvitationWithRelations } = await import(
+					"@/lib/invitation-server"
+				);
 				const invitationData = await getInvitationWithRelations(invitationId);
 
 				if (!invitationData) {
@@ -199,6 +199,8 @@ function RsvpPage() {
 
 		async function loadRsvpStatus(groupId: string) {
 			try {
+				// Dynamic import to avoid bundling server code on client
+				const { getGroupRsvpStatus } = await import("@/lib/rsvp-server");
 				const status = await getGroupRsvpStatus({ data: { groupId } });
 				setGuestsWithRsvp(status.guests);
 			} catch (error) {
@@ -213,6 +215,11 @@ function RsvpPage() {
 	// Handle RSVP submission
 	const handleRsvpSubmit = async (responses: RsvpResponseInput[]) => {
 		if (!guestGroup) return;
+
+		// Dynamic imports to avoid bundling server code on client
+		const { submitRsvp, getGroupRsvpStatus } = await import(
+			"@/lib/rsvp-server"
+		);
 
 		await submitRsvp({ data: { groupId: guestGroup.id, responses } });
 

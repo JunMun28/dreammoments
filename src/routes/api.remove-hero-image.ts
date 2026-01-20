@@ -1,8 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { json } from "@tanstack/react-start";
-import { eq } from "drizzle-orm";
-import { db } from "@/db/index";
-import { invitations } from "@/db/schema";
+// Note: drizzle-orm and db are dynamically imported in handlers
+// to avoid bundling for the client
 
 export const Route = createFileRoute("/api/remove-hero-image")({
 	server: {
@@ -18,6 +17,11 @@ export const Route = createFileRoute("/api/remove-hero-image")({
 							{ status: 400 },
 						);
 					}
+
+					// Dynamic imports to avoid bundling for client
+					const { eq } = await import("drizzle-orm");
+					const { db } = await import("@/db/index");
+					const { invitations } = await import("@/db/schema");
 
 					const result = await db
 						.update(invitations)

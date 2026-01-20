@@ -34,6 +34,21 @@ const config = defineConfig(({ mode }) => {
 			},
 			dedupe: ["react", "react-dom"],
 		},
+		// Exclude server-only packages from client bundling
+		optimizeDeps: {
+			exclude: [
+				"drizzle-orm",
+				"drizzle-orm/node-postgres",
+				"drizzle-orm/pg-core",
+				"pg",
+				"@neondatabase/serverless",
+			],
+		},
+		// Mark Node.js-only packages as external for SSR
+		ssr: {
+			external: ["pg", "drizzle-orm/node-postgres"],
+			noExternal: [],
+		},
 		test: {
 			environment: "jsdom",
 			include: ["src/**/*.test.{ts,tsx}"],

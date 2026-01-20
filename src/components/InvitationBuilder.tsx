@@ -5,20 +5,8 @@ import {
 	useInvitationBuilder,
 } from "@/contexts/InvitationBuilderContext";
 import { type AutosaveStatus, useAutosave } from "@/hooks/useAutosave";
-import {
-	createGuest,
-	createGuestGroup,
-	deleteGuest,
-	deleteGuestGroup,
-	getGuestGroupsWithGuests,
-	updateGuest,
-	updateGuestGroup,
-} from "@/lib/guest-server";
-import {
-	type GuestResponseRow,
-	getInvitationGuestResponses,
-	getInvitationRsvpSummary,
-} from "@/lib/rsvp-server";
+// Types only - these are erased at compile time and don't cause bundling issues
+import type { GuestResponseRow } from "@/lib/rsvp-server";
 import { cn } from "@/lib/utils";
 import { BasicInfoForm, type BasicInfoFormValues } from "./BasicInfoForm";
 import { CsvExportButton } from "./CsvExportButton";
@@ -158,6 +146,8 @@ function RsvpDashboardSection() {
 
 			setIsLoading(true);
 			try {
+				// Dynamic import to avoid bundling drizzle-orm on client
+				const { getInvitationRsvpSummary } = await import("@/lib/rsvp-server");
 				const data = await getInvitationRsvpSummary({
 					data: { invitationId: invitation.id },
 				});
@@ -206,6 +196,10 @@ function RsvpResponseTableSection() {
 
 			setIsLoading(true);
 			try {
+				// Dynamic import to avoid bundling drizzle-orm on client
+				const { getInvitationGuestResponses } = await import(
+					"@/lib/rsvp-server"
+				);
 				const data = await getInvitationGuestResponses({
 					data: { invitationId: invitation.id },
 				});
@@ -269,6 +263,8 @@ function GuestManagementSection() {
 	 */
 	const reloadGuestGroups = useCallback(async () => {
 		try {
+			// Dynamic import to avoid bundling drizzle-orm on client
+			const { getGuestGroupsWithGuests } = await import("@/lib/guest-server");
 			const groups = await getGuestGroupsWithGuests({
 				data: { invitationId: invitation.id },
 			});
@@ -305,6 +301,8 @@ function GuestManagementSection() {
 
 	const handleGroupCreate = useCallback(
 		async (name: string) => {
+			// Dynamic import to avoid bundling drizzle-orm on client
+			const { createGuestGroup } = await import("@/lib/guest-server");
 			const result = await createGuestGroup({
 				data: { invitationId: invitation.id, name },
 			});
@@ -314,15 +312,21 @@ function GuestManagementSection() {
 	);
 
 	const handleGroupUpdate = useCallback(async (id: string, name: string) => {
+		// Dynamic import to avoid bundling drizzle-orm on client
+		const { updateGuestGroup } = await import("@/lib/guest-server");
 		await updateGuestGroup({ data: { id, name } });
 	}, []);
 
 	const handleGroupDelete = useCallback(async (id: string) => {
+		// Dynamic import to avoid bundling drizzle-orm on client
+		const { deleteGuestGroup } = await import("@/lib/guest-server");
 		await deleteGuestGroup({ data: { id } });
 	}, []);
 
 	const handleGuestCreate = useCallback(
 		async (groupId: string, guest: GuestEditorValues) => {
+			// Dynamic import to avoid bundling drizzle-orm on client
+			const { createGuest } = await import("@/lib/guest-server");
 			const result = await createGuest({
 				data: {
 					groupId,
@@ -338,6 +342,8 @@ function GuestManagementSection() {
 
 	const handleGuestUpdate = useCallback(
 		async (_groupId: string, guestId: string, guest: GuestEditorValues) => {
+			// Dynamic import to avoid bundling drizzle-orm on client
+			const { updateGuest } = await import("@/lib/guest-server");
 			await updateGuest({
 				data: {
 					id: guestId,
@@ -352,6 +358,8 @@ function GuestManagementSection() {
 
 	const handleGuestDelete = useCallback(
 		async (_groupId: string, guestId: string) => {
+			// Dynamic import to avoid bundling drizzle-orm on client
+			const { deleteGuest } = await import("@/lib/guest-server");
 			await deleteGuest({ data: { id: guestId } });
 		},
 		[],

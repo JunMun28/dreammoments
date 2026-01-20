@@ -1,11 +1,11 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 
-import { getClient } from "@/db";
-
 const getTodos = createServerFn({
 	method: "GET",
 }).handler(async () => {
+	// Dynamic import to avoid bundling on client
+	const { getClient } = await import("@/db");
 	const client = await getClient();
 	if (!client) {
 		return undefined;
@@ -21,6 +21,8 @@ const insertTodo = createServerFn({
 })
 	.inputValidator((d: { title: string }) => d)
 	.handler(async ({ data }) => {
+		// Dynamic import to avoid bundling on client
+		const { getClient } = await import("@/db");
 		const client = await getClient();
 		if (!client) {
 			return undefined;

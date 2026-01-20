@@ -2,9 +2,9 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { createFileRoute } from "@tanstack/react-router";
 import { json } from "@tanstack/react-start";
-import { eq } from "drizzle-orm";
-import { db } from "@/db/index";
-import { invitations } from "@/db/schema";
+
+// Note: drizzle-orm and db are dynamically imported in handlers
+// to avoid bundling for the client
 
 /**
  * Upload directory for hero images (relative to project root)
@@ -70,6 +70,11 @@ export const Route = createFileRoute("/api/upload-hero-image")({
 
 					// Generate URL
 					const imageUrl = `${UPLOADS_URL_BASE}/${filename}`;
+
+					// Dynamic imports to avoid bundling for client
+					const { eq } = await import("drizzle-orm");
+					const { db } = await import("@/db/index");
+					const { invitations } = await import("@/db/schema");
 
 					// Update invitation with new hero image URL
 					const result = await db
