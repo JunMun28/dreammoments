@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { eq } from "drizzle-orm";
-import { db } from "@/db/index";
+import { getDb } from "@/db/index";
 import { invitations, notes, scheduleBlocks } from "@/db/schema";
 import { getTemplateById } from "./template-data";
 
@@ -26,6 +26,7 @@ export const updateInvitation = createServerFn({ method: "POST" })
 	.handler(async ({ data }) => {
 		const { invitationId, ...updateData } = data;
 
+		const db = await getDb();
 		const result = await db
 			.update(invitations)
 			.set({
@@ -48,6 +49,7 @@ export const updateInvitation = createServerFn({ method: "POST" })
 export const getInvitation = createServerFn({ method: "GET" })
 	.inputValidator((input: { id: string }) => input)
 	.handler(async ({ data }) => {
+		const db = await getDb();
 		const result = await db
 			.select()
 			.from(invitations)
@@ -80,6 +82,7 @@ export async function createInvitationInternal(input: CreateInvitationInput) {
 	const template = templateId ? getTemplateById(templateId) : undefined;
 
 	// Create the invitation
+	const db = await getDb();
 	const [invitation] = await db
 		.insert(invitations)
 		.values({
@@ -146,6 +149,7 @@ export async function getOrCreateInvitationInternal(
 	const { userId, templateId } = input;
 
 	// Check if user already has an invitation
+	const db = await getDb();
 	const existingResult = await db
 		.select()
 		.from(invitations)
@@ -174,9 +178,10 @@ export const getOrCreateInvitationForUser = createServerFn({ method: "POST" })
 
 /**
  * Get full invitation data with schedule blocks and notes.
- * Used by builder route to load invitation with related data.
+ * Internal function - used by builder route loader.
  */
-export async function getInvitationWithRelations(invitationId: string) {
+export async function getInvitationWithRelationsInternal(invitationId: string) {
+	const db = await getDb();
 	const result = await db
 		.select()
 		.from(invitations)
@@ -218,3 +223,13 @@ export async function getInvitationWithRelations(invitationId: string) {
 		})),
 	};
 }
+
+/**
+ * Server function to get full invitation data with relations.
+ * Wraps internal function for client-side use (handles server/client boundary).
+ */
+export const getInvitationWithRelations = createServerFn({ method: "GET" })
+	.inputValidator((input: { invitationId: string }) => input)
+	.handler(async ({ data }) => {
+		return getInvitationWithRelationsInternal(data.invitationId);
+	});

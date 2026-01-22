@@ -1,6 +1,10 @@
-import { createFileRoute, useSearch } from "@tanstack/react-router";
-import { useId } from "react";
-import { authClient } from "../lib/auth";
+import {
+	createFileRoute,
+	useNavigate,
+	useSearch,
+} from "@tanstack/react-router";
+import { useEffect, useId } from "react";
+import { authClient, useSession } from "../lib/auth";
 
 interface LoginSearch {
 	redirect?: string;
@@ -18,6 +22,30 @@ export const Route = createFileRoute("/login")({
 export function Login() {
 	const googleTitleId = useId();
 	const search = useSearch({ from: "/login" });
+	const navigate = useNavigate();
+	const session = useSession();
+
+	// Redirect authenticated users to builder
+	useEffect(() => {
+		if (session.data?.user) {
+			const redirectTo =
+				search.redirect ||
+				(search.template ? `/builder?template=${search.template}` : "/builder");
+			navigate({ to: redirectTo });
+		}
+	}, [session.data?.user, search.redirect, search.template, navigate]);
+
+	// Show loading while checking auth or if authenticated (will redirect)
+	if (session.isPending || session.data?.user) {
+		return (
+			<div className="min-h-screen flex items-center justify-center bg-stone-50 px-4">
+				<div className="max-w-md w-full text-center space-y-4">
+					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-stone-900 mx-auto" />
+					<p className="text-stone-600">Loading...</p>
+				</div>
+			</div>
+		);
+	}
 
 	const handleGoogleLogin = async () => {
 		try {

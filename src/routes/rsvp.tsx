@@ -83,7 +83,23 @@ function RsvpPage() {
 	const [guestGroup, setGuestGroup] = useState<GuestGroupInfo | null>(null);
 	const [invitation, setInvitation] = useState<InvitationData | null>(null);
 	const [guestsWithRsvp, setGuestsWithRsvp] = useState<GuestRsvpData[]>([]);
+	// Track hash changes to re-run data loading
+	const [currentHash, setCurrentHash] = useState(() =>
+		typeof window !== "undefined" ? window.location.hash : "",
+	);
 
+	// Listen for hash changes
+	useEffect(() => {
+		const handleHashChange = () => {
+			setCurrentHash(window.location.hash);
+			setLoadingState("loading"); // Reset to loading state
+		};
+
+		window.addEventListener("hashchange", handleHashChange);
+		return () => window.removeEventListener("hashchange", handleHashChange);
+	}, []);
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: currentHash intentionally triggers re-load on hash change
 	useEffect(() => {
 		async function loadData() {
 			// Dynamic imports to avoid bundling server code on client
@@ -182,7 +198,9 @@ function RsvpPage() {
 				const { getInvitationWithRelations } = await import(
 					"@/lib/invitation-server"
 				);
-				const invitationData = await getInvitationWithRelations(invitationId);
+				const invitationData = await getInvitationWithRelations({
+					data: { invitationId },
+				});
 
 				if (!invitationData) {
 					setLoadingState("invalid-token");
@@ -210,7 +228,7 @@ function RsvpPage() {
 		}
 
 		loadData();
-	}, []);
+	}, [currentHash]);
 
 	// Handle RSVP submission
 	const handleRsvpSubmit = async (responses: RsvpResponseInput[]) => {

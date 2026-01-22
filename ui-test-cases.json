@@ -3,7 +3,7 @@
     "project": "DreamMoments",
     "description": "UI test cases for wedding invitation builder and RSVP management platform",
     "version": "1.0.0",
-    "lastUpdated": "2025-01-14"
+    "lastUpdated": "2026-01-22"
   },
   "testSuites": [
     {
@@ -15,7 +15,7 @@
           "id": "TC-001-001",
           "name": "Home page renders correctly",
           "priority": "high",
-          "passes": false,
+          "passes": true,
           "steps": [
             {
               "step": 1,
@@ -48,7 +48,7 @@
           "id": "TC-001-002",
           "name": "CTA button redirects to login",
           "priority": "high",
-          "passes": false,
+          "passes": true,
           "steps": [
             {
               "step": 1,
@@ -66,7 +66,7 @@
           "id": "TC-001-003",
           "name": "Template cards are clickable",
           "priority": "medium",
-          "passes": false,
+          "passes": true,
           "steps": [
             {
               "step": 1,
@@ -106,7 +106,7 @@
               "expected": "Page adapts to mobile layout with hamburger menu if applicable"
             }
           ],
-          "passes": false
+          "passes": true
         }
       ]
     },
@@ -136,7 +136,7 @@
               "expected": "DreamMoments branding is displayed"
             }
           ],
-          "passes": false
+          "passes": true
         },
         {
           "id": "TC-002-002",
@@ -210,7 +210,7 @@
               "expected": "User is redirected to '/login'"
             }
           ],
-          "passes": false
+          "passes": true
         },
         {
           "id": "TC-002-005",
@@ -228,7 +228,7 @@
               "expected": "User sees friendly error message with option to retry login"
             }
           ],
-          "passes": false
+          "passes": true
         }
       ]
     },
@@ -263,7 +263,7 @@
               "expected": "CTA button is prominently displayed"
             }
           ],
-          "passes": false
+          "passes": true
         },
         {
           "id": "TC-003-002",
@@ -291,7 +291,7 @@
               "expected": "Preview returns to desktop dimensions"
             }
           ],
-          "passes": false
+          "passes": true
         },
         {
           "id": "TC-003-003",
@@ -309,7 +309,7 @@
               "expected": "User is redirected to '/login?template=romantic-garden'"
             }
           ],
-          "passes": false
+          "passes": true
         },
         {
           "id": "TC-003-004",
@@ -322,7 +322,7 @@
               "expected": "404 page or error message is displayed"
             }
           ],
-          "passes": false
+          "passes": true
         }
       ]
     },
@@ -357,7 +357,7 @@
               "expected": "Partner names, date, time, venue fields are visible"
             }
           ],
-          "passes": false
+          "passes": true
         },
         {
           "id": "TC-004-002",
@@ -390,7 +390,7 @@
               "expected": "Autosave indicator shows 'Saved'"
             }
           ],
-          "passes": false
+          "passes": true
         },
         {
           "id": "TC-004-003",
@@ -423,7 +423,7 @@
               "expected": "Changes are saved"
             }
           ],
-          "passes": false
+          "passes": true
         },
         {
           "id": "TC-004-004",
@@ -451,7 +451,7 @@
               "expected": "Preview displays '3:00 PM'"
             }
           ],
-          "passes": false
+          "passes": true
         },
         {
           "id": "TC-004-005",
@@ -479,7 +479,7 @@
               "expected": "Preview shows venue name and address"
             }
           ],
-          "passes": false
+          "passes": true
         },
         {
           "id": "TC-004-006",
@@ -507,7 +507,7 @@
               "expected": "Indicator shows 'Saved' with timestamp"
             }
           ],
-          "passes": false
+          "passes": true
         }
       ]
     },
@@ -1632,7 +1632,7 @@
               "expected": "RSVP form is not rendered"
             }
           ],
-          "passes": false
+          "passes": true
         },
         {
           "id": "TC-012-007",
@@ -1655,7 +1655,7 @@
               "expected": "RSVP form is not rendered"
             }
           ],
-          "passes": false
+          "passes": true
         },
         {
           "id": "TC-012-008",
@@ -1885,7 +1885,7 @@
               "expected": "Navigation link back to '/' available"
             }
           ],
-          "passes": false
+          "passes": true
         },
         {
           "id": "TC-014-003",

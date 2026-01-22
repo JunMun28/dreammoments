@@ -40,9 +40,9 @@ export const Route = createFileRoute("/builder")({
 		return { user: result.data.user };
 	},
 	loader: async ({ context, deps }) => {
-		// Dynamic imports to avoid bundling on client
+		// Use server functions which handle client/server boundary automatically
 		const { syncUserFromNeonAuth } = await import("@/lib/user-sync");
-		const { getOrCreateInvitationInternal, getInvitationWithRelations } =
+		const { getOrCreateInvitationForUser, getInvitationWithRelations } =
 			await import("@/lib/invitation-server");
 
 		const { user } = context;
@@ -50,18 +50,24 @@ export const Route = createFileRoute("/builder")({
 
 		// Sync user to local database (in case this is their first visit to builder)
 		const localUser = await syncUserFromNeonAuth({
-			neonAuthId: user.id,
-			email: user.email,
+			data: {
+				neonAuthId: user.id,
+				email: user.email,
+			},
 		});
 
 		// Get or create invitation for user
-		const { id: invitationId } = await getOrCreateInvitationInternal({
-			userId: localUser.id,
-			templateId: template,
+		const { id: invitationId } = await getOrCreateInvitationForUser({
+			data: {
+				userId: localUser.id,
+				templateId: template,
+			},
 		});
 
 		// Load full invitation data with schedule blocks and notes
-		const invitation = await getInvitationWithRelations(invitationId);
+		const invitation = await getInvitationWithRelations({
+			data: { invitationId },
+		});
 
 		if (!invitation) {
 			throw new Error("Failed to load invitation");

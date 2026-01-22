@@ -1,4 +1,35 @@
 
+## 2026-01-22: UI Testing - Builder Form Tests (TC-004)
+
+**Completed:** Fixed builder page auth redirect issue and ran UI tests for builder form editing
+
+**Issues Found & Fixed:**
+- Login page showing to authenticated users - added client-side redirect using useSession hook
+- "Database cannot be accessed from browser" error - converted internal DB functions to server functions with createServerFn wrapper
+- rsvp.tsx TypeScript error - updated getInvitationWithRelations call to use server function format
+- login.test.tsx missing mocks - added useNavigate and useSession mocks
+
+**Changes:**
+- `src/routes/login.tsx`: Added useSession hook and useNavigate for client-side redirect
+- `src/lib/invitation-server.ts`: Added getInvitationWithRelations server function wrapper
+- `src/routes/builder.tsx`: Updated to use server functions instead of internal functions
+- `src/routes/rsvp.tsx`: Fixed getInvitationWithRelations call format
+- `src/routes/login.test.tsx`: Updated mocks for new component dependencies
+
+**UI Tests Passed:**
+- TC-004-001: Builder page loads with form and preview - PASSED
+- TC-004-002: Edit partner names (Sarah & Michael) - PASSED
+- TC-004-003: Edit wedding date (June 15, 2026) - PASSED
+- TC-004-004: Edit wedding time (2:30 PM) - PASSED
+- TC-004-005: Edit venue details (Grand Ballroom, 123 Wedding Lane) - PASSED
+- TC-004-006: Autosave functionality - PASSED (green "Saved" indicator)
+
+**Verification:**
+- pnpm run typecheck: PASSED
+- pnpm run test: 633/633 tests PASSED
+- pnpm run check: PASSED (Biome lint/format)
+- pnpm run build: PASSED
+
 ## 2026-01-11: Core Database Schema (AUTH-001-T2, AUTH-002-T1, BLDR-001-T1)
 
 **Completed:** Foundational DB schema for MVP auth + invitations
@@ -1318,6 +1349,36 @@
   - Button shows as clicked/active but `data-viewport` attribute stays "desktop"
   - May be related to drizzle-orm/node-postgres Buffer error affecting hydration
   - Documented as test skip with comment explaining the issue
+
+**Verification:**
+- 633/633 unit tests pass
+- 14/14 E2E tests pass (1 skipped)
+- typecheck passes
+- biome check passes
+- build passes
+
+## 2026-01-22: Test Infrastructure Fixes (Code Quality)
+
+**Completed:** Fixed Vitest mock hoisting issues in test files to resolve test failures
+
+**Changes:**
+- `src/lib/rsvp-server.test.ts`: Fixed mock hoisting using `vi.hoisted()`
+- `src/lib/guest-session.test.ts`: Fixed mock hoisting using `vi.hoisted()`
+- `src/lib/guest-server.test.ts`: Fixed mock hoisting using `vi.hoisted()`
+- `src/routes/rsvp.tsx`: Fixed biome-ignore comment placement (moved before useEffect)
+- Multiple files: Fixed formatting issues (tabs vs spaces)
+
+**Decisions:**
+- Used `vi.hoisted()` pattern to create mock objects before `vi.mock()` factory functions
+- This resolves "Cannot access 'mockDb' before initialization" errors caused by `vi.mock()` hoisting
+- Added `getDb` mock to all DB mock configurations to match new async DB pattern
+
+**UI Test Results Updated (ui-test-cases.json):**
+- TS-001 Home Page: TC-001-001 to TC-001-004 - ALL PASSED
+- TS-002 Authentication: TC-002-001, TC-002-004, TC-002-005 - ALL PASSED
+- TS-003 Template Preview: TC-003-001 to TC-003-004 - ALL PASSED
+- TS-012 RSVP Flow: TC-012-006, TC-012-007 - ALL PASSED
+- TS-014 Error Handling: TC-014-002 - PASSED
 
 **Verification:**
 - 633/633 unit tests pass
