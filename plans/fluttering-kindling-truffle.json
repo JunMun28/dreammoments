@@ -322,7 +322,7 @@
         "Add element to page 2 - verify thumbnail preview updates",
         "Hover over page thumbnail and click delete - verify page is removed"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CE-016",

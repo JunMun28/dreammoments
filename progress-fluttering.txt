@@ -536,3 +536,54 @@
 - tests: 799 pass (21 new LayersPanel tests)
 - check: 1 warning (role="button" pattern - intentional for HTML validity)
 - e2e: not run (no new routes)
+
+## 2026-01-23: CE-015 - Page Thumbnails Panel for Multi-Page Navigation
+
+**Status:** COMPLETE
+
+**Changes:**
+- Created PageThumbnailsPanel component with full CE-015 features:
+  - Bottom panel with horizontal scrollable list of page thumbnails
+  - Each thumbnail shows preview image or placeholder with page number
+  - Active page highlighted with blue ring (ring-2 ring-blue-500)
+  - Click thumbnail to select/navigate to page
+  - Hover reveals delete button (X icon, only if >1 page)
+  - Add page button (+) at end of list
+  - Drag thumbnails to reorder pages
+- Added PageInfo interface for page data structure:
+  - id: string
+  - name: string
+  - thumbnailUrl: string | null
+  - order: number
+- Integrated PageThumbnailsPanel into canvas-editor route:
+  - Multi-page state management (pages, currentPageId)
+  - Add/delete/reorder/select page handlers
+  - Panel positioned at bottom of editor layout
+
+**Files changed:**
+- src/components/editor/PageThumbnailsPanel.tsx (new component)
+- src/components/editor/PageThumbnailsPanel.test.tsx (16 tests)
+- src/components/editor/index.ts (added exports)
+- src/routes/canvas-editor.tsx (PageThumbnailsPanel integration)
+
+**Key decisions:**
+- Used div with role="button" for thumbnails (supports drag/drop + accessibility)
+- Added keyboard support: Enter/Space to select page
+- Delete button only shows when >1 page exists (prevent empty state)
+- Pages sorted by order property for consistent display
+- Used controlled pattern with callbacks to parent route
+
+**Acceptance criteria verified:**
+- ✅ Bottom panel shows horizontal scrollable list of page thumbnails
+- ✅ Each page thumbnail shows preview or number placeholder
+- ✅ Current page visually highlighted
+- ✅ Click thumbnail to navigate to page
+- ✅ Add page button creates new blank page
+- ✅ Delete page button on hover (only if more than one page)
+- ✅ Drag to reorder pages
+
+**Verification:**
+- typecheck: pass
+- tests: 815 pass (16 new PageThumbnailsPanel tests)
+- check: pre-existing lint issues in other files
+- e2e: not run (no new routes)

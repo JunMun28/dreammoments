@@ -10,6 +10,8 @@ import {
 	type LayerInfo,
 	type LayerOperation,
 	LayersPanel,
+	type PageInfo,
+	PageThumbnailsPanel,
 	type PropertyUpdate,
 	type TextStyleDefinition,
 	TextStylesPanel,
@@ -133,6 +135,67 @@ function CanvasEditorPage() {
 		setPendingLayerOperation({ type: "sendBackward", layerId });
 	}, []);
 
+	// CE-015: Multi-page state
+	const [pages, setPages] = useState<PageInfo[]>([
+		{ id: "page-1", name: "Page 1", thumbnailUrl: null, order: 0 },
+	]);
+	const [currentPageId, setCurrentPageId] = useState("page-1");
+
+	// CE-015: Add a new page
+	const handleAddPage = useCallback(() => {
+		const newPageId = `page-${Date.now()}`;
+		const newPage: PageInfo = {
+			id: newPageId,
+			name: `Page ${pages.length + 1}`,
+			thumbnailUrl: null,
+			order: pages.length,
+		};
+		setPages((prev) => [...prev, newPage]);
+		setCurrentPageId(newPageId);
+	}, [pages.length]);
+
+	// CE-015: Delete a page
+	const handleDeletePage = useCallback(
+		(pageId: string) => {
+			if (pages.length <= 1) return; // Don't delete last page
+
+			setPages((prev) => {
+				const filtered = prev.filter((p) => p.id !== pageId);
+				// Reorder remaining pages
+				return filtered.map((p, i) => ({ ...p, order: i }));
+			});
+
+			// If deleting current page, switch to first remaining page
+			if (pageId === currentPageId) {
+				const remaining = pages.filter((p) => p.id !== pageId);
+				if (remaining.length > 0) {
+					setCurrentPageId(remaining[0].id);
+				}
+			}
+		},
+		[pages, currentPageId],
+	);
+
+	// CE-015: Reorder pages
+	const handleReorderPages = useCallback((pageId: string, newIndex: number) => {
+		setPages((prev) => {
+			const pagesCopy = [...prev];
+			const sourceIndex = pagesCopy.findIndex((p) => p.id === pageId);
+			if (sourceIndex === -1) return prev;
+
+			const [movedPage] = pagesCopy.splice(sourceIndex, 1);
+			pagesCopy.splice(newIndex, 0, movedPage);
+
+			// Update order values
+			return pagesCopy.map((p, i) => ({ ...p, order: i }));
+		});
+	}, []);
+
+	// CE-015: Select a page
+	const handlePageSelect = useCallback((pageId: string) => {
+		setCurrentPageId(pageId);
+	}, []);
+
 	/**
 	 * CE-008: Render the content browser panel based on active tool
 	 */
@@ -161,59 +224,72 @@ function CanvasEditorPage() {
 
 	return (
 		<TooltipProvider>
-			<div className="flex h-screen w-screen">
-				{/* Left Tool Sidebar (CE-005) */}
-				<aside className="w-14 flex-shrink-0 border-r bg-white">
-					<CanvasToolSidebar
-						activeTool={activeTool}
-						onToolChange={setActiveTool}
-					/>
-				</aside>
-
-				{/* Content Browser Panel (CE-006 to CE-009) */}
-				<aside className="hidden w-64 flex-shrink-0 overflow-y-auto border-r bg-white p-4 lg:block">
-					{renderContentPanel()}
-				</aside>
-
-				{/* Central Canvas */}
-				<main className="flex-1 overflow-hidden">
-					<FabricCanvas
-						onSelectionChange={setSelection}
-						pendingPropertyUpdate={pendingPropertyUpdate}
-						onPropertyUpdateApplied={handlePropertyUpdateApplied}
-						pendingAddTextStyle={pendingAddTextStyle}
-						onTextStyleAdded={handleTextStyleAdded}
-						onLayersChange={handleLayersChange}
-						pendingLayerOperation={pendingLayerOperation}
-						onLayerOperationApplied={handleLayerOperationApplied}
-					/>
-				</main>
-
-				{/* Right Panel: Properties + Layers (CE-010, CE-011, CE-014) */}
-				<aside className="hidden w-72 flex-shrink-0 flex-col border-l bg-white lg:flex">
-					{/* Properties Panel */}
-					<div className="flex-1 overflow-y-auto">
-						<CanvasPropertiesPanel
-							selection={selection}
-							onPropertyChange={handlePropertyChange}
+			<div className="flex h-screen w-screen flex-col">
+				{/* Main content area */}
+				<div className="flex flex-1 overflow-hidden">
+					{/* Left Tool Sidebar (CE-005) */}
+					<aside className="w-14 flex-shrink-0 border-r bg-white">
+						<CanvasToolSidebar
+							activeTool={activeTool}
+							onToolChange={setActiveTool}
 						/>
-					</div>
-					{/* Layers Panel (CE-014) */}
-					<div className="h-64 flex-shrink-0">
-						<LayersPanel
-							layers={layers}
-							selectedLayerId={selectedLayerId}
-							onLayerSelect={handleLayerSelect}
-							onToggleVisibility={handleToggleVisibility}
-							onToggleLock={handleToggleLock}
-							onReorderLayers={handleReorderLayers}
-							onBringToFront={handleBringToFront}
-							onSendToBack={handleSendToBack}
-							onBringForward={handleBringForward}
-							onSendBackward={handleSendBackward}
+					</aside>
+
+					{/* Content Browser Panel (CE-006 to CE-009) */}
+					<aside className="hidden w-64 flex-shrink-0 overflow-y-auto border-r bg-white p-4 lg:block">
+						{renderContentPanel()}
+					</aside>
+
+					{/* Central Canvas */}
+					<main className="flex-1 overflow-hidden">
+						<FabricCanvas
+							onSelectionChange={setSelection}
+							pendingPropertyUpdate={pendingPropertyUpdate}
+							onPropertyUpdateApplied={handlePropertyUpdateApplied}
+							pendingAddTextStyle={pendingAddTextStyle}
+							onTextStyleAdded={handleTextStyleAdded}
+							onLayersChange={handleLayersChange}
+							pendingLayerOperation={pendingLayerOperation}
+							onLayerOperationApplied={handleLayerOperationApplied}
 						/>
-					</div>
-				</aside>
+					</main>
+
+					{/* Right Panel: Properties + Layers (CE-010, CE-011, CE-014) */}
+					<aside className="hidden w-72 flex-shrink-0 flex-col border-l bg-white lg:flex">
+						{/* Properties Panel */}
+						<div className="flex-1 overflow-y-auto">
+							<CanvasPropertiesPanel
+								selection={selection}
+								onPropertyChange={handlePropertyChange}
+							/>
+						</div>
+						{/* Layers Panel (CE-014) */}
+						<div className="h-64 flex-shrink-0">
+							<LayersPanel
+								layers={layers}
+								selectedLayerId={selectedLayerId}
+								onLayerSelect={handleLayerSelect}
+								onToggleVisibility={handleToggleVisibility}
+								onToggleLock={handleToggleLock}
+								onReorderLayers={handleReorderLayers}
+								onBringToFront={handleBringToFront}
+								onSendToBack={handleSendToBack}
+								onBringForward={handleBringForward}
+								onSendBackward={handleSendBackward}
+							/>
+						</div>
+					</aside>
+				</div>
+
+				{/* Bottom Panel: Page Thumbnails (CE-015) */}
+				<PageThumbnailsPanel
+					pages={pages}
+					currentPageId={currentPageId}
+					onPageSelect={handlePageSelect}
+					onAddPage={handleAddPage}
+					onDeletePage={handleDeletePage}
+					onReorderPages={handleReorderPages}
+				/>
 			</div>
 		</TooltipProvider>
 	);
