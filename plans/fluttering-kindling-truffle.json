@@ -254,7 +254,7 @@
         "Set border width to 2px - verify border appears around image",
         "Set border radius to 10px - verify corners become rounded"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CE-013",

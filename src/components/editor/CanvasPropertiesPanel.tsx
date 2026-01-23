@@ -378,7 +378,16 @@ function TextProperties({
 }
 
 /**
- * Image element properties
+ * CE-012: Image element properties editor
+ *
+ * Features:
+ * - Replace image button opens file picker
+ * - Horizontal flip button
+ * - Vertical flip button
+ * - Opacity slider (0-100%)
+ * - Border width input
+ * - Border color picker
+ * - Border radius slider
  */
 function ImageProperties({
 	object,
@@ -389,7 +398,13 @@ function ImageProperties({
 }) {
 	const imgObj = object as FabricObject & {
 		opacity?: number;
+		strokeWidth?: number;
+		stroke?: string;
+		rx?: number;
+		ry?: number;
 	};
+
+	const borderRadius = imgObj.rx || 0;
 
 	return (
 		<div className="space-y-4 p-4">
@@ -440,6 +455,59 @@ function ImageProperties({
 							onPropertyChange?.("opacity", value[0] / 100)
 						}
 					/>
+				</div>
+
+				{/* Border Width */}
+				<div className="space-y-1.5">
+					<Label htmlFor="border-width">Border Width</Label>
+					<Input
+						id="border-width"
+						type="number"
+						min={0}
+						max={20}
+						value={imgObj.strokeWidth || 0}
+						className="h-9"
+						onChange={(e) =>
+							onPropertyChange?.("strokeWidth", Number(e.target.value))
+						}
+					/>
+				</div>
+
+				{/* Border Color */}
+				<div className="space-y-1.5">
+					<Label htmlFor="border-color">Border Color</Label>
+					<Input
+						id="border-color"
+						type="color"
+						value={
+							typeof imgObj.stroke === "string" ? imgObj.stroke : "#000000"
+						}
+						className="h-8 w-full cursor-pointer"
+						onChange={(e) => onPropertyChange?.("stroke", e.target.value)}
+					/>
+				</div>
+
+				{/* Border Radius */}
+				<div className="space-y-1.5">
+					<Label htmlFor="border-radius">Border Radius</Label>
+					<div className="flex items-center gap-2">
+						<Slider
+							id="border-radius"
+							min={0}
+							max={100}
+							step={1}
+							defaultValue={[borderRadius]}
+							onValueChange={(value) => {
+								// Set both rx and ry for rounded corners
+								onPropertyChange?.("rx", value[0]);
+								onPropertyChange?.("ry", value[0]);
+							}}
+							className="flex-1"
+						/>
+						<span className="w-12 text-right text-sm text-stone-500">
+							{borderRadius}px
+						</span>
+					</div>
 				</div>
 			</div>
 		</div>

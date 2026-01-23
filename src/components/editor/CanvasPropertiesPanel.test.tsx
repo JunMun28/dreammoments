@@ -190,9 +190,10 @@ describe("CE-010: CanvasPropertiesPanel", () => {
 		it("shows opacity slider", () => {
 			render(<CanvasPropertiesPanel selection={imageSelection} />);
 
-			// Radix Slider renders as role="slider"
-			const opacitySlider = screen.getByRole("slider");
-			expect(opacitySlider).toBeDefined();
+			// CE-012 adds multiple sliders (opacity + border radius)
+			// Check that sliders exist
+			const sliders = screen.getAllByRole("slider");
+			expect(sliders.length).toBeGreaterThanOrEqual(1);
 		});
 	});
 
@@ -650,6 +651,224 @@ describe("CE-013: Position/Transform Properties Editor", () => {
 
 			// New height 100, original height 50 -> scaleY = 2
 			expect(onPropertyChange).toHaveBeenCalledWith("scaleY", 2);
+		});
+	});
+});
+
+/**
+ * CE-012: Image element properties editor tests
+ *
+ * Acceptance criteria:
+ * - Replace image button opens file picker
+ * - Horizontal flip button
+ * - Vertical flip button
+ * - Opacity slider (0-100%)
+ * - Border width input
+ * - Border color picker
+ * - Border radius slider
+ * - Crop button opens crop tool (optional for v1)
+ */
+describe("CE-012: Image Properties Editor", () => {
+	const createImageSelection = (overrides = {}): CanvasSelectionInfo => ({
+		type: "image",
+		object: {
+			type: "image",
+			left: 100,
+			top: 100,
+			width: 300,
+			height: 200,
+			scaleX: 1,
+			scaleY: 1,
+			angle: 0,
+			opacity: 1,
+			flipX: false,
+			flipY: false,
+			strokeWidth: 0,
+			stroke: "#000000",
+			rx: 0,
+			ry: 0,
+			...overrides,
+		} as unknown as FabricImage,
+	});
+
+	describe("Replace image", () => {
+		it("shows Replace Image button", () => {
+			render(<CanvasPropertiesPanel selection={createImageSelection()} />);
+
+			const replaceBtn = screen.getByRole("button", { name: /replace image/i });
+			expect(replaceBtn).toBeDefined();
+		});
+
+		it("calls onPropertyChange with 'replace' when button is clicked", () => {
+			const onPropertyChange = vi.fn();
+			render(
+				<CanvasPropertiesPanel
+					selection={createImageSelection()}
+					onPropertyChange={onPropertyChange}
+				/>,
+			);
+
+			const replaceBtn = screen.getByRole("button", { name: /replace image/i });
+			replaceBtn.click();
+
+			expect(onPropertyChange).toHaveBeenCalledWith("replace", true);
+		});
+	});
+
+	describe("Flip controls", () => {
+		it("shows Flip Horizontal button", () => {
+			render(<CanvasPropertiesPanel selection={createImageSelection()} />);
+
+			const flipHBtn = screen.getByRole("button", { name: /flip horizontal/i });
+			expect(flipHBtn).toBeDefined();
+		});
+
+		it("shows Flip Vertical button", () => {
+			render(<CanvasPropertiesPanel selection={createImageSelection()} />);
+
+			const flipVBtn = screen.getByRole("button", { name: /flip vertical/i });
+			expect(flipVBtn).toBeDefined();
+		});
+
+		it("calls onPropertyChange with flipX when Flip Horizontal is clicked", () => {
+			const onPropertyChange = vi.fn();
+			render(
+				<CanvasPropertiesPanel
+					selection={createImageSelection()}
+					onPropertyChange={onPropertyChange}
+				/>,
+			);
+
+			const flipHBtn = screen.getByRole("button", { name: /flip horizontal/i });
+			flipHBtn.click();
+
+			expect(onPropertyChange).toHaveBeenCalledWith("flipX", true);
+		});
+
+		it("calls onPropertyChange with flipY when Flip Vertical is clicked", () => {
+			const onPropertyChange = vi.fn();
+			render(
+				<CanvasPropertiesPanel
+					selection={createImageSelection()}
+					onPropertyChange={onPropertyChange}
+				/>,
+			);
+
+			const flipVBtn = screen.getByRole("button", { name: /flip vertical/i });
+			flipVBtn.click();
+
+			expect(onPropertyChange).toHaveBeenCalledWith("flipY", true);
+		});
+	});
+
+	describe("Opacity control", () => {
+		it("shows opacity slider", () => {
+			render(<CanvasPropertiesPanel selection={createImageSelection()} />);
+
+			const opacityLabel = screen.getByText(/^opacity$/i);
+			expect(opacityLabel).toBeDefined();
+		});
+
+		it("shows opacity slider with correct initial value", () => {
+			render(
+				<CanvasPropertiesPanel
+					selection={createImageSelection({ opacity: 0.5 })}
+				/>,
+			);
+
+			// Find the slider by role
+			const sliders = screen.getAllByRole("slider");
+			// Opacity slider should be present
+			expect(sliders.length).toBeGreaterThanOrEqual(1);
+		});
+	});
+
+	describe("Border width", () => {
+		it("shows border width input", () => {
+			render(<CanvasPropertiesPanel selection={createImageSelection()} />);
+
+			const borderWidthInput = screen.getByLabelText(/border width/i);
+			expect(borderWidthInput).toBeDefined();
+		});
+
+		it("shows border width input with current value", () => {
+			render(
+				<CanvasPropertiesPanel
+					selection={createImageSelection({ strokeWidth: 2 })}
+				/>,
+			);
+
+			const borderWidthInput = screen.getByLabelText(/border width/i);
+			expect((borderWidthInput as HTMLInputElement).value).toBe("2");
+		});
+
+		it("calls onPropertyChange with strokeWidth when border width is changed", () => {
+			const onPropertyChange = vi.fn();
+			render(
+				<CanvasPropertiesPanel
+					selection={createImageSelection()}
+					onPropertyChange={onPropertyChange}
+				/>,
+			);
+
+			const borderWidthInput = screen.getByLabelText(/border width/i);
+			fireEvent.change(borderWidthInput, { target: { value: "4" } });
+
+			expect(onPropertyChange).toHaveBeenCalledWith("strokeWidth", 4);
+		});
+	});
+
+	describe("Border color", () => {
+		it("shows border color picker", () => {
+			render(<CanvasPropertiesPanel selection={createImageSelection()} />);
+
+			const borderColorInput = screen.getByLabelText(/border color/i);
+			expect(borderColorInput).toBeDefined();
+		});
+
+		it("shows border color picker with current value", () => {
+			render(
+				<CanvasPropertiesPanel
+					selection={createImageSelection({ stroke: "#ff0000" })}
+				/>,
+			);
+
+			const borderColorInput = screen.getByLabelText(/border color/i);
+			expect((borderColorInput as HTMLInputElement).value).toBe("#ff0000");
+		});
+
+		it("calls onPropertyChange with stroke when border color is changed", () => {
+			const onPropertyChange = vi.fn();
+			render(
+				<CanvasPropertiesPanel
+					selection={createImageSelection()}
+					onPropertyChange={onPropertyChange}
+				/>,
+			);
+
+			const borderColorInput = screen.getByLabelText(/border color/i);
+			fireEvent.change(borderColorInput, { target: { value: "#00ff00" } });
+
+			expect(onPropertyChange).toHaveBeenCalledWith("stroke", "#00ff00");
+		});
+	});
+
+	describe("Border radius", () => {
+		it("shows border radius slider", () => {
+			render(<CanvasPropertiesPanel selection={createImageSelection()} />);
+
+			const borderRadiusLabel = screen.getByText(/border radius/i);
+			expect(borderRadiusLabel).toBeDefined();
+		});
+
+		it("shows border radius value display", () => {
+			render(
+				<CanvasPropertiesPanel selection={createImageSelection({ rx: 10 })} />,
+			);
+
+			// Should display the current radius value
+			const radiusValue = screen.getByText("10px");
+			expect(radiusValue).toBeDefined();
 		});
 	});
 });

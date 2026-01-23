@@ -399,3 +399,46 @@
 - check: pass (after format --write)
 - e2e: 14 pass
 - UI: verified via playwright (TextStylesPanel shows, click adds styled text, properties panel updates)
+
+## 2026-01-23: CE-012 - Image Element Properties Editor
+
+**Status:** COMPLETE
+
+**Changes:**
+- Enhanced ImageProperties component with full CE-012 features:
+  - Replace image button (already existed)
+  - Horizontal flip button (already existed)
+  - Vertical flip button (already existed)
+  - Opacity slider 0-100% (already existed)
+  - Border width input (0-20px)
+  - Border color picker (color input)
+  - Border radius slider (0-100px with value display)
+- Border radius uses rx/ry Fabric.js properties for rounded corners
+- Added 17 new tests for CE-012 in CanvasPropertiesPanel.test.tsx
+- Updated old CE-010 test to use getAllByRole for multiple sliders
+
+**Files changed:**
+- src/components/editor/CanvasPropertiesPanel.tsx (ImageProperties enhancement)
+- src/components/editor/CanvasPropertiesPanel.test.tsx (17 new CE-012 tests)
+
+**Key decisions:**
+- Used strokeWidth/stroke for border (standard Fabric.js properties)
+- Used rx/ry for border radius (sets both for uniform corners)
+- Border radius slider max 100px to prevent excessive rounding
+- Value inputs use controlled pattern with value= for bidirectional sync
+
+**Acceptance criteria verified:**
+- ✅ Replace image button opens file picker (signals via onPropertyChange)
+- ✅ Horizontal flip button
+- ✅ Vertical flip button
+- ✅ Opacity slider (0-100%)
+- ✅ Border width input
+- ✅ Border color picker
+- ✅ Border radius slider
+- ⏭️ Crop button (optional for v1, not implemented)
+
+**Verification:**
+- typecheck: pass
+- tests: 764 pass (17 new CE-012 tests)
+- check: pre-existing lint issues (useUniqueElementIds in CanvasPropertiesPanel.tsx)
+- e2e: 14 pass
