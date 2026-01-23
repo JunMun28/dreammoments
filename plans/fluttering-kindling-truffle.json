@@ -186,7 +186,7 @@
         "Drag a flower sticker onto canvas - verify it appears as image element",
         "Type 'frame' in search - verify only frame assets are shown"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CE-010",

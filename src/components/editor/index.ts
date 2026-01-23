@@ -1,4 +1,9 @@
 // Editor components for multi-panel layout
+export {
+  type AssetCategory,
+  type AssetDefinition,
+  AssetsPanel,
+} from "./AssetsPanel";
 export { CanvasPanel } from "./CanvasPanel";
 export {
   CanvasPropertiesPanel,

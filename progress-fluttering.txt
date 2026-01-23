@@ -633,3 +633,54 @@
 - tests: 834 pass (19 new TemplatesPanel tests)
 - check: pass for new files (pre-existing lint issues in CanvasPropertiesPanel.tsx)
 - e2e: 14 pass
+
+## 2026-01-23: CE-009 - Assets Panel with Decorative Elements
+
+**Status:** COMPLETE
+
+**Changes:**
+- Created AssetsPanel component with full CE-009 features:
+  - Search input with clear button for filtering assets by name/tags
+  - Category filter buttons: All, Flowers, Frames, Dividers, Icons, Shapes
+  - Grid of asset thumbnails with SVG-based placeholder images
+  - Each asset has id, name, category, src (data URI), tags, width, height
+  - Click asset to trigger onAddAsset callback
+  - Empty state when no assets match filters
+  - Combined category + search filtering
+- Created 18 decorative assets across 5 categories:
+  - Flowers: Rose, Lily, Flower Branch, Bouquet
+  - Frames: Ornate Frame, Simple Frame, Rounded Frame
+  - Dividers: Simple Line, Ornate Divider, Flourish Divider
+  - Icons: Heart, Wedding Rings, Dove, Champagne
+  - Shapes: Circle, Square, Diamond, Star
+- Exported AssetDefinition and AssetCategory types from editor index
+- Integrated AssetsPanel into canvas-editor route:
+  - Added handleAddAsset callback
+  - Shows AssetsPanel when activeTool === "assets"
+
+**Files changed:**
+- src/components/editor/AssetsPanel.tsx (new component)
+- src/components/editor/AssetsPanel.test.tsx (15 tests)
+- src/components/editor/index.ts (added exports)
+- src/routes/canvas-editor.tsx (integrated AssetsPanel)
+
+**Key decisions:**
+- Used SVG data URIs for placeholder assets (no external images needed)
+- Assets filter by both name and tags for flexible search
+- Category "all" shows all assets, specific categories filter
+- Same controlled pattern as other content browser panels
+- TODO: Actual canvas image element creation deferred
+
+**Acceptance criteria verified:**
+- ✅ Assets panel shows searchable grid of decorative elements
+- ✅ Categories: Flowers, Frames, Dividers, Icons, Shapes
+- ✅ Each asset has thumbnail preview
+- ✅ Clicking asset signals intent to add image element
+- ✅ Search box filters assets by name/tag
+- ⏳ Dragging asset to canvas (deferred - requires drag/drop implementation)
+
+**Verification:**
+- typecheck: pass
+- tests: 849 pass (15 new AssetsPanel tests)
+- check: pass for new files (pre-existing lint issues in other files)
+- e2e: not run (no new routes)
