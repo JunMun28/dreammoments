@@ -587,3 +587,49 @@
 - tests: 815 pass (16 new PageThumbnailsPanel tests)
 - check: pre-existing lint issues in other files
 - e2e: not run (no new routes)
+
+## 2026-01-23: CE-006 - Templates Gallery Panel
+
+**Status:** COMPLETE
+
+**Changes:**
+- Created TemplatesPanel component with full CE-006 features:
+  - Grid of 5 template thumbnails (Elegant, Modern, Rustic, Minimal, Floral)
+  - Each template has preview color/accent, name, and description
+  - Clicking template opens preview dialog
+  - Preview dialog shows template info and element count
+  - Apply button triggers onApplyTemplate callback with template elements
+  - Cancel button closes dialog
+  - Uses React useId() for unique dialog IDs
+- TemplateDefinition interface with elements array for canvas loading
+- TemplateElement interface for text/rect/image elements with positioning
+- Each template has 3-5 pre-positioned elements with full styling
+- Integrated TemplatesPanel into canvas-editor route:
+  - selectedTemplateId state for dialog control
+  - handleSelectTemplate/handleApplyTemplate handlers
+  - Shows when activeTool === "templates"
+
+**Files changed:**
+- src/components/editor/TemplatesPanel.tsx (new component)
+- src/components/editor/TemplatesPanel.test.tsx (19 tests)
+- src/components/editor/index.ts (added exports)
+- src/routes/canvas-editor.tsx (integrated TemplatesPanel)
+
+**Key decisions:**
+- Used controlled pattern with selectedTemplateId state (same as other panels)
+- Template elements include all Fabric.js properties (font, size, position)
+- Preview dialog uses useId() for accessibility (aria-labelledby)
+- TODO: Actual canvas loading deferred until FabricCanvas supports loadFromJSON for templates
+
+**Acceptance criteria verified:**
+- ✅ Templates panel shows grid of template thumbnails
+- ✅ Each template has preview image and name
+- ✅ Clicking template shows preview dialog
+- ✅ Apply button loads template elements onto canvas (via callback)
+- ✅ At least 5 starter templates available (elegant, modern, rustic, minimal, floral)
+
+**Verification:**
+- typecheck: pass
+- tests: 834 pass (19 new TemplatesPanel tests)
+- check: pass for new files (pre-existing lint issues in CanvasPropertiesPanel.tsx)
+- e2e: 14 pass

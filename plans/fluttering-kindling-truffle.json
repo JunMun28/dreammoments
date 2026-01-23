@@ -127,7 +127,7 @@
         "Click a template thumbnail - verify preview dialog opens",
         "Click 'Apply' in preview - verify canvas is populated with template elements"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CE-007",

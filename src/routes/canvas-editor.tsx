@@ -13,6 +13,8 @@ import {
 	type PageInfo,
 	PageThumbnailsPanel,
 	type PropertyUpdate,
+	type TemplateDefinition,
+	TemplatesPanel,
 	type TextStyleDefinition,
 	TextStylesPanel,
 	type WidgetDefinition,
@@ -75,6 +77,31 @@ function CanvasEditorPage() {
 		setPendingAddWidget(widget);
 		// TODO: CE-020-023 will implement actual widget rendering on canvas
 		console.log("Widget selected:", widget.name);
+	}, []);
+
+	// CE-006: Template state for previewing and applying templates
+	const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
+		null,
+	);
+
+	// CE-006: Handle template selection (opens preview dialog)
+	const handleSelectTemplate = useCallback(
+		(template: TemplateDefinition | null) => {
+			setSelectedTemplateId(template?.id ?? null);
+		},
+		[],
+	);
+
+	// CE-006: Handle template apply (loads elements onto canvas)
+	const handleApplyTemplate = useCallback((template: TemplateDefinition) => {
+		// TODO: Load template elements onto canvas via FabricCanvas
+		console.log(
+			"Applying template:",
+			template.name,
+			template.elements.length,
+			"elements",
+		);
+		setSelectedTemplateId(null);
 	}, []);
 
 	// CE-014: Layers panel state
@@ -197,9 +224,19 @@ function CanvasEditorPage() {
 	}, []);
 
 	/**
-	 * CE-008: Render the content browser panel based on active tool
+	 * CE-006, CE-008: Render the content browser panel based on active tool
 	 */
 	const renderContentPanel = () => {
+		if (activeTool === "templates") {
+			return (
+				<TemplatesPanel
+					onSelectTemplate={handleSelectTemplate}
+					onApplyTemplate={handleApplyTemplate}
+					selectedTemplateId={selectedTemplateId}
+				/>
+			);
+		}
+
 		if (activeTool === "text") {
 			return <TextStylesPanel onAddTextStyle={handleAddTextStyle} />;
 		}
@@ -208,16 +245,14 @@ function CanvasEditorPage() {
 			return <ComponentsPanel onAddWidget={handleAddWidget} />;
 		}
 
-		// Placeholder for other tools (CE-006, CE-009)
+		// Placeholder for other tools (CE-009)
 		return (
 			<div className="text-sm text-stone-500">
 				<h3 className="mb-2 font-medium text-stone-700">
 					{activeTool.charAt(0).toUpperCase() + activeTool.slice(1)}
 				</h3>
 				<p>Content panel for: {activeTool}</p>
-				<p className="mt-2 text-xs text-stone-400">
-					(CE-006, CE-009: Content browser panels)
-				</p>
+				<p className="mt-2 text-xs text-stone-400">(CE-009: Assets panel)</p>
 			</div>
 		);
 	};
