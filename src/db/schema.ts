@@ -3,6 +3,7 @@ import {
 	boolean,
 	date,
 	integer,
+	jsonb,
 	pgTable,
 	text,
 	time,
@@ -49,6 +50,16 @@ export const invitations = pgTable("invitations", {
 
 	// RSVP
 	rsvpDeadline: timestamp("rsvp_deadline"),
+
+	// Venue coordinates (for map display)
+	venueLatitude: text("venue_latitude"),
+	venueLongitude: text("venue_longitude"),
+
+	// Layout format: "card" (default single card) or "longpage" (scrollable sections)
+	layoutFormat: text("layout_format").default("card"),
+
+	// Editor mode: "structured" (form-based) or "canvas" (fabric.js free-form)
+	editorMode: text("editor_mode").default("structured"),
 
 	// Timestamps
 	createdAt: timestamp("created_at").defaultNow(),
@@ -182,6 +193,48 @@ export const rsvpResponses = pgTable("rsvp_responses", {
 });
 
 // ============================================================================
+// GALLERY IMAGES - Photo gallery for couple photos
+// ============================================================================
+export const galleryImages = pgTable("gallery_images", {
+	id: uuid().primaryKey().defaultRandom(),
+	invitationId: uuid("invitation_id")
+		.notNull()
+		.references(() => invitations.id, { onDelete: "cascade" }),
+
+	// Image content
+	imageUrl: text("image_url").notNull(),
+	caption: text(),
+
+	// Ordering
+	order: integer().notNull().default(0),
+
+	// Timestamps
+	createdAt: timestamp("created_at").defaultNow(),
+});
+
+// ============================================================================
+// CANVAS STATES - Free-form canvas editor state (Fabric.js JSON)
+// Stores the serialized canvas data when editorMode = 'canvas'
+// ============================================================================
+export const canvasStates = pgTable("canvas_states", {
+	id: uuid().primaryKey().defaultRandom(),
+	invitationId: uuid("invitation_id")
+		.notNull()
+		.unique() // One canvas state per invitation
+		.references(() => invitations.id, { onDelete: "cascade" }),
+
+	// Canvas data as JSON (Fabric.js serialized format)
+	canvasData: jsonb("canvas_data").notNull(),
+
+	// Schema version for future migrations
+	version: integer().notNull().default(1),
+
+	// Timestamps
+	createdAt: timestamp("created_at").defaultNow(),
+	updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// ============================================================================
 // RELATIONS
 // ============================================================================
 export const usersRelations = relations(users, ({ many }) => ({
@@ -196,6 +249,22 @@ export const invitationsRelations = relations(invitations, ({ one, many }) => ({
 	scheduleBlocks: many(scheduleBlocks),
 	notes: many(notes),
 	guestGroups: many(guestGroups),
+	galleryImages: many(galleryImages),
+	canvasState: one(canvasStates),
+}));
+
+export const galleryImagesRelations = relations(galleryImages, ({ one }) => ({
+	invitation: one(invitations, {
+		fields: [galleryImages.invitationId],
+		references: [invitations.id],
+	}),
+}));
+
+export const canvasStatesRelations = relations(canvasStates, ({ one }) => ({
+	invitation: one(invitations, {
+		fields: [canvasStates.invitationId],
+		references: [invitations.id],
+	}),
 }));
 
 export const scheduleBlocksRelations = relations(scheduleBlocks, ({ one }) => ({

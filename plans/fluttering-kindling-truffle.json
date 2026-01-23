@@ -1,0 +1,524 @@
+{
+  "projectName": "DreamMoments Canvas Editor",
+  "referenceDesign": "https://www.hunbei.com/long_page/#/?scene_id=35601711",
+  "items": [
+    {
+      "id": "CE-001",
+      "category": "Canvas Foundation",
+      "description": "Initialize Fabric.js canvas with basic element rendering, drag, resize, and rotate capabilities",
+      "acceptanceCriteria": [
+        "Fabric.js canvas renders in the center panel",
+        "Users can add rectangle and text elements to canvas",
+        "Elements can be selected with click",
+        "Selected elements show transform handles (corners and edges)",
+        "Elements can be dragged to new positions",
+        "Elements can be resized by dragging corner handles",
+        "Elements can be rotated by dragging rotation handle"
+      ],
+      "stepsToVerify": [
+        "Navigate to /builder with editorMode='canvas'",
+        "Click 'Add Rectangle' button and verify shape appears on canvas",
+        "Click the rectangle to select it - verify blue selection border appears",
+        "Drag the rectangle - verify it moves to new position",
+        "Drag a corner handle - verify rectangle resizes proportionally",
+        "Drag rotation handle - verify element rotates"
+      ],
+      "passes": false
+    },
+    {
+      "id": "CE-002",
+      "category": "Canvas Foundation",
+      "description": "Implement zoom and pan controls for the canvas viewport",
+      "acceptanceCriteria": [
+        "Zoom in/out buttons visible in canvas toolbar",
+        "Zoom level displays as percentage (e.g., '80%')",
+        "Zoom range: 50% to 200%",
+        "Zoom presets available: 50%, 80%, 100%, 150%, 200%",
+        "Canvas can be panned by holding Space + drag (optional)",
+        "Fit to screen button resets view to show full canvas"
+      ],
+      "stepsToVerify": [
+        "Click zoom in (+) button - verify canvas scale increases and percentage updates",
+        "Click zoom out (-) button - verify canvas scale decreases",
+        "Click percentage display - verify preset dropdown appears",
+        "Select '150%' preset - verify canvas zooms to 150%",
+        "Click 'Fit' button - verify entire canvas fits in viewport"
+      ],
+      "passes": false
+    },
+    {
+      "id": "CE-003",
+      "category": "Canvas Foundation",
+      "description": "Implement undo/redo functionality for all canvas operations",
+      "acceptanceCriteria": [
+        "Undo button (Ctrl+Z) reverts last canvas change",
+        "Redo button (Ctrl+Shift+Z) restores undone change",
+        "History supports at least 50 operations",
+        "Undo/redo buttons show disabled state when unavailable",
+        "All element operations are undoable: add, delete, move, resize, rotate, property changes"
+      ],
+      "stepsToVerify": [
+        "Add element to canvas - verify it appears",
+        "Press Ctrl+Z - verify element is removed",
+        "Press Ctrl+Shift+Z - verify element reappears",
+        "Move element, then undo - verify element returns to original position",
+        "With empty history, verify undo button is disabled"
+      ],
+      "passes": false
+    },
+    {
+      "id": "CE-004",
+      "category": "Canvas Foundation",
+      "description": "Implement keyboard shortcuts for common canvas operations",
+      "acceptanceCriteria": [
+        "Delete/Backspace removes selected element(s)",
+        "Ctrl+C copies selected element(s)",
+        "Ctrl+V pastes copied element(s) with offset",
+        "Ctrl+X cuts selected element(s)",
+        "Ctrl+D duplicates selected element(s)",
+        "Ctrl+A selects all elements",
+        "Arrow keys nudge selected element by 1px",
+        "Shift+Arrow keys nudge by 10px",
+        "Escape deselects all elements"
+      ],
+      "stepsToVerify": [
+        "Select element and press Delete - verify element is removed",
+        "Select element, Ctrl+C, then Ctrl+V - verify copy appears offset from original",
+        "Select element, Ctrl+D - verify duplicate appears",
+        "Press Ctrl+A - verify all elements are selected",
+        "Select element, press Arrow Right - verify element moves 1px right",
+        "Press Escape - verify nothing is selected"
+      ],
+      "passes": false
+    },
+    {
+      "id": "CE-005",
+      "category": "Tool Sidebar",
+      "description": "Update left tool sidebar with hunbei.com-style tool categories",
+      "acceptanceCriteria": [
+        "Sidebar shows vertical icon buttons",
+        "Tools include: Sections, Templates, Text, Assets, Components, Settings",
+        "Each tool has icon and tooltip on hover",
+        "Active tool is visually highlighted",
+        "Clicking tool switches the content browser panel"
+      ],
+      "stepsToVerify": [
+        "Verify sidebar displays 6+ tool icons vertically",
+        "Hover over each icon - verify tooltip shows tool name",
+        "Click 'Templates' tool - verify it becomes highlighted",
+        "Click 'Components' tool - verify content browser switches to components panel"
+      ],
+      "passes": false
+    },
+    {
+      "id": "CE-006",
+      "category": "Content Browser",
+      "description": "Implement Templates gallery panel in content browser",
+      "acceptanceCriteria": [
+        "Templates panel shows grid of template thumbnails",
+        "Each template has preview image and name",
+        "Clicking template shows preview dialog",
+        "Apply button loads template elements onto canvas",
+        "At least 5 starter templates available (elegant, modern, rustic, minimal, floral)"
+      ],
+      "stepsToVerify": [
+        "Click Templates tool - verify grid of templates appears",
+        "Verify at least 5 templates are displayed with thumbnails",
+        "Click a template thumbnail - verify preview dialog opens",
+        "Click 'Apply' in preview - verify canvas is populated with template elements"
+      ],
+      "passes": false
+    },
+    {
+      "id": "CE-007",
+      "category": "Content Browser",
+      "description": "Implement Components library panel with wedding widgets",
+      "acceptanceCriteria": [
+        "Components panel shows categorized widget list",
+        "Categories: Interactive (countdown, map), Forms (RSVP), Media (gallery)",
+        "Each component has icon, name, and description",
+        "Dragging component to canvas adds it as widget element",
+        "Available widgets: Countdown Timer, Venue Map, RSVP Form, Photo Gallery, Schedule Timeline"
+      ],
+      "stepsToVerify": [
+        "Click Components tool - verify categorized widget list appears",
+        "Verify 'Countdown Timer' widget is listed under Interactive",
+        "Drag 'Countdown Timer' onto canvas - verify countdown widget appears",
+        "Drag 'Venue Map' onto canvas - verify map widget appears",
+        "Drag 'RSVP Form' onto canvas - verify form widget appears"
+      ],
+      "passes": false
+    },
+    {
+      "id": "CE-008",
+      "category": "Content Browser",
+      "description": "Implement Text styles panel with pre-styled text blocks",
+      "acceptanceCriteria": [
+        "Text panel shows list of pre-styled text options",
+        "Styles include: Heading, Subheading, Body, Quote, Caption",
+        "Each style shows preview of font/size/color",
+        "Clicking or dragging style adds text element to canvas",
+        "Added text elements are editable"
+      ],
+      "stepsToVerify": [
+        "Click Text tool - verify list of text styles appears",
+        "Verify at least 5 text styles are available",
+        "Click 'Heading' style - verify large styled text appears on canvas",
+        "Double-click the added text on canvas - verify it becomes editable",
+        "Type new text - verify it updates"
+      ],
+      "passes": false
+    },
+    {
+      "id": "CE-009",
+      "category": "Content Browser",
+      "description": "Implement Assets panel with decorative stickers and elements",
+      "acceptanceCriteria": [
+        "Assets panel shows searchable grid of decorative elements",
+        "Categories: Flowers, Frames, Dividers, Icons, Shapes",
+        "Each asset has thumbnail preview",
+        "Dragging asset to canvas adds it as image element",
+        "Search box filters assets by name/tag"
+      ],
+      "stepsToVerify": [
+        "Click Assets tool - verify grid of decorative elements appears",
+        "Verify category tabs/filters for Flowers, Frames, etc.",
+        "Drag a flower sticker onto canvas - verify it appears as image element",
+        "Type 'frame' in search - verify only frame assets are shown"
+      ],
+      "passes": false
+    },
+    {
+      "id": "CE-010",
+      "category": "Properties Panel",
+      "description": "Implement element-based properties panel that changes based on selection",
+      "acceptanceCriteria": [
+        "No selection: shows page/canvas properties (background color, size)",
+        "Text selected: shows text properties (font, size, color, alignment)",
+        "Image selected: shows image properties (replace, crop, flip, border)",
+        "Widget selected: shows widget-specific config",
+        "Multi-selection: shows only common properties"
+      ],
+      "stepsToVerify": [
+        "With nothing selected - verify panel shows 'Canvas Properties' with background options",
+        "Select a text element - verify panel switches to show font picker, size slider, color picker",
+        "Select an image element - verify panel shows Replace button, crop, flip options",
+        "Select a countdown widget - verify panel shows date/time configuration"
+      ],
+      "passes": false
+    },
+    {
+      "id": "CE-011",
+      "category": "Properties Panel",
+      "description": "Implement Text element properties editor",
+      "acceptanceCriteria": [
+        "Font family picker with Google Fonts options",
+        "Font size slider/input (8-200px)",
+        "Font weight toggle (normal/bold)",
+        "Font style toggle (normal/italic)",
+        "Text color picker",
+        "Text alignment buttons (left, center, right, justify)",
+        "Line height slider",
+        "Letter spacing slider",
+        "Changes apply in real-time to canvas"
+      ],
+      "stepsToVerify": [
+        "Select text element on canvas",
+        "Change font family - verify text updates to new font",
+        "Increase font size to 48px - verify text enlarges",
+        "Click bold toggle - verify text becomes bold",
+        "Change color to red - verify text color updates",
+        "Click center align - verify text centers within its bounds"
+      ],
+      "passes": false
+    },
+    {
+      "id": "CE-012",
+      "category": "Properties Panel",
+      "description": "Implement Image element properties editor",
+      "acceptanceCriteria": [
+        "Replace image button opens file picker",
+        "Horizontal flip button",
+        "Vertical flip button",
+        "Opacity slider (0-100%)",
+        "Border width input",
+        "Border color picker",
+        "Border radius slider",
+        "Crop button opens crop tool (optional for v1)"
+      ],
+      "stepsToVerify": [
+        "Select image element on canvas",
+        "Click Replace - verify file picker opens and new image replaces old",
+        "Click Horizontal Flip - verify image flips horizontally",
+        "Set opacity to 50% - verify image becomes semi-transparent",
+        "Set border width to 2px - verify border appears around image",
+        "Set border radius to 10px - verify corners become rounded"
+      ],
+      "passes": false
+    },
+    {
+      "id": "CE-013",
+      "category": "Properties Panel",
+      "description": "Implement Position/Transform properties editor for all elements",
+      "acceptanceCriteria": [
+        "X position input (pixels from left)",
+        "Y position input (pixels from top)",
+        "Width input",
+        "Height input",
+        "Rotation input (degrees)",
+        "Lock aspect ratio toggle",
+        "Changes sync bidirectionally with canvas"
+      ],
+      "stepsToVerify": [
+        "Select element on canvas",
+        "Change X to 100 - verify element moves horizontally",
+        "Change Y to 200 - verify element moves vertically",
+        "Change width to 300 - verify element resizes",
+        "Change rotation to 45 - verify element rotates 45 degrees",
+        "Drag element on canvas - verify position inputs update"
+      ],
+      "passes": false
+    },
+    {
+      "id": "CE-014",
+      "category": "Layers Panel",
+      "description": "Implement layers panel showing all canvas elements with z-index management",
+      "acceptanceCriteria": [
+        "Layers panel lists all elements by z-index (top to bottom)",
+        "Each layer row shows element type icon and name/preview",
+        "Clicking layer row selects element on canvas",
+        "Eye icon toggles element visibility",
+        "Lock icon toggles element editing lock",
+        "Drag rows to reorder z-index",
+        "Context menu: Bring to Front, Send to Back, Bring Forward, Send Backward"
+      ],
+      "stepsToVerify": [
+        "Add 3 elements to canvas",
+        "Open layers panel - verify all 3 elements listed",
+        "Click a layer row - verify corresponding element is selected on canvas",
+        "Click eye icon - verify element becomes hidden on canvas",
+        "Click lock icon - verify element cannot be moved/resized",
+        "Drag layer row to new position - verify z-index changes on canvas"
+      ],
+      "passes": false
+    },
+    {
+      "id": "CE-015",
+      "category": "Bottom Panel",
+      "description": "Implement page thumbnails panel for multi-page navigation",
+      "acceptanceCriteria": [
+        "Bottom panel shows horizontal scrollable list of page thumbnails",
+        "Each thumbnail shows miniature preview of page content",
+        "Active page is highlighted",
+        "Clicking thumbnail navigates to that page",
+        "Add page button (+) creates new blank page",
+        "Delete button (on hover) removes page",
+        "Drag thumbnails to reorder pages"
+      ],
+      "stepsToVerify": [
+        "Verify bottom panel shows current page thumbnail",
+        "Click + button - verify new page is created and shown",
+        "Click new page thumbnail - verify canvas switches to empty page",
+        "Add element to page 2 - verify thumbnail preview updates",
+        "Hover over page thumbnail and click delete - verify page is removed"
+      ],
+      "passes": false
+    },
+    {
+      "id": "CE-016",
+      "category": "Persistence",
+      "description": "Implement canvas state persistence to database",
+      "acceptanceCriteria": [
+        "Canvas state auto-saves after changes (1-second debounce)",
+        "Save indicator shows: 'Saving...', 'Saved', 'Error' states",
+        "Canvas state stored as JSON in canvasStates table",
+        "Reloading page restores canvas to last saved state",
+        "Multiple pages and all element properties are preserved"
+      ],
+      "stepsToVerify": [
+        "Add elements to canvas - verify 'Saving...' indicator appears",
+        "Wait 2 seconds - verify 'Saved' indicator appears",
+        "Refresh the page - verify all elements are restored in correct positions",
+        "Add a second page with elements, refresh - verify both pages restored"
+      ],
+      "passes": false
+    },
+    {
+      "id": "CE-017",
+      "category": "Persistence",
+      "description": "Implement database schema changes for canvas editor",
+      "acceptanceCriteria": [
+        "canvasStates table exists with: id, invitationId, canvasData (JSON), version, updatedAt",
+        "invitations table has editorMode column (values: 'structured' | 'canvas')",
+        "Foreign key: canvasStates.invitationId references invitations.id",
+        "ON DELETE CASCADE removes canvas state when invitation deleted"
+      ],
+      "stepsToVerify": [
+        "Run pnpm db:push - verify migrations apply without errors",
+        "Open Drizzle Studio - verify canvasStates table exists with correct columns",
+        "Verify invitations table has editorMode column",
+        "Delete an invitation - verify associated canvasStates record is deleted"
+      ],
+      "passes": true
+    },
+    {
+      "id": "CE-018",
+      "category": "Export",
+      "description": "Implement canvas export to PNG/JPEG image",
+      "acceptanceCriteria": [
+        "Export button in header opens export dialog",
+        "Format options: PNG, JPEG",
+        "Quality slider for JPEG (1-100%)",
+        "Preview shows export result",
+        "Download button saves file to user's device",
+        "Exported image matches canvas appearance"
+      ],
+      "stepsToVerify": [
+        "Add elements to canvas",
+        "Click Export button - verify dialog opens",
+        "Select PNG format - verify preview shows image",
+        "Click Download - verify PNG file downloads",
+        "Open downloaded file - verify it matches canvas"
+      ],
+      "passes": false
+    },
+    {
+      "id": "CE-019",
+      "category": "Migration",
+      "description": "Implement mode switching between structured and canvas editor",
+      "acceptanceCriteria": [
+        "Settings shows 'Editor Mode' toggle: Structured / Canvas",
+        "Switching to Canvas mode creates canvas state from structured data",
+        "One-way migration: structured sections convert to positioned elements",
+        "Existing invitations remain in structured mode by default",
+        "Warning dialog confirms mode switch (cannot undo)"
+      ],
+      "stepsToVerify": [
+        "Open existing invitation in structured mode",
+        "Navigate to Settings - verify Editor Mode toggle exists",
+        "Click 'Switch to Canvas' - verify warning dialog appears",
+        "Confirm switch - verify canvas editor loads with converted elements",
+        "Verify hero image, names, date appear as positioned elements on canvas"
+      ],
+      "passes": false
+    },
+    {
+      "id": "CE-020",
+      "category": "Widget",
+      "description": "Implement Countdown Timer widget for canvas",
+      "acceptanceCriteria": [
+        "Countdown widget can be added from Components panel",
+        "Widget displays days, hours, minutes, seconds until target date",
+        "Properties panel allows setting target date/time",
+        "Widget auto-updates (countdown ticks in real-time)",
+        "Styling options: font, colors, layout (horizontal/vertical)"
+      ],
+      "stepsToVerify": [
+        "Drag Countdown Timer from Components to canvas",
+        "Verify countdown displays with default date",
+        "In properties, change target date to tomorrow - verify countdown updates",
+        "Wait 1+ seconds - verify seconds counter decrements",
+        "Change font color - verify widget styling updates"
+      ],
+      "passes": false
+    },
+    {
+      "id": "CE-021",
+      "category": "Widget",
+      "description": "Implement Venue Map widget for canvas",
+      "acceptanceCriteria": [
+        "Map widget can be added from Components panel",
+        "Properties panel allows entering address or coordinates",
+        "Map shows pin at specified location",
+        "Map is interactive (pan/zoom) in preview mode",
+        "Styling options: map style, pin color, zoom level"
+      ],
+      "stepsToVerify": [
+        "Drag Venue Map from Components to canvas",
+        "Verify empty map placeholder appears",
+        "Enter venue address in properties - verify map updates to show location",
+        "Preview the invitation - verify map is interactive"
+      ],
+      "passes": false
+    },
+    {
+      "id": "CE-022",
+      "category": "Widget",
+      "description": "Implement RSVP Form widget for canvas",
+      "acceptanceCriteria": [
+        "RSVP Form widget can be added from Components panel",
+        "Form includes: Name, Email, Attending (Yes/No), Guest count, Message",
+        "Properties panel allows customizing which fields to show",
+        "Form submissions save to existing RSVP system",
+        "Styling options: colors, font, button style"
+      ],
+      "stepsToVerify": [
+        "Drag RSVP Form from Components to canvas",
+        "Verify form displays with default fields",
+        "In properties, toggle off 'Email' field - verify it disappears from form",
+        "Preview and submit RSVP - verify response saves to database"
+      ],
+      "passes": false
+    },
+    {
+      "id": "CE-023",
+      "category": "Widget",
+      "description": "Implement Photo Gallery widget for canvas",
+      "acceptanceCriteria": [
+        "Gallery widget can be added from Components panel",
+        "Properties panel allows uploading/selecting images",
+        "Gallery displays images in carousel or grid layout",
+        "Layout options: Carousel, Grid (2x2, 3x3), Masonry",
+        "Navigation: arrows, dots, swipe in preview mode"
+      ],
+      "stepsToVerify": [
+        "Drag Photo Gallery from Components to canvas",
+        "Verify empty gallery placeholder appears",
+        "Upload 3 images via properties - verify they appear in gallery",
+        "Switch layout to Grid - verify images display in grid format",
+        "Preview invitation - verify gallery navigation works"
+      ],
+      "passes": false
+    },
+    {
+      "id": "CE-024",
+      "category": "UX Polish",
+      "description": "Implement alignment guides (smart guides) when moving elements",
+      "acceptanceCriteria": [
+        "When dragging element, alignment guides appear at edges/centers",
+        "Guides show when element aligns with other elements",
+        "Guides show when element aligns with canvas edges/center",
+        "Element snaps to guide when within 5px",
+        "Guides are pink/red lines for visibility"
+      ],
+      "stepsToVerify": [
+        "Add two elements to canvas",
+        "Drag second element near first element's edge - verify vertical guide line appears",
+        "Continue dragging until edges align - verify element snaps to alignment",
+        "Drag element toward canvas center - verify center guide appears"
+      ],
+      "passes": false
+    },
+    {
+      "id": "CE-025",
+      "category": "UX Polish",
+      "description": "Implement multi-select for batch element operations",
+      "acceptanceCriteria": [
+        "Shift+click adds/removes elements from selection",
+        "Click-drag on empty canvas creates marquee selection box",
+        "Elements fully within marquee are selected",
+        "Selected elements can be moved together",
+        "Delete key removes all selected elements",
+        "Properties panel shows 'Multiple selected' with common properties only"
+      ],
+      "stepsToVerify": [
+        "Add 3 elements to canvas",
+        "Click first element, then Shift+click second - verify both selected",
+        "Drag from empty area - verify marquee box appears",
+        "Release when box covers 2 elements - verify both selected",
+        "Drag selected elements - verify they move together maintaining relative positions"
+      ],
+      "passes": false
+    }
+  ]
+}

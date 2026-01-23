@@ -1,3 +1,4 @@
+import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
 	InvitationBuilderProvider,
@@ -10,11 +11,24 @@ import type { GuestResponseRow } from "@/lib/rsvp-server";
 import { cn } from "@/lib/utils";
 import { BasicInfoForm, type BasicInfoFormValues } from "./BasicInfoForm";
 import { CsvExportButton } from "./CsvExportButton";
+import {
+	CanvasPanel,
+	EditorHeader,
+	EditorLayout,
+	FilmstripPanel,
+	PropertiesPanel,
+	SectionThumbnails,
+	ToolSidebar,
+} from "./editor";
+import { GallerySection } from "./GallerySection";
 import { GuestCsvImport, type ImportResult } from "./GuestCsvImport";
 import type { GuestEditorValues } from "./GuestEditor";
 import { GuestGroupList } from "./GuestGroupList";
 import { HeroImageSection } from "./HeroImageSection";
 import { InvitationPreview } from "./InvitationPreview";
+import { LayoutFormatSection } from "./LayoutFormatSection";
+import { LongPagePreview } from "./LongPagePreview";
+import { NoteList } from "./NoteList";
 import { RsvpDashboard, type RsvpSummaryData } from "./RsvpDashboard";
 import { RsvpDeadlineSection } from "./RsvpDeadlineSection";
 import {
@@ -23,8 +37,11 @@ import {
 	RsvpResponseFilters,
 } from "./RsvpResponseFilters";
 import { RsvpResponseTable } from "./RsvpResponseTable";
+import { ScheduleBlockList } from "./ScheduleBlockList";
 import { ThemeSection } from "./ThemeSection";
+import { TooltipProvider } from "./ui/tooltip";
 import { type ViewportMode, ViewportToggle } from "./ui/viewport-toggle";
+import { VenueMapSection } from "./VenueMapSection";
 
 interface InvitationBuilderProps {
 	/** Initial invitation data from server */
@@ -400,34 +417,54 @@ function GuestManagementSection() {
 }
 
 /**
- * Inner component that manages autosave and renders the layout.
- * Must be inside InvitationBuilderProvider to access context.
+ * Multi-panel editor content for longpage format.
+ * Uses the hunbei.com-style layout with 5 panels.
  */
-function InvitationBuilderContent({
+function MultiPanelEditorContent() {
+	const { invitation } = useInvitationBuilder();
+	const navigate = useNavigate();
+
+	const handlePreview = useCallback(() => {
+		// Open preview in new tab
+		window.open(`/invite/${invitation.id}`, "_blank");
+	}, [invitation.id]);
+
+	const handleExit = useCallback(() => {
+		navigate({ to: "/" });
+	}, [navigate]);
+
+	return (
+		<TooltipProvider>
+			<EditorLayout
+				header={<EditorHeader onPreview={handlePreview} onExit={handleExit} />}
+				toolSidebar={<ToolSidebar />}
+				thumbnails={<SectionThumbnails />}
+				canvas={<CanvasPanel />}
+				properties={<PropertiesPanel />}
+				filmstrip={<FilmstripPanel />}
+			/>
+		</TooltipProvider>
+	);
+}
+
+/**
+ * Classic two-column layout for card format.
+ * Existing layout with form on left, preview on right.
+ */
+function ClassicBuilderContent({
 	onSave,
 }: {
 	onSave: (data: InvitationData) => Promise<void>;
 }) {
-	const { invitation, setAutosaveStatus } = useInvitationBuilder();
+	const { invitation } = useInvitationBuilder();
 	const [viewportMode, setViewportMode] = useState<ViewportMode>("desktop");
-
-	const { status } = useAutosave({
-		data: invitation,
-		onSave,
-		delay: 1000,
-	});
-
-	// Sync status to context for potential use elsewhere
-	useEffect(() => {
-		setAutosaveStatus(status);
-	}, [status, setAutosaveStatus]);
 
 	return (
 		<div className="flex flex-col gap-4">
 			{/* Header with autosave status */}
 			<div className="flex items-center justify-between">
 				<h1 className="text-2xl font-bold">Edit Invitation</h1>
-				<AutosaveIndicator status={status} />
+				<AutosaveIndicator status={useInvitationBuilder().autosaveStatus} />
 			</div>
 
 			<div className="grid h-full gap-8 lg:grid-cols-2">
@@ -439,13 +476,36 @@ function InvitationBuilderContent({
 					</div>
 
 					<div className="rounded-lg border bg-card p-6">
+						<h2 className="mb-6 text-lg font-semibold">Venue Map</h2>
+						<VenueMapSection />
+					</div>
+
+					<div className="rounded-lg border bg-card p-6">
 						<h2 className="mb-6 text-lg font-semibold">Hero Image</h2>
 						<HeroImageSection />
 					</div>
 
 					<div className="rounded-lg border bg-card p-6">
+						<h2 className="mb-6 text-lg font-semibold">Photo Gallery</h2>
+						<GallerySection />
+					</div>
+
+					<div className="rounded-lg border bg-card p-6">
 						<h2 className="mb-6 text-lg font-semibold">Theme</h2>
 						<ThemeSection />
+					</div>
+
+					<div className="rounded-lg border bg-card p-6">
+						<ScheduleBlockList />
+					</div>
+
+					<div className="rounded-lg border bg-card p-6">
+						<NoteList />
+					</div>
+
+					<div className="rounded-lg border bg-card p-6">
+						<h2 className="mb-6 text-lg font-semibold">Layout</h2>
+						<LayoutFormatSection />
 					</div>
 
 					<div className="rounded-lg border bg-card p-6">
@@ -475,12 +535,50 @@ function InvitationBuilderContent({
 							<h2 className="text-lg font-semibold">Preview</h2>
 							<ViewportToggle value={viewportMode} onChange={setViewportMode} />
 						</div>
-						<InvitationPreview viewportMode={viewportMode} />
+						<div className="max-h-[calc(100vh-8rem)] overflow-y-auto rounded-lg border">
+							{invitation.layoutFormat === "longpage" ? (
+								<LongPagePreview viewportMode={viewportMode} showNav={false} />
+							) : (
+								<InvitationPreview viewportMode={viewportMode} />
+							)}
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 	);
+}
+
+/**
+ * Inner component that manages autosave and renders the appropriate layout.
+ * Uses multi-panel editor for longpage format, classic layout for card format.
+ * Must be inside InvitationBuilderProvider to access context.
+ */
+function InvitationBuilderContent({
+	onSave,
+}: {
+	onSave: (data: InvitationData) => Promise<void>;
+}) {
+	const { invitation, setAutosaveStatus } = useInvitationBuilder();
+
+	const { status } = useAutosave({
+		data: invitation,
+		onSave,
+		delay: 1000,
+	});
+
+	// Sync status to context for potential use elsewhere
+	useEffect(() => {
+		setAutosaveStatus(status);
+	}, [status, setAutosaveStatus]);
+
+	// Use multi-panel editor for longpage format
+	if (invitation.layoutFormat === "longpage") {
+		return <MultiPanelEditorContent />;
+	}
+
+	// Use classic two-column layout for card format
+	return <ClassicBuilderContent onSave={onSave} />;
 }
 
 /**

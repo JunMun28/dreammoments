@@ -1,0 +1,30 @@
+# Canvas Editor Progress Log
+
+## 2026-01-23: CE-017 - Database Schema for Canvas Editor
+
+**Status:** COMPLETE
+
+**Changes:**
+- Added `editorMode` column to `invitations` table (default: 'structured')
+- Created `canvasStates` table:
+  - id (uuid, PK)
+  - invitationId (uuid, FK to invitations, unique, ON DELETE CASCADE)
+  - canvasData (jsonb, not null)
+  - version (integer, default 1)
+  - createdAt, updatedAt timestamps
+- Added relations: invitations <-> canvasStates (1:1)
+- Schema pushed to Neon DB via db:push
+
+**Files changed:**
+- src/db/schema.ts (added canvasStates table, editorMode column, relations)
+
+**Bugfixes (pre-existing issues):**
+- Fixed /dashboard -> / route references in EditorHeader.tsx, InvitationBuilder.tsx
+- Fixed deleteGalleryImageFromServer -> deleteGalleryImage in FilmstripPanel.tsx
+- Fixed tooltip.tsx import type issue
+
+**Verification:**
+- typecheck: pass
+- tests: 651 pass
+- check: pass
+- db:push: success
