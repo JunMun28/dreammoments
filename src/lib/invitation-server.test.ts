@@ -2,12 +2,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { TemplateData } from "./template-data";
 
 // Mock drizzle/db
+const mockDb = {
+	insert: vi.fn(),
+	select: vi.fn(),
+	update: vi.fn(),
+};
+// Alias for use in tests
+const db = mockDb;
 vi.mock("@/db/index", () => ({
-	db: {
-		insert: vi.fn(),
-		select: vi.fn(),
-		update: vi.fn(),
-	},
+	getDb: vi.fn(() => Promise.resolve(mockDb)),
 }));
 
 vi.mock("@/db/schema", () => ({
@@ -28,7 +31,6 @@ vi.mock("./template-data", () => ({
 	getTemplateById: vi.fn(),
 }));
 
-import { db } from "@/db/index";
 import {
 	createInvitationInternal,
 	getOrCreateInvitationInternal,
@@ -258,5 +260,72 @@ describe("getOrCreateInvitationInternal", () => {
 
 		expect(result.id).toBe(mockInvitationId);
 		expect(result.isNew).toBe(true);
+	});
+});
+
+describe("updateEditorModeInternal", () => {
+	const mockInvitationId = "inv-456";
+
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it("updates editor mode to canvas", async () => {
+		const mockReturning = vi.fn().mockResolvedValue([{ id: mockInvitationId }]);
+		const mockWhere = vi.fn().mockReturnValue({ returning: mockReturning });
+		const mockSet = vi.fn().mockReturnValue({ where: mockWhere });
+		(db.update as ReturnType<typeof vi.fn>).mockReturnValue({ set: mockSet });
+
+		const { updateEditorModeInternal } = await import("./invitation-server");
+
+		const result = await updateEditorModeInternal({
+			invitationId: mockInvitationId,
+			editorMode: "canvas",
+		});
+
+		expect(db.update).toHaveBeenCalled();
+		expect(mockSet).toHaveBeenCalledWith(
+			expect.objectContaining({
+				editorMode: "canvas",
+			}),
+		);
+		expect(result).toEqual({ success: true, id: mockInvitationId });
+	});
+
+	it("updates editor mode to structured", async () => {
+		const mockReturning = vi.fn().mockResolvedValue([{ id: mockInvitationId }]);
+		const mockWhere = vi.fn().mockReturnValue({ returning: mockReturning });
+		const mockSet = vi.fn().mockReturnValue({ where: mockWhere });
+		(db.update as ReturnType<typeof vi.fn>).mockReturnValue({ set: mockSet });
+
+		const { updateEditorModeInternal } = await import("./invitation-server");
+
+		const result = await updateEditorModeInternal({
+			invitationId: mockInvitationId,
+			editorMode: "structured",
+		});
+
+		expect(mockSet).toHaveBeenCalledWith(
+			expect.objectContaining({
+				editorMode: "structured",
+			}),
+		);
+		expect(result).toEqual({ success: true, id: mockInvitationId });
+	});
+
+	it("throws error when invitation not found", async () => {
+		const mockReturning = vi.fn().mockResolvedValue([]);
+		const mockWhere = vi.fn().mockReturnValue({ returning: mockReturning });
+		const mockSet = vi.fn().mockReturnValue({ where: mockWhere });
+		(db.update as ReturnType<typeof vi.fn>).mockReturnValue({ set: mockSet });
+
+		const { updateEditorModeInternal } = await import("./invitation-server");
+
+		await expect(
+			updateEditorModeInternal({
+				invitationId: "non-existent",
+				editorMode: "canvas",
+			}),
+		).rejects.toThrow("Invitation not found");
 	});
 });

@@ -233,3 +233,51 @@ export const getInvitationWithRelations = createServerFn({ method: "GET" })
 	.handler(async ({ data }) => {
 		return getInvitationWithRelationsInternal(data.invitationId);
 	});
+
+/**
+ * Editor mode type - determines which editor UI to show
+ */
+export type EditorMode = "structured" | "canvas";
+
+/**
+ * Input type for updating editor mode
+ */
+export interface UpdateEditorModeInput {
+	invitationId: string;
+	editorMode: EditorMode;
+}
+
+/**
+ * Internal function to update invitation editor mode.
+ * Used when switching between structured and canvas editors.
+ * Extracted for testability.
+ */
+export async function updateEditorModeInternal(input: UpdateEditorModeInput) {
+	const { invitationId, editorMode } = input;
+
+	const db = await getDb();
+	const result = await db
+		.update(invitations)
+		.set({
+			editorMode,
+			updatedAt: new Date(),
+		})
+		.where(eq(invitations.id, invitationId))
+		.returning({ id: invitations.id });
+
+	if (result.length === 0) {
+		throw new Error("Invitation not found");
+	}
+
+	return { success: true, id: result[0].id };
+}
+
+/**
+ * Server function to update invitation editor mode.
+ * Used when switching between structured and canvas editors.
+ */
+export const updateEditorMode = createServerFn({ method: "POST" })
+	.inputValidator((input: UpdateEditorModeInput) => input)
+	.handler(async ({ data }) => {
+		return updateEditorModeInternal(data);
+	});

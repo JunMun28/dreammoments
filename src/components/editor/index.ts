@@ -24,6 +24,7 @@ export { type LayerInfo, LayersPanel } from "./LayersPanel";
 export { type PageInfo, PageThumbnailsPanel } from "./PageThumbnailsPanel";
 export { PropertiesPanel } from "./PropertiesPanel";
 export { SectionThumbnails } from "./SectionThumbnails";
+export { SettingsPanel, type SettingsPanelProps } from "./SettingsPanel";
 export {
   type TemplateDefinition,
   type TemplateElement,

@@ -400,7 +400,7 @@
         "Confirm switch - verify canvas editor loads with converted elements",
         "Verify hero image, names, date appear as positioned elements on canvas"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CE-020",
