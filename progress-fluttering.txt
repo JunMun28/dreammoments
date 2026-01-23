@@ -141,3 +141,43 @@
 - check: pass
 - build: pass
 - e2e: 14 pass
+
+## 2026-01-23: CE-004 - Keyboard Shortcuts
+
+**Status:** COMPLETE
+
+**Changes:**
+- Added keyboard shortcuts for canvas operations (already implemented, now tested):
+  - Delete/Backspace: removes selected element(s)
+  - Ctrl+C: copies selected element(s) to clipboard
+  - Ctrl+V: pastes from clipboard with 10px offset
+  - Ctrl+X: cuts selected element(s)
+  - Ctrl+D: duplicates selected element(s)
+  - Ctrl+A: selects all elements on canvas
+  - Arrow keys: nudges selected element by 1px
+  - Shift+Arrow: nudges by 10px
+  - Escape: deselects all elements
+- Added clipboardRef for copy/paste operations
+- Fixed handleDeleteSelected to use getActiveObject() instead of state for consistency
+- Added 10 new tests for keyboard shortcuts (CE-004 test suite)
+
+**Files changed:**
+- src/components/editor/FabricCanvas.tsx (refactored handleDeleteSelected)
+- src/components/editor/FabricCanvas.test.tsx (added CE-004 tests, updated mocks)
+
+**Acceptance criteria verified:**
+- ✅ Delete/Backspace removes selected element(s)
+- ✅ Ctrl+C copies selected element(s)
+- ✅ Ctrl+V pastes copied element(s) with offset
+- ✅ Ctrl+X cuts selected element(s)
+- ✅ Ctrl+D duplicates selected element(s)
+- ✅ Ctrl+A selects all elements
+- ✅ Arrow keys nudge selected element by 1px
+- ✅ Shift+Arrow keys nudge by 10px
+- ✅ Escape deselects all elements
+- ✅ Shortcuts don't fire when editing text
+
+**Verification:**
+- typecheck: pass
+- tests: 675 pass (10 new)
+- check: pass

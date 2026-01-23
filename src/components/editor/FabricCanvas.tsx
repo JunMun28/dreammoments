@@ -1,4 +1,10 @@
-import { Canvas, type FabricObject, IText, Rect } from "fabric";
+import {
+	ActiveSelection,
+	Canvas,
+	type FabricObject,
+	IText,
+	Rect,
+} from "fabric";
 import {
 	Maximize,
 	Minus,
@@ -58,6 +64,9 @@ export function FabricCanvas() {
 	const isRestoringRef = useRef(false);
 	const [canUndo, setCanUndo] = useState(false);
 	const [canRedo, setCanRedo] = useState(false);
+
+	// CE-004: Clipboard for copy/paste operations
+	const clipboardRef = useRef<FabricObject | null>(null);
 
 	/**
 	 * CE-003: Save current canvas state to history
@@ -214,13 +223,16 @@ export function FabricCanvas() {
 	 * Delete the currently selected object(s)
 	 */
 	const handleDeleteSelected = useCallback(() => {
-		if (!fabricRef.current || !selectedObject) return;
+		if (!fabricRef.current) return;
 
-		fabricRef.current.remove(selectedObject);
+		const active = fabricRef.current.getActiveObject();
+		if (!active) return;
+
+		fabricRef.current.remove(active);
 		fabricRef.current.discardActiveObject();
 		fabricRef.current.requestRenderAll();
 		setSelectedObject(null);
-	}, [selectedObject]);
+	}, []);
 
 	/**
 	 * CE-003: Undo last canvas operation
@@ -266,10 +278,178 @@ export function FabricCanvas() {
 		});
 	}, []);
 
-	// CE-003: Keyboard shortcuts for undo/redo
+	/**
+	 * CE-004: Copy selected element(s) to clipboard
+	 */
+	const handleCopy = useCallback(() => {
+		if (!fabricRef.current) return;
+
+		const active = fabricRef.current.getActiveObject();
+		if (!active) return;
+
+		// Clone the object for clipboard storage
+		active.clone().then((cloned: FabricObject) => {
+			clipboardRef.current = cloned;
+		});
+	}, []);
+
+	/**
+	 * CE-004: Paste element(s) from clipboard with offset
+	 */
+	const handlePaste = useCallback(() => {
+		if (!fabricRef.current || !clipboardRef.current) return;
+
+		const canvas = fabricRef.current;
+
+		clipboardRef.current.clone().then((cloned: FabricObject) => {
+			canvas.discardActiveObject();
+
+			// Offset pasted element by 10px
+			cloned.set({
+				left: (cloned.left || 0) + 10,
+				top: (cloned.top || 0) + 10,
+				evented: true,
+			});
+
+			// Handle ActiveSelection (multi-select) vs single object
+			if (cloned.type === "activeselection") {
+				// If it's a group of objects, add each one
+				const activeSelection = cloned as ActiveSelection;
+				activeSelection.canvas = canvas;
+				activeSelection.forEachObject((obj: FabricObject) => {
+					canvas.add(obj);
+				});
+				cloned.setCoords();
+			} else {
+				canvas.add(cloned);
+			}
+
+			// Update clipboard offset for next paste
+			clipboardRef.current?.set({
+				left: (clipboardRef.current.left || 0) + 10,
+				top: (clipboardRef.current.top || 0) + 10,
+			});
+
+			canvas.setActiveObject(cloned);
+			canvas.requestRenderAll();
+		});
+	}, []);
+
+	/**
+	 * CE-004: Cut selected element(s) - copy then delete
+	 */
+	const handleCut = useCallback(() => {
+		handleCopy();
+		// Small delay to ensure copy completes before delete
+		setTimeout(() => {
+			handleDeleteSelected();
+		}, 10);
+	}, [handleCopy, handleDeleteSelected]);
+
+	/**
+	 * CE-004: Duplicate selected element(s) - copy then paste
+	 */
+	const handleDuplicate = useCallback(() => {
+		if (!fabricRef.current) return;
+
+		const active = fabricRef.current.getActiveObject();
+		if (!active) return;
+
+		const canvas = fabricRef.current;
+
+		active.clone().then((cloned: FabricObject) => {
+			canvas.discardActiveObject();
+
+			// Offset duplicated element by 10px
+			cloned.set({
+				left: (cloned.left || 0) + 10,
+				top: (cloned.top || 0) + 10,
+				evented: true,
+			});
+
+			if (cloned.type === "activeselection") {
+				const activeSelection = cloned as ActiveSelection;
+				activeSelection.canvas = canvas;
+				activeSelection.forEachObject((obj: FabricObject) => {
+					canvas.add(obj);
+				});
+				cloned.setCoords();
+			} else {
+				canvas.add(cloned);
+			}
+
+			canvas.setActiveObject(cloned);
+			canvas.requestRenderAll();
+		});
+	}, []);
+
+	/**
+	 * CE-004: Select all elements on canvas
+	 */
+	const handleSelectAll = useCallback(() => {
+		if (!fabricRef.current) return;
+
+		const canvas = fabricRef.current;
+		const objects = canvas.getObjects();
+
+		if (objects.length === 0) return;
+
+		if (objects.length === 1) {
+			canvas.setActiveObject(objects[0]);
+		} else {
+			const selection = new ActiveSelection(objects, { canvas });
+			canvas.setActiveObject(selection);
+		}
+		canvas.requestRenderAll();
+	}, []);
+
+	/**
+	 * CE-004: Deselect all elements
+	 */
+	const handleDeselect = useCallback(() => {
+		if (!fabricRef.current) return;
+
+		fabricRef.current.discardActiveObject();
+		fabricRef.current.requestRenderAll();
+		setSelectedObject(null);
+	}, []);
+
+	/**
+	 * CE-004: Nudge selected element by pixels
+	 */
+	const handleNudge = useCallback(
+		(direction: "up" | "down" | "left" | "right", amount: number) => {
+			if (!fabricRef.current) return;
+
+			const active = fabricRef.current.getActiveObject();
+			if (!active) return;
+
+			switch (direction) {
+				case "up":
+					active.set("top", (active.top || 0) - amount);
+					break;
+				case "down":
+					active.set("top", (active.top || 0) + amount);
+					break;
+				case "left":
+					active.set("left", (active.left || 0) - amount);
+					break;
+				case "right":
+					active.set("left", (active.left || 0) + amount);
+					break;
+			}
+
+			active.setCoords();
+			fabricRef.current.requestRenderAll();
+			saveHistoryState();
+		},
+		[saveHistoryState],
+	);
+
+	// CE-003 & CE-004: Keyboard shortcuts
 	useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
-			// Ignore if typing in input/textarea
+			// Ignore if typing in input/textarea or editing text on canvas
 			if (
 				e.target instanceof HTMLInputElement ||
 				e.target instanceof HTMLTextAreaElement
@@ -277,26 +457,97 @@ export function FabricCanvas() {
 				return;
 			}
 
+			// Check if currently editing text in canvas
+			const activeObj = fabricRef.current?.getActiveObject();
+			if (activeObj && activeObj.type === "i-text") {
+				const itext = activeObj as IText;
+				if (itext.isEditing) {
+					return; // Let text editing handle the keypress
+				}
+			}
+
+			const hasModifier = e.ctrlKey || e.metaKey;
+
 			// Ctrl+Z or Cmd+Z for undo
-			if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
+			if (hasModifier && e.key === "z" && !e.shiftKey) {
 				e.preventDefault();
 				handleUndo();
 			}
 			// Ctrl+Shift+Z or Cmd+Shift+Z for redo
-			else if ((e.ctrlKey || e.metaKey) && e.key === "z" && e.shiftKey) {
+			else if (hasModifier && e.key === "z" && e.shiftKey) {
 				e.preventDefault();
 				handleRedo();
 			}
 			// Ctrl+Y or Cmd+Y for redo (alternative)
-			else if ((e.ctrlKey || e.metaKey) && e.key === "y") {
+			else if (hasModifier && e.key === "y") {
 				e.preventDefault();
 				handleRedo();
+			}
+			// CE-004: Ctrl+C or Cmd+C for copy
+			else if (hasModifier && e.key === "c") {
+				e.preventDefault();
+				handleCopy();
+			}
+			// CE-004: Ctrl+V or Cmd+V for paste
+			else if (hasModifier && e.key === "v") {
+				e.preventDefault();
+				handlePaste();
+			}
+			// CE-004: Ctrl+X or Cmd+X for cut
+			else if (hasModifier && e.key === "x") {
+				e.preventDefault();
+				handleCut();
+			}
+			// CE-004: Ctrl+D or Cmd+D for duplicate
+			else if (hasModifier && e.key === "d") {
+				e.preventDefault();
+				handleDuplicate();
+			}
+			// CE-004: Ctrl+A or Cmd+A for select all
+			else if (hasModifier && e.key === "a") {
+				e.preventDefault();
+				handleSelectAll();
+			}
+			// CE-004: Delete or Backspace to remove selected element(s)
+			else if (e.key === "Delete" || e.key === "Backspace") {
+				e.preventDefault();
+				handleDeleteSelected();
+			}
+			// CE-004: Escape to deselect
+			else if (e.key === "Escape") {
+				e.preventDefault();
+				handleDeselect();
+			}
+			// CE-004: Arrow keys for nudging
+			else if (e.key === "ArrowUp") {
+				e.preventDefault();
+				handleNudge("up", e.shiftKey ? 10 : 1);
+			} else if (e.key === "ArrowDown") {
+				e.preventDefault();
+				handleNudge("down", e.shiftKey ? 10 : 1);
+			} else if (e.key === "ArrowLeft") {
+				e.preventDefault();
+				handleNudge("left", e.shiftKey ? 10 : 1);
+			} else if (e.key === "ArrowRight") {
+				e.preventDefault();
+				handleNudge("right", e.shiftKey ? 10 : 1);
 			}
 		};
 
 		window.addEventListener("keydown", handleKeyDown);
 		return () => window.removeEventListener("keydown", handleKeyDown);
-	}, [handleUndo, handleRedo]);
+	}, [
+		handleUndo,
+		handleRedo,
+		handleCopy,
+		handlePaste,
+		handleCut,
+		handleDuplicate,
+		handleSelectAll,
+		handleDeleteSelected,
+		handleDeselect,
+		handleNudge,
+	]);
 
 	/**
 	 * Get selection info text based on selected object type

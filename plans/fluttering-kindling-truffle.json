@@ -89,7 +89,7 @@
         "Select element, press Arrow Right - verify element moves 1px right",
         "Press Escape - verify nothing is selected"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CE-005",

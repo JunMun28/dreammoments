@@ -23,13 +23,15 @@ const { mockFabricRect, mockFabricIText, mockFabricCanvas } = vi.hoisted(
 			remove: vi.fn(),
 			renderAll: vi.fn(),
 			setActiveObject: vi.fn(),
-			getActiveObject: vi.fn(() => null),
+			// biome-ignore lint/suspicious/noExplicitAny: Mock needs flexible return type for testing
+			getActiveObject: vi.fn((): any => null),
 			getActiveObjects: vi.fn(() => []),
 			discardActiveObject: vi.fn(),
 			on: vi.fn(),
 			off: vi.fn(),
 			dispose: vi.fn(),
-			getObjects: vi.fn(() => []),
+			// biome-ignore lint/suspicious/noExplicitAny: Mock needs flexible return type for testing
+			getObjects: vi.fn((): any[] => []),
 			setWidth: vi.fn(),
 			setHeight: vi.fn(),
 			requestRenderAll: vi.fn(),
@@ -52,6 +54,12 @@ vi.mock("fabric", () => ({
 	Rect: mockFabricRect,
 	IText: mockFabricIText,
 	FabricObject: class {},
+	ActiveSelection: vi.fn((objects, options) => ({
+		type: "activeselection",
+		canvas: options?.canvas,
+		forEachObject: vi.fn((cb) => objects.forEach(cb)),
+		setCoords: vi.fn(),
+	})),
 }));
 
 // Mock the InvitationBuilderContext
@@ -245,6 +253,204 @@ describe("FabricCanvas", () => {
 			});
 			// Check the disabled attribute
 			expect(deleteButton.hasAttribute("disabled")).toBe(true);
+		});
+	});
+
+	describe("Keyboard Shortcuts (CE-004)", () => {
+		it("Delete key removes selected element", async () => {
+			const mockObject = { type: "rect", set: vi.fn(), setCoords: vi.fn() };
+			mockFabricCanvas.getActiveObject.mockReturnValue(mockObject);
+
+			const user = userEvent.setup();
+			render(<FabricCanvas />);
+
+			await user.keyboard("{Delete}");
+
+			expect(mockFabricCanvas.remove).toHaveBeenCalledWith(mockObject);
+			expect(mockFabricCanvas.discardActiveObject).toHaveBeenCalled();
+		});
+
+		it("Backspace key removes selected element", async () => {
+			const mockObject = { type: "rect", set: vi.fn(), setCoords: vi.fn() };
+			mockFabricCanvas.getActiveObject.mockReturnValue(mockObject);
+
+			const user = userEvent.setup();
+			render(<FabricCanvas />);
+
+			await user.keyboard("{Backspace}");
+
+			expect(mockFabricCanvas.remove).toHaveBeenCalled();
+		});
+
+		it("Ctrl+A selects all elements", async () => {
+			const mockObjects = [
+				{ type: "rect", set: vi.fn() },
+				{ type: "i-text", set: vi.fn() },
+			];
+			mockFabricCanvas.getObjects.mockReturnValue(mockObjects);
+
+			const user = userEvent.setup();
+			render(<FabricCanvas />);
+
+			await user.keyboard("{Control>}a{/Control}");
+
+			expect(mockFabricCanvas.setActiveObject).toHaveBeenCalled();
+		});
+
+		it("Escape key deselects all elements", async () => {
+			const mockObject = { type: "rect", set: vi.fn(), setCoords: vi.fn() };
+			mockFabricCanvas.getActiveObject.mockReturnValue(mockObject);
+
+			const user = userEvent.setup();
+			render(<FabricCanvas />);
+
+			await user.keyboard("{Escape}");
+
+			expect(mockFabricCanvas.discardActiveObject).toHaveBeenCalled();
+		});
+
+		it("Arrow keys nudge selected element by 1px", async () => {
+			const mockObject = {
+				type: "rect",
+				left: 100,
+				top: 100,
+				set: vi.fn().mockReturnThis(),
+				setCoords: vi.fn(),
+			};
+			mockFabricCanvas.getActiveObject.mockReturnValue(mockObject);
+
+			const user = userEvent.setup();
+			render(<FabricCanvas />);
+
+			await user.keyboard("{ArrowRight}");
+
+			expect(mockObject.set).toHaveBeenCalledWith("left", 101);
+		});
+
+		it("Shift+Arrow keys nudge selected element by 10px", async () => {
+			const mockObject = {
+				type: "rect",
+				left: 100,
+				top: 100,
+				set: vi.fn().mockReturnThis(),
+				setCoords: vi.fn(),
+			};
+			mockFabricCanvas.getActiveObject.mockReturnValue(mockObject);
+
+			const user = userEvent.setup();
+			render(<FabricCanvas />);
+
+			await user.keyboard("{Shift>}{ArrowDown}{/Shift}");
+
+			expect(mockObject.set).toHaveBeenCalledWith("top", 110);
+		});
+
+		it("Ctrl+D duplicates selected element", async () => {
+			const mockClone = {
+				type: "rect",
+				left: 100,
+				top: 100,
+				set: vi.fn().mockReturnThis(),
+				setCoords: vi.fn(),
+			};
+			const mockObject = {
+				type: "rect",
+				left: 100,
+				top: 100,
+				set: vi.fn().mockReturnThis(),
+				setCoords: vi.fn(),
+				clone: vi.fn().mockResolvedValue(mockClone),
+			};
+			mockFabricCanvas.getActiveObject.mockReturnValue(mockObject);
+
+			const user = userEvent.setup();
+			render(<FabricCanvas />);
+
+			await user.keyboard("{Control>}d{/Control}");
+
+			await waitFor(() => {
+				expect(mockObject.clone).toHaveBeenCalled();
+			});
+		});
+
+		it("Ctrl+C copies selected element to clipboard", async () => {
+			const mockClone = {
+				type: "rect",
+				left: 100,
+				top: 100,
+				set: vi.fn().mockReturnThis(),
+				setCoords: vi.fn(),
+			};
+			const mockObject = {
+				type: "rect",
+				left: 100,
+				top: 100,
+				set: vi.fn().mockReturnThis(),
+				setCoords: vi.fn(),
+				clone: vi.fn().mockResolvedValue(mockClone),
+			};
+			mockFabricCanvas.getActiveObject.mockReturnValue(mockObject);
+
+			const user = userEvent.setup();
+			render(<FabricCanvas />);
+
+			await user.keyboard("{Control>}c{/Control}");
+
+			await waitFor(() => {
+				expect(mockObject.clone).toHaveBeenCalled();
+			});
+		});
+
+		it("Ctrl+X cuts selected element (copies then deletes)", async () => {
+			const mockClone = {
+				type: "rect",
+				left: 100,
+				top: 100,
+				set: vi.fn().mockReturnThis(),
+				setCoords: vi.fn(),
+			};
+			const mockObject = {
+				type: "rect",
+				left: 100,
+				top: 100,
+				set: vi.fn().mockReturnThis(),
+				setCoords: vi.fn(),
+				clone: vi.fn().mockResolvedValue(mockClone),
+			};
+			mockFabricCanvas.getActiveObject.mockReturnValue(mockObject);
+
+			const user = userEvent.setup();
+			render(<FabricCanvas />);
+
+			await user.keyboard("{Control>}x{/Control}");
+
+			await waitFor(() => {
+				expect(mockObject.clone).toHaveBeenCalled();
+			});
+			await waitFor(() => {
+				expect(mockFabricCanvas.remove).toHaveBeenCalled();
+			});
+		});
+
+		it("does not trigger shortcuts when editing text", async () => {
+			const mockTextObject = {
+				type: "i-text",
+				left: 100,
+				top: 100,
+				set: vi.fn().mockReturnThis(),
+				setCoords: vi.fn(),
+				isEditing: true, // Text is in edit mode
+			};
+			mockFabricCanvas.getActiveObject.mockReturnValue(mockTextObject);
+			mockFabricCanvas.remove.mockClear();
+
+			const user = userEvent.setup();
+			render(<FabricCanvas />);
+
+			await user.keyboard("{Delete}");
+
+			// Should NOT delete when in text editing mode
+			expect(mockFabricCanvas.remove).not.toHaveBeenCalled();
 		});
 	});
 });
