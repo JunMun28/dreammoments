@@ -442,3 +442,45 @@
 - tests: 764 pass (17 new CE-012 tests)
 - check: pre-existing lint issues (useUniqueElementIds in CanvasPropertiesPanel.tsx)
 - e2e: 14 pass
+
+## 2026-01-23: CE-007 - Components Library Panel
+
+**Status:** COMPLETE
+
+**Changes:**
+- Created ComponentsPanel component with categorized wedding widgets:
+  - Interactive: Countdown Timer, Venue Map, Schedule Timeline
+  - Forms: RSVP Form
+  - Media: Photo Gallery
+- Each widget has icon, name, description, and default dimensions
+- WidgetDefinition interface for typed widget passing
+- Integrated ComponentsPanel into canvas-editor route
+- Widget selection callback wired up (pendingAddWidget state for CE-020-023)
+
+**Files changed:**
+- src/components/editor/ComponentsPanel.tsx (new component)
+- src/components/editor/ComponentsPanel.test.tsx (14 tests)
+- src/components/editor/index.ts (added exports)
+- src/routes/canvas-editor.tsx (integrated ComponentsPanel)
+
+**Key decisions:**
+- Used same pattern as TextStylesPanel (onAddWidget callback)
+- Widget types: countdown, map, rsvp, gallery, schedule
+- Categories match hunbei.com reference: Interactive, Forms, Media
+- Default dimensions stored per widget for canvas placement
+- Actual widget rendering deferred to CE-020-023
+
+**Acceptance criteria verified:**
+- ✅ Components panel shows categorized widget list
+- ✅ Categories: Interactive (countdown, map, schedule), Forms (RSVP), Media (gallery)
+- ✅ Each component has icon, name, and description
+- ✅ Clicking component signals intent to add widget
+- ✅ Available widgets: Countdown Timer, Venue Map, RSVP Form, Photo Gallery, Schedule Timeline
+- ⏳ Dragging component to canvas (deferred - requires drag/drop implementation)
+
+**Verification:**
+- typecheck: pass
+- tests: 778 pass (14 new CE-007 tests)
+- check: pre-existing lint issues in CanvasPropertiesPanel.tsx
+- e2e: 14 pass
+- UI: verified via playwright (ComponentsPanel shows, widget click logs selection)

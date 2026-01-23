@@ -5,10 +5,12 @@ import {
 	CanvasPropertiesPanel,
 	type CanvasSelectionInfo,
 	CanvasToolSidebar,
+	ComponentsPanel,
 	FabricCanvas,
 	type PropertyUpdate,
 	type TextStyleDefinition,
 	TextStylesPanel,
+	type WidgetDefinition,
 } from "@/components/editor";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -58,6 +60,18 @@ function CanvasEditorPage() {
 		setPendingAddTextStyle(null);
 	}, []);
 
+	// CE-007: Widget state for adding widgets from ComponentsPanel
+	// Note: pendingAddWidget will be used when CE-020-023 widget rendering is implemented
+	const [_pendingAddWidget, setPendingAddWidget] =
+		useState<WidgetDefinition | null>(null);
+
+	// CE-007: Handle widget selection from ComponentsPanel
+	const handleAddWidget = useCallback((widget: WidgetDefinition) => {
+		setPendingAddWidget(widget);
+		// TODO: CE-020-023 will implement actual widget rendering on canvas
+		console.log("Widget selected:", widget.name);
+	}, []);
+
 	/**
 	 * CE-008: Render the content browser panel based on active tool
 	 */
@@ -66,7 +80,11 @@ function CanvasEditorPage() {
 			return <TextStylesPanel onAddTextStyle={handleAddTextStyle} />;
 		}
 
-		// Placeholder for other tools (CE-006, CE-007, CE-009)
+		if (activeTool === "components") {
+			return <ComponentsPanel onAddWidget={handleAddWidget} />;
+		}
+
+		// Placeholder for other tools (CE-006, CE-009)
 		return (
 			<div className="text-sm text-stone-500">
 				<h3 className="mb-2 font-medium text-stone-700">
@@ -74,7 +92,7 @@ function CanvasEditorPage() {
 				</h3>
 				<p>Content panel for: {activeTool}</p>
 				<p className="mt-2 text-xs text-stone-400">
-					(CE-006 to CE-009: Content browser panels)
+					(CE-006, CE-009: Content browser panels)
 				</p>
 			</div>
 		);

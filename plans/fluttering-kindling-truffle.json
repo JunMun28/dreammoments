@@ -147,7 +147,7 @@
         "Drag 'Venue Map' onto canvas - verify map widget appears",
         "Drag 'RSVP Form' onto canvas - verify form widget appears"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CE-008",
