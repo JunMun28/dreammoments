@@ -2,9 +2,12 @@ import {
   ActiveSelection,
   Canvas,
   type FabricObject,
+  Group,
   IText,
+  Line,
   Rect,
 } from "fabric";
+import type { WidgetDefinition } from "./ComponentsPanel";
 import {
   AlertCircle,
   Check,
@@ -55,6 +58,13 @@ const HISTORY_MAX_SIZE = 50;
  * CE-016: Save status for auto-save indicator
  */
 export type SaveStatus = "idle" | "saving" | "saved" | "error";
+
+/**
+ * CE-024: Alignment guide configuration
+ */
+const ALIGNMENT_THRESHOLD = 5; // Pixels within which to show alignment guides
+const GUIDE_COLOR = "#ff0080"; // Pink/magenta color for guides
+const GUIDE_STROKE_WIDTH = 1;
 
 /**
  * CE-016: Debounce delay for auto-save (1 second)
@@ -137,6 +147,10 @@ interface FabricCanvasProps {
   pendingLayerOperation?: LayerOperation | null;
   /** CE-014: Callback when layer operation is applied */
   onLayerOperationApplied?: () => void;
+  /** CE-020-023: Widget to add to canvas */
+  pendingAddWidget?: WidgetDefinition | null;
+  /** CE-020-023: Callback when widget is added */
+  onWidgetAdded?: () => void;
 }
 
 /**
@@ -157,6 +171,8 @@ export function FabricCanvas({
   onLayersChange,
   pendingLayerOperation,
   onLayerOperationApplied,
+  pendingAddWidget,
+  onWidgetAdded,
 }: FabricCanvasProps = {}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fabricRef = useRef<Canvas | null>(null);
@@ -183,6 +199,12 @@ export function FabricCanvas({
 
   // CE-018: Export dialog state
   const [showExportDialog, setShowExportDialog] = useState(false);
+
+  // CE-024: Alignment guide refs
+  const verticalGuideRef = useRef<Line | null>(null);
+  const horizontalGuideRef = useRef<Line | null>(null);
+  const centerVerticalGuideRef = useRef<Line | null>(null);
+  const centerHorizontalGuideRef = useRef<Line | null>(null);
 
   /**
    * CE-014: Generate layer info from canvas objects
@@ -232,6 +254,204 @@ export function FabricCanvas({
       onLayersChange(layers);
     }
   }, [onLayersChange, generateLayers, layerUpdateCounter, selectedObject]);
+
+  /**
+   * CE-024: Create alignment guide line
+   */
+  const createGuideLine = useCallback(
+    (points: [number, number, number, number]): Line => {
+      return new Line(points, {
+        stroke: GUIDE_COLOR,
+        strokeWidth: GUIDE_STROKE_WIDTH,
+        selectable: false,
+        evented: false,
+        strokeDashArray: [5, 5],
+        excludeFromExport: true,
+      });
+    },
+    [],
+  );
+
+  /**
+   * CE-024: Clear all alignment guides from canvas
+   */
+  const clearAlignmentGuides = useCallback(() => {
+    const canvas = fabricRef.current;
+    if (!canvas) return;
+
+    if (verticalGuideRef.current) {
+      canvas.remove(verticalGuideRef.current);
+      verticalGuideRef.current = null;
+    }
+    if (horizontalGuideRef.current) {
+      canvas.remove(horizontalGuideRef.current);
+      horizontalGuideRef.current = null;
+    }
+    if (centerVerticalGuideRef.current) {
+      canvas.remove(centerVerticalGuideRef.current);
+      centerVerticalGuideRef.current = null;
+    }
+    if (centerHorizontalGuideRef.current) {
+      canvas.remove(centerHorizontalGuideRef.current);
+      centerHorizontalGuideRef.current = null;
+    }
+  }, []);
+
+  /**
+   * CE-024: Check and show alignment guides during object movement
+   */
+  const checkAlignmentGuides = useCallback(
+    (movingObject: FabricObject) => {
+      const canvas = fabricRef.current;
+      if (!canvas) return;
+
+      // Clear existing guides first
+      clearAlignmentGuides();
+
+      // Get object dimensions in canvas coordinates (not viewport/screen coords)
+      const movingWidth =
+        (movingObject.width || 0) * (movingObject.scaleX || 1);
+      const movingHeight =
+        (movingObject.height || 0) * (movingObject.scaleY || 1);
+      const movingLeft = movingObject.left || 0;
+      const movingTop = movingObject.top || 0;
+      const movingRight = movingLeft + movingWidth;
+      const movingBottom = movingTop + movingHeight;
+      const movingCenterX = movingLeft + movingWidth / 2;
+      const movingCenterY = movingTop + movingHeight / 2;
+
+      const canvasCenterX = CANVAS_WIDTH / 2;
+      const canvasCenterY = CANVAS_HEIGHT / 2;
+
+      let showVerticalGuide = false;
+      let showHorizontalGuide = false;
+      let verticalGuideX = 0;
+      let horizontalGuideY = 0;
+
+      // Check alignment with canvas center
+      if (Math.abs(movingCenterX - canvasCenterX) < ALIGNMENT_THRESHOLD) {
+        showVerticalGuide = true;
+        verticalGuideX = canvasCenterX;
+      }
+      if (Math.abs(movingCenterY - canvasCenterY) < ALIGNMENT_THRESHOLD) {
+        showHorizontalGuide = true;
+        horizontalGuideY = canvasCenterY;
+      }
+
+      // Check alignment with other objects
+      const objects = canvas.getObjects();
+      for (const obj of objects) {
+        // Skip the moving object itself and guide lines
+        if (
+          obj === movingObject ||
+          obj === verticalGuideRef.current ||
+          obj === horizontalGuideRef.current ||
+          obj === centerVerticalGuideRef.current ||
+          obj === centerHorizontalGuideRef.current
+        )
+          continue;
+
+        // Skip if object is part of the active selection
+        if (movingObject.type === "activeselection") {
+          const selection = movingObject as ActiveSelection;
+          if (selection.getObjects().includes(obj)) continue;
+        }
+
+        // Get target object dimensions in canvas coordinates
+        const targetWidth = (obj.width || 0) * (obj.scaleX || 1);
+        const targetHeight = (obj.height || 0) * (obj.scaleY || 1);
+        const targetLeft = obj.left || 0;
+        const targetTop = obj.top || 0;
+        const targetRight = targetLeft + targetWidth;
+        const targetBottom = targetTop + targetHeight;
+        const targetCenterX = targetLeft + targetWidth / 2;
+        const targetCenterY = targetTop + targetHeight / 2;
+
+        // Check vertical alignments (X positions)
+        // Left edge to left edge
+        if (Math.abs(movingLeft - targetLeft) < ALIGNMENT_THRESHOLD) {
+          showVerticalGuide = true;
+          verticalGuideX = targetLeft;
+        }
+        // Right edge to right edge
+        if (Math.abs(movingRight - targetRight) < ALIGNMENT_THRESHOLD) {
+          showVerticalGuide = true;
+          verticalGuideX = targetRight;
+        }
+        // Left edge to right edge
+        if (Math.abs(movingLeft - targetRight) < ALIGNMENT_THRESHOLD) {
+          showVerticalGuide = true;
+          verticalGuideX = targetRight;
+        }
+        // Right edge to left edge
+        if (Math.abs(movingRight - targetLeft) < ALIGNMENT_THRESHOLD) {
+          showVerticalGuide = true;
+          verticalGuideX = targetLeft;
+        }
+        // Center to center (vertical)
+        if (Math.abs(movingCenterX - targetCenterX) < ALIGNMENT_THRESHOLD) {
+          showVerticalGuide = true;
+          verticalGuideX = targetCenterX;
+        }
+
+        // Check horizontal alignments (Y positions)
+        // Top edge to top edge
+        if (Math.abs(movingTop - targetTop) < ALIGNMENT_THRESHOLD) {
+          showHorizontalGuide = true;
+          horizontalGuideY = targetTop;
+        }
+        // Bottom edge to bottom edge
+        if (Math.abs(movingBottom - targetBottom) < ALIGNMENT_THRESHOLD) {
+          showHorizontalGuide = true;
+          horizontalGuideY = targetBottom;
+        }
+        // Top edge to bottom edge
+        if (Math.abs(movingTop - targetBottom) < ALIGNMENT_THRESHOLD) {
+          showHorizontalGuide = true;
+          horizontalGuideY = targetBottom;
+        }
+        // Bottom edge to top edge
+        if (Math.abs(movingBottom - targetTop) < ALIGNMENT_THRESHOLD) {
+          showHorizontalGuide = true;
+          horizontalGuideY = targetTop;
+        }
+        // Center to center (horizontal)
+        if (Math.abs(movingCenterY - targetCenterY) < ALIGNMENT_THRESHOLD) {
+          showHorizontalGuide = true;
+          horizontalGuideY = targetCenterY;
+        }
+      }
+
+      // Create and show vertical guide
+      if (showVerticalGuide) {
+        const guide = createGuideLine([
+          verticalGuideX,
+          0,
+          verticalGuideX,
+          CANVAS_HEIGHT,
+        ]);
+        verticalGuideRef.current = guide;
+        canvas.add(guide);
+        canvas.bringObjectToFront(guide);
+      }
+
+      // Create and show horizontal guide
+      if (showHorizontalGuide) {
+        const guide = createGuideLine([
+          0,
+          horizontalGuideY,
+          CANVAS_WIDTH,
+          horizontalGuideY,
+        ]);
+        horizontalGuideRef.current = guide;
+        canvas.add(guide);
+        canvas.bringObjectToFront(guide);
+      }
+
+      canvas.requestRenderAll();
+    },
+    [clearAlignmentGuides, createGuideLine],
+  );
 
   // CE-016: Debounced auto-save function
   const debouncedSave = useMemo(() => {
@@ -457,6 +677,40 @@ export function FabricCanvas({
     };
   }, []);
 
+  // CE-024: Set up alignment guide event handlers
+  useEffect(() => {
+    if (!fabricRef.current) return;
+
+    const canvas = fabricRef.current;
+
+    // Show alignment guides during object movement
+    const handleObjectMoving = (e: { target?: FabricObject }) => {
+      if (e.target) {
+        checkAlignmentGuides(e.target);
+      }
+    };
+
+    // Clear guides when movement ends
+    const handleObjectModified = () => {
+      clearAlignmentGuides();
+    };
+
+    // Clear guides when mouse is released
+    const handleMouseUp = () => {
+      clearAlignmentGuides();
+    };
+
+    canvas.on("object:moving", handleObjectMoving);
+    canvas.on("object:modified", handleObjectModified);
+    canvas.on("mouse:up", handleMouseUp);
+
+    return () => {
+      canvas.off("object:moving", handleObjectMoving);
+      canvas.off("object:modified", handleObjectModified);
+      canvas.off("mouse:up", handleMouseUp);
+    };
+  }, [checkAlignmentGuides, clearAlignmentGuides]);
+
   // CE-016: Restore initial canvas data on mount
   useEffect(() => {
     if (!fabricRef.current || !initialCanvasData) return;
@@ -554,6 +808,347 @@ export function FabricCanvas({
     onTextStyleAdded?.();
   }, [pendingAddTextStyle, onTextStyleAdded]);
 
+  // CE-020-023: Add widget to canvas
+  useEffect(() => {
+    if (!pendingAddWidget || !fabricRef.current) return;
+
+    const canvas = fabricRef.current;
+    const widget = pendingAddWidget;
+
+    // Create widget as a Fabric.js Group with visual representation
+    const createWidgetGroup = async () => {
+      const { defaultWidth, defaultHeight, type, name } = widget;
+
+      // Create background rect for the widget
+      const bgRect = new Rect({
+        width: defaultWidth,
+        height: defaultHeight,
+        fill: "#f5f5f4", // stone-100
+        stroke: "#d6d3d1", // stone-300
+        strokeWidth: 1,
+        rx: 8,
+        ry: 8,
+      });
+
+      // Create widget type label
+      const typeLabel = new IText(name, {
+        fontSize: 14,
+        fontFamily: "sans-serif",
+        fontWeight: "bold",
+        fill: "#57534e", // stone-600
+        left: defaultWidth / 2,
+        top: 12,
+        originX: "center",
+      });
+
+      // Create widget-specific content based on type
+      let contentElements: FabricObject[] = [];
+
+      if (type === "countdown") {
+        // CE-020: Countdown Timer placeholder
+        const daysText = new IText("00", {
+          fontSize: 32,
+          fontFamily: "sans-serif",
+          fontWeight: "bold",
+          fill: "#292524",
+          left: 40,
+          top: 45,
+        });
+        const daysLabel = new IText("Days", {
+          fontSize: 10,
+          fontFamily: "sans-serif",
+          fill: "#78716c",
+          left: 40,
+          top: 80,
+        });
+        const hoursText = new IText("00", {
+          fontSize: 32,
+          fontFamily: "sans-serif",
+          fontWeight: "bold",
+          fill: "#292524",
+          left: 100,
+          top: 45,
+        });
+        const hoursLabel = new IText("Hours", {
+          fontSize: 10,
+          fontFamily: "sans-serif",
+          fill: "#78716c",
+          left: 100,
+          top: 80,
+        });
+        const minsText = new IText("00", {
+          fontSize: 32,
+          fontFamily: "sans-serif",
+          fontWeight: "bold",
+          fill: "#292524",
+          left: 165,
+          top: 45,
+        });
+        const minsLabel = new IText("Mins", {
+          fontSize: 10,
+          fontFamily: "sans-serif",
+          fill: "#78716c",
+          left: 165,
+          top: 80,
+        });
+        const secsText = new IText("00", {
+          fontSize: 32,
+          fontFamily: "sans-serif",
+          fontWeight: "bold",
+          fill: "#292524",
+          left: 225,
+          top: 45,
+        });
+        const secsLabel = new IText("Secs", {
+          fontSize: 10,
+          fontFamily: "sans-serif",
+          fill: "#78716c",
+          left: 225,
+          top: 80,
+        });
+        contentElements = [
+          daysText,
+          daysLabel,
+          hoursText,
+          hoursLabel,
+          minsText,
+          minsLabel,
+          secsText,
+          secsLabel,
+        ];
+      } else if (type === "map") {
+        // CE-021: Venue Map placeholder
+        const mapPlaceholder = new Rect({
+          width: defaultWidth - 20,
+          height: defaultHeight - 60,
+          fill: "#e7e5e4",
+          left: 10,
+          top: 40,
+          rx: 4,
+          ry: 4,
+        });
+        const pinIcon = new IText("📍", {
+          fontSize: 24,
+          left: defaultWidth / 2,
+          top: defaultHeight / 2,
+          originX: "center",
+          originY: "center",
+        });
+        const addressText = new IText("Enter venue address", {
+          fontSize: 11,
+          fontFamily: "sans-serif",
+          fill: "#a8a29e",
+          left: defaultWidth / 2,
+          top: defaultHeight - 25,
+          originX: "center",
+        });
+        contentElements = [mapPlaceholder, pinIcon, addressText];
+      } else if (type === "rsvp") {
+        // CE-022: RSVP Form placeholder
+        const nameField = new Rect({
+          width: defaultWidth - 40,
+          height: 32,
+          fill: "#ffffff",
+          stroke: "#d6d3d1",
+          strokeWidth: 1,
+          left: 20,
+          top: 45,
+          rx: 4,
+          ry: 4,
+        });
+        const nameLabel = new IText("Name", {
+          fontSize: 10,
+          fontFamily: "sans-serif",
+          fill: "#78716c",
+          left: 25,
+          top: 52,
+        });
+        const emailField = new Rect({
+          width: defaultWidth - 40,
+          height: 32,
+          fill: "#ffffff",
+          stroke: "#d6d3d1",
+          strokeWidth: 1,
+          left: 20,
+          top: 90,
+          rx: 4,
+          ry: 4,
+        });
+        const emailLabel = new IText("Email", {
+          fontSize: 10,
+          fontFamily: "sans-serif",
+          fill: "#78716c",
+          left: 25,
+          top: 97,
+        });
+        const attendingLabel = new IText("Will you attend?", {
+          fontSize: 12,
+          fontFamily: "sans-serif",
+          fill: "#57534e",
+          left: 20,
+          top: 135,
+        });
+        const yesBtn = new Rect({
+          width: 60,
+          height: 28,
+          fill: "#c4a373",
+          left: 20,
+          top: 155,
+          rx: 4,
+          ry: 4,
+        });
+        const yesBtnText = new IText("Yes", {
+          fontSize: 12,
+          fontFamily: "sans-serif",
+          fill: "#ffffff",
+          left: 40,
+          top: 162,
+        });
+        const noBtn = new Rect({
+          width: 60,
+          height: 28,
+          fill: "#e7e5e4",
+          left: 90,
+          top: 155,
+          rx: 4,
+          ry: 4,
+        });
+        const noBtnText = new IText("No", {
+          fontSize: 12,
+          fontFamily: "sans-serif",
+          fill: "#57534e",
+          left: 112,
+          top: 162,
+        });
+        const submitBtn = new Rect({
+          width: defaultWidth - 40,
+          height: 36,
+          fill: "#292524",
+          left: 20,
+          top: 200,
+          rx: 4,
+          ry: 4,
+        });
+        const submitText = new IText("Submit RSVP", {
+          fontSize: 14,
+          fontFamily: "sans-serif",
+          fill: "#ffffff",
+          left: defaultWidth / 2,
+          top: 212,
+          originX: "center",
+        });
+        contentElements = [
+          nameField,
+          nameLabel,
+          emailField,
+          emailLabel,
+          attendingLabel,
+          yesBtn,
+          yesBtnText,
+          noBtn,
+          noBtnText,
+          submitBtn,
+          submitText,
+        ];
+      } else if (type === "gallery") {
+        // CE-023: Photo Gallery placeholder
+        const gridSize = 3;
+        const cellSize = (defaultWidth - 40) / gridSize;
+        for (let row = 0; row < 2; row++) {
+          for (let col = 0; col < gridSize; col++) {
+            const cell = new Rect({
+              width: cellSize - 5,
+              height: cellSize - 5,
+              fill: "#e7e5e4",
+              left: 20 + col * cellSize,
+              top: 45 + row * cellSize,
+              rx: 4,
+              ry: 4,
+            });
+            const icon = new IText("🖼", {
+              fontSize: 20,
+              left: 20 + col * cellSize + (cellSize - 5) / 2,
+              top: 45 + row * cellSize + (cellSize - 5) / 2,
+              originX: "center",
+              originY: "center",
+            });
+            contentElements.push(cell, icon);
+          }
+        }
+        const addPhotosText = new IText("Click to add photos", {
+          fontSize: 11,
+          fontFamily: "sans-serif",
+          fill: "#a8a29e",
+          left: defaultWidth / 2,
+          top: defaultHeight - 25,
+          originX: "center",
+        });
+        contentElements.push(addPhotosText);
+      } else if (type === "schedule") {
+        // Schedule Timeline placeholder
+        const item1 = new IText("3:00 PM - Ceremony", {
+          fontSize: 12,
+          fontFamily: "sans-serif",
+          fill: "#57534e",
+          left: 20,
+          top: 50,
+        });
+        const item2 = new IText("4:00 PM - Cocktails", {
+          fontSize: 12,
+          fontFamily: "sans-serif",
+          fill: "#57534e",
+          left: 20,
+          top: 75,
+        });
+        const item3 = new IText("5:30 PM - Reception", {
+          fontSize: 12,
+          fontFamily: "sans-serif",
+          fill: "#57534e",
+          left: 20,
+          top: 100,
+        });
+        const item4 = new IText("8:00 PM - Dancing", {
+          fontSize: 12,
+          fontFamily: "sans-serif",
+          fill: "#57534e",
+          left: 20,
+          top: 125,
+        });
+        // Timeline line
+        const timeline = new Rect({
+          width: 2,
+          height: 100,
+          fill: "#c4a373",
+          left: 10,
+          top: 50,
+        });
+        contentElements = [timeline, item1, item2, item3, item4];
+      }
+
+      // Create the group with all elements
+      const group = new Group([bgRect, typeLabel, ...contentElements], {
+        left: 50,
+        top: 100,
+        cornerColor: "#3b82f6",
+        cornerStrokeColor: "#1d4ed8",
+        cornerSize: 10,
+        transparentCorners: false,
+        borderColor: "#3b82f6",
+      });
+
+      // Store widget metadata on the group
+      (group as FabricObject & { widgetType?: string }).widgetType = type;
+      (group as FabricObject & { widgetId?: string }).widgetId = widget.id;
+
+      canvas.add(group);
+      canvas.setActiveObject(group);
+      canvas.requestRenderAll();
+      onWidgetAdded?.();
+    };
+
+    createWidgetGroup();
+  }, [pendingAddWidget, onWidgetAdded]);
+
   // CE-003: Set up history tracking for canvas changes
   useEffect(() => {
     if (!fabricRef.current) return;
@@ -631,6 +1226,7 @@ export function FabricCanvas({
 
   /**
    * Delete the currently selected object(s)
+   * CE-025: Handles both single selection and multi-selection (ActiveSelection)
    */
   const handleDeleteSelected = useCallback(() => {
     if (!fabricRef.current) return;
@@ -638,8 +1234,22 @@ export function FabricCanvas({
     const active = fabricRef.current.getActiveObject();
     if (!active) return;
 
-    fabricRef.current.remove(active);
-    fabricRef.current.discardActiveObject();
+    // CE-025: Handle multi-selection (ActiveSelection)
+    if (active instanceof ActiveSelection) {
+      // Get all objects in the selection
+      const objectsToRemove = active.getObjects();
+      // Discard selection first
+      fabricRef.current.discardActiveObject();
+      // Remove each object from the canvas
+      for (const obj of objectsToRemove) {
+        fabricRef.current.remove(obj);
+      }
+    } else {
+      // Single object selection
+      fabricRef.current.remove(active);
+      fabricRef.current.discardActiveObject();
+    }
+
     fabricRef.current.requestRenderAll();
     setSelectedObject(null);
   }, []);

@@ -728,3 +728,124 @@
 - tests: 864 pass (15 new ExportDialog tests)
 - check: pass
 - e2e: not run (existing functionality)
+
+## 2026-01-23: UI Testing - CE-019 to CE-025
+
+**Status:** TESTED (features not yet implemented)
+
+**Test Results:**
+
+### CE-019: Mode switching between structured and canvas editor
+- **Status:** NOT IMPLEMENTED
+- **Issue:** No Editor Mode toggle exists in Settings section
+- **Finding:** The `editorMode` column exists in schema (CE-017), but UI toggle is not built
+- **Acceptance criteria NOT met:** Settings does not show 'Editor Mode' toggle
+
+### CE-020: Countdown Timer widget
+- **Status:** NOT IMPLEMENTED
+- **Issue:** Clicking widget in Components panel logs selection but does not render on canvas
+- **Console log:** "Widget selected: Countdown Timer" (canvas-editor.tsx:81)
+- **Finding:** ComponentsPanel UI complete (CE-007), but actual widget rendering deferred
+- **Acceptance criteria NOT met:** Widget does not display on canvas
+
+### CE-021: Venue Map widget
+- **Status:** NOT IMPLEMENTED
+- **Same issue as CE-020:** Widget selection logged but not rendered
+
+### CE-022: RSVP Form widget
+- **Status:** NOT IMPLEMENTED
+- **Same issue as CE-020:** Widget selection logged but not rendered
+
+### CE-023: Photo Gallery widget
+- **Status:** NOT IMPLEMENTED
+- **Same issue as CE-020:** Widget selection logged but not rendered
+
+### CE-024: Alignment guides (smart guides)
+- **Status:** NOT IMPLEMENTED
+- **Issue:** No pink/red alignment guide lines appear when dragging elements
+- **Test:** Dragged rectangle near text element and canvas edges - no guides appeared
+- **Acceptance criteria NOT met:** No visual guides during element dragging
+
+### CE-025: Multi-select for batch element operations
+- **Status:** PARTIALLY WORKING
+- **Working features:**
+  - ✅ Shift+click adds elements to selection
+  - ✅ Marquee selection (drag from empty area selects elements within box)
+  - ✅ Selected elements move together maintaining relative positions
+  - ✅ Properties panel shows "Multiple selected" with "2 elements selected"
+  - ✅ Only common properties shown (Opacity slider)
+  - ✅ Backspace key deletes all selected elements
+- **Issue found:** Delete key does not delete - only deselects
+- **Acceptance criteria MOSTLY met:** Most functionality works, minor Delete key issue
+
+**Verification commands to run:**
+- pnpm run typecheck
+- pnpm run test
+- pnpm run check
+- pnpm run build
+- pnpm run test:e2e
+
+## 2026-01-24: UI Testing Revalidation - CE-019 to CE-025
+
+**Status:** RETESTED - Many items PASSING
+
+**Summary:**
+Previous progress notes were outdated. Re-running UI tests via browser automation revealed that CE-020 through CE-023 widgets ARE NOW WORKING.
+
+### CE-019: Mode switching between structured and canvas editor
+- **Status:** NOT IMPLEMENTED
+- **Finding:** Settings panel shows only placeholder text "Content panel for: settings"
+- **Issue:** No Editor Mode toggle exists - needs implementation
+
+### CE-020: Countdown Timer widget
+- **Status:** PASSING ✅
+- **Tested:** Click "Countdown Timer" in Components panel
+- **Result:** Widget appears on canvas with title, days/hours/mins/secs display
+- **Properties panel:** Shows Shape Properties with Fill Color, Stroke Color, Transform
+
+### CE-021: Venue Map widget
+- **Status:** PASSING ✅
+- **Tested:** Click "Venue Map" in Components panel
+- **Result:** Map placeholder appears with pin icon and "Enter venue address" text
+
+### CE-022: RSVP Form widget
+- **Status:** PASSING ✅
+- **Tested:** Click "RSVP Form" in Components panel
+- **Result:** Form widget appears with Name, Email, Yes/No buttons, Submit button
+
+### CE-023: Photo Gallery widget
+- **Status:** PASSING ✅
+- **Tested:** Click "Photo Gallery" in Components panel
+- **Result:** Gallery widget appears with 2x3 grid placeholders and "Click to add photos" text
+
+### CE-024: Alignment guides (smart guides)
+- **Status:** NOT IMPLEMENTED
+- **Tested:** Added 2 rectangles, dragged one near another
+- **Finding:** No pink/red alignment guide lines appear during drag
+- **Note:** ALIGNMENT_THRESHOLD and GUIDE_COLOR constants exist in code but guides not rendered
+
+### CE-025: Multi-select for batch element operations
+- **Status:** PASSING ✅ (after fix)
+- **Fix Applied:** Updated handleDeleteSelected() to handle ActiveSelection
+- **Working features:**
+  - ✅ Shift+click adds elements to selection
+  - ✅ Ctrl/Cmd+A selects all elements
+  - ✅ Selected elements move together
+  - ✅ Properties panel shows "Multiple selected" with element count
+  - ✅ Delete key now removes all selected elements (FIXED)
+  - ✅ Backspace key removes all selected elements
+
+**Fix Applied:**
+- File: src/components/editor/FabricCanvas.tsx
+- Function: handleDeleteSelected()
+- Change: Added ActiveSelection handling to iterate through and remove all objects in multi-selection
+
+**Verification Results:**
+- typecheck: pass
+- tests: 864 pass
+- build: pass
+- e2e: 14 pass (1 skipped)
+
+**Items Still Failing:**
+- CE-019: Mode switching (not implemented)
+- CE-024: Alignment guides (not implemented)

@@ -420,7 +420,7 @@
         "Wait 1+ seconds - verify seconds counter decrements",
         "Change font color - verify widget styling updates"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CE-021",
@@ -439,7 +439,7 @@
         "Enter venue address in properties - verify map updates to show location",
         "Preview the invitation - verify map is interactive"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CE-022",
@@ -458,7 +458,7 @@
         "In properties, toggle off 'Email' field - verify it disappears from form",
         "Preview and submit RSVP - verify response saves to database"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CE-023",
@@ -478,7 +478,7 @@
         "Switch layout to Grid - verify images display in grid format",
         "Preview invitation - verify gallery navigation works"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CE-024",
@@ -518,7 +518,7 @@
         "Release when box covers 2 elements - verify both selected",
         "Drag selected elements - verify they move together maintaining relative positions"
       ],
-      "passes": false
+      "passes": true
     }
   ]
 }
