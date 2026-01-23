@@ -108,7 +108,7 @@
         "Click 'Templates' tool - verify it becomes highlighted",
         "Click 'Components' tool - verify content browser switches to components panel"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CE-006",

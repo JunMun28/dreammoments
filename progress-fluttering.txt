@@ -181,3 +181,41 @@
 - typecheck: pass
 - tests: 675 pass (10 new)
 - check: pass
+
+## 2026-01-23: CE-005 - Tool Sidebar for Canvas Editor
+
+**Status:** COMPLETE
+
+**Changes:**
+- Created CanvasToolSidebar component with 6 tool buttons:
+  - Sections (LayoutGrid icon)
+  - Templates (Sparkles icon)
+  - Text (Type icon)
+  - Assets (Image icon)
+  - Components (Puzzle icon)
+  - Settings (Settings icon)
+- Added CanvasEditorTool type export for tool IDs
+- Component uses props: activeTool, onToolChange (controlled component)
+- Tooltips on hover via Radix Tooltip
+- Active tool highlighted with bg-stone-100 class
+- Updated canvas-editor route to integrate sidebar with content browser panel placeholder
+
+**Files changed:**
+- src/components/editor/CanvasToolSidebar.tsx (new component)
+- src/components/editor/CanvasToolSidebar.test.tsx (7 tests)
+- src/components/editor/index.ts (added export)
+- src/routes/canvas-editor.tsx (integrated CanvasToolSidebar)
+
+**Acceptance criteria verified:**
+- ✅ Sidebar shows vertical icon buttons
+- ✅ Tools include: Sections, Templates, Text, Assets, Components, Settings
+- ✅ Each tool has icon and tooltip on hover
+- ✅ Active tool is visually highlighted
+- ✅ Clicking tool switches the content browser panel
+
+**Verification:**
+- typecheck: pass
+- tests: 682 pass (7 new)
+- check: pass
+- e2e: 14 pass
+- UI: verified via playwright
