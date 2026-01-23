@@ -230,7 +230,7 @@
         "Change color to red - verify text color updates",
         "Click center align - verify text centers within its bounds"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CE-012",

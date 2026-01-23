@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import {
 	type CanvasEditorTool,
 	CanvasPropertiesPanel,
 	type CanvasSelectionInfo,
 	CanvasToolSidebar,
 	FabricCanvas,
+	type PropertyUpdate,
 } from "@/components/editor";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -21,6 +22,25 @@ export const Route = createFileRoute("/canvas-editor")({
 function CanvasEditorPage() {
 	const [activeTool, setActiveTool] = useState<CanvasEditorTool>("sections");
 	const [selection, setSelection] = useState<CanvasSelectionInfo | null>(null);
+
+	// CE-011: Property update state for bi-directional communication
+	const [pendingPropertyUpdate, setPendingPropertyUpdate] =
+		useState<PropertyUpdate | null>(null);
+
+	// CE-011: Handle property changes from the properties panel
+	const handlePropertyChange = useCallback(
+		(property: string, value: unknown) => {
+			setPendingPropertyUpdate({ property, value });
+		},
+		[],
+	);
+
+	// CE-011: Clear pending property update after canvas applies it
+	const handlePropertyUpdateApplied = useCallback(() => {
+		setPendingPropertyUpdate(null);
+		// Refresh selection to update properties panel with new values
+		setSelection((current) => (current ? { ...current } : null));
+	}, []);
 
 	return (
 		<TooltipProvider>
@@ -48,12 +68,19 @@ function CanvasEditorPage() {
 
 				{/* Central Canvas */}
 				<main className="flex-1 overflow-hidden">
-					<FabricCanvas onSelectionChange={setSelection} />
+					<FabricCanvas
+						onSelectionChange={setSelection}
+						pendingPropertyUpdate={pendingPropertyUpdate}
+						onPropertyUpdateApplied={handlePropertyUpdateApplied}
+					/>
 				</main>
 
-				{/* Right Properties Panel (CE-010) */}
+				{/* Right Properties Panel (CE-010, CE-011) */}
 				<aside className="hidden w-72 flex-shrink-0 overflow-y-auto border-l bg-white lg:block">
-					<CanvasPropertiesPanel selection={selection} />
+					<CanvasPropertiesPanel
+						selection={selection}
+						onPropertyChange={handlePropertyChange}
+					/>
 				</aside>
 			</div>
 		</TooltipProvider>

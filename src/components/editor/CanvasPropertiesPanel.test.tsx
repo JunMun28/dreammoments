@@ -228,3 +228,144 @@ describe("CE-010: CanvasPropertiesPanel", () => {
 		});
 	});
 });
+
+/**
+ * CE-011: Text element properties editor tests
+ *
+ * Acceptance criteria:
+ * - Font family picker with Google Fonts options
+ * - Font size slider/input (8-200px)
+ * - Font weight toggle (normal/bold)
+ * - Font style toggle (normal/italic)
+ * - Text color picker
+ * - Text alignment buttons (left, center, right, justify)
+ * - Line height slider
+ * - Letter spacing slider
+ * - Changes apply in real-time to canvas
+ */
+describe("CE-011: Text Properties Editor", () => {
+	const createTextSelection = (overrides = {}): CanvasSelectionInfo => ({
+		type: "i-text",
+		object: {
+			type: "i-text",
+			fontFamily: "serif",
+			fontSize: 24,
+			fill: "#000000",
+			textAlign: "left",
+			fontWeight: "normal",
+			fontStyle: "normal",
+			lineHeight: 1.2,
+			charSpacing: 0,
+			...overrides,
+		} as unknown as IText,
+	});
+
+	describe("Font controls", () => {
+		it("shows font weight toggle buttons (normal/bold)", () => {
+			render(<CanvasPropertiesPanel selection={createTextSelection()} />);
+
+			const boldBtn = screen.getByRole("button", { name: /bold/i });
+			expect(boldBtn).toBeDefined();
+		});
+
+		it("shows font style toggle buttons (normal/italic)", () => {
+			render(<CanvasPropertiesPanel selection={createTextSelection()} />);
+
+			const italicBtn = screen.getByRole("button", { name: /italic/i });
+			expect(italicBtn).toBeDefined();
+		});
+
+		it("displays font family selector with Google Fonts options", () => {
+			render(<CanvasPropertiesPanel selection={createTextSelection()} />);
+
+			const fontSelect = screen.getByLabelText(/font family/i);
+			expect(fontSelect).toBeDefined();
+
+			// Should have multiple font options including Google Fonts
+			const options = fontSelect.querySelectorAll("option");
+			expect(options.length).toBeGreaterThanOrEqual(5);
+		});
+	});
+
+	describe("Spacing controls", () => {
+		it("shows line height slider", () => {
+			render(<CanvasPropertiesPanel selection={createTextSelection()} />);
+
+			const lineHeightLabel = screen.getByText(/line height/i);
+			expect(lineHeightLabel).toBeDefined();
+
+			// Should have slider for line height
+			const sliders = screen.getAllByRole("slider");
+			expect(sliders.length).toBeGreaterThanOrEqual(1);
+		});
+
+		it("shows letter spacing slider", () => {
+			render(<CanvasPropertiesPanel selection={createTextSelection()} />);
+
+			const letterSpacingLabel = screen.getByText(/letter spacing/i);
+			expect(letterSpacingLabel).toBeDefined();
+		});
+	});
+
+	describe("Property change callbacks", () => {
+		it("calls onPropertyChange with fontWeight when bold is clicked", async () => {
+			const onPropertyChange = vi.fn();
+			render(
+				<CanvasPropertiesPanel
+					selection={createTextSelection()}
+					onPropertyChange={onPropertyChange}
+				/>,
+			);
+
+			const boldBtn = screen.getByRole("button", { name: /bold/i });
+			boldBtn.click();
+
+			expect(onPropertyChange).toHaveBeenCalledWith("fontWeight", "bold");
+		});
+
+		it("calls onPropertyChange with fontStyle when italic is clicked", async () => {
+			const onPropertyChange = vi.fn();
+			render(
+				<CanvasPropertiesPanel
+					selection={createTextSelection()}
+					onPropertyChange={onPropertyChange}
+				/>,
+			);
+
+			const italicBtn = screen.getByRole("button", { name: /italic/i });
+			italicBtn.click();
+
+			expect(onPropertyChange).toHaveBeenCalledWith("fontStyle", "italic");
+		});
+
+		it("toggles fontWeight back to normal when already bold", async () => {
+			const onPropertyChange = vi.fn();
+			render(
+				<CanvasPropertiesPanel
+					selection={createTextSelection({ fontWeight: "bold" })}
+					onPropertyChange={onPropertyChange}
+				/>,
+			);
+
+			const boldBtn = screen.getByRole("button", { name: /bold/i });
+			boldBtn.click();
+
+			expect(onPropertyChange).toHaveBeenCalledWith("fontWeight", "normal");
+		});
+
+		it("toggles fontStyle back to normal when already italic", async () => {
+			const onPropertyChange = vi.fn();
+			render(
+				<CanvasPropertiesPanel
+					selection={createTextSelection({ fontStyle: "italic" })}
+					onPropertyChange={onPropertyChange}
+				/>,
+			);
+
+			const italicBtn = screen.getByRole("button", { name: /italic/i });
+			italicBtn.click();
+
+			expect(onPropertyChange).toHaveBeenCalledWith("fontStyle", "normal");
+		});
+	});
+});

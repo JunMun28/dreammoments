@@ -267,3 +267,46 @@
 - tests: 709 pass (7 new)
 - check: pass (pre-existing issues in CanvasPropertiesPanel.tsx)
 - e2e: 14 pass
+
+## 2026-01-23: CE-011 - Text Element Properties Editor
+
+**Status:** COMPLETE
+
+**Changes:**
+- Enhanced TextProperties component with full CE-011 features:
+  - Font family picker with 8 options (serif, sans-serif, monospace, Playfair Display, Great Vibes, Lora, Cormorant Garamond, Dancing Script)
+  - Font size input (8-200px)
+  - Font weight toggle (Bold button with active state)
+  - Font style toggle (Italic button with active state)
+  - Text color picker
+  - Text alignment buttons (left, center, right, justify)
+  - Line height slider (0.5-3.0)
+  - Letter spacing slider (-100 to 500)
+- Added PropertyUpdate type and pendingPropertyUpdate/onPropertyUpdateApplied props to FabricCanvas
+- Wired up bi-directional property changes in canvas-editor route
+- Changes apply in real-time to canvas via property update effect
+
+**Files changed:**
+- src/components/editor/CanvasPropertiesPanel.tsx (enhanced TextProperties)
+- src/components/editor/CanvasPropertiesPanel.test.tsx (9 new tests)
+- src/components/editor/FabricCanvas.tsx (property update mechanism)
+- src/components/editor/index.ts (export PropertyUpdate type)
+- src/routes/canvas-editor.tsx (property change wiring)
+
+**Acceptance criteria verified:**
+- ✅ Font family picker with Google Fonts options
+- ✅ Font size input (8-200px)
+- ✅ Font weight toggle (normal/bold)
+- ✅ Font style toggle (normal/italic)
+- ✅ Text color picker
+- ✅ Text alignment buttons (left, center, right, justify)
+- ✅ Line height slider
+- ✅ Letter spacing slider
+- ✅ Changes apply in real-time to canvas
+
+**Verification:**
+- typecheck: pass
+- tests: 718 pass (9 new)
+- check: pass (pre-existing lint issues)
+- e2e: 14 pass
+- UI: verified via playwright (bold toggle, sliders work)

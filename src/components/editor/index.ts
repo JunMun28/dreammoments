@@ -7,7 +7,7 @@ export {
 export { type CanvasEditorTool, CanvasToolSidebar } from "./CanvasToolSidebar";
 export { EditorHeader } from "./EditorHeader";
 export { EditorLayout } from "./EditorLayout";
-export { FabricCanvas } from "./FabricCanvas";
+export { FabricCanvas, type PropertyUpdate } from "./FabricCanvas";
 export { FilmstripPanel } from "./FilmstripPanel";
 export { PropertiesPanel } from "./PropertiesPanel";
 export { SectionThumbnails } from "./SectionThumbnails";

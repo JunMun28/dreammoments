@@ -86,6 +86,14 @@ function debounce<T extends (...args: Parameters<T>) => void>(
 	return debouncedFn;
 }
 
+/**
+ * CE-011: Property update request from properties panel
+ */
+export interface PropertyUpdate {
+	property: string;
+	value: unknown;
+}
+
 interface FabricCanvasProps {
 	/** Callback when canvas selection changes (CE-010) */
 	onSelectionChange?: (selection: CanvasSelectionInfo | null) => void;
@@ -93,6 +101,10 @@ interface FabricCanvasProps {
 	initialCanvasData?: string | null;
 	/** CE-016: Callback when canvas changes (for auto-save) */
 	onCanvasChange?: (canvasJson: string) => Promise<void>;
+	/** CE-011: Property update to apply to selected object */
+	pendingPropertyUpdate?: PropertyUpdate | null;
+	/** CE-011: Callback when property update is applied */
+	onPropertyUpdateApplied?: () => void;
 }
 
 /**
@@ -106,6 +118,8 @@ export function FabricCanvas({
 	onSelectionChange,
 	initialCanvasData,
 	onCanvasChange,
+	pendingPropertyUpdate,
+	onPropertyUpdateApplied,
 }: FabricCanvasProps = {}) {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const fabricRef = useRef<Canvas | null>(null);
@@ -270,6 +284,35 @@ export function FabricCanvas({
 			}
 		}
 	}, [selectedObject, onSelectionChange]);
+
+	// CE-011: Apply property updates from properties panel
+	useEffect(() => {
+		if (!pendingPropertyUpdate || !fabricRef.current) return;
+
+		const canvas = fabricRef.current;
+		const active = canvas.getActiveObject();
+
+		if (!active) {
+			onPropertyUpdateApplied?.();
+			return;
+		}
+
+		const { property, value } = pendingPropertyUpdate;
+
+		// Handle toggle properties for image (flipX, flipY)
+		if (property === "flipX" || property === "flipY") {
+			const currentValue = active.get(property as keyof typeof active);
+			active.set(property as keyof typeof active, !currentValue);
+		} else {
+			// Standard property update
+			active.set(property as keyof typeof active, value);
+		}
+
+		active.setCoords();
+		canvas.requestRenderAll();
+		saveHistoryState();
+		onPropertyUpdateApplied?.();
+	}, [pendingPropertyUpdate, onPropertyUpdateApplied, saveHistoryState]);
 
 	// CE-003: Set up history tracking for canvas changes
 	useEffect(() => {

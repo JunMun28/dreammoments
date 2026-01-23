@@ -4,8 +4,10 @@ import {
 	AlignJustify,
 	AlignLeft,
 	AlignRight,
+	Bold,
 	FlipHorizontal,
 	FlipVertical,
+	Italic,
 	Replace,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -137,7 +139,17 @@ function CanvasProperties({
 }
 
 /**
- * Text element properties
+ * CE-011: Text element properties editor
+ *
+ * Features:
+ * - Font family picker with Google Fonts options
+ * - Font size input (8-200px)
+ * - Font weight toggle (normal/bold)
+ * - Font style toggle (normal/italic)
+ * - Text color picker
+ * - Text alignment buttons (left, center, right, justify)
+ * - Line height slider
+ * - Letter spacing slider
  */
 function TextProperties({
 	object,
@@ -151,6 +163,21 @@ function TextProperties({
 		fontSize?: number;
 		fill?: string;
 		textAlign?: string;
+		fontWeight?: string | number;
+		fontStyle?: string;
+		lineHeight?: number;
+		charSpacing?: number;
+	};
+
+	const isBold = textObj.fontWeight === "bold" || textObj.fontWeight === 700;
+	const isItalic = textObj.fontStyle === "italic";
+
+	const handleBoldToggle = () => {
+		onPropertyChange?.("fontWeight", isBold ? "normal" : "bold");
+	};
+
+	const handleItalicToggle = () => {
+		onPropertyChange?.("fontStyle", isItalic ? "normal" : "italic");
 	};
 
 	return (
@@ -158,6 +185,7 @@ function TextProperties({
 			<h3 className="font-medium text-stone-900">Text Properties</h3>
 
 			<div className="space-y-3">
+				{/* Font Family */}
 				<div className="space-y-1.5">
 					<Label htmlFor="font-family">Font Family</Label>
 					<select
@@ -171,9 +199,13 @@ function TextProperties({
 						<option value="monospace">Monospace</option>
 						<option value="Playfair Display">Playfair Display</option>
 						<option value="Great Vibes">Great Vibes</option>
+						<option value="Lora">Lora</option>
+						<option value="Cormorant Garamond">Cormorant Garamond</option>
+						<option value="Dancing Script">Dancing Script</option>
 					</select>
 				</div>
 
+				{/* Font Size */}
 				<div className="space-y-1.5">
 					<Label htmlFor="font-size">Font Size</Label>
 					<Input
@@ -189,6 +221,38 @@ function TextProperties({
 					/>
 				</div>
 
+				{/* Font Style Controls (Bold/Italic) */}
+				<div className="space-y-1.5">
+					<Label id="style-label">Style</Label>
+					<div
+						className="flex gap-1"
+						role="group"
+						aria-labelledby="style-label"
+					>
+						<Button
+							variant={isBold ? "default" : "outline"}
+							size="icon"
+							className="h-8 w-8"
+							onClick={handleBoldToggle}
+							aria-label="Bold"
+							aria-pressed={isBold}
+						>
+							<Bold className="h-4 w-4" />
+						</Button>
+						<Button
+							variant={isItalic ? "default" : "outline"}
+							size="icon"
+							className="h-8 w-8"
+							onClick={handleItalicToggle}
+							aria-label="Italic"
+							aria-pressed={isItalic}
+						>
+							<Italic className="h-4 w-4" />
+						</Button>
+					</div>
+				</div>
+
+				{/* Text Color */}
 				<div className="space-y-1.5">
 					<Label htmlFor="text-color">Text Color</Label>
 					<Input
@@ -202,6 +266,7 @@ function TextProperties({
 					/>
 				</div>
 
+				{/* Text Alignment */}
 				<div className="space-y-1.5">
 					<Label id="alignment-label">Alignment</Label>
 					<div
@@ -241,6 +306,48 @@ function TextProperties({
 						>
 							<AlignJustify className="h-4 w-4" />
 						</Button>
+					</div>
+				</div>
+
+				{/* Line Height */}
+				<div className="space-y-1.5">
+					<Label htmlFor="line-height">Line Height</Label>
+					<div className="flex items-center gap-2">
+						<Slider
+							id="line-height"
+							min={0.5}
+							max={3}
+							step={0.1}
+							defaultValue={[textObj.lineHeight || 1.2]}
+							onValueChange={(value) =>
+								onPropertyChange?.("lineHeight", value[0])
+							}
+							className="flex-1"
+						/>
+						<span className="w-10 text-right text-sm text-stone-500">
+							{(textObj.lineHeight || 1.2).toFixed(1)}
+						</span>
+					</div>
+				</div>
+
+				{/* Letter Spacing */}
+				<div className="space-y-1.5">
+					<Label htmlFor="letter-spacing">Letter Spacing</Label>
+					<div className="flex items-center gap-2">
+						<Slider
+							id="letter-spacing"
+							min={-100}
+							max={500}
+							step={10}
+							defaultValue={[textObj.charSpacing || 0]}
+							onValueChange={(value) =>
+								onPropertyChange?.("charSpacing", value[0])
+							}
+							className="flex-1"
+						/>
+						<span className="w-10 text-right text-sm text-stone-500">
+							{textObj.charSpacing || 0}
+						</span>
 					</div>
 				</div>
 			</div>
