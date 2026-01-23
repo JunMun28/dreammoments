@@ -35,6 +35,13 @@ const { mockFabricRect, mockFabricIText, mockFabricCanvas } = vi.hoisted(
 			requestRenderAll: vi.fn(),
 			getZoom: vi.fn(() => 1),
 			setZoom: vi.fn(),
+			// CE-002: Zoom methods
+			getCenterPoint: vi.fn(() => ({ x: 200, y: 350 })),
+			zoomToPoint: vi.fn(),
+			setViewportTransform: vi.fn(),
+			// CE-003: History methods
+			toJSON: vi.fn(() => ({ objects: [] })),
+			loadFromJSON: vi.fn(() => Promise.resolve()),
 		},
 	}),
 );

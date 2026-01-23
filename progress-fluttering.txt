@@ -97,3 +97,47 @@
 - check: pass
 - build: pass
 - e2e: 14 pass
+
+## 2026-01-23: CE-003 - Undo/Redo Functionality
+
+**Status:** COMPLETE
+
+**Changes:**
+- Added history state management with useRef for performance:
+  - historyRef: stores canvas JSON snapshots (max 50 states)
+  - historyIndexRef: tracks current position in history
+  - isRestoringRef: prevents saving state during undo/redo
+  - canUndo/canRedo state for button enablement
+- Implemented saveHistoryState function:
+  - Serializes canvas to JSON
+  - Removes future states when new action taken
+  - Limits history to 50 states
+- Added undo/redo handlers with async loadFromJSON
+- Set up history event tracking:
+  - object:modified - saves state after move/resize/rotate
+  - object:added - saves state after adding element
+  - object:removed - saves state after deleting element
+- Added keyboard shortcuts:
+  - Ctrl/Cmd+Z for undo
+  - Ctrl/Cmd+Shift+Z for redo
+  - Ctrl/Cmd+Y for redo (alternative)
+- Added undo/redo buttons to toolbar with disabled states
+
+**Files changed:**
+- src/components/editor/FabricCanvas.tsx (added history management)
+- src/components/editor/FabricCanvas.test.tsx (updated mock with toJSON/loadFromJSON)
+
+**Acceptance criteria verified:**
+- ✅ Undo button (Ctrl+Z) reverts last canvas change
+- ✅ Redo button (Ctrl+Shift+Z) restores undone change
+- ✅ Undo/redo buttons show disabled state when unavailable
+- ✅ Add element → Undo removes it → Redo brings it back
+- ✅ Move element → Undo returns it to original position
+- ✅ History limited to 50 states
+
+**Verification:**
+- typecheck: pass
+- tests: 665 pass
+- check: pass
+- build: pass
+- e2e: 14 pass

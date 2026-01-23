@@ -1,5 +1,14 @@
 import { Canvas, type FabricObject, IText, Rect } from "fabric";
-import { Maximize, Minus, Plus, Square, Trash2, Type } from "lucide-react";
+import {
+	Maximize,
+	Minus,
+	Plus,
+	Redo2,
+	Square,
+	Trash2,
+	Type,
+	Undo2,
+} from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,6 +33,11 @@ const ZOOM_STEP = 0.1; // 10% per click
 const ZOOM_PRESETS = [0.5, 0.8, 1.0, 1.5, 2.0]; // 50%, 80%, 100%, 150%, 200%
 
 /**
+ * History configuration for CE-003 (undo/redo)
+ */
+const HISTORY_MAX_SIZE = 50;
+
+/**
  * FabricCanvas component for canvas-based invitation editing.
  * Implements CE-001 requirements:
  * - Fabric.js canvas with basic element rendering
@@ -37,6 +51,43 @@ export function FabricCanvas() {
 		null,
 	);
 	const [zoomLevel, setZoomLevel] = useState(1.0); // CE-002: Zoom state
+
+	// CE-003: History state for undo/redo
+	const historyRef = useRef<string[]>([]);
+	const historyIndexRef = useRef(-1);
+	const isRestoringRef = useRef(false);
+	const [canUndo, setCanUndo] = useState(false);
+	const [canRedo, setCanRedo] = useState(false);
+
+	/**
+	 * CE-003: Save current canvas state to history
+	 */
+	const saveHistoryState = useCallback(() => {
+		if (!fabricRef.current || isRestoringRef.current) return;
+
+		const json = JSON.stringify(fabricRef.current.toJSON());
+		const history = historyRef.current;
+		const index = historyIndexRef.current;
+
+		// Remove any redo states (states after current index)
+		if (index < history.length - 1) {
+			history.splice(index + 1);
+		}
+
+		// Add new state
+		history.push(json);
+
+		// Limit history size
+		if (history.length > HISTORY_MAX_SIZE) {
+			history.shift();
+		} else {
+			historyIndexRef.current = history.length - 1;
+		}
+
+		// Update button states
+		setCanUndo(historyIndexRef.current > 0);
+		setCanRedo(false);
+	}, []);
 
 	// Initialize Fabric.js canvas on mount
 	useEffect(() => {
@@ -83,6 +134,31 @@ export function FabricCanvas() {
 			fabricRef.current = null;
 		};
 	}, []);
+
+	// CE-003: Set up history tracking for canvas changes
+	useEffect(() => {
+		if (!fabricRef.current) return;
+
+		const canvas = fabricRef.current;
+
+		// Save initial state
+		saveHistoryState();
+
+		// Track all object modifications for history
+		const onObjectModified = () => saveHistoryState();
+		const onObjectAdded = () => saveHistoryState();
+		const onObjectRemoved = () => saveHistoryState();
+
+		canvas.on("object:modified", onObjectModified);
+		canvas.on("object:added", onObjectAdded);
+		canvas.on("object:removed", onObjectRemoved);
+
+		return () => {
+			canvas.off("object:modified", onObjectModified);
+			canvas.off("object:added", onObjectAdded);
+			canvas.off("object:removed", onObjectRemoved);
+		};
+	}, [saveHistoryState]);
 
 	/**
 	 * Add a rectangle element to the canvas
@@ -145,6 +221,82 @@ export function FabricCanvas() {
 		fabricRef.current.requestRenderAll();
 		setSelectedObject(null);
 	}, [selectedObject]);
+
+	/**
+	 * CE-003: Undo last canvas operation
+	 */
+	const handleUndo = useCallback(() => {
+		if (!fabricRef.current || historyIndexRef.current <= 0) return;
+
+		isRestoringRef.current = true;
+		historyIndexRef.current -= 1;
+
+		const canvas = fabricRef.current;
+		const state = historyRef.current[historyIndexRef.current];
+
+		canvas.loadFromJSON(JSON.parse(state)).then(() => {
+			canvas.requestRenderAll();
+			setCanUndo(historyIndexRef.current > 0);
+			setCanRedo(historyIndexRef.current < historyRef.current.length - 1);
+			isRestoringRef.current = false;
+		});
+	}, []);
+
+	/**
+	 * CE-003: Redo previously undone operation
+	 */
+	const handleRedo = useCallback(() => {
+		if (
+			!fabricRef.current ||
+			historyIndexRef.current >= historyRef.current.length - 1
+		)
+			return;
+
+		isRestoringRef.current = true;
+		historyIndexRef.current += 1;
+
+		const canvas = fabricRef.current;
+		const state = historyRef.current[historyIndexRef.current];
+
+		canvas.loadFromJSON(JSON.parse(state)).then(() => {
+			canvas.requestRenderAll();
+			setCanUndo(historyIndexRef.current > 0);
+			setCanRedo(historyIndexRef.current < historyRef.current.length - 1);
+			isRestoringRef.current = false;
+		});
+	}, []);
+
+	// CE-003: Keyboard shortcuts for undo/redo
+	useEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			// Ignore if typing in input/textarea
+			if (
+				e.target instanceof HTMLInputElement ||
+				e.target instanceof HTMLTextAreaElement
+			) {
+				return;
+			}
+
+			// Ctrl+Z or Cmd+Z for undo
+			if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
+				e.preventDefault();
+				handleUndo();
+			}
+			// Ctrl+Shift+Z or Cmd+Shift+Z for redo
+			else if ((e.ctrlKey || e.metaKey) && e.key === "z" && e.shiftKey) {
+				e.preventDefault();
+				handleRedo();
+			}
+			// Ctrl+Y or Cmd+Y for redo (alternative)
+			else if ((e.ctrlKey || e.metaKey) && e.key === "y") {
+				e.preventDefault();
+				handleRedo();
+			}
+		};
+
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, [handleUndo, handleRedo]);
 
 	/**
 	 * Get selection info text based on selected object type
@@ -253,6 +405,34 @@ export function FabricCanvas() {
 					<Trash2 className="h-4 w-4" />
 					Delete
 				</Button>
+
+				<div className="mx-2 h-6 w-px bg-stone-200" />
+
+				{/* CE-003: Undo/Redo controls */}
+				<div className="flex items-center gap-1" data-testid="history-controls">
+					<Button
+						variant="outline"
+						size="icon"
+						onClick={handleUndo}
+						disabled={!canUndo}
+						className="h-8 w-8"
+						aria-label="Undo (Ctrl+Z)"
+						title="Undo (Ctrl+Z)"
+					>
+						<Undo2 className="h-4 w-4" />
+					</Button>
+					<Button
+						variant="outline"
+						size="icon"
+						onClick={handleRedo}
+						disabled={!canRedo}
+						className="h-8 w-8"
+						aria-label="Redo (Ctrl+Shift+Z)"
+						title="Redo (Ctrl+Shift+Z)"
+					>
+						<Redo2 className="h-4 w-4" />
+					</Button>
+				</div>
 
 				<div className="mx-2 h-6 w-px bg-stone-200" />
 

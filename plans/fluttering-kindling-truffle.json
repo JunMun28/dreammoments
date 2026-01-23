@@ -64,7 +64,7 @@
         "Move element, then undo - verify element returns to original position",
         "With empty history, verify undo button is disabled"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CE-004",
