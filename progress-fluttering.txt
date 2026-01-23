@@ -62,3 +62,38 @@
 - typecheck: pass
 - tests: 665 pass (14 new + 651 existing)
 - check: pass
+
+## 2026-01-23: CE-002 - Zoom and Pan Controls
+
+**Status:** COMPLETE
+
+**Changes:**
+- Added zoom controls to FabricCanvas toolbar:
+  - Zoom in (+) button
+  - Zoom out (-) button
+  - Zoom level display with percentage (e.g., "100%")
+  - Dropdown with zoom presets: 50%, 80%, 100%, 150%, 200%
+  - Fit to screen button (resets to 100%)
+- Zoom range limited to 50%-200%
+- Added shadcn dropdown-menu component
+- Created canvas-editor route for testing canvas features
+
+**Files changed:**
+- src/components/editor/FabricCanvas.tsx (added zoom controls and handlers)
+- src/components/ui/dropdown-menu.tsx (new shadcn component)
+- src/routes/canvas-editor.tsx (new test route)
+
+**Acceptance criteria verified:**
+- ✅ Zoom in/out buttons visible in canvas toolbar
+- ✅ Zoom level displays as percentage
+- ✅ Zoom range: 50% to 200%
+- ✅ Zoom presets: 50%, 80%, 100%, 150%, 200%
+- ✅ Fit to screen button resets view
+- ⏭️ Space+drag pan (optional, not implemented)
+
+**Verification:**
+- typecheck: pass
+- tests: 665 pass
+- check: pass
+- build: pass
+- e2e: 14 pass

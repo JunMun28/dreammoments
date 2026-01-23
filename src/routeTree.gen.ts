@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RsvpRouteImport } from './routes/rsvp'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as CanvasEditorRouteImport } from './routes/canvas-editor'
 import { Route as BuilderRouteImport } from './routes/builder'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
@@ -20,7 +21,9 @@ import { Route as DemoNeonRouteImport } from './routes/demo/neon'
 import { Route as DemoDrizzleRouteImport } from './routes/demo/drizzle'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as ApiUploadHeroImageRouteImport } from './routes/api.upload-hero-image'
+import { Route as ApiUploadGalleryImageRouteImport } from './routes/api.upload-gallery-image'
 import { Route as ApiRemoveHeroImageRouteImport } from './routes/api.remove-hero-image'
+import { Route as ApiDeleteGalleryImageRouteImport } from './routes/api.delete-gallery-image'
 import { Route as DemoStartServerFuncsRouteImport } from './routes/demo/start.server-funcs'
 import { Route as DemoStartApiRequestRouteImport } from './routes/demo/start.api-request'
 import { Route as DemoFormSimpleRouteImport } from './routes/demo/form.simple'
@@ -40,6 +43,11 @@ const RsvpRoute = RsvpRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CanvasEditorRoute = CanvasEditorRouteImport.update({
+  id: '/canvas-editor',
+  path: '/canvas-editor',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BuilderRoute = BuilderRouteImport.update({
@@ -87,9 +95,19 @@ const ApiUploadHeroImageRoute = ApiUploadHeroImageRouteImport.update({
   path: '/api/upload-hero-image',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiUploadGalleryImageRoute = ApiUploadGalleryImageRouteImport.update({
+  id: '/api/upload-gallery-image',
+  path: '/api/upload-gallery-image',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiRemoveHeroImageRoute = ApiRemoveHeroImageRouteImport.update({
   id: '/api/remove-hero-image',
   path: '/api/remove-hero-image',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDeleteGalleryImageRoute = ApiDeleteGalleryImageRouteImport.update({
+  id: '/api/delete-gallery-image',
+  path: '/api/delete-gallery-image',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DemoStartServerFuncsRoute = DemoStartServerFuncsRouteImport.update({
@@ -147,9 +165,12 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/builder': typeof BuilderRoute
+  '/canvas-editor': typeof CanvasEditorRoute
   '/login': typeof LoginRoute
   '/rsvp': typeof RsvpRoute
+  '/api/delete-gallery-image': typeof ApiDeleteGalleryImageRoute
   '/api/remove-hero-image': typeof ApiRemoveHeroImageRoute
+  '/api/upload-gallery-image': typeof ApiUploadGalleryImageRoute
   '/api/upload-hero-image': typeof ApiUploadHeroImageRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/demo/drizzle': typeof DemoDrizzleRoute
@@ -171,9 +192,12 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/builder': typeof BuilderRoute
+  '/canvas-editor': typeof CanvasEditorRoute
   '/login': typeof LoginRoute
   '/rsvp': typeof RsvpRoute
+  '/api/delete-gallery-image': typeof ApiDeleteGalleryImageRoute
   '/api/remove-hero-image': typeof ApiRemoveHeroImageRoute
+  '/api/upload-gallery-image': typeof ApiUploadGalleryImageRoute
   '/api/upload-hero-image': typeof ApiUploadHeroImageRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/demo/drizzle': typeof DemoDrizzleRoute
@@ -196,9 +220,12 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/builder': typeof BuilderRoute
+  '/canvas-editor': typeof CanvasEditorRoute
   '/login': typeof LoginRoute
   '/rsvp': typeof RsvpRoute
+  '/api/delete-gallery-image': typeof ApiDeleteGalleryImageRoute
   '/api/remove-hero-image': typeof ApiRemoveHeroImageRoute
+  '/api/upload-gallery-image': typeof ApiUploadGalleryImageRoute
   '/api/upload-hero-image': typeof ApiUploadHeroImageRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/demo/drizzle': typeof DemoDrizzleRoute
@@ -222,9 +249,12 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/builder'
+    | '/canvas-editor'
     | '/login'
     | '/rsvp'
+    | '/api/delete-gallery-image'
     | '/api/remove-hero-image'
+    | '/api/upload-gallery-image'
     | '/api/upload-hero-image'
     | '/auth/callback'
     | '/demo/drizzle'
@@ -246,9 +276,12 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/builder'
+    | '/canvas-editor'
     | '/login'
     | '/rsvp'
+    | '/api/delete-gallery-image'
     | '/api/remove-hero-image'
+    | '/api/upload-gallery-image'
     | '/api/upload-hero-image'
     | '/auth/callback'
     | '/demo/drizzle'
@@ -270,9 +303,12 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/builder'
+    | '/canvas-editor'
     | '/login'
     | '/rsvp'
+    | '/api/delete-gallery-image'
     | '/api/remove-hero-image'
+    | '/api/upload-gallery-image'
     | '/api/upload-hero-image'
     | '/auth/callback'
     | '/demo/drizzle'
@@ -295,9 +331,12 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SplatRoute: typeof SplatRoute
   BuilderRoute: typeof BuilderRoute
+  CanvasEditorRoute: typeof CanvasEditorRoute
   LoginRoute: typeof LoginRoute
   RsvpRoute: typeof RsvpRoute
+  ApiDeleteGalleryImageRoute: typeof ApiDeleteGalleryImageRoute
   ApiRemoveHeroImageRoute: typeof ApiRemoveHeroImageRoute
+  ApiUploadGalleryImageRoute: typeof ApiUploadGalleryImageRoute
   ApiUploadHeroImageRoute: typeof ApiUploadHeroImageRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   DemoDrizzleRoute: typeof DemoDrizzleRoute
@@ -330,6 +369,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/canvas-editor': {
+      id: '/canvas-editor'
+      path: '/canvas-editor'
+      fullPath: '/canvas-editor'
+      preLoaderRoute: typeof CanvasEditorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/builder': {
@@ -395,11 +441,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiUploadHeroImageRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/upload-gallery-image': {
+      id: '/api/upload-gallery-image'
+      path: '/api/upload-gallery-image'
+      fullPath: '/api/upload-gallery-image'
+      preLoaderRoute: typeof ApiUploadGalleryImageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/remove-hero-image': {
       id: '/api/remove-hero-image'
       path: '/api/remove-hero-image'
       fullPath: '/api/remove-hero-image'
       preLoaderRoute: typeof ApiRemoveHeroImageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/delete-gallery-image': {
+      id: '/api/delete-gallery-image'
+      path: '/api/delete-gallery-image'
+      fullPath: '/api/delete-gallery-image'
+      preLoaderRoute: typeof ApiDeleteGalleryImageRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demo/start/server-funcs': {
@@ -479,9 +539,12 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
   BuilderRoute: BuilderRoute,
+  CanvasEditorRoute: CanvasEditorRoute,
   LoginRoute: LoginRoute,
   RsvpRoute: RsvpRoute,
+  ApiDeleteGalleryImageRoute: ApiDeleteGalleryImageRoute,
   ApiRemoveHeroImageRoute: ApiRemoveHeroImageRoute,
+  ApiUploadGalleryImageRoute: ApiUploadGalleryImageRoute,
   ApiUploadHeroImageRoute: ApiUploadHeroImageRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   DemoDrizzleRoute: DemoDrizzleRoute,

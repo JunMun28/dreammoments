@@ -44,7 +44,7 @@
         "Select '150%' preset - verify canvas zooms to 150%",
         "Click 'Fit' button - verify entire canvas fits in viewport"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CE-003",
