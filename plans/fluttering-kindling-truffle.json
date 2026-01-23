@@ -277,7 +277,7 @@
         "Change rotation to 45 - verify element rotates 45 degrees",
         "Drag element on canvas - verify position inputs update"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CE-014",

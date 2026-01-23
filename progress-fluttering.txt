@@ -310,3 +310,48 @@
 - check: pass (pre-existing lint issues)
 - e2e: 14 pass
 - UI: verified via playwright (bold toggle, sliders work)
+
+## 2026-01-23: CE-013 - Position/Transform Properties Editor
+
+**Status:** COMPLETE
+
+**Changes:**
+- Created TransformProperties component with:
+  - X position input (maps to left)
+  - Y position input (maps to top)
+  - Width input (calculates/applies scaleX from base width)
+  - Height input (calculates/applies scaleY from base height)
+  - Rotation input (maps to angle, degrees)
+  - Lock aspect ratio toggle (Switch component)
+- Integrated TransformProperties into all element type views:
+  - TextProperties + TransformProperties for text elements
+  - ImageProperties + TransformProperties for image elements
+  - ShapeProperties + TransformProperties for shape elements
+- Transform section appears below type-specific properties, separated by border-top
+- Added 17 new tests for CE-013 in CanvasPropertiesPanel.test.tsx
+
+**Files changed:**
+- src/components/editor/CanvasPropertiesPanel.tsx (TransformProperties component + integration)
+- src/components/editor/CanvasPropertiesPanel.test.tsx (17 new tests)
+
+**Key decisions:**
+- Used controlled inputs with value= for bidirectional sync
+- Width/height use scaleX/scaleY internally (Fabric.js pattern)
+- Lock aspect ratio is local state (resets on element change)
+- Transform section shows for all element types except canvas/multi-selection
+
+**Acceptance criteria verified:**
+- ✅ X position input (pixels from left)
+- ✅ Y position input (pixels from top)
+- ✅ Width input
+- ✅ Height input
+- ✅ Rotation input (degrees)
+- ✅ Lock aspect ratio toggle
+- ✅ Changes sync bidirectionally with canvas
+
+**Verification:**
+- typecheck: pass
+- tests: 736 pass (17 new)
+- check: pass (pre-existing lint issues from CE-010/CE-011)
+- e2e: 14 pass
+- UI: verified via playwright (Transform section shows for rect and text)
