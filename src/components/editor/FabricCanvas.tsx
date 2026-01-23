@@ -27,6 +27,7 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { CanvasSelectionInfo } from "./CanvasPropertiesPanel";
+import type { TextStyleDefinition } from "./TextStylesPanel";
 
 /**
  * Default canvas dimensions (matches mobile-first invitation layout)
@@ -105,6 +106,10 @@ interface FabricCanvasProps {
 	pendingPropertyUpdate?: PropertyUpdate | null;
 	/** CE-011: Callback when property update is applied */
 	onPropertyUpdateApplied?: () => void;
+	/** CE-008: Text style to add to canvas */
+	pendingAddTextStyle?: TextStyleDefinition | null;
+	/** CE-008: Callback when text style is added */
+	onTextStyleAdded?: () => void;
 }
 
 /**
@@ -120,6 +125,8 @@ export function FabricCanvas({
 	onCanvasChange,
 	pendingPropertyUpdate,
 	onPropertyUpdateApplied,
+	pendingAddTextStyle,
+	onTextStyleAdded,
 }: FabricCanvasProps = {}) {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const fabricRef = useRef<Canvas | null>(null);
@@ -313,6 +320,37 @@ export function FabricCanvas({
 		saveHistoryState();
 		onPropertyUpdateApplied?.();
 	}, [pendingPropertyUpdate, onPropertyUpdateApplied, saveHistoryState]);
+
+	// CE-008: Add styled text element from TextStylesPanel
+	useEffect(() => {
+		if (!pendingAddTextStyle || !fabricRef.current) return;
+
+		const canvas = fabricRef.current;
+		const style = pendingAddTextStyle;
+
+		// Create text element with styling from TextStyleDefinition
+		const text = new IText(style.text, {
+			left: 100,
+			top: 100,
+			fontSize: style.fontSize,
+			fontFamily: style.fontFamily,
+			fontWeight: style.fontWeight,
+			fontStyle: style.fontStyle,
+			fill: style.fill,
+			textAlign: style.textAlign || "left",
+			lineHeight: style.lineHeight || 1.2,
+			cornerColor: "#3b82f6",
+			cornerStrokeColor: "#1d4ed8",
+			cornerSize: 10,
+			transparentCorners: false,
+			borderColor: "#3b82f6",
+		});
+
+		canvas.add(text);
+		canvas.setActiveObject(text);
+		canvas.requestRenderAll();
+		onTextStyleAdded?.();
+	}, [pendingAddTextStyle, onTextStyleAdded]);
 
 	// CE-003: Set up history tracking for canvas changes
 	useEffect(() => {

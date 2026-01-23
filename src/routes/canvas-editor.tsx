@@ -7,6 +7,8 @@ import {
 	CanvasToolSidebar,
 	FabricCanvas,
 	type PropertyUpdate,
+	type TextStyleDefinition,
+	TextStylesPanel,
 } from "@/components/editor";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -42,6 +44,42 @@ function CanvasEditorPage() {
 		setSelection((current) => (current ? { ...current } : null));
 	}, []);
 
+	// CE-008: Text style state for adding styled text from TextStylesPanel
+	const [pendingAddTextStyle, setPendingAddTextStyle] =
+		useState<TextStyleDefinition | null>(null);
+
+	// CE-008: Handle text style selection from TextStylesPanel
+	const handleAddTextStyle = useCallback((style: TextStyleDefinition) => {
+		setPendingAddTextStyle(style);
+	}, []);
+
+	// CE-008: Clear pending text style after canvas adds it
+	const handleTextStyleAdded = useCallback(() => {
+		setPendingAddTextStyle(null);
+	}, []);
+
+	/**
+	 * CE-008: Render the content browser panel based on active tool
+	 */
+	const renderContentPanel = () => {
+		if (activeTool === "text") {
+			return <TextStylesPanel onAddTextStyle={handleAddTextStyle} />;
+		}
+
+		// Placeholder for other tools (CE-006, CE-007, CE-009)
+		return (
+			<div className="text-sm text-stone-500">
+				<h3 className="mb-2 font-medium text-stone-700">
+					{activeTool.charAt(0).toUpperCase() + activeTool.slice(1)}
+				</h3>
+				<p>Content panel for: {activeTool}</p>
+				<p className="mt-2 text-xs text-stone-400">
+					(CE-006 to CE-009: Content browser panels)
+				</p>
+			</div>
+		);
+	};
+
 	return (
 		<TooltipProvider>
 			<div className="flex h-screen w-screen">
@@ -53,17 +91,9 @@ function CanvasEditorPage() {
 					/>
 				</aside>
 
-				{/* Content Browser Panel - placeholder for future content panels */}
+				{/* Content Browser Panel (CE-006 to CE-009) */}
 				<aside className="hidden w-64 flex-shrink-0 overflow-y-auto border-r bg-white p-4 lg:block">
-					<div className="text-sm text-stone-500">
-						<h3 className="mb-2 font-medium text-stone-700">
-							{activeTool.charAt(0).toUpperCase() + activeTool.slice(1)}
-						</h3>
-						<p>Content panel for: {activeTool}</p>
-						<p className="mt-2 text-xs text-stone-400">
-							(CE-006 to CE-009: Content browser panels)
-						</p>
-					</div>
+					{renderContentPanel()}
 				</aside>
 
 				{/* Central Canvas */}
@@ -72,6 +102,8 @@ function CanvasEditorPage() {
 						onSelectionChange={setSelection}
 						pendingPropertyUpdate={pendingPropertyUpdate}
 						onPropertyUpdateApplied={handlePropertyUpdateApplied}
+						pendingAddTextStyle={pendingAddTextStyle}
+						onTextStyleAdded={handleTextStyleAdded}
 					/>
 				</main>
 

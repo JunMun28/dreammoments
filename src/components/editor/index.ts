@@ -11,4 +11,5 @@ export { FabricCanvas, type PropertyUpdate } from "./FabricCanvas";
 export { FilmstripPanel } from "./FilmstripPanel";
 export { PropertiesPanel } from "./PropertiesPanel";
 export { SectionThumbnails } from "./SectionThumbnails";
+export { TextStylesPanel, type TextStyleDefinition } from "./TextStylesPanel";
 export { ToolSidebar } from "./ToolSidebar";

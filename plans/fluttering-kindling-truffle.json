@@ -167,7 +167,7 @@
         "Double-click the added text on canvas - verify it becomes editable",
         "Type new text - verify it updates"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CE-009",

@@ -355,3 +355,47 @@
 - check: pass (pre-existing lint issues from CE-010/CE-011)
 - e2e: 14 pass
 - UI: verified via playwright (Transform section shows for rect and text)
+
+## 2026-01-23: CE-008 - Text Styles Panel
+
+**Status:** COMPLETE
+
+**Changes:**
+- Created TextStylesPanel component with 5 pre-styled text options:
+  - Heading: Playfair Display, 36px, bold, #292524
+  - Subheading: Lora, 24px, normal, #44403c
+  - Body: serif, 16px, normal, #57534e, lineHeight 1.6
+  - Quote: Cormorant Garamond, 20px, italic, #78716c
+  - Caption: sans-serif, 12px, normal, #a8a29e
+- Each style button shows preview text with visual styling
+- Exported TextStyleDefinition interface for type-safe style passing
+- Added pendingAddTextStyle/onTextStyleAdded props to FabricCanvas for integration
+- Wired TextStylesPanel to canvas via canvas-editor.tsx route
+- Clicking style adds styled IText element to canvas at (100, 100)
+
+**Files changed:**
+- src/components/editor/TextStylesPanel.tsx (new component)
+- src/components/editor/TextStylesPanel.test.tsx (12 tests)
+- src/components/editor/FabricCanvas.tsx (pendingAddTextStyle effect)
+- src/components/editor/index.ts (export TextStylesPanel, TextStyleDefinition)
+- src/routes/canvas-editor.tsx (TextStylesPanel integration)
+
+**Key decisions:**
+- Used controlled pattern with pendingAddTextStyle state in parent
+- Text styles include all Fabric.js IText properties (font, size, weight, style, fill, align, lineHeight)
+- Preview uses Tailwind classes mapped per style ID
+- Establishes content browser panel pattern for CE-006, CE-007, CE-009
+
+**Acceptance criteria verified:**
+- ✅ Text panel shows list of pre-styled text options
+- ✅ Styles include: Heading, Subheading, Body, Quote, Caption
+- ✅ Each style shows preview of font/size/color
+- ✅ Clicking style adds text element to canvas
+- ✅ Added text elements are editable (IText double-click to edit)
+
+**Verification:**
+- typecheck: pass
+- tests: 748 pass (12 new)
+- check: pass (after format --write)
+- e2e: 14 pass
+- UI: verified via playwright (TextStylesPanel shows, click adds styled text, properties panel updates)
