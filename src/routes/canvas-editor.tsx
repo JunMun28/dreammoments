@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import {
 	type CanvasEditorTool,
+	CanvasPropertiesPanel,
+	type CanvasSelectionInfo,
 	CanvasToolSidebar,
 	FabricCanvas,
 } from "@/components/editor";
@@ -14,10 +16,11 @@ export const Route = createFileRoute("/canvas-editor")({
 /**
  * Canvas Editor test page for testing CE-001 through CE-025 features.
  * This route provides direct access to the FabricCanvas component
- * alongside the CanvasToolSidebar (CE-005).
+ * alongside the CanvasToolSidebar (CE-005) and CanvasPropertiesPanel (CE-010).
  */
 function CanvasEditorPage() {
 	const [activeTool, setActiveTool] = useState<CanvasEditorTool>("sections");
+	const [selection, setSelection] = useState<CanvasSelectionInfo | null>(null);
 
 	return (
 		<TooltipProvider>
@@ -45,8 +48,13 @@ function CanvasEditorPage() {
 
 				{/* Central Canvas */}
 				<main className="flex-1 overflow-hidden">
-					<FabricCanvas />
+					<FabricCanvas onSelectionChange={setSelection} />
 				</main>
+
+				{/* Right Properties Panel (CE-010) */}
+				<aside className="hidden w-72 flex-shrink-0 overflow-y-auto border-l bg-white lg:block">
+					<CanvasPropertiesPanel selection={selection} />
+				</aside>
 			</div>
 		</TooltipProvider>
 	);

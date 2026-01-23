@@ -205,7 +205,7 @@
         "Select an image element - verify panel shows Replace button, crop, flip options",
         "Select a countdown widget - verify panel shows date/time configuration"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CE-011",

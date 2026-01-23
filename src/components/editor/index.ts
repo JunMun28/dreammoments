@@ -1,5 +1,9 @@
 // Editor components for multi-panel layout
 export { CanvasPanel } from "./CanvasPanel";
+export {
+	CanvasPropertiesPanel,
+	type CanvasSelectionInfo,
+} from "./CanvasPropertiesPanel";
 export { type CanvasEditorTool, CanvasToolSidebar } from "./CanvasToolSidebar";
 export { EditorHeader } from "./EditorHeader";
 export { EditorLayout } from "./EditorLayout";

@@ -23,6 +23,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import type { CanvasSelectionInfo } from "./CanvasPropertiesPanel";
 
 /**
  * Default canvas dimensions (matches mobile-first invitation layout)
@@ -43,6 +44,11 @@ const ZOOM_PRESETS = [0.5, 0.8, 1.0, 1.5, 2.0]; // 50%, 80%, 100%, 150%, 200%
  */
 const HISTORY_MAX_SIZE = 50;
 
+interface FabricCanvasProps {
+	/** Callback when canvas selection changes (CE-010) */
+	onSelectionChange?: (selection: CanvasSelectionInfo | null) => void;
+}
+
 /**
  * FabricCanvas component for canvas-based invitation editing.
  * Implements CE-001 requirements:
@@ -50,7 +56,7 @@ const HISTORY_MAX_SIZE = 50;
  * - Drag, resize, and rotate capabilities
  * - Selection with transform handles
  */
-export function FabricCanvas() {
+export function FabricCanvas({ onSelectionChange }: FabricCanvasProps = {}) {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const fabricRef = useRef<Canvas | null>(null);
 	const [selectedObject, setSelectedObject] = useState<FabricObject | null>(
@@ -143,6 +149,26 @@ export function FabricCanvas() {
 			fabricRef.current = null;
 		};
 	}, []);
+
+	// CE-010: Notify parent of selection changes
+	useEffect(() => {
+		if (onSelectionChange) {
+			if (selectedObject) {
+				const info: CanvasSelectionInfo = {
+					type: selectedObject.type || "object",
+					object: selectedObject,
+				};
+				// Add count for multi-selection
+				if (selectedObject.type === "activeselection") {
+					const selection = selectedObject as ActiveSelection;
+					info.count = selection.getObjects().length;
+				}
+				onSelectionChange(info);
+			} else {
+				onSelectionChange(null);
+			}
+		}
+	}, [selectedObject, onSelectionChange]);
 
 	// CE-003: Set up history tracking for canvas changes
 	useEffect(() => {
