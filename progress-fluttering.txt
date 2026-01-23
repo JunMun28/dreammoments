@@ -28,3 +28,37 @@
 - tests: 651 pass
 - check: pass
 - db:push: success
+
+## 2026-01-23: CE-001 - Canvas Foundation with Fabric.js
+
+**Status:** COMPLETE
+
+**Changes:**
+- Added fabric@6.9.1 dependency for canvas editor
+- Created FabricCanvas component with:
+  - Fabric.js canvas initialization and cleanup
+  - Add Rectangle functionality with transform handles
+  - Add Text functionality with IText for inline editing
+  - Delete selected element functionality
+  - Selection state tracking with event handlers
+  - Selection info display (shows selected element type)
+  - Proper dispose on unmount to prevent memory leaks
+- Exported FabricCanvas from editor index
+
+**Files changed:**
+- package.json (added fabric dependency)
+- src/components/editor/FabricCanvas.tsx (new component)
+- src/components/editor/FabricCanvas.test.tsx (14 tests)
+- src/components/editor/index.ts (added export)
+
+**Key decisions:**
+- Used Fabric.js v6 for modern canvas manipulation
+- Canvas dimensions 400x700 (mobile-first invitation layout)
+- Selection events: created, updated, cleared for state sync
+- Blue corner/border colors for selection handles (#3b82f6)
+- Wedding theme colors for default rect (#c4a373)
+
+**Verification:**
+- typecheck: pass
+- tests: 665 pass (14 new + 651 existing)
+- check: pass

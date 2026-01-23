@@ -23,7 +23,7 @@
         "Drag a corner handle - verify rectangle resizes proportionally",
         "Drag rotation handle - verify element rotates"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CE-002",

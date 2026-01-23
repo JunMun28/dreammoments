@@ -1,0 +1,9 @@
+// Editor components for multi-panel layout
+export { CanvasPanel } from "./CanvasPanel";
+export { EditorHeader } from "./EditorHeader";
+export { EditorLayout } from "./EditorLayout";
+export { FabricCanvas } from "./FabricCanvas";
+export { FilmstripPanel } from "./FilmstripPanel";
+export { PropertiesPanel } from "./PropertiesPanel";
+export { SectionThumbnails } from "./SectionThumbnails";
+export { ToolSidebar } from "./ToolSidebar";
