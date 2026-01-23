@@ -6,6 +6,9 @@ import {
 	Rect,
 } from "fabric";
 import {
+	AlertCircle,
+	Check,
+	Loader2,
 	Maximize,
 	Minus,
 	Plus,
@@ -15,7 +18,7 @@ import {
 	Type,
 	Undo2,
 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
@@ -44,9 +47,52 @@ const ZOOM_PRESETS = [0.5, 0.8, 1.0, 1.5, 2.0]; // 50%, 80%, 100%, 150%, 200%
  */
 const HISTORY_MAX_SIZE = 50;
 
+/**
+ * CE-016: Save status for auto-save indicator
+ */
+export type SaveStatus = "idle" | "saving" | "saved" | "error";
+
+/**
+ * CE-016: Debounce delay for auto-save (1 second)
+ */
+const AUTO_SAVE_DEBOUNCE_MS = 1000;
+
+/**
+ * Simple debounce utility function
+ */
+function debounce<T extends (...args: Parameters<T>) => void>(
+	fn: T,
+	delay: number,
+): { (...args: Parameters<T>): void; cancel: () => void } {
+	let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
+	const debouncedFn = (...args: Parameters<T>) => {
+		if (timeoutId) {
+			clearTimeout(timeoutId);
+		}
+		timeoutId = setTimeout(() => {
+			fn(...args);
+			timeoutId = null;
+		}, delay);
+	};
+
+	debouncedFn.cancel = () => {
+		if (timeoutId) {
+			clearTimeout(timeoutId);
+			timeoutId = null;
+		}
+	};
+
+	return debouncedFn;
+}
+
 interface FabricCanvasProps {
 	/** Callback when canvas selection changes (CE-010) */
 	onSelectionChange?: (selection: CanvasSelectionInfo | null) => void;
+	/** CE-016: Initial canvas data to restore on mount */
+	initialCanvasData?: string | null;
+	/** CE-016: Callback when canvas changes (for auto-save) */
+	onCanvasChange?: (canvasJson: string) => Promise<void>;
 }
 
 /**
@@ -56,7 +102,11 @@ interface FabricCanvasProps {
  * - Drag, resize, and rotate capabilities
  * - Selection with transform handles
  */
-export function FabricCanvas({ onSelectionChange }: FabricCanvasProps = {}) {
+export function FabricCanvas({
+	onSelectionChange,
+	initialCanvasData,
+	onCanvasChange,
+}: FabricCanvasProps = {}) {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const fabricRef = useRef<Canvas | null>(null);
 	const [selectedObject, setSelectedObject] = useState<FabricObject | null>(
@@ -74,8 +124,39 @@ export function FabricCanvas({ onSelectionChange }: FabricCanvasProps = {}) {
 	// CE-004: Clipboard for copy/paste operations
 	const clipboardRef = useRef<FabricObject | null>(null);
 
+	// CE-016: Save status for auto-save indicator
+	const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
+
+	// CE-016: Debounced auto-save function
+	const debouncedSave = useMemo(() => {
+		if (!onCanvasChange) return null;
+
+		return debounce(async (canvasJson: string) => {
+			setSaveStatus("saving");
+			try {
+				await onCanvasChange(canvasJson);
+				setSaveStatus("saved");
+				// Reset to idle after 2 seconds
+				setTimeout(() => setSaveStatus("idle"), 2000);
+			} catch (error) {
+				console.error("Failed to save canvas:", error);
+				setSaveStatus("error");
+				// Keep error visible for 5 seconds
+				setTimeout(() => setSaveStatus("idle"), 5000);
+			}
+		}, AUTO_SAVE_DEBOUNCE_MS);
+	}, [onCanvasChange]);
+
+	// CE-016: Cleanup debounce on unmount
+	useEffect(() => {
+		return () => {
+			debouncedSave?.cancel();
+		};
+	}, [debouncedSave]);
+
 	/**
 	 * CE-003: Save current canvas state to history
+	 * CE-016: Also triggers debounced auto-save
 	 */
 	const saveHistoryState = useCallback(() => {
 		if (!fabricRef.current || isRestoringRef.current) return;
@@ -102,7 +183,10 @@ export function FabricCanvas({ onSelectionChange }: FabricCanvasProps = {}) {
 		// Update button states
 		setCanUndo(historyIndexRef.current > 0);
 		setCanRedo(false);
-	}, []);
+
+		// CE-016: Trigger debounced auto-save
+		debouncedSave?.(json);
+	}, [debouncedSave]);
 
 	// Initialize Fabric.js canvas on mount
 	useEffect(() => {
@@ -149,6 +233,23 @@ export function FabricCanvas({ onSelectionChange }: FabricCanvasProps = {}) {
 			fabricRef.current = null;
 		};
 	}, []);
+
+	// CE-016: Restore initial canvas data on mount
+	useEffect(() => {
+		if (!fabricRef.current || !initialCanvasData) return;
+
+		isRestoringRef.current = true;
+		const canvas = fabricRef.current;
+
+		canvas.loadFromJSON(JSON.parse(initialCanvasData)).then(() => {
+			canvas.requestRenderAll();
+			isRestoringRef.current = false;
+			// Clear history and save restored state as initial
+			historyRef.current = [];
+			historyIndexRef.current = -1;
+			saveHistoryState();
+		});
+	}, [initialCanvasData, saveHistoryState]);
 
 	// CE-010: Notify parent of selection changes
 	useEffect(() => {
@@ -771,6 +872,33 @@ export function FabricCanvas({ onSelectionChange }: FabricCanvasProps = {}) {
 						<Maximize className="h-4 w-4" />
 					</Button>
 				</div>
+
+				{/* CE-016: Save status indicator */}
+				{onCanvasChange && saveStatus !== "idle" && (
+					<div
+						data-testid="save-status"
+						className="flex items-center gap-1 text-sm"
+					>
+						{saveStatus === "saving" && (
+							<>
+								<Loader2 className="h-4 w-4 animate-spin text-stone-500" />
+								<span className="text-stone-500">Saving...</span>
+							</>
+						)}
+						{saveStatus === "saved" && (
+							<>
+								<Check className="h-4 w-4 text-green-600" />
+								<span className="text-green-600">Saved</span>
+							</>
+						)}
+						{saveStatus === "error" && (
+							<>
+								<AlertCircle className="h-4 w-4 text-red-600" />
+								<span className="text-red-600">Error</span>
+							</>
+						)}
+					</div>
+				)}
 
 				{/* Selection info */}
 				<div

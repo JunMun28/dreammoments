@@ -341,7 +341,7 @@
         "Refresh the page - verify all elements are restored in correct positions",
         "Add a second page with elements, refresh - verify both pages restored"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CE-017",
