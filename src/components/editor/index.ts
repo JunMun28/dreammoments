@@ -1,15 +1,20 @@
 // Editor components for multi-panel layout
 export { CanvasPanel } from "./CanvasPanel";
 export {
-	CanvasPropertiesPanel,
-	type CanvasSelectionInfo,
+  CanvasPropertiesPanel,
+  type CanvasSelectionInfo,
 } from "./CanvasPropertiesPanel";
 export { type CanvasEditorTool, CanvasToolSidebar } from "./CanvasToolSidebar";
 export { ComponentsPanel, type WidgetDefinition } from "./ComponentsPanel";
 export { EditorHeader } from "./EditorHeader";
 export { EditorLayout } from "./EditorLayout";
-export { FabricCanvas, type PropertyUpdate } from "./FabricCanvas";
+export {
+  FabricCanvas,
+  type LayerOperation,
+  type PropertyUpdate,
+} from "./FabricCanvas";
 export { FilmstripPanel } from "./FilmstripPanel";
+export { LayersPanel, type LayerInfo } from "./LayersPanel";
 export { PropertiesPanel } from "./PropertiesPanel";
 export { SectionThumbnails } from "./SectionThumbnails";
 export { type TextStyleDefinition, TextStylesPanel } from "./TextStylesPanel";

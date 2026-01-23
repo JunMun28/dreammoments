@@ -7,6 +7,9 @@ import {
 	CanvasToolSidebar,
 	ComponentsPanel,
 	FabricCanvas,
+	type LayerInfo,
+	type LayerOperation,
+	LayersPanel,
 	type PropertyUpdate,
 	type TextStyleDefinition,
 	TextStylesPanel,
@@ -72,6 +75,64 @@ function CanvasEditorPage() {
 		console.log("Widget selected:", widget.name);
 	}, []);
 
+	// CE-014: Layers panel state
+	const [layers, setLayers] = useState<LayerInfo[]>([]);
+	const [pendingLayerOperation, setPendingLayerOperation] =
+		useState<LayerOperation | null>(null);
+
+	// CE-014: Get selected layer ID from selection
+	const selectedLayerId =
+		selection && layers.length > 0
+			? layers.find((l) => l.name === "Rectangle" || l.name.includes("Text"))
+					?.id || null
+			: null;
+
+	// CE-014: Handle layers change from FabricCanvas
+	const handleLayersChange = useCallback((newLayers: LayerInfo[]) => {
+		setLayers(newLayers);
+	}, []);
+
+	// CE-014: Handle layer operation applied
+	const handleLayerOperationApplied = useCallback(() => {
+		setPendingLayerOperation(null);
+	}, []);
+
+	// CE-014: Layer panel callbacks
+	const handleLayerSelect = useCallback((layerId: string) => {
+		setPendingLayerOperation({ type: "select", layerId });
+	}, []);
+
+	const handleToggleVisibility = useCallback((layerId: string) => {
+		setPendingLayerOperation({ type: "toggleVisibility", layerId });
+	}, []);
+
+	const handleToggleLock = useCallback((layerId: string) => {
+		setPendingLayerOperation({ type: "toggleLock", layerId });
+	}, []);
+
+	const handleReorderLayers = useCallback(
+		(layerId: string, newIndex: number) => {
+			setPendingLayerOperation({ type: "reorder", layerId, newIndex });
+		},
+		[],
+	);
+
+	const handleBringToFront = useCallback((layerId: string) => {
+		setPendingLayerOperation({ type: "bringToFront", layerId });
+	}, []);
+
+	const handleSendToBack = useCallback((layerId: string) => {
+		setPendingLayerOperation({ type: "sendToBack", layerId });
+	}, []);
+
+	const handleBringForward = useCallback((layerId: string) => {
+		setPendingLayerOperation({ type: "bringForward", layerId });
+	}, []);
+
+	const handleSendBackward = useCallback((layerId: string) => {
+		setPendingLayerOperation({ type: "sendBackward", layerId });
+	}, []);
+
 	/**
 	 * CE-008: Render the content browser panel based on active tool
 	 */
@@ -122,15 +183,36 @@ function CanvasEditorPage() {
 						onPropertyUpdateApplied={handlePropertyUpdateApplied}
 						pendingAddTextStyle={pendingAddTextStyle}
 						onTextStyleAdded={handleTextStyleAdded}
+						onLayersChange={handleLayersChange}
+						pendingLayerOperation={pendingLayerOperation}
+						onLayerOperationApplied={handleLayerOperationApplied}
 					/>
 				</main>
 
-				{/* Right Properties Panel (CE-010, CE-011) */}
-				<aside className="hidden w-72 flex-shrink-0 overflow-y-auto border-l bg-white lg:block">
-					<CanvasPropertiesPanel
-						selection={selection}
-						onPropertyChange={handlePropertyChange}
-					/>
+				{/* Right Panel: Properties + Layers (CE-010, CE-011, CE-014) */}
+				<aside className="hidden w-72 flex-shrink-0 flex-col border-l bg-white lg:flex">
+					{/* Properties Panel */}
+					<div className="flex-1 overflow-y-auto">
+						<CanvasPropertiesPanel
+							selection={selection}
+							onPropertyChange={handlePropertyChange}
+						/>
+					</div>
+					{/* Layers Panel (CE-014) */}
+					<div className="h-64 flex-shrink-0">
+						<LayersPanel
+							layers={layers}
+							selectedLayerId={selectedLayerId}
+							onLayerSelect={handleLayerSelect}
+							onToggleVisibility={handleToggleVisibility}
+							onToggleLock={handleToggleLock}
+							onReorderLayers={handleReorderLayers}
+							onBringToFront={handleBringToFront}
+							onSendToBack={handleSendToBack}
+							onBringForward={handleBringForward}
+							onSendBackward={handleSendBackward}
+						/>
+					</div>
 				</aside>
 			</div>
 		</TooltipProvider>

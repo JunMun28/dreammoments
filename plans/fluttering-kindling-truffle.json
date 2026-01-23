@@ -300,7 +300,7 @@
         "Click lock icon - verify element cannot be moved/resized",
         "Drag layer row to new position - verify z-index changes on canvas"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CE-015",

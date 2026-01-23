@@ -484,3 +484,55 @@
 - check: pre-existing lint issues in CanvasPropertiesPanel.tsx
 - e2e: 14 pass
 - UI: verified via playwright (ComponentsPanel shows, widget click logs selection)
+
+## 2026-01-23: CE-014 - Layers Panel with z-index Management
+
+**Status:** COMPLETE
+
+**Changes:**
+- Created LayersPanel component with full CE-014 features:
+  - Lists all canvas elements by z-index (highest/front first)
+  - Each layer row shows type icon (Text/Image/Rectangle) and name
+  - Click layer row selects element on canvas
+  - Eye icon toggles element visibility
+  - Lock icon toggles element editing lock
+  - Drag-to-reorder rows for z-index management
+  - Context menu: Bring to Front, Send to Back, Bring Forward, Send Backward
+- Added LayerInfo interface for layer data structure
+- Added LayerOperation interface for canvas-panel communication
+- Updated FabricCanvas with layer management:
+  - generateLayers() function creates LayerInfo from canvas objects
+  - onLayersChange callback reports layer updates
+  - pendingLayerOperation/onLayerOperationApplied for operations
+  - Effects for select, toggleVisibility, toggleLock, reorder, z-index operations
+- Integrated LayersPanel into canvas-editor.tsx route right sidebar
+
+**Files changed:**
+- src/components/editor/LayersPanel.tsx (new component)
+- src/components/editor/LayersPanel.test.tsx (21 tests)
+- src/components/editor/FabricCanvas.tsx (layer management)
+- src/components/editor/index.ts (added exports)
+- src/components/ui/context-menu.tsx (new shadcn component)
+- src/routes/canvas-editor.tsx (LayersPanel integration)
+
+**Key decisions:**
+- Used controlled pattern with pendingLayerOperation state (same as other panels)
+- Layer IDs derived from canvas object z-index (layer-0, layer-1, etc.)
+- Context menu uses Radix ContextMenu from shadcn
+- Used div with role="button" instead of nested buttons (HTML validity)
+- Layer operations (reorder, z-index) save to history for undo/redo
+
+**Acceptance criteria verified:**
+- ✅ Layers panel lists all elements by z-index (top to bottom)
+- ✅ Each layer row shows element type icon and name/preview
+- ✅ Clicking layer row selects element on canvas
+- ✅ Eye icon toggles element visibility
+- ✅ Lock icon toggles element editing lock
+- ✅ Drag rows to reorder z-index
+- ✅ Context menu: Bring to Front, Send to Back, Bring Forward, Send Backward
+
+**Verification:**
+- typecheck: pass
+- tests: 799 pass (21 new LayersPanel tests)
+- check: 1 warning (role="button" pattern - intentional for HTML validity)
+- e2e: not run (no new routes)
