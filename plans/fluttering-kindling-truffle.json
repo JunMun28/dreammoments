@@ -380,7 +380,7 @@
         "Click Download - verify PNG file downloads",
         "Open downloaded file - verify it matches canvas"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CE-019",

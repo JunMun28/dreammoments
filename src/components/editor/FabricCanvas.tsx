@@ -8,6 +8,7 @@ import {
 import {
   AlertCircle,
   Check,
+  Download,
   Loader2,
   Maximize,
   Minus,
@@ -27,6 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { CanvasSelectionInfo } from "./CanvasPropertiesPanel";
+import { ExportDialog } from "./ExportDialog";
 import type { LayerInfo } from "./LayersPanel";
 import type { TextStyleDefinition } from "./TextStylesPanel";
 
@@ -178,6 +180,9 @@ export function FabricCanvas({
 
   // CE-014: Counter to trigger layer updates
   const [layerUpdateCounter, setLayerUpdateCounter] = useState(0);
+
+  // CE-018: Export dialog state
+  const [showExportDialog, setShowExportDialog] = useState(false);
 
   /**
    * CE-014: Generate layer info from canvas objects
@@ -1178,11 +1183,19 @@ export function FabricCanvas({
           </div>
         )}
 
-        {/* Selection info */}
-        <div
-          data-testid="selection-info"
-          className="ml-auto text-sm text-stone-500"
+        {/* CE-018: Export button */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowExportDialog(true)}
+          className="ml-auto gap-2"
         >
+          <Download className="h-4 w-4" />
+          Export
+        </Button>
+
+        {/* Selection info */}
+        <div data-testid="selection-info" className="text-sm text-stone-500">
           {getSelectionInfoText()}
         </div>
       </div>
@@ -1198,6 +1211,13 @@ export function FabricCanvas({
           />
         </div>
       </div>
+
+      {/* CE-018: Export dialog */}
+      <ExportDialog
+        open={showExportDialog}
+        onOpenChange={setShowExportDialog}
+        canvasRef={fabricRef}
+      />
     </div>
   );
 }

@@ -684,3 +684,47 @@
 - tests: 849 pass (15 new AssetsPanel tests)
 - check: pass for new files (pre-existing lint issues in other files)
 - e2e: not run (no new routes)
+
+## 2026-01-23: CE-018 - Canvas Export to PNG/JPEG
+
+**Status:** COMPLETE
+
+**Changes:**
+- Created ExportDialog component with full CE-018 features:
+  - Format selection: PNG and JPEG radio buttons
+  - Quality slider for JPEG (1-100%, default 80%)
+  - Live preview of export result using canvas.toDataURL()
+  - Download button saves file with timestamp filename
+  - Cancel button closes dialog
+- Integrated ExportDialog into FabricCanvas toolbar:
+  - Added Export button with Download icon
+  - showExportDialog state for dialog control
+  - Passes canvasRef for export rendering
+- Export filename format: canvas-export-YYYYMMDDTHHMMSS.{png|jpeg}
+
+**Files changed:**
+- src/components/editor/ExportDialog.tsx (new component)
+- src/components/editor/ExportDialog.test.tsx (15 tests)
+- src/components/editor/FabricCanvas.tsx (added Export button and dialog)
+- src/components/editor/index.ts (added export)
+
+**Key decisions:**
+- Used Fabric.js toDataURL() with format and quality options
+- Quality slider only visible when JPEG selected
+- Preview updates on format/quality change via useEffect
+- Used useId() for unique slider IDs (Biome lint compliance)
+- MockResizeObserver needed for Radix Slider in tests
+
+**Acceptance criteria verified:**
+- ✅ Export button in toolbar opens export dialog
+- ✅ Format options: PNG, JPEG (radio buttons)
+- ✅ Quality slider for JPEG (1-100%)
+- ✅ Preview shows export result
+- ✅ Download button saves file to user's device
+- ✅ Dialog closes after successful download
+
+**Verification:**
+- typecheck: pass
+- tests: 864 pass (15 new ExportDialog tests)
+- check: pass
+- e2e: not run (existing functionality)

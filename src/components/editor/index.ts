@@ -12,6 +12,7 @@ export {
 export { type CanvasEditorTool, CanvasToolSidebar } from "./CanvasToolSidebar";
 export { ComponentsPanel, type WidgetDefinition } from "./ComponentsPanel";
 export { EditorHeader } from "./EditorHeader";
+export { ExportDialog } from "./ExportDialog";
 export { EditorLayout } from "./EditorLayout";
 export {
   FabricCanvas,
