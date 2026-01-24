@@ -902,3 +902,49 @@ Previous progress notes were outdated. Re-running UI tests via browser automatio
 - check: pass
 - e2e: 14 pass (1 skipped)
 - UI: verified via playwright (Settings panel shows, warning dialog works)
+
+## 2026-01-24: CE-024 - Alignment Guides (Smart Guides) When Moving Elements
+
+**Status:** COMPLETE
+
+**Changes:**
+- Enhanced checkAlignmentGuides() function in FabricCanvas.tsx:
+  - Added canvas edge alignment checks (left=0, right=CANVAS_WIDTH, top=0, bottom=CANVAS_HEIGHT)
+  - Added canvas center alignment checks (CANVAS_WIDTH/2, CANVAS_HEIGHT/2)
+  - Added element-to-element alignment checks (edges and centers)
+  - Implemented snap position tracking with snapLeft/snapTop variables
+  - Added snap application via movingObject.set() and movingObject.setCoords()
+  - Elements now snap to alignment positions within ALIGNMENT_THRESHOLD (5px)
+  - Pink guide lines (GUIDE_COLOR="#ff0080") appear during drag
+- Added 12 new tests for CE-024 in FabricCanvas.test.tsx:
+  - Event handler setup tests (object:moving, object:modified, mouse:up)
+  - Guide creation tests (fabric.Line with correct color, non-selectable, evented false)
+  - Snapping behavior tests (canvas edges, canvas center, element edges)
+- Updated mock setup:
+  - Added mockFabricLine factory for Line class
+  - Added bringObjectToFront to mockFabricCanvas
+  - Added getObjects to ActiveSelection mock
+
+**Files changed:**
+- src/components/editor/FabricCanvas.tsx (enhanced checkAlignmentGuides with snapping)
+- src/components/editor/FabricCanvas.test.tsx (12 new CE-024 tests)
+
+**Key decisions:**
+- Guide lines are fabric.Line objects added to canvas during drag, removed on mouse:up
+- Snap positions tracked separately from guide display (can show guide without snapping)
+- All snap checks use ALIGNMENT_THRESHOLD=5 for consistent behavior
+- Guide lines set as selectable:false, evented:false to prevent interaction
+
+**Acceptance criteria verified:**
+- ✅ When dragging element, alignment guides appear at edges/centers
+- ✅ Guides show when element aligns with other elements
+- ✅ Guides show when element aligns with canvas edges/center
+- ✅ Element snaps to guide when within 5px
+- ✅ Guides are pink lines (#ff0080) for visibility
+
+**Verification:**
+- typecheck: pass
+- tests: 891 pass (12 new CE-024 tests)
+- check: pass (pre-existing issues in CanvasPropertiesPanel.tsx)
+- build: pass
+- UI: verified via playwright (rectangles snap to edges during drag)

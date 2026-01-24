@@ -497,7 +497,7 @@
         "Continue dragging until edges align - verify element snaps to alignment",
         "Drag element toward canvas center - verify center guide appears"
       ],
-      "passes": false
+      "passes": true
     },
     {
       "id": "CE-025",
