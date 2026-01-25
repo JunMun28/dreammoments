@@ -787,4 +787,39 @@ describe("FabricCanvas", () => {
       );
     });
   });
+
+  describe("Canvas Height Adjustment (CE-027)", () => {
+    it("uses default canvas height of 700px", () => {
+      render(<FabricCanvas />);
+
+      const canvasElement = screen.getByTestId("fabric-canvas");
+      expect(canvasElement.getAttribute("height")).toBe("700");
+    });
+
+    it("uses custom canvas height when provided", () => {
+      render(<FabricCanvas canvasHeight={1500} />);
+
+      const canvasElement = screen.getByTestId("fabric-canvas");
+      expect(canvasElement.getAttribute("height")).toBe("1500");
+    });
+
+    it("updates canvas height when prop changes", () => {
+      const { rerender } = render(<FabricCanvas canvasHeight={700} />);
+
+      // Change height
+      rerender(<FabricCanvas canvasHeight={2000} />);
+
+      // Verify setHeight was called with new height
+      expect(mockFabricCanvas.setHeight).toHaveBeenCalledWith(2000);
+    });
+
+    it("requests render after height change", () => {
+      const { rerender } = render(<FabricCanvas canvasHeight={700} />);
+      mockFabricCanvas.requestRenderAll.mockClear();
+
+      rerender(<FabricCanvas canvasHeight={1400} />);
+
+      expect(mockFabricCanvas.requestRenderAll).toHaveBeenCalled();
+    });
+  });
 });

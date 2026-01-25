@@ -122,6 +122,8 @@ interface FabricCanvasProps {
   onLayerOperationApplied?: () => void;
   pendingAddWidget?: WidgetDefinition | null;
   onWidgetAdded?: () => void;
+  /** CE-027: Canvas height in pixels (default 700) */
+  canvasHeight?: number;
 }
 
 /**
@@ -141,6 +143,7 @@ export function FabricCanvas({
   onLayerOperationApplied,
   pendingAddWidget,
   onWidgetAdded,
+  canvasHeight = CANVAS_HEIGHT,
 }: FabricCanvasProps = {}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fabricRef = useRef<Canvas | null>(null);
@@ -227,7 +230,7 @@ export function FabricCanvas({
     fabricRef,
     {
       canvasWidth: CANVAS_WIDTH,
-      canvasHeight: CANVAS_HEIGHT,
+      canvasHeight,
     },
   );
 
@@ -393,7 +396,7 @@ export function FabricCanvas({
 
     const fabricCanvas = new Canvas(canvasRef.current, {
       width: CANVAS_WIDTH,
-      height: CANVAS_HEIGHT,
+      height: canvasHeight,
       backgroundColor: "#ffffff",
       selection: true,
       preserveObjectStacking: true,
@@ -422,7 +425,17 @@ export function FabricCanvas({
       fabricCanvas.dispose();
       fabricRef.current = null;
     };
+    // Note: canvasHeight is intentionally not in deps - we handle height changes separately
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // CE-027: Update canvas height when prop changes
+  useEffect(() => {
+    if (!fabricRef.current) return;
+
+    fabricRef.current.setHeight(canvasHeight);
+    fabricRef.current.requestRenderAll();
+  }, [canvasHeight]);
 
   // CE-024: Register alignment guide event handlers
   useEffect(() => {
@@ -826,7 +839,7 @@ export function FabricCanvas({
               ref={canvasRef}
               data-testid="fabric-canvas"
               width={CANVAS_WIDTH}
-              height={CANVAS_HEIGHT}
+              height={canvasHeight}
             />
           </div>
         </CanvasContextMenu>
