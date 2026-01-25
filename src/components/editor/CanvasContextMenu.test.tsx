@@ -550,7 +550,8 @@ describe("CanvasContextMenu", () => {
 
       await waitFor(() => {
         const copyItem = screen.getByText("Copy").closest("[role='menuitem']");
-        expect(copyItem?.getAttribute("data-disabled")).toBe("true");
+        // Radix UI uses data-disabled="" (empty string) for disabled items
+        expect(copyItem?.hasAttribute("data-disabled")).toBe(true);
       });
     });
 
@@ -569,7 +570,8 @@ describe("CanvasContextMenu", () => {
         const pasteItem = screen
           .getByText("Paste")
           .closest("[role='menuitem']");
-        expect(pasteItem?.getAttribute("data-disabled")).toBe("true");
+        // Radix UI uses data-disabled="" (empty string) for disabled items
+        expect(pasteItem?.hasAttribute("data-disabled")).toBe(true);
       });
     });
 
@@ -588,7 +590,7 @@ describe("CanvasContextMenu", () => {
         const pasteItem = screen
           .getByText("Paste")
           .closest("[role='menuitem']");
-        expect(pasteItem?.getAttribute("data-disabled")).not.toBe("true");
+        expect(pasteItem?.hasAttribute("data-disabled")).toBe(false);
       });
     });
 
@@ -607,7 +609,8 @@ describe("CanvasContextMenu", () => {
         const bringToFrontItem = screen
           .getByText("Bring to Front")
           .closest("[role='menuitem']");
-        expect(bringToFrontItem?.getAttribute("data-disabled")).toBe("true");
+        // Radix UI uses data-disabled="" (empty string) for disabled items
+        expect(bringToFrontItem?.hasAttribute("data-disabled")).toBe(true);
       });
     });
 
@@ -624,7 +627,8 @@ describe("CanvasContextMenu", () => {
 
       await waitFor(() => {
         const lockItem = screen.getByText("Lock").closest("[role='menuitem']");
-        expect(lockItem?.getAttribute("data-disabled")).toBe("true");
+        // Radix UI uses data-disabled="" (empty string) for disabled items
+        expect(lockItem?.hasAttribute("data-disabled")).toBe(true);
       });
     });
   });
