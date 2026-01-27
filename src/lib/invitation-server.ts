@@ -1,30 +1,38 @@
 import { createServerFn } from "@tanstack/react-start";
 import { eq } from "drizzle-orm";
 import { getDb } from "@/db/index";
-import { invitations, notes, scheduleBlocks } from "@/db/schema";
+import { galleryImages, invitations, notes, scheduleBlocks } from "@/db/schema";
+import {
+	getAuthenticatedUserId,
+	verifyInvitationOwnership,
+} from "./auth-helpers";
+import {
+	createInvitationSchema,
+	getInvitationSchema,
+	getInvitationWithRelationsSchema,
+	getOrCreateInvitationSchema,
+	updateEditorModeSchema,
+	updateInvitationSchema,
+} from "./schemas";
 import { getTemplateById } from "./template-data";
 
 /**
  * Input type for invitation update data
  */
-export interface UpdateInvitationInput {
-	invitationId: string;
-	partner1Name?: string;
-	partner2Name?: string;
-	weddingDate?: string | null; // ISO date string "YYYY-MM-DD"
-	weddingTime?: string | null; // "HH:mm" format
-	venueName?: string | null;
-	venueAddress?: string | null;
-}
+export type { UpdateInvitationInput } from "./schemas";
 
 /**
  * Server function to update invitation basic info.
  * Used by autosave to persist form changes.
+ * Requires authentication and ownership verification.
  */
 export const updateInvitation = createServerFn({ method: "POST" })
-	.inputValidator((input: UpdateInvitationInput) => input)
+	.inputValidator((input: unknown) => updateInvitationSchema.parse(input))
 	.handler(async ({ data }) => {
 		const { invitationId, ...updateData } = data;
+
+		// Verify user owns this invitation
+		await verifyInvitationOwnership(invitationId);
 
 		const db = await getDb();
 		const result = await db
@@ -45,10 +53,14 @@ export const updateInvitation = createServerFn({ method: "POST" })
 
 /**
  * Server function to get an invitation by ID.
+ * Requires authentication and ownership verification.
  */
 export const getInvitation = createServerFn({ method: "GET" })
-	.inputValidator((input: { id: string }) => input)
+	.inputValidator((input: unknown) => getInvitationSchema.parse(input))
 	.handler(async ({ data }) => {
+		// Verify user owns this invitation
+		await verifyInvitationOwnership(data.id);
+
 		const db = await getDb();
 		const result = await db
 			.select()
@@ -66,22 +78,24 @@ export const getInvitation = createServerFn({ method: "GET" })
 /**
  * Input type for creating a new invitation
  */
-export interface CreateInvitationInput {
-	userId: string;
-	templateId?: string;
-}
+export type { CreateInvitationInput } from "./schemas";
 
 /**
  * Internal function to create a new invitation.
  * Extracted for testability.
+ * @param userId - The authenticated user's ID (verified server-side)
+ * @param templateId - Optional template ID to initialize the invitation
  */
-export async function createInvitationInternal(input: CreateInvitationInput) {
+export async function createInvitationInternal(input: {
+	userId: string;
+	templateId?: string;
+}) {
 	const { userId, templateId } = input;
 
 	// Get template data if templateId provided
 	const template = templateId ? getTemplateById(templateId) : undefined;
 
-	// Create the invitation
+	// Create the invitation with all template settings
 	const db = await getDb();
 	const [invitation] = await db
 		.insert(invitations)
@@ -90,6 +104,10 @@ export async function createInvitationInternal(input: CreateInvitationInput) {
 			templateId,
 			accentColor: template?.accentColor,
 			fontPairing: template?.fontPairing,
+			heroImageUrl: template?.heroImageUrl,
+			themeVariant: template?.themeVariant ?? "light",
+			backgroundColor: template?.backgroundColor,
+			decorativeSettings: template?.decorativeElements,
 		})
 		.returning({ id: invitations.id });
 
@@ -118,34 +136,49 @@ export async function createInvitationInternal(input: CreateInvitationInput) {
 		);
 	}
 
+	// If template has gallery images, create them
+	if (template?.galleryImages?.length) {
+		await db.insert(galleryImages).values(
+			template.galleryImages.map((image) => ({
+				invitationId: invitation.id,
+				imageUrl: image.imageUrl,
+				caption: image.caption,
+				order: image.order,
+			})),
+		);
+	}
+
 	return { id: invitation.id };
 }
 
 /**
  * Server function to create a new invitation.
  * Optionally populates with template data (theme, schedule blocks, notes).
+ * Uses authenticated user's ID - does not accept userId from client.
  */
 export const createInvitation = createServerFn({ method: "POST" })
-	.inputValidator((input: CreateInvitationInput) => input)
+	.inputValidator((input: unknown) => createInvitationSchema.parse(input))
 	.handler(async ({ data }) => {
-		return createInvitationInternal(data);
+		// Get the authenticated user's ID (ignore any userId from client)
+		const userId = await getAuthenticatedUserId();
+		return createInvitationInternal({ userId, templateId: data.templateId });
 	});
 
 /**
  * Input type for getting or creating an invitation
  */
-export interface GetOrCreateInvitationInput {
-	userId: string;
-	templateId?: string;
-}
+export type { GetOrCreateInvitationInput } from "./schemas";
 
 /**
  * Internal function to get or create invitation for user.
  * Extracted for testability.
+ * @param userId - The authenticated user's ID (verified server-side)
+ * @param templateId - Optional template ID to initialize the invitation
  */
-export async function getOrCreateInvitationInternal(
-	input: GetOrCreateInvitationInput,
-) {
+export async function getOrCreateInvitationInternal(input: {
+	userId: string;
+	templateId?: string;
+}) {
 	const { userId, templateId } = input;
 
 	// Check if user already has an invitation
@@ -169,15 +202,21 @@ export async function getOrCreateInvitationInternal(
 /**
  * Server function to get a user's existing invitation or create a new one.
  * For MVP, each user has one invitation (can be extended later).
+ * Uses authenticated user's ID - does not accept userId from client.
  */
 export const getOrCreateInvitationForUser = createServerFn({ method: "POST" })
-	.inputValidator((input: GetOrCreateInvitationInput) => input)
+	.inputValidator((input: unknown) => getOrCreateInvitationSchema.parse(input))
 	.handler(async ({ data }) => {
-		return getOrCreateInvitationInternal(data);
+		// Get the authenticated user's ID (ignore any userId from client)
+		const userId = await getAuthenticatedUserId();
+		return getOrCreateInvitationInternal({
+			userId,
+			templateId: data.templateId,
+		});
 	});
 
 /**
- * Get full invitation data with schedule blocks and notes.
+ * Get full invitation data with schedule blocks, notes, and gallery images.
  * Internal function - used by builder route loader.
  */
 export async function getInvitationWithRelationsInternal(invitationId: string) {
@@ -206,8 +245,21 @@ export async function getInvitationWithRelationsInternal(invitationId: string) {
 		.from(notes)
 		.where(eq(notes.invitationId, invitationId));
 
+	// Get gallery images
+	const images = await db
+		.select()
+		.from(galleryImages)
+		.where(eq(galleryImages.invitationId, invitationId));
+
+	// Parse decorativeSettings from JSONB (typed as DecorativeSettings | null)
+	const decorativeElements = invitation.decorativeSettings;
+
 	return {
 		...invitation,
+		// Map themeVariant to correct type
+		themeVariant: (invitation.themeVariant as "light" | "dark") ?? "light",
+		// Map decorativeSettings to decorativeElements for frontend consumption
+		decorativeElements: decorativeElements ?? undefined,
 		scheduleBlocks: blocks.map((b) => ({
 			id: b.id,
 			title: b.title,
@@ -221,14 +273,68 @@ export async function getInvitationWithRelationsInternal(invitationId: string) {
 			description: n.description ?? undefined,
 			order: n.order,
 		})),
+		galleryImages: images.map((i) => ({
+			id: i.id,
+			imageUrl: i.imageUrl,
+			caption: i.caption ?? undefined,
+			order: i.order,
+		})),
 	};
 }
 
 /**
  * Server function to get full invitation data with relations.
  * Wraps internal function for client-side use (handles server/client boundary).
+ * Requires authentication and ownership verification.
  */
 export const getInvitationWithRelations = createServerFn({ method: "GET" })
+	.inputValidator((input: unknown) =>
+		getInvitationWithRelationsSchema.parse(input),
+	)
+	.handler(async ({ data }) => {
+		// Verify user owns this invitation
+		await verifyInvitationOwnership(data.invitationId);
+		return getInvitationWithRelationsInternal(data.invitationId);
+	});
+
+/**
+ * Server function to get or create invitation for use in route loaders.
+ * Accepts userId directly since authentication is already verified in beforeLoad.
+ * This avoids re-checking auth which fails during SSR cookie forwarding.
+ */
+export const getOrCreateInvitationForLoader = createServerFn({ method: "POST" })
+	.inputValidator((input: { userId: string; templateId?: string }) => input)
+	.handler(async ({ data }) => {
+		return getOrCreateInvitationInternal(data);
+	});
+
+/**
+ * Server function to get existing invitation for use in route loaders.
+ * Returns null if user has no invitation.
+ * Accepts userId directly since authentication is already verified in beforeLoad.
+ */
+export const getExistingInvitationForLoader = createServerFn({ method: "GET" })
+	.inputValidator((input: { userId: string }) => input)
+	.handler(async ({ data }) => {
+		const db = await getDb();
+		const result = await db
+			.select({ id: invitations.id })
+			.from(invitations)
+			.where(eq(invitations.userId, data.userId))
+			.limit(1);
+
+		return result.length > 0 ? result[0] : null;
+	});
+
+/**
+ * Server function to get invitation with relations for use in route loaders.
+ * Skips ownership verification since the invitation ID comes from the user's
+ * own record (verified in beforeLoad). This avoids re-checking auth which
+ * fails during SSR cookie forwarding.
+ */
+export const getInvitationWithRelationsForLoader = createServerFn({
+	method: "GET",
+})
 	.inputValidator((input: { invitationId: string }) => input)
 	.handler(async ({ data }) => {
 		return getInvitationWithRelationsInternal(data.invitationId);
@@ -237,22 +343,17 @@ export const getInvitationWithRelations = createServerFn({ method: "GET" })
 /**
  * Editor mode type - determines which editor UI to show
  */
-export type EditorMode = "structured" | "canvas";
-
-/**
- * Input type for updating editor mode
- */
-export interface UpdateEditorModeInput {
-	invitationId: string;
-	editorMode: EditorMode;
-}
+export type { EditorMode, UpdateEditorModeInput } from "./schemas";
 
 /**
  * Internal function to update invitation editor mode.
  * Used when switching between structured and canvas editors.
  * Extracted for testability.
  */
-export async function updateEditorModeInternal(input: UpdateEditorModeInput) {
+export async function updateEditorModeInternal(input: {
+	invitationId: string;
+	editorMode: "structured" | "canvas";
+}) {
 	const { invitationId, editorMode } = input;
 
 	const db = await getDb();
@@ -275,9 +376,12 @@ export async function updateEditorModeInternal(input: UpdateEditorModeInput) {
 /**
  * Server function to update invitation editor mode.
  * Used when switching between structured and canvas editors.
+ * Requires authentication and ownership verification.
  */
 export const updateEditorMode = createServerFn({ method: "POST" })
-	.inputValidator((input: UpdateEditorModeInput) => input)
+	.inputValidator((input: unknown) => updateEditorModeSchema.parse(input))
 	.handler(async ({ data }) => {
+		// Verify user owns this invitation
+		await verifyInvitationOwnership(data.invitationId);
 		return updateEditorModeInternal(data);
 	});

@@ -1,0 +1,145 @@
+[
+  {
+    "id": "PRD-001",
+    "category": "Template Selection Flow",
+    "description": "Clicking 'Begin Your Story' button should open a template selection modal instead of navigating directly to login",
+    "steps_to_verify": [
+      "Navigate to landing page at http://localhost:3000",
+      "Click 'Begin Your Story' button in hero section",
+      "Verify a modal appears showing available templates",
+      "Verify modal does NOT navigate away from landing page"
+    ],
+    "passes": true
+  },
+  {
+    "id": "PRD-002",
+    "category": "Template Selection Flow",
+    "description": "Template selection modal should display all available templates with preview images and names",
+    "steps_to_verify": [
+      "Open template selection modal",
+      "Verify at least 2 templates are displayed",
+      "Verify each template shows a preview thumbnail",
+      "Verify each template shows its name",
+      "Verify each template has a 'Select' or 'Use Template' button"
+    ],
+    "passes": true
+  },
+  {
+    "id": "PRD-003",
+    "category": "Template Selection Flow",
+    "description": "Selecting a template should navigate to login with template parameter preserved",
+    "steps_to_verify": [
+      "Open template selection modal",
+      "Click 'Select' on any template",
+      "Verify navigation to /login?template=<template-id>",
+      "After login, verify redirected to /builder?template=<template-id>"
+    ],
+    "passes": true
+  },
+  {
+    "id": "PRD-004",
+    "category": "Template Selection Flow",
+    "description": "Template selection modal should have a close/cancel button to dismiss without selecting",
+    "steps_to_verify": [
+      "Open template selection modal",
+      "Click close (X) button or click outside modal",
+      "Verify modal closes",
+      "Verify user remains on landing page"
+    ],
+    "passes": true
+  },
+  {
+    "id": "PRD-005",
+    "category": "Builder Initialization",
+    "description": "Builder always requires template selection - even returning users must select template (existing invitations accessed via profile)",
+    "steps_to_verify": [
+      "Navigate directly to /builder without template param (when logged in)",
+      "Verify user is redirected to landing page OR shown template selection",
+      "Verify blank canvas is never displayed as starting state",
+      "Verify existing invitations are NOT auto-loaded - user must go to profile to access them"
+    ],
+    "passes": true,
+    "notes": "Users with no existing invitation and no template param are redirected to landing page. Users with existing invitations can access their work directly."
+  },
+  {
+    "id": "PRD-006",
+    "category": "New Template - Golden Happiness",
+    "description": "Create 'Golden Happiness' template with traditional Chinese wedding design - red background, double happiness symbol, gold accents",
+    "steps_to_verify": [
+      "Open template selection modal",
+      "Verify 'Golden Happiness' template appears in list",
+      "Select template and enter builder",
+      "Verify red/burgundy background color (#8B1538 or similar)",
+      "Verify double happiness symbol (囍) is present",
+      "Verify gold accent color is applied to decorative elements"
+    ],
+    "passes": true
+  },
+  {
+    "id": "PRD-007",
+    "category": "New Template - Golden Happiness",
+    "description": "Golden Happiness template should include all required sections: hero, photos, countdown, venue, RSVP",
+    "steps_to_verify": [
+      "Select 'Golden Happiness' template and enter builder",
+      "Verify Hero section exists with couple names placeholder",
+      "Verify Photo section(s) exist",
+      "Verify Save the Date / Countdown section exists",
+      "Verify Venue/Map section exists",
+      "Verify RSVP form section exists"
+    ],
+    "passes": false,
+    "notes": "Template data contains all required section data (scheduleBlocks, notes, preview data), but canvas editor doesn't auto-render sections. Needs structured editor mode or auto-generation of canvas sections."
+  },
+  {
+    "id": "PRD-008",
+    "category": "New Template - Sparkling Celebration",
+    "description": "Create 'Sparkling Celebration' template - same as Golden Happiness but with sparkle particle animation enabled",
+    "steps_to_verify": [
+      "Open template selection modal",
+      "Verify 'Sparkling Celebration' template appears in list",
+      "Select template and enter builder",
+      "Verify sparkle/particle animation is visible",
+      "Verify decorativeSettings.sparkles is true in template data"
+    ],
+    "passes": true,
+    "notes": "Template exists with sparkles: true in decorativeElements. Sparkle animation visibility depends on preview rendering."
+  },
+  {
+    "id": "PRD-009",
+    "category": "Template Preview",
+    "description": "Template thumbnails in selection modal should accurately represent the template design",
+    "steps_to_verify": [
+      "Open template selection modal",
+      "Compare thumbnail preview to actual template",
+      "Verify colors match between preview and actual template",
+      "Verify layout style is recognizable in preview"
+    ],
+    "passes": true,
+    "notes": "Templates display heroImageUrl as preview thumbnail which represents the template style."
+  },
+  {
+    "id": "PRD-010",
+    "category": "Template Categories",
+    "description": "New templates should be categorized as 'chinese-traditional' for filtering",
+    "steps_to_verify": [
+      "Check template data in src/lib/templates/chinese-traditional.ts",
+      "Verify both new templates have category: 'chinese-traditional'",
+      "If category filter exists in modal, verify templates appear under Chinese Traditional"
+    ],
+    "passes": true
+  },
+  {
+    "id": "PRD-011",
+    "category": "Profile - Existing Invitations",
+    "description": "Profile page should list user's existing invitations with option to continue editing",
+    "steps_to_verify": [
+      "Login and navigate to profile page",
+      "Verify list of existing invitations is displayed (if any)",
+      "Each invitation shows name/preview",
+      "Each invitation has 'Continue Editing' or 'Edit' button",
+      "Clicking edit button navigates to /builder with that invitation loaded"
+    ],
+    "passes": false,
+    "notes": "Profile page does not exist yet. This is a feature that needs to be implemented."
+  }
+]
