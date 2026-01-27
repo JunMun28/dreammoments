@@ -87,8 +87,8 @@
       "Verify Venue/Map section exists",
       "Verify RSVP form section exists"
     ],
-    "passes": false,
-    "notes": "Template data contains all required section data (scheduleBlocks, notes, preview data), but canvas editor doesn't auto-render sections. Needs structured editor mode or auto-generation of canvas sections."
+    "passes": true,
+    "notes": "Fixed by refactoring builder.tsx to use InvitationBuilder component which renders all sections. Template data flows from loader through InvitationBuilderContext to render Hero, Countdown, Gallery, Schedule, Venue, Details, and RSVP sections."
   },
   {
     "id": "PRD-008",
