@@ -6,7 +6,6 @@ import {
 	type GuestRow,
 	parseCsvContent,
 } from "@/lib/csv-parser";
-import { importGuestsFromCsv } from "@/lib/guest-server";
 import { GuestImportPreview } from "./GuestImportPreview";
 import { CsvUpload } from "./ui/csv-upload";
 
@@ -109,6 +108,7 @@ export function GuestCsvImport({
 
 	/**
 	 * Handle confirm - import guests to server
+	 * Uses dynamic import to avoid bundling server code on client
 	 */
 	const handleConfirm = useCallback(async () => {
 		if (!parsedData || parsedData.validRows.length === 0) return;
@@ -117,6 +117,8 @@ export function GuestCsvImport({
 		setImportError(null);
 
 		try {
+			// Dynamic import to avoid bundling drizzle-orm on client
+			const { importGuestsFromCsv } = await import("@/lib/guest-server");
 			const result = await importGuestsFromCsv({
 				data: {
 					invitationId,

@@ -46,13 +46,16 @@ interface RsvpFormProps {
 
 // ============================================================================
 // MEAL OPTIONS
+// Tailored for Singapore/Malaysia Chinese weddings
 // ============================================================================
 
 const MEAL_OPTIONS = [
-	{ value: "chicken", label: "Chicken" },
-	{ value: "fish", label: "Fish" },
-	{ value: "beef", label: "Beef" },
+	{ value: "standard", label: "Standard (No restrictions)" },
+	{ value: "halal", label: "Halal" },
 	{ value: "vegetarian", label: "Vegetarian" },
+	{ value: "no-beef", label: "No Beef" },
+	{ value: "no-pork", label: "No Pork" },
+	{ value: "no-shellfish", label: "No Shellfish" },
 	{ value: "vegan", label: "Vegan" },
 ];
 

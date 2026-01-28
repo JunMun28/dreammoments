@@ -5,17 +5,20 @@ import {
 	EyeOff,
 	Image,
 	Lock,
+	Pencil,
 	Square,
 	Type,
 	Unlock,
 } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
 	ContextMenu,
 	ContextMenuContent,
 	ContextMenuItem,
+	ContextMenuSeparator,
 	ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import { Input } from "@/components/ui/input";
 
 /**
  * Layer information for display in the LayersPanel
@@ -27,6 +30,8 @@ export interface LayerInfo {
 	type: string;
 	/** Display name for the layer */
 	name: string;
+	/** Custom name set by user (if any) */
+	customName?: string;
 	/** Whether the layer is visible on canvas */
 	visible: boolean;
 	/** Whether the layer is locked (cannot be moved/edited) */
@@ -54,6 +59,8 @@ interface LayersPanelProps {
 	onBringForward?: (layerId: string) => void;
 	/** Callback to move layer one step backward */
 	onSendBackward?: (layerId: string) => void;
+	/** G12: Callback to rename a layer */
+	onRenameLayer?: (layerId: string, newName: string) => void;
 }
 
 /**
@@ -94,12 +101,46 @@ export function LayersPanel({
 	onSendToBack,
 	onBringForward,
 	onSendBackward,
+	onRenameLayer,
 }: LayersPanelProps) {
 	const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 	// Track which layer has context menu open (for potential future use)
 	const [_contextMenuLayerId, setContextMenuLayerId] = useState<string | null>(
 		null,
 	);
+	// G12: Track which layer is being renamed
+	const [editingLayerId, setEditingLayerId] = useState<string | null>(null);
+	const [editingName, setEditingName] = useState("");
+	const editInputRef = useRef<HTMLInputElement>(null);
+
+	// G12: Focus input when editing starts
+	useEffect(() => {
+		if (editingLayerId && editInputRef.current) {
+			editInputRef.current.focus();
+			editInputRef.current.select();
+		}
+	}, [editingLayerId]);
+
+	// G12: Start editing layer name
+	const startEditing = useCallback((layer: LayerInfo) => {
+		setEditingLayerId(layer.id);
+		setEditingName(layer.customName || layer.name);
+	}, []);
+
+	// G12: Finish editing and save
+	const finishEditing = useCallback(() => {
+		if (editingLayerId && editingName.trim()) {
+			onRenameLayer?.(editingLayerId, editingName.trim());
+		}
+		setEditingLayerId(null);
+		setEditingName("");
+	}, [editingLayerId, editingName, onRenameLayer]);
+
+	// G12: Cancel editing
+	const cancelEditing = useCallback(() => {
+		setEditingLayerId(null);
+		setEditingName("");
+	}, []);
 
 	const handleDragStart = useCallback(
 		(e: React.DragEvent<HTMLButtonElement>, layerId: string) => {
@@ -210,8 +251,38 @@ export function LayersPanel({
 												<IconComponent className="h-4 w-4" />
 											</span>
 
-											{/* Layer name */}
-											<span className="flex-1 truncate">{layer.name}</span>
+											{/* Layer name - G12: inline editing */}
+											{editingLayerId === layer.id ? (
+												<Input
+													ref={editInputRef}
+													value={editingName}
+													onChange={(e) => setEditingName(e.target.value)}
+													onBlur={finishEditing}
+													onKeyDown={(e) => {
+														if (e.key === "Enter") {
+															e.preventDefault();
+															finishEditing();
+														} else if (e.key === "Escape") {
+															e.preventDefault();
+															cancelEditing();
+														}
+													}}
+													onClick={(e) => e.stopPropagation()}
+													className="h-6 flex-1 px-1 py-0 text-sm"
+													data-testid={`layer-name-input-${layer.id}`}
+												/>
+											) : (
+												<span
+													className="flex-1 truncate"
+													onDoubleClick={(e) => {
+														e.stopPropagation();
+														startEditing(layer);
+													}}
+													title="Double-click to rename"
+												>
+													{layer.customName || layer.name}
+												</span>
+											)}
 
 											{/* Visibility toggle */}
 											<button
@@ -260,6 +331,15 @@ export function LayersPanel({
 
 									{/* Context menu for z-index operations */}
 									<ContextMenuContent>
+										{/* G12: Rename option */}
+										<ContextMenuItem
+											onClick={() => startEditing(layer)}
+											className="flex items-center gap-2"
+										>
+											<Pencil className="h-4 w-4" />
+											Rename
+										</ContextMenuItem>
+										<ContextMenuSeparator />
 										<ContextMenuItem
 											onClick={() => onBringToFront?.(layer.id)}
 											className="flex items-center gap-2"

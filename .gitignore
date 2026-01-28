@@ -16,6 +16,10 @@ todos.json
 coverage
 playwright-report
 test-results
+.playwright-mcp
+
+# User uploads
+public/uploads
 
 post-log.json
 pre-log.json

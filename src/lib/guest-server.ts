@@ -1,8 +1,24 @@
 import crypto from "node:crypto";
 import { createServerFn } from "@tanstack/react-start";
-import { eq } from "drizzle-orm";
-import { db } from "@/db/index";
+import { eq, inArray } from "drizzle-orm";
+import { getDb } from "@/db/index";
 import { guestGroups, guests } from "@/db/schema";
+import {
+	verifyGuestGroupOwnership,
+	verifyGuestOwnership,
+	verifyInvitationOwnership,
+} from "./auth-helpers";
+import {
+	createGuestGroupSchema,
+	createGuestSchema,
+	deleteGuestGroupSchema,
+	deleteGuestSchema,
+	getGuestGroupByTokenSchema,
+	getGuestGroupsWithGuestsSchema,
+	importGuestsFromCsvSchema,
+	updateGuestGroupSchema,
+	updateGuestSchema,
+} from "./schemas";
 
 /**
  * Generate a secure random token for RSVP links.
@@ -37,6 +53,7 @@ export async function createGuestGroupInternal(input: CreateGuestGroupInput) {
 
 	const rsvpToken = generateRsvpToken();
 
+	const db = await getDb();
 	const [group] = await db
 		.insert(guestGroups)
 		.values({
@@ -51,10 +68,13 @@ export async function createGuestGroupInternal(input: CreateGuestGroupInput) {
 
 /**
  * Server function to create a guest group.
+ * Requires authentication and ownership verification.
  */
 export const createGuestGroup = createServerFn({ method: "POST" })
-	.inputValidator((input: CreateGuestGroupInput) => input)
+	.inputValidator((input: unknown) => createGuestGroupSchema.parse(input))
 	.handler(async ({ data }) => {
+		// Verify user owns the invitation
+		await verifyInvitationOwnership(data.invitationId);
 		return createGuestGroupInternal(data);
 	});
 
@@ -81,6 +101,7 @@ export async function updateGuestGroupInternal(input: UpdateGuestGroupInput) {
 		updateData.name = name.trim();
 	}
 
+	const db = await getDb();
 	const [group] = await db
 		.update(guestGroups)
 		.set(updateData)
@@ -96,10 +117,13 @@ export async function updateGuestGroupInternal(input: UpdateGuestGroupInput) {
 
 /**
  * Server function to update a guest group.
+ * Requires authentication and ownership verification.
  */
 export const updateGuestGroup = createServerFn({ method: "POST" })
-	.inputValidator((input: UpdateGuestGroupInput) => input)
+	.inputValidator((input: unknown) => updateGuestGroupSchema.parse(input))
 	.handler(async ({ data }) => {
+		// Verify user owns the group (via invitation)
+		await verifyGuestGroupOwnership(data.id);
 		return updateGuestGroupInternal(data);
 	});
 
@@ -112,6 +136,7 @@ export async function deleteGuestGroupInternal(id: string) {
 		throw new Error("id is required");
 	}
 
+	const db = await getDb();
 	await db.delete(guestGroups).where(eq(guestGroups.id, id));
 
 	return { success: true };
@@ -119,10 +144,13 @@ export async function deleteGuestGroupInternal(id: string) {
 
 /**
  * Server function to delete a guest group.
+ * Requires authentication and ownership verification.
  */
 export const deleteGuestGroup = createServerFn({ method: "POST" })
-	.inputValidator((input: { id: string }) => input)
+	.inputValidator((input: unknown) => deleteGuestGroupSchema.parse(input))
 	.handler(async ({ data }) => {
+		// Verify user owns the group (via invitation)
+		await verifyGuestGroupOwnership(data.id);
 		return deleteGuestGroupInternal(data.id);
 	});
 
@@ -133,8 +161,8 @@ export const deleteGuestGroup = createServerFn({ method: "POST" })
 export interface CreateGuestInput {
 	groupId: string;
 	name: string;
-	email?: string;
-	phone?: string;
+	email?: string | null;
+	phone?: string | null;
 }
 
 /**
@@ -150,6 +178,7 @@ export async function createGuestInternal(input: CreateGuestInput) {
 		throw new Error("name is required");
 	}
 
+	const db = await getDb();
 	const [guest] = await db
 		.insert(guests)
 		.values({
@@ -165,18 +194,21 @@ export async function createGuestInternal(input: CreateGuestInput) {
 
 /**
  * Server function to create a guest.
+ * Requires authentication and ownership verification.
  */
 export const createGuest = createServerFn({ method: "POST" })
-	.inputValidator((input: CreateGuestInput) => input)
+	.inputValidator((input: unknown) => createGuestSchema.parse(input))
 	.handler(async ({ data }) => {
+		// Verify user owns the group (via invitation)
+		await verifyGuestGroupOwnership(data.groupId);
 		return createGuestInternal(data);
 	});
 
 export interface UpdateGuestInput {
 	id: string;
 	name?: string;
-	email?: string;
-	phone?: string;
+	email?: string | null;
+	phone?: string | null;
 	groupId?: string;
 }
 
@@ -198,15 +230,16 @@ export async function updateGuestInternal(input: UpdateGuestInput) {
 		updateData.name = name.trim();
 	}
 	if (email !== undefined) {
-		updateData.email = email.trim() || null;
+		updateData.email = email?.trim() || null;
 	}
 	if (phone !== undefined) {
-		updateData.phone = phone.trim() || null;
+		updateData.phone = phone?.trim() || null;
 	}
 	if (groupId !== undefined) {
 		updateData.groupId = groupId;
 	}
 
+	const db = await getDb();
 	const [guest] = await db
 		.update(guests)
 		.set(updateData)
@@ -222,10 +255,17 @@ export async function updateGuestInternal(input: UpdateGuestInput) {
 
 /**
  * Server function to update a guest.
+ * Requires authentication and ownership verification.
  */
 export const updateGuest = createServerFn({ method: "POST" })
-	.inputValidator((input: UpdateGuestInput) => input)
+	.inputValidator((input: unknown) => updateGuestSchema.parse(input))
 	.handler(async ({ data }) => {
+		// Verify user owns the guest (via group → invitation)
+		await verifyGuestOwnership(data.id);
+		// If moving to a new group, verify ownership of that group too
+		if (data.groupId) {
+			await verifyGuestGroupOwnership(data.groupId);
+		}
 		return updateGuestInternal(data);
 	});
 
@@ -237,6 +277,7 @@ export async function deleteGuestInternal(id: string) {
 		throw new Error("id is required");
 	}
 
+	const db = await getDb();
 	await db.delete(guests).where(eq(guests.id, id));
 
 	return { success: true };
@@ -244,10 +285,13 @@ export async function deleteGuestInternal(id: string) {
 
 /**
  * Server function to delete a guest.
+ * Requires authentication and ownership verification.
  */
 export const deleteGuest = createServerFn({ method: "POST" })
-	.inputValidator((input: { id: string }) => input)
+	.inputValidator((input: unknown) => deleteGuestSchema.parse(input))
 	.handler(async ({ data }) => {
+		// Verify user owns the guest (via group → invitation)
+		await verifyGuestOwnership(data.id);
 		return deleteGuestInternal(data.id);
 	});
 
@@ -322,10 +366,13 @@ export async function importGuestsFromCsvInternal(
 
 /**
  * Server function to import guests from CSV data.
+ * Requires authentication and ownership verification.
  */
 export const importGuestsFromCsv = createServerFn({ method: "POST" })
-	.inputValidator((input: ImportGuestsFromCsvInput) => input)
+	.inputValidator((input: unknown) => importGuestsFromCsvSchema.parse(input))
 	.handler(async ({ data }) => {
+		// Verify user owns the invitation
+		await verifyInvitationOwnership(data.invitationId);
 		return importGuestsFromCsvInternal(data);
 	});
 
@@ -347,6 +394,7 @@ export interface GuestGroupWithGuests {
 
 /**
  * Internal function to get all guest groups with their guests.
+ * Uses a single batch query to avoid N+1 performance issues.
  */
 export async function getGuestGroupsWithGuestsInternal(
 	invitationId: string,
@@ -354,6 +402,8 @@ export async function getGuestGroupsWithGuestsInternal(
 	if (!invitationId) {
 		throw new Error("invitationId is required");
 	}
+
+	const db = await getDb();
 
 	// Get all groups for this invitation
 	const groups = await db
@@ -365,37 +415,54 @@ export async function getGuestGroupsWithGuestsInternal(
 		return [];
 	}
 
-	// Get guests for each group
-	const result: GuestGroupWithGuests[] = [];
+	// Batch load all guests for these groups in a single query (fixes N+1)
+	const groupIds = groups.map((g) => g.id);
+	const allGuests = await db
+		.select()
+		.from(guests)
+		.where(inArray(guests.groupId, groupIds));
 
-	for (const group of groups) {
-		const groupGuests = await db
-			.select()
-			.from(guests)
-			.where(eq(guests.groupId, group.id));
-
-		result.push({
-			id: group.id,
-			name: group.name,
-			rsvpToken: group.rsvpToken,
-			guests: groupGuests.map((g) => ({
-				id: g.id,
-				name: g.name,
-				email: g.email,
-				phone: g.phone,
-			})),
+	// Group guests by their groupId
+	const guestsByGroupId = new Map<
+		string,
+		Array<{
+			id: string;
+			name: string;
+			email: string | null;
+			phone: string | null;
+		}>
+	>();
+	for (const guest of allGuests) {
+		const groupGuests = guestsByGroupId.get(guest.groupId) || [];
+		groupGuests.push({
+			id: guest.id,
+			name: guest.name,
+			email: guest.email,
+			phone: guest.phone,
 		});
+		guestsByGroupId.set(guest.groupId, groupGuests);
 	}
 
-	return result;
+	// Assemble the result
+	return groups.map((group) => ({
+		id: group.id,
+		name: group.name,
+		rsvpToken: group.rsvpToken,
+		guests: guestsByGroupId.get(group.id) || [],
+	}));
 }
 
 /**
  * Server function to get guest groups with their guests.
+ * Requires authentication and ownership verification.
  */
 export const getGuestGroupsWithGuests = createServerFn({ method: "GET" })
-	.inputValidator((input: { invitationId: string }) => input)
+	.inputValidator((input: unknown) =>
+		getGuestGroupsWithGuestsSchema.parse(input),
+	)
 	.handler(async ({ data }) => {
+		// Verify user owns the invitation
+		await verifyInvitationOwnership(data.invitationId);
 		return getGuestGroupsWithGuestsInternal(data.invitationId);
 	});
 
@@ -428,6 +495,7 @@ export async function getGuestGroupByTokenInternal(
 	}
 
 	// Find the group by token
+	const db = await getDb();
 	const groupResults = await db
 		.select()
 		.from(guestGroups)
@@ -463,9 +531,11 @@ export async function getGuestGroupByTokenInternal(
 /**
  * Server function to get a guest group by its RSVP token.
  * Used by the /rsvp page to look up the group from the URL token.
+ * NOTE: This uses token-based auth (RSVP flow), not session auth.
  */
 export const getGuestGroupByToken = createServerFn({ method: "GET" })
-	.inputValidator((input: { token: string }) => input)
+	.inputValidator((input: unknown) => getGuestGroupByTokenSchema.parse(input))
 	.handler(async ({ data }) => {
+		// No ownership check needed - token-based auth for RSVP flow
 		return getGuestGroupByTokenInternal(data.token);
 	});

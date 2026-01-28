@@ -53,8 +53,10 @@ export function AuthCallback() {
 
 				// Sync user to local database
 				await syncUserFromNeonAuth({
-					neonAuthId: user.id,
-					email: user.email,
+					data: {
+						neonAuthId: user.id,
+						email: user.email,
+					},
 				});
 
 				// Redirect to intended destination or home

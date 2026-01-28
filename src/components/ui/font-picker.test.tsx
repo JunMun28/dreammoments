@@ -12,7 +12,7 @@ import {
 
 describe("FONT_PAIRINGS", () => {
 	it("has expected number of pairings", () => {
-		expect(FONT_PAIRINGS.length).toBe(5);
+		expect(FONT_PAIRINGS.length).toBe(6);
 	});
 
 	it("all pairings have required fields", () => {

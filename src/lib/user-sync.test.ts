@@ -12,7 +12,7 @@ const mockDb = {
 };
 
 vi.mock("@/db/index", () => ({
-	db: mockDb,
+	getDb: vi.fn().mockResolvedValue(mockDb),
 }));
 
 vi.mock("@/db/schema", () => ({
@@ -36,7 +36,7 @@ describe("User Sync", () => {
 		mockDb.set.mockReturnThis();
 	});
 
-	describe("syncUserFromNeonAuth", () => {
+	describe("syncUserFromNeonAuthInternal", () => {
 		it("should create new user when neonAuthId not found", async () => {
 			// First query returns empty (user not found by neonAuthId)
 			mockDb.where.mockResolvedValueOnce([]);
@@ -49,8 +49,8 @@ describe("User Sync", () => {
 				},
 			]);
 
-			const { syncUserFromNeonAuth } = await import("./user-sync");
-			const result = await syncUserFromNeonAuth({
+			const { syncUserFromNeonAuthInternal } = await import("./user-sync");
+			const result = await syncUserFromNeonAuthInternal({
 				neonAuthId: "neon-123",
 				email: "test@example.com",
 			});
@@ -71,8 +71,8 @@ describe("User Sync", () => {
 			};
 			mockDb.where.mockResolvedValueOnce([existingUser]);
 
-			const { syncUserFromNeonAuth } = await import("./user-sync");
-			const result = await syncUserFromNeonAuth({
+			const { syncUserFromNeonAuthInternal } = await import("./user-sync");
+			const result = await syncUserFromNeonAuthInternal({
 				neonAuthId: "neon-123",
 				email: "test@example.com",
 			});
@@ -93,8 +93,8 @@ describe("User Sync", () => {
 				{ ...existingUser, email: "new@example.com" },
 			]);
 
-			const { syncUserFromNeonAuth } = await import("./user-sync");
-			const result = await syncUserFromNeonAuth({
+			const { syncUserFromNeonAuthInternal } = await import("./user-sync");
+			const result = await syncUserFromNeonAuthInternal({
 				neonAuthId: "neon-123",
 				email: "new@example.com",
 			});
@@ -104,18 +104,21 @@ describe("User Sync", () => {
 		});
 
 		it("should throw error when neonAuthId is missing", async () => {
-			const { syncUserFromNeonAuth } = await import("./user-sync");
+			const { syncUserFromNeonAuthInternal } = await import("./user-sync");
 
 			await expect(
-				syncUserFromNeonAuth({ neonAuthId: "", email: "test@example.com" }),
+				syncUserFromNeonAuthInternal({
+					neonAuthId: "",
+					email: "test@example.com",
+				}),
 			).rejects.toThrow("neonAuthId is required");
 		});
 
 		it("should throw error when email is missing", async () => {
-			const { syncUserFromNeonAuth } = await import("./user-sync");
+			const { syncUserFromNeonAuthInternal } = await import("./user-sync");
 
 			await expect(
-				syncUserFromNeonAuth({ neonAuthId: "neon-123", email: "" }),
+				syncUserFromNeonAuthInternal({ neonAuthId: "neon-123", email: "" }),
 			).rejects.toThrow("email is required");
 		});
 
@@ -129,8 +132,8 @@ describe("User Sync", () => {
 				},
 			]);
 
-			const { syncUserFromNeonAuth } = await import("./user-sync");
-			await syncUserFromNeonAuth({
+			const { syncUserFromNeonAuthInternal } = await import("./user-sync");
+			await syncUserFromNeonAuthInternal({
 				neonAuthId: "neon-123",
 				email: "TEST@EXAMPLE.COM",
 			});

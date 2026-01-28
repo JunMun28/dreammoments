@@ -20,19 +20,7 @@ import {
 	type ScheduleBlock,
 	useInvitationBuilder,
 } from "@/contexts/InvitationBuilderContext";
-
-/**
- * Format time from 24-hour to 12-hour display
- */
-export function formatBlockTime(time: string | undefined): string {
-	if (!time) return "";
-	const [hoursStr, minutesStr] = time.split(":");
-	const hours = Number.parseInt(hoursStr, 10);
-	const minutes = minutesStr || "00";
-	const period = hours >= 12 ? "PM" : "AM";
-	const displayHours = hours % 12 || 12;
-	return `${displayHours}:${minutes} ${period}`;
-}
+import { formatTime } from "@/lib/format-utils";
 
 interface ScheduleBlockItemProps {
 	block: ScheduleBlock;
@@ -93,7 +81,7 @@ function ScheduleBlockItem({
 					<h4 className="font-medium text-foreground">{block.title}</h4>
 					{block.time && (
 						<p className="text-sm text-muted-foreground">
-							{formatBlockTime(block.time)}
+							{formatTime(block.time)}
 						</p>
 					)}
 					{block.description && (

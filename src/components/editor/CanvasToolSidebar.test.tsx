@@ -12,6 +12,8 @@ const expectedTools = [
 	{ id: "text", label: "Text" },
 	{ id: "assets", label: "Assets" },
 	{ id: "components", label: "Components" },
+	{ id: "background", label: "Background" },
+	{ id: "music", label: "Music" },
 	{ id: "settings", label: "Settings" },
 ];
 
@@ -25,12 +27,12 @@ describe("CanvasToolSidebar", () => {
 	});
 
 	describe("CE-005: Tool Sidebar", () => {
-		it("renders all 6 tool buttons vertically", () => {
+		it("renders all 8 tool buttons vertically", () => {
 			render(
 				<CanvasToolSidebar activeTool="sections" onToolChange={() => {}} />,
 			);
 
-			// Verify all 6 tools have accessible buttons
+			// Verify all 8 tools have accessible buttons
 			for (const tool of expectedTools) {
 				const btn = screen.getByRole("button", { name: tool.label });
 				expect(btn).toBeDefined();
@@ -77,7 +79,7 @@ describe("CanvasToolSidebar", () => {
 			expect(onToolChange).toHaveBeenCalledWith("components");
 		});
 
-		it("renders tools in correct order: Sections, Templates, Text, Assets, Components, Settings", () => {
+		it("renders tools in correct order: Sections, Templates, Text, Assets, Components, Background, Music, Settings", () => {
 			render(
 				<CanvasToolSidebar activeTool="sections" onToolChange={() => {}} />,
 			);
@@ -93,6 +95,8 @@ describe("CanvasToolSidebar", () => {
 				"Text",
 				"Assets",
 				"Components",
+				"Background",
+				"Music",
 				"Settings",
 			]);
 		});

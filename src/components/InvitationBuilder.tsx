@@ -1,589 +1,88 @@
 import { useNavigate } from "@tanstack/react-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect } from "react";
 import {
-	InvitationBuilderProvider,
-	type InvitationData,
-	useInvitationBuilder,
+  InvitationBuilderProvider,
+  type InvitationData,
+  useInvitationBuilder,
 } from "@/contexts/InvitationBuilderContext";
-import { type AutosaveStatus, useAutosave } from "@/hooks/useAutosave";
-// Types only - these are erased at compile time and don't cause bundling issues
-import type { GuestResponseRow } from "@/lib/rsvp-server";
-import { cn } from "@/lib/utils";
-import { BasicInfoForm, type BasicInfoFormValues } from "./BasicInfoForm";
-import { CsvExportButton } from "./CsvExportButton";
+import { useAutosave } from "@/hooks/useAutosave";
 import {
-	CanvasPanel,
-	EditorHeader,
-	EditorLayout,
-	FilmstripPanel,
-	PropertiesPanel,
-	SectionThumbnails,
-	ToolSidebar,
+  CanvasPanel,
+  EditorHeader,
+  EditorLayout,
+  FilmstripPanel,
+  PropertiesPanel,
+  SectionThumbnails,
+  ToolSidebar,
 } from "./editor";
-import { GallerySection } from "./GallerySection";
-import { GuestCsvImport, type ImportResult } from "./GuestCsvImport";
-import type { GuestEditorValues } from "./GuestEditor";
-import { GuestGroupList } from "./GuestGroupList";
-import { HeroImageSection } from "./HeroImageSection";
-import { InvitationPreview } from "./InvitationPreview";
-import { LayoutFormatSection } from "./LayoutFormatSection";
-import { LongPagePreview } from "./LongPagePreview";
-import { NoteList } from "./NoteList";
-import { RsvpDashboard, type RsvpSummaryData } from "./RsvpDashboard";
-import { RsvpDeadlineSection } from "./RsvpDeadlineSection";
-import {
-	filterResponses,
-	type RsvpFilterState,
-	RsvpResponseFilters,
-} from "./RsvpResponseFilters";
-import { RsvpResponseTable } from "./RsvpResponseTable";
-import { ScheduleBlockList } from "./ScheduleBlockList";
-import { ThemeSection } from "./ThemeSection";
 import { TooltipProvider } from "./ui/tooltip";
-import { type ViewportMode, ViewportToggle } from "./ui/viewport-toggle";
-import { VenueMapSection } from "./VenueMapSection";
 
 interface InvitationBuilderProps {
-	/** Initial invitation data from server */
-	initialData: InvitationData;
-	/** Callback to save invitation (typically a server function) */
-	onSave: (data: InvitationData) => Promise<void>;
+  /** Initial invitation data from server */
+  initialData: InvitationData;
+  /** Callback to save invitation (typically a server function) */
+  onSave: (data: InvitationData) => Promise<void>;
 }
 
 /**
- * Autosave status indicator component
- */
-function AutosaveIndicator({ status }: { status: AutosaveStatus }) {
-	return (
-		<div
-			className={cn(
-				"flex items-center gap-2 text-sm transition-opacity duration-200",
-				status === "idle" && "opacity-0",
-			)}
-		>
-			{status === "saving" && (
-				<>
-					<div className="h-2 w-2 animate-pulse rounded-full bg-yellow-500" />
-					<span className="text-muted-foreground">Saving...</span>
-				</>
-			)}
-			{status === "saved" && (
-				<>
-					<div className="h-2 w-2 rounded-full bg-green-500" />
-					<span className="text-muted-foreground">Saved</span>
-				</>
-			)}
-			{status === "error" && (
-				<>
-					<div className="h-2 w-2 rounded-full bg-red-500" />
-					<span className="text-destructive">Failed to save</span>
-				</>
-			)}
-		</div>
-	);
-}
-
-/**
- * Form wrapper that connects BasicInfoForm to the builder context.
- */
-function BuilderForm({
-	onSave,
-}: {
-	onSave: (data: InvitationData) => Promise<void>;
-}) {
-	const { invitation, updateInvitation } = useInvitationBuilder();
-
-	const handleChange = useCallback(
-		(values: BasicInfoFormValues) => {
-			updateInvitation(values);
-		},
-		[updateInvitation],
-	);
-
-	const handleSubmit = useCallback(
-		async (values: BasicInfoFormValues) => {
-			// Manual save via form submit
-			await onSave({ ...invitation, ...values });
-		},
-		[invitation, onSave],
-	);
-
-	const formInitialValues: BasicInfoFormValues = {
-		partner1Name: invitation.partner1Name ?? "",
-		partner2Name: invitation.partner2Name ?? "",
-		weddingDate: invitation.weddingDate,
-		weddingTime: invitation.weddingTime,
-		venueName: invitation.venueName,
-		venueAddress: invitation.venueAddress,
-		rsvpDeadline: invitation.rsvpDeadline,
-	};
-
-	return (
-		<BasicInfoForm
-			initialValues={formInitialValues}
-			onSubmit={handleSubmit}
-			onChange={handleChange}
-		/>
-	);
-}
-
-/**
- * RSVP settings section with deadline configuration.
- */
-function RsvpSettingsSection() {
-	const { invitation, updateInvitation } = useInvitationBuilder();
-
-	const handleDeadlineChange = useCallback(
-		(deadline: Date | undefined) => {
-			updateInvitation({ rsvpDeadline: deadline });
-		},
-		[updateInvitation],
-	);
-
-	return (
-		<RsvpDeadlineSection
-			value={invitation.rsvpDeadline}
-			onChange={handleDeadlineChange}
-		/>
-	);
-}
-
-/**
- * RSVP Dashboard section that loads and displays RSVP summary.
- */
-function RsvpDashboardSection() {
-	const { invitation } = useInvitationBuilder();
-	const [summary, setSummary] = useState<RsvpSummaryData | null>(null);
-	const [isLoading, setIsLoading] = useState(true);
-
-	// Load RSVP summary on mount and when invitation changes
-	useEffect(() => {
-		async function loadSummary() {
-			if (!invitation.id) return;
-
-			setIsLoading(true);
-			try {
-				// Dynamic import to avoid bundling drizzle-orm on client
-				const { getInvitationRsvpSummary } = await import("@/lib/rsvp-server");
-				const data = await getInvitationRsvpSummary({
-					data: { invitationId: invitation.id },
-				});
-				setSummary(data);
-			} catch (error) {
-				console.error("Failed to load RSVP summary:", error);
-			} finally {
-				setIsLoading(false);
-			}
-		}
-
-		loadSummary();
-	}, [invitation.id]);
-
-	const emptySummary: RsvpSummaryData = {
-		totalInvited: 0,
-		totalAttending: 0,
-		totalDeclined: 0,
-		totalPending: 0,
-		groups: [],
-	};
-
-	return (
-		<RsvpDashboard summary={summary ?? emptySummary} isLoading={isLoading} />
-	);
-}
-
-/**
- * RSVP Response Table section that loads and displays guest responses.
- * Includes filters and CSV export button.
- */
-function RsvpResponseTableSection() {
-	const { invitation } = useInvitationBuilder();
-	const [responses, setResponses] = useState<GuestResponseRow[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [filters, setFilters] = useState<RsvpFilterState>({
-		status: "all",
-		groupId: "all",
-		searchQuery: "",
-	});
-
-	// Load guest responses on mount and when invitation changes
-	useEffect(() => {
-		async function loadResponses() {
-			if (!invitation.id) return;
-
-			setIsLoading(true);
-			try {
-				// Dynamic import to avoid bundling drizzle-orm on client
-				const { getInvitationGuestResponses } = await import(
-					"@/lib/rsvp-server"
-				);
-				const data = await getInvitationGuestResponses({
-					data: { invitationId: invitation.id },
-				});
-				setResponses(data);
-			} catch (error) {
-				console.error("Failed to load guest responses:", error);
-			} finally {
-				setIsLoading(false);
-			}
-		}
-
-		loadResponses();
-	}, [invitation.id]);
-
-	// Extract unique groups from responses for filter dropdown
-	const groups = useMemo(() => {
-		const groupMap = new Map<string, { id: string; name: string }>();
-		for (const response of responses) {
-			if (!groupMap.has(response.groupId)) {
-				groupMap.set(response.groupId, {
-					id: response.groupId,
-					name: response.groupName,
-				});
-			}
-		}
-		return Array.from(groupMap.values());
-	}, [responses]);
-
-	// Apply filters to responses
-	const filteredResponses = useMemo(
-		() => filterResponses(responses, filters),
-		[responses, filters],
-	);
-
-	return (
-		<div className="space-y-4">
-			<RsvpResponseFilters
-				filters={filters}
-				onFiltersChange={setFilters}
-				groups={groups}
-				resultCount={filteredResponses.length}
-				totalCount={responses.length}
-			/>
-			<div className="flex justify-end">
-				<CsvExportButton responses={filteredResponses} />
-			</div>
-			<RsvpResponseTable responses={filteredResponses} isLoading={isLoading} />
-		</div>
-	);
-}
-
-/**
- * Guest management section with CSV import and manual CRUD.
- */
-function GuestManagementSection() {
-	const { invitation, setGuestGroups } = useInvitationBuilder();
-	const [importKey, setImportKey] = useState(0);
-
-	/**
-	 * Reload guest groups from server after CSV import
-	 */
-	const reloadGuestGroups = useCallback(async () => {
-		try {
-			// Dynamic import to avoid bundling drizzle-orm on client
-			const { getGuestGroupsWithGuests } = await import("@/lib/guest-server");
-			const groups = await getGuestGroupsWithGuests({
-				data: { invitationId: invitation.id },
-			});
-			// Convert server data to context format
-			const contextGroups = groups.map((g) => ({
-				id: g.id,
-				name: g.name,
-				rsvpToken: g.rsvpToken,
-				guests: g.guests.map((guest) => ({
-					id: guest.id,
-					name: guest.name,
-					email: guest.email ?? undefined,
-					phone: guest.phone ?? undefined,
-				})),
-			}));
-			setGuestGroups(contextGroups);
-		} catch (error) {
-			console.error("Failed to reload guest groups:", error);
-		}
-	}, [invitation.id, setGuestGroups]);
-
-	/**
-	 * Handle successful CSV import
-	 */
-	const handleImportComplete = useCallback(
-		async (_result: ImportResult) => {
-			// Reload guest groups to show imported data
-			await reloadGuestGroups();
-			// Force re-render of import component to reset state
-			setImportKey((prev) => prev + 1);
-		},
-		[reloadGuestGroups],
-	);
-
-	const handleGroupCreate = useCallback(
-		async (name: string) => {
-			// Dynamic import to avoid bundling drizzle-orm on client
-			const { createGuestGroup } = await import("@/lib/guest-server");
-			const result = await createGuestGroup({
-				data: { invitationId: invitation.id, name },
-			});
-			return { id: result.id, rsvpToken: result.rsvpToken };
-		},
-		[invitation.id],
-	);
-
-	const handleGroupUpdate = useCallback(async (id: string, name: string) => {
-		// Dynamic import to avoid bundling drizzle-orm on client
-		const { updateGuestGroup } = await import("@/lib/guest-server");
-		await updateGuestGroup({ data: { id, name } });
-	}, []);
-
-	const handleGroupDelete = useCallback(async (id: string) => {
-		// Dynamic import to avoid bundling drizzle-orm on client
-		const { deleteGuestGroup } = await import("@/lib/guest-server");
-		await deleteGuestGroup({ data: { id } });
-	}, []);
-
-	const handleGuestCreate = useCallback(
-		async (groupId: string, guest: GuestEditorValues) => {
-			// Dynamic import to avoid bundling drizzle-orm on client
-			const { createGuest } = await import("@/lib/guest-server");
-			const result = await createGuest({
-				data: {
-					groupId,
-					name: guest.name,
-					email: guest.email,
-					phone: guest.phone,
-				},
-			});
-			return { id: result.id };
-		},
-		[],
-	);
-
-	const handleGuestUpdate = useCallback(
-		async (_groupId: string, guestId: string, guest: GuestEditorValues) => {
-			// Dynamic import to avoid bundling drizzle-orm on client
-			const { updateGuest } = await import("@/lib/guest-server");
-			await updateGuest({
-				data: {
-					id: guestId,
-					name: guest.name,
-					email: guest.email,
-					phone: guest.phone,
-				},
-			});
-		},
-		[],
-	);
-
-	const handleGuestDelete = useCallback(
-		async (_groupId: string, guestId: string) => {
-			// Dynamic import to avoid bundling drizzle-orm on client
-			const { deleteGuest } = await import("@/lib/guest-server");
-			await deleteGuest({ data: { id: guestId } });
-		},
-		[],
-	);
-
-	return (
-		<div className="space-y-6">
-			{/* CSV Import Section */}
-			<GuestCsvImport
-				key={importKey}
-				invitationId={invitation.id}
-				onImportComplete={handleImportComplete}
-			/>
-
-			{/* Divider */}
-			<div className="relative">
-				<div className="absolute inset-0 flex items-center">
-					<span className="w-full border-t" />
-				</div>
-				<div className="relative flex justify-center text-xs uppercase">
-					<span className="bg-card px-2 text-muted-foreground">
-						or manage manually
-					</span>
-				</div>
-			</div>
-
-			{/* Manual Guest Management */}
-			<GuestGroupList
-				onGroupCreate={handleGroupCreate}
-				onGroupUpdate={handleGroupUpdate}
-				onGroupDelete={handleGroupDelete}
-				onGuestCreate={handleGuestCreate}
-				onGuestUpdate={handleGuestUpdate}
-				onGuestDelete={handleGuestDelete}
-			/>
-		</div>
-	);
-}
-
-/**
- * Multi-panel editor content for longpage format.
+ * Multi-panel editor content.
  * Uses the hunbei.com-style layout with 5 panels.
  */
 function MultiPanelEditorContent() {
-	const { invitation } = useInvitationBuilder();
-	const navigate = useNavigate();
+  const { invitation } = useInvitationBuilder();
+  const navigate = useNavigate();
 
-	const handlePreview = useCallback(() => {
-		// Open preview in new tab
-		window.open(`/invite/${invitation.id}`, "_blank");
-	}, [invitation.id]);
+  const handlePreview = useCallback(() => {
+    // Open preview in new tab
+    window.open(`/invite/${invitation.id}`, "_blank");
+  }, [invitation.id]);
 
-	const handleExit = useCallback(() => {
-		navigate({ to: "/" });
-	}, [navigate]);
+  const handleExit = useCallback(() => {
+    navigate({ to: "/" });
+  }, [navigate]);
 
-	return (
-		<TooltipProvider>
-			<EditorLayout
-				header={<EditorHeader onPreview={handlePreview} onExit={handleExit} />}
-				toolSidebar={<ToolSidebar />}
-				thumbnails={<SectionThumbnails />}
-				canvas={<CanvasPanel />}
-				properties={<PropertiesPanel />}
-				filmstrip={<FilmstripPanel />}
-			/>
-		</TooltipProvider>
-	);
+  return (
+    <TooltipProvider>
+      <EditorLayout
+        header={<EditorHeader onPreview={handlePreview} onExit={handleExit} />}
+        toolSidebar={<ToolSidebar />}
+        thumbnails={<SectionThumbnails />}
+        canvas={<CanvasPanel />}
+        properties={<PropertiesPanel />}
+        filmstrip={<FilmstripPanel />}
+      />
+    </TooltipProvider>
+  );
 }
 
 /**
- * Classic two-column layout for card format.
- * Existing layout with form on left, preview on right.
- */
-function ClassicBuilderContent({
-	onSave,
-}: {
-	onSave: (data: InvitationData) => Promise<void>;
-}) {
-	const { invitation } = useInvitationBuilder();
-	const [viewportMode, setViewportMode] = useState<ViewportMode>("desktop");
-
-	return (
-		<div className="flex flex-col gap-4">
-			{/* Header with autosave status */}
-			<div className="flex items-center justify-between">
-				<h1 className="text-2xl font-bold">Edit Invitation</h1>
-				<AutosaveIndicator status={useInvitationBuilder().autosaveStatus} />
-			</div>
-
-			<div className="grid h-full gap-8 lg:grid-cols-2">
-				{/* Form panel */}
-				<div className="space-y-8 overflow-y-auto">
-					<div className="rounded-lg border bg-card p-6">
-						<h2 className="mb-6 text-lg font-semibold">Basic Information</h2>
-						<BuilderForm onSave={onSave} />
-					</div>
-
-					<div className="rounded-lg border bg-card p-6">
-						<h2 className="mb-6 text-lg font-semibold">Venue Map</h2>
-						<VenueMapSection />
-					</div>
-
-					<div className="rounded-lg border bg-card p-6">
-						<h2 className="mb-6 text-lg font-semibold">Hero Image</h2>
-						<HeroImageSection />
-					</div>
-
-					<div className="rounded-lg border bg-card p-6">
-						<h2 className="mb-6 text-lg font-semibold">Photo Gallery</h2>
-						<GallerySection />
-					</div>
-
-					<div className="rounded-lg border bg-card p-6">
-						<h2 className="mb-6 text-lg font-semibold">Theme</h2>
-						<ThemeSection />
-					</div>
-
-					<div className="rounded-lg border bg-card p-6">
-						<ScheduleBlockList />
-					</div>
-
-					<div className="rounded-lg border bg-card p-6">
-						<NoteList />
-					</div>
-
-					<div className="rounded-lg border bg-card p-6">
-						<h2 className="mb-6 text-lg font-semibold">Layout</h2>
-						<LayoutFormatSection />
-					</div>
-
-					<div className="rounded-lg border bg-card p-6">
-						<h2 className="mb-6 text-lg font-semibold">RSVP Settings</h2>
-						<RsvpSettingsSection />
-					</div>
-
-					<div className="rounded-lg border bg-card p-6">
-						<RsvpDashboardSection />
-					</div>
-
-					<div className="rounded-lg border bg-card p-6">
-						<h2 className="mb-6 text-lg font-semibold">Response Details</h2>
-						<RsvpResponseTableSection />
-					</div>
-
-					<div className="rounded-lg border bg-card p-6">
-						<h2 className="mb-6 text-lg font-semibold">Guest Management</h2>
-						<GuestManagementSection />
-					</div>
-				</div>
-
-				{/* Preview panel */}
-				<div className="hidden lg:block">
-					<div className="sticky top-4">
-						<div className="mb-4 flex items-center justify-between">
-							<h2 className="text-lg font-semibold">Preview</h2>
-							<ViewportToggle value={viewportMode} onChange={setViewportMode} />
-						</div>
-						<div className="max-h-[calc(100vh-8rem)] overflow-y-auto rounded-lg border">
-							{invitation.layoutFormat === "longpage" ? (
-								<LongPagePreview viewportMode={viewportMode} showNav={false} />
-							) : (
-								<InvitationPreview viewportMode={viewportMode} />
-							)}
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	);
-}
-
-/**
- * Inner component that manages autosave and renders the appropriate layout.
- * Uses multi-panel editor for longpage format, classic layout for card format.
+ * Inner component that manages autosave and renders the canvas editor.
  * Must be inside InvitationBuilderProvider to access context.
  */
 function InvitationBuilderContent({
-	onSave,
+  onSave,
 }: {
-	onSave: (data: InvitationData) => Promise<void>;
+  onSave: (data: InvitationData) => Promise<void>;
 }) {
-	const { invitation, setAutosaveStatus } = useInvitationBuilder();
+  const { invitation, setAutosaveStatus } = useInvitationBuilder();
 
-	const { status } = useAutosave({
-		data: invitation,
-		onSave,
-		delay: 1000,
-	});
+  const { status } = useAutosave({
+    data: invitation,
+    onSave,
+    delay: 1000,
+  });
 
-	// Sync status to context for potential use elsewhere
-	useEffect(() => {
-		setAutosaveStatus(status);
-	}, [status, setAutosaveStatus]);
+  // Sync status to context for potential use elsewhere
+  useEffect(() => {
+    setAutosaveStatus(status);
+  }, [status, setAutosaveStatus]);
 
-	// Use multi-panel editor for longpage format
-	if (invitation.layoutFormat === "longpage") {
-		return <MultiPanelEditorContent />;
-	}
-
-	// Use classic two-column layout for card format
-	return <ClassicBuilderContent onSave={onSave} />;
+  return <MultiPanelEditorContent />;
 }
 
 /**
  * Main invitation builder component.
- * Provides side-by-side editing with live preview.
+ * Uses the canvas editor with multi-panel layout.
  * Includes autosave functionality.
  *
  * @example
@@ -597,12 +96,12 @@ function InvitationBuilderContent({
  * ```
  */
 export function InvitationBuilder({
-	initialData,
-	onSave,
+  initialData,
+  onSave,
 }: InvitationBuilderProps) {
-	return (
-		<InvitationBuilderProvider initialData={initialData}>
-			<InvitationBuilderContent onSave={onSave} />
-		</InvitationBuilderProvider>
-	);
+  return (
+    <InvitationBuilderProvider initialData={initialData}>
+      <InvitationBuilderContent onSave={onSave} />
+    </InvitationBuilderProvider>
+  );
 }

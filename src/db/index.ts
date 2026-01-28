@@ -23,11 +23,22 @@ export async function getDb(): Promise<NodePgDatabase<typeof schema>> {
 		if (!process.env.DATABASE_URL) {
 			throw new Error("DATABASE_URL environment variable is required");
 		}
+
+		// Ensure SSL is enabled for Neon connections
+		const dbUrl = process.env.DATABASE_URL;
+		const dbUrlWithSsl = dbUrl.includes("sslmode=")
+			? dbUrl
+			: `${dbUrl}?sslmode=require`;
+
 		// Dynamic import with string concatenation to prevent Vite static analysis
 		const drizzleModule = await import(
 			/* @vite-ignore */ "drizzle-orm" + "/node-postgres"
 		);
-		_db = drizzleModule.drizzle(process.env.DATABASE_URL, { schema });
+		_db = drizzleModule.drizzle(dbUrlWithSsl, { schema });
+	}
+	// Safety check - should never happen since we just initialized _db above
+	if (!_db) {
+		throw new Error("Database initialization failed unexpectedly");
 	}
 	return _db;
 }

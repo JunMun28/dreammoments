@@ -77,6 +77,41 @@ describe("ComponentsPanel (CE-007)", () => {
 			expect(screen.getByText("RSVP Form")).toBeDefined();
 			expect(screen.getByText(/Collect guest responses/i)).toBeDefined();
 		});
+
+		it("shows Radio Button widget", () => {
+			render(<ComponentsPanel onAddWidget={mockOnAddWidget} />);
+
+			expect(screen.getByText("Radio Button")).toBeDefined();
+			expect(screen.getByText(/Single choice selection/i)).toBeDefined();
+		});
+
+		it("shows Checkbox widget", () => {
+			render(<ComponentsPanel onAddWidget={mockOnAddWidget} />);
+
+			expect(screen.getByText("Checkbox")).toBeDefined();
+			expect(screen.getByText(/Multiple choice selection/i)).toBeDefined();
+		});
+
+		it("shows Dropdown widget", () => {
+			render(<ComponentsPanel onAddWidget={mockOnAddWidget} />);
+
+			expect(screen.getByText("Dropdown")).toBeDefined();
+			expect(screen.getByText(/Select from a list/i)).toBeDefined();
+		});
+
+		it("shows Text Input widget", () => {
+			render(<ComponentsPanel onAddWidget={mockOnAddWidget} />);
+
+			expect(screen.getByText("Text Input")).toBeDefined();
+			expect(screen.getByText(/Single line text input/i)).toBeDefined();
+		});
+
+		it("shows Submit Button widget", () => {
+			render(<ComponentsPanel onAddWidget={mockOnAddWidget} />);
+
+			expect(screen.getByText("Submit Button")).toBeDefined();
+			expect(screen.getByText(/Submit form data/i)).toBeDefined();
+		});
 	});
 
 	describe("Media Category", () => {
@@ -179,6 +214,101 @@ describe("ComponentsPanel (CE-007)", () => {
 				}),
 			);
 		});
+
+		it("calls onAddWidget when clicking Radio Button", async () => {
+			const user = userEvent.setup();
+			render(<ComponentsPanel onAddWidget={mockOnAddWidget} />);
+
+			const radioButton = screen.getByRole("button", {
+				name: /Radio Button/i,
+			});
+			await user.click(radioButton);
+
+			expect(mockOnAddWidget).toHaveBeenCalledTimes(1);
+			expect(mockOnAddWidget).toHaveBeenCalledWith(
+				expect.objectContaining({
+					id: "radio-button",
+					type: "radio",
+					name: "Radio Button",
+				}),
+			);
+		});
+
+		it("calls onAddWidget when clicking Checkbox", async () => {
+			const user = userEvent.setup();
+			render(<ComponentsPanel onAddWidget={mockOnAddWidget} />);
+
+			const checkboxButton = screen.getByRole("button", {
+				name: /^Checkbox$/i,
+			});
+			await user.click(checkboxButton);
+
+			expect(mockOnAddWidget).toHaveBeenCalledTimes(1);
+			expect(mockOnAddWidget).toHaveBeenCalledWith(
+				expect.objectContaining({
+					id: "checkbox",
+					type: "checkbox",
+					name: "Checkbox",
+				}),
+			);
+		});
+
+		it("calls onAddWidget when clicking Dropdown", async () => {
+			const user = userEvent.setup();
+			render(<ComponentsPanel onAddWidget={mockOnAddWidget} />);
+
+			const dropdownButton = screen.getByRole("button", {
+				name: /^Dropdown$/i,
+			});
+			await user.click(dropdownButton);
+
+			expect(mockOnAddWidget).toHaveBeenCalledTimes(1);
+			expect(mockOnAddWidget).toHaveBeenCalledWith(
+				expect.objectContaining({
+					id: "dropdown",
+					type: "dropdown",
+					name: "Dropdown",
+				}),
+			);
+		});
+
+		it("calls onAddWidget when clicking Text Input", async () => {
+			const user = userEvent.setup();
+			render(<ComponentsPanel onAddWidget={mockOnAddWidget} />);
+
+			const inputButton = screen.getByRole("button", {
+				name: /Text Input/i,
+			});
+			await user.click(inputButton);
+
+			expect(mockOnAddWidget).toHaveBeenCalledTimes(1);
+			expect(mockOnAddWidget).toHaveBeenCalledWith(
+				expect.objectContaining({
+					id: "text-input",
+					type: "input",
+					name: "Text Input",
+				}),
+			);
+		});
+
+		it("calls onAddWidget when clicking Submit Button", async () => {
+			const user = userEvent.setup();
+			render(<ComponentsPanel onAddWidget={mockOnAddWidget} />);
+
+			const submitButton = screen.getByRole("button", {
+				name: /Submit Button/i,
+			});
+			await user.click(submitButton);
+
+			expect(mockOnAddWidget).toHaveBeenCalledTimes(1);
+			expect(mockOnAddWidget).toHaveBeenCalledWith(
+				expect.objectContaining({
+					id: "submit-button",
+					type: "submit",
+					name: "Submit Button",
+				}),
+			);
+		});
 	});
 
 	describe("Widget Definition Interface", () => {
@@ -206,7 +336,7 @@ describe("ComponentsPanel (CE-007)", () => {
 		it("all widget buttons have accessible names", () => {
 			render(<ComponentsPanel onAddWidget={mockOnAddWidget} />);
 
-			// All 5 widgets should be accessible by their names
+			// All 10 widgets should be accessible by their names
 			expect(
 				screen.getByRole("button", { name: /Countdown Timer/i }),
 			).toBeDefined();
@@ -217,6 +347,15 @@ describe("ComponentsPanel (CE-007)", () => {
 			).toBeDefined();
 			expect(
 				screen.getByRole("button", { name: /Schedule Timeline/i }),
+			).toBeDefined();
+			expect(
+				screen.getByRole("button", { name: /Radio Button/i }),
+			).toBeDefined();
+			expect(screen.getByRole("button", { name: /^Checkbox$/i })).toBeDefined();
+			expect(screen.getByRole("button", { name: /^Dropdown$/i })).toBeDefined();
+			expect(screen.getByRole("button", { name: /Text Input/i })).toBeDefined();
+			expect(
+				screen.getByRole("button", { name: /Submit Button/i }),
 			).toBeDefined();
 		});
 	});

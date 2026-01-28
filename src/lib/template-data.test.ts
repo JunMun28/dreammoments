@@ -3,8 +3,8 @@ import { getAllTemplates, getTemplateById, templates } from "./template-data";
 
 describe("template-data", () => {
 	describe("templates", () => {
-		it("should have at least 3 templates", () => {
-			expect(templates.length).toBeGreaterThanOrEqual(3);
+		it("should have at least 1 template", () => {
+			expect(templates.length).toBeGreaterThanOrEqual(1);
 		});
 
 		it("should have unique IDs for each template", () => {
@@ -61,9 +61,9 @@ describe("template-data", () => {
 
 	describe("getTemplateById", () => {
 		it("should return template when ID exists", () => {
-			const template = getTemplateById("classic-elegance");
+			const template = getTemplateById("crimson-blessings");
 			expect(template).toBeDefined();
-			expect(template?.name).toBe("Classic Elegance");
+			expect(template?.name).toBe("Crimson Blessings 喜庆红");
 		});
 
 		it("should return undefined for non-existent ID", () => {

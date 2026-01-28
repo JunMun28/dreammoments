@@ -7,9 +7,9 @@ import {
 	submitRsvpInternal,
 } from "./rsvp-server";
 
-// Mock the database
-vi.mock("@/db/index", () => ({
-	db: {
+// Use vi.hoisted to create mock before vi.mock hoisting
+const { mockDb } = vi.hoisted(() => ({
+	mockDb: {
 		select: vi.fn(),
 		insert: vi.fn(),
 		update: vi.fn(),
@@ -17,15 +17,10 @@ vi.mock("@/db/index", () => ({
 	},
 }));
 
-// Get the mocked db
-import { db } from "@/db/index";
-
-const mockDb = db as unknown as {
-	select: ReturnType<typeof vi.fn>;
-	insert: ReturnType<typeof vi.fn>;
-	update: ReturnType<typeof vi.fn>;
-	delete: ReturnType<typeof vi.fn>;
-};
+vi.mock("@/db/index", () => ({
+	db: mockDb,
+	getDb: vi.fn(() => Promise.resolve(mockDb)),
+}));
 
 describe("rsvp-server", () => {
 	beforeEach(() => {
@@ -195,13 +190,20 @@ describe("rsvp-server", () => {
 		});
 
 		it("should return guest list with their RSVP responses", async () => {
-			// Mock: get guests in group
+			// Mock: get guests in group (batch query 1)
 			mockDb.select.mockReturnValueOnce({
 				from: vi.fn().mockReturnValueOnce({
 					where: vi.fn().mockResolvedValueOnce([
-						{ id: "guest-1", name: "John Doe", email: null, phone: null },
+						{
+							id: "guest-1",
+							groupId: "group-123",
+							name: "John Doe",
+							email: null,
+							phone: null,
+						},
 						{
 							id: "guest-2",
+							groupId: "group-123",
 							name: "Jane Smith",
 							email: "jane@example.com",
 							phone: null,
@@ -210,7 +212,7 @@ describe("rsvp-server", () => {
 				}),
 			});
 
-			// Mock: get RSVP responses for guest-1 (has response)
+			// Mock: batch get all RSVP responses for all guests (batch query 2)
 			mockDb.select.mockReturnValueOnce({
 				from: vi.fn().mockReturnValueOnce({
 					where: vi.fn().mockResolvedValueOnce([
@@ -224,13 +226,6 @@ describe("rsvp-server", () => {
 							plusOneNames: null,
 						},
 					]),
-				}),
-			});
-
-			// Mock: get RSVP responses for guest-2 (no response)
-			mockDb.select.mockReturnValueOnce({
-				from: vi.fn().mockReturnValueOnce({
-					where: vi.fn().mockResolvedValueOnce([]),
 				}),
 			});
 
@@ -257,17 +252,29 @@ describe("rsvp-server", () => {
 		});
 
 		it("should calculate total headcount correctly", async () => {
-			// Mock: two guests
+			// Mock: two guests (batch query 1)
 			mockDb.select.mockReturnValueOnce({
 				from: vi.fn().mockReturnValueOnce({
 					where: vi.fn().mockResolvedValueOnce([
-						{ id: "guest-1", name: "John", email: null, phone: null },
-						{ id: "guest-2", name: "Jane", email: null, phone: null },
+						{
+							id: "guest-1",
+							groupId: "group-123",
+							name: "John",
+							email: null,
+							phone: null,
+						},
+						{
+							id: "guest-2",
+							groupId: "group-123",
+							name: "Jane",
+							email: null,
+							phone: null,
+						},
 					]),
 				}),
 			});
 
-			// Guest 1: attending with 2 plus-ones
+			// Mock: batch get all RSVP responses (batch query 2)
 			mockDb.select.mockReturnValueOnce({
 				from: vi.fn().mockReturnValueOnce({
 					where: vi.fn().mockResolvedValueOnce([
@@ -280,14 +287,6 @@ describe("rsvp-server", () => {
 							plusOneCount: 2,
 							plusOneNames: "Child 1, Child 2",
 						},
-					]),
-				}),
-			});
-
-			// Guest 2: attending with no plus-ones
-			mockDb.select.mockReturnValueOnce({
-				from: vi.fn().mockReturnValueOnce({
-					where: vi.fn().mockResolvedValueOnce([
 						{
 							id: "r2",
 							guestId: "guest-2",
@@ -318,7 +317,7 @@ describe("rsvp-server", () => {
 		});
 
 		it("should return zeros when no guest groups exist", async () => {
-			// Mock: no guest groups
+			// Mock: no guest groups (batch query 1)
 			mockDb.select.mockReturnValueOnce({
 				from: vi.fn().mockReturnValueOnce({
 					where: vi.fn().mockResolvedValueOnce([]),
@@ -335,7 +334,7 @@ describe("rsvp-server", () => {
 		});
 
 		it("should aggregate totals across all groups", async () => {
-			// Mock: get guest groups for invitation
+			// Mock: get guest groups for invitation (batch query 1)
 			mockDb.select.mockReturnValueOnce({
 				from: vi.fn().mockReturnValueOnce({
 					where: vi.fn().mockResolvedValueOnce([
@@ -355,16 +354,36 @@ describe("rsvp-server", () => {
 				}),
 			});
 
-			// Mock: Group 1 guests
+			// Mock: batch get all guests for all groups (batch query 2)
 			mockDb.select.mockReturnValueOnce({
 				from: vi.fn().mockReturnValueOnce({
 					where: vi.fn().mockResolvedValueOnce([
-						{ id: "guest-1", name: "Mom", email: null, phone: null },
-						{ id: "guest-2", name: "Dad", email: null, phone: null },
+						{
+							id: "guest-1",
+							groupId: "group-1",
+							name: "Mom",
+							email: null,
+							phone: null,
+						},
+						{
+							id: "guest-2",
+							groupId: "group-1",
+							name: "Dad",
+							email: null,
+							phone: null,
+						},
+						{
+							id: "guest-3",
+							groupId: "group-2",
+							name: "Alice",
+							email: null,
+							phone: null,
+						},
 					]),
 				}),
 			});
-			// Guest 1: attending with 1 plus-one
+
+			// Mock: batch get all RSVP responses (batch query 3)
 			mockDb.select.mockReturnValueOnce({
 				from: vi.fn().mockReturnValueOnce({
 					where: vi.fn().mockResolvedValueOnce([
@@ -377,13 +396,6 @@ describe("rsvp-server", () => {
 							plusOneCount: 1,
 							plusOneNames: "Brother",
 						},
-					]),
-				}),
-			});
-			// Guest 2: declined
-			mockDb.select.mockReturnValueOnce({
-				from: vi.fn().mockReturnValueOnce({
-					where: vi.fn().mockResolvedValueOnce([
 						{
 							id: "r2",
 							guestId: "guest-2",
@@ -393,24 +405,8 @@ describe("rsvp-server", () => {
 							plusOneCount: 0,
 							plusOneNames: null,
 						},
+						// guest-3 has no response (pending)
 					]),
-				}),
-			});
-
-			// Mock: Group 2 guests
-			mockDb.select.mockReturnValueOnce({
-				from: vi.fn().mockReturnValueOnce({
-					where: vi
-						.fn()
-						.mockResolvedValueOnce([
-							{ id: "guest-3", name: "Alice", email: null, phone: null },
-						]),
-				}),
-			});
-			// Guest 3: pending (no response)
-			mockDb.select.mockReturnValueOnce({
-				from: vi.fn().mockReturnValueOnce({
-					where: vi.fn().mockResolvedValueOnce([]),
 				}),
 			});
 
@@ -428,7 +424,7 @@ describe("rsvp-server", () => {
 		});
 
 		it("should return per-group breakdown", async () => {
-			// Mock: single group
+			// Mock: single group (batch query 1)
 			mockDb.select.mockReturnValueOnce({
 				from: vi.fn().mockReturnValueOnce({
 					where: vi.fn().mockResolvedValueOnce([
@@ -442,12 +438,13 @@ describe("rsvp-server", () => {
 				}),
 			});
 
-			// Mock: guests
+			// Mock: batch get all guests (batch query 2)
 			mockDb.select.mockReturnValueOnce({
 				from: vi.fn().mockReturnValueOnce({
 					where: vi.fn().mockResolvedValueOnce([
 						{
 							id: "guest-1",
+							groupId: "group-1",
 							name: "John",
 							email: "john@test.com",
 							phone: null,
@@ -455,6 +452,8 @@ describe("rsvp-server", () => {
 					]),
 				}),
 			});
+
+			// Mock: batch get all RSVP responses (batch query 3)
 			mockDb.select.mockReturnValueOnce({
 				from: vi.fn().mockReturnValueOnce({
 					where: vi.fn().mockResolvedValueOnce([
@@ -493,7 +492,7 @@ describe("rsvp-server", () => {
 		});
 
 		it("should return empty array when no guest groups exist", async () => {
-			// Mock: no guest groups
+			// Mock: no guest groups (batch query 1)
 			mockDb.select.mockReturnValueOnce({
 				from: vi.fn().mockReturnValueOnce({
 					where: vi.fn().mockResolvedValueOnce([]),
@@ -510,7 +509,7 @@ describe("rsvp-server", () => {
 			const respondedAt = new Date("2026-01-10T14:30:00Z");
 			const updatedAt = new Date("2026-01-11T10:00:00Z");
 
-			// Mock: get guest groups for invitation
+			// Mock: get guest groups for invitation (batch query 1)
 			mockDb.select.mockReturnValueOnce({
 				from: vi.fn().mockReturnValueOnce({
 					where: vi.fn().mockResolvedValueOnce([
@@ -524,12 +523,13 @@ describe("rsvp-server", () => {
 				}),
 			});
 
-			// Mock: get guests in group
+			// Mock: batch get all guests (batch query 2)
 			mockDb.select.mockReturnValueOnce({
 				from: vi.fn().mockReturnValueOnce({
 					where: vi.fn().mockResolvedValueOnce([
 						{
 							id: "guest-1",
+							groupId: "group-1",
 							name: "John Doe",
 							email: "john@example.com",
 							phone: "555-1234",
@@ -538,7 +538,7 @@ describe("rsvp-server", () => {
 				}),
 			});
 
-			// Mock: get RSVP response for guest
+			// Mock: batch get all RSVP responses (batch query 3)
 			mockDb.select.mockReturnValueOnce({
 				from: vi.fn().mockReturnValueOnce({
 					where: vi.fn().mockResolvedValueOnce([
@@ -580,7 +580,7 @@ describe("rsvp-server", () => {
 		});
 
 		it("should return pending status for guests without response", async () => {
-			// Mock: get guest groups
+			// Mock: get guest groups (batch query 1)
 			mockDb.select.mockReturnValueOnce({
 				from: vi.fn().mockReturnValueOnce({
 					where: vi.fn().mockResolvedValueOnce([
@@ -594,18 +594,22 @@ describe("rsvp-server", () => {
 				}),
 			});
 
-			// Mock: guests
+			// Mock: batch get all guests (batch query 2)
 			mockDb.select.mockReturnValueOnce({
 				from: vi.fn().mockReturnValueOnce({
-					where: vi
-						.fn()
-						.mockResolvedValueOnce([
-							{ id: "guest-1", name: "Alice", email: null, phone: null },
-						]),
+					where: vi.fn().mockResolvedValueOnce([
+						{
+							id: "guest-1",
+							groupId: "group-1",
+							name: "Alice",
+							email: null,
+							phone: null,
+						},
+					]),
 				}),
 			});
 
-			// Mock: no RSVP response
+			// Mock: batch get all RSVP responses - none (batch query 3)
 			mockDb.select.mockReturnValueOnce({
 				from: vi.fn().mockReturnValueOnce({
 					where: vi.fn().mockResolvedValueOnce([]),
@@ -622,7 +626,7 @@ describe("rsvp-server", () => {
 		it("should return declined status correctly", async () => {
 			const respondedAt = new Date("2026-01-12T09:00:00Z");
 
-			// Mock: get guest groups
+			// Mock: get guest groups (batch query 1)
 			mockDb.select.mockReturnValueOnce({
 				from: vi.fn().mockReturnValueOnce({
 					where: vi.fn().mockResolvedValueOnce([
@@ -636,12 +640,13 @@ describe("rsvp-server", () => {
 				}),
 			});
 
-			// Mock: guests
+			// Mock: batch get all guests (batch query 2)
 			mockDb.select.mockReturnValueOnce({
 				from: vi.fn().mockReturnValueOnce({
 					where: vi.fn().mockResolvedValueOnce([
 						{
 							id: "guest-1",
+							groupId: "group-1",
 							name: "Bob",
 							email: "bob@work.com",
 							phone: null,
@@ -650,7 +655,7 @@ describe("rsvp-server", () => {
 				}),
 			});
 
-			// Mock: RSVP response - declined
+			// Mock: batch get all RSVP responses (batch query 3)
 			mockDb.select.mockReturnValueOnce({
 				from: vi.fn().mockReturnValueOnce({
 					where: vi.fn().mockResolvedValueOnce([
@@ -677,7 +682,7 @@ describe("rsvp-server", () => {
 		});
 
 		it("should aggregate guests from multiple groups", async () => {
-			// Mock: get multiple guest groups
+			// Mock: get multiple guest groups (batch query 1)
 			mockDb.select.mockReturnValueOnce({
 				from: vi.fn().mockReturnValueOnce({
 					where: vi.fn().mockResolvedValueOnce([
@@ -697,32 +702,29 @@ describe("rsvp-server", () => {
 				}),
 			});
 
-			// Mock: Group 1 guests
+			// Mock: batch get all guests from all groups (batch query 2)
 			mockDb.select.mockReturnValueOnce({
 				from: vi.fn().mockReturnValueOnce({
-					where: vi
-						.fn()
-						.mockResolvedValueOnce([
-							{ id: "guest-1", name: "Mom", email: null, phone: null },
-						]),
-				}),
-			});
-			mockDb.select.mockReturnValueOnce({
-				from: vi.fn().mockReturnValueOnce({
-					where: vi.fn().mockResolvedValueOnce([]),
+					where: vi.fn().mockResolvedValueOnce([
+						{
+							id: "guest-1",
+							groupId: "group-1",
+							name: "Mom",
+							email: null,
+							phone: null,
+						},
+						{
+							id: "guest-2",
+							groupId: "group-2",
+							name: "Alice",
+							email: null,
+							phone: null,
+						},
+					]),
 				}),
 			});
 
-			// Mock: Group 2 guests
-			mockDb.select.mockReturnValueOnce({
-				from: vi.fn().mockReturnValueOnce({
-					where: vi
-						.fn()
-						.mockResolvedValueOnce([
-							{ id: "guest-2", name: "Alice", email: null, phone: null },
-						]),
-				}),
-			});
+			// Mock: batch get all RSVP responses - none (batch query 3)
 			mockDb.select.mockReturnValueOnce({
 				from: vi.fn().mockReturnValueOnce({
 					where: vi.fn().mockResolvedValueOnce([]),

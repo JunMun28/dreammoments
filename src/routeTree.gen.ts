@@ -11,18 +11,21 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RsvpRouteImport } from './routes/rsvp'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as CanvasEditorRouteImport } from './routes/canvas-editor'
 import { Route as BuilderRouteImport } from './routes/builder'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TemplatesIndexRouteImport } from './routes/templates.index'
 import { Route as TemplatesTemplateIdRouteImport } from './routes/templates.$templateId'
 import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
 import { Route as DemoNeonRouteImport } from './routes/demo/neon'
 import { Route as DemoDrizzleRouteImport } from './routes/demo/drizzle'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
+import { Route as ApiUploadVideoRouteImport } from './routes/api.upload-video'
+import { Route as ApiUploadMusicRouteImport } from './routes/api.upload-music'
 import { Route as ApiUploadHeroImageRouteImport } from './routes/api.upload-hero-image'
 import { Route as ApiUploadGalleryImageRouteImport } from './routes/api.upload-gallery-image'
 import { Route as ApiRemoveHeroImageRouteImport } from './routes/api.remove-hero-image'
+import { Route as ApiRemoveBackgroundRouteImport } from './routes/api.remove-background'
 import { Route as ApiDeleteGalleryImageRouteImport } from './routes/api.delete-gallery-image'
 import { Route as DemoStartServerFuncsRouteImport } from './routes/demo/start.server-funcs'
 import { Route as DemoStartApiRequestRouteImport } from './routes/demo/start.api-request'
@@ -45,11 +48,6 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CanvasEditorRoute = CanvasEditorRouteImport.update({
-  id: '/canvas-editor',
-  path: '/canvas-editor',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const BuilderRoute = BuilderRouteImport.update({
   id: '/builder',
   path: '/builder',
@@ -63,6 +61,11 @@ const SplatRoute = SplatRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TemplatesIndexRoute = TemplatesIndexRouteImport.update({
+  id: '/templates/',
+  path: '/templates/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TemplatesTemplateIdRoute = TemplatesTemplateIdRouteImport.update({
@@ -90,6 +93,16 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   path: '/auth/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiUploadVideoRoute = ApiUploadVideoRouteImport.update({
+  id: '/api/upload-video',
+  path: '/api/upload-video',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiUploadMusicRoute = ApiUploadMusicRouteImport.update({
+  id: '/api/upload-music',
+  path: '/api/upload-music',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiUploadHeroImageRoute = ApiUploadHeroImageRouteImport.update({
   id: '/api/upload-hero-image',
   path: '/api/upload-hero-image',
@@ -103,6 +116,11 @@ const ApiUploadGalleryImageRoute = ApiUploadGalleryImageRouteImport.update({
 const ApiRemoveHeroImageRoute = ApiRemoveHeroImageRouteImport.update({
   id: '/api/remove-hero-image',
   path: '/api/remove-hero-image',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiRemoveBackgroundRoute = ApiRemoveBackgroundRouteImport.update({
+  id: '/api/remove-background',
+  path: '/api/remove-background',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiDeleteGalleryImageRoute = ApiDeleteGalleryImageRouteImport.update({
@@ -165,18 +183,21 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/builder': typeof BuilderRoute
-  '/canvas-editor': typeof CanvasEditorRoute
   '/login': typeof LoginRoute
   '/rsvp': typeof RsvpRoute
   '/api/delete-gallery-image': typeof ApiDeleteGalleryImageRoute
+  '/api/remove-background': typeof ApiRemoveBackgroundRoute
   '/api/remove-hero-image': typeof ApiRemoveHeroImageRoute
   '/api/upload-gallery-image': typeof ApiUploadGalleryImageRoute
   '/api/upload-hero-image': typeof ApiUploadHeroImageRoute
+  '/api/upload-music': typeof ApiUploadMusicRoute
+  '/api/upload-video': typeof ApiUploadVideoRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/demo/drizzle': typeof DemoDrizzleRoute
   '/demo/neon': typeof DemoNeonRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/templates/$templateId': typeof TemplatesTemplateIdRoute
+  '/templates': typeof TemplatesIndexRoute
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/api/tq-todos': typeof DemoApiTqTodosRoute
   '/demo/form/address': typeof DemoFormAddressRoute
@@ -192,18 +213,21 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/builder': typeof BuilderRoute
-  '/canvas-editor': typeof CanvasEditorRoute
   '/login': typeof LoginRoute
   '/rsvp': typeof RsvpRoute
   '/api/delete-gallery-image': typeof ApiDeleteGalleryImageRoute
+  '/api/remove-background': typeof ApiRemoveBackgroundRoute
   '/api/remove-hero-image': typeof ApiRemoveHeroImageRoute
   '/api/upload-gallery-image': typeof ApiUploadGalleryImageRoute
   '/api/upload-hero-image': typeof ApiUploadHeroImageRoute
+  '/api/upload-music': typeof ApiUploadMusicRoute
+  '/api/upload-video': typeof ApiUploadVideoRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/demo/drizzle': typeof DemoDrizzleRoute
   '/demo/neon': typeof DemoNeonRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/templates/$templateId': typeof TemplatesTemplateIdRoute
+  '/templates': typeof TemplatesIndexRoute
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/api/tq-todos': typeof DemoApiTqTodosRoute
   '/demo/form/address': typeof DemoFormAddressRoute
@@ -220,18 +244,21 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
   '/builder': typeof BuilderRoute
-  '/canvas-editor': typeof CanvasEditorRoute
   '/login': typeof LoginRoute
   '/rsvp': typeof RsvpRoute
   '/api/delete-gallery-image': typeof ApiDeleteGalleryImageRoute
+  '/api/remove-background': typeof ApiRemoveBackgroundRoute
   '/api/remove-hero-image': typeof ApiRemoveHeroImageRoute
   '/api/upload-gallery-image': typeof ApiUploadGalleryImageRoute
   '/api/upload-hero-image': typeof ApiUploadHeroImageRoute
+  '/api/upload-music': typeof ApiUploadMusicRoute
+  '/api/upload-video': typeof ApiUploadVideoRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/demo/drizzle': typeof DemoDrizzleRoute
   '/demo/neon': typeof DemoNeonRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/templates/$templateId': typeof TemplatesTemplateIdRoute
+  '/templates/': typeof TemplatesIndexRoute
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/api/tq-todos': typeof DemoApiTqTodosRoute
   '/demo/form/address': typeof DemoFormAddressRoute
@@ -249,18 +276,21 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/builder'
-    | '/canvas-editor'
     | '/login'
     | '/rsvp'
     | '/api/delete-gallery-image'
+    | '/api/remove-background'
     | '/api/remove-hero-image'
     | '/api/upload-gallery-image'
     | '/api/upload-hero-image'
+    | '/api/upload-music'
+    | '/api/upload-video'
     | '/auth/callback'
     | '/demo/drizzle'
     | '/demo/neon'
     | '/demo/tanstack-query'
     | '/templates/$templateId'
+    | '/templates'
     | '/demo/api/names'
     | '/demo/api/tq-todos'
     | '/demo/form/address'
@@ -276,18 +306,21 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/builder'
-    | '/canvas-editor'
     | '/login'
     | '/rsvp'
     | '/api/delete-gallery-image'
+    | '/api/remove-background'
     | '/api/remove-hero-image'
     | '/api/upload-gallery-image'
     | '/api/upload-hero-image'
+    | '/api/upload-music'
+    | '/api/upload-video'
     | '/auth/callback'
     | '/demo/drizzle'
     | '/demo/neon'
     | '/demo/tanstack-query'
     | '/templates/$templateId'
+    | '/templates'
     | '/demo/api/names'
     | '/demo/api/tq-todos'
     | '/demo/form/address'
@@ -303,18 +336,21 @@ export interface FileRouteTypes {
     | '/'
     | '/$'
     | '/builder'
-    | '/canvas-editor'
     | '/login'
     | '/rsvp'
     | '/api/delete-gallery-image'
+    | '/api/remove-background'
     | '/api/remove-hero-image'
     | '/api/upload-gallery-image'
     | '/api/upload-hero-image'
+    | '/api/upload-music'
+    | '/api/upload-video'
     | '/auth/callback'
     | '/demo/drizzle'
     | '/demo/neon'
     | '/demo/tanstack-query'
     | '/templates/$templateId'
+    | '/templates/'
     | '/demo/api/names'
     | '/demo/api/tq-todos'
     | '/demo/form/address'
@@ -331,18 +367,21 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SplatRoute: typeof SplatRoute
   BuilderRoute: typeof BuilderRoute
-  CanvasEditorRoute: typeof CanvasEditorRoute
   LoginRoute: typeof LoginRoute
   RsvpRoute: typeof RsvpRoute
   ApiDeleteGalleryImageRoute: typeof ApiDeleteGalleryImageRoute
+  ApiRemoveBackgroundRoute: typeof ApiRemoveBackgroundRoute
   ApiRemoveHeroImageRoute: typeof ApiRemoveHeroImageRoute
   ApiUploadGalleryImageRoute: typeof ApiUploadGalleryImageRoute
   ApiUploadHeroImageRoute: typeof ApiUploadHeroImageRoute
+  ApiUploadMusicRoute: typeof ApiUploadMusicRoute
+  ApiUploadVideoRoute: typeof ApiUploadVideoRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   DemoDrizzleRoute: typeof DemoDrizzleRoute
   DemoNeonRoute: typeof DemoNeonRoute
   DemoTanstackQueryRoute: typeof DemoTanstackQueryRoute
   TemplatesTemplateIdRoute: typeof TemplatesTemplateIdRoute
+  TemplatesIndexRoute: typeof TemplatesIndexRoute
   DemoApiNamesRoute: typeof DemoApiNamesRoute
   DemoApiTqTodosRoute: typeof DemoApiTqTodosRoute
   DemoFormAddressRoute: typeof DemoFormAddressRoute
@@ -371,13 +410,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/canvas-editor': {
-      id: '/canvas-editor'
-      path: '/canvas-editor'
-      fullPath: '/canvas-editor'
-      preLoaderRoute: typeof CanvasEditorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/builder': {
       id: '/builder'
       path: '/builder'
@@ -397,6 +429,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/templates/': {
+      id: '/templates/'
+      path: '/templates'
+      fullPath: '/templates'
+      preLoaderRoute: typeof TemplatesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/templates/$templateId': {
@@ -434,6 +473,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/upload-video': {
+      id: '/api/upload-video'
+      path: '/api/upload-video'
+      fullPath: '/api/upload-video'
+      preLoaderRoute: typeof ApiUploadVideoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/upload-music': {
+      id: '/api/upload-music'
+      path: '/api/upload-music'
+      fullPath: '/api/upload-music'
+      preLoaderRoute: typeof ApiUploadMusicRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/upload-hero-image': {
       id: '/api/upload-hero-image'
       path: '/api/upload-hero-image'
@@ -453,6 +506,13 @@ declare module '@tanstack/react-router' {
       path: '/api/remove-hero-image'
       fullPath: '/api/remove-hero-image'
       preLoaderRoute: typeof ApiRemoveHeroImageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/remove-background': {
+      id: '/api/remove-background'
+      path: '/api/remove-background'
+      fullPath: '/api/remove-background'
+      preLoaderRoute: typeof ApiRemoveBackgroundRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/delete-gallery-image': {
@@ -539,18 +599,21 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
   BuilderRoute: BuilderRoute,
-  CanvasEditorRoute: CanvasEditorRoute,
   LoginRoute: LoginRoute,
   RsvpRoute: RsvpRoute,
   ApiDeleteGalleryImageRoute: ApiDeleteGalleryImageRoute,
+  ApiRemoveBackgroundRoute: ApiRemoveBackgroundRoute,
   ApiRemoveHeroImageRoute: ApiRemoveHeroImageRoute,
   ApiUploadGalleryImageRoute: ApiUploadGalleryImageRoute,
   ApiUploadHeroImageRoute: ApiUploadHeroImageRoute,
+  ApiUploadMusicRoute: ApiUploadMusicRoute,
+  ApiUploadVideoRoute: ApiUploadVideoRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   DemoDrizzleRoute: DemoDrizzleRoute,
   DemoNeonRoute: DemoNeonRoute,
   DemoTanstackQueryRoute: DemoTanstackQueryRoute,
   TemplatesTemplateIdRoute: TemplatesTemplateIdRoute,
+  TemplatesIndexRoute: TemplatesIndexRoute,
   DemoApiNamesRoute: DemoApiNamesRoute,
   DemoApiTqTodosRoute: DemoApiTqTodosRoute,
   DemoFormAddressRoute: DemoFormAddressRoute,

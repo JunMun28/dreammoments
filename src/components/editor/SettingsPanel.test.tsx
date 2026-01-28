@@ -5,10 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SettingsPanel } from "./SettingsPanel";
 
 describe("SettingsPanel", () => {
-  const defaultProps = {
-    currentMode: "structured" as const,
-    onModeChange: vi.fn(),
-  };
+  const defaultProps = {};
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -18,131 +15,84 @@ describe("SettingsPanel", () => {
     cleanup();
   });
 
-  describe("CE-019: Editor Mode UI", () => {
-    it("renders editor mode toggle section", () => {
+  describe("CE-027: Canvas Height Adjustment", () => {
+    it("renders canvas height section", () => {
       render(<SettingsPanel {...defaultProps} />);
 
-      expect(screen.getByText("Editor Mode")).toBeDefined();
+      expect(screen.getByText("Canvas Height")).toBeDefined();
     });
 
-    it("shows Structured mode option", () => {
+    it("displays current canvas height value", () => {
+      render(<SettingsPanel {...defaultProps} canvasHeight={1500} />);
+
+      expect(screen.getByText("1500px")).toBeDefined();
+    });
+
+    it("displays default height of 700px when not specified", () => {
       render(<SettingsPanel {...defaultProps} />);
 
-      expect(screen.getByLabelText(/Structured/)).toBeDefined();
+      expect(screen.getByText("700px")).toBeDefined();
     });
 
-    it("shows Canvas mode option", () => {
+    it("renders height slider with correct min/max", () => {
       render(<SettingsPanel {...defaultProps} />);
 
-      expect(screen.getByLabelText(/Canvas/)).toBeDefined();
+      const slider = screen.getByRole("slider", { name: /canvas height/i });
+      expect(slider).toBeDefined();
+      expect(slider.getAttribute("min")).toBe("700");
+      expect(slider.getAttribute("max")).toBe("20000");
     });
 
-    it("displays current mode as structured by default", () => {
-      render(<SettingsPanel {...defaultProps} currentMode="structured" />);
-
-      const structuredRadio = screen.getByRole("radio", {
-        name: /Structured/,
-      }) as HTMLInputElement;
-      expect(structuredRadio.checked).toBe(true);
-    });
-
-    it("displays current mode as canvas when set", () => {
-      render(<SettingsPanel {...defaultProps} currentMode="canvas" />);
-
-      const canvasRadio = screen.getByRole("radio", {
-        name: /Canvas/,
-      }) as HTMLInputElement;
-      expect(canvasRadio.checked).toBe(true);
-    });
-
-    it("shows warning dialog when switching to canvas mode", async () => {
-      render(<SettingsPanel {...defaultProps} currentMode="structured" />);
-
-      const canvasRadio = screen.getByRole("radio", { name: /Canvas/ });
-      fireEvent.click(canvasRadio);
-
-      // Warning dialog should appear
-      const dialogTitle = await screen.findByText(/Switch to Canvas Mode/);
-      expect(dialogTitle).toBeDefined();
-      expect(screen.getByText(/This action cannot be undone/)).toBeDefined();
-    });
-
-    it("calls onModeChange when confirmed in warning dialog", async () => {
-      const onModeChange = vi.fn();
+    it("calls onCanvasHeightChange when slider is changed", () => {
+      const onCanvasHeightChange = vi.fn();
       render(
         <SettingsPanel
           {...defaultProps}
-          currentMode="structured"
-          onModeChange={onModeChange}
+          canvasHeight={700}
+          onCanvasHeightChange={onCanvasHeightChange}
         />,
       );
 
-      // Click canvas mode
-      const canvasRadio = screen.getByRole("radio", { name: /Canvas/ });
-      fireEvent.click(canvasRadio);
+      const slider = screen.getByRole("slider", { name: /canvas height/i });
+      fireEvent.change(slider, { target: { value: "1000" } });
 
-      // Confirm in dialog
-      const confirmButton = await screen.findByRole("button", {
-        name: /Switch to Canvas/,
-      });
-      fireEvent.click(confirmButton);
-
-      expect(onModeChange).toHaveBeenCalledWith("canvas");
+      expect(onCanvasHeightChange).toHaveBeenCalledWith(1000);
     });
 
-    it("does not call onModeChange when dialog is cancelled", async () => {
-      const onModeChange = vi.fn();
-      render(
-        <SettingsPanel
-          {...defaultProps}
-          currentMode="structured"
-          onModeChange={onModeChange}
-        />,
-      );
-
-      // Click canvas mode
-      const canvasRadio = screen.getByRole("radio", { name: /Canvas/ });
-      fireEvent.click(canvasRadio);
-
-      // Cancel dialog
-      const cancelButton = await screen.findByRole("button", {
-        name: /Cancel/,
-      });
-      fireEvent.click(cancelButton);
-
-      expect(onModeChange).not.toHaveBeenCalled();
-    });
-
-    it("allows switching from canvas to structured without warning", () => {
-      const onModeChange = vi.fn();
-      render(
-        <SettingsPanel
-          {...defaultProps}
-          currentMode="canvas"
-          onModeChange={onModeChange}
-        />,
-      );
-
-      const structuredRadio = screen.getByRole("radio", {
-        name: /Structured/,
-      });
-      fireEvent.click(structuredRadio);
-
-      // No dialog should appear, mode changes directly
-      expect(onModeChange).toHaveBeenCalledWith("structured");
-    });
-
-    it("shows mode descriptions", () => {
+    it("shows preset height buttons", () => {
       render(<SettingsPanel {...defaultProps} />);
 
-      expect(
-        screen.getByText(/Use predefined sections and form-based editing/),
-      ).toBeDefined();
-      expect(
-        screen.getByText(/Full creative control with drag-and-drop canvas/),
-      ).toBeDefined();
+      expect(screen.getByRole("button", { name: "700" })).toBeDefined();
+      expect(screen.getByRole("button", { name: "1400" })).toBeDefined();
+      expect(screen.getByRole("button", { name: "2100" })).toBeDefined();
+      expect(screen.getByRole("button", { name: "5000" })).toBeDefined();
     });
 
+    it("calls onCanvasHeightChange when preset button is clicked", () => {
+      const onCanvasHeightChange = vi.fn();
+      render(
+        <SettingsPanel
+          {...defaultProps}
+          canvasHeight={700}
+          onCanvasHeightChange={onCanvasHeightChange}
+        />,
+      );
+
+      const presetButton = screen.getByRole("button", { name: "2100" });
+      fireEvent.click(presetButton);
+
+      expect(onCanvasHeightChange).toHaveBeenCalledWith(2100);
+    });
+
+    it("highlights current preset button", () => {
+      render(<SettingsPanel {...defaultProps} canvasHeight={1400} />);
+
+      const presetButton = screen.getByRole("button", { name: "1400" });
+      expect(presetButton.className).toContain("bg-blue");
+    });
+  });
+
+  describe("Save indicators", () => {
     it("shows saving indicator when isSaving is true", () => {
       render(<SettingsPanel {...defaultProps} isSaving={true} />);
 
@@ -156,100 +106,103 @@ describe("SettingsPanel", () => {
     });
   });
 
-  describe("CE-027: Canvas Height Adjustment", () => {
-    it("renders canvas height section when in canvas mode", () => {
-      render(<SettingsPanel {...defaultProps} currentMode="canvas" />);
+  describe("Auto-scroll settings", () => {
+    it("shows auto-scroll section", () => {
+      render(<SettingsPanel {...defaultProps} />);
 
-      expect(screen.getByText("Canvas Height")).toBeDefined();
+      expect(screen.getByText("Auto Scroll")).toBeDefined();
     });
 
-    it("does not show canvas height section in structured mode", () => {
-      render(<SettingsPanel {...defaultProps} currentMode="structured" />);
+    it("renders auto-scroll toggle", () => {
+      render(<SettingsPanel {...defaultProps} />);
 
-      expect(screen.queryByText("Canvas Height")).toBeNull();
+      const toggle = screen.getByRole("switch", { name: /auto scroll/i });
+      expect(toggle).toBeDefined();
     });
 
-    it("displays current canvas height value", () => {
+    it("auto-scroll toggle is unchecked by default", () => {
+      render(<SettingsPanel {...defaultProps} />);
+
+      const toggle = screen.getByRole("switch", { name: /auto scroll/i });
+      expect(toggle.getAttribute("aria-checked")).toBe("false");
+    });
+
+    it("auto-scroll toggle is checked when autoScroll is true", () => {
+      render(<SettingsPanel {...defaultProps} autoScroll={true} />);
+
+      const toggle = screen.getByRole("switch", { name: /auto scroll/i });
+      expect(toggle.getAttribute("aria-checked")).toBe("true");
+    });
+
+    it("calls onAutoScrollChange when toggle is clicked", () => {
+      const onAutoScrollChange = vi.fn();
       render(
         <SettingsPanel
           {...defaultProps}
-          currentMode="canvas"
-          canvasHeight={1500}
+          onAutoScrollChange={onAutoScrollChange}
         />,
       );
 
-      expect(screen.getByText("1500px")).toBeDefined();
+      const toggle = screen.getByRole("switch", { name: /auto scroll/i });
+      fireEvent.click(toggle);
+
+      expect(onAutoScrollChange).toHaveBeenCalledWith(true);
     });
 
-    it("displays default height of 700px when not specified", () => {
-      render(<SettingsPanel {...defaultProps} currentMode="canvas" />);
+    it("shows duration slider when auto-scroll is enabled", () => {
+      render(<SettingsPanel {...defaultProps} autoScroll={true} />);
 
-      expect(screen.getByText("700px")).toBeDefined();
-    });
-
-    it("renders height slider with correct min/max", () => {
-      render(<SettingsPanel {...defaultProps} currentMode="canvas" />);
-
-      const slider = screen.getByRole("slider", { name: /canvas height/i });
+      expect(screen.getByText("Scroll Duration")).toBeDefined();
+      const slider = screen.getByRole("slider", { name: /scroll duration/i });
       expect(slider).toBeDefined();
-      expect(slider.getAttribute("min")).toBe("700");
-      expect(slider.getAttribute("max")).toBe("20000");
     });
 
-    it("calls onCanvasHeightChange when slider is changed", () => {
-      const onCanvasHeightChange = vi.fn();
+    it("does not show duration slider when auto-scroll is disabled", () => {
+      render(<SettingsPanel {...defaultProps} autoScroll={false} />);
+
+      expect(screen.queryByText("Scroll Duration")).toBeNull();
+    });
+
+    it("displays current scroll duration value", () => {
       render(
         <SettingsPanel
           {...defaultProps}
-          currentMode="canvas"
-          canvasHeight={700}
-          onCanvasHeightChange={onCanvasHeightChange}
+          autoScroll={true}
+          scrollDuration={60}
         />,
       );
 
-      const slider = screen.getByRole("slider", { name: /canvas height/i });
-      fireEvent.change(slider, { target: { value: "1000" } });
-
-      expect(onCanvasHeightChange).toHaveBeenCalledWith(1000);
+      expect(screen.getByText("60s")).toBeDefined();
     });
 
-    it("shows preset height buttons", () => {
-      render(<SettingsPanel {...defaultProps} currentMode="canvas" />);
+    it("uses default scroll duration of 30s", () => {
+      render(<SettingsPanel {...defaultProps} autoScroll={true} />);
 
-      expect(screen.getByRole("button", { name: "700" })).toBeDefined();
-      expect(screen.getByRole("button", { name: "1400" })).toBeDefined();
-      expect(screen.getByRole("button", { name: "2100" })).toBeDefined();
-      expect(screen.getByRole("button", { name: "5000" })).toBeDefined();
+      expect(screen.getByText("30s")).toBeDefined();
     });
 
-    it("calls onCanvasHeightChange when preset button is clicked", () => {
-      const onCanvasHeightChange = vi.fn();
+    it("calls onScrollDurationChange when slider is changed", () => {
+      const onScrollDurationChange = vi.fn();
       render(
         <SettingsPanel
           {...defaultProps}
-          currentMode="canvas"
-          canvasHeight={700}
-          onCanvasHeightChange={onCanvasHeightChange}
+          autoScroll={true}
+          onScrollDurationChange={onScrollDurationChange}
         />,
       );
 
-      const presetButton = screen.getByRole("button", { name: "2100" });
-      fireEvent.click(presetButton);
+      const slider = screen.getByRole("slider", { name: /scroll duration/i });
+      fireEvent.change(slider, { target: { value: "120" } });
 
-      expect(onCanvasHeightChange).toHaveBeenCalledWith(2100);
+      expect(onScrollDurationChange).toHaveBeenCalledWith(120);
     });
 
-    it("highlights current preset button", () => {
-      render(
-        <SettingsPanel
-          {...defaultProps}
-          currentMode="canvas"
-          canvasHeight={1400}
-        />,
-      );
+    it("slider has min=1 and max=300", () => {
+      render(<SettingsPanel {...defaultProps} autoScroll={true} />);
 
-      const presetButton = screen.getByRole("button", { name: "1400" });
-      expect(presetButton.className).toContain("bg-blue");
+      const slider = screen.getByRole("slider", { name: /scroll duration/i });
+      expect(slider.getAttribute("min")).toBe("1");
+      expect(slider.getAttribute("max")).toBe("300");
     });
   });
 });

@@ -1,6 +1,8 @@
 import {
 	Image,
 	LayoutGrid,
+	Music,
+	Paintbrush,
 	Puzzle,
 	Settings,
 	Sparkles,
@@ -23,6 +25,8 @@ export type CanvasEditorTool =
 	| "text"
 	| "assets"
 	| "components"
+	| "background"
+	| "music"
 	| "settings";
 
 /**
@@ -38,6 +42,8 @@ const canvasTools: {
 	{ id: "text", icon: Type, label: "Text" },
 	{ id: "assets", icon: Image, label: "Assets" },
 	{ id: "components", icon: Puzzle, label: "Components" },
+	{ id: "background", icon: Paintbrush, label: "Background" },
+	{ id: "music", icon: Music, label: "Music" },
 	{ id: "settings", icon: Settings, label: "Settings" },
 ];
 

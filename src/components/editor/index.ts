@@ -1,14 +1,14 @@
 // Editor components for multi-panel layout
 export {
-  type AssetCategory,
-  type AssetDefinition,
-  AssetsPanel,
+	type AssetCategory,
+	type AssetDefinition,
+	AssetsPanel,
 } from "./AssetsPanel";
 export { CanvasContextMenu } from "./CanvasContextMenu";
 export { CanvasPanel } from "./CanvasPanel";
 export {
-  CanvasPropertiesPanel,
-  type CanvasSelectionInfo,
+	CanvasPropertiesPanel,
+	type CanvasSelectionInfo,
 } from "./CanvasPropertiesPanel";
 export { type CanvasEditorTool, CanvasToolSidebar } from "./CanvasToolSidebar";
 export { ComponentsPanel, type WidgetDefinition } from "./ComponentsPanel";
@@ -16,20 +16,21 @@ export { EditorHeader } from "./EditorHeader";
 export { EditorLayout } from "./EditorLayout";
 export { ExportDialog } from "./ExportDialog";
 export {
-  FabricCanvas,
-  type LayerOperation,
-  type PropertyUpdate,
+	FabricCanvas,
+	type LayerOperation,
+	type PropertyUpdate,
 } from "./FabricCanvas";
 export { FilmstripPanel } from "./FilmstripPanel";
 export { type LayerInfo, LayersPanel } from "./LayersPanel";
+export { MusicPanel } from "./MusicPanel";
 export { type PageInfo, PageThumbnailsPanel } from "./PageThumbnailsPanel";
 export { PropertiesPanel } from "./PropertiesPanel";
 export { SectionThumbnails } from "./SectionThumbnails";
 export { SettingsPanel, type SettingsPanelProps } from "./SettingsPanel";
 export {
-  type TemplateDefinition,
-  type TemplateElement,
-  TemplatesPanel,
+	type TemplateDefinition,
+	type TemplateElement,
+	TemplatesPanel,
 } from "./TemplatesPanel";
 export { type TextStyleDefinition, TextStylesPanel } from "./TextStylesPanel";
 export { ToolSidebar } from "./ToolSidebar";

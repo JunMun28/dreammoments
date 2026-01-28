@@ -1,8 +1,6 @@
-import { AlertTriangle, Check, Loader2 } from "lucide-react";
-import { useId, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Check, Loader2, MoveVertical } from "lucide-react";
 import { Label } from "@/components/ui/label";
-import type { EditorMode } from "@/lib/invitation-server";
+import { Switch } from "@/components/ui/switch";
 
 /** Default canvas height in pixels */
 const DEFAULT_CANVAS_HEIGHT = 700;
@@ -16,59 +14,48 @@ const MAX_CANVAS_HEIGHT = 20000;
 /** Preset canvas heights for quick selection */
 const HEIGHT_PRESETS = [700, 1400, 2100, 5000];
 
+/** Default scroll duration in seconds */
+const DEFAULT_SCROLL_DURATION = 30;
+
+/** Minimum scroll duration in seconds */
+const MIN_SCROLL_DURATION = 1;
+
+/** Maximum scroll duration in seconds */
+const MAX_SCROLL_DURATION = 300;
+
 export interface SettingsPanelProps {
-  /** Current editor mode */
-  currentMode: EditorMode;
-  /** Callback when mode changes */
-  onModeChange?: (mode: EditorMode) => void;
   /** Whether a save operation is in progress */
   isSaving?: boolean;
   /** Whether the last save was successful */
   isSaved?: boolean;
-  /** Current canvas height in pixels (canvas mode only) */
+  /** Current canvas height in pixels */
   canvasHeight?: number;
   /** Callback when canvas height changes */
   onCanvasHeightChange?: (height: number) => void;
+  /** Whether auto-scroll is enabled */
+  autoScroll?: boolean;
+  /** Callback when auto-scroll is toggled */
+  onAutoScrollChange?: (enabled: boolean) => void;
+  /** Scroll duration in seconds (1-300) */
+  scrollDuration?: number;
+  /** Callback when scroll duration changes */
+  onScrollDurationChange?: (duration: number) => void;
 }
 
 /**
  * Settings panel for the canvas editor.
- * Includes Editor Mode toggle (CE-019) with warning dialog for mode switching.
+ * Includes canvas height adjustment and auto-scroll settings.
  */
 export function SettingsPanel({
-  currentMode,
-  onModeChange,
   isSaving = false,
   isSaved = false,
   canvasHeight = DEFAULT_CANVAS_HEIGHT,
   onCanvasHeightChange,
+  autoScroll = false,
+  onAutoScrollChange,
+  scrollDuration = DEFAULT_SCROLL_DURATION,
+  onScrollDurationChange,
 }: SettingsPanelProps) {
-  const [showWarningDialog, setShowWarningDialog] = useState(false);
-  const structuredId = useId();
-  const canvasId = useId();
-  const dialogTitleId = useId();
-
-  const handleModeSelect = (mode: EditorMode) => {
-    if (mode === currentMode) return;
-
-    // Switching to canvas mode requires confirmation
-    if (mode === "canvas") {
-      setShowWarningDialog(true);
-    } else {
-      // Switching to structured mode is allowed without warning
-      onModeChange?.(mode);
-    }
-  };
-
-  const handleConfirmSwitch = () => {
-    setShowWarningDialog(false);
-    onModeChange?.("canvas");
-  };
-
-  const handleCancelSwitch = () => {
-    setShowWarningDialog(false);
-  };
-
   return (
     <div className="space-y-6 p-4">
       <div className="flex items-center justify-between">
@@ -87,158 +74,91 @@ export function SettingsPanel({
         )}
       </div>
 
-      {/* Editor Mode Section */}
+      {/* Canvas Height Section */}
       <div className="space-y-3">
-        <Label className="text-sm font-medium text-stone-700">
-          Editor Mode
-        </Label>
+        <div className="flex items-center justify-between">
+          <Label className="text-sm font-medium text-stone-700">
+            Canvas Height
+          </Label>
+          <span className="text-sm font-medium text-stone-900">
+            {canvasHeight}px
+          </span>
+        </div>
 
-        <div className="space-y-2">
-          {/* Structured Mode Option */}
-          <label
-            htmlFor={structuredId}
-            className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors ${
-              currentMode === "structured"
-                ? "border-blue-500 bg-blue-50"
-                : "border-stone-200 hover:bg-stone-50"
-            }`}
-          >
-            <input
-              type="radio"
-              id={structuredId}
-              name="editor-mode"
-              value="structured"
-              checked={currentMode === "structured"}
-              onChange={() => handleModeSelect("structured")}
-              className="mt-1"
-            />
-            <div>
-              <div className="font-medium text-stone-900">Structured</div>
-              <div className="text-sm text-stone-500">
-                Use predefined sections and form-based editing
-              </div>
-            </div>
-          </label>
+        {/* Height Slider */}
+        <input
+          type="range"
+          min={MIN_CANVAS_HEIGHT}
+          max={MAX_CANVAS_HEIGHT}
+          value={canvasHeight}
+          onChange={(e) => onCanvasHeightChange?.(Number(e.target.value))}
+          aria-label="Canvas height"
+          className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-stone-200 accent-blue-600"
+        />
 
-          {/* Canvas Mode Option */}
-          <label
-            htmlFor={canvasId}
-            className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors ${
-              currentMode === "canvas"
-                ? "border-blue-500 bg-blue-50"
-                : "border-stone-200 hover:bg-stone-50"
-            }`}
-          >
-            <input
-              type="radio"
-              id={canvasId}
-              name="editor-mode"
-              value="canvas"
-              checked={currentMode === "canvas"}
-              onChange={() => handleModeSelect("canvas")}
-              className="mt-1"
-            />
-            <div>
-              <div className="font-medium text-stone-900">Canvas</div>
-              <div className="text-sm text-stone-500">
-                Full creative control with drag-and-drop canvas
-              </div>
-            </div>
-          </label>
+        {/* Preset Buttons */}
+        <div className="flex gap-2">
+          {HEIGHT_PRESETS.map((preset) => (
+            <button
+              key={preset}
+              type="button"
+              onClick={() => onCanvasHeightChange?.(preset)}
+              className={`flex-1 rounded-md px-2 py-1.5 text-sm font-medium transition-colors ${
+                canvasHeight === preset
+                  ? "bg-blue-600 text-white"
+                  : "bg-stone-100 text-stone-700 hover:bg-stone-200"
+              }`}
+            >
+              {preset}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Canvas Height Section - Only visible in canvas mode */}
-      {currentMode === "canvas" && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <Label className="text-sm font-medium text-stone-700">
-              Canvas Height
-            </Label>
-            <span className="text-sm font-medium text-stone-900">
-              {canvasHeight}px
-            </span>
-          </div>
+      {/* Auto-scroll Section */}
+      <div className="space-y-3">
+        <Label className="text-sm font-medium text-stone-700">
+          Auto Scroll
+        </Label>
 
-          {/* Height Slider */}
-          <input
-            type="range"
-            min={MIN_CANVAS_HEIGHT}
-            max={MAX_CANVAS_HEIGHT}
-            value={canvasHeight}
-            onChange={(e) => onCanvasHeightChange?.(Number(e.target.value))}
-            aria-label="Canvas height"
-            className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-stone-200 accent-blue-600"
-          />
-
-          {/* Preset Buttons */}
-          <div className="flex gap-2">
-            {HEIGHT_PRESETS.map((preset) => (
-              <button
-                key={preset}
-                type="button"
-                onClick={() => onCanvasHeightChange?.(preset)}
-                className={`flex-1 rounded-md px-2 py-1.5 text-sm font-medium transition-colors ${
-                  canvasHeight === preset
-                    ? "bg-blue-600 text-white"
-                    : "bg-stone-100 text-stone-700 hover:bg-stone-200"
-                }`}
-              >
-                {preset}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Warning Dialog */}
-      {showWarningDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div
-            className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl"
-            role="dialog"
-            aria-labelledby={dialogTitleId}
+        {/* Auto-scroll Toggle */}
+        <div className="flex items-center justify-between">
+          <Label
+            htmlFor="auto-scroll-toggle"
+            className="flex cursor-pointer items-center gap-2 text-sm text-stone-600"
           >
-            <div className="mb-4 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100">
-                <AlertTriangle className="h-5 w-5 text-amber-600" />
-              </div>
-              <h4
-                id={dialogTitleId}
-                className="text-lg font-semibold text-stone-900"
-              >
-                Switch to Canvas Mode?
-              </h4>
-            </div>
-
-            <div className="mb-6 space-y-2 text-sm text-stone-600">
-              <p>
-                <strong className="text-stone-900">
-                  This action cannot be undone.
-                </strong>
-              </p>
-              <p>
-                Your structured content will be converted to canvas elements.
-                Once you switch to Canvas mode, you cannot switch back to
-                Structured mode without losing your layout changes.
-              </p>
-            </div>
-
-            <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={handleCancelSwitch}>
-                Cancel
-              </Button>
-              <Button
-                variant="default"
-                onClick={handleConfirmSwitch}
-                className="bg-amber-600 hover:bg-amber-700"
-              >
-                Switch to Canvas
-              </Button>
-            </div>
-          </div>
+            <MoveVertical className="h-4 w-4 text-stone-500" />
+            Enable auto-scroll
+          </Label>
+          <Switch
+            id="auto-scroll-toggle"
+            checked={autoScroll}
+            onCheckedChange={(checked) => onAutoScrollChange?.(checked)}
+            aria-label="Auto scroll"
+          />
         </div>
-      )}
+
+        {/* Duration Slider - Only visible when auto-scroll is enabled */}
+        {autoScroll && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm text-stone-600">Scroll Duration</Label>
+              <span className="text-sm font-medium text-stone-900">
+                {scrollDuration}s
+              </span>
+            </div>
+            <input
+              type="range"
+              min={MIN_SCROLL_DURATION}
+              max={MAX_SCROLL_DURATION}
+              value={scrollDuration}
+              onChange={(e) => onScrollDurationChange?.(Number(e.target.value))}
+              aria-label="Scroll duration"
+              className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-stone-200 accent-blue-600"
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

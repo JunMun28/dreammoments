@@ -12,43 +12,51 @@ import {
 	updateGuestInternal,
 } from "./guest-server";
 
-// Create a chainable mock that returns empty array and supports both .where() and .where().limit()
-const createSelectMock = () => {
-	const emptyArray: unknown[] = [];
-	// Make the array support .limit() so it works as both direct result and chainable
-	(emptyArray as { limit?: () => unknown[] }).limit = () => [];
-	return emptyArray;
-};
+// Use vi.hoisted to create mock before vi.mock hoisting
+const { mockDb } = vi.hoisted(() => {
+	// Create a chainable mock that returns empty array and supports both .where() and .where().limit()
+	const createSelectMock = () => {
+		const emptyArray: unknown[] = [];
+		// Make the array support .limit() so it works as both direct result and chainable
+		(emptyArray as { limit?: () => unknown[] }).limit = () => [];
+		return emptyArray;
+	};
 
-// Mock the db module
-vi.mock("@/db/index", () => ({
-	db: {
-		insert: vi.fn().mockReturnValue({
-			values: vi.fn().mockReturnValue({
-				returning: vi.fn().mockResolvedValue([{ id: "mock-uuid" }]),
+	return {
+		createSelectMock,
+		mockDb: {
+			insert: vi.fn().mockReturnValue({
+				values: vi.fn().mockReturnValue({
+					returning: vi.fn().mockResolvedValue([{ id: "mock-uuid" }]),
+				}),
 			}),
-		}),
-		update: vi.fn().mockReturnValue({
-			set: vi.fn().mockReturnValue({
+			update: vi.fn().mockReturnValue({
+				set: vi.fn().mockReturnValue({
+					where: vi.fn().mockReturnValue({
+						returning: vi.fn().mockResolvedValue([{ id: "mock-uuid" }]),
+					}),
+				}),
+			}),
+			delete: vi.fn().mockReturnValue({
 				where: vi.fn().mockReturnValue({
 					returning: vi.fn().mockResolvedValue([{ id: "mock-uuid" }]),
 				}),
 			}),
-		}),
-		delete: vi.fn().mockReturnValue({
-			where: vi.fn().mockReturnValue({
-				returning: vi.fn().mockResolvedValue([{ id: "mock-uuid" }]),
-			}),
-		}),
-		select: vi.fn().mockReturnValue({
-			from: vi.fn().mockReturnValue({
-				where: vi.fn().mockImplementation(() => createSelectMock()),
-				leftJoin: vi.fn().mockReturnValue({
-					where: vi.fn().mockResolvedValue([]),
+			select: vi.fn().mockReturnValue({
+				from: vi.fn().mockReturnValue({
+					where: vi.fn().mockImplementation(() => createSelectMock()),
+					leftJoin: vi.fn().mockReturnValue({
+						where: vi.fn().mockResolvedValue([]),
+					}),
 				}),
 			}),
-		}),
-	},
+		},
+	};
+});
+
+vi.mock("@/db/index", () => ({
+	db: mockDb,
+	getDb: vi.fn(() => Promise.resolve(mockDb)),
 }));
 
 describe("guest-server", () => {

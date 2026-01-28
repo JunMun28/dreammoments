@@ -31,7 +31,7 @@ describe("NoteList", () => {
 	it("renders empty state when no notes exist", () => {
 		renderWithProvider();
 
-		expect(screen.getByTestId("empty-notes-message")).toBeDefined();
+		expect(screen.getByTestId("empty-note-message")).toBeDefined();
 		expect(screen.getByTestId("add-note-button")).toBeDefined();
 	});
 
@@ -85,7 +85,7 @@ describe("NoteList", () => {
 
 		expect(screen.getByText("Parking")).toBeDefined();
 		expect(screen.getByText("Dress Code")).toBeDefined();
-		expect(screen.queryByTestId("empty-notes-message")).toBeNull();
+		expect(screen.queryByTestId("empty-note-message")).toBeNull();
 	});
 
 	it("shows edit and delete buttons for each note", () => {
@@ -177,7 +177,7 @@ describe("NoteList", () => {
 		await user.click(screen.getByTestId("confirm-delete-note-1"));
 
 		expect(screen.queryByText("Parking")).toBeNull();
-		expect(screen.getByTestId("empty-notes-message")).toBeDefined();
+		expect(screen.getByTestId("empty-note-message")).toBeDefined();
 	});
 
 	it("shows reorder buttons for each note", () => {

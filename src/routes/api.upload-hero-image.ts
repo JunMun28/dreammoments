@@ -48,6 +48,27 @@ export const Route = createFileRoute("/api/upload-hero-image")({
 						);
 					}
 
+					// Verify user owns the invitation
+					const {
+						verifyInvitationOwnership,
+						AuthenticationError,
+						AuthorizationError,
+					} = await import("@/lib/auth-helpers");
+					try {
+						await verifyInvitationOwnership(invitationId);
+					} catch (error) {
+						if (error instanceof AuthenticationError) {
+							return json(
+								{ error: "Authentication required" },
+								{ status: 401 },
+							);
+						}
+						if (error instanceof AuthorizationError) {
+							return json({ error: "Access denied" }, { status: 403 });
+						}
+						throw error;
+					}
+
 					// Validate image type
 					if (!image.type.startsWith("image/")) {
 						return json({ error: "Invalid file type" }, { status: 400 });

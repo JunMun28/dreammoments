@@ -66,6 +66,13 @@ export const FONT_PAIRINGS: FontPairing[] = [
 		bodyFont: "Open Sans",
 		description: "Warm slab serif with neutral sans",
 	},
+	{
+		id: "oriental-elegance",
+		name: "Oriental Elegance",
+		headingFont: "Cinzel Decorative",
+		bodyFont: "EB Garamond",
+		description: "Regal capitals with classic elegance",
+	},
 ];
 
 /**

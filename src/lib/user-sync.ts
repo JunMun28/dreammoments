@@ -1,5 +1,6 @@
+import { createServerFn } from "@tanstack/react-start";
 import { eq } from "drizzle-orm";
-import { db } from "@/db/index";
+import { getDb } from "@/db/index";
 import { users } from "@/db/schema";
 
 interface SyncUserInput {
@@ -14,14 +15,11 @@ interface User {
 }
 
 /**
- * Syncs a Neon Auth user to the local users table.
+ * Internal function for syncing Neon Auth user to local users table.
  * Creates a new user if the neonAuthId doesn't exist.
  * Updates email if it has changed for existing users.
- *
- * @param input - The Neon Auth user data (neonAuthId and email)
- * @returns The local user record
  */
-export async function syncUserFromNeonAuth(
+export async function syncUserFromNeonAuthInternal(
 	input: SyncUserInput,
 ): Promise<User> {
 	const { neonAuthId, email: rawEmail } = input;
@@ -34,6 +32,7 @@ export async function syncUserFromNeonAuth(
 	}
 
 	const email = rawEmail.toLowerCase();
+	const db = await getDb();
 
 	// Check if user exists by neonAuthId
 	const existingUsers = await db
@@ -65,3 +64,13 @@ export async function syncUserFromNeonAuth(
 
 	return newUser as User;
 }
+
+/**
+ * Server function to sync a Neon Auth user to the local users table.
+ * Wraps the internal function for client-side use.
+ */
+export const syncUserFromNeonAuth = createServerFn({ method: "POST" })
+	.inputValidator((input: SyncUserInput) => input)
+	.handler(async ({ data }) => {
+		return syncUserFromNeonAuthInternal(data);
+	});

@@ -1,4 +1,5 @@
-import type { FabricObject } from "fabric";
+import { Gradient } from "fabric";
+import type { FabricObject, Shadow, TFiller } from "fabric";
 import {
   AlignCenter,
   AlignJustify,
@@ -7,18 +8,22 @@ import {
   Bold,
   FlipHorizontal,
   FlipVertical,
+  ImageOff,
   Italic,
   Link,
+  Loader2,
   Replace,
   RotateCw,
+  Underline,
 } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { AnimationProperties } from "./AnimationProperties";
+import { ClickProperties } from "./properties/ClickProperties";
 
 /**
  * Selection info passed from canvas to properties panel
@@ -85,6 +90,10 @@ export function CanvasPropertiesPanel({
           object={selection.object}
           onPropertyChange={onPropertyChange}
         />
+        <ClickProperties
+          object={selection.object}
+          onPropertyChange={onPropertyChange}
+        />
         <AnimationProperties
           object={selection.object}
           onPropertyChange={onPropertyChange}
@@ -105,6 +114,10 @@ export function CanvasPropertiesPanel({
           object={selection.object}
           onPropertyChange={onPropertyChange}
         />
+        <ClickProperties
+          object={selection.object}
+          onPropertyChange={onPropertyChange}
+        />
         <AnimationProperties
           object={selection.object}
           onPropertyChange={onPropertyChange}
@@ -121,6 +134,10 @@ export function CanvasPropertiesPanel({
         onPropertyChange={onPropertyChange}
       />
       <TransformProperties
+        object={selection.object}
+        onPropertyChange={onPropertyChange}
+      />
+      <ClickProperties
         object={selection.object}
         onPropertyChange={onPropertyChange}
       />
@@ -196,16 +213,36 @@ function TextProperties({
   const textObj = object as FabricObject & {
     fontFamily?: string;
     fontSize?: number;
-    fill?: string;
+    fill?: string | TFiller;
     textAlign?: string;
     fontWeight?: string | number;
     fontStyle?: string;
+    underline?: boolean;
     lineHeight?: number;
     charSpacing?: number;
+    width?: number;
+    height?: number;
   };
 
   const isBold = textObj.fontWeight === "bold" || textObj.fontWeight === 700;
   const isItalic = textObj.fontStyle === "italic";
+  const isUnderline = textObj.underline === true;
+
+  // G5: Detect if fill is a gradient
+  const fillValue = textObj.fill;
+  const isGradient = fillValue instanceof Gradient;
+
+  // Extract gradient colors if gradient, otherwise use solid color
+  const solidColor = typeof fillValue === "string" ? fillValue : "#000000";
+
+  // Get gradient colors from existing gradient or defaults
+  const gradientColor1 = isGradient
+    ? fillValue.colorStops?.[0]?.color || "#b76e79"
+    : "#b76e79";
+  const gradientColor2 = isGradient
+    ? fillValue.colorStops?.[1]?.color || "#d4a574"
+    : "#d4a574";
+  const gradientAngle = isGradient ? 0 : 0; // Default horizontal
 
   const handleBoldToggle = () => {
     onPropertyChange?.("fontWeight", isBold ? "normal" : "bold");
@@ -213,6 +250,63 @@ function TextProperties({
 
   const handleItalicToggle = () => {
     onPropertyChange?.("fontStyle", isItalic ? "normal" : "italic");
+  };
+
+  const handleUnderlineToggle = () => {
+    onPropertyChange?.("underline", !isUnderline);
+  };
+
+  // G5: Toggle between solid color and gradient
+  const handleFillTypeChange = (useGradient: boolean) => {
+    if (useGradient) {
+      // Create gradient fill
+      const gradient = new Gradient({
+        type: "linear",
+        coords: { x1: 0, y1: 0, x2: textObj.width || 100, y2: 0 },
+        colorStops: [
+          { offset: 0, color: gradientColor1 },
+          { offset: 1, color: gradientColor2 },
+        ],
+      });
+      onPropertyChange?.("fill", gradient);
+    } else {
+      // Switch to solid color
+      onPropertyChange?.("fill", solidColor);
+    }
+  };
+
+  // G5: Update gradient colors
+  const updateGradientColor = (index: 0 | 1, color: string) => {
+    const colors = [gradientColor1, gradientColor2];
+    colors[index] = color;
+    const gradient = new Gradient({
+      type: "linear",
+      coords: { x1: 0, y1: 0, x2: textObj.width || 100, y2: 0 },
+      colorStops: [
+        { offset: 0, color: colors[0] },
+        { offset: 1, color: colors[1] },
+      ],
+    });
+    onPropertyChange?.("fill", gradient);
+  };
+
+  // G5: Update gradient angle
+  const updateGradientAngle = (angle: number) => {
+    const radians = (angle * Math.PI) / 180;
+    const width = textObj.width || 100;
+    const height = textObj.height || 50;
+    const x2 = Math.cos(radians) * width;
+    const y2 = Math.sin(radians) * height;
+
+    const gradient = new Gradient({
+      type: "linear",
+      coords: { x1: 0, y1: 0, x2, y2 },
+      colorStops: [
+        { offset: 0, color: gradientColor1 },
+        { offset: 1, color: gradientColor2 },
+      ],
+    });
+    onPropertyChange?.("fill", gradient);
   };
 
   return (
@@ -284,22 +378,111 @@ function TextProperties({
             >
               <Italic className="h-4 w-4" />
             </Button>
+            <Button
+              variant={isUnderline ? "default" : "outline"}
+              size="icon"
+              className="h-8 w-8"
+              onClick={handleUnderlineToggle}
+              aria-label="Underline"
+              aria-pressed={isUnderline}
+            >
+              <Underline className="h-4 w-4" />
+            </Button>
           </div>
         </div>
 
-        {/* Text Color */}
+        {/* G5: Fill Type Toggle */}
         <div className="space-y-1.5">
-          <Label htmlFor="text-color">Text Color</Label>
-          <Input
-            id="text-color"
-            type="color"
-            defaultValue={
-              typeof textObj.fill === "string" ? textObj.fill : "#000000"
-            }
-            className="h-8 w-full cursor-pointer"
-            onChange={(e) => onPropertyChange?.("fill", e.target.value)}
-          />
+          <Label>Fill Type</Label>
+          <div className="flex gap-1">
+            <Button
+              variant={!isGradient ? "default" : "outline"}
+              size="sm"
+              className="flex-1"
+              onClick={() => handleFillTypeChange(false)}
+            >
+              Solid
+            </Button>
+            <Button
+              variant={isGradient ? "default" : "outline"}
+              size="sm"
+              className="flex-1"
+              onClick={() => handleFillTypeChange(true)}
+            >
+              Gradient
+            </Button>
+          </div>
         </div>
+
+        {/* Text Color (solid) */}
+        {!isGradient && (
+          <div className="space-y-1.5">
+            <Label htmlFor="text-color">Text Color</Label>
+            <Input
+              id="text-color"
+              type="color"
+              value={solidColor}
+              className="h-8 w-full cursor-pointer"
+              onChange={(e) => onPropertyChange?.("fill", e.target.value)}
+            />
+          </div>
+        )}
+
+        {/* G5: Gradient Colors */}
+        {isGradient && (
+          <>
+            <div className="space-y-1.5">
+              <Label htmlFor="gradient-color-1">Gradient Start</Label>
+              <Input
+                id="gradient-color-1"
+                type="color"
+                value={gradientColor1}
+                className="h-8 w-full cursor-pointer"
+                onChange={(e) => updateGradientColor(0, e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="gradient-color-2">Gradient End</Label>
+              <Input
+                id="gradient-color-2"
+                type="color"
+                value={gradientColor2}
+                className="h-8 w-full cursor-pointer"
+                onChange={(e) => updateGradientColor(1, e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="gradient-angle">Gradient Angle</Label>
+              <div className="flex items-center gap-2">
+                <Slider
+                  id="gradient-angle"
+                  min={0}
+                  max={360}
+                  step={15}
+                  value={[gradientAngle]}
+                  onValueChange={(value) => updateGradientAngle(value[0])}
+                  className="flex-1"
+                />
+                <span className="w-12 text-right text-sm text-stone-500">
+                  {gradientAngle}°
+                </span>
+              </div>
+            </div>
+
+            {/* Gradient Preview */}
+            <div className="space-y-1.5">
+              <Label>Preview</Label>
+              <div
+                className="h-6 w-full rounded border"
+                style={{
+                  background: `linear-gradient(${gradientAngle}deg, ${gradientColor1}, ${gradientColor2})`,
+                }}
+              />
+            </div>
+          </>
+        )}
 
         {/* Text Alignment */}
         <div className="space-y-1.5">
@@ -409,15 +592,102 @@ function ImageProperties({
   object: FabricObject;
   onPropertyChange?: (property: string, value: unknown) => void;
 }) {
+  const [isRemovingBg, setIsRemovingBg] = useState(false);
+  const [bgRemovalError, setBgRemovalError] = useState<string | null>(null);
+  const [bgRemovalAvailable, setBgRemovalAvailable] = useState<boolean | null>(
+    null,
+  );
+
   const imgObj = object as FabricObject & {
     opacity?: number;
     strokeWidth?: number;
     stroke?: string;
     rx?: number;
     ry?: number;
+    shadow?: Shadow | null;
+    _element?: HTMLImageElement;
+    getSrc?: () => string;
   };
 
   const borderRadius = imgObj.rx || 0;
+
+  // Check if background removal is available
+  useEffect(() => {
+    fetch("/api/remove-background")
+      .then((res) => res.json())
+      .then((data) => setBgRemovalAvailable(data.available))
+      .catch(() => setBgRemovalAvailable(false));
+  }, []);
+
+  // Handle background removal
+  const handleRemoveBackground = useCallback(async () => {
+    setIsRemovingBg(true);
+    setBgRemovalError(null);
+
+    try {
+      // Get image source URL
+      const imgSrc = imgObj.getSrc?.() || imgObj._element?.src;
+      if (!imgSrc) {
+        throw new Error("Could not get image source");
+      }
+
+      // Fetch the image as a blob
+      const response = await fetch(imgSrc);
+      if (!response.ok) {
+        throw new Error("Could not fetch image");
+      }
+      const blob = await response.blob();
+
+      // Send to background removal API
+      const formData = new FormData();
+      formData.append("image", blob);
+      // Get invitation ID from URL or use placeholder
+      const invitationId =
+        new URLSearchParams(window.location.search).get("id") || "temp";
+      formData.append("invitationId", invitationId);
+
+      const bgResponse = await fetch("/api/remove-background", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await bgResponse.json();
+
+      if (!bgResponse.ok) {
+        throw new Error(result.error || "Background removal failed");
+      }
+
+      // Update the image with the new URL
+      onPropertyChange?.("replaceWithUrl", result.imageUrl);
+    } catch (error) {
+      setBgRemovalError(
+        error instanceof Error ? error.message : "Background removal failed",
+      );
+    } finally {
+      setIsRemovingBg(false);
+    }
+  }, [imgObj, onPropertyChange]);
+
+  // Extract shadow properties
+  const shadowObj = imgObj.shadow as Shadow | null;
+  const shadowColor =
+    typeof shadowObj?.color === "string" ? shadowObj.color : "#000000";
+  const shadowBlur = shadowObj?.blur || 0;
+  const shadowOffsetX = shadowObj?.offsetX || 0;
+  const shadowOffsetY = shadowObj?.offsetY || 0;
+
+  // Helper to update shadow with merged values
+  const updateShadow = (updates: Partial<Shadow>) => {
+    const currentShadow = imgObj.shadow as Shadow | null;
+    const newShadow = {
+      color: currentShadow?.color || "#000000",
+      blur: currentShadow?.blur || 0,
+      offsetX: currentShadow?.offsetX || 0,
+      offsetY: currentShadow?.offsetY || 0,
+      ...updates,
+    };
+    onPropertyChange?.("shadow", newShadow);
+  };
 
   return (
     <div className="space-y-4 p-4">
@@ -432,6 +702,34 @@ function ImageProperties({
           <Replace className="mr-2 h-4 w-4" />
           Replace Image
         </Button>
+
+        {/* G10: Remove Background Button */}
+        {bgRemovalAvailable && (
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={handleRemoveBackground}
+            disabled={isRemovingBg}
+          >
+            {isRemovingBg ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Removing Background...
+              </>
+            ) : (
+              <>
+                <ImageOff className="mr-2 h-4 w-4" />
+                Remove Background
+              </>
+            )}
+          </Button>
+        )}
+
+        {bgRemovalError && (
+          <div className="rounded-lg bg-red-50 p-2 text-xs text-red-600">
+            {bgRemovalError}
+          </div>
+        )}
 
         <div className="flex gap-2">
           <Button
@@ -519,6 +817,80 @@ function ImageProperties({
             />
             <span className="w-12 text-right text-sm text-stone-500">
               {borderRadius}px
+            </span>
+          </div>
+        </div>
+
+        {/* G4: Drop Shadow Section */}
+        <div className="space-y-1.5 border-t pt-3">
+          <Label className="font-medium">Drop Shadow</Label>
+        </div>
+
+        {/* Shadow Color */}
+        <div className="space-y-1.5">
+          <Label htmlFor="shadow-color">Shadow Color</Label>
+          <Input
+            id="shadow-color"
+            type="color"
+            value={shadowColor}
+            className="h-8 w-full cursor-pointer"
+            onChange={(e) => updateShadow({ color: e.target.value })}
+          />
+        </div>
+
+        {/* Shadow Blur */}
+        <div className="space-y-1.5">
+          <Label htmlFor="shadow-blur">Shadow Blur</Label>
+          <div className="flex items-center gap-2">
+            <Slider
+              id="shadow-blur"
+              min={0}
+              max={50}
+              step={1}
+              value={[shadowBlur]}
+              onValueChange={(value) => updateShadow({ blur: value[0] })}
+              className="flex-1"
+            />
+            <span className="w-12 text-right text-sm text-stone-500">
+              {shadowBlur}px
+            </span>
+          </div>
+        </div>
+
+        {/* Shadow Offset X */}
+        <div className="space-y-1.5">
+          <Label htmlFor="shadow-offset-x">Offset X</Label>
+          <div className="flex items-center gap-2">
+            <Slider
+              id="shadow-offset-x"
+              min={-50}
+              max={50}
+              step={1}
+              value={[shadowOffsetX]}
+              onValueChange={(value) => updateShadow({ offsetX: value[0] })}
+              className="flex-1"
+            />
+            <span className="w-12 text-right text-sm text-stone-500">
+              {shadowOffsetX}px
+            </span>
+          </div>
+        </div>
+
+        {/* Shadow Offset Y */}
+        <div className="space-y-1.5">
+          <Label htmlFor="shadow-offset-y">Offset Y</Label>
+          <div className="flex items-center gap-2">
+            <Slider
+              id="shadow-offset-y"
+              min={-50}
+              max={50}
+              step={1}
+              value={[shadowOffsetY]}
+              onValueChange={(value) => updateShadow({ offsetY: value[0] })}
+              className="flex-1"
+            />
+            <span className="w-12 text-right text-sm text-stone-500">
+              {shadowOffsetY}px
             </span>
           </div>
         </div>

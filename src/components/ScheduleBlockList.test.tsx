@@ -7,27 +7,28 @@ import {
 	type InvitationData,
 	type ScheduleBlock,
 } from "@/contexts/InvitationBuilderContext";
-import { formatBlockTime, ScheduleBlockList } from "./ScheduleBlockList";
+import { formatTime } from "@/lib/format-utils";
+import { ScheduleBlockList } from "./ScheduleBlockList";
 
-describe("formatBlockTime", () => {
+describe("formatTime", () => {
 	it("formats morning time correctly", () => {
-		expect(formatBlockTime("09:30")).toBe("9:30 AM");
+		expect(formatTime("09:30")).toBe("9:30 AM");
 	});
 
 	it("formats noon correctly", () => {
-		expect(formatBlockTime("12:00")).toBe("12:00 PM");
+		expect(formatTime("12:00")).toBe("12:00 PM");
 	});
 
 	it("formats afternoon time correctly", () => {
-		expect(formatBlockTime("14:30")).toBe("2:30 PM");
+		expect(formatTime("14:30")).toBe("2:30 PM");
 	});
 
 	it("formats midnight correctly", () => {
-		expect(formatBlockTime("00:00")).toBe("12:00 AM");
+		expect(formatTime("00:00")).toBe("12:00 AM");
 	});
 
 	it("returns empty string for undefined", () => {
-		expect(formatBlockTime(undefined)).toBe("");
+		expect(formatTime(undefined)).toBe("");
 	});
 });
 

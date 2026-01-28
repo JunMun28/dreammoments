@@ -6,12 +6,16 @@
 import { CalendarDays, Clock, MapPin } from "lucide-react";
 import { type CSSProperties, useEffect, useMemo } from "react";
 import type { Note, ScheduleBlock } from "@/contexts/InvitationBuilderContext";
+import { formatTime } from "@/lib/format-utils";
+import { sortByOrder } from "@/lib/list-utils";
 import { cn } from "@/lib/utils";
+import { CountdownTimer } from "./CountdownTimer";
 import { getFontPairingById, getGoogleFontsUrl } from "./ui/font-picker";
 import type { ViewportMode } from "./ui/viewport-toggle";
 
 /**
  * Formats a Date to a readable string like "June 15, 2026"
+ * Note: This accepts Date objects, unlike format-utils.ts which accepts strings
  */
 function formatDate(date: Date | undefined): string {
 	if (!date) return "";
@@ -20,31 +24,6 @@ function formatDate(date: Date | undefined): string {
 		day: "numeric",
 		year: "numeric",
 	});
-}
-
-/**
- * Formats 24h time "HH:mm" to "H:MM AM/PM"
- */
-function formatTime(time: string | undefined): string {
-	if (!time) return "";
-	const [hours, minutes] = time.split(":").map(Number);
-	const period = hours >= 12 ? "PM" : "AM";
-	const displayHours = hours % 12 || 12;
-	return `${displayHours}:${minutes.toString().padStart(2, "0")} ${period}`;
-}
-
-/**
- * Sorts schedule blocks by order field
- */
-function sortBlocksByOrder(blocks: ScheduleBlock[]): ScheduleBlock[] {
-	return [...blocks].sort((a, b) => a.order - b.order);
-}
-
-/**
- * Sorts notes by order field
- */
-function sortNotesByOrder(notes: Note[]): Note[] {
-	return [...notes].sort((a, b) => a.order - b.order);
 }
 
 /**
@@ -149,10 +128,10 @@ export function TemplatePreview({
 		document.head.appendChild(link);
 	}, [fontsUrl]);
 
-	const sortedBlocks = sortBlocksByOrder(scheduleBlocks);
+	const sortedBlocks = sortByOrder(scheduleBlocks);
 	const hasSchedule = sortedBlocks.length > 0;
 
-	const sortedNotes = sortNotesByOrder(notes);
+	const sortedNotes = sortByOrder(notes);
 	const hasNotes = sortedNotes.length > 0;
 
 	const hasNames = partner1Name || partner2Name;
@@ -292,6 +271,22 @@ export function TemplatePreview({
 					)}
 				</div>
 
+				{/* Countdown Timer */}
+				<div className="mt-8 border-t border-stone-200 pt-6">
+					<p
+						className="mb-2 text-center text-xs uppercase tracking-widest"
+						style={{ color: "var(--accent-color)" }}
+					>
+						Countdown
+					</p>
+					<CountdownTimer
+						weddingDate={
+							weddingDate ? weddingDate.toISOString().split("T")[0] : undefined
+						}
+						accentColor={accentColor}
+					/>
+				</div>
+
 				{/* Schedule */}
 				<div className="mt-8 border-t border-stone-200 pt-6">
 					<p
@@ -376,4 +371,10 @@ export function TemplatePreview({
 	);
 }
 
-export { formatDate, formatTime };
+// Re-export utilities for backwards compatibility
+export { formatDate };
+export { formatTime } from "@/lib/format-utils";
+export {
+	sortByOrder as sortBlocksByOrder,
+	sortByOrder as sortNotesByOrder,
+} from "@/lib/list-utils";

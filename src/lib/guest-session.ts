@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { useSession } from "@tanstack/react-start/server";
 import { eq } from "drizzle-orm";
-import { db } from "@/db/index";
+import { getDb } from "@/db/index";
 import { guestGroups, guestSessions } from "@/db/schema";
 
 /** Session expiry time: 30 days in milliseconds */
@@ -49,6 +49,7 @@ export async function createGuestSessionInternal(
 	const sessionToken = generateSessionToken();
 	const expiresAt = new Date(Date.now() + SESSION_EXPIRY_MS);
 
+	const db = await getDb();
 	const [session] = await db
 		.insert(guestSessions)
 		.values({
@@ -68,6 +69,7 @@ export async function createGuestSessionInternal(
 export async function validateGuestSessionInternal(
 	sessionToken: string,
 ): Promise<SessionValidationResult | null> {
+	const db = await getDb();
 	const results = await db
 		.select()
 		.from(guestSessions)
@@ -101,6 +103,7 @@ export async function exchangeTokenForSessionInternal(
 	rsvpToken: string,
 ): Promise<SessionValidationResult | null> {
 	// Look up guest group by RSVP token
+	const db = await getDb();
 	const groups = await db
 		.select()
 		.from(guestGroups)
@@ -129,14 +132,45 @@ interface GuestSessionCookieData {
 }
 
 /**
+ * Get the session secret from environment.
+ * Throws an error in production if SESSION_SECRET is not set.
+ */
+function getSessionSecret(): string {
+	const secret = process.env.SESSION_SECRET;
+
+	if (!secret) {
+		if (process.env.NODE_ENV === "production") {
+			throw new Error(
+				"SESSION_SECRET environment variable is required in production. " +
+					"Generate a secure 32+ character secret and set it in your environment.",
+			);
+		}
+		// Development fallback (will be logged as warning)
+		console.warn(
+			"SESSION_SECRET not set. Using insecure development default. " +
+				"Set SESSION_SECRET in .env.local for production.",
+		);
+		return "dreammoments-dev-session-secret-not-for-production";
+	}
+
+	// Validate secret length (should be at least 32 characters)
+	if (secret.length < 32) {
+		console.warn(
+			"SESSION_SECRET should be at least 32 characters for security.",
+		);
+	}
+
+	return secret;
+}
+
+/**
  * Get guest session from cookie.
  * Uses TanStack Start's useSession for secure HTTP-only cookie handling.
  */
 function getGuestSessionCookie() {
 	return useSession<GuestSessionCookieData>({
 		name: "guest-session",
-		password:
-			process.env.SESSION_SECRET ?? "dreammoments-guest-session-secret-32c",
+		password: getSessionSecret(),
 		cookie: {
 			secure: process.env.NODE_ENV === "production",
 			sameSite: "lax",

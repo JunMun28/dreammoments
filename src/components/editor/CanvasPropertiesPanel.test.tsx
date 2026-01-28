@@ -368,6 +368,54 @@ describe("CE-011: Text Properties Editor", () => {
 
 			expect(onPropertyChange).toHaveBeenCalledWith("fontStyle", "normal");
 		});
+
+		it("shows underline toggle button", () => {
+			render(<CanvasPropertiesPanel selection={createTextSelection()} />);
+
+			const underlineBtn = screen.getByRole("button", { name: /underline/i });
+			expect(underlineBtn).toBeDefined();
+		});
+
+		it("calls onPropertyChange with underline when underline button is clicked", async () => {
+			const onPropertyChange = vi.fn();
+			render(
+				<CanvasPropertiesPanel
+					selection={createTextSelection()}
+					onPropertyChange={onPropertyChange}
+				/>,
+			);
+
+			const underlineBtn = screen.getByRole("button", { name: /underline/i });
+			underlineBtn.click();
+
+			expect(onPropertyChange).toHaveBeenCalledWith("underline", true);
+		});
+
+		it("toggles underline off when already underlined", async () => {
+			const onPropertyChange = vi.fn();
+			render(
+				<CanvasPropertiesPanel
+					selection={createTextSelection({ underline: true })}
+					onPropertyChange={onPropertyChange}
+				/>,
+			);
+
+			const underlineBtn = screen.getByRole("button", { name: /underline/i });
+			underlineBtn.click();
+
+			expect(onPropertyChange).toHaveBeenCalledWith("underline", false);
+		});
+
+		it("shows underline button as pressed when text is underlined", () => {
+			render(
+				<CanvasPropertiesPanel
+					selection={createTextSelection({ underline: true })}
+				/>,
+			);
+
+			const underlineBtn = screen.getByRole("button", { name: /underline/i });
+			expect(underlineBtn.getAttribute("aria-pressed")).toBe("true");
+		});
 	});
 });
 

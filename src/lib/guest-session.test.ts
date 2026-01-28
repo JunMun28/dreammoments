@@ -5,9 +5,9 @@ import {
 	validateGuestSessionInternal,
 } from "./guest-session";
 
-// Mock drizzle
-vi.mock("@/db/index", () => ({
-	db: {
+// Use vi.hoisted to create mock before vi.mock hoisting
+const { mockDb } = vi.hoisted(() => ({
+	mockDb: {
 		insert: vi.fn(() => ({
 			values: vi.fn(() => ({
 				returning: vi.fn(),
@@ -29,6 +29,11 @@ vi.mock("@/db/index", () => ({
 			where: vi.fn(),
 		})),
 	},
+}));
+
+vi.mock("@/db/index", () => ({
+	db: mockDb,
+	getDb: vi.fn(() => Promise.resolve(mockDb)),
 }));
 
 // Mock crypto - need to export default since it's a Node builtin

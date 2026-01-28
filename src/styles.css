@@ -1,21 +1,21 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
-@import 'tw-animate-css';
+@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
 body {
   @apply m-0;
   font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
-    'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
+    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 code {
   font-family:
-    source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+    source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 
 :root {
@@ -134,5 +134,76 @@ code {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Sparkle twinkle animation for decorative effects */
+@keyframes sparkle-twinkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-sparkle-twinkle {
+  animation: sparkle-twinkle 3s ease-in-out infinite;
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .animate-sparkle-twinkle {
+    animation: none;
+    opacity: 0.5;
+  }
+}
+
+/* Fade up animation for scroll reveals */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-up {
+  animation: fade-up 0.8s ease-out forwards;
+}
+
+/* Gold shimmer text effect */
+@keyframes gold-shimmer {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+.gold-shimmer-text {
+  background: linear-gradient(90deg, #d4af37, #f5d77e, #d4af37);
+  background-size: 200% 100%;
+  animation: gold-shimmer 3s ease-in-out infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .gold-shimmer-text {
+    animation: none;
+    background-position: 0% 50%;
   }
 }

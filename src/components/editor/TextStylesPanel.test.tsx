@@ -3,7 +3,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { TextStylesPanel, type TextStyleDefinition } from "./TextStylesPanel";
+import { type TextStyleDefinition, TextStylesPanel } from "./TextStylesPanel";
 
 describe("TextStylesPanel (CE-008)", () => {
 	beforeEach(() => {

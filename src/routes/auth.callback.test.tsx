@@ -54,8 +54,10 @@ describe("AuthCallback", () => {
 
 		await waitFor(() => {
 			expect(syncUserFromNeonAuth).toHaveBeenCalledWith({
-				neonAuthId: "user-123",
-				email: "test@example.com",
+				data: {
+					neonAuthId: "user-123",
+					email: "test@example.com",
+				},
 			});
 		});
 
