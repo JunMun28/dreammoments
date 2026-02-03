@@ -12,7 +12,7 @@
         "Open src/templates/love-at-dusk.ts and confirm sections + tokens exist",
         "Open src/templates/index.ts and confirm registry exports"
       ],
-      "passes": false,
+      "passes": true,
       "status": "done"
     },
     {
@@ -24,7 +24,7 @@
         "Navigate to /invite/love-at-dusk-sample and confirm placeholder renders",
         "Navigate to /dashboard and confirm placeholder list renders"
       ],
-      "passes": false,
+      "passes": true,
       "status": "done"
     },
     {
@@ -36,7 +36,7 @@
         "Confirm templates, process, pricing sections are visible",
         "Confirm CTA links resolve to /editor/new"
       ],
-      "passes": false,
+      "passes": true,
       "status": "done"
     },
     {

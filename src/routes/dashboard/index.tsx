@@ -4,7 +4,7 @@ export const Route = createFileRoute('/dashboard/')({
 	component: DashboardScreen,
 })
 
-function DashboardScreen() {
+export function DashboardScreen() {
 	return (
 		<div className="min-h-screen bg-[#0c0a08] px-6 py-10">
 			<div className="mx-auto max-w-6xl space-y-8">

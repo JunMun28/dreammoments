@@ -6,7 +6,7 @@ export const Route = createFileRoute('/editor/$invitationId')({
 	component: EditorScreen,
 })
 
-function EditorScreen() {
+export function EditorScreen() {
 	return (
 		<div className="min-h-screen bg-[#0c0a08] px-6 py-10">
 			<div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[0.6fr_0.4fr]">

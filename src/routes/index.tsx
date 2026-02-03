@@ -69,7 +69,7 @@ const pricing = [
 	},
 ]
 
-function Landing() {
+export function Landing() {
 	return (
 		<main className="dm-grid">
 			<section className="dm-hero relative overflow-hidden px-6 pb-20 pt-24">

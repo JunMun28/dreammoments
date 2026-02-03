@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 - `src/` app code.
-- `src/routes/` file-based routes (TanStack Router). `__root.tsx` layout, `index.tsx` home, `demo/` examples.
+- `src/routes/` file-based routes (TanStack Router). `__root.tsx` layout, `index.tsx` home.
 - `src/components/` UI pieces.
 - `src/lib/` utilities. `src/data/` static data. `src/integrations/` external services.
 - `src/db/` Drizzle schema + helpers. `drizzle/` generated migrations.
@@ -26,7 +26,9 @@
 - Frameworks: Vitest + Testing Library.
 - No coverage threshold set.
 - Naming: `*.test.ts` / `*.test.tsx` near code or in `tests/`.
-- Run `pnpm test`.
+- TDD: write failing test first, then implement.
+- Always run `pnpm test` and report results.
+- Set `passes: true` only after tests + manual verify.
 
 ## Commit & Pull Request Guidelines
 - Git history empty; no established pattern yet.

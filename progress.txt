@@ -3,6 +3,8 @@
 - landing revamp live: hero + templates + process + pricing
 - added template scaffolds: types, registry, love-at-dusk mapping
 - added route placeholders: /editor/:id, /invite/:slug, /dashboard
+- set up node-based Vitest, added tests for landing/routes/templates
+- tests: pnpm test (pass)
 next
 - build editor form + live sync
 - implement real template sections + animations
