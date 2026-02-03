@@ -1,0 +1,851 @@
+{
+  "project": "DreamMoments",
+  "version": "1.0",
+  "lastUpdated": "2026-02-03",
+  "items": [
+    {
+      "id": "ARCH-001",
+      "category": "Architecture",
+      "description": "Template system scaffold with Love at Dusk mapped from template_1.md",
+      "stepsToVerify": [
+        "Open src/templates/types.ts and confirm TemplateConfig is defined",
+        "Open src/templates/love-at-dusk.ts and confirm sections + tokens exist",
+        "Open src/templates/index.ts and confirm registry exports"
+      ],
+      "passes": false,
+      "status": "done"
+    },
+    {
+      "id": "ARCH-002",
+      "category": "Architecture",
+      "description": "Route scaffolds for editor, invite, and dashboard",
+      "stepsToVerify": [
+        "Navigate to /editor/new and confirm placeholder editor renders",
+        "Navigate to /invite/love-at-dusk-sample and confirm placeholder renders",
+        "Navigate to /dashboard and confirm placeholder list renders"
+      ],
+      "passes": false,
+      "status": "done"
+    },
+    {
+      "id": "ARCH-003",
+      "category": "Architecture",
+      "description": "Landing page revamp aligned to PRD positioning",
+      "stepsToVerify": [
+        "Navigate to / and confirm DreamMoments hero renders",
+        "Confirm templates, process, pricing sections are visible",
+        "Confirm CTA links resolve to /editor/new"
+      ],
+      "passes": false,
+      "status": "done"
+    },
+    {
+      "id": "ARCH-004",
+      "category": "Architecture",
+      "description": "Remove TanStack demo routes and sample navigation",
+      "stepsToVerify": [
+        "Confirm src/routes/demo is removed",
+        "Confirm header no longer links to /demo/*"
+      ],
+      "passes": false,
+      "status": "done"
+    },
+    {
+      "id": "ARCH-005",
+      "category": "Architecture",
+      "description": "Devtools enabled only in dev builds",
+      "stepsToVerify": [
+        "Build production and confirm devtools are not rendered",
+        "Run dev and confirm devtools render"
+      ],
+      "passes": false,
+      "status": "done"
+    },
+    {
+      "id": "AUTH-001",
+      "category": "Authentication",
+      "description": "Implement Google OAuth sign-in as the primary authentication method",
+      "stepsToVerify": [
+        "Click 'Sign in with Google' button on login page",
+        "Verify redirect to Google OAuth consent screen",
+        "Complete Google sign-in flow",
+        "Verify user is redirected back to app and logged in",
+        "Verify user record is created in database with auth_provider='google'"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "AUTH-002",
+      "category": "Authentication",
+      "description": "Implement email/password authentication as fallback method",
+      "stepsToVerify": [
+        "Navigate to signup page and enter email/password",
+        "Verify password meets minimum requirements",
+        "Submit form and verify account creation",
+        "Log out and log back in with same credentials",
+        "Verify password reset flow works via email"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "AUTH-003",
+      "category": "Authentication",
+      "description": "Support multiple invitations per user account",
+      "stepsToVerify": [
+        "Log in to existing account with one invitation",
+        "Create a second invitation",
+        "Verify both invitations appear in dashboard",
+        "Verify each invitation can be edited independently"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "TMPL-001",
+      "category": "Template Selection",
+      "description": "Landing page displays 3 premium templates with live previews",
+      "stepsToVerify": [
+        "Navigate to landing page",
+        "Verify 3 templates are displayed (Love at Dusk, Garden Romance, Eternal Elegance)",
+        "Verify each template has a full-page section",
+        "Verify scroll-triggered animations demonstrate template capabilities",
+        "Verify 'Use This Template' CTA is visible on each section"
+      ],
+      "passes": false,
+      "status": "in_progress"
+    },
+    {
+      "id": "TMPL-002",
+      "category": "Template Selection",
+      "description": "Love at Dusk template with all 11 sections and Chinese elegance theme",
+      "stepsToVerify": [
+        "Select Love at Dusk template",
+        "Verify color palette matches spec (warm brown, gold, dark background)",
+        "Verify all 11 sections are present (Hero, Announcement, Couple Introduction, Love Story Timeline, Gallery, Schedule, Venue, Entourage, Gift Registry, RSVP, Footer)",
+        "Verify Playfair Display/Noto Serif SC fonts for headings",
+        "Verify signature animations (parallax, slide-in cards, staggered fade)"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "TMPL-003",
+      "category": "Template Selection",
+      "description": "Garden Romance template with all 9 sections and natural theme",
+      "stepsToVerify": [
+        "Select Garden Romance template",
+        "Verify color palette matches spec (forest green, blush pink, warm white)",
+        "Verify all 9 sections are present",
+        "Verify Cormorant Garamond/Lato fonts",
+        "Verify botanical animations (flowers bloom, vines grow, butterfly particles)"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "TMPL-004",
+      "category": "Template Selection",
+      "description": "Eternal Elegance template with all 8 sections and western classic theme",
+      "stepsToVerify": [
+        "Select Eternal Elegance template",
+        "Verify color palette matches spec (black, champagne gold, white)",
+        "Verify all 8 sections are present",
+        "Verify Didot/Bodoni/Garamond fonts",
+        "Verify signature animations (monogram SVG draw, letter-by-letter reveal, gold shimmer)"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "EDIT-001",
+      "category": "Live Editor",
+      "description": "Desktop split-screen editor layout with live preview",
+      "stepsToVerify": [
+        "Open editor on desktop viewport (>1024px)",
+        "Verify split-screen layout (60% preview left, 40% form right)",
+        "Edit any field in the form panel",
+        "Verify changes reflect instantly in preview panel",
+        "Scroll preview and verify form panel updates to matching section"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "EDIT-002",
+      "category": "Live Editor",
+      "description": "Mobile editor with tap-to-edit interface",
+      "stepsToVerify": [
+        "Open editor on mobile viewport (<768px)",
+        "Verify full-screen template preview mode",
+        "Tap any text element and verify inline edit popover appears",
+        "Tap a section and verify bottom sheet with section fields appears",
+        "Verify sticky 'Preview / Edit' toggle is functional"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "EDIT-003",
+      "category": "Live Editor",
+      "description": "Pre-filled sample data for immediate context",
+      "stepsToVerify": [
+        "Create new invitation",
+        "Verify hero section has sample couple names (e.g., 'Sarah & Michael')",
+        "Verify venue has sample data (e.g., 'Grand Hyatt Singapore')",
+        "Verify schedule has sample events",
+        "Verify all sample data is realistic and matches PRD examples"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "EDIT-004",
+      "category": "Live Editor",
+      "description": "Auto-save draft functionality every 30 seconds",
+      "stepsToVerify": [
+        "Start editing an invitation",
+        "Make changes to multiple fields",
+        "Wait 30 seconds without manual save",
+        "Refresh the page",
+        "Verify all changes were preserved automatically"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "EDIT-005",
+      "category": "Live Editor",
+      "description": "Undo/Redo functionality for last 20 actions",
+      "stepsToVerify": [
+        "Make 5 distinct changes to invitation",
+        "Click undo 5 times and verify each change is reversed",
+        "Click redo 3 times and verify changes are restored",
+        "Make 25 changes and verify only last 20 can be undone"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "EDIT-006",
+      "category": "Live Editor",
+      "description": "Real-time field validation with helpful error messages",
+      "stepsToVerify": [
+        "Leave required field empty and verify error message appears",
+        "Enter invalid date format and verify validation error",
+        "Enter invalid email format and verify validation error",
+        "Fix errors and verify error messages disappear instantly"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "EDIT-007",
+      "category": "Live Editor",
+      "description": "Image upload with R2 storage integration",
+      "stepsToVerify": [
+        "Click upload button for hero image",
+        "Select image file from device",
+        "Verify upload progress indicator",
+        "Verify image appears in preview after upload",
+        "Verify image is stored in Cloudflare R2"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "EDIT-008",
+      "category": "Live Editor",
+      "description": "Section visibility toggle (show/hide sections)",
+      "stepsToVerify": [
+        "Open section settings in editor",
+        "Toggle a section to hidden",
+        "Verify section no longer appears in preview",
+        "Toggle section back to visible",
+        "Verify section reappears in preview"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "AI-001",
+      "category": "AI Assistant",
+      "description": "AI content generation for schedule section",
+      "stepsToVerify": [
+        "Click AI assistant button on schedule section",
+        "Enter prompt (e.g., 'Generate timeline for Chinese wedding')",
+        "Verify AI generates 5-7 timeline events",
+        "Click 'Apply' and verify content populates section",
+        "Click 'Regenerate' and verify new content is generated"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "AI-002",
+      "category": "AI Assistant",
+      "description": "AI content generation for FAQ section",
+      "stepsToVerify": [
+        "Click AI assistant button on FAQ section",
+        "Enter prompt or use default generation",
+        "Verify AI generates 4-5 FAQ items",
+        "Verify questions are relevant to wedding context",
+        "Apply and verify content appears in section"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "AI-003",
+      "category": "AI Assistant",
+      "description": "AI content generation for love story/couple bio",
+      "stepsToVerify": [
+        "Click AI assistant on couple story section",
+        "Provide context about couple (e.g., 'Met in college, dated 5 years')",
+        "Verify AI generates romantic narrative with milestones",
+        "Apply and verify story appears in timeline format"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "AI-004",
+      "category": "AI Assistant",
+      "description": "AI styling adjustments via natural language prompts",
+      "stepsToVerify": [
+        "Click AI assistant button",
+        "Enter styling prompt (e.g., 'Make this more romantic')",
+        "Verify AI suggests color/style adjustments",
+        "Apply and verify visual changes in preview",
+        "Verify design overrides are saved to database"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "AI-005",
+      "category": "AI Assistant",
+      "description": "AI auto-translation between English and Chinese",
+      "stepsToVerify": [
+        "Enter content in English",
+        "Click translate to Chinese option",
+        "Verify content is translated with proper Chinese characters",
+        "Translate Chinese content back to English",
+        "Verify translation maintains meaning and formality"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "AI-006",
+      "category": "AI Assistant",
+      "description": "AI usage limits enforced per tier (Free: 5, Premium: 100)",
+      "stepsToVerify": [
+        "Create invitation as free user",
+        "Use AI generation 5 times",
+        "Attempt 6th generation and verify limit reached message",
+        "Upgrade to premium and verify limit increases to 100",
+        "Verify usage counter displays correctly in UI"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "RSVP-001",
+      "category": "RSVP System",
+      "description": "Guest-facing RSVP form with all required fields",
+      "stepsToVerify": [
+        "Open public invitation as guest",
+        "Navigate to RSVP section",
+        "Verify name field is required",
+        "Verify attendance options (Attending/Not Attending/Undecided)",
+        "Verify dietary requirements dropdown with custom text option",
+        "Verify optional message field",
+        "Submit form and verify confirmation message"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "RSVP-002",
+      "category": "RSVP System",
+      "description": "Plus-one/guest count functionality",
+      "stepsToVerify": [
+        "Enable plus-ones in RSVP settings",
+        "Set max plus-ones to 2",
+        "Submit RSVP as guest with 2 additional guests",
+        "Verify total guest count is tracked (3 total)",
+        "Verify couple dashboard shows aggregated plus-one counts"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "RSVP-003",
+      "category": "RSVP System",
+      "description": "RSVP dashboard with guest list and filters",
+      "stepsToVerify": [
+        "Navigate to RSVP management in dashboard",
+        "Verify guest list table displays all responses",
+        "Filter by 'Attending' and verify correct results",
+        "Filter by 'Not Attending' and verify correct results",
+        "Filter by 'Pending' and verify correct results",
+        "Use search to find specific guest by name"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "RSVP-004",
+      "category": "RSVP System",
+      "description": "Dietary requirements summary aggregation",
+      "stepsToVerify": [
+        "Multiple guests submit RSVPs with dietary requirements",
+        "Navigate to dietary summary in dashboard",
+        "Verify aggregated counts per dietary type",
+        "Verify custom dietary notes are listed"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "RSVP-005",
+      "category": "RSVP System",
+      "description": "CSV export of guest list",
+      "stepsToVerify": [
+        "Navigate to RSVP dashboard",
+        "Click 'Export CSV' button",
+        "Verify CSV file downloads",
+        "Open CSV and verify all guest data is present",
+        "Verify columns include name, attendance, dietary, guest count, message"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "RSVP-006",
+      "category": "RSVP System",
+      "description": "Guest import via CSV upload",
+      "stepsToVerify": [
+        "Navigate to guest import in dashboard",
+        "Upload CSV file with guest names and emails",
+        "Verify column mapping interface appears",
+        "Map columns correctly and import",
+        "Verify guests appear in guest list with 'Pending' status"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "RSVP-007",
+      "category": "RSVP System",
+      "description": "Manual guest entry form",
+      "stepsToVerify": [
+        "Navigate to RSVP dashboard",
+        "Click 'Add Guest Manually'",
+        "Enter guest name, email, relationship",
+        "Save and verify guest appears in list",
+        "Edit manually added guest and verify changes save"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "DASH-001",
+      "category": "Dashboard",
+      "description": "My Invitations list with status and quick actions",
+      "stepsToVerify": [
+        "Navigate to dashboard",
+        "Verify all user's invitations are listed",
+        "Verify each shows status (Draft/Published/Archived)",
+        "Verify Edit action opens editor",
+        "Verify Preview action opens preview mode",
+        "Verify Share action opens share modal",
+        "Verify Delete action removes invitation with confirmation"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "DASH-002",
+      "category": "Dashboard",
+      "description": "RSVP overview with statistics",
+      "stepsToVerify": [
+        "Navigate to invitation dashboard",
+        "Verify total invited count displays",
+        "Verify responded count displays",
+        "Verify breakdown shows Attending/Not Attending/Pending",
+        "Verify recent responses list shows latest RSVPs"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "DASH-003",
+      "category": "Dashboard",
+      "description": "Basic analytics with view counts and RSVP rate",
+      "stepsToVerify": [
+        "Navigate to analytics section",
+        "Verify total views count is displayed",
+        "Verify RSVP rate (responded/invited) is calculated",
+        "Verify views over time line chart renders",
+        "Verify data updates when invitation receives new views"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "DASH-004",
+      "category": "Dashboard",
+      "description": "Invitation settings (URL slug, publish/unpublish)",
+      "stepsToVerify": [
+        "Navigate to invitation settings",
+        "Change URL slug and save (premium only)",
+        "Verify new slug is accessible",
+        "Click Unpublish and verify invitation returns 404",
+        "Click Publish and verify invitation is accessible again"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "SHARE-001",
+      "category": "Sharing",
+      "description": "Shareable URL with custom slug format",
+      "stepsToVerify": [
+        "Publish invitation",
+        "Verify URL format is dreammoments.app/invite/{slug}",
+        "Verify slug uses couple names (e.g., sarah-michael)",
+        "If slug taken, verify UID appended (e.g., sarah-michael-x7k2)",
+        "Verify URL is publicly accessible"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "SHARE-002",
+      "category": "Sharing",
+      "description": "Copy link functionality",
+      "stepsToVerify": [
+        "Open share modal after publishing",
+        "Click 'Copy Link' button",
+        "Verify link is copied to clipboard",
+        "Paste and verify correct URL"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "SHARE-003",
+      "category": "Sharing",
+      "description": "WhatsApp share with pre-formatted message",
+      "stepsToVerify": [
+        "Open share modal",
+        "Click WhatsApp share button",
+        "Verify WhatsApp opens with pre-filled message",
+        "Verify message contains invitation link",
+        "Verify message includes couple names and date"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "SHARE-004",
+      "category": "Sharing",
+      "description": "QR code download for printed materials",
+      "stepsToVerify": [
+        "Open share modal",
+        "Click 'Download QR Code'",
+        "Verify QR code image downloads",
+        "Scan QR code with phone",
+        "Verify QR code opens invitation URL"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "ANIM-001",
+      "category": "Animations",
+      "description": "GSAP ScrollTrigger integration for scroll animations",
+      "stepsToVerify": [
+        "Open published invitation",
+        "Scroll through sections",
+        "Verify sections animate on scroll into view",
+        "Verify animations are smooth (60fps)",
+        "Verify scroll position triggers correct animations"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "ANIM-002",
+      "category": "Animations",
+      "description": "Reduced motion support for accessibility",
+      "stepsToVerify": [
+        "Enable 'prefers-reduced-motion' in OS settings",
+        "Open invitation",
+        "Verify all animations are disabled",
+        "Verify content is still visible and readable",
+        "Disable reduced motion and verify animations return"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "ANIM-003",
+      "category": "Animations",
+      "description": "Template-specific signature animations",
+      "stepsToVerify": [
+        "Love at Dusk: Verify slow zoom parallax on hero",
+        "Love at Dusk: Verify timeline cards slide from alternating sides",
+        "Garden Romance: Verify flowers bloom on scroll",
+        "Garden Romance: Verify vine growth animations",
+        "Eternal Elegance: Verify monogram SVG line draw animation",
+        "Eternal Elegance: Verify letter-by-letter text reveal"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "PAY-001",
+      "category": "Payments",
+      "description": "Stripe checkout integration",
+      "stepsToVerify": [
+        "Click upgrade to premium",
+        "Verify redirect to Stripe Checkout",
+        "Complete payment with test card",
+        "Verify redirect back to app",
+        "Verify premium features are unlocked"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "PAY-002",
+      "category": "Payments",
+      "description": "Malaysia payment methods (FPX, GrabPay)",
+      "stepsToVerify": [
+        "Set currency to MYR",
+        "Proceed to checkout",
+        "Verify FPX bank transfer option available",
+        "Verify GrabPay option available",
+        "Complete payment with FPX in test mode"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "PAY-003",
+      "category": "Payments",
+      "description": "Singapore payment methods (PayNow, GrabPay)",
+      "stepsToVerify": [
+        "Set currency to SGD",
+        "Proceed to checkout",
+        "Verify PayNow option available",
+        "Verify GrabPay option available",
+        "Complete payment with PayNow in test mode"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "PAY-004",
+      "category": "Payments",
+      "description": "Premium feature gating enforcement",
+      "stepsToVerify": [
+        "As free user, try to set custom URL slug",
+        "Verify upgrade prompt appears",
+        "Verify CSV import shows premium badge",
+        "Upgrade and verify custom slug is now editable",
+        "Verify all premium features are accessible"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "DB-001",
+      "category": "Database",
+      "description": "Neon Postgres database setup with Drizzle ORM",
+      "stepsToVerify": [
+        "Verify Neon database is provisioned",
+        "Run Drizzle migrations",
+        "Verify all tables created (users, invitations, guests, views, payments)",
+        "Verify indexes are created for performance",
+        "Test database connection from application"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "DB-002",
+      "category": "Database",
+      "description": "Template versioning and snapshot on publish",
+      "stepsToVerify": [
+        "Publish an invitation",
+        "Verify template_version is saved to database",
+        "Verify template_snapshot JSON contains full config",
+        "Update template in codebase",
+        "Verify old invitation still renders with snapshot"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "STOR-001",
+      "category": "Storage",
+      "description": "Cloudflare R2 integration for image storage",
+      "stepsToVerify": [
+        "Upload image through editor",
+        "Verify image is stored in R2 bucket",
+        "Verify image URL is accessible publicly",
+        "Verify image is optimized (resized/compressed)",
+        "Verify old images can be deleted"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "PERF-001",
+      "category": "Performance",
+      "description": "Page load time under 3 seconds",
+      "stepsToVerify": [
+        "Run Lighthouse audit on invitation page",
+        "Verify First Contentful Paint < 1.5s",
+        "Verify Largest Contentful Paint < 2.5s",
+        "Verify Time to Interactive < 3s",
+        "Test on 3G throttled network"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "PERF-002",
+      "category": "Performance",
+      "description": "Lighthouse score above 90",
+      "stepsToVerify": [
+        "Run Lighthouse audit on landing page",
+        "Verify Performance score > 90",
+        "Verify Accessibility score > 90",
+        "Verify Best Practices score > 90",
+        "Verify SEO score > 90"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "MOBILE-001",
+      "category": "Mobile",
+      "description": "Mobile responsive design for all pages",
+      "stepsToVerify": [
+        "Test landing page on 375px width (iPhone SE)",
+        "Test editor on 390px width (iPhone 14)",
+        "Test invitation view on 412px width (Pixel 7)",
+        "Verify all content is readable without horizontal scroll",
+        "Verify touch targets are at least 44x44px"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "MOBILE-002",
+      "category": "Mobile",
+      "description": "70%+ of guests view invitations on mobile",
+      "stepsToVerify": [
+        "Track user agent in invitation views",
+        "Verify mobile detection is accurate",
+        "Check analytics shows device breakdown",
+        "Ensure mobile experience is prioritized in testing"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "SEC-001",
+      "category": "Security",
+      "description": "RSVP API allows public submission without auth",
+      "stepsToVerify": [
+        "Submit RSVP without being logged in",
+        "Verify RSVP is recorded successfully",
+        "Verify no authentication errors",
+        "Verify rate limiting prevents spam"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "SEC-002",
+      "category": "Security",
+      "description": "RSVP management requires owner authentication",
+      "stepsToVerify": [
+        "Try to access /api/invitations/:id/guests without auth",
+        "Verify 401 Unauthorized response",
+        "Login as different user (not owner)",
+        "Verify 403 Forbidden response",
+        "Login as owner and verify access granted"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "LONG-001",
+      "category": "Longevity",
+      "description": "Invitations remain accessible forever",
+      "stepsToVerify": [
+        "Publish invitation",
+        "Note the URL slug",
+        "Wait 30 days (or simulate with database dates)",
+        "Access invitation URL",
+        "Verify invitation still renders correctly"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "PUB-001",
+      "category": "Publishing",
+      "description": "Preview mode shows full invitation before publishing",
+      "stepsToVerify": [
+        "Click Preview button in editor",
+        "Verify full-screen preview opens",
+        "Verify mobile preview toggle works",
+        "Verify all sections render correctly",
+        "Click 'Back to Edit' returns to editor"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "PUB-002",
+      "category": "Publishing",
+      "description": "Publish flow with upgrade prompt for free users",
+      "stepsToVerify": [
+        "Complete invitation as free user",
+        "Click Publish button",
+        "Verify upgrade prompt shows premium benefits",
+        "Skip upgrade and publish with default slug",
+        "Verify invitation is live and shareable"
+      ],
+      "passes": false,
+      "status": "todo"
+    },
+    {
+      "id": "FLOW-001",
+      "category": "User Flow",
+      "description": "Complete flow from signup to shareable link under 5 minutes",
+      "stepsToVerify": [
+        "Start timer",
+        "Sign up with Google (one-click)",
+        "Select template",
+        "Replace sample names with real names",
+        "Set wedding date",
+        "Optionally upload hero photo",
+        "Publish invitation",
+        "Copy shareable link",
+        "Verify total time < 5 minutes"
+      ],
+      "passes": false,
+      "status": "todo"
+    }
+  ]
+}

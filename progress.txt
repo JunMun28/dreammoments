@@ -1,0 +1,9 @@
+2026-02-03
+- removed TanStack demo routes, new header, devtools dev-only
+- landing revamp live: hero + templates + process + pricing
+- added template scaffolds: types, registry, love-at-dusk mapping
+- added route placeholders: /editor/:id, /invite/:slug, /dashboard
+next
+- build editor form + live sync
+- implement real template sections + animations
+- connect data layer + auth
