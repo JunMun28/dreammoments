@@ -13,14 +13,14 @@ function ResetScreen() {
 	const [message, setMessage] = useState('')
 
 	return (
-		<div className="min-h-screen bg-[#0c0a08] px-6 py-16">
+		<div className="min-h-screen bg-[color:var(--dm-bg)] px-6 py-16">
 			<div className="mx-auto max-w-md space-y-6">
 				<div>
-				<p className="text-xs uppercase tracking-[0.4em] text-[#d8b25a]">Reset</p>
-				<h1 className="mt-3 text-3xl font-semibold text-[#fdf6ea]">Reset Password</h1>
-					<p className="mt-2 text-sm text-[#f7e8c4]/70">Create a new password for your account.</p>
+				<p className="text-xs uppercase tracking-[0.4em] text-[color:var(--dm-accent-strong)]">Reset</p>
+				<h1 className="mt-3 text-3xl font-semibold text-[color:var(--dm-ink)]">Reset Password</h1>
+					<p className="mt-2 text-sm text-[color:var(--dm-muted)]">Create a new password for your account.</p>
 				</div>
-				<div className="rounded-3xl border border-white/10 bg-[#0f0c0a] p-6">
+				<div className="rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-6">
 					<form
 						className="space-y-4"
 						onSubmit={(event) => {
@@ -29,7 +29,7 @@ function ResetScreen() {
 							setMessage(error ?? 'Password updated. Please sign in again.')
 						}}
 					>
-						<label className="grid gap-2 text-xs uppercase tracking-[0.2em] text-[#f7e8c4]/70">
+						<label className="grid gap-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
 							Email
 							<input
 								type="email"
@@ -38,11 +38,11 @@ function ResetScreen() {
 								spellCheck={false}
 								value={email}
 								onChange={(event) => setEmail(event.target.value)}
-								className="h-12 rounded-2xl border border-white/10 bg-[#0f0c0a] px-4 text-base text-[#f7e8c4]"
+								className="h-12 rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] px-4 text-base text-[color:var(--dm-ink)]"
 								required
 							/>
 						</label>
-						<label className="grid gap-2 text-xs uppercase tracking-[0.2em] text-[#f7e8c4]/70">
+						<label className="grid gap-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
 							New Password
 							<input
 								type="password"
@@ -50,24 +50,24 @@ function ResetScreen() {
 								autoComplete="new-password"
 								value={password}
 								onChange={(event) => setPassword(event.target.value)}
-								className="h-12 rounded-2xl border border-white/10 bg-[#0f0c0a] px-4 text-base text-[#f7e8c4]"
+								className="h-12 rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] px-4 text-base text-[color:var(--dm-ink)]"
 								required
 							/>
 						</label>
 						{message ? (
-							<p role="status" className="text-xs text-[#f7e8c4]/70">
+							<p role="status" className="text-xs text-[color:var(--dm-muted)]">
 								{message}
 							</p>
 						) : null}
 						<button
 							type="submit"
-							className="w-full rounded-full bg-[#d8b25a] px-4 py-3 text-xs uppercase tracking-[0.2em] text-[#0c0a08]"
+							className="w-full rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-3 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)]"
 						>
 							Update Password
 						</button>
 					</form>
 				</div>
-			<Link to="/auth/login" className="rounded-full px-3 py-2 text-xs uppercase tracking-[0.2em] text-[#f7e8c4]/70">
+			<Link to="/auth/login" className="rounded-full px-3 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
 				Back to Sign In
 			</Link>
 			</div>

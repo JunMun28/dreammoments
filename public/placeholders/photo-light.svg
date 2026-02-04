@@ -1,0 +1,36 @@
+<svg width="800" height="450" viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="450" rx="32" fill="url(#bg)"/>
+  <g opacity="0.5">
+    <circle cx="120" cy="120" r="90" fill="url(#orb1)"/>
+    <circle cx="700" cy="90" r="120" fill="url(#orb2)"/>
+    <circle cx="620" cy="360" r="140" fill="url(#orb3)"/>
+  </g>
+  <g opacity="0.35">
+    <path d="M120 320C200 280 320 280 400 320C480 360 600 360 680 320" stroke="#D94674" stroke-width="2" stroke-linecap="round"/>
+    <path d="M90 350C190 310 330 310 420 350C510 390 640 390 720 350" stroke="#7F1D1D" stroke-width="2" stroke-linecap="round"/>
+  </g>
+  <g opacity="0.7">
+    <rect x="280" y="190" width="240" height="70" rx="35" fill="#FFFFFF"/>
+    <rect x="300" y="212" width="200" height="8" rx="4" fill="#D94674"/>
+    <rect x="330" y="230" width="140" height="6" rx="3" fill="#7F1D1D" fill-opacity="0.5"/>
+  </g>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="800" y2="450" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF6F8"/>
+      <stop offset="0.5" stop-color="#FDECF1"/>
+      <stop offset="1" stop-color="#FFF1F2"/>
+    </linearGradient>
+    <radialGradient id="orb1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(120 120) rotate(90) scale(90)">
+      <stop stop-color="#F9A8D4" stop-opacity="0.6"/>
+      <stop offset="1" stop-color="#F9A8D4" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="orb2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(700 90) rotate(90) scale(120)">
+      <stop stop-color="#FB7185" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#FB7185" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="orb3" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(620 360) rotate(90) scale(140)">
+      <stop stop-color="#7F1D1D" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#7F1D1D" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+</svg>

@@ -18,19 +18,21 @@ export default function ShareModal({
 	return (
 		<div className="dm-inline-edit">
 			<div className="dm-inline-card">
-				<p className="text-xs uppercase tracking-[0.3em] text-[#d8b25a]">Share Invitation</p>
-				<p className="mt-2 text-sm text-[#f7e8c4]/70">{url}</p>
+				<p className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">
+					Share Invitation
+				</p>
+				<p className="mt-2 text-sm text-[color:var(--dm-muted)]">{url}</p>
 				<div className="mt-4 flex flex-wrap gap-3">
 					<button
 						type="button"
-						className="rounded-full border border-white/20 px-4 py-2 text-xs uppercase tracking-[0.2em] text-[#f7e8c4]"
+						className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-accent-strong)]"
 						onClick={() => navigator.clipboard.writeText(url)}
 					>
 						Copy Link
 					</button>
 					<button
 						type="button"
-						className="rounded-full border border-white/20 px-4 py-2 text-xs uppercase tracking-[0.2em] text-[#f7e8c4]"
+						className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-accent-strong)]"
 						onClick={() =>
 							window.open(
 								`https://wa.me/?text=${encodeURIComponent(message)}`,
@@ -44,7 +46,7 @@ export default function ShareModal({
 					<a
 						href={qrUrl}
 						download={`invite-${invitation.slug}.png`}
-						className="rounded-full border border-white/20 px-4 py-2 text-xs uppercase tracking-[0.2em] text-[#f7e8c4]"
+						className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-accent-strong)]"
 					>
 						Download QR Code
 					</a>
@@ -60,7 +62,7 @@ export default function ShareModal({
 				</div>
 				<button
 					type="button"
-					className="mt-4 w-full rounded-full bg-[#d8b25a] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[#0c0a08]"
+					className="mt-4 w-full rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)]"
 					onClick={onClose}
 				>
 					Close

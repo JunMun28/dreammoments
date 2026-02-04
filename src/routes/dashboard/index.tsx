@@ -33,17 +33,17 @@ function DashboardScreen() {
 	if (!user) return <Navigate to="/auth/login" />
 
 	return (
-		<div className="min-h-screen bg-[#0c0a08] px-6 py-10">
+		<div className="min-h-screen bg-[color:var(--dm-bg)] px-6 py-10">
 			<div className="mx-auto max-w-6xl space-y-8">
 				<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 								<div className="min-w-0">
-						<p className="text-xs uppercase tracking-[0.4em] text-[#d8b25a]">Dashboard</p>
-						<h1 className="mt-2 text-3xl font-semibold text-[#fdf6ea]">My Invitations</h1>
-						<p className="mt-2 text-sm text-[#f7e8c4]/70">Manage drafts, RSVPs, and sharing.</p>
+						<p className="text-xs uppercase tracking-[0.4em] text-[color:var(--dm-accent-strong)]">Dashboard</p>
+						<h1 className="mt-2 text-3xl font-semibold text-[color:var(--dm-ink)]">My Invitations</h1>
+						<p className="mt-2 text-sm text-[color:var(--dm-muted)]">Manage drafts, RSVPs, and sharing.</p>
 					</div>
 					<Link
 						to="/editor/new"
-						className="rounded-full bg-[#d8b25a] px-5 py-3 text-xs uppercase tracking-[0.2em] text-[#0c0a08]"
+						className="rounded-full bg-[color:var(--dm-accent-strong)] px-5 py-3 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)]"
 					>
 						New Invitation
 					</Link>
@@ -51,12 +51,12 @@ function DashboardScreen() {
 
 				<div className="grid gap-6 lg:grid-cols-2">
 					{!sortedInvitations.length ? (
-						<div className="rounded-3xl border border-white/10 bg-[#0f0c0a] p-8 text-center">
-							<p className="text-xs uppercase tracking-[0.3em] text-[#d8b25a]">No Invitations Yet</p>
-							<p className="mt-3 text-sm text-[#f7e8c4]/70">Start with a template and publish in minutes.</p>
+						<div className="rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-8 text-center">
+							<p className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">No Invitations Yet</p>
+							<p className="mt-3 text-sm text-[color:var(--dm-muted)]">Start with a template and publish in minutes.</p>
 							<Link
 								to="/editor/new"
-								className="mt-5 inline-flex rounded-full bg-[#d8b25a] px-5 py-3 text-xs uppercase tracking-[0.2em] text-[#0c0a08]"
+								className="mt-5 inline-flex rounded-full bg-[color:var(--dm-accent-strong)] px-5 py-3 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)]"
 							>
 								Create Invitation
 							</Link>
@@ -72,17 +72,17 @@ function DashboardScreen() {
 						return (
 							<div
 								key={invitation.id}
-								className="rounded-3xl border border-white/10 bg-[#0f0c0a] p-6"
+								className="rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-6"
 							>
 								<div className="flex flex-wrap items-start justify-between gap-4">
 									<div>
-										<p className="text-xs uppercase tracking-[0.3em] text-[#d8b25a]">
+										<p className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">
 											{templateName}
 										</p>
-									<h2 className="mt-2 text-xl font-semibold text-[#fdf6ea] break-words">
+									<h2 className="mt-2 text-xl font-semibold text-[color:var(--dm-ink)] break-words">
 											{invitation.title}
 										</h2>
-										<p className="mt-2 text-xs uppercase tracking-[0.2em] text-[#f7e8c4]/60">
+										<p className="mt-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
 											{statusLabels[invitation.status]}
 										</p>
 									</div>
@@ -90,20 +90,20 @@ function DashboardScreen() {
 										<Link
 											to="/editor/$invitationId"
 											params={{ invitationId: invitation.id }}
-											className="rounded-full border border-white/20 px-4 py-2 text-[#f7e8c4]"
+											className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)]"
 										>
 											Edit
 										</Link>
 										<Link
 											to="/invite/$slug"
 											params={{ slug: invitation.slug }}
-											className="rounded-full border border-white/20 px-4 py-2 text-[#f7e8c4]"
+											className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)]"
 										>
 											Preview
 										</Link>
 										<button
 											type="button"
-											className="rounded-full border border-white/20 px-4 py-2 text-[#f7e8c4]"
+											className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)]"
 											onClick={() => {
 												setSelected(invitation)
 												setShareOpen(true)
@@ -113,7 +113,7 @@ function DashboardScreen() {
 										</button>
 										<button
 											type="button"
-											className="rounded-full border border-white/20 px-4 py-2 text-[#f7e8c4]"
+											className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)]"
 											onClick={() => {
 												const confirmed = window.confirm('Delete this invitation?')
 												if (!confirmed) return
@@ -125,21 +125,21 @@ function DashboardScreen() {
 									</div>
 								</div>
 								<div className="mt-4 grid gap-3 sm:grid-cols-3">
-									<div className="rounded-2xl border border-white/5 bg-[#14100d] p-4">
-										<p className="text-xs uppercase tracking-[0.2em] text-[#f7e8c4]/60">Views</p>
-										<p className="mt-2 text-lg font-semibold tabular-nums text-[#fdf6ea]">
+									<div className="rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-4">
+										<p className="text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">Views</p>
+										<p className="mt-2 text-lg font-semibold tabular-nums text-[color:var(--dm-ink)]">
 											{analytics.totalViews}
 										</p>
 									</div>
-									<div className="rounded-2xl border border-white/5 bg-[#14100d] p-4">
-										<p className="text-xs uppercase tracking-[0.2em] text-[#f7e8c4]/60">RSVPs</p>
-										<p className="mt-2 text-lg font-semibold tabular-nums text-[#fdf6ea]">
+									<div className="rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-4">
+										<p className="text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">RSVPs</p>
+										<p className="mt-2 text-lg font-semibold tabular-nums text-[color:var(--dm-ink)]">
 											{guests.length}
 										</p>
 									</div>
-									<div className="rounded-2xl border border-white/5 bg-[#14100d] p-4">
-										<p className="text-xs uppercase tracking-[0.2em] text-[#f7e8c4]/60">Updated</p>
-										<p className="mt-2 text-xs text-[#f7e8c4]/70">
+									<div className="rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-4">
+										<p className="text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">Updated</p>
+										<p className="mt-2 text-xs text-[color:var(--dm-muted)]">
 											{new Date(invitation.updatedAt).toLocaleDateString()}
 										</p>
 									</div>

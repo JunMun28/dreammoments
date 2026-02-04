@@ -9,6 +9,8 @@ export const Route = createFileRoute('/invite/$slug')({
 	component: InviteScreen,
 })
 
+const lightTemplates = new Set(['garden-romance', 'eternal-elegance', 'blush-romance'])
+
 function formatTemplateName(templateId: string) {
 	return templateId
 		.split('-')
@@ -17,6 +19,7 @@ function formatTemplateName(templateId: string) {
 }
 
 function resolveSampleTemplate(slug: string) {
+	if (slug.includes('blush-romance')) return 'blush-romance'
 	if (slug.includes('garden-romance')) return 'garden-romance'
 	if (slug.includes('eternal-elegance')) return 'eternal-elegance'
 	return 'love-at-dusk'
@@ -47,6 +50,9 @@ export function InviteScreen() {
 		if (isSample) return `${templateLabel} Sample Invitation`
 		return `${content.hero.partnerOneName} & ${content.hero.partnerTwoName}`
 	}, [content.hero.partnerOneName, content.hero.partnerTwoName, isSample, templateLabel])
+	const shellClass = lightTemplates.has(templateId)
+		? 'dm-shell-light'
+		: 'dm-shell-dark'
 
 	const handleRsvpSubmit = (payload: {
 		name: string
@@ -68,8 +74,8 @@ export function InviteScreen() {
 	}
 
 	return (
-		<div className="min-h-screen bg-[#0c0a08]">
-			<header className="border-b border-white/10 px-6 py-6 text-center text-xs uppercase tracking-[0.4em] text-[#d8b25a]">
+		<div className={`min-h-screen ${shellClass}`}>
+			<header className="border-b border-[color:var(--dm-border)] px-6 py-6 text-center text-xs uppercase tracking-[0.4em] text-[color:var(--dm-accent-strong)]">
 				{headerLabel}
 			</header>
 			<InvitationRenderer

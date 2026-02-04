@@ -13,7 +13,7 @@ function NewEditorRedirect() {
 	useEffect(() => {
 		if (!userId) return
 		const params = new URLSearchParams(window.location.search)
-		const templateId = params.get('template') ?? 'love-at-dusk'
+		const templateId = params.get('template') ?? 'blush-romance'
 		const invitation = createInvitation(userId, templateId)
 		setInvitationId(invitation.id)
 	}, [userId])

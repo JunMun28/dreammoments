@@ -24,6 +24,15 @@ export default function EternalEleganceInvitation({
 	const taglineLetters = data.hero.tagline.split('')
 	const editableProps = (fieldPath: string, className: string) => ({
 		onClick: mode === 'editor' ? () => onInlineEdit?.(fieldPath) : undefined,
+		onKeyDown:
+			mode === 'editor'
+				? (event) => {
+						if (event.key === 'Enter' || event.key === ' ') {
+							event.preventDefault()
+							onInlineEdit?.(fieldPath)
+						}
+					}
+				: undefined,
 		role: mode === 'editor' ? 'button' : undefined,
 		tabIndex: mode === 'editor' ? 0 : undefined,
 		className: mode === 'editor' ? `${className} dm-editable` : className,
@@ -163,6 +172,14 @@ export default function EternalEleganceInvitation({
 					<div className="mt-6 grid gap-4 md:grid-cols-3">
 						{data.gallery.photos.map((photo, index) => (
 							<div key={`${photo.caption ?? 'photo'}-${index}`} className="eternal-photo">
+								<img
+									src={photo.url || '/placeholders/photo-light.svg'}
+									alt=""
+									loading="lazy"
+									width={360}
+									height={140}
+									className="absolute inset-0 h-full w-full rounded-[inherit] object-cover"
+								/>
 								<span>{photo.caption ?? 'Portrait'}</span>
 							</div>
 						))}

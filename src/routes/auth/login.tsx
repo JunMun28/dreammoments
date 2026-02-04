@@ -15,23 +15,29 @@ function LoginScreen() {
 	if (user) return <Navigate to="/dashboard" />
 
 	return (
-		<div className="min-h-screen bg-[#0c0a08] px-6 py-16">
+		<div className="min-h-screen bg-[color:var(--dm-bg)] px-6 py-16 text-[color:var(--dm-ink)]">
 			<div className="mx-auto max-w-md space-y-6">
 				<div>
-				<p className="text-xs uppercase tracking-[0.4em] text-[#d8b25a]">Sign In</p>
-				<h1 className="mt-3 text-3xl font-semibold text-[#fdf6ea]">Welcome Back</h1>
-					<p className="mt-2 text-sm text-[#f7e8c4]/70">Access your invitations and RSVPs.</p>
+					<p className="text-xs uppercase tracking-[0.4em] text-[color:var(--dm-accent-strong)]">
+						Sign In
+					</p>
+					<h1 className="mt-3 text-3xl font-semibold text-[color:var(--dm-ink)]">
+						Welcome Back
+					</h1>
+					<p className="mt-2 text-sm text-[color:var(--dm-muted)]">
+						Access your invitations and RSVPs.
+					</p>
 				</div>
 
-			<button
-				type="button"
-				className="w-full rounded-full border border-white/15 px-4 py-3 text-sm uppercase tracking-[0.2em] text-[#f7e8c4]"
-				onClick={signInWithGoogle}
-			>
-				Sign In with Google
-			</button>
+				<button
+					type="button"
+					className="w-full rounded-full border border-[color:var(--dm-border)] px-4 py-3 text-sm uppercase tracking-[0.2em] text-[color:var(--dm-accent-strong)]"
+					onClick={signInWithGoogle}
+				>
+					Sign In with Google
+				</button>
 
-				<div className="rounded-3xl border border-white/10 bg-[#0f0c0a] p-6">
+				<div className="rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-6">
 					<form
 						className="space-y-4"
 						onSubmit={(event) => {
@@ -40,7 +46,7 @@ function LoginScreen() {
 							setError(message ?? '')
 						}}
 					>
-						<label className="grid gap-2 text-xs uppercase tracking-[0.2em] text-[#f7e8c4]/70">
+						<label className="grid gap-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
 							Email
 							<input
 								type="email"
@@ -49,11 +55,11 @@ function LoginScreen() {
 								spellCheck={false}
 								value={email}
 								onChange={(event) => setEmail(event.target.value)}
-								className="h-12 rounded-2xl border border-white/10 bg-[#0f0c0a] px-4 text-base text-[#f7e8c4]"
+								className="h-12 rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] px-4 text-base text-[color:var(--dm-ink)]"
 								required
 							/>
 						</label>
-						<label className="grid gap-2 text-xs uppercase tracking-[0.2em] text-[#f7e8c4]/70">
+						<label className="grid gap-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
 							Password
 							<input
 								type="password"
@@ -61,27 +67,37 @@ function LoginScreen() {
 								autoComplete="current-password"
 								value={password}
 								onChange={(event) => setPassword(event.target.value)}
-								className="h-12 rounded-2xl border border-white/10 bg-[#0f0c0a] px-4 text-base text-[#f7e8c4]"
+								className="h-12 rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] px-4 text-base text-[color:var(--dm-ink)]"
 								required
 							/>
 						</label>
 						{error ? (
-							<p role="status" className="text-xs text-[#f59e0b]">
+							<p role="status" className="text-xs text-[#b91c1c]">
 								{error}
 							</p>
 						) : null}
 						<button
 							type="submit"
-							className="w-full rounded-full bg-[#d8b25a] px-4 py-3 text-xs uppercase tracking-[0.2em] text-[#0c0a08]"
+							className="w-full rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-3 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)]"
 						>
 							Sign In
 						</button>
 					</form>
 				</div>
 
-				<div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[#f7e8c4]/70">
-					<Link to="/auth/reset" className="rounded-full px-3 py-2 hover:text-white">Forgot Password</Link>
-					<Link to="/auth/signup" className="rounded-full px-3 py-2 hover:text-white">Create Account</Link>
+				<div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
+					<Link
+						to="/auth/reset"
+						className="rounded-full px-3 py-2 hover:text-[color:var(--dm-ink)]"
+					>
+						Forgot Password
+					</Link>
+					<Link
+						to="/auth/signup"
+						className="rounded-full px-3 py-2 hover:text-[color:var(--dm-ink)]"
+					>
+						Create Account
+					</Link>
 				</div>
 			</div>
 		</div>

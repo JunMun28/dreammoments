@@ -4,11 +4,11 @@ import type { InvitationContent } from '../../../lib/types'
 import SectionShell from '../SectionShell'
 import type { TemplateInvitationProps } from '../types'
 
-type GardenRomanceInvitationProps = TemplateInvitationProps & {
+type BlushRomanceInvitationProps = TemplateInvitationProps & {
 	content: InvitationContent
 }
 
-export default function GardenRomanceInvitation({
+export default function BlushRomanceInvitation({
 	content,
 	hiddenSections,
 	mode = 'public',
@@ -17,7 +17,7 @@ export default function GardenRomanceInvitation({
 	onInlineEdit,
 	onRsvpSubmit,
 	rsvpStatus,
-}: GardenRomanceInvitationProps) {
+}: BlushRomanceInvitationProps) {
 	useScrollReveal()
 	const data = useMemo(() => content, [content])
 	const editableProps = (fieldPath: string, className: string) => ({
@@ -37,35 +37,35 @@ export default function GardenRomanceInvitation({
 	})
 
 	return (
-		<div className="garden-romance">
+		<div className="blush-romance">
 			<SectionShell
 				id="hero"
 				mode={mode}
 				hidden={hiddenSections?.hero}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="garden-section garden-hero"
+				className="blush-section blush-hero"
 			>
-				<div className="garden-hero-frame" />
-				<div className="garden-hero-bloom" />
+				<div className="blush-hero-frame" />
+				<div className="blush-hero-bloom" />
 				<div className="mx-auto flex max-w-4xl flex-col items-center text-center">
-					<p className="garden-kicker">Garden Romance</p>
+					<p className="blush-kicker">Blush Romance</p>
 					<h1
 						data-reveal
 						{...editableProps(
 							'hero.partnerOneName',
-							'dm-reveal garden-title',
+							'dm-reveal blush-title',
 						)}
 					>
 						{data.hero.partnerOneName} & {data.hero.partnerTwoName}
 					</h1>
 					<p
 						data-reveal
-						{...editableProps('hero.tagline', 'dm-reveal garden-tagline')}
+						{...editableProps('hero.tagline', 'dm-reveal blush-tagline')}
 					>
 						{data.hero.tagline}
 					</p>
-					<div data-reveal className="dm-reveal garden-pill-row">
+					<div data-reveal className="dm-reveal blush-pill-row">
 						<span>{data.hero.date}</span>
 						<span>{data.venue.name}</span>
 					</div>
@@ -78,15 +78,15 @@ export default function GardenRomanceInvitation({
 				hidden={hiddenSections?.announcement}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="garden-section"
+				className="blush-section"
 			>
 				<div className="mx-auto max-w-3xl text-center">
-					<p className="garden-kicker">Invitation</p>
+					<p className="blush-kicker">Invitation</p>
 					<h2
 						data-reveal
 						{...editableProps(
 							'announcement.title',
-							'dm-reveal garden-heading',
+							'dm-reveal blush-heading',
 						)}
 					>
 						{data.announcement.title}
@@ -95,12 +95,12 @@ export default function GardenRomanceInvitation({
 						data-reveal
 						{...editableProps(
 							'announcement.message',
-							'dm-reveal garden-body',
+							'dm-reveal blush-body',
 						)}
 					>
 						{data.announcement.message}
 					</p>
-					<p data-reveal className="dm-reveal garden-subtext">
+					<p data-reveal className="dm-reveal blush-subtext">
 						{data.announcement.formalText}
 					</p>
 				</div>
@@ -112,21 +112,21 @@ export default function GardenRomanceInvitation({
 				hidden={hiddenSections?.story}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="garden-section garden-panel"
+				className="blush-section blush-panel"
 			>
 				<div className="mx-auto max-w-4xl">
-					<p className="garden-kicker">Our Story</p>
+					<p className="blush-kicker">Our Story</p>
 					<div className="mt-6 grid gap-4">
 						{data.story.milestones.map((milestone, index) => (
 							<div
 								key={`${milestone.title}-${index}`}
 								data-reveal
 								style={{ transitionDelay: `${index * 90}ms` }}
-								className="dm-reveal garden-card"
+								className="dm-reveal blush-card"
 							>
-								<p className="garden-meta">{milestone.date}</p>
-								<p className="garden-heading">{milestone.title}</p>
-								<p className="garden-body">{milestone.description}</p>
+								<p className="blush-meta">{milestone.date}</p>
+								<p className="blush-heading">{milestone.title}</p>
+								<p className="blush-body">{milestone.description}</p>
 							</div>
 						))}
 					</div>
@@ -139,17 +139,17 @@ export default function GardenRomanceInvitation({
 				hidden={hiddenSections?.gallery}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="garden-section"
+				className="blush-section"
 			>
 				<div className="mx-auto max-w-5xl">
-					<p className="garden-kicker">Gallery</p>
+					<p className="blush-kicker">Gallery</p>
 					<div className="mt-6 grid gap-4 md:grid-cols-3">
 						{data.gallery.photos.map((photo, index) => (
 							<div
 								key={`${photo.caption ?? 'gallery'}-${index}`}
 								data-reveal
 								style={{ transitionDelay: `${index * 70}ms` }}
-								className="dm-reveal garden-photo"
+								className="dm-reveal blush-photo"
 							>
 								<img
 									src={photo.url || '/placeholders/photo-light.svg'}
@@ -157,9 +157,9 @@ export default function GardenRomanceInvitation({
 									loading="lazy"
 									width={360}
 									height={140}
-									className="garden-photo-frame w-full object-cover"
+									className="blush-photo-frame w-full object-cover"
 								/>
-								<p className="garden-meta">{photo.caption ?? 'Moment'}</p>
+								<p className="blush-meta">{photo.caption ?? 'Moment'}</p>
 							</div>
 						))}
 					</div>
@@ -172,21 +172,21 @@ export default function GardenRomanceInvitation({
 				hidden={hiddenSections?.schedule}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="garden-section garden-panel"
+				className="blush-section blush-panel"
 			>
 				<div className="mx-auto max-w-4xl">
-					<p className="garden-kicker">Schedule</p>
+					<p className="blush-kicker">Schedule</p>
 					<div className="mt-6 grid gap-4">
 						{data.schedule.events.map((event, index) => (
 							<div
 								key={`${event.time}-${event.title}`}
 								data-reveal
 								style={{ transitionDelay: `${index * 60}ms` }}
-								className="dm-reveal garden-timeline"
+								className="dm-reveal blush-timeline"
 							>
-								<p className="garden-meta">{event.time}</p>
-								<p className="garden-heading">{event.title}</p>
-								<p className="garden-body">{event.description}</p>
+								<p className="blush-meta">{event.time}</p>
+								<p className="blush-heading">{event.title}</p>
+								<p className="blush-body">{event.description}</p>
 							</div>
 						))}
 					</div>
@@ -199,22 +199,22 @@ export default function GardenRomanceInvitation({
 				hidden={hiddenSections?.venue}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="garden-section"
+				className="blush-section"
 			>
-				<div className="mx-auto max-w-5xl garden-venue">
+				<div className="mx-auto max-w-5xl blush-venue">
 					<div>
-						<p className="garden-kicker">Venue</p>
-					<h3 {...editableProps('venue.name', 'garden-heading')}>
-						{data.venue.name}
-					</h3>
-					<p {...editableProps('venue.address', 'garden-body')}>
-						{data.venue.address}
-					</p>
-					<p {...editableProps('venue.directions', 'garden-subtext')}>
-						{data.venue.directions}
-					</p>
+						<p className="blush-kicker">Venue</p>
+						<h3 {...editableProps('venue.name', 'blush-heading')}>
+							{data.venue.name}
+						</h3>
+						<p {...editableProps('venue.address', 'blush-body')}>
+							{data.venue.address}
+						</p>
+						<p {...editableProps('venue.directions', 'blush-subtext')}>
+							{data.venue.directions}
+						</p>
 					</div>
-					<div className="garden-map">
+					<div className="blush-map">
 						<img
 							src="/placeholders/photo-light.svg"
 							alt=""
@@ -232,12 +232,12 @@ export default function GardenRomanceInvitation({
 				hidden={hiddenSections?.rsvp}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="garden-section garden-panel"
+				className="blush-section blush-panel"
 			>
-				<div className="mx-auto max-w-4xl">
-					<p className="garden-kicker">RSVP</p>
+				<div className="mx-auto max-w-3xl">
+					<p className="blush-kicker">RSVP</p>
 					<form
-						className="garden-form"
+						className="mt-6 blush-form"
 						onSubmit={(event) => {
 							event.preventDefault()
 							if (!onRsvpSubmit) return
@@ -263,7 +263,7 @@ export default function GardenRomanceInvitation({
 						<input name="dietary" placeholder="Vegetarian, no pork…" aria-label="Dietary requirements" autoComplete="off" />
 						<textarea name="message" placeholder="Can’t wait to celebrate with you…" aria-label="Message" autoComplete="off" />
 						{rsvpStatus ? (
-							<p role="status" className="garden-meta">
+							<p role="status" className="blush-meta">
 								{rsvpStatus}
 							</p>
 						) : null}
@@ -278,15 +278,20 @@ export default function GardenRomanceInvitation({
 				hidden={hiddenSections?.faq}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="garden-section"
+				className="blush-section"
 			>
 				<div className="mx-auto max-w-4xl">
-					<p className="garden-kicker">FAQ</p>
-					<div className="mt-4 grid gap-3">
+					<p className="blush-kicker">FAQ</p>
+					<div className="mt-6 grid gap-4">
 						{data.faq.items.map((item, index) => (
-							<div key={`${item.question}-${index}`} className="garden-faq">
-								<p className="garden-heading">{item.question}</p>
-								<p className="garden-body">{item.answer}</p>
+							<div
+								key={`${item.question}-${index}`}
+								data-reveal
+								style={{ transitionDelay: `${index * 70}ms` }}
+								className="dm-reveal blush-faq"
+							>
+								<p className="blush-heading">{item.question}</p>
+								<p className="blush-body">{item.answer}</p>
 							</div>
 						))}
 					</div>
@@ -299,13 +304,15 @@ export default function GardenRomanceInvitation({
 				hidden={hiddenSections?.footer}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="garden-section garden-footer"
+				className="blush-section blush-footer"
 			>
 				<div className="mx-auto max-w-3xl text-center">
-					<p {...editableProps('footer.message', 'garden-heading')}>
+					<p
+						data-reveal
+						{...editableProps('footer.message', 'dm-reveal blush-body')}
+					>
 						{data.footer.message}
 					</p>
-					<p className="garden-kicker">Garden Romance</p>
 				</div>
 			</SectionShell>
 		</div>

@@ -19,20 +19,20 @@ function UpgradeScreen() {
 		currency === 'MYR' ? ['Card', 'FPX', 'GrabPay'] : ['Card', 'PayNow', 'GrabPay']
 
 	return (
-		<div className="min-h-screen bg-[#0c0a08] px-6 py-16">
+		<div className="min-h-screen bg-[color:var(--dm-bg)] px-6 py-16">
 			<div className="mx-auto max-w-xl space-y-6">
 				<div>
-					<p className="text-xs uppercase tracking-[0.4em] text-[#d8b25a]">Upgrade</p>
-				<h1 className="mt-3 text-3xl font-semibold text-[#fdf6ea]">Premium Checkout</h1>
-					<p className="mt-2 text-sm text-[#f7e8c4]/70">Mock Stripe Checkout for testing.</p>
+					<p className="text-xs uppercase tracking-[0.4em] text-[color:var(--dm-accent-strong)]">Upgrade</p>
+				<h1 className="mt-3 text-3xl font-semibold text-[color:var(--dm-ink)]">Premium Checkout</h1>
+					<p className="mt-2 text-sm text-[color:var(--dm-muted)]">Mock Stripe Checkout for testing.</p>
 				</div>
-				<div className="rounded-3xl border border-white/10 bg-[#0f0c0a] p-6">
-					<label className="grid gap-2 text-xs uppercase tracking-[0.2em] text-[#f7e8c4]/70">
+				<div className="rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-6">
+					<label className="grid gap-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
 						Currency
 					<select
 						value={currency}
 						onChange={(event) => setCurrency(event.target.value as 'MYR' | 'SGD')}
-						className="h-12 rounded-2xl border border-white/10 bg-[#0f0c0a] px-4 text-base text-[#f7e8c4]"
+						className="h-12 rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] px-4 text-base text-[color:var(--dm-ink)]"
 						name="currency"
 						autoComplete="off"
 					>
@@ -40,10 +40,10 @@ function UpgradeScreen() {
 							<option value="SGD">SGD</option>
 						</select>
 					</label>
-					<p className="mt-4 text-sm text-[#f7e8c4]/70">Available Methods: {methods.join(', ')}</p>
+					<p className="mt-4 text-sm text-[color:var(--dm-muted)]">Available Methods: {methods.join(', ')}</p>
 					<button
 						type="button"
-						className="mt-4 w-full rounded-full bg-[#d8b25a] px-4 py-3 text-xs uppercase tracking-[0.2em] text-[#0c0a08]"
+						className="mt-4 w-full rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-3 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)]"
 						onClick={() => {
 							recordPayment({
 								userId: user.id,
@@ -58,7 +58,7 @@ function UpgradeScreen() {
 						Proceed to Stripe Checkout
 					</button>
 					{status ? (
-						<p role="status" className="mt-3 text-xs text-[#f7e8c4]/70">
+						<p role="status" className="mt-3 text-xs text-[color:var(--dm-muted)]">
 							{status}
 						</p>
 					) : null}

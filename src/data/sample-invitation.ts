@@ -127,6 +127,11 @@ export function buildSampleContent(templateId: string): InvitationContent {
 		base.announcement.formalText = '诚挚邀请您参加我们的婚礼。'
 		base.footer.message = '期待与您在婚礼相见。'
 	}
+	if (templateId === 'blush-romance') {
+		base.hero.tagline = 'Soft blush tones for a timeless promise.'
+		base.announcement.title = 'Blush Romance'
+		base.footer.message = 'With love, in gentle blush.'
+	}
 	if (templateId === 'garden-romance') {
 		base.hero.tagline = 'A garden vow, a lifetime promise.'
 		base.announcement.title = 'Garden Romance'

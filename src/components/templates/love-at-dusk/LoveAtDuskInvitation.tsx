@@ -24,6 +24,15 @@ export default function LoveAtDuskInvitation({
 	const data = useMemo(() => content, [content])
 	const editableProps = (fieldPath: string, className: string) => ({
 		onClick: mode === 'editor' ? () => onInlineEdit?.(fieldPath) : undefined,
+		onKeyDown:
+			mode === 'editor'
+				? (event) => {
+						if (event.key === 'Enter' || event.key === ' ') {
+							event.preventDefault()
+							onInlineEdit?.(fieldPath)
+						}
+					}
+				: undefined,
 		role: mode === 'editor' ? 'button' : undefined,
 		tabIndex: mode === 'editor' ? 0 : undefined,
 		className: mode === 'editor' ? `${className} dm-editable` : className,
@@ -256,7 +265,14 @@ export default function LoveAtDuskInvitation({
 								style={{ transitionDelay: `${index * 60}ms` }}
 								className="dm-reveal rounded-2xl border border-white/10 bg-gradient-to-br from-[#2a1b13] via-[#0f0c0a] to-[#5b2f22] p-6"
 							>
-								<div className="h-32 w-full rounded-xl border border-white/10 bg-black/30" />
+								<img
+									src={item.url || '/placeholders/photo-dark.svg'}
+									alt=""
+									loading="lazy"
+									width={360}
+									height={128}
+									className="h-32 w-full rounded-xl border border-white/10 object-cover"
+								/>
 								<p className="mt-4 text-xs uppercase tracking-[0.3em] text-[var(--love-accent)]">
 									{item.caption ?? `Photo ${index + 1}`}
 								</p>
@@ -354,7 +370,14 @@ export default function LoveAtDuskInvitation({
 						data-reveal
 						className="dm-reveal rounded-3xl border border-white/10 bg-gradient-to-br from-[#2a1b13] via-[#0f0c0a] to-[#5b2f22] p-6"
 					>
-						<div className="h-48 rounded-2xl border border-white/10 bg-black/30" />
+						<img
+							src="/placeholders/photo-dark.svg"
+							alt=""
+							loading="lazy"
+							width={480}
+							height={192}
+							className="h-48 w-full rounded-2xl border border-white/10 object-cover"
+						/>
 						<p className="mt-3 text-xs uppercase tracking-[0.3em] text-[var(--love-accent)]">
 							Map preview
 						</p>
@@ -438,11 +461,11 @@ export default function LoveAtDuskInvitation({
 							RSVP
 						</p>
 						<h2
-							data-reveal
-							className="dm-reveal mt-4 text-2xl font-semibold text-[var(--love-cream)]"
-						>
-							Join us on our day
-						</h2>
+						data-reveal
+						className="dm-reveal mt-4 text-2xl font-semibold text-[var(--love-cream)]"
+					>
+						Join Us on Our Day
+					</h2>
 						<p
 							data-reveal
 							className="dm-reveal mt-3 text-sm text-[var(--love-muted)]"
@@ -538,7 +561,7 @@ export default function LoveAtDuskInvitation({
 						) : null}
 						<button
 							type="submit"
-							className="mt-6 w-full rounded-full bg-[var(--love-accent)] px-6 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-[#0c0a08]"
+							className="mt-6 w-full rounded-full bg-[var(--love-accent)] px-6 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-[var(--love-ink)]"
 						>
 							Submit RSVP
 						</button>

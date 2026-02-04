@@ -15,28 +15,29 @@ export default function Header() {
 	const { user, signOut } = useAuth()
 
 	return (
-		<header className="sticky top-0 z-50 border-b border-white/10 bg-[#0c0a08]/80 backdrop-blur">
+		<header className="sticky top-0 z-50 border-b border-[color:var(--dm-border)] bg-[color:var(--dm-bg)] backdrop-blur">
 			<div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
 				<Link
 					to="/"
-					className="text-lg font-semibold tracking-[0.2em] text-[#f7e8c4]"
+					className="text-lg font-semibold tracking-[0.2em] text-[color:var(--dm-ink)]"
 				>
 					DREAMMOMENTS
 				</Link>
 				<button
+					type="button"
 					onClick={() => setOpen((prev) => !prev)}
-					className="rounded-full border border-white/15 p-2 text-[#f7e8c4] md:hidden"
+					className="rounded-full border border-[color:var(--dm-border)] p-2 text-[color:var(--dm-ink)] md:hidden"
 					aria-label="Toggle navigation"
 				>
 					{open ? <X size={18} /> : <Menu size={18} />}
 				</button>
-				<nav className="hidden items-center gap-6 text-sm uppercase tracking-[0.22em] text-[#f7e8c4]/80 md:flex">
+				<nav className="hidden items-center gap-6 text-sm uppercase tracking-[0.22em] text-[color:var(--dm-muted)] md:flex">
 					{navItems.map((item) =>
 						item.to ? (
 							<Link
 								key={item.label}
 								to={item.to}
-								className="transition hover:text-white"
+								className="dm-nav-link transition hover:text-[color:var(--dm-ink)]"
 							>
 								{item.label}
 							</Link>
@@ -44,7 +45,7 @@ export default function Header() {
 							<a
 								key={item.label}
 								href={item.href}
-								className="transition hover:text-white"
+								className="dm-nav-link transition hover:text-[color:var(--dm-ink)]"
 							>
 								{item.label}
 							</a>
@@ -53,7 +54,7 @@ export default function Header() {
 					{user?.plan === 'free' ? (
 						<Link
 							to="/upgrade"
-							className="rounded-full bg-[#d8b25a] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[#0c0a08]"
+							className="rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)]"
 						>
 							Upgrade
 						</Link>
@@ -62,29 +63,29 @@ export default function Header() {
 						<button
 							type="button"
 							onClick={signOut}
-							className="rounded-full border border-white/15 px-4 py-2 text-xs uppercase tracking-[0.2em] text-[#f7e8c4]"
+							className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-accent-strong)]"
 						>
-							Sign out
+							Sign Out
 						</button>
 					) : (
 						<Link
 							to="/auth/login"
-							className="rounded-full border border-white/15 px-4 py-2 text-xs uppercase tracking-[0.2em] text-[#f7e8c4]"
+							className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-accent-strong)]"
 						>
-							Sign in
+							Sign In
 						</Link>
 					)}
 				</nav>
 			</div>
 			{open && (
-				<div className="border-t border-white/10 bg-[#0c0a08] md:hidden">
-					<div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4 text-sm uppercase tracking-[0.2em] text-[#f7e8c4]/80">
+				<div className="border-t border-[color:var(--dm-border)] bg-[color:var(--dm-bg)] md:hidden">
+					<div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4 text-sm uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
 						{navItems.map((item) =>
 							item.to ? (
 								<Link
 									key={item.label}
 									to={item.to}
-									className="transition hover:text-white"
+									className="dm-nav-link transition hover:text-[color:var(--dm-ink)]"
 									onClick={() => setOpen(false)}
 								>
 									{item.label}
@@ -93,7 +94,7 @@ export default function Header() {
 								<a
 									key={item.label}
 									href={item.href}
-									className="transition hover:text-white"
+									className="dm-nav-link transition hover:text-[color:var(--dm-ink)]"
 									onClick={() => setOpen(false)}
 								>
 									{item.label}
@@ -103,7 +104,7 @@ export default function Header() {
 						{user?.plan === 'free' ? (
 							<Link
 								to="/upgrade"
-								className="rounded-full bg-[#d8b25a] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[#0c0a08]"
+								className="rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)]"
 								onClick={() => setOpen(false)}
 							>
 								Upgrade
@@ -116,17 +117,17 @@ export default function Header() {
 									signOut()
 									setOpen(false)
 								}}
-								className="rounded-full border border-white/15 px-4 py-2 text-xs uppercase tracking-[0.2em] text-[#f7e8c4]"
+								className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-accent-strong)]"
 							>
-								Sign out
+								Sign Out
 							</button>
 						) : (
 							<Link
 								to="/auth/login"
-								className="rounded-full border border-white/15 px-4 py-2 text-xs uppercase tracking-[0.2em] text-[#f7e8c4]"
+								className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-accent-strong)]"
 								onClick={() => setOpen(false)}
 							>
-								Sign in
+								Sign In
 							</Link>
 						)}
 					</div>

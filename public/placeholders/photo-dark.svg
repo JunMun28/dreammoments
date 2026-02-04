@@ -1,0 +1,36 @@
+<svg width="800" height="450" viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="450" rx="32" fill="url(#bg)"/>
+  <g opacity="0.6">
+    <circle cx="140" cy="120" r="90" fill="url(#orb1)"/>
+    <circle cx="680" cy="110" r="120" fill="url(#orb2)"/>
+    <circle cx="640" cy="360" r="140" fill="url(#orb3)"/>
+  </g>
+  <g opacity="0.35">
+    <path d="M110 320C210 280 330 280 420 320C510 360 630 360 710 320" stroke="#D8B25A" stroke-width="2" stroke-linecap="round"/>
+    <path d="M90 350C190 310 340 310 430 350C520 390 650 390 730 350" stroke="#C05B5B" stroke-width="2" stroke-linecap="round"/>
+  </g>
+  <g opacity="0.7">
+    <rect x="280" y="190" width="240" height="70" rx="35" fill="#0F0C0A"/>
+    <rect x="300" y="212" width="200" height="8" rx="4" fill="#D8B25A"/>
+    <rect x="330" y="230" width="140" height="6" rx="3" fill="#F7E8C4" fill-opacity="0.5"/>
+  </g>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="800" y2="450" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0C0A08"/>
+      <stop offset="0.5" stop-color="#1B1410"/>
+      <stop offset="1" stop-color="#2A1B13"/>
+    </linearGradient>
+    <radialGradient id="orb1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(140 120) rotate(90) scale(90)">
+      <stop stop-color="#D8B25A" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#D8B25A" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="orb2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(680 110) rotate(90) scale(120)">
+      <stop stop-color="#C05B5B" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#C05B5B" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="orb3" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(640 360) rotate(90) scale(140)">
+      <stop stop-color="#F7E8C4" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#F7E8C4" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+</svg>

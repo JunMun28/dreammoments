@@ -87,6 +87,8 @@ const listFieldMap: Record<
 	},
 }
 
+const lightTemplates = new Set(['garden-romance', 'eternal-elegance', 'blush-romance'])
+
 function getDefaultSection(sectionId: string, content: InvitationContent) {
 	return (content as Record<string, unknown>)[sectionId]
 }
@@ -153,8 +155,9 @@ export function EditorScreen() {
 		() => templates.find((item) => item.id === invitation?.templateId),
 		[invitation?.templateId],
 	)
+	const isLightTemplate = lightTemplates.has(template?.id ?? 'blush-romance')
 	const initialContent = useMemo(
-		() => invitation?.content ?? buildSampleContent('love-at-dusk'),
+		() => invitation?.content ?? buildSampleContent('blush-romance'),
 		[invitation?.content],
 	)
 	const [draft, setDraft] = useState<InvitationContent>(initialContent)
@@ -218,6 +221,17 @@ export function EditorScreen() {
 
 	useEffect(() => {
 		if (typeof window === 'undefined') return
+		if (!hasUnsavedChanges) return
+		const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+			event.preventDefault()
+			event.returnValue = ''
+		}
+		window.addEventListener('beforeunload', handleBeforeUnload)
+		return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+	}, [hasUnsavedChanges])
+
+	useEffect(() => {
+		if (typeof window === 'undefined') return
 		const handler = (event: BeforeUnloadEvent) => {
 			if (!hasUnsavedChanges) return
 			event.preventDefault()
@@ -249,8 +263,8 @@ export function EditorScreen() {
 	if (!user) return <Navigate to="/auth/login" />
 	if (!invitation) {
 		return (
-			<div className="min-h-screen bg-[#0c0a08] px-6 py-10">
-				<p className="text-sm text-[#f7e8c4]/70">Invitation not found.</p>
+			<div className="min-h-screen bg-[color:var(--dm-bg)] px-6 py-10">
+				<p className="text-sm text-[color:var(--dm-muted)]">Invitation not found.</p>
 			</div>
 		)
 	}
@@ -435,13 +449,13 @@ export function EditorScreen() {
 
 		return (
 			<div className="space-y-3">
-				<p className="text-xs uppercase tracking-[0.3em] text-[#d8b25a]">
+				<p className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">
 					{listConfig.label}
 				</p>
 				{safeItems.map((item: any, index: number) => (
-					<div key={index} className="grid gap-2 rounded-2xl border border-white/10 bg-[#14100d] p-4">
+					<div key={index} className="grid gap-2 rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-4">
 						{listConfig.fields.map((field) => (
-							<label key={field.key} className="grid gap-1 text-xs uppercase tracking-[0.2em] text-[#f7e8c4]/70">
+							<label key={field.key} className="grid gap-1 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
 								{field.label}
 								<input
 									name={`${sectionId}.${field.key}.${index}`}
@@ -455,13 +469,13 @@ export function EditorScreen() {
 										)
 										updateItems(nextItems)
 									}}
-									className="h-10 rounded-xl border border-white/10 bg-[#0f0c0a] px-3 text-sm text-[#f7e8c4]"
+									className="h-10 rounded-xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] px-3 text-base text-[color:var(--dm-ink)]"
 								/>
 							</label>
 						))}
 						<button
 							type="button"
-							className="rounded-full border border-white/10 px-3 py-2 text-xs uppercase tracking-[0.2em] text-[#d8b25a]"
+							className="rounded-full border border-[color:var(--dm-border)] px-3 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-accent-strong)]"
 							onClick={() => updateItems(safeItems.filter((_: any, i: number) => i !== index))}
 						>
 							Remove
@@ -470,7 +484,7 @@ export function EditorScreen() {
 				))}
 				<button
 					type="button"
-					className="rounded-full border border-[#d8b25a]/50 px-4 py-2 text-xs uppercase tracking-[0.2em] text-[#d8b25a]"
+					className="rounded-full border border-[color:var(--dm-accent-strong)]/40 px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-accent-strong)]"
 					onClick={() =>
 						updateItems([
 							...safeItems,
@@ -496,8 +510,8 @@ export function EditorScreen() {
 		if (field.type === 'toggle') {
 			const checked = Boolean(getValueByPath(draft, fieldPath))
 			return (
-				<label className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-[#14100d] px-4 py-3">
-					<span className="text-xs uppercase tracking-[0.2em] text-[#f7e8c4]/70">
+				<label className="flex items-center justify-between gap-4 rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] px-4 py-3">
+					<span className="text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
 						{field.label}
 					</span>
 					<input
@@ -515,7 +529,7 @@ export function EditorScreen() {
 		if (field.type === 'image') {
 			return (
 				<div className="space-y-2">
-					<p className="text-xs uppercase tracking-[0.2em] text-[#f7e8c4]/70">
+					<p className="text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
 						{field.label}
 					</p>
 					<input
@@ -527,7 +541,7 @@ export function EditorScreen() {
 							const file = event.target.files?.[0]
 							if (file) void handleImageUpload(fieldPath, file)
 						}}
-						className="w-full rounded-2xl border border-white/10 bg-[#14100d] px-4 py-3 text-xs text-[#f7e8c4]"
+						className="w-full rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] px-4 py-3 text-base text-[color:var(--dm-ink)]"
 					/>
 					{value && (
 						<img
@@ -542,7 +556,7 @@ export function EditorScreen() {
 					{value ? (
 						<button
 							type="button"
-							className="rounded-full border border-white/10 px-3 py-2 text-xs uppercase tracking-[0.2em] text-[#f7e8c4]/70"
+							className="rounded-full border border-[color:var(--dm-border)] px-3 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]"
 							onClick={() => handleFieldChange(fieldPath, '')}
 						>
 							Remove Image
@@ -563,16 +577,16 @@ export function EditorScreen() {
 			name: fieldPath,
 			autoComplete: 'off',
 			className:
-				'h-11 w-full rounded-2xl border border-white/10 bg-[#0f0c0a] px-4 text-base text-[#f7e8c4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d8b25a]/60',
+				'h-11 w-full rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] px-4 text-base text-[color:var(--dm-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--dm-focus)]/60',
 		}
 
 		return (
-			<label className="grid gap-2 text-xs uppercase tracking-[0.2em] text-[#f7e8c4]/70">
+			<label className="grid gap-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
 				{field.label}
 				{field.type === 'textarea' ? (
 					<textarea
 						{...inputProps}
-						className="min-h-[110px] w-full rounded-2xl border border-white/10 bg-[#0f0c0a] px-4 py-3 text-base text-[#f7e8c4]"
+						className="min-h-[110px] w-full rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] px-4 py-3 text-base text-[color:var(--dm-ink)]"
 					/>
 				) : (
 					<input
@@ -581,7 +595,7 @@ export function EditorScreen() {
 					/>
 				)}
 				{error ? (
-					<span role="status" className="text-[11px] text-[#f59e0b]">
+					<span role="status" className="text-[11px] text-[#b91c1c]">
 						{error}
 					</span>
 				) : null}
@@ -590,27 +604,27 @@ export function EditorScreen() {
 	}
 
 	return (
-		<div className="min-h-screen bg-[#0c0a08] px-4 py-8">
+		<div className="min-h-screen bg-[color:var(--dm-bg)] px-4 py-8">
 			<div className="mx-auto max-w-6xl space-y-6">
 				<div className="flex flex-wrap items-center justify-between gap-4">
 					<div>
-						<p className="text-xs uppercase tracking-[0.4em] text-[#d8b25a]">
+						<p className="text-xs uppercase tracking-[0.4em] text-[color:var(--dm-accent-strong)]">
 							Editor
 						</p>
-						<h1 className="mt-2 text-2xl font-semibold text-[#fdf6ea]">
+						<h1 className="mt-2 text-2xl font-semibold text-[color:var(--dm-ink)]">
 							{invitation.title}
 						</h1>
 					</div>
 					<div className="flex flex-wrap gap-3 text-xs uppercase tracking-[0.2em]">
 						<Link
 							to="/dashboard"
-							className="rounded-full border border-white/20 px-4 py-2 text-[#f7e8c4]"
+							className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)]"
 						>
 							Dashboard
 						</Link>
 						<button
 							type="button"
-							className="rounded-full border border-white/20 px-4 py-2 text-[#f7e8c4]"
+							className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)]"
 							onClick={handleUndo}
 							disabled={!canUndo}
 						>
@@ -618,7 +632,7 @@ export function EditorScreen() {
 						</button>
 						<button
 							type="button"
-							className="rounded-full border border-white/20 px-4 py-2 text-[#f7e8c4]"
+							className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)]"
 							onClick={handleRedo}
 							disabled={!canRedo}
 						>
@@ -626,33 +640,33 @@ export function EditorScreen() {
 						</button>
 						<button
 							type="button"
-							className="rounded-full border border-white/20 px-4 py-2 text-[#f7e8c4]"
+							className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)]"
 							onClick={() => setPreviewMode(true)}
 						>
 							Preview
 						</button>
 						<button
 							type="button"
-							className="rounded-full bg-[#d8b25a] px-4 py-2 text-[#0c0a08]"
+							className="rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-[color:var(--dm-on-accent)]"
 							onClick={handlePublish}
 						>
 							Publish
 						</button>
 					</div>
 				</div>
-				<p className="text-xs text-[#f7e8c4]/60">
+				<p className="text-xs text-[color:var(--dm-muted)]">
 					AI Usage: {invitation.aiGenerationsUsed}/{planLimit} · Autosave {autosaveAt || 'Pending'}
 				</p>
 				<div className="grid gap-6 lg:grid-cols-[0.6fr_0.4fr]">
-					<div className="rounded-3xl border border-white/10 bg-[#0f0c0a] p-4">
+					<div className="rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-4">
 						<div className="flex items-center justify-between">
-							<p className="text-xs uppercase tracking-[0.4em] text-[#d8b25a]">
+							<p className="text-xs uppercase tracking-[0.4em] text-[color:var(--dm-accent-strong)]">
 								Live Preview
 							</p>
 							{isMobile && (
 								<button
 									type="button"
-									className="rounded-full border border-white/15 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-[#f7e8c4]"
+									className="rounded-full border border-[color:var(--dm-border)] px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-[color:var(--dm-ink)]"
 									onClick={() => setPreviewMode((prev) => !prev)}
 								>
 									{previewMode ? 'Edit' : 'Preview'}
@@ -661,11 +675,11 @@ export function EditorScreen() {
 						</div>
 						<div
 							ref={previewRef}
-							className="mt-4 max-h-[70vh] overflow-y-auto rounded-3xl border border-white/10"
+							className="mt-4 max-h-[70vh] overflow-y-auto rounded-3xl border border-[color:var(--dm-border)]"
 							style={styleOverrides}
 						>
 							<InvitationRenderer
-								templateId={template?.id ?? 'love-at-dusk'}
+								templateId={template?.id ?? 'blush-romance'}
 								content={draft}
 								hiddenSections={sectionVisibility}
 								mode="editor"
@@ -677,28 +691,28 @@ export function EditorScreen() {
 					</div>
 
 					{!isMobile || !previewMode ? (
-						<div className="rounded-3xl border border-white/10 bg-[#100d0a] p-5">
+						<div className="rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-5">
 							<div className="flex items-center justify-between">
-								<p className="text-xs uppercase tracking-[0.4em] text-[#d8b25a]">
+								<p className="text-xs uppercase tracking-[0.4em] text-[color:var(--dm-accent-strong)]">
 									Section Editor
 								</p>
 								<button
 									type="button"
-									className="rounded-full border border-white/15 px-3 py-2 text-[10px] uppercase tracking-[0.2em] text-[#f7e8c4]/70"
+									className="rounded-full border border-[color:var(--dm-border)] px-3 py-2 text-[10px] uppercase tracking-[0.2em] text-[color:var(--dm-muted)]"
 									onClick={() => openAiPanel(activeSection)}
 								>
 									AI Helper
 								</button>
 							</div>
 							<div className="mt-4 space-y-4">
-								<p className="text-sm text-[#f7e8c4]/70">
+								<p className="text-sm text-[color:var(--dm-muted)]">
 									Active: {activeSectionConfig?.id ?? activeSection}
 								</p>
 								<div className="space-y-3">
 									{template?.sections.map((section) => (
 										<label
 											key={section.id}
-											className="flex items-center justify-between rounded-2xl border border-white/10 bg-[#14100d] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[#f7e8c4]/70"
+											className="flex items-center justify-between rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]"
 										>
 											<span>{section.id}</span>
 											<input
@@ -728,7 +742,7 @@ export function EditorScreen() {
 			{inlineEdit && (
 				<div className="dm-inline-edit">
 					<div className="dm-inline-card">
-						<p className="text-xs uppercase tracking-[0.3em] text-[#d8b25a]">
+						<p className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">
 							Quick Edit
 						</p>
 						<input
@@ -740,19 +754,19 @@ export function EditorScreen() {
 									prev ? { ...prev, value: event.target.value } : prev,
 								)
 							}
-							className="mt-3 h-12 w-full rounded-2xl border border-white/10 bg-[#0f0c0a] px-4 text-base text-[#f7e8c4]"
+							className="mt-3 h-12 w-full rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] px-4 text-base text-[color:var(--dm-ink)]"
 						/>
 						<div className="mt-4 flex gap-3">
 							<button
 								type="button"
-								className="flex-1 rounded-full border border-white/20 px-4 py-2 text-xs uppercase tracking-[0.2em] text-[#f7e8c4]"
+								className="flex-1 rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-ink)]"
 								onClick={() => setInlineEdit(null)}
 							>
 								Cancel
 							</button>
 							<button
 								type="button"
-								className="flex-1 rounded-full bg-[#d8b25a] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[#0c0a08]"
+								className="flex-1 rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)]"
 								onClick={handleInlineSave}
 							>
 								Apply
@@ -765,7 +779,7 @@ export function EditorScreen() {
 			{aiPanel.open && (
 				<div className="dm-inline-edit">
 					<div className="dm-inline-card">
-						<p className="text-xs uppercase tracking-[0.3em] text-[#d8b25a]">
+						<p className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">
 							AI Assistant
 						</p>
 						<select
@@ -778,7 +792,7 @@ export function EditorScreen() {
 									type: event.target.value as AiPanelState['type'],
 								}))
 							}
-							className="mt-3 h-10 w-full rounded-2xl border border-white/10 bg-[#0f0c0a] px-3 text-sm text-[#f7e8c4]"
+							className="mt-3 h-10 w-full rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] px-3 text-base text-[color:var(--dm-ink)]"
 						>
 							<option value="schedule">Schedule</option>
 							<option value="faq">FAQ</option>
@@ -796,24 +810,24 @@ export function EditorScreen() {
 								setAiPanel((prev) => ({ ...prev, prompt: event.target.value }))
 							}
 							placeholder="Describe what you want (e.g., “Romantic schedule”)…"
-							className="mt-3 min-h-[120px] w-full rounded-2xl border border-white/10 bg-[#0f0c0a] px-4 py-3 text-sm text-[#f7e8c4]"
+							className="mt-3 min-h-[120px] w-full rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] px-4 py-3 text-base text-[color:var(--dm-ink)]"
 						/>
 						{aiPanel.error ? (
-							<p role="status" className="mt-2 text-xs text-[#f59e0b]">
-								{aiPanel.error}
-							</p>
-						) : null}
+						<p role="status" className="mt-2 text-xs text-[#b91c1c]">
+							{aiPanel.error}
+						</p>
+					) : null}
 						<div className="mt-4 flex flex-wrap gap-3">
 							<button
 								type="button"
-								className="rounded-full border border-white/20 px-4 py-2 text-xs uppercase tracking-[0.2em] text-[#f7e8c4]"
+								className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-ink)]"
 								onClick={handleAiGenerate}
 							>
 								Generate
 							</button>
 							<button
 								type="button"
-								className="rounded-full bg-[#d8b25a] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[#0c0a08]"
+								className="rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)]"
 								onClick={handleAiApply}
 								disabled={!aiPanel.result}
 							>
@@ -821,14 +835,14 @@ export function EditorScreen() {
 							</button>
 							<button
 								type="button"
-								className="rounded-full border border-white/20 px-4 py-2 text-xs uppercase tracking-[0.2em] text-[#f7e8c4]"
+								className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-ink)]"
 								onClick={() => setAiPanel((prev) => ({ ...prev, open: false }))}
 							>
 								Close
 							</button>
 						</div>
 						{aiPanel.result ? (
-							<pre className="mt-4 max-h-40 overflow-auto rounded-2xl bg-[#0f0c0a] p-3 text-[11px] text-[#f7e8c4]/80">
+							<pre className="mt-4 max-h-40 overflow-auto rounded-2xl bg-[color:var(--dm-surface)] p-3 text-[11px] text-[color:var(--dm-muted)]">
 								{JSON.stringify(aiPanel.result, null, 2)}
 							</pre>
 						) : null}
@@ -837,18 +851,22 @@ export function EditorScreen() {
 			)}
 
 			{previewMode && (
-				<div className="dm-preview">
+				<div
+					className={`dm-preview ${
+						isLightTemplate ? 'dm-shell-light' : 'dm-shell-dark'
+					}`}
+				>
 					<div className="dm-preview-toolbar">
 						<button
 							type="button"
-							className="rounded-full border border-white/20 px-4 py-2 text-xs uppercase tracking-[0.2em] text-[#f7e8c4]"
+							className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-ink)]"
 							onClick={() => setPreviewMode(false)}
 						>
 							Back to Edit
 						</button>
 						<button
 							type="button"
-							className="rounded-full bg-[#d8b25a] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[#0c0a08]"
+							className="rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)]"
 							onClick={handleShare}
 						>
 							Share
@@ -856,7 +874,7 @@ export function EditorScreen() {
 					</div>
 					<div className="dm-preview-body" style={styleOverrides}>
 						<InvitationRenderer
-							templateId={template?.id ?? 'love-at-dusk'}
+							templateId={template?.id ?? 'blush-romance'}
 							content={draft}
 							hiddenSections={sectionVisibility}
 							mode="preview"
@@ -868,10 +886,10 @@ export function EditorScreen() {
 			{upgradeOpen && (
 				<div className="dm-inline-edit">
 					<div className="dm-inline-card">
-						<p className="text-xs uppercase tracking-[0.3em] text-[#d8b25a]">
+						<p className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">
 							Upgrade to Premium
 						</p>
-						<ul className="mt-3 space-y-2 text-sm text-[#f7e8c4]/70">
+						<ul className="mt-3 space-y-2 text-sm text-[color:var(--dm-muted)]">
 							<li>Custom URL slug</li>
 							<li>100 AI generations</li>
 							<li>CSV import + export</li>
@@ -880,7 +898,7 @@ export function EditorScreen() {
 						<div className="mt-4 flex gap-3">
 							<button
 								type="button"
-								className="flex-1 rounded-full border border-white/20 px-4 py-2 text-xs uppercase tracking-[0.2em] text-[#f7e8c4]"
+								className="flex-1 rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-ink)]"
 								onClick={() => {
 									publishInvitation(invitation.id, { randomize: true })
 									setUpgradeOpen(false)
@@ -890,7 +908,7 @@ export function EditorScreen() {
 							</button>
 							<button
 								type="button"
-								className="flex-1 rounded-full bg-[#d8b25a] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[#0c0a08]"
+								className="flex-1 rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)]"
 								onClick={() => navigate({ to: '/upgrade' })}
 							>
 								Upgrade

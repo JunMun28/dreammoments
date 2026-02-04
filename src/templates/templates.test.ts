@@ -2,8 +2,8 @@ import { describe, expect, test } from 'vitest'
 import { templates, loveAtDuskTemplate } from './index'
 
 describe('templates registry', () => {
-	test('includes three templates', () => {
-		expect(templates.length).toBe(3)
+	test('includes four templates', () => {
+		expect(templates.length).toBe(4)
 	})
 
 	test('love at dusk has core sections', () => {

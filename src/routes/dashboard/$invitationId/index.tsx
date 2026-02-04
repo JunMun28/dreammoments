@@ -114,7 +114,7 @@ export function InvitationDashboard() {
 	if (!invitation) return <Navigate to="/dashboard" />
 	if (invitation.userId !== user.id) {
 		return (
-			<div className="min-h-screen bg-[#0c0a08] px-6 py-10 text-sm text-[#f7e8c4]/70">
+			<div className="min-h-screen bg-[color:var(--dm-bg)] px-6 py-10 text-sm text-[color:var(--dm-muted)]">
 				403 · Not authorized.
 			</div>
 		)
@@ -136,25 +136,25 @@ export function InvitationDashboard() {
 	const dietary = getDietarySummary(invitationId)
 
 	return (
-		<div className="min-h-screen bg-[#0c0a08] px-6 py-10">
+		<div className="min-h-screen bg-[color:var(--dm-bg)] px-6 py-10">
 			<div className="mx-auto max-w-6xl space-y-10">
 				<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 					<div>
-						<p className="text-xs uppercase tracking-[0.4em] text-[#d8b25a]">Invitation Overview</p>
-						<h1 className="mt-2 text-3xl font-semibold text-[#fdf6ea] break-words">{invitation.title}</h1>
-						<p className="mt-2 text-sm text-[#f7e8c4]/70 break-words">{invitation.slug}</p>
+						<p className="text-xs uppercase tracking-[0.4em] text-[color:var(--dm-accent-strong)]">Invitation Overview</p>
+						<h1 className="mt-2 text-3xl font-semibold text-[color:var(--dm-ink)] break-words">{invitation.title}</h1>
+						<p className="mt-2 text-sm text-[color:var(--dm-muted)] break-words">{invitation.slug}</p>
 					</div>
 					<div className="flex flex-wrap gap-3 text-xs uppercase tracking-[0.2em]">
 						<Link
 							to="/editor/$invitationId"
 							params={{ invitationId }}
-							className="rounded-full border border-white/20 px-4 py-2 text-[#f7e8c4]"
+							className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)]"
 						>
 							Open Editor
 						</Link>
 						<button
 							type="button"
-							className="rounded-full border border-white/20 px-4 py-2 text-[#f7e8c4]"
+							className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)]"
 							onClick={() => setShareOpen(true)}
 						>
 							Share
@@ -170,22 +170,22 @@ export function InvitationDashboard() {
 						{ label: 'Attending', value: attending },
 						{ label: 'Pending', value: pending },
 					].map((stat) => (
-						<div key={stat.label} className="rounded-3xl border border-white/10 bg-[#0f0c0a] p-6">
-							<p className="text-xs uppercase tracking-[0.3em] text-[#d8b25a]">{stat.label}</p>
-							<p className="mt-3 text-2xl font-semibold text-[#fdf6ea] tabular-nums">{stat.value}</p>
+						<div key={stat.label} className="rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-6">
+							<p className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">{stat.label}</p>
+							<p className="mt-3 text-2xl font-semibold text-[color:var(--dm-ink)] tabular-nums">{stat.value}</p>
 						</div>
 					))}
 				</div>
 
 				<div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-					<div className="rounded-3xl border border-white/10 bg-[#0f0c0a] p-6">
-						<h2 className="text-xl font-semibold text-[#fdf6ea]">RSVP Management</h2>
+					<div className="rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-6">
+						<h2 className="text-xl font-semibold text-[color:var(--dm-ink)]">RSVP Management</h2>
 						<div className="mt-4 flex flex-wrap gap-3 text-xs uppercase tracking-[0.2em]">
 							{filterOptions.map((option) => (
 								<button
 									key={option.value}
 									type="button"
-									className="rounded-full border border-white/20 px-3 py-2 text-[#f7e8c4]"
+									className="rounded-full border border-[color:var(--dm-border)] px-3 py-2 text-[color:var(--dm-ink)]"
 									onClick={() => setFilter(option.value)}
 								>
 									{option.label}
@@ -197,15 +197,15 @@ export function InvitationDashboard() {
 								name="guestSearch"
 								value={search}
 								onChange={(event) => setSearch(event.target.value)}
-								className="h-10 flex-1 rounded-full border border-white/10 bg-[#0f0c0a] px-4 text-xs text-[#f7e8c4]"
+								className="h-10 flex-1 rounded-full border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] px-4 text-base text-[color:var(--dm-ink)]"
 								autoComplete="off"
 								type="search"
 							/>
 						</div>
 
-						<div className="mt-4 overflow-auto rounded-2xl border border-white/10">
-							<table className="w-full text-left text-xs text-[#f7e8c4]/80 tabular-nums">
-								<thead className="bg-[#14100d] uppercase tracking-[0.2em]">
+						<div className="mt-4 overflow-auto rounded-2xl border border-[color:var(--dm-border)]">
+							<table className="w-full text-left text-xs text-[color:var(--dm-muted)] tabular-nums">
+								<thead className="bg-[color:var(--dm-surface)] uppercase tracking-[0.2em]">
 									<tr>
 										<th className="px-4 py-3">Guest</th>
 										<th className="px-4 py-3">Status</th>
@@ -216,7 +216,7 @@ export function InvitationDashboard() {
 								</thead>
 								<tbody>
 									{filteredGuests.map((guest) => (
-										<tr key={guest.id} className="border-t border-white/5">
+										<tr key={guest.id} className="border-t border-[color:var(--dm-border)]">
 											<td className="px-4 py-3">{guest.name}</td>
 											<td className="px-4 py-3">
 												{attendanceLabels[guest.attendance ?? 'pending']}
@@ -233,13 +233,13 @@ export function InvitationDashboard() {
 						<div className="mt-6 flex flex-wrap gap-3 text-xs uppercase tracking-[0.2em]">
 							<button
 								type="button"
-								className="rounded-full border border-white/20 px-4 py-2 text-[#f7e8c4]"
+								className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)]"
 								onClick={() => downloadCsv(`guests-${invitation.slug}.csv`, exportGuestsCsv(invitationId))}
 							>
 								Export Guests CSV
 							</button>
 							{user.plan === 'premium' ? (
-								<label className="rounded-full border border-white/20 px-4 py-2 text-[#f7e8c4]">
+								<label className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)]">
 									Import Guests CSV
 									<input
 										type="file"
@@ -254,7 +254,7 @@ export function InvitationDashboard() {
 									/>
 								</label>
 							) : (
-								<span className="rounded-full border border-white/10 px-4 py-2 text-[#f7e8c4]/50">
+								<span className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-muted)]">
 									Premium CSV Import
 								</span>
 							)}
@@ -262,7 +262,7 @@ export function InvitationDashboard() {
 
 						{importRows.length ? (
 							<div className="mt-4 space-y-3">
-								<p className="text-xs uppercase tracking-[0.2em] text-[#d8b25a]">Map Columns</p>
+								<p className="text-xs uppercase tracking-[0.2em] text-[color:var(--dm-accent-strong)]">Map Columns</p>
 								<div className="grid gap-3 sm:grid-cols-3">
 									{['name', 'email', 'relationship'].map((field) => (
 										<select
@@ -274,7 +274,7 @@ export function InvitationDashboard() {
 													[field]: event.target.value,
 												}))
 											}
-											className="h-10 rounded-2xl border border-white/10 bg-[#0f0c0a] px-3 text-xs text-[#f7e8c4]"
+											className="h-10 rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] px-3 text-base text-[color:var(--dm-ink)]"
 										>
 											<option value="">{fieldLabels[field as keyof CsvMapping]}</option>
 											{Object.keys(importRows[0]).map((header) => (
@@ -287,7 +287,7 @@ export function InvitationDashboard() {
 								</div>
 								<button
 									type="button"
-									className="rounded-full bg-[#d8b25a] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[#0c0a08]"
+									className="rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)]"
 									onClick={() => {
 										const mapped = importRows.map((row) => ({
 											name: mapping.name ? row[mapping.name] : row.name,
@@ -305,9 +305,9 @@ export function InvitationDashboard() {
 					</div>
 
 					<div className="space-y-6">
-						<div className="rounded-3xl border border-white/10 bg-[#0f0c0a] p-6">
-							<h3 className="text-sm uppercase tracking-[0.3em] text-[#d8b25a]">Dietary Summary</h3>
-							<div className="mt-4 space-y-2 text-sm text-[#f7e8c4]/70">
+						<div className="rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-6">
+							<h3 className="text-sm uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">Dietary Summary</h3>
+							<div className="mt-4 space-y-2 text-sm text-[color:var(--dm-muted)]">
 								{Object.entries(dietary.summary).map(([label, count]) => (
 									<p key={label}>{label}: {count}</p>
 								))}
@@ -320,15 +320,15 @@ export function InvitationDashboard() {
 							</div>
 						</div>
 
-						<div className="rounded-3xl border border-white/10 bg-[#0f0c0a] p-6">
-							<h3 className="text-sm uppercase tracking-[0.3em] text-[#d8b25a]">Add Guest</h3>
+						<div className="rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-6">
+							<h3 className="text-sm uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">Add Guest</h3>
 							<div className="mt-4 grid gap-3">
 							<input
 								placeholder="Mei Lin…"
 								aria-label="Guest Name"
 								value={manualGuest.name}
 								onChange={(event) => setManualGuest((prev) => ({ ...prev, name: event.target.value }))}
-								className="h-10 rounded-2xl border border-white/10 bg-[#0f0c0a] px-3 text-sm text-[#f7e8c4]"
+								className="h-10 rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] px-3 text-base text-[color:var(--dm-ink)]"
 								name="guestName"
 								autoComplete="off"
 							/>
@@ -337,7 +337,7 @@ export function InvitationDashboard() {
 								aria-label="Guest Email"
 								value={manualGuest.email}
 								onChange={(event) => setManualGuest((prev) => ({ ...prev, email: event.target.value }))}
-								className="h-10 rounded-2xl border border-white/10 bg-[#0f0c0a] px-3 text-sm text-[#f7e8c4]"
+								className="h-10 rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] px-3 text-base text-[color:var(--dm-ink)]"
 								name="guestEmail"
 								autoComplete="off"
 								spellCheck={false}
@@ -348,13 +348,13 @@ export function InvitationDashboard() {
 								aria-label="Guest Relationship"
 								value={manualGuest.relationship}
 								onChange={(event) => setManualGuest((prev) => ({ ...prev, relationship: event.target.value }))}
-								className="h-10 rounded-2xl border border-white/10 bg-[#0f0c0a] px-3 text-sm text-[#f7e8c4]"
+								className="h-10 rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] px-3 text-base text-[color:var(--dm-ink)]"
 								name="guestRelationship"
 								autoComplete="off"
 							/>
 								<button
 									type="button"
-									className="rounded-full bg-[#d8b25a] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[#0c0a08]"
+									className="rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)]"
 									onClick={() => {
 										if (!manualGuest.name) return
 										addGuest(invitationId, manualGuest)
@@ -369,12 +369,12 @@ export function InvitationDashboard() {
 				</div>
 
 				<div className="grid gap-6 lg:grid-cols-2">
-					<div className="rounded-3xl border border-white/10 bg-[#0f0c0a] p-6">
-						<h2 className="text-xl font-semibold text-[#fdf6ea]">Analytics</h2>
-						<p className="mt-2 text-sm text-[#f7e8c4]/70">
+					<div className="rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-6">
+						<h2 className="text-xl font-semibold text-[color:var(--dm-ink)]">Analytics</h2>
+						<p className="mt-2 text-sm text-[color:var(--dm-muted)]">
 							Views: {analytics.totalViews} · RSVP Rate: {(analytics.rsvpRate * 100).toFixed(0)}%
 						</p>
-						<div className="mt-4 h-24 rounded-2xl border border-white/10 bg-[#14100d] p-3">
+						<div className="mt-4 h-24 rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-3">
 							<svg viewBox="0 0 200 60" className="h-full w-full">
 								{analytics.viewsByDay.map((point, index) => (
 									<circle
@@ -382,26 +382,26 @@ export function InvitationDashboard() {
 										cx={20 + index * 30}
 										cy={50 - point.views * 8}
 										r="3"
-										fill="#d8b25a"
+										fill="var(--dm-accent-strong)"
 									/>
 								))}
 							</svg>
 						</div>
-						<p className="mt-3 text-xs uppercase tracking-[0.2em] text-[#f7e8c4]/60">
+						<p className="mt-3 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
 							Device Mix: {devices.mobile ?? 0} Mobile / {devices.desktop ?? 0} Desktop
 						</p>
 					</div>
 
-					<div className="rounded-3xl border border-white/10 bg-[#0f0c0a] p-6">
-						<h2 className="text-xl font-semibold text-[#fdf6ea]">Settings</h2>
-						<p className="mt-2 text-sm text-[#f7e8c4]/70">Status: {statusLabels[invitation.status]}</p>
+					<div className="rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-6">
+						<h2 className="text-xl font-semibold text-[color:var(--dm-ink)]">Settings</h2>
+						<p className="mt-2 text-sm text-[color:var(--dm-muted)]">Status: {statusLabels[invitation.status]}</p>
 						<div className="mt-4 space-y-3">
-							<label className="grid gap-2 text-xs uppercase tracking-[0.2em] text-[#f7e8c4]/70">
+							<label className="grid gap-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
 								Custom Slug (Premium)
 								<input
 									defaultValue={invitation.slug}
 									onBlur={(event) => setInvitationSlug(invitationId, event.target.value)}
-									className="h-10 rounded-2xl border border-white/10 bg-[#0f0c0a] px-3 text-sm text-[#f7e8c4]"
+									className="h-10 rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] px-3 text-base text-[color:var(--dm-ink)]"
 									disabled={user.plan !== 'premium'}
 									autoComplete="off"
 								/>
@@ -409,21 +409,21 @@ export function InvitationDashboard() {
 							<div className="flex flex-wrap gap-3 text-xs uppercase tracking-[0.2em]">
 								<button
 									type="button"
-									className="rounded-full border border-white/20 px-4 py-2 text-[#f7e8c4]"
+									className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)]"
 									onClick={() => publishInvitation(invitationId)}
 								>
 									Publish
 								</button>
 								<button
 									type="button"
-									className="rounded-full border border-white/20 px-4 py-2 text-[#f7e8c4]"
+									className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)]"
 									onClick={() => unpublishInvitation(invitationId)}
 								>
 									Unpublish
 								</button>
 							</div>
 							{user.plan !== 'premium' ? (
-								<p className="text-xs text-[#f59e0b]">Upgrade to edit slug.</p>
+								<p className="text-xs text-[#b91c1c]">Upgrade to edit slug.</p>
 							) : null}
 						</div>
 					</div>
