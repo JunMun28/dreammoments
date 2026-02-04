@@ -5,9 +5,8 @@ import { useAuth } from '../lib/auth'
 
 const navItems = [
 	{ label: 'Templates', href: '/#templates' },
-	{ label: 'How It Works', href: '/#process' },
+	{ label: 'How it works', href: '/#process' },
 	{ label: 'Pricing', href: '/#pricing' },
-	{ label: 'Dashboard', to: '/dashboard' },
 ]
 
 export default function Header() {
@@ -31,30 +30,36 @@ export default function Header() {
 				>
 					{open ? <X size={18} /> : <Menu size={18} />}
 				</button>
-				<nav className="hidden items-center gap-6 text-sm uppercase tracking-[0.22em] text-[color:var(--dm-muted)] md:flex">
+				<nav className="hidden items-center gap-6 text-sm text-[color:var(--dm-muted)] md:flex">
 					{navItems.map((item) =>
-						item.to ? (
-							<Link
-								key={item.label}
-								to={item.to}
-								className="dm-nav-link transition hover:text-[color:var(--dm-ink)]"
-							>
-								{item.label}
-							</Link>
-						) : (
-							<a
-								key={item.label}
-								href={item.href}
-								className="dm-nav-link transition hover:text-[color:var(--dm-ink)]"
-							>
-								{item.label}
-							</a>
-						),
+						<a
+							key={item.label}
+							href={item.href}
+							className="dm-nav-link transition hover:text-[color:var(--dm-ink)]"
+						>
+							{item.label}
+						</a>,
+					)}
+					{user ? (
+						<Link
+							to="/dashboard"
+							className="rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-sm font-semibold text-[color:var(--dm-on-accent)]"
+						>
+							Open app
+						</Link>
+					) : (
+						<Link
+							to="/editor/new"
+							search={{ template: 'love-at-dusk' }}
+							className="rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-sm font-semibold text-[color:var(--dm-on-accent)]"
+						>
+							Start free
+						</Link>
 					)}
 					{user?.plan === 'free' ? (
 						<Link
 							to="/upgrade"
-							className="rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)]"
+							className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs font-semibold text-[color:var(--dm-accent-strong)]"
 						>
 							Upgrade
 						</Link>
@@ -63,48 +68,55 @@ export default function Header() {
 						<button
 							type="button"
 							onClick={signOut}
-							className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-accent-strong)]"
+							className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs font-semibold text-[color:var(--dm-accent-strong)]"
 						>
-							Sign Out
+							Sign out
 						</button>
 					) : (
 						<Link
 							to="/auth/login"
-							className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-accent-strong)]"
+							className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs font-semibold text-[color:var(--dm-accent-strong)]"
 						>
-							Sign In
+							Sign in
 						</Link>
 					)}
 				</nav>
 			</div>
 			{open && (
 				<div className="border-t border-[color:var(--dm-border)] bg-[color:var(--dm-bg)] md:hidden">
-					<div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4 text-sm uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
+					<div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4 text-sm text-[color:var(--dm-muted)]">
 						{navItems.map((item) =>
-							item.to ? (
-								<Link
-									key={item.label}
-									to={item.to}
-									className="dm-nav-link transition hover:text-[color:var(--dm-ink)]"
-									onClick={() => setOpen(false)}
-								>
-									{item.label}
-								</Link>
-							) : (
-								<a
-									key={item.label}
-									href={item.href}
-									className="dm-nav-link transition hover:text-[color:var(--dm-ink)]"
-									onClick={() => setOpen(false)}
-								>
-									{item.label}
-								</a>
-							),
+							<a
+								key={item.label}
+								href={item.href}
+								className="dm-nav-link transition hover:text-[color:var(--dm-ink)]"
+								onClick={() => setOpen(false)}
+							>
+								{item.label}
+							</a>,
+						)}
+						{user ? (
+							<Link
+								to="/dashboard"
+								className="rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-center text-sm font-semibold text-[color:var(--dm-on-accent)]"
+								onClick={() => setOpen(false)}
+							>
+								Open app
+							</Link>
+						) : (
+							<Link
+								to="/editor/new"
+								search={{ template: 'love-at-dusk' }}
+								className="rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-center text-sm font-semibold text-[color:var(--dm-on-accent)]"
+								onClick={() => setOpen(false)}
+							>
+								Start free
+							</Link>
 						)}
 						{user?.plan === 'free' ? (
 							<Link
 								to="/upgrade"
-								className="rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)]"
+								className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-center text-xs font-semibold text-[color:var(--dm-accent-strong)]"
 								onClick={() => setOpen(false)}
 							>
 								Upgrade
@@ -117,17 +129,17 @@ export default function Header() {
 									signOut()
 									setOpen(false)
 								}}
-								className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-accent-strong)]"
+								className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs font-semibold text-[color:var(--dm-accent-strong)]"
 							>
-								Sign Out
+								Sign out
 							</button>
 						) : (
 							<Link
 								to="/auth/login"
-								className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-accent-strong)]"
+								className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs font-semibold text-[color:var(--dm-accent-strong)]"
 								onClick={() => setOpen(false)}
 							>
-								Sign In
+								Sign in
 							</Link>
 						)}
 					</div>

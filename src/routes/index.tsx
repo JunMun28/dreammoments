@@ -1,403 +1,254 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useScrollReveal } from '../lib/scroll-effects'
+import { ArrowRight, Check, Play, Star, Sparkles, Heart } from 'lucide-react'
+import { motion, useScroll, useTransform } from 'motion/react'
+import { clsx, type ClassValue } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+
+// Utility for safe class merging
+function cn(...inputs: ClassValue[]) {
+	return twMerge(clsx(inputs))
+}
 
 export const Route = createFileRoute('/')({ component: Landing })
 
-const templates = [
-	{
-		id: 'blush-romance',
-		name: 'Blush Romance',
-		nameZh: '胭脂之恋',
-		vibe: 'Romantic & Light',
-		description: 'Soft blush tones with botanical romance.',
-		colors: ['#7F1D1D', '#D94674', '#FFF1F2'],
-		preview: ['Hero', 'Story', 'Gallery'],
-	},
-	{
-		id: 'love-at-dusk',
-		name: 'Love at Dusk',
-		nameZh: '暮色之恋',
-		vibe: 'Romantic Chinese',
-		description: 'Cinematic reds, gold accents, and poetic pacing.',
-		colors: ['#B30E0E', '#741212', '#FFE094'],
-		preview: ['Hero', 'Announcement', 'RSVP'],
-	},
-	{
-		id: 'garden-romance',
-		name: 'Garden Romance',
-		nameZh: '花园之誓',
-		vibe: 'Natural & Light',
-		description: 'Soft botanicals with airy typography.',
-		colors: ['#2D5A3D', '#E8B4B8', '#FDF8F5'],
-		preview: ['Hero', 'Story', 'Gallery'],
-	},
-	{
-		id: 'eternal-elegance',
-		name: 'Eternal Elegance',
-		nameZh: '恒久典雅',
-		vibe: 'Classic Western',
-		description: 'Black, champagne gold, and refined restraint.',
-		colors: ['#1C1C1C', '#C9A962', '#FFFFFF'],
-		preview: ['Hero', 'Schedule', 'RSVP'],
-	},
-]
+// --- Components ---
 
-const steps = [
-	{
-		title: 'Choose a Template',
-		desc: 'Pick a cinematic base tuned for Chinese weddings.',
-	},
-	{
-		title: 'Edit in Minutes',
-		desc: 'Live preview, bilingual prompts, instant polish.',
-	},
-	{
-		title: 'Publish and Share',
-		desc: 'Get a link and QR code ready for WhatsApp.',
-	},
-]
+function Hero() {
+	const { scrollY } = useScroll();
+	const y1 = useTransform(scrollY, [0, 500], [0, 200]);
+	const y2 = useTransform(scrollY, [0, 500], [0, -150]);
 
-const pricing = [
-	{
-		name: 'Free',
-		price: 'RM0',
-		note: 'Perfect for a fast launch',
-		features: [
-			'All 4 templates',
-			'5 AI generations',
-			'Randomized URL',
-			'Unlimited RSVPs',
-		],
-	},
-	{
-		name: 'Premium',
-		price: 'RM49 / SGD19',
-		note: 'For a polished final',
-		features: [
-			'Custom URL slug',
-			'100 AI generations',
-			'Guest import + export',
-			'Advanced analytics',
-		],
-	},
-]
-
-export function Landing() {
-	useScrollReveal()
 	return (
-		<main className="dm-grid">
-			<section className="dm-hero relative overflow-hidden px-6 pb-20 pt-24">
-				<div className="absolute -left-24 top-20 h-72 w-72 rounded-full bg-[color:var(--dm-accent)]/20 blur-[120px] dm-orb" />
-				<div className="absolute -right-20 bottom-10 h-72 w-72 rounded-full bg-[color:var(--dm-accent-strong)]/15 blur-[120px] dm-orb" />
-				<div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[1.1fr_0.9fr]">
-					<div className="space-y-8">
-						<p className="font-accent text-xs uppercase tracking-[0.5em] text-[color:var(--dm-accent-strong)]">
-							DreamMoments
-						</p>
-						<h1 className="text-4xl font-semibold leading-tight text-[color:var(--dm-ink)] sm:text-5xl lg:text-6xl">
-							Beautiful Invitations, Fast.
-							<span className="block text-[color:var(--dm-accent-strong)]">
-								为华人婚礼而生的数字请柬
-							</span>
-						</h1>
-						<p className="max-w-xl text-base leading-relaxed text-[color:var(--dm-muted)] sm:text-lg">
-							Create a cinematic, bilingual wedding invitation in under 5
-							minutes. Built for modern Chinese couples in Malaysia and
-							Singapore.
-						</p>
-						<div className="flex flex-wrap items-center gap-4">
-							<Link
-								to="/editor/new"
-								search={{ template: 'blush-romance' }}
-								className="rounded-full bg-[color:var(--dm-accent-strong)] px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)] transition hover:bg-[color:var(--dm-accent)]"
-							>
-								Start with Blush Romance
-							</Link>
-							<a
-								href="#templates"
-								className="rounded-full border border-[color:var(--dm-border)] px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-[color:var(--dm-accent-strong)] transition hover:border-[color:var(--dm-accent)]"
-							>
-								View Templates
-							</a>
-						</div>
-						<div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-							<div className="dm-card rounded-2xl p-4">
-								<p className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">
-									Speed
-								</p>
-								<p className="text-2xl font-semibold text-[color:var(--dm-ink)]">5 min</p>
-								<p className="text-xs text-[color:var(--dm-muted)]">
-									Signup to share link
-								</p>
-							</div>
-							<div className="dm-card rounded-2xl p-4">
-								<p className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">
-									Quality
-								</p>
-								<p className="text-2xl font-semibold text-[color:var(--dm-ink)]">
-									Designer‑level
-								</p>
-								<p className="text-xs text-[color:var(--dm-muted)]">Cinematic motion</p>
-							</div>
-							<div className="dm-card rounded-2xl p-4">
-								<p className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">
-									Bilingual
-								</p>
-								<p className="text-2xl font-semibold text-[color:var(--dm-ink)]">EN + 中文</p>
-								<p className="text-xs text-[color:var(--dm-muted)]">AI assisted tone</p>
-							</div>
-						</div>
-					</div>
-					<div className="relative">
-						<div className="dm-card dm-hover-glow rounded-[28px] border border-[color:var(--dm-border)] p-6">
-							<div className="space-y-5 rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-6">
-								<p className="text-xs uppercase tracking-[0.4em] text-[color:var(--dm-accent-strong)]">
-									Live Preview
-								</p>
-								<div className="space-y-2">
-									<p className="text-3xl font-semibold text-[color:var(--dm-ink)]">
-										Sarah & Michael
-									</p>
-									<p className="text-sm text-[color:var(--dm-muted)]">
-										Grand Hyatt Singapore · 15 Jun 2025
-									</p>
-								</div>
-								<img
-									src="/placeholders/photo-light.svg"
-									alt=""
-									loading="lazy"
-									width={640}
-									height={176}
-									className="h-44 w-full rounded-2xl border border-[color:var(--dm-border)] object-cover"
-								/>
-								<p className="text-sm leading-relaxed text-[color:var(--dm-muted)]">
-									Two hearts, one beautiful journey. A modern ceremony with
-									Chinese elegance.
-								</p>
-								<div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[color:var(--dm-accent-strong)]">
-									<span>Hero</span>
-									<span>Announcement</span>
-									<span>RSVP</span>
-								</div>
-							</div>
-						</div>
-						<div className="absolute -bottom-10 -left-10 hidden h-36 w-36 rounded-full border border-[color:var(--dm-accent-strong)]/30 bg-[color:var(--dm-accent-strong)]/10 blur-2xl lg:block" />
-					</div>
-				</div>
-			</section>
+		<section className="relative min-h-[95svh] w-full overflow-hidden bg-[color:var(--dm-bg)] text-[color:var(--dm-ink)] flex flex-col justify-center">
+			
+			{/* Soft Blob Backgrounds */}
+			<div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+				<motion.div 
+					style={{ y: y1 }}
+					className="absolute -top-[10%] -left-[5%] w-[60vw] h-[60vw] max-w-[600px] max-h-[600px] rounded-full bg-[color:var(--dm-sage)] blur-[100px] opacity-60 animate-float"
+				/>
+				<motion.div 
+					style={{ y: y2 }}
+					className="absolute top-[20%] -right-[10%] w-[50vw] h-[50vw] max-w-[500px] max-h-[500px] rounded-full bg-[color:var(--dm-lavender)] blur-[80px] opacity-60 animate-float" 
+				/>
+				<motion.div 
+					className="absolute bottom-[10%] left-[20%] w-[30vw] h-[30vw] max-w-[300px] max-h-[300px] rounded-full bg-[color:var(--dm-peach)] blur-[90px] opacity-40 animate-float" 
+					transition={{ delay: 2 }}
+				/>
+			</div>
 
-			<section id="templates" className="px-6 py-20">
-				<div className="mx-auto max-w-6xl space-y-10">
-					<div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-						<div>
-							<p className="font-accent text-xs uppercase tracking-[0.5em] text-[color:var(--dm-accent-strong)]">
-								Templates
-							</p>
-							<h2 className="text-3xl font-semibold text-[color:var(--dm-ink)] sm:text-4xl">
-								Four Signature Styles. One Seamless Editor.
-							</h2>
-						</div>
-						<p className="max-w-xl text-sm text-[color:var(--dm-muted)]">
-							Each template ships with curated motion, section order, and
-							bilingual tone. Swap content, keep the cinematic flow.
-						</p>
-					</div>
-					<div className="grid gap-10">
-						{templates.map((template, index) => {
-							const isDarkPreview = template.id === 'love-at-dusk'
-							const previewImage = isDarkPreview
-								? '/placeholders/photo-dark.svg'
-								: '/placeholders/photo-light.svg'
-							return (
-							<section
-								key={template.id}
-								data-template-section
-								className="dm-card rounded-[32px] p-8 lg:min-h-screen"
-							>
-								<div className="grid gap-8 lg:grid-cols-[1fr_1.1fr] lg:items-center">
-									<div className="space-y-6">
-										<p className="font-accent text-xs uppercase tracking-[0.5em] text-[color:var(--dm-accent-strong)]">
-											Template {index + 1}
-										</p>
-										<h3
-											data-reveal
-											className="dm-reveal text-3xl font-semibold text-[color:var(--dm-ink)]"
-										>
-											{template.name}
-										</h3>
-										<p
-											data-reveal
-											className="dm-reveal text-sm text-[color:var(--dm-muted)]"
-										>
-											{template.description}
-										</p>
-										<div
-											data-reveal
-											className="dm-reveal flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]"
-										>
-											<span>{template.vibe}</span>
-											<span>{template.nameZh}</span>
-										</div>
-										<div className="flex gap-2">
-											{template.colors.map((color) => (
-												<div
-													key={color}
-													className="h-8 w-8 rounded-full border border-[color:var(--dm-border)]"
-													style={{ backgroundColor: color }}
-												/>
-											))}
-										</div>
-										<div className="flex flex-col gap-3 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
-											<Link
-												to="/editor/new"
-												search={{ template: template.id }}
-												className="rounded-full border border-[color:var(--dm-accent-strong)]/40 px-4 py-2 text-center text-[color:var(--dm-accent-strong)] transition hover:border-[color:var(--dm-accent)]"
-											>
-												Use This Template
-											</Link>
-											<Link
-												to="/invite/$slug"
-												params={{ slug: `${template.id}-sample` }}
-												className="text-center text-[color:var(--dm-muted)] transition hover:text-[color:var(--dm-ink)]"
-											>
-												View Sample Invitation
-											</Link>
-										</div>
-									</div>
-									<div data-reveal className="dm-reveal">
-										<div
-											className={`rounded-3xl border border-[color:var(--dm-border)] p-6 ${
-												isDarkPreview ? 'dm-shell-dark' : 'dm-shell-light'
-											}`}
-										>
-											<div className="space-y-5 rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-6">
-												<p className="text-xs uppercase tracking-[0.4em] text-[color:var(--dm-accent-strong)]">
-													Live Preview
-												</p>
-												<h4 className="mt-3 text-2xl font-semibold text-[color:var(--dm-ink)]">
-													{template.name}
-												</h4>
-												<p className="mt-2 text-sm text-[color:var(--dm-muted)]">
-													{template.nameZh}
-												</p>
-												<img
-													src={previewImage}
-													alt=""
-													loading="lazy"
-													width={720}
-													height={192}
-													className="mt-6 h-48 w-full rounded-2xl border border-[color:var(--dm-border)] object-cover"
-												/>
-												<div className="mt-5 flex flex-wrap gap-3 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-accent-strong)]">
-													{template.preview.map((item) => (
-														<span key={item}>{item}</span>
-													))}
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-							</section>
-							)
-						})}
-					</div>
-				</div>
-			</section>
+			<div className="relative z-10 mx-auto max-w-4xl px-6 text-center">
+				<motion.div
+					initial={{ opacity: 0, y: 30 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ duration: 0.8, ease: "easeOut" }}
+				>
+					<span className="font-accent text-3xl sm:text-4xl text-[color:var(--dm-muted)] block mb-4 rotate-[-2deg]">
+						slow down & savour
+					</span>
+					<h1 className="font-heading text-6xl sm:text-7xl lg:text-8xl leading-[0.95] tracking-tight mb-8">
+						Digital invites that feel <br/>
+						<span className="text-[color:var(--dm-peach)] italic">warmly</span> yours.
+					</h1>
+					<p className="font-body text-xl text-[color:var(--dm-ink)]/80 max-w-lg mx-auto leading-relaxed mb-10">
+						A quiet space for your big news. Thoughtfully designed, intentionally simple, and beautiful on every screen.
+					</p>
 
-			<section id="process" className="px-6 py-20">
-				<div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.9fr_1.1fr]">
-					<div className="space-y-6">
-						<p className="font-accent text-xs uppercase tracking-[0.5em] text-[color:var(--dm-accent-strong)]">
-							Process
-						</p>
-						<h2 className="text-3xl font-semibold text-[color:var(--dm-ink)] sm:text-4xl">
-							From Idea to Share Link in Under 5 Minutes.
-						</h2>
-						<p className="text-sm text-[color:var(--dm-muted)]">
-							Designed for couples with limited time, but high standards. Each
-							step is focused and guided.
-						</p>
-					</div>
-					<div className="grid gap-4">
-						{steps.map((step, index) => (
-							<div key={step.title} className="dm-card rounded-2xl p-5">
-								<p className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">
-									Step {index + 1}
-								</p>
-								<h3 className="mt-2 text-xl font-semibold text-[color:var(--dm-ink)]">
-									{step.title}
-								</h3>
-								<p className="mt-2 text-sm text-[color:var(--dm-muted)]">{step.desc}</p>
-							</div>
-						))}
-					</div>
-				</div>
-			</section>
-
-			<section id="pricing" className="px-6 py-20">
-				<div className="mx-auto max-w-6xl space-y-8">
-					<div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-						<div>
-							<p className="font-accent text-xs uppercase tracking-[0.5em] text-[color:var(--dm-accent-strong)]">
-								Pricing
-							</p>
-							<h2 className="text-3xl font-semibold text-[color:var(--dm-ink)] sm:text-4xl">
-							Simple Tiers, Generous Limits.
-							</h2>
-						</div>
-						<p className="max-w-xl text-sm text-[color:var(--dm-muted)]">
-							Premium unlocks custom slugs and higher AI limits, but the
-							template quality never changes.
-						</p>
-					</div>
-					<div className="grid gap-6 lg:grid-cols-2">
-						{pricing.map((tier) => (
-							<div key={tier.name} className="dm-card rounded-3xl p-6">
-								<div className="flex items-center justify-between">
-									<div>
-										<p className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">
-											{tier.name}
-										</p>
-										<p className="mt-2 text-3xl font-semibold text-[color:var(--dm-ink)]">
-											{tier.price}
-										</p>
-										<p className="mt-1 text-sm text-[color:var(--dm-muted)]">{tier.note}</p>
-									</div>
-									<div className="h-16 w-16 rounded-full border border-[color:var(--dm-accent-strong)]/40 bg-[color:var(--dm-accent-strong)]/10" />
-								</div>
-								<ul className="mt-6 space-y-2 text-sm text-[color:var(--dm-muted)]">
-									{tier.features.map((feature) => (
-										<li key={feature} className="flex items-center gap-2">
-											<span className="h-1.5 w-1.5 rounded-full bg-[color:var(--dm-accent-strong)]" />
-											{feature}
-										</li>
-									))}
-								</ul>
-							</div>
-						))}
-					</div>
-					<div className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-6">
-						<p className="text-sm text-[color:var(--dm-muted)]">
-							Built for Malaysian and Singaporean Chinese weddings. Stripe
-							supports FPX and PayNow.
-						</p>
+					<div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
 						<Link
 							to="/editor/new"
-							search={{ template: 'blush-romance' }}
-							className="rounded-full bg-[color:var(--dm-accent-strong)] px-6 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)]"
+							className="group relative px-8 py-4 bg-[color:var(--dm-ink)] text-[color:var(--dm-surface)] rounded-full text-lg font-medium transition-transform hover:scale-105 active:scale-95"
 						>
-							Create Your Invitation
+							Start Designing
+							<span className="absolute inset-0 rounded-full ring-1 ring-white/20 group-hover:ring-white/40 transition-all" />
 						</Link>
+						<a
+							href="#showcase"
+							className="px-8 py-4 bg-white/50 backdrop-blur-sm border border-[color:var(--dm-border)] text-[color:var(--dm-ink)] rounded-full text-lg font-medium transition-all hover:bg-white hover:shadow-lg"
+						>
+							View Collection
+						</a>
 					</div>
-				</div>
-			</section>
+				</motion.div>
+			</div>
 
-			<footer className="border-t border-[color:var(--dm-border)] px-6 py-10 text-xs uppercase tracking-[0.3em] text-[color:var(--dm-muted)]">
-				<div className="mx-auto flex max-w-6xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-					<span>DreamMoments</span>
-					<span>Beautiful Invitations, Fast.</span>
+			{/* Scroll Indicator */}
+			<motion.div 
+				initial={{ opacity: 0 }}
+				animate={{ opacity: 1 }}
+				transition={{ delay: 1, duration: 1 }}
+				className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-[color:var(--dm-muted)]"
+			>
+				<span className="text-sm font-medium tracking-widest uppercase text-[10px]">Scroll to Explore</span>
+				<div className="w-[1px] h-12 bg-gradient-to-b from-[color:var(--dm-muted)] to-transparent" />
+			</motion.div>
+		</section>
+	)
+}
+
+function Showcase() {
+	const templates = [
+		{
+			id: 'sage-morning',
+			title: 'Sage Morning',
+			desc: 'For quiet garden ceremonies.',
+			color: 'bg-[#E8EFE8]',
+			image: '/placeholders/photo-light.svg'
+		},
+		{
+			id: 'velvet-dusk',
+			title: 'Velvet Dusk',
+			desc: 'Warm tones for evening vows.',
+			color: 'bg-[#F2E8E8]',
+			image: '/placeholders/photo-dark.svg'
+		},
+		{
+			id: 'peach-haze',
+			title: 'Peach Haze',
+			desc: 'Soft, sun-drenched romance.',
+			color: 'bg-[#FFF0ED]',
+			image: '/placeholders/photo-light.svg'
+		}
+	];
+
+	return (
+		<section id="showcase" className="py-32 px-6">
+			<div className="max-w-7xl mx-auto">
+				<div className="text-center mb-20">
+					<h2 className="font-heading text-4xl sm:text-5xl mb-4">The Collection</h2>
+					<p className="font-accent text-2xl text-[color:var(--dm-muted)]">curated for intimacy</p>
 				</div>
-			</footer>
+
+				<div className="grid md:grid-cols-3 gap-8">
+					{templates.map((t, i) => (
+						<motion.div
+							key={t.id}
+							initial={{ opacity: 0, y: 40 }}
+							whileInView={{ opacity: 1, y: 0 }}
+							viewport={{ once: true, margin: "-50px" }}
+							transition={{ delay: i * 0.2, duration: 0.8 }}
+							className="group cursor-pointer"
+						>
+							<div className={cn(
+								"aspect-[3/4] rounded-[2.5rem] overflow-hidden mb-6 relative transition-transform duration-700 ease-out group-hover:-translate-y-2",
+								t.color
+							)}>
+								<div className="absolute inset-4 rounded-[2rem] overflow-hidden bg-white/40 border border-white/50 backdrop-blur-sm shadow-sm transition-all duration-500 group-hover:shadow-md">
+                   {/* Placeholder visual */}
+                   <div className="h-full w-full flex items-center justify-center opacity-30">
+                      <Heart className="w-16 h-16 text-[color:var(--dm-ink)]" />
+                   </div>
+                </div>
+							</div>
+							<div className="text-center">
+								<h3 className="font-heading text-2xl mb-1 group-hover:text-[color:var(--dm-peach)] transition-colors">{t.title}</h3>
+								<p className="text-[color:var(--dm-muted)]">{t.desc}</p>
+							</div>
+						</motion.div>
+					))}
+				</div>
+			</div>
+		</section>
+	)
+}
+
+function Features() {
+	return (
+		<section className="py-32 px-6 bg-[color:var(--dm-surface-muted)] rounded-[3rem] mx-4 sm:mx-8 mb-20">
+			<div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-20 items-center">
+				<motion.div
+					initial={{ opacity: 0, x: -30 }}
+					whileInView={{ opacity: 1, x: 0 }}
+					viewport={{ once: true }}
+					transition={{ duration: 0.8 }}
+				>
+					<span className="font-accent text-3xl text-[color:var(--dm-peach)] block mb-4">gentle features</span>
+					<h2 className="font-heading text-5xl sm:text-6xl mb-8 leading-tight">
+						Designed to feel <br/> like a <span className="italic">living room.</span>
+					</h2>
+					<p className="text-xl text-[color:var(--dm-muted)] leading-relaxed mb-12">
+						No clutter, no noise. Just a serene space for your guests to feel the love, get the details, and say yes.
+					</p>
+					
+					<div className="space-y-8">
+						{[
+							{ title: 'Tactile Textures', desc: 'Grainy, paper-like feel.', icon: <Sparkles className="w-5 h-5"/> },
+							{ title: 'Fluid Motion', desc: 'Slow, calming transitions.', icon: <Play className="w-5 h-5"/> },
+							{ title: 'Guest Ease', desc: 'One-tap RSVP, no logins.', icon: <Check className="w-5 h-5"/> }
+						].map((item, i) => (
+							<motion.div 
+                key={i}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 + 0.5 }}
+                className="flex items-start gap-4"
+              >
+								<div className="w-10 h-10 rounded-full bg-[color:var(--dm-surface)] border border-[color:var(--dm-border)] flex items-center justify-center text-[color:var(--dm-ink)] shadow-sm">
+									{item.icon}
+								</div>
+								<div>
+									<h4 className="font-bold text-lg">{item.title}</h4>
+									<p className="text-[color:var(--dm-muted)]">{item.desc}</p>
+								</div>
+							</motion.div>
+						))}
+					</div>
+				</motion.div>
+
+				<motion.div
+					initial={{ opacity: 0, scale: 0.95 }}
+					whileInView={{ opacity: 1, scale: 1 }}
+					viewport={{ once: true }}
+					transition={{ duration: 1, ease: "easeOut" }}
+					className="relative aspect-square bg-[color:var(--dm-surface)] rounded-[3rem] shadow-2xl p-8 border border-[color:var(--dm-border)] transform rotate-2 hover:rotate-0 transition-transform duration-700"
+				>
+           {/* Abstract Phone / Card UI */}
+           <div className="h-full w-full rounded-[2rem] bg-[color:var(--dm-bg)] overflow-hidden relative flex flex-col">
+              <div className="h-12 border-b border-[color:var(--dm-border)] flex items-center px-6 gap-2">
+                 <div className="w-2 h-2 rounded-full bg-[color:var(--dm-border)]"></div>
+                 <div className="w-2 h-2 rounded-full bg-[color:var(--dm-border)]"></div>
+              </div>
+              <div className="flex-1 p-8 flex flex-col items-center justify-center text-center">
+                  <div className="w-20 h-20 rounded-full bg-[color:var(--dm-sage)] blur-2xl absolute top-1/4 left-1/4 opacity-50"></div>
+                  <div className="w-32 h-32 rounded-full bg-[color:var(--dm-peach)] blur-3xl absolute bottom-1/4 right-1/4 opacity-40"></div>
+                  
+                  <div className="relative z-10">
+                     <p className="font-accent text-3xl mb-2">Sarah & Tom</p>
+                     <h3 className="font-heading text-4xl mb-6">We're getting married.</h3>
+                     <div className="inline-block px-6 py-2 rounded-full border border-[color:var(--dm-ink)]/20 bg-white/50 backdrop-blur-md text-sm uppercase tracking-widest">
+                        Sept 24
+                     </div>
+                  </div>
+              </div>
+           </div>
+				</motion.div>
+			</div>
+		</section>
+	)
+}
+
+function Footer() {
+	return (
+		<footer className="py-20 text-center text-[color:var(--dm-muted)]">
+			<div className="flex justify-center gap-2 mb-8 opacity-50">
+				<Star className="w-4 h-4" />
+				<Star className="w-4 h-4" />
+				<Star className="w-4 h-4" />
+			</div>
+			<p className="font-heading text-2xl text-[color:var(--dm-ink)] mb-2">DreamMoments</p>
+			<p className="text-sm">Made with <Heart className="w-3 h-3 inline text-[color:var(--dm-peach)]" /> for love.</p>
+		</footer>
+	)
+}
+
+export function Landing() {
+	return (
+		<main className="min-h-screen bg-[color:var(--dm-bg)] selection:bg-[color:var(--dm-peach)] selection:text-[color:var(--dm-ink)]">
+			<Hero />
+			<Showcase />
+			<Features />
+			<Footer />
 		</main>
 	)
 }
+
