@@ -1,27 +1,60 @@
 import { describe, expect, test, vi } from 'vitest'
 import { renderToString } from 'react-dom/server'
-import { EditorScreen } from '../routes/editor/$invitationId'
-import { InviteScreen } from '../routes/invite/$slug'
-import { DashboardScreen } from '../routes/dashboard/index'
+import ShareModal from '../components/share/ShareModal'
 
 vi.mock('@tanstack/react-router', () => ({
 	Link: ({ children, ...props }: any) => <a {...props}>{children}</a>,
 	createFileRoute: () => () => ({}),
 }))
 
-describe('route placeholders', () => {
-	test('editor renders preview label', () => {
-		const markup = renderToString(<EditorScreen />)
-		expect(markup).toContain('Live Preview')
-	})
-
-	test('invite renders public label', () => {
-		const markup = renderToString(<InviteScreen />)
-		expect(markup).toContain('Public Invitation')
-	})
-
-	test('dashboard renders heading', () => {
-		const markup = renderToString(<DashboardScreen />)
-		expect(markup).toContain('My Invitations')
+describe('share modal', () => {
+	test('renders share link', () => {
+		const markup = renderToString(
+			<ShareModal
+				open
+				invitation={{
+					id: 'inv-1',
+					userId: 'user-1',
+					slug: 'sarah-michael',
+					title: 'Sarah & Michael',
+					templateId: 'love-at-dusk',
+					templateVersion: '1.0.0',
+					content: {
+						hero: {
+							partnerOneName: 'Sarah',
+							partnerTwoName: 'Michael',
+							tagline: 'Two hearts',
+							date: '2025-06-15',
+						},
+						announcement: { title: '', message: '', formalText: '' },
+						couple: {
+							partnerOne: { fullName: '', bio: '' },
+							partnerTwo: { fullName: '', bio: '' },
+						},
+						story: { milestones: [] },
+						gallery: { photos: [] },
+						schedule: { events: [] },
+						venue: { name: '', address: '', coordinates: { lat: 0, lng: 0 }, directions: '' },
+						entourage: { members: [] },
+						registry: { title: '', note: '' },
+						rsvp: { deadline: '', allowPlusOnes: false, maxPlusOnes: 0, dietaryOptions: [], customMessage: '' },
+						faq: { items: [] },
+						footer: { message: '' },
+						details: { scheduleSummary: '', venueSummary: '' },
+						calendar: { dateLabel: '', message: '' },
+						countdown: { targetDate: '' },
+					},
+					sectionVisibility: {},
+					designOverrides: {},
+					status: 'draft',
+					aiGenerationsUsed: 0,
+					invitedCount: 0,
+					createdAt: '',
+					updatedAt: '',
+				}}
+				onClose={() => {}}
+			/>
+		)
+		expect(markup).toContain('sarah-michael')
 	})
 })

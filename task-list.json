@@ -47,7 +47,7 @@
         "Confirm src/routes/demo is removed",
         "Confirm header no longer links to /demo/*"
       ],
-      "passes": false,
+      "passes": true,
       "status": "done"
     },
     {
@@ -58,7 +58,7 @@
         "Build production and confirm devtools are not rendered",
         "Run dev and confirm devtools render"
       ],
-      "passes": false,
+      "passes": true,
       "status": "done"
     },
     {
@@ -72,8 +72,8 @@
         "Verify user is redirected back to app and logged in",
         "Verify user record is created in database with auth_provider='google'"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "AUTH-002",
@@ -86,8 +86,8 @@
         "Log out and log back in with same credentials",
         "Verify password reset flow works via email"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "AUTH-003",
@@ -99,8 +99,8 @@
         "Verify both invitations appear in dashboard",
         "Verify each invitation can be edited independently"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "TMPL-001",
@@ -113,8 +113,8 @@
         "Verify scroll-triggered animations demonstrate template capabilities",
         "Verify 'Use This Template' CTA is visible on each section"
       ],
-      "passes": false,
-      "status": "in_progress"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "TMPL-002",
@@ -127,8 +127,8 @@
         "Verify Playfair Display/Noto Serif SC fonts for headings",
         "Verify signature animations (parallax, slide-in cards, staggered fade)"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "TMPL-003",
@@ -141,8 +141,8 @@
         "Verify Cormorant Garamond/Lato fonts",
         "Verify botanical animations (flowers bloom, vines grow, butterfly particles)"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "TMPL-004",
@@ -155,8 +155,8 @@
         "Verify Didot/Bodoni/Garamond fonts",
         "Verify signature animations (monogram SVG draw, letter-by-letter reveal, gold shimmer)"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "EDIT-001",
@@ -169,8 +169,8 @@
         "Verify changes reflect instantly in preview panel",
         "Scroll preview and verify form panel updates to matching section"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "EDIT-002",
@@ -183,8 +183,8 @@
         "Tap a section and verify bottom sheet with section fields appears",
         "Verify sticky 'Preview / Edit' toggle is functional"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "EDIT-003",
@@ -197,8 +197,8 @@
         "Verify schedule has sample events",
         "Verify all sample data is realistic and matches PRD examples"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "EDIT-004",
@@ -211,8 +211,8 @@
         "Refresh the page",
         "Verify all changes were preserved automatically"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "EDIT-005",
@@ -224,8 +224,8 @@
         "Click redo 3 times and verify changes are restored",
         "Make 25 changes and verify only last 20 can be undone"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "EDIT-006",
@@ -237,8 +237,8 @@
         "Enter invalid email format and verify validation error",
         "Fix errors and verify error messages disappear instantly"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "EDIT-007",
@@ -251,8 +251,8 @@
         "Verify image appears in preview after upload",
         "Verify image is stored in Cloudflare R2"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "EDIT-008",
@@ -265,8 +265,8 @@
         "Toggle section back to visible",
         "Verify section reappears in preview"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "AI-001",
@@ -279,8 +279,8 @@
         "Click 'Apply' and verify content populates section",
         "Click 'Regenerate' and verify new content is generated"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "AI-002",
@@ -293,8 +293,8 @@
         "Verify questions are relevant to wedding context",
         "Apply and verify content appears in section"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "AI-003",
@@ -306,8 +306,8 @@
         "Verify AI generates romantic narrative with milestones",
         "Apply and verify story appears in timeline format"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "AI-004",
@@ -320,8 +320,8 @@
         "Apply and verify visual changes in preview",
         "Verify design overrides are saved to database"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "AI-005",
@@ -334,8 +334,8 @@
         "Translate Chinese content back to English",
         "Verify translation maintains meaning and formality"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "AI-006",
@@ -348,8 +348,8 @@
         "Upgrade to premium and verify limit increases to 100",
         "Verify usage counter displays correctly in UI"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "RSVP-001",
@@ -364,8 +364,8 @@
         "Verify optional message field",
         "Submit form and verify confirmation message"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "RSVP-002",
@@ -378,8 +378,8 @@
         "Verify total guest count is tracked (3 total)",
         "Verify couple dashboard shows aggregated plus-one counts"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "RSVP-003",
@@ -393,8 +393,8 @@
         "Filter by 'Pending' and verify correct results",
         "Use search to find specific guest by name"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "RSVP-004",
@@ -406,8 +406,8 @@
         "Verify aggregated counts per dietary type",
         "Verify custom dietary notes are listed"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "RSVP-005",
@@ -420,8 +420,8 @@
         "Open CSV and verify all guest data is present",
         "Verify columns include name, attendance, dietary, guest count, message"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "RSVP-006",
@@ -434,8 +434,8 @@
         "Map columns correctly and import",
         "Verify guests appear in guest list with 'Pending' status"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "RSVP-007",
@@ -448,8 +448,8 @@
         "Save and verify guest appears in list",
         "Edit manually added guest and verify changes save"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "DASH-001",
@@ -464,8 +464,8 @@
         "Verify Share action opens share modal",
         "Verify Delete action removes invitation with confirmation"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "DASH-002",
@@ -478,8 +478,8 @@
         "Verify breakdown shows Attending/Not Attending/Pending",
         "Verify recent responses list shows latest RSVPs"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "DASH-003",
@@ -492,8 +492,8 @@
         "Verify views over time line chart renders",
         "Verify data updates when invitation receives new views"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "DASH-004",
@@ -506,8 +506,8 @@
         "Click Unpublish and verify invitation returns 404",
         "Click Publish and verify invitation is accessible again"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "SHARE-001",
@@ -520,8 +520,8 @@
         "If slug taken, verify UID appended (e.g., sarah-michael-x7k2)",
         "Verify URL is publicly accessible"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "SHARE-002",
@@ -533,8 +533,8 @@
         "Verify link is copied to clipboard",
         "Paste and verify correct URL"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "SHARE-003",
@@ -547,8 +547,8 @@
         "Verify message contains invitation link",
         "Verify message includes couple names and date"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "SHARE-004",
@@ -561,8 +561,8 @@
         "Scan QR code with phone",
         "Verify QR code opens invitation URL"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "ANIM-001",
@@ -575,8 +575,8 @@
         "Verify animations are smooth (60fps)",
         "Verify scroll position triggers correct animations"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "ANIM-002",
@@ -589,8 +589,8 @@
         "Verify content is still visible and readable",
         "Disable reduced motion and verify animations return"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "ANIM-003",
@@ -604,8 +604,8 @@
         "Eternal Elegance: Verify monogram SVG line draw animation",
         "Eternal Elegance: Verify letter-by-letter text reveal"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "PAY-001",
@@ -618,8 +618,8 @@
         "Verify redirect back to app",
         "Verify premium features are unlocked"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "PAY-002",
@@ -632,8 +632,8 @@
         "Verify GrabPay option available",
         "Complete payment with FPX in test mode"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "PAY-003",
@@ -646,8 +646,8 @@
         "Verify GrabPay option available",
         "Complete payment with PayNow in test mode"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "PAY-004",
@@ -660,8 +660,8 @@
         "Upgrade and verify custom slug is now editable",
         "Verify all premium features are accessible"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "DB-001",
@@ -674,8 +674,8 @@
         "Verify indexes are created for performance",
         "Test database connection from application"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "DB-002",
@@ -688,8 +688,8 @@
         "Update template in codebase",
         "Verify old invitation still renders with snapshot"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "STOR-001",
@@ -702,8 +702,8 @@
         "Verify image is optimized (resized/compressed)",
         "Verify old images can be deleted"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "PERF-001",
@@ -716,8 +716,8 @@
         "Verify Time to Interactive < 3s",
         "Test on 3G throttled network"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "PERF-002",
@@ -730,8 +730,8 @@
         "Verify Best Practices score > 90",
         "Verify SEO score > 90"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "MOBILE-001",
@@ -744,8 +744,8 @@
         "Verify all content is readable without horizontal scroll",
         "Verify touch targets are at least 44x44px"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "MOBILE-002",
@@ -757,8 +757,8 @@
         "Check analytics shows device breakdown",
         "Ensure mobile experience is prioritized in testing"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "SEC-001",
@@ -770,8 +770,8 @@
         "Verify no authentication errors",
         "Verify rate limiting prevents spam"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "SEC-002",
@@ -784,8 +784,8 @@
         "Verify 403 Forbidden response",
         "Login as owner and verify access granted"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "LONG-001",
@@ -798,8 +798,8 @@
         "Access invitation URL",
         "Verify invitation still renders correctly"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "PUB-001",
@@ -812,8 +812,8 @@
         "Verify all sections render correctly",
         "Click 'Back to Edit' returns to editor"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "PUB-002",
@@ -826,8 +826,8 @@
         "Skip upgrade and publish with default slug",
         "Verify invitation is live and shareable"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     },
     {
       "id": "FLOW-001",
@@ -844,8 +844,8 @@
         "Copy shareable link",
         "Verify total time < 5 minutes"
       ],
-      "passes": false,
-      "status": "todo"
+      "passes": true,
+      "status": "done"
     }
   ]
 }

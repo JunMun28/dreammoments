@@ -9,12 +9,23 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UpgradeRouteImport } from './routes/upgrade'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as InviteSlugRouteImport } from './routes/invite/$slug'
+import { Route as EditorNewRouteImport } from './routes/editor/new'
 import { Route as EditorInvitationIdRouteImport } from './routes/editor/$invitationId'
+import { Route as AuthSignupRouteImport } from './routes/auth/signup'
+import { Route as AuthResetRouteImport } from './routes/auth/reset'
+import { Route as AuthLoginRouteImport } from './routes/auth/login'
+import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as DashboardInvitationIdIndexRouteImport } from './routes/dashboard/$invitationId/index'
 
+const UpgradeRoute = UpgradeRouteImport.update({
+  id: '/upgrade',
+  path: '/upgrade',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -30,9 +41,34 @@ const InviteSlugRoute = InviteSlugRouteImport.update({
   path: '/invite/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EditorNewRoute = EditorNewRouteImport.update({
+  id: '/editor/new',
+  path: '/editor/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EditorInvitationIdRoute = EditorInvitationIdRouteImport.update({
   id: '/editor/$invitationId',
   path: '/editor/$invitationId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthSignupRoute = AuthSignupRouteImport.update({
+  id: '/auth/signup',
+  path: '/auth/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthResetRoute = AuthResetRouteImport.update({
+  id: '/auth/reset',
+  path: '/auth/reset',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/auth/login',
+  path: '/auth/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardInvitationIdIndexRoute =
@@ -44,14 +80,26 @@ const DashboardInvitationIdIndexRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/upgrade': typeof UpgradeRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/reset': typeof AuthResetRoute
+  '/auth/signup': typeof AuthSignupRoute
   '/editor/$invitationId': typeof EditorInvitationIdRoute
+  '/editor/new': typeof EditorNewRoute
   '/invite/$slug': typeof InviteSlugRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/$invitationId/': typeof DashboardInvitationIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/upgrade': typeof UpgradeRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/reset': typeof AuthResetRoute
+  '/auth/signup': typeof AuthSignupRoute
   '/editor/$invitationId': typeof EditorInvitationIdRoute
+  '/editor/new': typeof EditorNewRoute
   '/invite/$slug': typeof InviteSlugRoute
   '/dashboard': typeof DashboardIndexRoute
   '/dashboard/$invitationId': typeof DashboardInvitationIdIndexRoute
@@ -59,7 +107,13 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/upgrade': typeof UpgradeRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/reset': typeof AuthResetRoute
+  '/auth/signup': typeof AuthSignupRoute
   '/editor/$invitationId': typeof EditorInvitationIdRoute
+  '/editor/new': typeof EditorNewRoute
   '/invite/$slug': typeof InviteSlugRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/$invitationId/': typeof DashboardInvitationIdIndexRoute
@@ -68,21 +122,39 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/upgrade'
+    | '/auth/callback'
+    | '/auth/login'
+    | '/auth/reset'
+    | '/auth/signup'
     | '/editor/$invitationId'
+    | '/editor/new'
     | '/invite/$slug'
     | '/dashboard/'
     | '/dashboard/$invitationId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/upgrade'
+    | '/auth/callback'
+    | '/auth/login'
+    | '/auth/reset'
+    | '/auth/signup'
     | '/editor/$invitationId'
+    | '/editor/new'
     | '/invite/$slug'
     | '/dashboard'
     | '/dashboard/$invitationId'
   id:
     | '__root__'
     | '/'
+    | '/upgrade'
+    | '/auth/callback'
+    | '/auth/login'
+    | '/auth/reset'
+    | '/auth/signup'
     | '/editor/$invitationId'
+    | '/editor/new'
     | '/invite/$slug'
     | '/dashboard/'
     | '/dashboard/$invitationId/'
@@ -90,7 +162,13 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  UpgradeRoute: typeof UpgradeRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
+  AuthLoginRoute: typeof AuthLoginRoute
+  AuthResetRoute: typeof AuthResetRoute
+  AuthSignupRoute: typeof AuthSignupRoute
   EditorInvitationIdRoute: typeof EditorInvitationIdRoute
+  EditorNewRoute: typeof EditorNewRoute
   InviteSlugRoute: typeof InviteSlugRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
   DashboardInvitationIdIndexRoute: typeof DashboardInvitationIdIndexRoute
@@ -98,6 +176,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/upgrade': {
+      id: '/upgrade'
+      path: '/upgrade'
+      fullPath: '/upgrade'
+      preLoaderRoute: typeof UpgradeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -119,11 +204,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InviteSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/editor/new': {
+      id: '/editor/new'
+      path: '/editor/new'
+      fullPath: '/editor/new'
+      preLoaderRoute: typeof EditorNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/editor/$invitationId': {
       id: '/editor/$invitationId'
       path: '/editor/$invitationId'
       fullPath: '/editor/$invitationId'
       preLoaderRoute: typeof EditorInvitationIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/signup': {
+      id: '/auth/signup'
+      path: '/auth/signup'
+      fullPath: '/auth/signup'
+      preLoaderRoute: typeof AuthSignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/reset': {
+      id: '/auth/reset'
+      path: '/auth/reset'
+      fullPath: '/auth/reset'
+      preLoaderRoute: typeof AuthResetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/login': {
+      id: '/auth/login'
+      path: '/auth/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard/$invitationId/': {
@@ -138,7 +258,13 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  UpgradeRoute: UpgradeRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
+  AuthLoginRoute: AuthLoginRoute,
+  AuthResetRoute: AuthResetRoute,
+  AuthSignupRoute: AuthSignupRoute,
   EditorInvitationIdRoute: EditorInvitationIdRoute,
+  EditorNewRoute: EditorNewRoute,
   InviteSlugRoute: InviteSlugRoute,
   DashboardIndexRoute: DashboardIndexRoute,
   DashboardInvitationIdIndexRoute: DashboardInvitationIdIndexRoute,

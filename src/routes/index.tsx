@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { useScrollReveal } from '../lib/scroll-effects'
 
 export const Route = createFileRoute('/')({ component: Landing })
 
@@ -10,6 +11,7 @@ const templates = [
 		vibe: 'Romantic Chinese',
 		description: 'Cinematic reds, gold accents, and poetic pacing.',
 		colors: ['#B30E0E', '#741212', '#FFE094'],
+		preview: ['Hero', 'Announcement', 'RSVP'],
 	},
 	{
 		id: 'garden-romance',
@@ -18,6 +20,7 @@ const templates = [
 		vibe: 'Natural & Light',
 		description: 'Soft botanicals with airy typography.',
 		colors: ['#2D5A3D', '#E8B4B8', '#FDF8F5'],
+		preview: ['Hero', 'Story', 'Gallery'],
 	},
 	{
 		id: 'eternal-elegance',
@@ -26,6 +29,7 @@ const templates = [
 		vibe: 'Classic Western',
 		description: 'Black, champagne gold, and refined restraint.',
 		colors: ['#1C1C1C', '#C9A962', '#FFFFFF'],
+		preview: ['Hero', 'Schedule', 'RSVP'],
 	},
 ]
 
@@ -70,6 +74,7 @@ const pricing = [
 ]
 
 export function Landing() {
+	useScrollReveal()
 	return (
 		<main className="dm-grid">
 			<section className="dm-hero relative overflow-hidden px-6 pb-20 pt-24">
@@ -180,44 +185,84 @@ export function Landing() {
 							bilingual tone. Swap content, keep the cinematic flow.
 						</p>
 					</div>
-					<div className="grid gap-6 lg:grid-cols-3">
-						{templates.map((template) => (
-							<div key={template.id} className="dm-card rounded-3xl p-6">
-								<div className="flex items-center justify-between text-xs uppercase tracking-[0.4em] text-[#d8b25a]">
-									<span>{template.vibe}</span>
-									<span>{template.nameZh}</span>
-								</div>
-								<h3 className="mt-4 text-2xl font-semibold text-[#fdf6ea]">
-									{template.name}
-								</h3>
-								<p className="mt-3 text-sm text-[#f7e8c4]/70">
-									{template.description}
-								</p>
-								<div className="mt-6 flex gap-2">
-									{template.colors.map((color) => (
+					<div className="grid gap-10">
+						{templates.map((template, index) => (
+							<section
+								key={template.id}
+								data-template-section
+								className="dm-card rounded-[32px] p-8 lg:min-h-screen"
+							>
+								<div className="grid gap-8 lg:grid-cols-[1fr_1.1fr] lg:items-center">
+									<div className="space-y-6">
+										<p className="font-accent text-xs uppercase tracking-[0.5em] text-[#d8b25a]">
+											Template {index + 1}
+										</p>
+										<h3
+											data-reveal
+											className="dm-reveal text-3xl font-semibold text-[#fdf6ea]"
+										>
+											{template.name}
+										</h3>
+										<p
+											data-reveal
+											className="dm-reveal text-sm text-[#f7e8c4]/70"
+										>
+											{template.description}
+										</p>
 										<div
-											key={color}
-											className="h-8 w-8 rounded-full border border-white/20"
-											style={{ backgroundColor: color }}
-										/>
-									))}
+											data-reveal
+											className="dm-reveal flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.3em] text-[#d8b25a]"
+										>
+											<span>{template.vibe}</span>
+											<span>{template.nameZh}</span>
+										</div>
+										<div className="flex gap-2">
+											{template.colors.map((color) => (
+												<div
+													key={color}
+													className="h-8 w-8 rounded-full border border-white/20"
+													style={{ backgroundColor: color }}
+												/>
+											))}
+										</div>
+										<div className="flex flex-col gap-3 text-xs uppercase tracking-[0.2em] text-[#f7e8c4]/70">
+											<Link
+												to="/editor/new"
+												search={{ template: template.id }}
+												className="rounded-full border border-[#d8b25a]/50 px-4 py-2 text-center text-[#d8b25a] transition hover:border-[#d8b25a]"
+											>
+												Use this template
+											</Link>
+											<Link
+												to="/invite/$slug"
+												params={{ slug: `${template.id}-sample` }}
+												className="text-center text-[#f7e8c4]/80 transition hover:text-white"
+											>
+												View sample invitation
+											</Link>
+										</div>
+									</div>
+									<div data-reveal className="dm-reveal">
+										<div className="rounded-3xl border border-white/10 bg-[#100d0a]/80 p-6">
+											<p className="text-xs uppercase tracking-[0.4em] text-[#d8b25a]">
+												Live preview
+											</p>
+											<h4 className="mt-3 text-2xl font-semibold text-[#fdf6ea]">
+												{template.name}
+											</h4>
+											<p className="mt-2 text-sm text-[#f7e8c4]/70">
+												{template.nameZh}
+											</p>
+											<div className="mt-6 h-48 rounded-2xl border border-white/10 bg-gradient-to-br from-[#2a1b13] via-[#0f0c0a] to-[#5b2f22]" />
+											<div className="mt-5 flex flex-wrap gap-3 text-xs uppercase tracking-[0.2em] text-[#d8b25a]">
+												{template.preview.map((item) => (
+													<span key={item}>{item}</span>
+												))}
+											</div>
+										</div>
+									</div>
 								</div>
-								<div className="mt-6 flex flex-col gap-3 text-xs uppercase tracking-[0.2em] text-[#f7e8c4]/70">
-									<Link
-										to="/editor/new"
-										className="rounded-full border border-[#d8b25a]/50 px-4 py-2 text-center text-[#d8b25a] transition hover:border-[#d8b25a]"
-									>
-										Use this template
-									</Link>
-									<Link
-										to="/invite/$slug"
-										params={{ slug: `${template.id}-sample` }}
-										className="text-center text-[#f7e8c4]/80 transition hover:text-white"
-									>
-										View sample invitation
-									</Link>
-								</div>
-							</div>
+							</section>
 						))}
 					</div>
 				</div>

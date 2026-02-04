@@ -5,7 +5,40 @@
 - added route placeholders: /editor/:id, /invite/:slug, /dashboard
 - set up node-based Vitest, added tests for landing/routes/templates
 - tests: pnpm test (pass)
+- landing templates now full-page sections + scroll reveal
+- Love at Dusk invitation view built (11 sections, parallax, staggered reveal)
+- added scroll effects hook + Love at Dusk sample data
+- tests: pnpm test (pass)
 next
-- build editor form + live sync
-- implement real template sections + animations
-- connect data layer + auth
+- plan v1 focus: architecture + core path
+- DB-001 + DB-002 (schema + template snapshot)
+- AUTH-001 + AUTH-002 + AUTH-003 (auth + multi invitations)
+- EDIT-001 + EDIT-003 + EDIT-006 + EDIT-008 (editor core + validation + visibility)
+- PUB-001 + PUB-002 + SHARE-001..004 (publish + share)
+- RSVP-001..007 after core flow stable
+2026-02-03
+- implemented auth flows (google + email), auth routes, upgrade flow
+- built full editor: live preview, section sync, autosave, undo/redo, validation, inline edit, AI panel
+- added RSVP submission, dashboard management, CSV export/import, dietary summary, plus-one tracking
+- added garden + eternal templates, animations, RSVP forms, share modal, publish/preview flow
+- added local data store, slugging, template snapshot, mock payments, analytics + device mix
+- updated route tree, styles, tests
+- tests: pnpm test (pass, JSON modules warning)
+2026-02-03
+- fixed /dashboard list view + empty state; detail view polish
+- a11y/copy polish: title case, sample placeholders, aria-labels, aria-live
+- added skip link + focus styles + 44px min tap targets
+- tests: pnpm test (pass, JSON modules warning)
+2026-02-03
+- added skip link/main, focus + tap target tweaks, placeholder examples
+- tests: pnpm test (pass, JSON modules warning)
+2026-02-03
+- editor a11y: aria labels + names for AI panel
+- tests: pnpm test (pass, JSON modules warning)
+2026-02-03
+- love-at-dusk heading levels normalized to h1/h2
+- tests: pnpm test (pass, JSON modules warning)
+2026-02-03
+- dev server fix: header map paren bug; dev server now runs (port 3001)
+- dev server config: host ipv4 + polling; devtools event bus disabled
+- playwright: landing + invite load, no console errors after fix

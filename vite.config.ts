@@ -39,12 +39,30 @@ const config = defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  server: {
+    host: '127.0.0.1',
+    port: 3000,
+    watch: {
+      usePolling: true,
+      interval: 200,
+    },
+  },
   test: {
     environment: 'node',
     globals: true,
   },
   plugins: [
-    ...(isTest ? [] : [devtools(), nitro(), tanstackStart()]),
+    ...(isTest
+      ? []
+      : [
+          devtools({
+            eventBusConfig: {
+              enabled: false,
+            },
+          }),
+          nitro(),
+          tanstackStart(),
+        ]),
     // this is the plugin that enables path aliases
     viteTsConfigPaths({
       projects: ['./tsconfig.json'],

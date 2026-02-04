@@ -21,8 +21,8 @@ export const loveAtDuskTemplate: TemplateConfig = {
 			muted: '#B7A38A',
 		},
 		typography: {
-			headingFont: "'Cormorant Garamond', 'Noto Serif SC', serif",
-			bodyFont: "'Manrope', 'Noto Serif SC', sans-serif",
+			headingFont: "'Playfair Display', 'Noto Serif SC', serif",
+			bodyFont: "'Noto Serif SC', 'Manrope', serif",
 			accentFont: "'Noto Serif SC', serif",
 		},
 		animations: {
@@ -99,24 +99,36 @@ export const loveAtDuskTemplate: TemplateConfig = {
 			notes: 'Side-by-side portraits with callout labels.',
 			fields: [
 				{
-					id: 'partnerOneBio',
+					id: 'partnerOne.fullName',
+					label: 'Groom full name',
+					type: 'text',
+					sample: '满小满',
+				},
+				{
+					id: 'partnerTwo.fullName',
+					label: 'Bride full name',
+					type: 'text',
+					sample: '美小美',
+				},
+				{
+					id: 'partnerOne.bio',
 					label: 'Groom bio',
 					type: 'textarea',
 					sample: '温柔踏实，热爱摄影与旅行。',
 				},
 				{
-					id: 'partnerTwoBio',
+					id: 'partnerTwo.bio',
 					label: 'Bride bio',
 					type: 'textarea',
 					sample: '浪漫细腻，喜欢花艺与烘焙。',
 				},
 				{
-					id: 'partnerOnePhoto',
+					id: 'partnerOne.photoUrl',
 					label: 'Groom photo',
 					type: 'image',
 				},
 				{
-					id: 'partnerTwoPhoto',
+					id: 'partnerTwo.photoUrl',
 					label: 'Bride photo',
 					type: 'image',
 				},
@@ -168,58 +180,34 @@ export const loveAtDuskTemplate: TemplateConfig = {
 			notes: 'Map with Chinese date line, address, and directions.',
 			fields: [
 				{
-					id: 'venueName',
+					id: 'name',
 					label: 'Venue name',
 					type: 'text',
 					sample: '婚贝大酒店A栋9F幸福宴会厅',
 				},
 				{
-					id: 'venueAddress',
+					id: 'address',
 					label: 'Venue address',
 					type: 'textarea',
 					sample: '10 Scotts Road, Singapore 228211',
 				},
 				{
-					id: 'venueCoordinates',
-					label: 'Venue coordinates',
+					id: 'coordinates',
+					label: 'Venue coordinates (lat,lng)',
 					type: 'text',
 				},
 			],
 		},
 		{
-			id: 'calendar',
-			type: 'calendar',
+			id: 'entourage',
+			type: 'entourage',
 			defaultVisible: true,
-			notes: 'Wedding date calendar with heart indicator.',
+			notes: 'Wedding entourage roles and names.',
 			fields: [
 				{
-					id: 'weddingDate',
-					label: 'Wedding date',
-					type: 'date',
-					required: true,
-				},
-				{
-					id: 'lunarDate',
-					label: 'Lunar date',
-					type: 'text',
-				},
-				{
-					id: 'dayOfWeek',
-					label: 'Day of week',
-					type: 'text',
-				},
-			],
-		},
-		{
-			id: 'countdown',
-			type: 'countdown',
-			defaultVisible: true,
-			notes: 'Countdown timer with gold digits.',
-			fields: [
-				{
-					id: 'countdownDate',
-					label: 'Countdown date',
-					type: 'date',
+					id: 'members',
+					label: 'Entourage list',
+					type: 'list',
 				},
 			],
 		},
@@ -230,7 +218,7 @@ export const loveAtDuskTemplate: TemplateConfig = {
 			notes: 'Optional gift registry grid.',
 			fields: [
 				{
-					id: 'giftPreference',
+					id: 'note',
 					label: 'Gift preference',
 					type: 'textarea',
 				},
@@ -243,7 +231,7 @@ export const loveAtDuskTemplate: TemplateConfig = {
 			notes: 'Minimal RSVP form with name and guest count.',
 			fields: [
 				{
-					id: 'rsvpDeadline',
+					id: 'deadline',
 					label: 'RSVP deadline',
 					type: 'date',
 				},
@@ -251,6 +239,11 @@ export const loveAtDuskTemplate: TemplateConfig = {
 					id: 'allowPlusOnes',
 					label: 'Allow plus ones',
 					type: 'toggle',
+				},
+				{
+					id: 'maxPlusOnes',
+					label: 'Max plus ones',
+					type: 'text',
 				},
 			],
 		},
@@ -261,7 +254,7 @@ export const loveAtDuskTemplate: TemplateConfig = {
 			notes: 'Thank you and closing line.',
 			fields: [
 				{
-					id: 'thankYouMessage',
+					id: 'message',
 					label: 'Footer message',
 					type: 'text',
 					sample: '期待与您在婚礼相见。',

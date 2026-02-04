@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { Menu, X } from 'lucide-react'
 import { useState } from 'react'
+import { useAuth } from '../lib/auth'
 
 const navItems = [
 	{ label: 'Templates', href: '/#templates' },
@@ -11,6 +12,7 @@ const navItems = [
 
 export default function Header() {
 	const [open, setOpen] = useState(false)
+	const { user, signOut } = useAuth()
 
 	return (
 		<header className="sticky top-0 z-50 border-b border-white/10 bg-[#0c0a08]/80 backdrop-blur">
@@ -48,6 +50,30 @@ export default function Header() {
 							</a>
 						),
 					)}
+					{user?.plan === 'free' ? (
+						<Link
+							to="/upgrade"
+							className="rounded-full bg-[#d8b25a] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[#0c0a08]"
+						>
+							Upgrade
+						</Link>
+					) : null}
+					{user ? (
+						<button
+							type="button"
+							onClick={signOut}
+							className="rounded-full border border-white/15 px-4 py-2 text-xs uppercase tracking-[0.2em] text-[#f7e8c4]"
+						>
+							Sign out
+						</button>
+					) : (
+						<Link
+							to="/auth/login"
+							className="rounded-full border border-white/15 px-4 py-2 text-xs uppercase tracking-[0.2em] text-[#f7e8c4]"
+						>
+							Sign in
+						</Link>
+					)}
 				</nav>
 			</div>
 			{open && (
@@ -73,6 +99,35 @@ export default function Header() {
 									{item.label}
 								</a>
 							),
+						)}
+						{user?.plan === 'free' ? (
+							<Link
+								to="/upgrade"
+								className="rounded-full bg-[#d8b25a] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[#0c0a08]"
+								onClick={() => setOpen(false)}
+							>
+								Upgrade
+							</Link>
+						) : null}
+						{user ? (
+							<button
+								type="button"
+								onClick={() => {
+									signOut()
+									setOpen(false)
+								}}
+								className="rounded-full border border-white/15 px-4 py-2 text-xs uppercase tracking-[0.2em] text-[#f7e8c4]"
+							>
+								Sign out
+							</button>
+						) : (
+							<Link
+								to="/auth/login"
+								className="rounded-full border border-white/15 px-4 py-2 text-xs uppercase tracking-[0.2em] text-[#f7e8c4]"
+								onClick={() => setOpen(false)}
+							>
+								Sign in
+							</Link>
 						)}
 					</div>
 				</div>

@@ -7,6 +7,7 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 
 import Header from '../components/Header'
+import { AuthProvider } from '../lib/auth'
 
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 
@@ -51,14 +52,19 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 function RootDocument({ children }: { children: React.ReactNode }) {
   const showDevtools = import.meta.env.DEV
 
-  return (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        <Header />
-        {children}
+	return (
+		<html lang="en">
+			<head>
+				<HeadContent />
+			</head>
+			<body>
+				<AuthProvider>
+					<a className="dm-skip-link" href="#main">
+						Skip to Content
+					</a>
+					<Header />
+					<main id="main">{children}</main>
+				</AuthProvider>
         {showDevtools && (
           <TanStackDevtools
             config={{

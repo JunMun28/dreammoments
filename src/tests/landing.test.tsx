@@ -15,4 +15,10 @@ describe('landing page', () => {
 		expect(markup).toContain('Process')
 		expect(markup).toContain('Pricing')
 	})
+
+	test('renders three full template sections', () => {
+		const markup = renderToString(<Landing />)
+		const matches = markup.match(/data-template-section=/g) ?? []
+		expect(matches).toHaveLength(3)
+	})
 })
