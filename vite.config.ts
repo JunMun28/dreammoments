@@ -8,6 +8,7 @@ import { fileURLToPath, URL } from 'url'
 
 import tailwindcss from '@tailwindcss/vite'
 import { nitro } from 'nitro/vite'
+import { configDefaults } from 'vitest/config'
 
 const { createHash, webcrypto } = crypto
 
@@ -50,6 +51,7 @@ const config = defineConfig({
   test: {
     environment: 'node',
     globals: true,
+    exclude: [...configDefaults.exclude, 'tests/e2e/**'],
   },
   plugins: [
     ...(isTest

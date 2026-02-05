@@ -37,7 +37,15 @@ export function InviteScreen() {
 		invitation?.templateId ??
 		resolveSampleTemplate(slug)
 	const content = invitation?.content ?? buildSampleContent(templateId)
-	const hiddenSections = invitation?.sectionVisibility
+	const hiddenSections = useMemo(() => {
+		if (!invitation?.sectionVisibility) return undefined
+		return Object.fromEntries(
+			Object.entries(invitation.sectionVisibility).map(([key, value]) => [
+				key,
+				!value,
+			]),
+		)
+	}, [invitation?.sectionVisibility])
 
 	useEffect(() => {
 		if (typeof window === 'undefined') return

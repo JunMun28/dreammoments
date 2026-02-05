@@ -10,15 +10,15 @@ vi.mock('@tanstack/react-router', () => ({
 describe('landing page', () => {
 	test('renders hero headline', () => {
 		const markup = renderToString(<Landing />)
-		expect(markup).toContain('A wedding invitation')
-		expect(markup).toContain('Templates')
-		expect(markup).toContain('How it works')
-		expect(markup).toContain('Pricing')
+		expect(markup).toContain('Digital invites that feel')
+		expect(markup).toContain('The Collection')
+		expect(markup).toContain('gentle features')
 	})
 
-	test('renders three full template sections', () => {
+	test('renders three collection cards', () => {
 		const markup = renderToString(<Landing />)
-		const matches = markup.match(/data-template-section=/g) ?? []
-		expect(matches).toHaveLength(3)
+		expect(markup).toContain('Sage Morning')
+		expect(markup).toContain('Velvet Dusk')
+		expect(markup).toContain('Peach Haze')
 	})
 })

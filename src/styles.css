@@ -188,3 +188,293 @@ h4 {
 .animate-float {
   animation: float 6s ease-in-out infinite;
 }
+
+/* Blush Romance Template Styles */
+.blush-romance {
+  font-family: var(--font-body);
+  color: var(--dm-ink);
+  background: var(--dm-bg);
+  min-height: 100%;
+}
+
+.blush-section {
+  padding: 4rem 1.5rem;
+  position: relative;
+}
+
+.blush-hero {
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.blush-hero-frame {
+  position: absolute;
+  inset: 1.5rem;
+  border: 1px solid var(--dm-peach);
+  opacity: 0.3;
+  border-radius: 50% 50% 0 0;
+  pointer-events: none;
+}
+
+.blush-hero-bloom {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%;
+  height: 60%;
+  background: var(--dm-peach);
+  filter: blur(120px);
+  opacity: 0.15;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.blush-kicker {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--dm-muted);
+  margin-bottom: 1.5rem;
+}
+
+.blush-title {
+  font-family: var(--font-heading);
+  font-size: clamp(3rem, 8vw, 5rem);
+  line-height: 1.1;
+  font-weight: 400;
+  margin-bottom: 1rem;
+  color: var(--dm-ink);
+}
+
+.blush-tagline {
+  font-family: var(--font-accent);
+  font-size: 1.75rem;
+  color: var(--dm-peach);
+  margin-bottom: 2.5rem;
+  transform: rotate(-2deg);
+}
+
+.blush-pill-row {
+  display: inline-flex;
+  gap: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  border: 1px solid var(--dm-border);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(8px);
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--dm-muted);
+}
+
+.blush-heading {
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  font-weight: 400;
+}
+
+.blush-body {
+  font-size: 1.125rem;
+  line-height: 1.7;
+  color: var(--dm-muted);
+  max-width: 60ch;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.blush-subtext {
+  font-size: 0.875rem;
+  color: var(--dm-muted);
+  opacity: 0.8;
+  margin-top: 1rem;
+}
+
+.blush-panel {
+  background: var(--dm-surface-muted);
+  border-radius: 2rem;
+  margin: 2rem 1rem;
+  padding: 4rem 2rem;
+}
+
+.blush-card {
+  background: var(--dm-surface);
+  padding: 2rem;
+  border-radius: 1.5rem;
+  border: 1px solid var(--dm-border);
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.blush-card:hover {
+  transform: translateY(-2px);
+}
+
+.blush-meta {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--dm-peach);
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+.blush-photo {
+  position: relative;
+  border-radius: 1.5rem;
+  overflow: hidden;
+}
+
+.blush-photo img {
+  border-radius: 1.5rem;
+  transition: transform 0.5s ease;
+}
+
+.blush-photo:hover img {
+  transform: scale(1.05);
+}
+
+.blush-timeline {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  text-align: left;
+  gap: 2rem;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--dm-border);
+}
+
+.blush-timeline:last-child {
+  border-bottom: none;
+}
+
+.blush-timeline .blush-meta {
+  margin-bottom: 0;
+  padding-top: 0.25rem;
+}
+
+.blush-timeline .blush-heading {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.blush-timeline .blush-body {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.blush-venue {
+  display: grid;
+  gap: 3rem;
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .blush-venue {
+    grid-template-columns: 1fr 1fr;
+    text-align: left;
+  }
+}
+
+.blush-map {
+  border-radius: 2rem;
+  overflow: hidden;
+  aspect-ratio: 16/9;
+  border: 1px solid var(--dm-border);
+}
+
+.blush-map img {
+  width: 100%;
+  height: 100%;
+  object-cover: cover;
+}
+
+/* Form Styles */
+.blush-form {
+  display: grid;
+  gap: 1rem;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.blush-form input,
+.blush-form select,
+.blush-form textarea {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  border-radius: 1rem;
+  border: 1px solid var(--dm-border);
+  background: var(--dm-surface);
+  font-family: var(--font-body);
+  color: var(--dm-ink);
+  transition: all 0.2s ease;
+}
+
+.blush-form input:focus,
+.blush-form select:focus,
+.blush-form textarea:focus {
+  outline: none;
+  border-color: var(--dm-peach);
+  background: #fff;
+}
+
+.blush-form button {
+  background: var(--dm-ink);
+  color: white;
+  padding: 1rem;
+  border-radius: 999px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-top: 1rem;
+  transition: opacity 0.2s;
+}
+
+.blush-form button:hover {
+  opacity: 0.9;
+}
+
+.blush-faq {
+  background: var(--dm-surface);
+  padding: 1.5rem;
+  border-radius: 1rem;
+  border: 1px solid var(--dm-border);
+  text-align: left;
+}
+
+.blush-faq .blush-heading {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.blush-faq .blush-body {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.blush-footer {
+  padding-bottom: 6rem;
+}
+
+/* Animations */
+.dm-reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: reveal 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes reveal {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

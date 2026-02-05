@@ -50,6 +50,8 @@ export function useStore<T>(selector: (store: Store) => T) {
 		const win = safeWindow()
 		if (!win) return
 		const handler = () => setStoreState(getStore())
+		handler()
+		;(win as any).__dmStoreHydrated = true
 		win.addEventListener(STORE_EVENT, handler)
 		return () => win.removeEventListener(STORE_EVENT, handler)
 	}, [])

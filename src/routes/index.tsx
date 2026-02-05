@@ -113,6 +113,7 @@ function Showcase() {
 
 	return (
 		<section id="showcase" className="py-32 px-6">
+			<div id="templates" />
 			<div className="max-w-7xl mx-auto">
 				<div className="text-center mb-20">
 					<h2 className="font-heading text-4xl sm:text-5xl mb-4">The Collection</h2>
@@ -154,7 +155,7 @@ function Showcase() {
 
 function Features() {
 	return (
-		<section className="py-32 px-6 bg-[color:var(--dm-surface-muted)] rounded-[3rem] mx-4 sm:mx-8 mb-20">
+		<section id="process" className="py-32 px-6 bg-[color:var(--dm-surface-muted)] rounded-[3rem] mx-4 sm:mx-8 mb-20">
 			<div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-20 items-center">
 				<motion.div
 					initial={{ opacity: 0, x: -30 }}
@@ -229,7 +230,7 @@ function Features() {
 
 function Footer() {
 	return (
-		<footer className="py-20 text-center text-[color:var(--dm-muted)]">
+		<footer id="pricing" className="py-20 text-center text-[color:var(--dm-muted)]">
 			<div className="flex justify-center gap-2 mb-8 opacity-50">
 				<Star className="w-4 h-4" />
 				<Star className="w-4 h-4" />
@@ -251,4 +252,3 @@ export function Landing() {
 		</main>
 	)
 }
-

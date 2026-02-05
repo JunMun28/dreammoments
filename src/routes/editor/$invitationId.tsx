@@ -336,6 +336,17 @@ export function EditorScreen() {
 		(section) => section.id === activeSection,
 	)
 
+	const hiddenSections = useMemo(() => {
+		const hidden: Record<string, boolean> = {}
+		if (template?.sections) {
+			template.sections.forEach((section) => {
+				const isVisible = sectionVisibility[section.id] ?? true
+				hidden[section.id] = !isVisible
+			})
+		}
+		return hidden
+	}, [sectionVisibility, template?.sections])
+
 	const handleAiGenerate = async () => {
 		if (remainingAi <= 0) {
 			setAiPanel((prev) => ({
@@ -678,15 +689,15 @@ export function EditorScreen() {
 							className="mt-4 max-h-[70vh] overflow-y-auto rounded-3xl border border-[color:var(--dm-border)]"
 							style={styleOverrides}
 						>
-							<InvitationRenderer
-								templateId={template?.id ?? 'blush-romance'}
-								content={draft}
-								hiddenSections={sectionVisibility}
-								mode="editor"
-								onSectionSelect={(sectionId) => setActiveSection(sectionId)}
-								onAiClick={openAiPanel}
-								onInlineEdit={handleInlineEdit}
-							/>
+						<InvitationRenderer
+							templateId={template?.id ?? 'blush-romance'}
+							content={draft}
+							hiddenSections={hiddenSections}
+							mode="editor"
+							onSectionSelect={(sectionId) => setActiveSection(sectionId)}
+							onAiClick={openAiPanel}
+							onInlineEdit={handleInlineEdit}
+						/>
 						</div>
 					</div>
 
@@ -876,7 +887,7 @@ export function EditorScreen() {
 						<InvitationRenderer
 							templateId={template?.id ?? 'blush-romance'}
 							content={draft}
-							hiddenSections={sectionVisibility}
+							hiddenSections={hiddenSections}
 							mode="preview"
 						/>
 					</div>

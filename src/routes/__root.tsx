@@ -51,6 +51,10 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   const showDevtools = import.meta.env.DEV
+	const handleSkipToContent = () => {
+		const target = typeof document === "undefined" ? null : document.getElementById("main")
+		target?.focus()
+	}
 
 	return (
 		<html lang="en">
@@ -59,11 +63,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			</head>
 			<body>
 				<AuthProvider>
-					<a className="dm-skip-link" href="#main">
+					<a className="dm-skip-link" href="#main" onClick={handleSkipToContent}>
 						Skip to Content
 					</a>
 					<Header />
-					<main id="main">{children}</main>
+					<main id="main" tabIndex={-1}>{children}</main>
 				</AuthProvider>
         {showDevtools && (
           <TanStackDevtools
