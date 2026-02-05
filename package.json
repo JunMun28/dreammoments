@@ -2,9 +2,17 @@
   "name": "dreammoments",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@10.28.2",
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
   "scripts": {
+    "preinstall": "node scripts/check-node.mjs",
+    "predev": "node scripts/check-node.mjs",
     "dev": "NODE_OPTIONS=--dns-result-order=ipv4first CHOKIDAR_USEPOLLING=1 CHOKIDAR_INTERVAL=200 vite dev --host 127.0.0.1 --port 3000",
+    "prebuild": "node scripts/check-node.mjs",
     "build": "vite build",
+    "prepreview": "node scripts/check-node.mjs",
     "preview": "vite preview",
     "test": "vitest run",
     "test:e2e": "playwright test",

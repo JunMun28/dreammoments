@@ -25,17 +25,18 @@ export default function Header() {
 				<button
 					type="button"
 					onClick={() => setOpen((prev) => !prev)}
-					className="rounded-full border border-[color:var(--dm-border)] p-2 text-[color:var(--dm-ink)] md:hidden"
+					className="rounded-full border border-[color:var(--dm-border)] p-2 text-[color:var(--dm-ink)] md:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--dm-peach)] focus-visible:ring-offset-2"
 					aria-label="Toggle navigation"
+					aria-expanded={open}
 				>
-					{open ? <X size={18} /> : <Menu size={18} />}
+					{open ? <X aria-hidden="true" size={18} /> : <Menu aria-hidden="true" size={18} />}
 				</button>
 				<nav className="hidden items-center gap-6 text-sm text-[color:var(--dm-muted)] md:flex">
 					{navItems.map((item) =>
 						<a
 							key={item.label}
 							href={item.href}
-							className="dm-nav-link transition hover:text-[color:var(--dm-ink)]"
+							className="dm-nav-link inline-flex items-center min-h-[44px] leading-none transition hover:text-[color:var(--dm-ink)]"
 						>
 							{item.label}
 						</a>,
@@ -43,7 +44,7 @@ export default function Header() {
 					{user ? (
 						<Link
 							to="/dashboard"
-							className="rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-sm font-semibold text-[color:var(--dm-on-accent)]"
+							className="rounded-full inline-flex items-center justify-center bg-[color:var(--dm-accent-strong)] px-4 py-2 text-sm font-semibold leading-none text-[color:var(--dm-on-accent)]"
 						>
 							Open app
 						</Link>
@@ -51,7 +52,7 @@ export default function Header() {
 						<Link
 							to="/editor/new"
 							search={{ template: 'love-at-dusk' }}
-							className="rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-sm font-semibold text-[color:var(--dm-on-accent)]"
+							className="rounded-full inline-flex items-center justify-center bg-[color:var(--dm-accent-strong)] px-4 py-2 text-sm font-semibold leading-none text-[color:var(--dm-on-accent)]"
 						>
 							Start free
 						</Link>
@@ -59,7 +60,7 @@ export default function Header() {
 					{user?.plan === 'free' ? (
 						<Link
 							to="/upgrade"
-							className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs font-semibold text-[color:var(--dm-accent-strong)]"
+							className="rounded-full inline-flex items-center justify-center border border-[color:var(--dm-border)] px-4 py-2 text-xs font-semibold leading-none text-[color:var(--dm-accent-strong)]"
 						>
 							Upgrade
 						</Link>
@@ -68,14 +69,14 @@ export default function Header() {
 						<button
 							type="button"
 							onClick={signOut}
-							className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs font-semibold text-[color:var(--dm-accent-strong)]"
+							className="rounded-full inline-flex items-center justify-center border border-[color:var(--dm-border)] px-4 py-2 text-xs font-semibold leading-none text-[color:var(--dm-accent-strong)]"
 						>
 							Sign out
 						</button>
 					) : (
 						<Link
 							to="/auth/login"
-							className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs font-semibold text-[color:var(--dm-accent-strong)]"
+							className="rounded-full inline-flex items-center justify-center border border-[color:var(--dm-border)] px-4 py-2 text-xs font-semibold leading-none text-[color:var(--dm-accent-strong)]"
 						>
 							Sign in
 						</Link>
@@ -89,7 +90,7 @@ export default function Header() {
 							<a
 								key={item.label}
 								href={item.href}
-								className="dm-nav-link transition hover:text-[color:var(--dm-ink)]"
+								className="dm-nav-link inline-flex items-center min-h-[44px] leading-none transition hover:text-[color:var(--dm-ink)]"
 								onClick={() => setOpen(false)}
 							>
 								{item.label}
@@ -98,7 +99,7 @@ export default function Header() {
 						{user ? (
 							<Link
 								to="/dashboard"
-								className="rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-center text-sm font-semibold text-[color:var(--dm-on-accent)]"
+								className="rounded-full inline-flex items-center justify-center bg-[color:var(--dm-accent-strong)] px-4 py-2 text-center text-sm font-semibold leading-none text-[color:var(--dm-on-accent)]"
 								onClick={() => setOpen(false)}
 							>
 								Open app
@@ -107,7 +108,7 @@ export default function Header() {
 							<Link
 								to="/editor/new"
 								search={{ template: 'love-at-dusk' }}
-								className="rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-center text-sm font-semibold text-[color:var(--dm-on-accent)]"
+								className="rounded-full inline-flex items-center justify-center bg-[color:var(--dm-accent-strong)] px-4 py-2 text-center text-sm font-semibold leading-none text-[color:var(--dm-on-accent)]"
 								onClick={() => setOpen(false)}
 							>
 								Start free
@@ -116,7 +117,7 @@ export default function Header() {
 						{user?.plan === 'free' ? (
 							<Link
 								to="/upgrade"
-								className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-center text-xs font-semibold text-[color:var(--dm-accent-strong)]"
+								className="rounded-full inline-flex items-center justify-center border border-[color:var(--dm-border)] px-4 py-2 text-center text-xs font-semibold leading-none text-[color:var(--dm-accent-strong)]"
 								onClick={() => setOpen(false)}
 							>
 								Upgrade
@@ -129,14 +130,14 @@ export default function Header() {
 									signOut()
 									setOpen(false)
 								}}
-								className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs font-semibold text-[color:var(--dm-accent-strong)]"
+								className="rounded-full inline-flex items-center justify-center border border-[color:var(--dm-border)] px-4 py-2 text-xs font-semibold leading-none text-[color:var(--dm-accent-strong)]"
 							>
 								Sign out
 							</button>
 						) : (
 							<Link
 								to="/auth/login"
-								className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs font-semibold text-[color:var(--dm-accent-strong)]"
+								className="rounded-full inline-flex items-center justify-center border border-[color:var(--dm-border)] px-4 py-2 text-xs font-semibold leading-none text-[color:var(--dm-accent-strong)]"
 								onClick={() => setOpen(false)}
 							>
 								Sign in

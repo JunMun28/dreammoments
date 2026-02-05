@@ -142,12 +142,21 @@ h4 {
   background: var(--dm-surface);
   border: 1px solid var(--dm-border);
   box-shadow: 0 4px 20px -2px rgba(0,0,0,0.05);
-  transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .dm-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 32px -4px rgba(0,0,0,0.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dm-card {
+    transition: none;
+  }
+  .dm-card:hover {
+    transform: none;
+  }
 }
 
 .dm-blob {
@@ -187,6 +196,12 @@ h4 {
 
 .animate-float {
   animation: float 6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float {
+    animation: none;
+  }
 }
 
 /* Blush Romance Template Styles */
@@ -319,6 +334,15 @@ h4 {
   transform: translateY(-2px);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .blush-card {
+    transition: none;
+  }
+  .blush-card:hover {
+    transform: none;
+  }
+}
+
 .blush-meta {
   font-family: var(--font-body);
   font-size: 0.75rem;
@@ -422,7 +446,8 @@ h4 {
 .blush-form input:focus,
 .blush-form select:focus,
 .blush-form textarea:focus {
-  outline: none;
+  outline: 2px solid var(--dm-peach);
+  outline-offset: 2px;
   border-color: var(--dm-peach);
   background: #fff;
 }
@@ -476,5 +501,13 @@ h4 {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dm-reveal {
+    opacity: 1;
+    transform: none;
+    animation: none;
   }
 }

@@ -5,6 +5,7 @@ Welcome to your new TanStack app!
 To run this application:
 
 ```bash
+nvm use || nvm install
 pnpm install
 pnpm dev
 ```
