@@ -63,14 +63,18 @@ code {
   /* Softly Theme - Digital Wellness Palette */
   --dm-bg: #FDFCF8;         /* Warm Off-White */
   --dm-surface: #FFFFFF;
-  --dm-surface-muted: #F7F5F0; 
+  --dm-surface-muted: #F7F5F0;
   --dm-sage: #E8EFE8;       /* Soft Sage */
   --dm-lavender: #EFEDF4;   /* Soft Lavender */
   --dm-peach: #FFB7B2;      /* Primary Accent (Coral/Peach) */
   --dm-ink: #292524;        /* Soft Black */
   --dm-muted: #78716C;      /* Warm Grey */
   --dm-border: #E6E0DA;
-  
+
+  /* Accent Colors for CTAs */
+  --dm-accent-strong: #292524;  /* Strong accent for primary buttons (same as ink) */
+  --dm-on-accent: #FFFFFF;      /* Text color on accent backgrounds */
+
   --radius: 2rem;           /* High radius */
   --border-hairline: 1px;
 
@@ -90,7 +94,9 @@ code {
   --color-dm-ink: var(--dm-ink);
   --color-dm-muted: var(--dm-muted);
   --color-dm-border: var(--dm-border);
-  
+  --color-dm-accent-strong: var(--dm-accent-strong);
+  --color-dm-on-accent: var(--dm-on-accent);
+
   --font-heading: var(--font-heading);
   --font-body: var(--font-body);
   --font-accent: var(--font-accent);
