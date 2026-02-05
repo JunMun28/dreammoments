@@ -1,45 +1,58 @@
-import { useMemo } from 'react'
-import { useScrollReveal } from '../../../lib/scroll-effects'
-import type { InvitationContent } from '../../../lib/types'
-import SectionShell from '../SectionShell'
-import type { TemplateInvitationProps } from '../types'
+import { useMemo } from "react";
+import { useScrollReveal } from "../../../lib/scroll-effects";
+import type { InvitationContent } from "../../../lib/types";
+import SectionShell from "../SectionShell";
+import type { RsvpPayload, TemplateInvitationProps } from "../types";
 
 type BlushRomanceInvitationProps = TemplateInvitationProps & {
-	content: InvitationContent
-}
+	content: InvitationContent;
+};
 
 export default function BlushRomanceInvitation({
 	content,
 	hiddenSections,
-	mode = 'public',
+	mode = "public",
 	onSectionSelect,
 	onAiClick,
 	onInlineEdit,
 	onRsvpSubmit,
 	rsvpStatus,
 }: BlushRomanceInvitationProps) {
-	useScrollReveal()
-	const data = useMemo(() => content, [content])
+	useScrollReveal();
+	const data = useMemo(() => content, [content]);
+	const parseAttendance = (
+		value: FormDataEntryValue | null,
+	): RsvpPayload["attendance"] => {
+		const candidate = String(value ?? "attending");
+		if (
+			candidate === "attending" ||
+			candidate === "not_attending" ||
+			candidate === "undecided"
+		) {
+			return candidate;
+		}
+		return "attending";
+	};
 	const editableProps = (fieldPath: string, className: string) => ({
-		onClick: mode === 'editor' ? () => onInlineEdit?.(fieldPath) : undefined,
+		onClick: mode === "editor" ? () => onInlineEdit?.(fieldPath) : undefined,
 		onKeyDown:
-			mode === 'editor'
+			mode === "editor"
 				? (event) => {
-						if (event.key === 'Enter' || event.key === ' ') {
-							event.preventDefault()
-							onInlineEdit?.(fieldPath)
+						if (event.key === "Enter" || event.key === " ") {
+							event.preventDefault();
+							onInlineEdit?.(fieldPath);
 						}
 					}
 				: undefined,
-		role: mode === 'editor' ? 'button' : undefined,
-		tabIndex: mode === 'editor' ? 0 : undefined,
-		className: mode === 'editor' ? `${className} dm-editable` : className,
-	})
+		role: mode === "editor" ? "button" : undefined,
+		tabIndex: mode === "editor" ? 0 : undefined,
+		className: mode === "editor" ? `${className} dm-editable` : className,
+	});
 
 	return (
 		<div className="blush-romance">
 			<SectionShell
-				id="hero"
+				sectionId="hero"
 				mode={mode}
 				hidden={hiddenSections?.hero}
 				onSelect={onSectionSelect}
@@ -52,16 +65,13 @@ export default function BlushRomanceInvitation({
 					<p className="blush-kicker">Blush Romance</p>
 					<h1
 						data-reveal
-						{...editableProps(
-							'hero.partnerOneName',
-							'dm-reveal blush-title',
-						)}
+						{...editableProps("hero.partnerOneName", "dm-reveal blush-title")}
 					>
 						{data.hero.partnerOneName} & {data.hero.partnerTwoName}
 					</h1>
 					<p
 						data-reveal
-						{...editableProps('hero.tagline', 'dm-reveal blush-tagline')}
+						{...editableProps("hero.tagline", "dm-reveal blush-tagline")}
 					>
 						{data.hero.tagline}
 					</p>
@@ -73,7 +83,7 @@ export default function BlushRomanceInvitation({
 			</SectionShell>
 
 			<SectionShell
-				id="announcement"
+				sectionId="announcement"
 				mode={mode}
 				hidden={hiddenSections?.announcement}
 				onSelect={onSectionSelect}
@@ -84,19 +94,13 @@ export default function BlushRomanceInvitation({
 					<p className="blush-kicker">Invitation</p>
 					<h2
 						data-reveal
-						{...editableProps(
-							'announcement.title',
-							'dm-reveal blush-heading',
-						)}
+						{...editableProps("announcement.title", "dm-reveal blush-heading")}
 					>
 						{data.announcement.title}
 					</h2>
 					<p
 						data-reveal
-						{...editableProps(
-							'announcement.message',
-							'dm-reveal blush-body',
-						)}
+						{...editableProps("announcement.message", "dm-reveal blush-body")}
 					>
 						{data.announcement.message}
 					</p>
@@ -107,7 +111,7 @@ export default function BlushRomanceInvitation({
 			</SectionShell>
 
 			<SectionShell
-				id="story"
+				sectionId="story"
 				mode={mode}
 				hidden={hiddenSections?.story}
 				onSelect={onSectionSelect}
@@ -119,7 +123,7 @@ export default function BlushRomanceInvitation({
 					<div className="mt-6 grid gap-4">
 						{data.story.milestones.map((milestone, index) => (
 							<div
-								key={`${milestone.title}-${index}`}
+								key={`${milestone.date}-${milestone.title}`}
 								data-reveal
 								style={{ transitionDelay: `${index * 90}ms` }}
 								className="dm-reveal blush-card"
@@ -134,7 +138,7 @@ export default function BlushRomanceInvitation({
 			</SectionShell>
 
 			<SectionShell
-				id="gallery"
+				sectionId="gallery"
 				mode={mode}
 				hidden={hiddenSections?.gallery}
 				onSelect={onSectionSelect}
@@ -146,20 +150,20 @@ export default function BlushRomanceInvitation({
 					<div className="mt-6 grid gap-4 md:grid-cols-3">
 						{data.gallery.photos.map((photo, index) => (
 							<div
-								key={`${photo.caption ?? 'gallery'}-${index}`}
+								key={`${photo.url ?? "photo"}-${photo.caption ?? "Moment"}`}
 								data-reveal
 								style={{ transitionDelay: `${index * 70}ms` }}
 								className="dm-reveal blush-photo"
 							>
 								<img
-									src={photo.url || '/placeholders/photo-light.svg'}
+									src={photo.url || "/placeholders/photo-light.svg"}
 									alt=""
 									loading="lazy"
 									width={360}
 									height={140}
 									className="blush-photo-frame w-full object-cover"
 								/>
-								<p className="blush-meta">{photo.caption ?? 'Moment'}</p>
+								<p className="blush-meta">{photo.caption ?? "Moment"}</p>
 							</div>
 						))}
 					</div>
@@ -167,7 +171,7 @@ export default function BlushRomanceInvitation({
 			</SectionShell>
 
 			<SectionShell
-				id="schedule"
+				sectionId="schedule"
 				mode={mode}
 				hidden={hiddenSections?.schedule}
 				onSelect={onSectionSelect}
@@ -194,7 +198,7 @@ export default function BlushRomanceInvitation({
 			</SectionShell>
 
 			<SectionShell
-				id="venue"
+				sectionId="venue"
 				mode={mode}
 				hidden={hiddenSections?.venue}
 				onSelect={onSectionSelect}
@@ -204,13 +208,13 @@ export default function BlushRomanceInvitation({
 				<div className="mx-auto max-w-5xl blush-venue">
 					<div>
 						<p className="blush-kicker">Venue</p>
-						<h3 {...editableProps('venue.name', 'blush-heading')}>
+						<h3 {...editableProps("venue.name", "blush-heading")}>
 							{data.venue.name}
 						</h3>
-						<p {...editableProps('venue.address', 'blush-body')}>
+						<p {...editableProps("venue.address", "blush-body")}>
 							{data.venue.address}
 						</p>
-						<p {...editableProps('venue.directions', 'blush-subtext')}>
+						<p {...editableProps("venue.directions", "blush-subtext")}>
 							{data.venue.directions}
 						</p>
 					</div>
@@ -227,7 +231,7 @@ export default function BlushRomanceInvitation({
 			</SectionShell>
 
 			<SectionShell
-				id="rsvp"
+				sectionId="rsvp"
 				mode={mode}
 				hidden={hiddenSections?.rsvp}
 				onSelect={onSectionSelect}
@@ -239,33 +243,64 @@ export default function BlushRomanceInvitation({
 					<form
 						className="mt-6 blush-form"
 						onSubmit={(event) => {
-							event.preventDefault()
-							if (!onRsvpSubmit) return
-							const formData = new FormData(event.currentTarget)
+							event.preventDefault();
+							if (!onRsvpSubmit) return;
+							const formData = new FormData(event.currentTarget);
 							onRsvpSubmit({
-								name: String(formData.get('name') ?? ''),
-								attendance: String(formData.get('attendance') ?? 'attending') as any,
-								guestCount: Number(formData.get('guestCount') ?? 1),
-								dietaryRequirements: String(formData.get('dietary') ?? ''),
-								message: String(formData.get('message') ?? ''),
-								email: String(formData.get('email') ?? ''),
-							})
+								name: String(formData.get("name") ?? ""),
+								attendance: parseAttendance(formData.get("attendance")),
+								guestCount: Number(formData.get("guestCount") ?? 1),
+								dietaryRequirements: String(formData.get("dietary") ?? ""),
+								message: String(formData.get("message") ?? ""),
+								email: String(formData.get("email") ?? ""),
+							});
 						}}
 					>
-						<input name="name" placeholder="Rachel Lim…" aria-label="Name" autoComplete="off" required />
+						<input
+							name="name"
+							placeholder="Rachel Lim…"
+							aria-label="Name"
+							autoComplete="off"
+							required
+						/>
 						<select name="attendance" aria-label="Attendance">
 							<option value="attending">Attending</option>
 							<option value="not_attending">Not Attending</option>
 							<option value="undecided">Undecided</option>
 						</select>
-						<input name="email" placeholder="rachel@example.com…" aria-label="Email" type="email" autoComplete="off" spellCheck={false} />
-						<input name="guestCount" placeholder="2…" aria-label="Guest count" type="number" min={1} inputMode="numeric" autoComplete="off" />
-						<input name="dietary" placeholder="Vegetarian, no pork…" aria-label="Dietary requirements" autoComplete="off" />
-						<textarea name="message" placeholder="Can’t wait to celebrate with you…" aria-label="Message" autoComplete="off" />
+						<input
+							name="email"
+							placeholder="rachel@example.com…"
+							aria-label="Email"
+							type="email"
+							autoComplete="off"
+							spellCheck={false}
+						/>
+						<input
+							name="guestCount"
+							placeholder="2…"
+							aria-label="Guest count"
+							type="number"
+							min={1}
+							inputMode="numeric"
+							autoComplete="off"
+						/>
+						<input
+							name="dietary"
+							placeholder="Vegetarian, no pork…"
+							aria-label="Dietary requirements"
+							autoComplete="off"
+						/>
+						<textarea
+							name="message"
+							placeholder="Can’t wait to celebrate with you…"
+							aria-label="Message"
+							autoComplete="off"
+						/>
 						{rsvpStatus ? (
-							<p role="status" className="blush-meta">
+							<output className="blush-meta" aria-live="polite">
 								{rsvpStatus}
-							</p>
+							</output>
 						) : null}
 						<button type="submit">Send RSVP</button>
 					</form>
@@ -273,7 +308,7 @@ export default function BlushRomanceInvitation({
 			</SectionShell>
 
 			<SectionShell
-				id="faq"
+				sectionId="faq"
 				mode={mode}
 				hidden={hiddenSections?.faq}
 				onSelect={onSectionSelect}
@@ -285,7 +320,7 @@ export default function BlushRomanceInvitation({
 					<div className="mt-6 grid gap-4">
 						{data.faq.items.map((item, index) => (
 							<div
-								key={`${item.question}-${index}`}
+								key={item.question}
 								data-reveal
 								style={{ transitionDelay: `${index * 70}ms` }}
 								className="dm-reveal blush-faq"
@@ -299,7 +334,7 @@ export default function BlushRomanceInvitation({
 			</SectionShell>
 
 			<SectionShell
-				id="footer"
+				sectionId="footer"
 				mode={mode}
 				hidden={hiddenSections?.footer}
 				onSelect={onSectionSelect}
@@ -309,12 +344,12 @@ export default function BlushRomanceInvitation({
 				<div className="mx-auto max-w-3xl text-center">
 					<p
 						data-reveal
-						{...editableProps('footer.message', 'dm-reveal blush-body')}
+						{...editableProps("footer.message", "dm-reveal blush-body")}
 					>
 						{data.footer.message}
 					</p>
 				</div>
 			</SectionShell>
 		</div>
-	)
+	);
 }

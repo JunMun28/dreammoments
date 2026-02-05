@@ -1,9 +1,9 @@
-import type { TemplateConfig } from '../../templates/types'
+import type { TemplateConfig } from "../../templates/types";
 
 type TemplateRendererProps = {
-	template: TemplateConfig
-	className?: string
-}
+	template: TemplateConfig;
+	className?: string;
+};
 
 export default function TemplateRenderer({
 	template,
@@ -18,7 +18,9 @@ export default function TemplateRenderer({
 				<h2 className="mt-2 text-2xl font-semibold text-[color:var(--dm-ink)]">
 					{template.name}
 				</h2>
-				<p className="mt-2 text-sm text-[color:var(--dm-muted)]">{template.description}</p>
+				<p className="mt-2 text-sm text-[color:var(--dm-muted)]">
+					{template.description}
+				</p>
 				<div className="mt-6 grid gap-3">
 					{template.sections.map((section) => (
 						<div
@@ -28,7 +30,9 @@ export default function TemplateRenderer({
 							<p className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">
 								{section.type}
 							</p>
-							<p className="mt-2 text-sm text-[color:var(--dm-muted)]">{section.id}</p>
+							<p className="mt-2 text-sm text-[color:var(--dm-muted)]">
+								{section.id}
+							</p>
 							{section.notes && (
 								<p className="mt-2 text-xs text-[color:var(--dm-muted)]">
 									{section.notes}
@@ -39,5 +43,5 @@ export default function TemplateRenderer({
 				</div>
 			</div>
 		</section>
-	)
+	);
 }

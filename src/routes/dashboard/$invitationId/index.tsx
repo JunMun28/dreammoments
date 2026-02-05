@@ -1,6 +1,7 @@
-import { createFileRoute, Link, Navigate } from '@tanstack/react-router'
-import { useEffect, useMemo, useState } from 'react'
-import ShareModal from '../../../components/share/ShareModal'
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
+import ShareModal from "../../../components/share/ShareModal";
+import { useAuth } from "../../../lib/auth";
 import {
 	addGuest,
 	exportGuestsCsv,
@@ -8,141 +9,179 @@ import {
 	getDeviceBreakdown,
 	getDietarySummary,
 	importGuests,
-	listGuests,
 	publishInvitation,
 	setInvitationSlug,
 	unpublishInvitation,
-} from '../../../lib/data'
-import { useAuth } from '../../../lib/auth'
-import { useStore } from '../../../lib/store'
-import type { AttendanceStatus, Invitation, InvitationStatus } from '../../../lib/types'
+} from "../../../lib/data";
+import { useStore } from "../../../lib/store";
+import type {
+	AttendanceStatus,
+	Invitation,
+	InvitationStatus,
+} from "../../../lib/types";
 
-export const Route = createFileRoute('/dashboard/$invitationId/')({
+export const Route = createFileRoute("/dashboard/$invitationId/")({
 	component: InvitationDashboard,
-})
+});
 
 type CsvMapping = {
-	name?: string
-	email?: string
-	relationship?: string
-}
+	name?: string;
+	email?: string;
+	relationship?: string;
+};
 
 function parseCsv(text: string) {
-	const [headerLine, ...rows] = text.split(/\r?\n/).filter(Boolean)
-	const headers = headerLine.split(',').map((item) => item.trim().replace(/^"|"$/g, ''))
+	const [headerLine, ...rows] = text.split(/\r?\n/).filter(Boolean);
+	const headers = headerLine
+		.split(",")
+		.map((item) => item.trim().replace(/^"|"$/g, ""));
 	return rows.map((row) => {
-		const values = row.split(',').map((item) => item.trim().replace(/^"|"$/g, ''))
-		return Object.fromEntries(headers.map((header, index) => [header, values[index] ?? '']))
-	})
+		const values = row
+			.split(",")
+			.map((item) => item.trim().replace(/^"|"$/g, ""));
+		return Object.fromEntries(
+			headers.map((header, index) => [header, values[index] ?? ""]),
+		);
+	});
 }
 
 function downloadCsv(name: string, content: string) {
-	const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' })
-	const url = URL.createObjectURL(blob)
-	const link = document.createElement('a')
-	link.href = url
-	link.download = name
-	link.click()
-	URL.revokeObjectURL(url)
+	const blob = new Blob([content], { type: "text/csv;charset=utf-8;" });
+	const url = URL.createObjectURL(blob);
+	const link = document.createElement("a");
+	link.href = url;
+	link.download = name;
+	link.click();
+	URL.revokeObjectURL(url);
 }
 
-const filterOptions: Array<{ value: AttendanceStatus | 'pending' | 'all'; label: string }> =
-	[
-		{ value: 'all', label: 'All' },
-		{ value: 'attending', label: 'Attending' },
-		{ value: 'not_attending', label: 'Not Attending' },
-		{ value: 'pending', label: 'Pending' },
-	]
+const filterOptions: Array<{
+	value: AttendanceStatus | "pending" | "all";
+	label: string;
+}> = [
+	{ value: "all", label: "All" },
+	{ value: "attending", label: "Attending" },
+	{ value: "not_attending", label: "Not Attending" },
+	{ value: "pending", label: "Pending" },
+];
 
-const attendanceLabels: Record<AttendanceStatus | 'pending' | 'undecided', string> = {
-	attending: 'Attending',
-	not_attending: 'Not Attending',
-	undecided: 'Undecided',
-	pending: 'Pending',
-}
+const attendanceLabels: Record<
+	AttendanceStatus | "pending" | "undecided",
+	string
+> = {
+	attending: "Attending",
+	not_attending: "Not Attending",
+	undecided: "Undecided",
+	pending: "Pending",
+};
 
 const statusLabels: Record<InvitationStatus, string> = {
-	draft: 'Draft',
-	published: 'Published',
-	archived: 'Archived',
-}
+	draft: "Draft",
+	published: "Published",
+	archived: "Archived",
+};
 
 const fieldLabels: Record<keyof CsvMapping, string> = {
-	name: 'Name',
-	email: 'Email',
-	relationship: 'Relationship',
-}
+	name: "Name",
+	email: "Email",
+	relationship: "Relationship",
+};
 
 export function InvitationDashboard() {
-	const { invitationId } = Route.useParams()
-	const { user } = useAuth()
+	const { invitationId } = Route.useParams();
+	const { user } = useAuth();
 	const invitation = useStore((store) =>
 		store.invitations.find((item) => item.id === invitationId),
-	)
+	);
 	const guests = useStore((store) =>
 		store.guests.filter((guest) => guest.invitationId === invitationId),
-	)
-	const [filter, setFilter] = useState<AttendanceStatus | 'pending' | 'all'>('all')
-	const [search, setSearch] = useState('')
-	const [shareOpen, setShareOpen] = useState(false)
-	const [importRows, setImportRows] = useState<Record<string, string>[]>([])
-	const [mapping, setMapping] = useState<CsvMapping>({})
-	const [manualGuest, setManualGuest] = useState({ name: '', email: '', relationship: '' })
+	);
+	const [filter, setFilter] = useState<AttendanceStatus | "pending" | "all">(
+		"all",
+	);
+	const [search, setSearch] = useState("");
+	const [shareOpen, setShareOpen] = useState(false);
+	const [importRows, setImportRows] = useState<Record<string, string>[]>([]);
+	const [mapping, setMapping] = useState<CsvMapping>({});
+	const [manualGuest, setManualGuest] = useState({
+		name: "",
+		email: "",
+		relationship: "",
+	});
 
 	useEffect(() => {
-		if (typeof window === 'undefined') return
-		const params = new URLSearchParams(window.location.search)
-		const filterParam = params.get('filter')
-		const queryParam = params.get('q')
-		if (filterParam) setFilter(filterParam as typeof filter)
-		if (queryParam) setSearch(queryParam)
-	}, [])
+		if (typeof window === "undefined") return;
+		const params = new URLSearchParams(window.location.search);
+		const filterParam = params.get("filter");
+		const queryParam = params.get("q");
+		if (filterParam) setFilter(filterParam as typeof filter);
+		if (queryParam) setSearch(queryParam);
+	}, []);
 
 	useEffect(() => {
-		if (typeof window === 'undefined') return
-		const params = new URLSearchParams(window.location.search)
-		if (filter && filter !== 'all') params.set('filter', filter)
-		else params.delete('filter')
-		if (search) params.set('q', search)
-		else params.delete('q')
-		const next = params.toString()
-		const url = next ? `${window.location.pathname}?${next}` : window.location.pathname
-		window.history.replaceState(null, '', url)
-	}, [filter, search])
+		if (typeof window === "undefined") return;
+		const params = new URLSearchParams(window.location.search);
+		if (filter && filter !== "all") params.set("filter", filter);
+		else params.delete("filter");
+		if (search) params.set("q", search);
+		else params.delete("q");
+		const next = params.toString();
+		const url = next
+			? `${window.location.pathname}?${next}`
+			: window.location.pathname;
+		window.history.replaceState(null, "", url);
+	}, [filter, search]);
 
-	if (!user) return <Navigate to="/auth/login" />
-	if (!invitation) return <Navigate to="/dashboard" />
+	const filteredGuests = useMemo(() => {
+		let list = guests.filter((guest) => guest.invitationId === invitationId);
+		if (filter && filter !== "all") {
+			if (filter === "pending") {
+				list = list.filter((guest) => !guest.attendance);
+			} else {
+				list = list.filter((guest) => guest.attendance === filter);
+			}
+		}
+		if (search) {
+			list = list.filter((guest) =>
+				guest.name.toLowerCase().includes(search.toLowerCase()),
+			);
+		}
+		return list;
+	}, [filter, search, guests, invitationId]);
+
+	if (!user) return <Navigate to="/auth/login" />;
+	if (!invitation) return <Navigate to="/dashboard" />;
 	if (invitation.userId !== user.id) {
 		return (
 			<div className="min-h-screen bg-[color:var(--dm-bg)] px-6 py-10 text-sm text-[color:var(--dm-muted)]">
 				403 · Not authorized.
 			</div>
-		)
+		);
 	}
 
-	const filteredGuests = useMemo(() => {
-		let list = listGuests(invitationId, filter === 'all' ? undefined : filter)
-		if (search) {
-			list = list.filter((guest) => guest.name.toLowerCase().includes(search.toLowerCase()))
-		}
-		return list
-	}, [filter, search, guests, invitationId])
-
-	const totalGuests = guests.reduce((sum, guest) => sum + guest.guestCount, 0)
-	const attending = guests.filter((guest) => guest.attendance === 'attending').length
-	const pending = guests.filter((guest) => !guest.attendance).length
-	const analytics = getAnalytics(invitationId)
-	const devices = getDeviceBreakdown(invitationId)
-	const dietary = getDietarySummary(invitationId)
+	const totalGuests = guests.reduce((sum, guest) => sum + guest.guestCount, 0);
+	const attending = guests.filter(
+		(guest) => guest.attendance === "attending",
+	).length;
+	const pending = guests.filter((guest) => !guest.attendance).length;
+	const analytics = getAnalytics(invitationId);
+	const devices = getDeviceBreakdown(invitationId);
+	const dietary = getDietarySummary(invitationId);
 
 	return (
 		<div className="min-h-screen bg-[color:var(--dm-bg)] px-6 py-10">
 			<div className="mx-auto max-w-6xl space-y-10">
 				<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 					<div>
-						<p className="text-xs uppercase tracking-[0.4em] text-[color:var(--dm-accent-strong)]">Invitation Overview</p>
-						<h1 className="mt-2 text-3xl font-semibold text-[color:var(--dm-ink)] break-words">{invitation.title}</h1>
-						<p className="mt-2 text-sm text-[color:var(--dm-muted)] break-words">{invitation.slug}</p>
+						<p className="text-xs uppercase tracking-[0.4em] text-[color:var(--dm-accent-strong)]">
+							Invitation Overview
+						</p>
+						<h1 className="mt-2 text-3xl font-semibold text-[color:var(--dm-ink)] break-words">
+							{invitation.title}
+						</h1>
+						<p className="mt-2 text-sm text-[color:var(--dm-muted)] break-words">
+							{invitation.slug}
+						</p>
 					</div>
 					<div className="flex flex-wrap gap-3 text-xs uppercase tracking-[0.2em]">
 						<Link
@@ -163,23 +202,35 @@ export function InvitationDashboard() {
 				</div>
 
 				<div className="grid gap-4 lg:grid-cols-5">
-				{[
-						{ label: 'Invited', value: invitation.invitedCount || guests.length },
-						{ label: 'Responded', value: guests.length },
-						{ label: 'Total Guests', value: totalGuests },
-						{ label: 'Attending', value: attending },
-						{ label: 'Pending', value: pending },
+					{[
+						{
+							label: "Invited",
+							value: invitation.invitedCount || guests.length,
+						},
+						{ label: "Responded", value: guests.length },
+						{ label: "Total Guests", value: totalGuests },
+						{ label: "Attending", value: attending },
+						{ label: "Pending", value: pending },
 					].map((stat) => (
-						<div key={stat.label} className="rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-6">
-							<p className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">{stat.label}</p>
-							<p className="mt-3 text-2xl font-semibold text-[color:var(--dm-ink)] tabular-nums">{stat.value}</p>
+						<div
+							key={stat.label}
+							className="rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-6"
+						>
+							<p className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">
+								{stat.label}
+							</p>
+							<p className="mt-3 text-2xl font-semibold text-[color:var(--dm-ink)] tabular-nums">
+								{stat.value}
+							</p>
 						</div>
 					))}
 				</div>
 
 				<div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
 					<div className="rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-6">
-						<h2 className="text-xl font-semibold text-[color:var(--dm-ink)]">RSVP Management</h2>
+						<h2 className="text-xl font-semibold text-[color:var(--dm-ink)]">
+							RSVP Management
+						</h2>
 						<div className="mt-4 flex flex-wrap gap-3 text-xs uppercase tracking-[0.2em]">
 							{filterOptions.map((option) => (
 								<button
@@ -216,14 +267,19 @@ export function InvitationDashboard() {
 								</thead>
 								<tbody>
 									{filteredGuests.map((guest) => (
-										<tr key={guest.id} className="border-t border-[color:var(--dm-border)]">
+										<tr
+											key={guest.id}
+											className="border-t border-[color:var(--dm-border)]"
+										>
 											<td className="px-4 py-3">{guest.name}</td>
 											<td className="px-4 py-3">
-												{attendanceLabels[guest.attendance ?? 'pending']}
+												{attendanceLabels[guest.attendance ?? "pending"]}
 											</td>
 											<td className="px-4 py-3">{guest.guestCount}</td>
-											<td className="px-4 py-3">{guest.dietaryRequirements ?? '-'}</td>
-											<td className="px-4 py-3">{guest.message ?? '-'}</td>
+											<td className="px-4 py-3">
+												{guest.dietaryRequirements ?? "-"}
+											</td>
+											<td className="px-4 py-3">{guest.message ?? "-"}</td>
 										</tr>
 									))}
 								</tbody>
@@ -234,11 +290,16 @@ export function InvitationDashboard() {
 							<button
 								type="button"
 								className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)]"
-								onClick={() => downloadCsv(`guests-${invitation.slug}.csv`, exportGuestsCsv(invitationId))}
+								onClick={() =>
+									downloadCsv(
+										`guests-${invitation.slug}.csv`,
+										exportGuestsCsv(invitationId),
+									)
+								}
 							>
 								Export Guests CSV
 							</button>
-							{user.plan === 'premium' ? (
+							{user.plan === "premium" ? (
 								<label className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)]">
 									Import Guests CSV
 									<input
@@ -246,10 +307,10 @@ export function InvitationDashboard() {
 										accept=".csv"
 										className="hidden"
 										onChange={async (event) => {
-											const file = event.target.files?.[0]
-											if (!file) return
-											const text = await file.text()
-											setImportRows(parseCsv(text))
+											const file = event.target.files?.[0];
+											if (!file) return;
+											const text = await file.text();
+											setImportRows(parseCsv(text));
 										}}
 									/>
 								</label>
@@ -262,12 +323,14 @@ export function InvitationDashboard() {
 
 						{importRows.length ? (
 							<div className="mt-4 space-y-3">
-								<p className="text-xs uppercase tracking-[0.2em] text-[color:var(--dm-accent-strong)]">Map Columns</p>
+								<p className="text-xs uppercase tracking-[0.2em] text-[color:var(--dm-accent-strong)]">
+									Map Columns
+								</p>
 								<div className="grid gap-3 sm:grid-cols-3">
-									{['name', 'email', 'relationship'].map((field) => (
+									{["name", "email", "relationship"].map((field) => (
 										<select
 											key={field}
-											value={mapping[field as keyof CsvMapping] ?? ''}
+											value={mapping[field as keyof CsvMapping] ?? ""}
 											onChange={(event) =>
 												setMapping((prev) => ({
 													...prev,
@@ -276,7 +339,9 @@ export function InvitationDashboard() {
 											}
 											className="h-10 rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] px-3 text-base text-[color:var(--dm-ink)]"
 										>
-											<option value="">{fieldLabels[field as keyof CsvMapping]}</option>
+											<option value="">
+												{fieldLabels[field as keyof CsvMapping]}
+											</option>
 											{Object.keys(importRows[0]).map((header) => (
 												<option key={header} value={header}>
 													{header}
@@ -292,10 +357,12 @@ export function InvitationDashboard() {
 										const mapped = importRows.map((row) => ({
 											name: mapping.name ? row[mapping.name] : row.name,
 											email: mapping.email ? row[mapping.email] : row.email,
-											relationship: mapping.relationship ? row[mapping.relationship] : row.relationship,
-										}))
-										importGuests(invitationId, mapped)
-										setImportRows([])
+											relationship: mapping.relationship
+												? row[mapping.relationship]
+												: row.relationship,
+										}));
+										importGuests(invitationId, mapped);
+										setImportRows([]);
 									}}
 								>
 									Import Guests
@@ -306,59 +373,81 @@ export function InvitationDashboard() {
 
 					<div className="space-y-6">
 						<div className="rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-6">
-							<h3 className="text-sm uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">Dietary Summary</h3>
+							<h3 className="text-sm uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">
+								Dietary Summary
+							</h3>
 							<div className="mt-4 space-y-2 text-sm text-[color:var(--dm-muted)]">
 								{Object.entries(dietary.summary).map(([label, count]) => (
-									<p key={label}>{label}: {count}</p>
+									<p key={label}>
+										{label}: {count}
+									</p>
 								))}
 								{dietary.notes.map((note) => (
 									<p key={note}>{note}</p>
 								))}
-								{!Object.keys(dietary.summary).length && !dietary.notes.length ? (
+								{!Object.keys(dietary.summary).length &&
+								!dietary.notes.length ? (
 									<p>No dietary notes yet.</p>
 								) : null}
 							</div>
 						</div>
 
 						<div className="rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-6">
-							<h3 className="text-sm uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">Add Guest</h3>
+							<h3 className="text-sm uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">
+								Add Guest
+							</h3>
 							<div className="mt-4 grid gap-3">
-							<input
-								placeholder="Mei Lin…"
-								aria-label="Guest Name"
-								value={manualGuest.name}
-								onChange={(event) => setManualGuest((prev) => ({ ...prev, name: event.target.value }))}
-								className="h-10 rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] px-3 text-base text-[color:var(--dm-ink)]"
-								name="guestName"
-								autoComplete="off"
-							/>
-							<input
-								placeholder="mei@example.com…"
-								aria-label="Guest Email"
-								value={manualGuest.email}
-								onChange={(event) => setManualGuest((prev) => ({ ...prev, email: event.target.value }))}
-								className="h-10 rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] px-3 text-base text-[color:var(--dm-ink)]"
-								name="guestEmail"
-								autoComplete="off"
-								spellCheck={false}
-								type="email"
-							/>
-							<input
-								placeholder="Cousin…"
-								aria-label="Guest Relationship"
-								value={manualGuest.relationship}
-								onChange={(event) => setManualGuest((prev) => ({ ...prev, relationship: event.target.value }))}
-								className="h-10 rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] px-3 text-base text-[color:var(--dm-ink)]"
-								name="guestRelationship"
-								autoComplete="off"
-							/>
+								<input
+									placeholder="Mei Lin…"
+									aria-label="Guest Name"
+									value={manualGuest.name}
+									onChange={(event) =>
+										setManualGuest((prev) => ({
+											...prev,
+											name: event.target.value,
+										}))
+									}
+									className="h-10 rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] px-3 text-base text-[color:var(--dm-ink)]"
+									name="guestName"
+									autoComplete="off"
+								/>
+								<input
+									placeholder="mei@example.com…"
+									aria-label="Guest Email"
+									value={manualGuest.email}
+									onChange={(event) =>
+										setManualGuest((prev) => ({
+											...prev,
+											email: event.target.value,
+										}))
+									}
+									className="h-10 rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] px-3 text-base text-[color:var(--dm-ink)]"
+									name="guestEmail"
+									autoComplete="off"
+									spellCheck={false}
+									type="email"
+								/>
+								<input
+									placeholder="Cousin…"
+									aria-label="Guest Relationship"
+									value={manualGuest.relationship}
+									onChange={(event) =>
+										setManualGuest((prev) => ({
+											...prev,
+											relationship: event.target.value,
+										}))
+									}
+									className="h-10 rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] px-3 text-base text-[color:var(--dm-ink)]"
+									name="guestRelationship"
+									autoComplete="off"
+								/>
 								<button
 									type="button"
 									className="rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)]"
 									onClick={() => {
-										if (!manualGuest.name) return
-										addGuest(invitationId, manualGuest)
-										setManualGuest({ name: '', email: '', relationship: '' })
+										if (!manualGuest.name) return;
+										addGuest(invitationId, manualGuest);
+										setManualGuest({ name: "", email: "", relationship: "" });
 									}}
 								>
 									Add Guest
@@ -370,12 +459,16 @@ export function InvitationDashboard() {
 
 				<div className="grid gap-6 lg:grid-cols-2">
 					<div className="rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-6">
-						<h2 className="text-xl font-semibold text-[color:var(--dm-ink)]">Analytics</h2>
+						<h2 className="text-xl font-semibold text-[color:var(--dm-ink)]">
+							Analytics
+						</h2>
 						<p className="mt-2 text-sm text-[color:var(--dm-muted)]">
-							Views: {analytics.totalViews} · RSVP Rate: {(analytics.rsvpRate * 100).toFixed(0)}%
+							Views: {analytics.totalViews} · RSVP Rate:{" "}
+							{(analytics.rsvpRate * 100).toFixed(0)}%
 						</p>
 						<div className="mt-4 h-24 rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-3">
 							<svg viewBox="0 0 200 60" className="h-full w-full">
+								<title>Views by day</title>
 								{analytics.viewsByDay.map((point, index) => (
 									<circle
 										key={point.date}
@@ -388,21 +481,28 @@ export function InvitationDashboard() {
 							</svg>
 						</div>
 						<p className="mt-3 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
-							Device Mix: {devices.mobile ?? 0} Mobile / {devices.desktop ?? 0} Desktop
+							Device Mix: {devices.mobile ?? 0} Mobile / {devices.desktop ?? 0}{" "}
+							Desktop
 						</p>
 					</div>
 
 					<div className="rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-6">
-						<h2 className="text-xl font-semibold text-[color:var(--dm-ink)]">Settings</h2>
-						<p className="mt-2 text-sm text-[color:var(--dm-muted)]">Status: {statusLabels[invitation.status]}</p>
+						<h2 className="text-xl font-semibold text-[color:var(--dm-ink)]">
+							Settings
+						</h2>
+						<p className="mt-2 text-sm text-[color:var(--dm-muted)]">
+							Status: {statusLabels[invitation.status]}
+						</p>
 						<div className="mt-4 space-y-3">
 							<label className="grid gap-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
 								Custom Slug (Premium)
 								<input
 									defaultValue={invitation.slug}
-									onBlur={(event) => setInvitationSlug(invitationId, event.target.value)}
+									onBlur={(event) =>
+										setInvitationSlug(invitationId, event.target.value)
+									}
 									className="h-10 rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] px-3 text-base text-[color:var(--dm-ink)]"
-									disabled={user.plan !== 'premium'}
+									disabled={user.plan !== "premium"}
 									autoComplete="off"
 								/>
 							</label>
@@ -422,7 +522,7 @@ export function InvitationDashboard() {
 									Unpublish
 								</button>
 							</div>
-							{user.plan !== 'premium' ? (
+							{user.plan !== "premium" ? (
 								<p className="text-xs text-[#b91c1c]">Upgrade to edit slug.</p>
 							) : null}
 						</div>
@@ -430,7 +530,11 @@ export function InvitationDashboard() {
 				</div>
 			</div>
 
-			<ShareModal open={shareOpen} invitation={invitation as Invitation} onClose={() => setShareOpen(false)} />
+			<ShareModal
+				open={shareOpen}
+				invitation={invitation as Invitation}
+				onClose={() => setShareOpen(false)}
+			/>
 		</div>
-	)
+	);
 }

@@ -1,47 +1,60 @@
-import { useMemo } from 'react'
-import type { InvitationContent } from '../../../lib/types'
-import { useParallax, useScrollReveal } from '../../../lib/scroll-effects'
-import SectionShell from '../SectionShell'
-import type { TemplateInvitationProps } from '../types'
+import { useMemo } from "react";
+import { useParallax, useScrollReveal } from "../../../lib/scroll-effects";
+import type { InvitationContent } from "../../../lib/types";
+import SectionShell from "../SectionShell";
+import type { RsvpPayload, TemplateInvitationProps } from "../types";
 
 type LoveAtDuskInvitationProps = TemplateInvitationProps & {
-	content: InvitationContent
-}
+	content: InvitationContent;
+};
 
 export default function LoveAtDuskInvitation({
 	content,
 	hiddenSections,
-	mode = 'public',
-				onSectionSelect,
-				onAiClick,
-				onInlineEdit,
-				onRsvpSubmit,
-				rsvpStatus,
+	mode = "public",
+	onSectionSelect,
+	onAiClick,
+	onInlineEdit,
+	onRsvpSubmit,
+	rsvpStatus,
 }: LoveAtDuskInvitationProps) {
-	useScrollReveal()
-	useParallax()
+	useScrollReveal();
+	useParallax();
 
-	const data = useMemo(() => content, [content])
+	const data = useMemo(() => content, [content]);
+	const parseAttendance = (
+		value: FormDataEntryValue | null,
+	): RsvpPayload["attendance"] => {
+		const candidate = String(value ?? "attending");
+		if (
+			candidate === "attending" ||
+			candidate === "not_attending" ||
+			candidate === "undecided"
+		) {
+			return candidate;
+		}
+		return "attending";
+	};
 	const editableProps = (fieldPath: string, className: string) => ({
-		onClick: mode === 'editor' ? () => onInlineEdit?.(fieldPath) : undefined,
+		onClick: mode === "editor" ? () => onInlineEdit?.(fieldPath) : undefined,
 		onKeyDown:
-			mode === 'editor'
+			mode === "editor"
 				? (event) => {
-						if (event.key === 'Enter' || event.key === ' ') {
-							event.preventDefault()
-							onInlineEdit?.(fieldPath)
+						if (event.key === "Enter" || event.key === " ") {
+							event.preventDefault();
+							onInlineEdit?.(fieldPath);
 						}
 					}
 				: undefined,
-		role: mode === 'editor' ? 'button' : undefined,
-		tabIndex: mode === 'editor' ? 0 : undefined,
-		className: mode === 'editor' ? `${className} dm-editable` : className,
-	})
+		role: mode === "editor" ? "button" : undefined,
+		tabIndex: mode === "editor" ? 0 : undefined,
+		className: mode === "editor" ? `${className} dm-editable` : className,
+	});
 
 	return (
 		<div className="love-at-dusk">
 			<SectionShell
-				id="hero"
+				sectionId="hero"
 				mode={mode}
 				hidden={hiddenSections?.hero}
 				onSelect={onSectionSelect}
@@ -54,8 +67,8 @@ export default function LoveAtDuskInvitation({
 					<p
 						data-reveal
 						{...editableProps(
-							'announcement.title',
-							'dm-reveal text-xs uppercase tracking-[0.6em] text-[var(--love-accent)]',
+							"announcement.title",
+							"dm-reveal text-xs uppercase tracking-[0.6em] text-[var(--love-accent)]",
 						)}
 					>
 						{data.announcement.title}
@@ -72,8 +85,8 @@ export default function LoveAtDuskInvitation({
 					>
 						<span
 							{...editableProps(
-								'hero.partnerOneName',
-								'love-heading dm-editable',
+								"hero.partnerOneName",
+								"love-heading dm-editable",
 							)}
 						>
 							{data.hero.partnerOneName}
@@ -81,8 +94,8 @@ export default function LoveAtDuskInvitation({
 						<span className="mx-3 text-[var(--love-accent)]">×</span>
 						<span
 							{...editableProps(
-								'hero.partnerTwoName',
-								'love-heading dm-editable',
+								"hero.partnerTwoName",
+								"love-heading dm-editable",
 							)}
 						>
 							{data.hero.partnerTwoName}
@@ -91,8 +104,8 @@ export default function LoveAtDuskInvitation({
 					<p
 						data-reveal
 						{...editableProps(
-							'hero.tagline',
-							'dm-reveal mt-4 max-w-2xl text-base text-[var(--love-muted)]',
+							"hero.tagline",
+							"dm-reveal mt-4 max-w-2xl text-base text-[var(--love-muted)]",
 						)}
 					>
 						{data.hero.tagline}
@@ -108,7 +121,7 @@ export default function LoveAtDuskInvitation({
 			</SectionShell>
 
 			<SectionShell
-				id="announcement"
+				sectionId="announcement"
 				mode={mode}
 				hidden={hiddenSections?.announcement}
 				onSelect={onSectionSelect}
@@ -125,8 +138,8 @@ export default function LoveAtDuskInvitation({
 					<p
 						data-reveal
 						{...editableProps(
-							'announcement.message',
-							'dm-reveal mt-6 text-lg text-[var(--love-cream)]',
+							"announcement.message",
+							"dm-reveal mt-6 text-lg text-[var(--love-cream)]",
 						)}
 					>
 						{data.announcement.message}
@@ -134,8 +147,8 @@ export default function LoveAtDuskInvitation({
 					<p
 						data-reveal
 						{...editableProps(
-							'announcement.formalText',
-							'dm-reveal mt-4 text-sm text-[var(--love-muted)]',
+							"announcement.formalText",
+							"dm-reveal mt-4 text-sm text-[var(--love-muted)]",
 						)}
 					>
 						{data.announcement.formalText}
@@ -144,7 +157,7 @@ export default function LoveAtDuskInvitation({
 			</SectionShell>
 
 			<SectionShell
-				id="couple"
+				sectionId="couple"
 				mode={mode}
 				hidden={hiddenSections?.couple}
 				onSelect={onSectionSelect}
@@ -154,25 +167,25 @@ export default function LoveAtDuskInvitation({
 				<div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-2">
 					{[
 						{
-							label: 'GROOM',
-							fieldPrefix: 'couple.partnerOne',
+							label: "GROOM",
+							fieldPrefix: "couple.partnerOne",
 							name: data.couple.partnerOne.fullName,
 							bio: data.couple.partnerOne.bio,
-							accent: 'from-[var(--love-primary)] to-[var(--love-secondary)]',
+							accent: "from-[var(--love-primary)] to-[var(--love-secondary)]",
 						},
 						{
-							label: 'BRIDE',
-							fieldPrefix: 'couple.partnerTwo',
+							label: "BRIDE",
+							fieldPrefix: "couple.partnerTwo",
 							name: data.couple.partnerTwo.fullName,
 							bio: data.couple.partnerTwo.bio,
-							accent: 'from-[var(--love-secondary)] to-[var(--love-primary)]',
+							accent: "from-[var(--love-secondary)] to-[var(--love-primary)]",
 						},
 					].map((person, index) => (
 						<div
 							key={person.label}
 							data-reveal
 							className={`dm-reveal ${
-								index === 0 ? 'slide-left' : 'slide-right'
+								index === 0 ? "slide-left" : "slide-right"
 							} rounded-3xl border border-white/10 bg-[#140d0b]/80 p-6`}
 						>
 							<div
@@ -184,7 +197,7 @@ export default function LoveAtDuskInvitation({
 							<p
 								{...editableProps(
 									`${person.fieldPrefix}.fullName`,
-									'mt-3 text-sm text-[var(--love-cream)]',
+									"mt-3 text-sm text-[var(--love-cream)]",
 								)}
 							>
 								{person.name}
@@ -192,7 +205,7 @@ export default function LoveAtDuskInvitation({
 							<p
 								{...editableProps(
 									`${person.fieldPrefix}.bio`,
-									'mt-2 text-xs text-[var(--love-muted)]',
+									"mt-2 text-xs text-[var(--love-muted)]",
 								)}
 							>
 								{person.bio}
@@ -203,7 +216,7 @@ export default function LoveAtDuskInvitation({
 			</SectionShell>
 
 			<SectionShell
-				id="story"
+				sectionId="story"
 				mode={mode}
 				hidden={hiddenSections?.story}
 				onSelect={onSectionSelect}
@@ -224,7 +237,7 @@ export default function LoveAtDuskInvitation({
 								data-reveal
 								style={{ transitionDelay: `${index * 80}ms` }}
 								className={`dm-reveal ${
-									index % 2 === 0 ? 'slide-left' : 'slide-right'
+									index % 2 === 0 ? "slide-left" : "slide-right"
 								} rounded-3xl border border-white/10 bg-[#120c0a] p-6`}
 							>
 								<p className="text-xs uppercase tracking-[0.4em] text-[var(--love-accent)]">
@@ -243,7 +256,7 @@ export default function LoveAtDuskInvitation({
 			</SectionShell>
 
 			<SectionShell
-				id="gallery"
+				sectionId="gallery"
 				mode={mode}
 				hidden={hiddenSections?.gallery}
 				onSelect={onSectionSelect}
@@ -260,13 +273,13 @@ export default function LoveAtDuskInvitation({
 					<div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 						{data.gallery.photos.map((item, index) => (
 							<div
-								key={`${item.caption ?? 'photo'}-${index}`}
+								key={`${item.url ?? "photo"}-${item.caption ?? "Photo"}`}
 								data-reveal
 								style={{ transitionDelay: `${index * 60}ms` }}
 								className="dm-reveal rounded-2xl border border-white/10 bg-gradient-to-br from-[#2a1b13] via-[#0f0c0a] to-[#5b2f22] p-6"
 							>
 								<img
-									src={item.url || '/placeholders/photo-dark.svg'}
+									src={item.url || "/placeholders/photo-dark.svg"}
 									alt=""
 									loading="lazy"
 									width={360}
@@ -283,7 +296,7 @@ export default function LoveAtDuskInvitation({
 			</SectionShell>
 
 			<SectionShell
-				id="schedule"
+				sectionId="schedule"
 				mode={mode}
 				hidden={hiddenSections?.schedule}
 				onSelect={onSectionSelect}
@@ -323,7 +336,7 @@ export default function LoveAtDuskInvitation({
 			</SectionShell>
 
 			<SectionShell
-				id="venue"
+				sectionId="venue"
 				mode={mode}
 				hidden={hiddenSections?.venue}
 				onSelect={onSectionSelect}
@@ -341,8 +354,8 @@ export default function LoveAtDuskInvitation({
 						<h2
 							data-reveal
 							{...editableProps(
-								'venue.name',
-								'dm-reveal text-2xl font-semibold text-[var(--love-cream)]',
+								"venue.name",
+								"dm-reveal text-2xl font-semibold text-[var(--love-cream)]",
 							)}
 						>
 							{data.venue.name}
@@ -350,8 +363,8 @@ export default function LoveAtDuskInvitation({
 						<p
 							data-reveal
 							{...editableProps(
-								'venue.address',
-								'dm-reveal text-sm text-[var(--love-muted)]',
+								"venue.address",
+								"dm-reveal text-sm text-[var(--love-muted)]",
 							)}
 						>
 							{data.venue.address}
@@ -359,8 +372,8 @@ export default function LoveAtDuskInvitation({
 						<p
 							data-reveal
 							{...editableProps(
-								'venue.directions',
-								'dm-reveal text-xs text-[var(--love-muted)]',
+								"venue.directions",
+								"dm-reveal text-xs text-[var(--love-muted)]",
 							)}
 						>
 							{data.venue.directions}
@@ -386,7 +399,7 @@ export default function LoveAtDuskInvitation({
 			</SectionShell>
 
 			<SectionShell
-				id="entourage"
+				sectionId="entourage"
 				mode={mode}
 				hidden={hiddenSections?.entourage}
 				onSelect={onSectionSelect}
@@ -403,7 +416,7 @@ export default function LoveAtDuskInvitation({
 					<div className="mt-6 grid gap-4 sm:grid-cols-3">
 						{data.entourage.members.map((person, index) => (
 							<div
-								key={`${person.role}-${index}`}
+								key={`${person.role}-${person.name}`}
 								data-reveal
 								style={{ transitionDelay: `${index * 80}ms` }}
 								className="dm-reveal rounded-2xl border border-white/10 bg-[#140d0b]/80 p-5 text-center"
@@ -421,7 +434,7 @@ export default function LoveAtDuskInvitation({
 			</SectionShell>
 
 			<SectionShell
-				id="registry"
+				sectionId="registry"
 				mode={mode}
 				hidden={hiddenSections?.registry}
 				onSelect={onSectionSelect}
@@ -445,7 +458,7 @@ export default function LoveAtDuskInvitation({
 			</SectionShell>
 
 			<SectionShell
-				id="rsvp"
+				sectionId="rsvp"
 				mode={mode}
 				hidden={hiddenSections?.rsvp}
 				onSelect={onSectionSelect}
@@ -461,11 +474,11 @@ export default function LoveAtDuskInvitation({
 							RSVP
 						</p>
 						<h2
-						data-reveal
-						className="dm-reveal mt-4 text-2xl font-semibold text-[var(--love-cream)]"
-					>
-						Join Us on Our Day
-					</h2>
+							data-reveal
+							className="dm-reveal mt-4 text-2xl font-semibold text-[var(--love-cream)]"
+						>
+							Join Us on Our Day
+						</h2>
 						<p
 							data-reveal
 							className="dm-reveal mt-3 text-sm text-[var(--love-muted)]"
@@ -477,17 +490,17 @@ export default function LoveAtDuskInvitation({
 						data-reveal
 						className="dm-reveal rounded-3xl border border-white/10 bg-[#140d0b]/80 p-6"
 						onSubmit={(event) => {
-							event.preventDefault()
-							if (!onRsvpSubmit) return
-							const formData = new FormData(event.currentTarget)
+							event.preventDefault();
+							if (!onRsvpSubmit) return;
+							const formData = new FormData(event.currentTarget);
 							onRsvpSubmit({
-								name: String(formData.get('name') ?? ''),
-								attendance: String(formData.get('attendance') ?? 'attending') as any,
-								guestCount: Number(formData.get('guestCount') ?? 1),
-								dietaryRequirements: String(formData.get('dietary') ?? ''),
-								message: String(formData.get('message') ?? ''),
-								email: String(formData.get('email') ?? ''),
-							})
+								name: String(formData.get("name") ?? ""),
+								attendance: parseAttendance(formData.get("attendance")),
+								guestCount: Number(formData.get("guestCount") ?? 1),
+								dietaryRequirements: String(formData.get("dietary") ?? ""),
+								message: String(formData.get("message") ?? ""),
+								email: String(formData.get("email") ?? ""),
+							});
 						}}
 					>
 						<div className="grid gap-4 sm:grid-cols-2">
@@ -555,9 +568,12 @@ export default function LoveAtDuskInvitation({
 							/>
 						</label>
 						{rsvpStatus ? (
-							<p role="status" className="mt-3 text-xs text-[var(--love-accent)]">
+							<output
+								className="mt-3 text-xs text-[var(--love-accent)]"
+								aria-live="polite"
+							>
 								{rsvpStatus}
-							</p>
+							</output>
 						) : null}
 						<button
 							type="submit"
@@ -570,7 +586,7 @@ export default function LoveAtDuskInvitation({
 			</SectionShell>
 
 			<SectionShell
-				id="footer"
+				sectionId="footer"
 				mode={mode}
 				hidden={hiddenSections?.footer}
 				onSelect={onSectionSelect}
@@ -581,8 +597,8 @@ export default function LoveAtDuskInvitation({
 					<p
 						data-reveal
 						{...editableProps(
-							'footer.message',
-							'dm-reveal text-lg text-[var(--love-cream)]',
+							"footer.message",
+							"dm-reveal text-lg text-[var(--love-cream)]",
 						)}
 					>
 						{data.footer.message}
@@ -596,5 +612,5 @@ export default function LoveAtDuskInvitation({
 				</div>
 			</SectionShell>
 		</div>
-	)
+	);
 }

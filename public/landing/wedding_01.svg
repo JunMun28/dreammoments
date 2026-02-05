@@ -1,0 +1,52 @@
+<svg width="900" height="1200" viewBox="0 0 900 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="900" height="1200" fill="url(#bg)"/>
+  <g opacity="0.85">
+    <circle cx="150" cy="220" r="220" fill="url(#bokeh1)"/>
+    <circle cx="760" cy="210" r="260" fill="url(#bokeh2)"/>
+    <circle cx="720" cy="980" r="320" fill="url(#bokeh3)"/>
+    <circle cx="190" cy="940" r="260" fill="url(#bokeh4)"/>
+  </g>
+  <g opacity="0.16">
+    <path d="M0 820C190 740 330 750 450 810C560 865 700 900 900 850V1200H0V820Z" fill="#2A1B13"/>
+  </g>
+  <g opacity="0.2">
+    <path d="M140 640C220 560 300 530 382 540C450 548 505 598 560 670C610 736 685 780 760 780" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+    <path d="M120 690C230 610 320 585 410 600C480 612 535 662 585 726C628 782 690 820 780 820" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+  </g>
+  <g opacity="0.38">
+    <path d="M365 725C375 675 415 642 450 642C485 642 525 675 535 725C545 775 510 820 450 852C390 820 355 775 365 725Z" fill="#FFFFFF"/>
+    <path d="M380 720C388 682 418 658 450 658C482 658 512 682 520 720C528 758 503 792 450 820C397 792 372 758 380 720Z" fill="#FFB7B2"/>
+  </g>
+  <g opacity="0.12">
+    <rect x="0" y="0" width="900" height="1200" fill="url(#grain)"/>
+  </g>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="900" y2="1200" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF6F1"/>
+      <stop offset="0.45" stop-color="#FFE3D7"/>
+      <stop offset="1" stop-color="#F6EFE7"/>
+    </linearGradient>
+    <radialGradient id="bokeh1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(150 220) rotate(90) scale(220)">
+      <stop stop-color="#E8EFE8" stop-opacity="0.7"/>
+      <stop offset="1" stop-color="#E8EFE8" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="bokeh2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(760 210) rotate(90) scale(260)">
+      <stop stop-color="#FFB7B2" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#FFB7B2" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="bokeh3" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(720 980) rotate(90) scale(320)">
+      <stop stop-color="#EFEDF4" stop-opacity="0.65"/>
+      <stop offset="1" stop-color="#EFEDF4" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="bokeh4" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(190 940) rotate(90) scale(260)">
+      <stop stop-color="#FFFFFF" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="grain" x1="0" y1="0" x2="900" y2="1200" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#000000" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#000000" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+</svg>
+

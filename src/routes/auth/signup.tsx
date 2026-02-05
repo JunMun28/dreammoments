@@ -1,27 +1,33 @@
-import { createFileRoute, Link, Navigate } from '@tanstack/react-router'
-import { useState } from 'react'
-import { useAuth } from '../../lib/auth'
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { useAuth } from "../../lib/auth";
 
-export const Route = createFileRoute('/auth/signup')({
+export const Route = createFileRoute("/auth/signup")({
 	component: SignupScreen,
-})
+});
 
 function SignupScreen() {
-	const { user, signUpWithEmail, signInWithGoogle } = useAuth()
-	const [name, setName] = useState('')
-	const [email, setEmail] = useState('')
-	const [password, setPassword] = useState('')
-	const [error, setError] = useState('')
+	const { user, signUpWithEmail, signInWithGoogle } = useAuth();
+	const [name, setName] = useState("");
+	const [email, setEmail] = useState("");
+	const [password, setPassword] = useState("");
+	const [error, setError] = useState("");
 
-	if (user) return <Navigate to="/dashboard" />
+	if (user) return <Navigate to="/dashboard" />;
 
 	return (
 		<div className="min-h-screen bg-[color:var(--dm-bg)] px-6 py-16">
 			<div className="mx-auto max-w-md space-y-6">
 				<div>
-				<p className="text-xs uppercase tracking-[0.4em] text-[color:var(--dm-accent-strong)]">Sign Up</p>
-				<h1 className="mt-3 text-3xl font-semibold text-[color:var(--dm-ink)]">Create Your Account</h1>
-					<p className="mt-2 text-sm text-[color:var(--dm-muted)]">Start your invitation in minutes.</p>
+					<p className="text-xs uppercase tracking-[0.4em] text-[color:var(--dm-accent-strong)]">
+						Sign Up
+					</p>
+					<h1 className="mt-3 text-3xl font-semibold text-[color:var(--dm-ink)]">
+						Create Your Account
+					</h1>
+					<p className="mt-2 text-sm text-[color:var(--dm-muted)]">
+						Start your invitation in minutes.
+					</p>
 				</div>
 
 				<button
@@ -36,9 +42,9 @@ function SignupScreen() {
 					<form
 						className="space-y-4"
 						onSubmit={(event) => {
-							event.preventDefault()
-							const message = signUpWithEmail({ email, password, name })
-							setError(message ?? '')
+							event.preventDefault();
+							const message = signUpWithEmail({ email, password, name });
+							setError(message ?? "");
 						}}
 					>
 						<label className="grid gap-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
@@ -78,9 +84,9 @@ function SignupScreen() {
 							/>
 						</label>
 						{error ? (
-							<p role="status" className="text-xs text-[#b91c1c]">
+							<output className="text-xs text-[#b91c1c]" aria-live="polite">
 								{error}
-							</p>
+							</output>
 						) : null}
 						<button
 							type="submit"
@@ -101,5 +107,5 @@ function SignupScreen() {
 				</div>
 			</div>
 		</div>
-	)
+	);
 }

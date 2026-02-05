@@ -1,47 +1,60 @@
-import { useMemo } from 'react'
-import { useScrollReveal } from '../../../lib/scroll-effects'
-import type { InvitationContent } from '../../../lib/types'
-import SectionShell from '../SectionShell'
-import type { TemplateInvitationProps } from '../types'
+import { useMemo } from "react";
+import { useScrollReveal } from "../../../lib/scroll-effects";
+import type { InvitationContent } from "../../../lib/types";
+import SectionShell from "../SectionShell";
+import type { RsvpPayload, TemplateInvitationProps } from "../types";
 
 type EternalEleganceInvitationProps = TemplateInvitationProps & {
-	content: InvitationContent
-}
+	content: InvitationContent;
+};
 
 export default function EternalEleganceInvitation({
 	content,
 	hiddenSections,
-	mode = 'public',
+	mode = "public",
 	onSectionSelect,
 	onAiClick,
 	onInlineEdit,
 	onRsvpSubmit,
 	rsvpStatus,
 }: EternalEleganceInvitationProps) {
-	useScrollReveal()
-	const data = useMemo(() => content, [content])
-	const monogram = `${data.hero.partnerOneName.charAt(0)}${data.hero.partnerTwoName.charAt(0)}`
-	const taglineLetters = data.hero.tagline.split('')
+	useScrollReveal();
+	const data = useMemo(() => content, [content]);
+	const monogram = `${data.hero.partnerOneName.charAt(0)}${data.hero.partnerTwoName.charAt(0)}`;
+	const taglineLetters = data.hero.tagline.split("");
+	const parseAttendance = (
+		value: FormDataEntryValue | null,
+	): RsvpPayload["attendance"] => {
+		const candidate = String(value ?? "attending");
+		if (
+			candidate === "attending" ||
+			candidate === "not_attending" ||
+			candidate === "undecided"
+		) {
+			return candidate;
+		}
+		return "attending";
+	};
 	const editableProps = (fieldPath: string, className: string) => ({
-		onClick: mode === 'editor' ? () => onInlineEdit?.(fieldPath) : undefined,
+		onClick: mode === "editor" ? () => onInlineEdit?.(fieldPath) : undefined,
 		onKeyDown:
-			mode === 'editor'
+			mode === "editor"
 				? (event) => {
-						if (event.key === 'Enter' || event.key === ' ') {
-							event.preventDefault()
-							onInlineEdit?.(fieldPath)
+						if (event.key === "Enter" || event.key === " ") {
+							event.preventDefault();
+							onInlineEdit?.(fieldPath);
 						}
 					}
 				: undefined,
-		role: mode === 'editor' ? 'button' : undefined,
-		tabIndex: mode === 'editor' ? 0 : undefined,
-		className: mode === 'editor' ? `${className} dm-editable` : className,
-	})
+		role: mode === "editor" ? "button" : undefined,
+		tabIndex: mode === "editor" ? 0 : undefined,
+		className: mode === "editor" ? `${className} dm-editable` : className,
+	});
 
 	return (
 		<div className="eternal-elegance">
 			<SectionShell
-				id="hero"
+				sectionId="hero"
 				mode={mode}
 				hidden={hiddenSections?.hero}
 				onSelect={onSectionSelect}
@@ -50,6 +63,7 @@ export default function EternalEleganceInvitation({
 			>
 				<div className="eternal-monogram" aria-hidden="true">
 					<svg viewBox="0 0 120 120" className="eternal-monogram-svg">
+						<title>Monogram</title>
 						<circle cx="60" cy="60" r="52" />
 						<text x="60" y="68" textAnchor="middle">
 							{monogram}
@@ -60,20 +74,17 @@ export default function EternalEleganceInvitation({
 					<p className="eternal-kicker">Eternal Elegance</p>
 					<h1
 						data-reveal
-						{...editableProps(
-							'hero.partnerOneName',
-							'dm-reveal eternal-title',
-						)}
+						{...editableProps("hero.partnerOneName", "dm-reveal eternal-title")}
 					>
 						{data.hero.partnerOneName} & {data.hero.partnerTwoName}
 					</h1>
 					<p
 						data-reveal
-						{...editableProps('hero.tagline', 'dm-reveal eternal-tagline')}
+						{...editableProps("hero.tagline", "dm-reveal eternal-tagline")}
 					>
 						{taglineLetters.map((char, index) => (
 							<span
-								key={`${char}-${index}`}
+								key={`${index}-${char}`}
 								className="eternal-letter"
 								style={{ animationDelay: `${index * 40}ms` }}
 							>
@@ -88,7 +99,7 @@ export default function EternalEleganceInvitation({
 			</SectionShell>
 
 			<SectionShell
-				id="announcement"
+				sectionId="announcement"
 				mode={mode}
 				hidden={hiddenSections?.announcement}
 				onSelect={onSectionSelect}
@@ -100,18 +111,15 @@ export default function EternalEleganceInvitation({
 					<h2
 						data-reveal
 						{...editableProps(
-							'announcement.title',
-							'dm-reveal eternal-heading',
+							"announcement.title",
+							"dm-reveal eternal-heading",
 						)}
 					>
 						{data.announcement.title}
 					</h2>
 					<p
 						data-reveal
-						{...editableProps(
-							'announcement.message',
-							'dm-reveal eternal-body',
-						)}
+						{...editableProps("announcement.message", "dm-reveal eternal-body")}
 					>
 						{data.announcement.message}
 					</p>
@@ -119,7 +127,7 @@ export default function EternalEleganceInvitation({
 			</SectionShell>
 
 			<SectionShell
-				id="couple"
+				sectionId="couple"
 				mode={mode}
 				hidden={hiddenSections?.couple}
 				onSelect={onSectionSelect}
@@ -137,19 +145,23 @@ export default function EternalEleganceInvitation({
 							bio: data.couple.partnerTwo.bio,
 						},
 					].map((person) => (
-						<div key={person.name} data-reveal className="dm-reveal eternal-card">
+						<div
+							key={person.name}
+							data-reveal
+							className="dm-reveal eternal-card"
+						>
 							<p
 								{...editableProps(
-									`couple.${person.name === data.couple.partnerOne.fullName ? 'partnerOne' : 'partnerTwo'}.fullName`,
-									'eternal-heading',
+									`couple.${person.name === data.couple.partnerOne.fullName ? "partnerOne" : "partnerTwo"}.fullName`,
+									"eternal-heading",
 								)}
 							>
 								{person.name}
 							</p>
 							<p
 								{...editableProps(
-									`couple.${person.name === data.couple.partnerOne.fullName ? 'partnerOne' : 'partnerTwo'}.bio`,
-									'eternal-body',
+									`couple.${person.name === data.couple.partnerOne.fullName ? "partnerOne" : "partnerTwo"}.bio`,
+									"eternal-body",
 								)}
 							>
 								{person.bio}
@@ -160,7 +172,7 @@ export default function EternalEleganceInvitation({
 			</SectionShell>
 
 			<SectionShell
-				id="gallery"
+				sectionId="gallery"
 				mode={mode}
 				hidden={hiddenSections?.gallery}
 				onSelect={onSectionSelect}
@@ -170,17 +182,20 @@ export default function EternalEleganceInvitation({
 				<div className="mx-auto max-w-5xl">
 					<p className="eternal-kicker">Gallery</p>
 					<div className="mt-6 grid gap-4 md:grid-cols-3">
-						{data.gallery.photos.map((photo, index) => (
-							<div key={`${photo.caption ?? 'photo'}-${index}`} className="eternal-photo">
+						{data.gallery.photos.map((photo) => (
+							<div
+								key={`${photo.url ?? "photo"}-${photo.caption ?? "Portrait"}`}
+								className="eternal-photo"
+							>
 								<img
-									src={photo.url || '/placeholders/photo-light.svg'}
+									src={photo.url || "/placeholders/photo-light.svg"}
 									alt=""
 									loading="lazy"
 									width={360}
 									height={140}
 									className="absolute inset-0 h-full w-full rounded-[inherit] object-cover"
 								/>
-								<span>{photo.caption ?? 'Portrait'}</span>
+								<span>{photo.caption ?? "Portrait"}</span>
 							</div>
 						))}
 					</div>
@@ -188,7 +203,7 @@ export default function EternalEleganceInvitation({
 			</SectionShell>
 
 			<SectionShell
-				id="details"
+				sectionId="details"
 				mode={mode}
 				hidden={hiddenSections?.details}
 				onSelect={onSectionSelect}
@@ -197,17 +212,17 @@ export default function EternalEleganceInvitation({
 			>
 				<div className="mx-auto max-w-4xl text-center">
 					<p className="eternal-kicker">Details</p>
-					<p {...editableProps('details.scheduleSummary', 'eternal-heading')}>
+					<p {...editableProps("details.scheduleSummary", "eternal-heading")}>
 						{data.details.scheduleSummary}
 					</p>
-					<p {...editableProps('details.venueSummary', 'eternal-body')}>
+					<p {...editableProps("details.venueSummary", "eternal-body")}>
 						{data.details.venueSummary}
 					</p>
 				</div>
 			</SectionShell>
 
 			<SectionShell
-				id="rsvp"
+				sectionId="rsvp"
 				mode={mode}
 				hidden={hiddenSections?.rsvp}
 				onSelect={onSectionSelect}
@@ -219,33 +234,64 @@ export default function EternalEleganceInvitation({
 					<form
 						className="eternal-form"
 						onSubmit={(event) => {
-							event.preventDefault()
-							if (!onRsvpSubmit) return
-							const formData = new FormData(event.currentTarget)
+							event.preventDefault();
+							if (!onRsvpSubmit) return;
+							const formData = new FormData(event.currentTarget);
 							onRsvpSubmit({
-								name: String(formData.get('name') ?? ''),
-								attendance: String(formData.get('attendance') ?? 'attending') as any,
-								guestCount: Number(formData.get('guestCount') ?? 1),
-								dietaryRequirements: String(formData.get('dietary') ?? ''),
-								message: String(formData.get('message') ?? ''),
-								email: String(formData.get('email') ?? ''),
-							})
+								name: String(formData.get("name") ?? ""),
+								attendance: parseAttendance(formData.get("attendance")),
+								guestCount: Number(formData.get("guestCount") ?? 1),
+								dietaryRequirements: String(formData.get("dietary") ?? ""),
+								message: String(formData.get("message") ?? ""),
+								email: String(formData.get("email") ?? ""),
+							});
 						}}
 					>
-						<input name="name" placeholder="James Tan…" aria-label="Name" autoComplete="off" required />
+						<input
+							name="name"
+							placeholder="James Tan…"
+							aria-label="Name"
+							autoComplete="off"
+							required
+						/>
 						<select name="attendance" aria-label="Attendance">
 							<option value="attending">Attending</option>
 							<option value="not_attending">Not Attending</option>
 							<option value="undecided">Undecided</option>
 						</select>
-						<input name="email" placeholder="james@example.com…" aria-label="Email" type="email" autoComplete="off" spellCheck={false} />
-						<input name="guestCount" placeholder="2…" aria-label="Guest count" type="number" min={1} inputMode="numeric" autoComplete="off" />
-						<input name="dietary" placeholder="No seafood…" aria-label="Dietary requirements" autoComplete="off" />
-						<textarea name="message" placeholder="We’re honored to attend…" aria-label="Message" autoComplete="off" />
+						<input
+							name="email"
+							placeholder="james@example.com…"
+							aria-label="Email"
+							type="email"
+							autoComplete="off"
+							spellCheck={false}
+						/>
+						<input
+							name="guestCount"
+							placeholder="2…"
+							aria-label="Guest count"
+							type="number"
+							min={1}
+							inputMode="numeric"
+							autoComplete="off"
+						/>
+						<input
+							name="dietary"
+							placeholder="No seafood…"
+							aria-label="Dietary requirements"
+							autoComplete="off"
+						/>
+						<textarea
+							name="message"
+							placeholder="We’re honored to attend…"
+							aria-label="Message"
+							autoComplete="off"
+						/>
 						{rsvpStatus ? (
-							<p role="status" className="eternal-body">
+							<output className="eternal-body" aria-live="polite">
 								{rsvpStatus}
-							</p>
+							</output>
 						) : null}
 						<button type="submit">Submit RSVP</button>
 					</form>
@@ -253,7 +299,7 @@ export default function EternalEleganceInvitation({
 			</SectionShell>
 
 			<SectionShell
-				id="registry"
+				sectionId="registry"
 				mode={mode}
 				hidden={hiddenSections?.registry}
 				onSelect={onSectionSelect}
@@ -262,14 +308,14 @@ export default function EternalEleganceInvitation({
 			>
 				<div className="mx-auto max-w-3xl text-center">
 					<p className="eternal-kicker">Registry</p>
-					<p {...editableProps('registry.note', 'eternal-body')}>
+					<p {...editableProps("registry.note", "eternal-body")}>
 						{data.registry.note}
 					</p>
 				</div>
 			</SectionShell>
 
 			<SectionShell
-				id="footer"
+				sectionId="footer"
 				mode={mode}
 				hidden={hiddenSections?.footer}
 				onSelect={onSectionSelect}
@@ -277,12 +323,12 @@ export default function EternalEleganceInvitation({
 				className="eternal-section eternal-footer"
 			>
 				<div className="mx-auto max-w-3xl text-center">
-					<p {...editableProps('footer.message', 'eternal-heading')}>
+					<p {...editableProps("footer.message", "eternal-heading")}>
 						{data.footer.message}
 					</p>
 					<p className="eternal-kicker">Eternal Elegance</p>
 				</div>
 			</SectionShell>
 		</div>
-	)
+	);
 }

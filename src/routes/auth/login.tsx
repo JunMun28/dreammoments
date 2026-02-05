@@ -1,18 +1,18 @@
-import { createFileRoute, Link, Navigate } from '@tanstack/react-router'
-import { useState } from 'react'
-import { useAuth } from '../../lib/auth'
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { useAuth } from "../../lib/auth";
 
-export const Route = createFileRoute('/auth/login')({
+export const Route = createFileRoute("/auth/login")({
 	component: LoginScreen,
-})
+});
 
 function LoginScreen() {
-	const { user, signInWithGoogle, signInWithEmail } = useAuth()
-	const [email, setEmail] = useState('')
-	const [password, setPassword] = useState('')
-	const [error, setError] = useState('')
+	const { user, signInWithGoogle, signInWithEmail } = useAuth();
+	const [email, setEmail] = useState("");
+	const [password, setPassword] = useState("");
+	const [error, setError] = useState("");
 
-	if (user) return <Navigate to="/dashboard" />
+	if (user) return <Navigate to="/dashboard" />;
 
 	return (
 		<div className="min-h-screen bg-[color:var(--dm-bg)] px-6 py-16 text-[color:var(--dm-ink)]">
@@ -41,9 +41,9 @@ function LoginScreen() {
 					<form
 						className="space-y-4"
 						onSubmit={(event) => {
-							event.preventDefault()
-							const message = signInWithEmail({ email, password })
-							setError(message ?? '')
+							event.preventDefault();
+							const message = signInWithEmail({ email, password });
+							setError(message ?? "");
 						}}
 					>
 						<label className="grid gap-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
@@ -72,9 +72,9 @@ function LoginScreen() {
 							/>
 						</label>
 						{error ? (
-							<p role="status" className="text-xs text-[#b91c1c]">
+							<output className="text-xs text-[#b91c1c]" aria-live="polite">
 								{error}
-							</p>
+							</output>
 						) : null}
 						<button
 							type="submit"
@@ -101,5 +101,5 @@ function LoginScreen() {
 				</div>
 			</div>
 		</div>
-	)
+	);
 }

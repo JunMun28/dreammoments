@@ -1,60 +1,58 @@
+import { TanStackDevtools } from "@tanstack/react-devtools";
+import type { QueryClient } from "@tanstack/react-query";
 import {
-  HeadContent,
-  Scripts,
-  createRootRouteWithContext,
-} from '@tanstack/react-router'
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
-import { TanStackDevtools } from '@tanstack/react-devtools'
+	createRootRouteWithContext,
+	HeadContent,
+	Scripts,
+} from "@tanstack/react-router";
+import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { useRef } from "react";
+import Header from "../components/Header";
 
-import Header from '../components/Header'
-import { AuthProvider } from '../lib/auth'
-
-import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
-
-import appCss from '../styles.css?url'
-
-import type { QueryClient } from '@tanstack/react-query'
+import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
+import { AuthProvider } from "../lib/auth";
+import appCss from "../styles.css?url";
 
 interface MyRouterContext {
-  queryClient: QueryClient
+	queryClient: QueryClient;
 }
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
-  head: () => ({
-    meta: [
-      {
-        charSet: 'utf-8',
-      },
-      {
-        name: 'viewport',
-        content: 'width=device-width, initial-scale=1',
-      },
-      {
-        title: 'DreamMoments',
-      },
-      {
-        name: 'description',
-        content:
-          'AI-powered wedding invitations for Malaysian and Singaporean Chinese couples.',
-      },
-    ],
-    links: [
-      {
-        rel: 'stylesheet',
-        href: appCss,
-      },
-    ],
-  }),
+	head: () => ({
+		meta: [
+			{
+				charSet: "utf-8",
+			},
+			{
+				name: "viewport",
+				content: "width=device-width, initial-scale=1",
+			},
+			{
+				title: "DreamMoments",
+			},
+			{
+				name: "description",
+				content:
+					"AI-powered wedding invitations for Malaysian and Singaporean Chinese couples.",
+			},
+		],
+		links: [
+			{
+				rel: "stylesheet",
+				href: appCss,
+			},
+		],
+	}),
 
-  shellComponent: RootDocument,
-})
+	shellComponent: RootDocument,
+});
 
 function RootDocument({ children }: { children: React.ReactNode }) {
-  const showDevtools = import.meta.env.DEV
+	const showDevtools = import.meta.env.DEV;
+	const mainRef = useRef<HTMLMainElement | null>(null);
 	const handleSkipToContent = () => {
-		const target = typeof document === "undefined" ? null : document.getElementById("main")
-		target?.focus()
-	}
+		mainRef.current?.focus();
+	};
 
 	return (
 		<html lang="en">
@@ -63,28 +61,34 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			</head>
 			<body>
 				<AuthProvider>
-					<a className="dm-skip-link" href="#main" onClick={handleSkipToContent}>
+					<button
+						type="button"
+						className="dm-skip-link"
+						onClick={handleSkipToContent}
+					>
 						Skip to Content
-					</a>
+					</button>
 					<Header />
-					<main id="main" tabIndex={-1}>{children}</main>
+					<main ref={mainRef} tabIndex={-1}>
+						{children}
+					</main>
 				</AuthProvider>
-        {showDevtools && (
-          <TanStackDevtools
-            config={{
-              position: 'bottom-right',
-            }}
-            plugins={[
-              {
-                name: 'Tanstack Router',
-                render: <TanStackRouterDevtoolsPanel />,
-              },
-              TanStackQueryDevtools,
-            ]}
-          />
-        )}
-        <Scripts />
-      </body>
-    </html>
-  )
+				{showDevtools && (
+					<TanStackDevtools
+						config={{
+							position: "bottom-right",
+						}}
+						plugins={[
+							{
+								name: "Tanstack Router",
+								render: <TanStackRouterDevtoolsPanel />,
+							},
+							TanStackQueryDevtools,
+						]}
+					/>
+				)}
+				<Scripts />
+			</body>
+		</html>
+	);
 }

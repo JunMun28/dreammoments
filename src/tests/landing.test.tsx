@@ -1,9 +1,12 @@
+import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import { renderToString } from "react-dom/server";
 import { describe, expect, test, vi } from "vitest";
 import { Landing } from "../routes/index";
 
+type MockLinkProps = ComponentPropsWithoutRef<"a"> & { children?: ReactNode };
+
 vi.mock("@tanstack/react-router", () => ({
-	Link: ({ children, ...props }: any) => <a {...props}>{children}</a>,
+	Link: ({ children, ...props }: MockLinkProps) => <a {...props}>{children}</a>,
 	createFileRoute: () => () => ({}),
 }));
 

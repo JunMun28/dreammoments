@@ -20,7 +20,11 @@ describe("header", () => {
 				<Header />
 			</AuthProvider>,
 		);
-		expect(markup).toContain('dm-nav-link inline-flex items-center min-h-[44px]');
-		expect(markup).toContain('rounded-full inline-flex items-center justify-center');
+		expect(markup).toContain(
+			"dm-nav-link inline-flex items-center min-h-[44px]",
+		);
+		expect(markup).toContain(
+			"rounded-full inline-flex items-center justify-center",
+		);
 	});
 });
