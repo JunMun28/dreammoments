@@ -47,9 +47,18 @@ export const baseSampleContent: InvitationContent = {
 	},
 	gallery: {
 		photos: [
-			{ url: "", caption: "Sunset vows" },
-			{ url: "", caption: "Garden strolls" },
-			{ url: "", caption: "Together always" },
+			{
+				url: "https://images.unsplash.com/photo-1519741497674-611481863552?w=900&h=900&fit=crop",
+				caption: "Sunset vows",
+			},
+			{
+				url: "https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=900&h=600&fit=crop",
+				caption: "Garden strolls",
+			},
+			{
+				url: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=900&h=600&fit=crop",
+				caption: "Together always",
+			},
 		],
 	},
 	schedule: {
@@ -145,9 +154,13 @@ export function buildSampleContent(templateId: string): InvitationContent {
 		base.footer.message = "With love, in gentle blush.";
 	}
 	if (templateId === "garden-romance") {
-		base.hero.tagline = "A garden vow, a lifetime promise.";
-		base.announcement.title = "Garden Romance";
-		base.footer.message = "Meet us under the florals.";
+		base.hero.tagline = "良缘天定 · 佳期如梦";
+		base.announcement.title = "We Joyfully Invite You";
+		base.announcement.message =
+			"Together with our beloved families, we request the honour of your presence at the celebration of our marriage.";
+		base.announcement.formalText =
+			"谨定于良辰吉日，诚邀阁下拨冗光临，共证我们的幸福时刻。";
+		base.footer.message = "百年好合 · 永结同心";
 	}
 	if (templateId === "eternal-elegance") {
 		base.hero.tagline = "Forever begins in elegant simplicity.";

@@ -1,5 +1,6 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { readRedirectFromSearch } from "../../lib/auth-redirect";
 import { useAuth } from "../../lib/auth";
 
 export const Route = createFileRoute("/auth/login")({
@@ -11,8 +12,12 @@ function LoginScreen() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [error, setError] = useState("");
+	const redirectTarget =
+		typeof window === "undefined"
+			? "/dashboard"
+			: readRedirectFromSearch(window.location.search);
 
-	if (user) return <Navigate to="/dashboard" />;
+	if (user) return <Navigate to={redirectTarget} />;
 
 	return (
 		<div className="min-h-screen bg-[color:var(--dm-bg)] px-6 py-16 text-[color:var(--dm-ink)]">
@@ -32,7 +37,7 @@ function LoginScreen() {
 				<button
 					type="button"
 					className="w-full rounded-full border border-[color:var(--dm-border)] px-4 py-3 text-sm uppercase tracking-[0.2em] text-[color:var(--dm-accent-strong)]"
-					onClick={signInWithGoogle}
+					onClick={() => signInWithGoogle(redirectTarget)}
 				>
 					Sign In with Google
 				</button>
@@ -88,12 +93,14 @@ function LoginScreen() {
 				<div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
 					<Link
 						to="/auth/reset"
+						search={{ redirect: redirectTarget }}
 						className="rounded-full px-3 py-2 hover:text-[color:var(--dm-ink)]"
 					>
 						Forgot Password
 					</Link>
 					<Link
 						to="/auth/signup"
+						search={{ redirect: redirectTarget }}
 						className="rounded-full px-3 py-2 hover:text-[color:var(--dm-ink)]"
 					>
 						Create Account

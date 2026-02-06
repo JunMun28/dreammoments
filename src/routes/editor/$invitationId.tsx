@@ -734,92 +734,96 @@ export function EditorScreen() {
 						</button>
 					</div>
 				</div>
-				<p className="text-xs text-[color:var(--dm-muted)]">
-					AI Usage: {invitation.aiGenerationsUsed}/{planLimit} · Autosave{" "}
-					{autosaveAt || "Pending"}
-				</p>
-				<div className="grid gap-6 lg:grid-cols-[0.6fr_0.4fr]">
-					<div className="rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-4">
-						<div className="flex items-center justify-between">
-							<p className="text-xs uppercase tracking-[0.4em] text-[color:var(--dm-accent-strong)]">
-								Live Preview
-							</p>
-							{isMobile && (
-								<button
-									type="button"
-									className="rounded-full border border-[color:var(--dm-border)] px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-[color:var(--dm-ink)]"
-									onClick={() => setPreviewMode((prev) => !prev)}
-								>
-									{previewMode ? "Edit" : "Preview"}
-								</button>
-							)}
-						</div>
-						<div
-							ref={previewRef}
-							className="mt-4 max-h-[70vh] overflow-y-auto rounded-3xl border border-[color:var(--dm-border)]"
-							style={styleOverrides}
-						>
-							<InvitationRenderer
-								templateId={template?.id ?? "blush-romance"}
-								content={draft}
-								hiddenSections={hiddenSections}
-								mode="editor"
-								onSectionSelect={(sectionId) => setActiveSection(sectionId)}
-								onAiClick={openAiPanel}
-								onInlineEdit={handleInlineEdit}
-							/>
-						</div>
-					</div>
-
-					{!isMobile || !previewMode ? (
-						<div className="rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-5">
+				{!previewMode && (
+				<>
+					<p className="text-xs text-[color:var(--dm-muted)]">
+						AI Usage: {invitation.aiGenerationsUsed}/{planLimit} · Autosave{" "}
+						{autosaveAt || "Pending"}
+					</p>
+					<div className="grid gap-6 lg:grid-cols-[0.6fr_0.4fr]">
+						<div className="rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-4 lg:sticky lg:top-8 lg:self-start lg:max-h-[calc(100vh-4rem)]">
 							<div className="flex items-center justify-between">
 								<p className="text-xs uppercase tracking-[0.4em] text-[color:var(--dm-accent-strong)]">
-									Section Editor
+									Live Preview
 								</p>
-								<button
-									type="button"
-									className="rounded-full border border-[color:var(--dm-border)] px-3 py-2 text-[10px] uppercase tracking-[0.2em] text-[color:var(--dm-muted)]"
-									onClick={() => openAiPanel(activeSection)}
-								>
-									AI Helper
-								</button>
+								{isMobile && (
+									<button
+										type="button"
+										className="rounded-full border border-[color:var(--dm-border)] px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-[color:var(--dm-ink)]"
+										onClick={() => setPreviewMode((prev) => !prev)}
+									>
+										{previewMode ? "Edit" : "Preview"}
+									</button>
+								)}
 							</div>
-							<div className="mt-4 space-y-4">
-								<p className="text-sm text-[color:var(--dm-muted)]">
-									Active: {activeSectionConfig?.id ?? activeSection}
-								</p>
-								<div className="space-y-3">
-									{template?.sections.map((section) => (
-										<label
-											key={section.id}
-											className="flex items-center justify-between rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]"
-										>
-											<span>{section.id}</span>
-											<input
-												type="checkbox"
-												checked={sectionVisibility[section.id] ?? true}
-												onChange={(event) =>
-													setSectionVisibility((prev) => ({
-														...prev,
-														[section.id]: event.target.checked,
-													}))
-												}
-											/>
-										</label>
-									))}
-								</div>
-								<div className="mt-6 space-y-4">
-									{activeSectionConfig?.fields.map((field) => (
-										<div key={field.id}>
-											{renderField(activeSectionConfig.id, field)}
-										</div>
-									))}
-								</div>
+							<div
+								ref={previewRef}
+								className="mt-4 overflow-y-auto rounded-3xl border border-[color:var(--dm-border)] lg:max-h-[calc(100vh-8rem)]"
+								style={styleOverrides}
+							>
+								<InvitationRenderer
+									templateId={template?.id ?? "blush-romance"}
+									content={draft}
+									hiddenSections={hiddenSections}
+									mode="editor"
+									onSectionSelect={(sectionId) => setActiveSection(sectionId)}
+									onAiClick={openAiPanel}
+									onInlineEdit={handleInlineEdit}
+								/>
 							</div>
 						</div>
-					) : null}
-				</div>
+
+						{!isMobile || !previewMode ? (
+							<div className="rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-5">
+								<div className="flex items-center justify-between">
+									<p className="text-xs uppercase tracking-[0.4em] text-[color:var(--dm-accent-strong)]">
+										Section Editor
+									</p>
+									<button
+										type="button"
+										className="rounded-full border border-[color:var(--dm-border)] px-3 py-2 text-[10px] uppercase tracking-[0.2em] text-[color:var(--dm-muted)]"
+										onClick={() => openAiPanel(activeSection)}
+									>
+										AI Helper
+									</button>
+								</div>
+								<div className="mt-4 space-y-4">
+									<p className="text-sm text-[color:var(--dm-muted)]">
+										Active: {activeSectionConfig?.id ?? activeSection}
+									</p>
+									<div className="space-y-3">
+										{template?.sections.map((section) => (
+											<label
+												key={section.id}
+												className="flex items-center justify-between rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]"
+											>
+												<span>{section.id}</span>
+												<input
+													type="checkbox"
+													checked={sectionVisibility[section.id] ?? true}
+													onChange={(event) =>
+														setSectionVisibility((prev) => ({
+															...prev,
+															[section.id]: event.target.checked,
+														}))
+													}
+												/>
+											</label>
+										))}
+									</div>
+									<div className="mt-6 space-y-4">
+										{activeSectionConfig?.fields.map((field) => (
+											<div key={field.id}>
+												{renderField(activeSectionConfig.id, field)}
+											</div>
+										))}
+									</div>
+								</div>
+							</div>
+						) : null}
+					</div>
+				</>
+			)}
 			</div>
 
 			{inlineEdit && (

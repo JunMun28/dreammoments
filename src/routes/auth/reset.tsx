@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { readRedirectFromSearch } from "../../lib/auth-redirect";
 import { useAuth } from "../../lib/auth";
 
 export const Route = createFileRoute("/auth/reset")({
@@ -11,6 +12,10 @@ function ResetScreen() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [message, setMessage] = useState("");
+	const redirectTarget =
+		typeof window === "undefined"
+			? "/dashboard"
+			: readRedirectFromSearch(window.location.search);
 
 	return (
 		<div className="min-h-screen bg-[color:var(--dm-bg)] px-6 py-16">
@@ -78,6 +83,7 @@ function ResetScreen() {
 				</div>
 				<Link
 					to="/auth/login"
+					search={{ redirect: redirectTarget }}
 					className="rounded-full px-3 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]"
 				>
 					Back to Sign In

@@ -1,11 +1,12 @@
 import { createContext, useContext } from "react";
+import { sanitizeRedirect } from "./auth-redirect";
 import { createUser, setCurrentUserId } from "./data";
 import { getStore, updateStore, useStore } from "./store";
 import type { User } from "./types";
 
 const AuthContext = createContext<{
 	user?: User;
-	signInWithGoogle: () => void;
+	signInWithGoogle: (redirectTo?: string) => void;
 	signUpWithEmail: (payload: {
 		email: string;
 		password: string;
@@ -40,7 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		store.users.find((item) => item.id === userId),
 	);
 
-	const signInWithGoogle = () => {
+	const signInWithGoogle = (redirectTo?: string) => {
 		if (googleClientId && googleRedirectUri) {
 			const params = new URLSearchParams({
 				client_id: googleClientId,
@@ -49,6 +50,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				scope: "openid email profile",
 				prompt: "select_account",
 			});
+			if (redirectTo) {
+				params.set("state", sanitizeRedirect(redirectTo));
+			}
 			window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
 			return;
 		}

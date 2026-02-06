@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import type { TemplateRenderMode } from "./types";
 
 type SectionShellProps = {
@@ -8,6 +8,7 @@ type SectionShellProps = {
 	onSelect?: (sectionId: string) => void;
 	onAiClick?: (sectionId: string) => void;
 	className?: string;
+	style?: CSSProperties;
 	children: ReactNode;
 };
 
@@ -18,6 +19,7 @@ export default function SectionShell({
 	onSelect,
 	onAiClick,
 	className,
+	style,
 	children,
 }: SectionShellProps) {
 	if (hidden) return null;
@@ -41,7 +43,7 @@ export default function SectionShell({
 
 	if (!interactive) {
 		return (
-			<section data-section={sectionId} className={className}>
+			<section data-section={sectionId} className={className} style={style}>
 				{aiButton}
 				{children}
 			</section>
@@ -53,6 +55,7 @@ export default function SectionShell({
 		<div
 			data-section={sectionId}
 			className={className}
+			style={style}
 			role="button"
 			tabIndex={0}
 			onClick={() => onSelect?.(sectionId)}
