@@ -133,7 +133,7 @@ function EnvelopeHero() {
 								className="absolute inset-0 rounded-[2.75rem] overflow-hidden"
 							>
 								<motion.img
-									src="/landing/wedding_01.svg"
+									src="/photos/romantic-portrait.jpg"
 									alt=""
 									loading="eager"
 									decoding="async"
@@ -212,21 +212,21 @@ function CinematicShowcase() {
 			id: "sage-morning",
 			title: "Sage Morning",
 			desc: "For quiet garden ceremonies.",
-			photo: "/landing/wedding_01.svg",
+			photo: "/photos/golden-hour.jpg",
 			accent: "bg-[color:var(--dm-sage)]",
 		},
 		{
 			id: "velvet-dusk",
 			title: "Velvet Dusk",
 			desc: "Warm tones for evening vows.",
-			photo: "/landing/wedding_02.svg",
+			photo: "/photos/couple-walking.jpg",
 			accent: "bg-black/60",
 		},
 		{
 			id: "peach-haze",
 			title: "Peach Haze",
 			desc: "Soft, sun-drenched romance.",
-			photo: "/landing/wedding_04.svg",
+			photo: "/photos/floral-detail.jpg",
 			accent: "bg-[color:var(--dm-peach)]/40",
 		},
 	];
@@ -268,7 +268,7 @@ function CinematicShowcase() {
 									>
 										<img
 											src={t.photo}
-											alt=""
+											alt={`${t.title} wedding invitation mood preview`}
 											loading="lazy"
 											decoding="async"
 											className="absolute inset-0 h-full w-full object-cover scale-[1.02] transition-transform duration-700 ease-out group-hover:scale-[1.06]"
@@ -324,6 +324,80 @@ function CinematicShowcase() {
 				</div>
 			</section>
 		</>
+	);
+}
+
+function MomentsGallery() {
+	const moments = [
+		{
+			id: "vows",
+			src: "/photos/romantic-portrait.jpg",
+			alt: "Bride and groom sharing a quiet portrait moment",
+			className: "md:col-span-7",
+		},
+		{
+			id: "sunset",
+			src: "/photos/golden-hour.jpg",
+			alt: "Couple embracing during golden-hour light",
+			className: "md:col-span-5",
+		},
+		{
+			id: "walk",
+			src: "/photos/couple-walking.jpg",
+			alt: "Newlyweds walking hand in hand",
+			className: "md:col-span-4",
+		},
+		{
+			id: "rings",
+			src: "/photos/rings.jpg",
+			alt: "Wedding rings arranged on a soft background",
+			className: "md:col-span-8",
+		},
+	];
+
+	return (
+		<section className="py-28 px-6">
+			<div className="max-w-7xl mx-auto">
+				<div className="text-center mb-14">
+					<p className="font-accent text-3xl text-[color:var(--dm-peach)] mb-2 rotate-[-1deg]">
+						real moments
+					</p>
+					<h2 className="font-heading text-4xl sm:text-5xl mb-4">
+						Photos that hold the feeling.
+					</h2>
+					<p className="max-w-2xl mx-auto text-[color:var(--dm-muted)] text-lg leading-relaxed">
+						Make every scroll feel like opening a keepsake album your guests
+						will remember.
+					</p>
+				</div>
+
+				<div className="grid gap-5 md:grid-cols-12 auto-rows-[220px] md:auto-rows-[260px]">
+					{moments.map((moment, i) => (
+						<motion.figure
+							key={moment.id}
+							initial={{ opacity: 0, y: 24 }}
+							whileInView={{ opacity: 1, y: 0 }}
+							viewport={{ once: true, margin: "-80px" }}
+							transition={{ duration: 0.7, ease: "easeOut", delay: i * 0.08 }}
+							className={cn(
+								"group relative overflow-hidden rounded-[2rem] dm-photo-frame",
+								moment.className,
+							)}
+						>
+							<img
+								src={moment.src}
+								alt={moment.alt}
+								loading="lazy"
+								decoding="async"
+								className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
+							/>
+							<div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-white/10" />
+							<div className="absolute inset-0 dm-grain opacity-50" />
+						</motion.figure>
+					))}
+				</div>
+			</div>
+		</section>
 	);
 }
 
@@ -460,6 +534,7 @@ export function Landing() {
 		<div className="min-h-screen bg-[color:var(--dm-bg)] selection:bg-[color:var(--dm-peach)] selection:text-[color:var(--dm-ink)]">
 			<EnvelopeHero />
 			<CinematicShowcase />
+			<MomentsGallery />
 			<Features />
 			<Footer />
 		</div>

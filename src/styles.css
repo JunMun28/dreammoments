@@ -214,6 +214,22 @@ h4 {
   will-change: transform;
 }
 
+.dm-photo-frame {
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 18px 45px -24px rgba(24, 19, 18, 0.45);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0));
+}
+
+.dm-photo-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  pointer-events: none;
+}
+
 .dm-blob {
   position: absolute;
   border-radius: 50%;
