@@ -800,3 +800,94 @@ h4 {
 [data-section]:focus-within .dm-ai-button {
   opacity: 1;
 }
+
+/* ─── Floating Petals (Hero) ─── */
+
+.dm-petals {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.dm-petal {
+  position: absolute;
+  background: var(--dm-peach);
+  border-radius: 50% 50% 50% 20%;
+  pointer-events: none;
+  animation: dm-petal-fall linear infinite;
+}
+
+@keyframes dm-petal-fall {
+  0% {
+    transform: translateY(-5%) translateX(0) rotate(0deg);
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  25% {
+    transform: translateY(25%) translateX(15px) rotate(90deg);
+  }
+  50% {
+    transform: translateY(50%) translateX(-10px) rotate(180deg);
+  }
+  75% {
+    transform: translateY(75%) translateX(12px) rotate(270deg);
+  }
+  95% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(105%) translateX(-5px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dm-petals {
+    display: none;
+  }
+}
+
+/* ─── Animated Timeline (Getting Started) ─── */
+
+.dm-timeline-track {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+}
+
+.dm-timeline-bg {
+  position: absolute;
+  inset: 0;
+  background: var(--dm-border);
+}
+
+.dm-timeline-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  background: var(--dm-peach);
+  transform-origin: top;
+}
+
+.dm-timeline-step {
+  transition: background-color 0.5s ease, border-color 0.5s ease, color 0.5s ease;
+}
+
+.dm-timeline-step-active {
+  border-color: var(--dm-peach) !important;
+  background: var(--dm-peach) !important;
+  color: white !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dm-timeline-step {
+    transition: none;
+  }
+}

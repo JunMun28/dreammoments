@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Check, Heart, Monitor, Play, Smartphone, Sparkles, Star } from "lucide-react";
-import { motion } from "motion/react";
-import { useEffect, useState } from "react";
+import { motion, useScroll, useTransform } from "motion/react";
+import { useEffect, useRef, useState } from "react";
 
 export const Route = createFileRoute("/")({ component: Landing });
 
@@ -28,13 +28,53 @@ function usePrefersReducedMotion() {
 const REVEAL_EASE: [number, number, number, number] = [0.25, 0.1, 0.25, 1];
 const REVEAL_TRANSITION = { duration: 0.8, ease: REVEAL_EASE };
 
+// --- Static petal seed data (deterministic for SSR safety) ---
+const PETALS = [
+	{ left: 5, size: 10, duration: 12, delay: 0, opacity: 0.35 },
+	{ left: 12, size: 8, duration: 14, delay: 2.5, opacity: 0.3 },
+	{ left: 22, size: 12, duration: 10, delay: 1, opacity: 0.4 },
+	{ left: 30, size: 9, duration: 16, delay: 4, opacity: 0.25 },
+	{ left: 38, size: 11, duration: 11, delay: 6, opacity: 0.35 },
+	{ left: 45, size: 8, duration: 13, delay: 3, opacity: 0.3 },
+	{ left: 52, size: 14, duration: 9, delay: 8, opacity: 0.4 },
+	{ left: 60, size: 10, duration: 15, delay: 1.5, opacity: 0.3 },
+	{ left: 67, size: 9, duration: 12, delay: 5, opacity: 0.35 },
+	{ left: 74, size: 12, duration: 10, delay: 10, opacity: 0.25 },
+	{ left: 80, size: 8, duration: 14, delay: 7, opacity: 0.4 },
+	{ left: 86, size: 11, duration: 11, delay: 2, opacity: 0.3 },
+	{ left: 91, size: 10, duration: 13, delay: 9, opacity: 0.35 },
+	{ left: 17, size: 13, duration: 8, delay: 11, opacity: 0.3 },
+	{ left: 55, size: 9, duration: 16, delay: 12, opacity: 0.25 },
+];
+
 // --- Components ---
+
+function FloatingPetals() {
+	return (
+		<div className="dm-petals" aria-hidden="true">
+			{PETALS.map((p) => (
+				<div
+					key={`${p.left}-${p.delay}`}
+					className="dm-petal"
+					style={{
+						left: `${p.left}%`,
+						width: `${p.size}px`,
+						height: `${p.size}px`,
+						opacity: p.opacity,
+						animationDuration: `${p.duration}s`,
+						animationDelay: `${p.delay}s`,
+					}}
+				/>
+			))}
+		</div>
+	);
+}
 
 function Hero() {
 	const reducedMotion = usePrefersReducedMotion();
 
 	return (
-		<section className="dm-hero relative min-h-[100svh] w-full overflow-hidden">
+		<section className="dm-hero relative min-h-svh w-full overflow-hidden">
 			{/* Floating blobs */}
 			<div className="dm-blob dm-blob-sage w-[420px] h-[420px] top-[10%] left-[8%]" />
 			<div
@@ -49,12 +89,15 @@ function Hero() {
 				}}
 			/>
 
+			{/* Floating petals */}
+			{!reducedMotion && <FloatingPetals />}
+
 			{/* Grain overlay */}
 			<div className="dm-hero-grain absolute inset-0" />
 
 			{/* Content */}
-			<div className="dm-hero-content relative z-10 min-h-[100svh]">
-				<div className="mx-auto min-h-[100svh] w-full max-w-5xl px-6 pt-32 pb-20 lg:pt-40 flex flex-col items-center justify-center gap-10">
+			<div className="dm-hero-content relative z-10 min-h-svh">
+				<div className="mx-auto min-h-svh w-full max-w-5xl px-6 pt-32 pb-20 lg:pt-40 flex flex-col items-center justify-center gap-10">
 					<div className="max-w-[780px] text-center">
 						<motion.span
 							initial={reducedMotion ? false : { opacity: 0, y: 20 }}
@@ -84,43 +127,7 @@ function Hero() {
 							DreamMoments turns your wedding details into a warm, beautiful
 							page your guests will love — before they even tap RSVP.
 						</motion.p>
-
-						<motion.div
-							initial={reducedMotion ? false : { opacity: 0, y: 20 }}
-							animate={{ opacity: 1, y: 0 }}
-							transition={{ ...REVEAL_TRANSITION, delay: 0.5 }}
-							className="flex flex-col sm:flex-row gap-4 items-center justify-center"
-						>
-							<Link
-								to="/editor/new"
-								className="dm-cta-primary active:scale-[0.97]"
-							>
-								Start free trial
-							</Link>
-							<a href="#showcase" className="dm-cta-secondary">
-								See real invites
-							</a>
-						</motion.div>
 					</div>
-
-					{/* Feature pills */}
-					<motion.div
-						initial={reducedMotion ? false : { opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ ...REVEAL_TRANSITION, delay: 0.65 }}
-						className="flex flex-wrap gap-3 justify-center"
-					>
-						{[
-							"One-tap RSVP",
-							"AI-written vows",
-							"Photo gallery",
-							"Live replies",
-						].map((label) => (
-							<span key={label} className="dm-hero-pill">
-								{label}
-							</span>
-						))}
-					</motion.div>
 				</div>
 			</div>
 		</section>
@@ -252,7 +259,7 @@ function Showcase() {
 							}}
 							className={
 								isMobile
-									? "flex-shrink-0 w-[280px] snap-center"
+									? "shrink-0 w-[280px] snap-center"
 									: ""
 							}
 						>
@@ -262,10 +269,10 @@ function Showcase() {
 								className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dm-peach focus-visible:ring-offset-2 rounded-[2.5rem]"
 							>
 								<div
-									className={`rounded-[3rem] overflow-hidden mb-6 relative transition-transform duration-[800ms] ease-out group-hover:-translate-y-2 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)] ${
+									className={`rounded-[3rem] overflow-hidden mb-6 relative transition-transform duration-800 ease-out group-hover:-translate-y-2 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)] ${
 										isMobile
-											? "aspect-[9/16]"
-											: "aspect-[3/4]"
+											? "aspect-9/16"
+											: "aspect-3/4"
 									}`}
 								>
 									<img
@@ -273,13 +280,13 @@ function Showcase() {
 										alt={`${t.title} wedding invitation mood preview`}
 										loading="lazy"
 										decoding="async"
-										className="absolute inset-0 h-full w-full object-cover scale-[1.02] transition-transform duration-[800ms] ease-out group-hover:scale-[1.05]"
+										className="absolute inset-0 h-full w-full object-cover scale-[1.02] transition-transform duration-800 ease-out group-hover:scale-[1.05]"
 									/>
-									<div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/5 to-white/10" />
+									<div className="absolute inset-0 bg-linear-to-t from-black/30 via-black/5 to-white/10" />
 									<div className="absolute inset-0 dm-grain opacity-60" />
 
 									<div className="absolute inset-4 rounded-[2.5rem] overflow-hidden border border-white/25 bg-white/10 backdrop-blur-[2px]">
-										<div className="absolute inset-0 bg-gradient-to-b from-white/20 to-white/0" />
+										<div className="absolute inset-0 bg-linear-to-b from-white/20 to-white/0" />
 										<div className="relative h-full w-full p-6 flex flex-col justify-between">
 											<div className="flex items-center justify-between gap-3">
 												<div className="inline-flex items-center gap-2 rounded-full bg-white/50 backdrop-blur-md border border-white/30 px-3 py-1 text-[10px] tracking-[0.2em] uppercase text-dm-ink/60">
@@ -292,7 +299,7 @@ function Showcase() {
 											</div>
 
 											<div className="text-center">
-												<p className="font-accent text-3xl text-white/85 rotate-[-1deg] drop-shadow-sm">
+												<p className="font-accent text-3xl text-white/85 -rotate-1 drop-shadow-sm">
 													Sarah & Tom
 												</p>
 												<h3 className="font-heading text-3xl text-white drop-shadow-sm mt-1">
@@ -324,34 +331,44 @@ function Showcase() {
 	);
 }
 
+const TIMELINE_STEPS = [
+	{
+		id: "01",
+		title: "Sign up",
+		description: "Create account with email or Google.",
+	},
+	{
+		id: "02",
+		title: "Choose a template",
+		description: "Pick the design that matches your ceremony mood.",
+	},
+	{
+		id: "03",
+		title: "Personalize your details",
+		description: "Edit names, schedule, story, gallery, RSVP fields.",
+	},
+	{
+		id: "04",
+		title: "Publish and share",
+		description: "Generate your invitation link and send to guests.",
+	},
+	{
+		id: "05",
+		title: "Collect RSVPs",
+		description: "Track replies and views from your dashboard.",
+	},
+];
+
 function GettingStartedTimeline() {
-	const steps = [
-		{
-			id: "01",
-			title: "Sign up",
-			description: "Create account with email or Google.",
-		},
-		{
-			id: "02",
-			title: "Choose a template",
-			description: "Pick the design that matches your ceremony mood.",
-		},
-		{
-			id: "03",
-			title: "Personalize your details",
-			description: "Edit names, schedule, story, gallery, RSVP fields.",
-		},
-		{
-			id: "04",
-			title: "Publish and share",
-			description: "Generate your invitation link and send to guests.",
-		},
-		{
-			id: "05",
-			title: "Collect RSVPs",
-			description: "Track replies and views from your dashboard.",
-		},
-	];
+	const reducedMotion = usePrefersReducedMotion();
+	const olRef = useRef<HTMLOListElement>(null);
+
+	const { scrollYProgress } = useScroll({
+		target: olRef,
+		offset: ["start 0.8", "end 0.6"],
+	});
+
+	const lineHeight = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
 
 	return (
 		<section className="relative py-28 px-6 overflow-hidden">
@@ -396,35 +413,85 @@ function GettingStartedTimeline() {
 					</motion.p>
 				</div>
 
-				<ol className="relative mx-auto max-w-3xl border-l border-dm-border pl-7 space-y-6">
-					{steps.map((step, i) => (
-						<motion.li
+				<ol ref={olRef} className="relative mx-auto max-w-3xl pl-7 space-y-6">
+					{/* Timeline track */}
+					<div className="dm-timeline-track" aria-hidden="true">
+						<div className="dm-timeline-bg" />
+						{!reducedMotion && (
+							<motion.div
+								className="dm-timeline-line"
+								style={{ height: lineHeight }}
+							/>
+						)}
+					</div>
+
+					{TIMELINE_STEPS.map((step, i) => (
+						<TimelineStep
 							key={step.id}
-							initial={{ opacity: 0, y: 30 }}
-							whileInView={{ opacity: 1, y: 0 }}
-							viewport={{ once: true, margin: "-60px" }}
-							transition={{
-								...REVEAL_TRANSITION,
-								delay: i * 0.08,
-							}}
-							className="relative"
-						>
-							<span className="absolute -left-[46px] top-6 flex h-10 w-10 items-center justify-center rounded-full border border-dm-border bg-dm-surface text-[11px] font-semibold tracking-[0.18em] text-dm-muted">
-								{step.id}
-							</span>
-							<div className="rounded-[2rem] border border-dm-border bg-dm-surface/90 p-6 sm:p-7 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)]">
-								<h3 className="font-heading text-2xl sm:text-3xl text-dm-ink">
-									{step.title}
-								</h3>
-								<p className="mt-3 text-dm-muted text-base leading-relaxed">
-									{step.description}
-								</p>
-							</div>
-						</motion.li>
+							step={step}
+							index={i}
+							total={TIMELINE_STEPS.length}
+							scrollYProgress={scrollYProgress}
+							reducedMotion={reducedMotion}
+						/>
 					))}
 				</ol>
 			</div>
 		</section>
+	);
+}
+
+function TimelineStep({
+	step,
+	index,
+	total,
+	scrollYProgress,
+	reducedMotion,
+}: {
+	step: (typeof TIMELINE_STEPS)[number];
+	index: number;
+	total: number;
+	scrollYProgress: ReturnType<typeof useScroll>["scrollYProgress"];
+	reducedMotion: boolean;
+}) {
+	const threshold = (index + 0.5) / total;
+	const isActive = useTransform(scrollYProgress, (v) => v >= threshold);
+	const [active, setActive] = useState(false);
+
+	useEffect(() => {
+		if (reducedMotion) return;
+		return isActive.on("change", (v) => setActive(v));
+	}, [isActive, reducedMotion]);
+
+	return (
+		<motion.li
+			initial={{ opacity: 0, y: 30 }}
+			whileInView={{ opacity: 1, y: 0 }}
+			viewport={{ once: true, margin: "-60px" }}
+			transition={{
+				...REVEAL_TRANSITION,
+				delay: index * 0.08,
+			}}
+			className="relative"
+		>
+			<span
+				className={`dm-timeline-step absolute -left-[46px] top-6 flex h-10 w-10 items-center justify-center rounded-full border text-[11px] font-semibold tracking-[0.18em] ${
+					active
+						? "dm-timeline-step-active"
+						: "border-dm-border bg-dm-surface text-dm-muted"
+				}`}
+			>
+				{step.id}
+			</span>
+			<div className="rounded-4xl border border-dm-border bg-dm-surface/90 p-6 sm:p-7 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)]">
+				<h3 className="font-heading text-2xl sm:text-3xl text-dm-ink">
+					{step.title}
+				</h3>
+				<p className="mt-3 text-dm-muted text-base leading-relaxed">
+					{step.description}
+				</p>
+			</div>
+		</motion.li>
 	);
 }
 
