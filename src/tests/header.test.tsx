@@ -26,5 +26,6 @@ describe("header", () => {
 		expect(markup).toContain(
 			"rounded-full inline-flex items-center justify-center",
 		);
+		expect(markup).toContain("Start Free Trial");
 	});
 });

@@ -69,7 +69,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 						Skip to Content
 					</button>
 					<Header />
-					<main ref={mainRef} tabIndex={-1}>
+					<main ref={mainRef} tabIndex={-1} className="pt-20">
 						{children}
 					</main>
 				</AuthProvider>

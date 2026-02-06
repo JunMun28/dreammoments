@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { type ClassValue, clsx } from "clsx";
 import { Check, Heart, Play, Sparkles, Star } from "lucide-react";
-import { motion, useScroll, useTransform } from "motion/react";
-import { useEffect, useRef, useState } from "react";
+import { motion } from "motion/react";
+import { type MouseEvent, useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 
 // Utility for safe class merging
@@ -11,11 +11,91 @@ function cn(...inputs: ClassValue[]) {
 }
 
 export const Route = createFileRoute("/")({ component: Landing });
+export const HERO_INTRO_STORAGE_KEY = "dm.heroIntro.v1";
+export const HERO_VIDEO_WEBM = "/videos/hero-loop.webm";
+export const HERO_VIDEO_MP4 = "/videos/hero-loop.mp4";
+export const HERO_VIDEO_POSTER = "/photos/romantic-portrait.jpg";
+
+type HeroSatellite = {
+	id: string;
+	label: string;
+	value: string;
+	toneClass: string;
+	desktop: { x: number; y: number };
+	mobile: { x: number; y: number };
+};
+
+const HERO_SATELLITES: HeroSatellite[] = [
+	{
+		id: "story-flow",
+		label: "Vow Script",
+		value: "Personalized ceremony copy",
+		toneClass: "dm-satellite-tone-peach",
+		desktop: { x: 16, y: 22 },
+		mobile: { x: 18, y: 20 },
+	},
+	{
+		id: "guest-view",
+		label: "Guest Journey",
+		value: "One-tap RSVP flow",
+		toneClass: "dm-satellite-tone-surface",
+		desktop: { x: 85, y: 22 },
+		mobile: { x: 84, y: 29 },
+	},
+	{
+		id: "rsvp-pulse",
+		label: "Live Replies",
+		value: "Replies in real time",
+		toneClass: "dm-satellite-tone-sage",
+		desktop: { x: 14, y: 77 },
+		mobile: { x: 20, y: 82 },
+	},
+	{
+		id: "mood-board",
+		label: "Memory Vault",
+		value: "Photo and timeline sync",
+		toneClass: "dm-satellite-tone-ink",
+		desktop: { x: 86, y: 76 },
+		mobile: { x: 82, y: 84 },
+	},
+];
+
+function buildBranchPath(x: number, y: number) {
+	const centerX = 50;
+	const centerY = 50;
+	const driftX = x - centerX;
+	const driftY = y - centerY;
+	const curveLift = y < centerY ? -8 : 8;
+	const controlOneX = centerX + driftX * 0.32;
+	const controlOneY = centerY + curveLift;
+	const controlTwoX = centerX + driftX * 0.76;
+	const controlTwoY = centerY + driftY * 0.68;
+	return `M ${centerX} ${centerY} C ${controlOneX} ${controlOneY}, ${controlTwoX} ${controlTwoY}, ${x} ${y}`;
+}
+
+type HeroIntroStorageRead = Pick<Storage, "getItem">;
+type HeroIntroStorageWrite = Pick<Storage, "setItem">;
+
+export function shouldPlayHeroIntro(
+	reducedMotion: boolean,
+	storage: HeroIntroStorageRead,
+) {
+	if (reducedMotion) return false;
+	return storage.getItem(HERO_INTRO_STORAGE_KEY) !== "1";
+}
+
+export function persistHeroIntroSeen(storage: HeroIntroStorageWrite) {
+	storage.setItem(HERO_INTRO_STORAGE_KEY, "1");
+}
 
 // --- Components ---
 
 function usePrefersReducedMotion() {
-	const [reduced, setReduced] = useState(false);
+	const [reduced, setReduced] = useState(() => {
+		if (typeof window === "undefined") return false;
+		return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+	});
+
 	useEffect(() => {
 		if (typeof window === "undefined") return;
 		const query = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -27,178 +107,277 @@ function usePrefersReducedMotion() {
 	return reduced;
 }
 
-function EnvelopeHero() {
-	const sectionRef = useRef<HTMLElement | null>(null);
-	const reducedMotion = usePrefersReducedMotion();
-
-	const { scrollYProgress } = useScroll({
-		target: sectionRef,
-		offset: ["start start", "end start"],
+function useIsMobileHero() {
+	const [isMobile, setIsMobile] = useState(() => {
+		if (typeof window === "undefined") return false;
+		return window.matchMedia("(max-width: 1023px)").matches;
 	});
 
-	// Background blobs drift a little within the hero section.
-	const bgY1 = useTransform(scrollYProgress, [0, 1], [0, 160]);
-	const bgY2 = useTransform(scrollYProgress, [0, 1], [0, -120]);
+	useEffect(() => {
+		if (typeof window === "undefined") return;
+		const query = window.matchMedia("(max-width: 1023px)");
+		const update = () => setIsMobile(query.matches);
+		update();
+		query.addEventListener?.("change", update);
+		return () => query.removeEventListener?.("change", update);
+	}, []);
 
-	// Envelope animation (0..1 over the section scroll)
-	const flapRotateX = useTransform(
-		scrollYProgress,
-		[0, 0.7, 1],
-		[0, -120, -160],
-	);
-	const letterY = useTransform(scrollYProgress, [0, 0.45, 1], [22, -36, -140]);
-	const letterRotate = useTransform(scrollYProgress, [0, 1], [2, 0]);
-	const photoScale = useTransform(scrollYProgress, [0, 1], [1.06, 1]);
-	const photoFade = useTransform(scrollYProgress, [0, 0.2, 0.6], [0.0, 0.9, 1]);
+	return isMobile;
+}
+
+function useHeroIntro() {
+	const reducedMotion = usePrefersReducedMotion();
+	const [shouldPlayIntro, setShouldPlayIntro] = useState(() => {
+		if (typeof window === "undefined") return false;
+		const isReduced = window.matchMedia(
+			"(prefers-reduced-motion: reduce)",
+		).matches;
+		return shouldPlayHeroIntro(isReduced, window.sessionStorage);
+	});
+
+	useEffect(() => {
+		if (typeof window === "undefined") return;
+		const shouldPlay = shouldPlayHeroIntro(
+			reducedMotion,
+			window.sessionStorage,
+		);
+		setShouldPlayIntro(shouldPlay);
+		if (shouldPlay) {
+			persistHeroIntroSeen(window.sessionStorage);
+		}
+	}, [reducedMotion]);
+
+	return { shouldPlayIntro, reducedMotion };
+}
+
+function CinematicHero() {
+	const { shouldPlayIntro, reducedMotion } = useHeroIntro();
+	const isMobileHero = useIsMobileHero();
+	const shouldAnimate = shouldPlayIntro && !reducedMotion;
+	const titleLineDuration = isMobileHero ? 0.26 : 0.34;
+	const titleDelayStart = isMobileHero ? 0.04 : 0.08;
+	const motionEase: [number, number, number, number] = [0.165, 0.84, 0.44, 1];
+	const titleLines = [
+		[{ text: "More than an invitation." }],
+		[
+			{ text: "A " },
+			{ text: "cinematic", highlight: true },
+			{ text: " love story." },
+		],
+		[
+			{ text: "Crafted to be " },
+			{ text: "remembered.", highlight: true },
+		],
+	];
+	const satellites = HERO_SATELLITES.filter(
+		(satellite) => !(isMobileHero && satellite.id === "mood-board"),
+	).map((satellite) => ({
+		...satellite,
+		position: isMobileHero ? satellite.mobile : satellite.desktop,
+	}));
+
+	const handleNodePointerMove = (event: MouseEvent<HTMLDivElement>) => {
+		if (reducedMotion || isMobileHero) return;
+		const node = event.currentTarget;
+		const rect = node.getBoundingClientRect();
+		const ratioX = (event.clientX - rect.left) / rect.width - 0.5;
+		const ratioY = (event.clientY - rect.top) / rect.height - 0.5;
+		const tiltX = (-ratioY * 10).toFixed(2);
+		const tiltY = (ratioX * 10).toFixed(2);
+		node.style.setProperty("--dm-node-tilt-x", `${tiltX}deg`);
+		node.style.setProperty("--dm-node-tilt-y", `${tiltY}deg`);
+	};
+
+	const handleNodePointerLeave = (event: MouseEvent<HTMLDivElement>) => {
+		const node = event.currentTarget;
+		node.style.setProperty("--dm-node-tilt-x", "0deg");
+		node.style.setProperty("--dm-node-tilt-y", "0deg");
+	};
 
 	return (
 		<section
-			ref={sectionRef}
-			className="relative min-h-[140svh] w-full overflow-hidden bg-[color:var(--dm-bg)] text-[color:var(--dm-ink)]"
+			data-hero-intro={shouldAnimate ? "play" : "skip"}
+			className="dm-cinema-hero relative min-h-[100svh] w-full overflow-hidden text-[color:var(--dm-ink)]"
 		>
-			{/* Soft Blob Backgrounds */}
-			<div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-				<motion.div
-					style={{ y: bgY1 }}
-					className="absolute -top-[10%] -left-[5%] w-[60vw] h-[60vw] max-w-[600px] max-h-[600px] rounded-full bg-[color:var(--dm-sage)] blur-[100px] opacity-60 animate-float"
-				/>
-				<motion.div
-					style={{ y: bgY2 }}
-					className="absolute top-[20%] -right-[10%] w-[50vw] h-[50vw] max-w-[500px] max-h-[500px] rounded-full bg-[color:var(--dm-lavender)] blur-[80px] opacity-60 animate-float"
-				/>
-				<motion.div
-					className="absolute bottom-[10%] left-[20%] w-[30vw] h-[30vw] max-w-[300px] max-h-[300px] rounded-full bg-[color:var(--dm-peach)] blur-[90px] opacity-40 animate-float"
-					transition={{ delay: 2 }}
-				/>
+			<div className="absolute inset-0">
+				<div className="dm-cinema-overlay absolute inset-0" />
+				<div className="dm-cinema-grain absolute inset-0" />
 			</div>
 
-			<div className="sticky top-0 z-10 min-h-[95svh] flex items-center">
-				<div className="mx-auto w-full max-w-6xl px-6 pt-24 pb-10 lg:pt-28 grid gap-10 lg:grid-cols-2 lg:gap-12 items-center">
-					<motion.div
-						initial={{ opacity: 0, y: 24 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.8, ease: "easeOut" }}
-						className="text-center lg:text-left"
-					>
-						<span className="font-accent text-3xl sm:text-4xl text-[color:var(--dm-muted)] block mb-4 rotate-[-2deg]">
-							slow down & savour
+			<div className="dm-cinema-content relative z-10 min-h-[100svh]">
+				<div className="mx-auto min-h-[100svh] w-full max-w-7xl px-6 pt-24 pb-14 lg:pt-28 flex flex-col items-center gap-10 lg:gap-12">
+					<div className="max-w-[860px] text-center">
+						<span className="font-accent text-3xl sm:text-4xl text-[color:var(--dm-peach)]/95 block mb-4 rotate-[-2deg]">
+							romantic cinematic mode
 						</span>
-						<h1 className="font-heading text-6xl sm:text-7xl lg:text-8xl leading-[0.95] tracking-tight mb-8">
-							Digital invites that feel{" "}
-							<span className="text-[color:var(--dm-peach)] italic">
-								warmly
-							</span>{" "}
-							yours.
+						<h1 className="dm-hero-title mb-7">
+							{titleLines.map((lineParts, index) => (
+								<motion.span
+									key={`hero-line-${index + 1}`}
+									initial={
+										shouldAnimate ? { opacity: 0, y: 18 } : { opacity: 1, y: 0 }
+									}
+									animate={{ opacity: 1, y: 0 }}
+									transition={
+										shouldAnimate
+											? {
+													duration: titleLineDuration,
+													delay: titleDelayStart + index * 0.04,
+													ease: motionEase,
+												}
+											: { duration: 0 }
+									}
+									className="block text-[color:var(--dm-ink)]"
+								>
+									{lineParts.map((part) => (
+										<span
+											key={`${part.text}-${index}`}
+											className={part.highlight ? "dm-hero-highlight" : undefined}
+										>
+											{part.text}
+										</span>
+									))}
+								</motion.span>
+							))}
 						</h1>
-						<p className="font-body text-xl text-[color:var(--dm-ink)]/80 max-w-lg mx-auto lg:mx-0 leading-relaxed mb-10">
-							A quiet space for your big news. Thoughtfully designed,
-							intentionally simple, and beautiful on every screen.
+						<p className="font-body text-lg sm:text-xl text-[color:var(--dm-ink)]/82 max-w-[42ch] leading-relaxed mx-auto mb-10">
+							DreamMoments turns your wedding details into a luminous page your
+							guests feel before they even tap RSVP.
 						</p>
 
-						<div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center">
+						<div className="dm-hero-cta-group flex flex-col sm:flex-row gap-4 items-center justify-center">
 							<Link
 								to="/editor/new"
-								className="group relative px-8 py-4 bg-[color:var(--dm-ink)] text-[color:var(--dm-surface)] rounded-full text-lg font-medium transition-transform hover:scale-105 active:scale-95"
+								className="dm-hero-cta-primary group relative px-8 py-4 rounded-full text-lg font-medium active:scale-95"
 							>
-								Start Designing
-								<span className="absolute inset-0 rounded-full ring-1 ring-white/20 group-hover:ring-white/40 transition-all" />
+								Start Free Trial
+								<span className="dm-hero-cta-ring absolute inset-0 rounded-full ring-1 ring-white/20 transition-all" />
 							</Link>
 							<a
 								href="#showcase"
-								className="px-8 py-4 bg-white/50 backdrop-blur-sm border border-[color:var(--dm-border)] text-[color:var(--dm-ink)] rounded-full text-lg font-medium transition-all hover:bg-white hover:shadow-lg"
+								className="dm-hero-cta-secondary px-8 py-4 rounded-full text-lg font-medium"
 							>
-								View Collection
+								See Real Invites
 							</a>
 						</div>
-
-						<div className="mt-10 hidden lg:block text-[color:var(--dm-muted)]">
-							<div className="flex items-center gap-3">
-								<span className="text-[10px] tracking-[0.3em] uppercase">
-									Scroll
-								</span>
-								<div className="h-[1px] w-16 bg-gradient-to-r from-[color:var(--dm-muted)] to-transparent" />
-								<span className="font-accent text-xl rotate-[-2deg]">
-									open the note
-								</span>
-							</div>
-						</div>
-					</motion.div>
-
-					{/* Envelope Stage (decorative) */}
-					<div className="relative mx-auto w-full max-w-[420px] lg:max-w-[520px]">
-						<div aria-hidden="true" className="relative aspect-[4/5]">
-							{/* Photo background (reveals as the letter slides) */}
-							<motion.div
-								style={reducedMotion ? { opacity: 1 } : { opacity: photoFade }}
-								className="absolute inset-0 rounded-[2.75rem] overflow-hidden"
-							>
-								<motion.img
-									src="/photos/romantic-portrait.jpg"
-									alt=""
-									loading="eager"
-									decoding="async"
-									style={reducedMotion ? undefined : { scale: photoScale }}
-									className="h-full w-full object-cover"
-								/>
-								<div className="absolute inset-0 bg-gradient-to-t from-black/15 via-black/0 to-white/15" />
-								<div className="absolute inset-0 dm-grain" />
-							</motion.div>
-
-							{/* Envelope base */}
-							<div className="absolute inset-0 rounded-[2.75rem] dm-envelope shadow-2xl">
-								{/* Letter/card */}
-								<motion.div
-									style={
-										reducedMotion
-											? { y: -140, rotate: 0 }
-											: { y: letterY, rotate: letterRotate }
-									}
-									className="absolute left-1/2 -translate-x-1/2 bottom-10 w-[82%] rounded-[2.25rem] dm-letter border border-white/40 shadow-xl"
-								>
-									<div className="p-7 sm:p-8 text-center">
-										<p className="font-accent text-3xl mb-1 text-[color:var(--dm-muted)] rotate-[-1deg]">
-											With love,
-										</p>
-										<h3 className="font-heading text-3xl sm:text-4xl mb-4">
-											Sarah & Tom
-										</h3>
-										<div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white/60 backdrop-blur-md border border-[color:var(--dm-border)] text-xs uppercase tracking-[0.25em] text-[color:var(--dm-ink)]/70">
-											<span>Sept 24</span>
-											<span className="opacity-40">•</span>
-											<span>Kuala Lumpur</span>
-										</div>
-										<p className="mt-5 text-sm text-[color:var(--dm-muted)] leading-relaxed">
-											A quiet, modern invite your guests will actually enjoy
-											reading.
-										</p>
-									</div>
-								</motion.div>
-
-								{/* Envelope flap */}
-								<motion.div
-									style={
-										reducedMotion ? { rotateX: -160 } : { rotateX: flapRotateX }
-									}
-									className="absolute inset-x-8 top-8 h-[44%] origin-top dm-envelope-flap"
-								/>
-
-								{/* Bottom fold highlight */}
-								<div className="absolute inset-x-8 bottom-8 h-[36%] rounded-[2rem] bg-white/15 border border-white/20" />
-							</div>
-						</div>
 					</div>
+
+					<motion.div
+						initial={shouldAnimate ? { opacity: 0 } : false}
+						animate={{ opacity: 1 }}
+						transition={
+							shouldAnimate
+								? { duration: 0.52, delay: 0.1, ease: motionEase }
+								: { duration: 0 }
+						}
+						className="dm-hero-network-stage"
+					>
+						<svg
+							data-hero-filmstrip
+							className="dm-hero-branches"
+							viewBox="0 0 100 100"
+							preserveAspectRatio="none"
+							aria-hidden="true"
+						>
+							{satellites.map((satellite, index) => {
+								const path = buildBranchPath(
+									satellite.position.x,
+									satellite.position.y,
+								);
+								return (
+									<g key={`${satellite.id}-branch`}>
+										<path
+											d={path}
+											className="dm-hero-branch-base"
+											style={{ animationDelay: `${index * 0.28}s` }}
+										/>
+										<path
+											d={path}
+											className="dm-hero-branch-pulse"
+											style={{ animationDelay: `${index * 0.34}s` }}
+										/>
+									</g>
+								);
+							})}
+						</svg>
+
+						<motion.div
+							data-hero-film
+							initial={shouldAnimate ? { opacity: 0 } : false}
+							animate={{ opacity: 1 }}
+							transition={
+								shouldAnimate
+									? { duration: 0.42, delay: 0.2, ease: motionEase }
+									: { duration: 0 }
+							}
+							className="dm-central-node"
+							onMouseMove={handleNodePointerMove}
+							onMouseLeave={handleNodePointerLeave}
+						>
+							<video
+								muted
+								playsInline
+								autoPlay={!reducedMotion}
+								loop
+								preload="metadata"
+								poster={HERO_VIDEO_POSTER}
+								className="dm-central-node-media"
+							>
+								<source src={HERO_VIDEO_WEBM} type="video/webm" />
+								<source src={HERO_VIDEO_MP4} type="video/mp4" />
+							</video>
+							<div className="dm-central-node-overlay absolute inset-0" />
+							<div className="dm-central-node-content">
+								<span className="dm-central-node-chip">Live Preview Node</span>
+								<p className="dm-central-node-label">
+									A 16:9 story canvas blending vows, photos, and details in one
+									glass layer.
+								</p>
+							</div>
+						</motion.div>
+
+						{satellites.map((satellite, index) => (
+							<motion.article
+								key={satellite.id}
+								data-hero-proof={
+									satellite.id === "rsvp-pulse" ? "RSVP in 20 sec" : undefined
+								}
+								initial={shouldAnimate ? { opacity: 0 } : false}
+								animate={{ opacity: 1 }}
+								transition={
+									shouldAnimate
+										? {
+												duration: 0.24,
+												delay: 0.28 + index * 0.08,
+												ease: motionEase,
+											}
+										: { duration: 0 }
+								}
+								className="dm-satellite-card"
+								style={{
+									left: `${satellite.position.x}%`,
+									top: `${satellite.position.y}%`,
+									animationDelay: `${index * 0.42}s`,
+								}}
+							>
+								<div className={cn("dm-satellite-card-inner", satellite.toneClass)}>
+									<p className="dm-satellite-label">{satellite.label}</p>
+									<p className="dm-satellite-value">{satellite.value}</p>
+								</div>
+							</motion.article>
+						))}
+					</motion.div>
 				</div>
 			</div>
 
-			{/* Mobile scroll indicator */}
 			<motion.div
 				initial={{ opacity: 0 }}
 				animate={{ opacity: 1 }}
-				transition={{ delay: 1, duration: 1 }}
+				transition={{ delay: 0.9, duration: 0.6 }}
 				className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-[color:var(--dm-muted)] lg:hidden"
 			>
 				<span className="text-sm font-medium tracking-widest uppercase text-[10px]">
-					Scroll to Open
+					Scroll for More
 				</span>
 				<div className="w-[1px] h-12 bg-gradient-to-b from-[color:var(--dm-muted)] to-transparent" />
 			</motion.div>
@@ -532,7 +711,7 @@ function Footer() {
 export function Landing() {
 	return (
 		<div className="min-h-screen bg-[color:var(--dm-bg)] selection:bg-[color:var(--dm-peach)] selection:text-[color:var(--dm-ink)]">
-			<EnvelopeHero />
+			<CinematicHero />
 			<CinematicShowcase />
 			<MomentsGallery />
 			<Features />
