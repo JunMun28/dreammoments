@@ -1,11 +1,30 @@
 import {
 	createFileRoute,
-	Link,
 	Navigate,
 	useNavigate,
 } from "@tanstack/react-router";
-import { type ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { EditorLayout } from "../../components/editor/EditorLayout";
+import { EditorPreviewFrame } from "../../components/editor/EditorPreviewFrame";
+import { EditorToolbar } from "../../components/editor/EditorToolbar";
+import { FieldRenderer } from "../../components/editor/FieldRenderer";
+import MobileBottomSheet from "../../components/editor/MobileBottomSheet";
+import { SectionPillBar } from "../../components/editor/SectionPillBar";
+import { ToggleSwitch } from "../../components/editor/ToggleSwitch";
+import { useAutoSave } from "../../components/editor/hooks/useAutoSave";
+import {
+	getValueByPath,
+	setValueByPath,
+	useEditorState,
+} from "../../components/editor/hooks/useEditorState";
+import { useMediaQuery } from "../../components/editor/hooks/useMediaQuery";
+import { usePreviewScroll } from "../../components/editor/hooks/usePreviewScroll";
+import { useSectionProgress } from "../../components/editor/hooks/useSectionProgress";
 import InvitationRenderer from "../../components/templates/InvitationRenderer";
+import {
+	FullPageLoader,
+	LoadingSpinner,
+} from "../../components/ui/LoadingSpinner";
 import { buildSampleContent } from "../../data/sample-invitation";
 import { generateAiContent } from "../../lib/ai";
 import {
@@ -15,19 +34,13 @@ import {
 	markAiGenerationAccepted,
 	publishInvitation,
 	recordAiGeneration,
-	setInvitationVisibility,
 	updateInvitation,
-	updateInvitationContent,
 } from "../../lib/data";
 import { uploadImage } from "../../lib/storage";
 import { useStore } from "../../lib/store";
 import type { InvitationContent } from "../../lib/types";
 import { templates } from "../../templates";
-import type {
-	FieldConfig,
-	SectionConfig,
-	TemplateConfig,
-} from "../../templates/types";
+import type { SectionConfig, TemplateConfig } from "../../templates/types";
 
 export const Route = createFileRoute("/editor/$invitationId")({
 	component: EditorScreen,
@@ -48,125 +61,69 @@ type AiPanelState = {
 	error?: string;
 };
 
-const listFieldMap: Record<
-	string,
-	{ label: string; fields: Array<{ key: string; label: string }> }
-> = {
-	story: {
-		label: "Milestones",
-		fields: [
-			{ key: "date", label: "Date" },
-			{ key: "title", label: "Title" },
-			{ key: "description", label: "Description" },
-		],
-	},
-	schedule: {
-		label: "Events",
-		fields: [
-			{ key: "time", label: "Time" },
-			{ key: "title", label: "Title" },
-			{ key: "description", label: "Description" },
-		],
-	},
-	faq: {
-		label: "FAQ Items",
-		fields: [
-			{ key: "question", label: "Question" },
-			{ key: "answer", label: "Answer" },
-		],
-	},
-	gallery: {
-		label: "Gallery",
-		fields: [
-			{ key: "url", label: "Image URL" },
-			{ key: "caption", label: "Caption" },
-		],
-	},
-	entourage: {
-		label: "Entourage",
-		fields: [
-			{ key: "role", label: "Role" },
-			{ key: "name", label: "Name" },
-		],
-	},
-};
-
 const lightTemplates = new Set([
 	"garden-romance",
 	"eternal-elegance",
 	"blush-romance",
 ]);
 
-function getDefaultSection(sectionId: string, content: InvitationContent) {
-	return (content as Record<string, unknown>)[sectionId];
+function getListItems(
+	sectionId: string,
+	draft: InvitationContent,
+): Array<Record<string, unknown>> {
+	const section = (draft as unknown as Record<string, unknown>)[sectionId];
+	if (!section || typeof section !== "object") return [];
+	const sectionObj = section as Record<string, unknown>;
+	const items =
+		sectionId === "story"
+			? sectionObj.milestones
+			: sectionId === "schedule"
+				? sectionObj.events
+				: sectionId === "faq"
+					? sectionObj.items
+					: sectionId === "gallery"
+						? sectionObj.photos
+						: sectionObj.members;
+	return (Array.isArray(items) ? items : []) as Array<
+		Record<string, unknown>
+	>;
 }
 
-function getValueByPath(content: InvitationContent, path: string) {
-	const parts = path.split(".");
-	let current: unknown = content;
-	for (const part of parts) {
-		if (current == null) return "";
-		if (typeof current !== "object") return "";
-		current = (current as Record<string, unknown>)[part];
-	}
-	if (current == null) return "";
-	if (typeof current === "string") return current;
-	if (typeof current === "number") return String(current);
-	if (typeof current === "boolean") return String(current);
-	return "";
-}
-
-function setValueByPath(
-	content: InvitationContent,
-	path: string,
-	value: unknown,
-) {
-	const next = structuredClone(content);
-	const parts = path.split(".");
-	let current = next as unknown as Record<string, unknown>;
-	parts.slice(0, -1).forEach((part) => {
-		const existing = current[part];
-		if (existing == null || typeof existing !== "object") {
-			current[part] = {};
-		}
-		current = current[part] as Record<string, unknown>;
-	});
-	current[parts.at(-1) as string] = value;
+function updateListItems(
+	draft: InvitationContent,
+	sectionId: string,
+	nextItems: Array<Record<string, unknown>>,
+): InvitationContent {
+	const next = structuredClone(draft);
+	if (sectionId === "story")
+		next.story.milestones = nextItems as typeof next.story.milestones;
+	if (sectionId === "schedule")
+		next.schedule.events = nextItems as typeof next.schedule.events;
+	if (sectionId === "faq")
+		next.faq.items = nextItems as typeof next.faq.items;
+	if (sectionId === "gallery")
+		next.gallery.photos = nextItems as typeof next.gallery.photos;
+	if (sectionId === "entourage")
+		next.entourage.members = nextItems as typeof next.entourage.members;
 	return next;
-}
-
-function validateField(field: FieldConfig, value: string) {
-	if (field.required && !value?.trim()) return `${field.label} is required`;
-	if (field.type === "date" && value && !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-		return "Use YYYY-MM-DD format";
-	}
-	if (field.id.toLowerCase().includes("email") && value) {
-		if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return "Invalid email";
-	}
-	return "";
-}
-
-function useMediaQuery(query: string) {
-	const [matches, setMatches] = useState(false);
-	useEffect(() => {
-		if (typeof window === "undefined") return;
-		const media = window.matchMedia(query);
-		const handler = () => setMatches(media.matches);
-		handler();
-		media.addEventListener("change", handler);
-		return () => media.removeEventListener("change", handler);
-	}, [query]);
-	return matches;
 }
 
 export function EditorScreen() {
 	const { invitationId } = Route.useParams();
 	const navigate = useNavigate();
+	const rawId = useId();
+	const inlineEditTitleId = `inline-edit-title-${rawId.replaceAll(":", "")}`;
+	const aiPanelTitleId = `ai-panel-title-${rawId.replaceAll(":", "")}`;
+	const upgradeTitleId = `upgrade-title-${rawId.replaceAll(":", "")}`;
+
 	const invitation = useStore((store) =>
 		store.invitations.find((item) => item.id === invitationId),
 	);
 	const user = getCurrentUser();
-	const isMobile = useMediaQuery("(max-width: 768px)");
+
+	const isMobile = useMediaQuery("(max-width: 767px)");
+	const isTablet = useMediaQuery("(min-width: 768px) and (max-width: 1023px)");
+
 	const template = useMemo<TemplateConfig | undefined>(
 		() => templates.find((item) => item.id === invitation?.templateId),
 		[invitation?.templateId],
@@ -176,17 +133,52 @@ export function EditorScreen() {
 		() => invitation?.content ?? buildSampleContent("blush-romance"),
 		[invitation?.content],
 	);
-	const [draft, setDraft] = useState<InvitationContent>(initialContent);
-	const [sectionVisibility, setSectionVisibility] = useState<
-		Record<string, boolean>
-	>(invitation?.sectionVisibility ?? {});
-	const [activeSection, setActiveSection] = useState<string>(
-		template?.sections[0]?.id ?? "hero",
+
+	// Core editor state (draft, undo/redo, field changes)
+	const editor = useEditorState({
+		initialContent,
+		initialVisibility: invitation?.sectionVisibility ?? {},
+		initialSection: template?.sections[0]?.id ?? "hero",
+	});
+
+	// Refs for auto-save
+	const previewRef = useRef<HTMLDivElement | null>(null);
+	const draftRef = useRef(editor.draft);
+	const visibilityRef = useRef(editor.sectionVisibility);
+	useEffect(() => {
+		draftRef.current = editor.draft;
+	}, [editor.draft]);
+	useEffect(() => {
+		visibilityRef.current = editor.sectionVisibility;
+	}, [editor.sectionVisibility]);
+
+	// Auto-save
+	const { autosaveAt, saveStatus } = useAutoSave({
+		invitationId: invitation?.id ?? "",
+		draftRef,
+		visibilityRef,
+	});
+
+	// Section progress
+	const sectionProgress = useSectionProgress({
+		sections: template?.sections ?? [],
+		content: editor.draft,
+		sectionVisibility: editor.sectionVisibility,
+	});
+
+	// Preview scroll sync
+	const onActiveSectionChange = useCallback(
+		(sectionId: string) => editor.setActiveSection(sectionId),
+		[editor.setActiveSection],
 	);
-	const [errors, setErrors] = useState<Record<string, string>>({});
-	const [history, setHistory] = useState<InvitationContent[]>([]);
-	const [future, setFuture] = useState<InvitationContent[]>([]);
+	const { scrollToSection } = usePreviewScroll({
+		previewRef,
+		onActiveSectionChange,
+	});
+
+	// Local UI state
 	const [previewMode, setPreviewMode] = useState(false);
+	const [mobileEditorOpen, setMobileEditorOpen] = useState(false);
 	const [inlineEdit, setInlineEdit] = useState<InlineEditState | null>(null);
 	const [aiPanel, setAiPanel] = useState<AiPanelState>({
 		open: false,
@@ -194,109 +186,31 @@ export function EditorScreen() {
 		prompt: "",
 		type: "schedule",
 	});
-	const [autosaveAt, setAutosaveAt] = useState<string>("");
+	const [aiGenerating, setAiGenerating] = useState(false);
+	const [uploadingField, setUploadingField] = useState<string | null>(null);
 	const [upgradeOpen, setUpgradeOpen] = useState(false);
-	const [lastSavedSnapshot, setLastSavedSnapshot] = useState(
-		JSON.stringify(initialContent),
-	);
-	const styleOverrides = (invitation.designOverrides ?? {}) as Record<
+	const [isHydrated, setIsHydrated] = useState(false);
+
+	const styleOverrides = (invitation?.designOverrides ?? {}) as Record<
 		string,
 		string
 	>;
 
-	const previewRef = useRef<HTMLDivElement | null>(null);
-	const draftRef = useRef(draft);
-	const visibilityRef = useRef(sectionVisibility);
-
 	useEffect(() => {
-		draftRef.current = draft;
-	}, [draft]);
-
-	useEffect(() => {
-		visibilityRef.current = sectionVisibility;
-	}, [sectionVisibility]);
-
-	useEffect(() => {
-		if (!invitation) return;
-		setDraft(invitation.content);
-		setSectionVisibility(invitation.sectionVisibility);
-		setActiveSection(template?.sections[0]?.id ?? "hero");
-		setHistory([]);
-		setFuture([]);
-	}, [invitation, template?.sections[0]?.id]);
-
-	useEffect(() => {
-		if (!invitation) return;
-		const interval = window.setInterval(() => {
-			updateInvitationContent(invitation.id, draftRef.current);
-			setInvitationVisibility(invitation.id, visibilityRef.current);
-			setAutosaveAt(new Date().toLocaleTimeString());
-			setLastSavedSnapshot(JSON.stringify(draftRef.current));
-		}, 30000);
-		return () => window.clearInterval(interval);
-	}, [invitation]);
-
-	const hasUnsavedChanges = JSON.stringify(draft) !== lastSavedSnapshot;
-
-	useEffect(() => {
-		if (typeof window === "undefined") return;
-		if (!hasUnsavedChanges) return;
-		const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-			event.preventDefault();
-			event.returnValue = "";
-		};
-		window.addEventListener("beforeunload", handleBeforeUnload);
-		return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-	}, [hasUnsavedChanges]);
-
-	useEffect(() => {
-		if (typeof window === "undefined") return;
-		const handler = (event: BeforeUnloadEvent) => {
-			if (!hasUnsavedChanges) return;
-			event.preventDefault();
-			event.returnValue = "";
-		};
-		window.addEventListener("beforeunload", handler);
-		return () => window.removeEventListener("beforeunload", handler);
-	}, [hasUnsavedChanges]);
-
-	useEffect(() => {
-		if (!previewRef.current) return;
-		const root = previewRef.current;
-		const sections = Array.from(
-			root.querySelectorAll<HTMLElement>("[data-section]"),
-		);
-		if (!sections.length) return;
-		const observer = new IntersectionObserver(
-			(entries) => {
-				entries.forEach((entry) => {
-					if (entry.isIntersecting) {
-						setActiveSection(
-							entry.target.getAttribute("data-section") ?? "hero",
-						);
-					}
-				});
-			},
-			{ root, threshold: 0.4 },
-		);
-		sections.forEach((section) => {
-			observer.observe(section);
-		});
-		return () => observer.disconnect();
+		setIsHydrated(true);
 	}, []);
 
-	const hiddenSections = useMemo(() => {
-		const hidden: Record<string, boolean> = {};
-		if (template?.sections) {
-			template.sections.forEach((section) => {
-				const isVisible = sectionVisibility[section.id] ?? true;
-				hidden[section.id] = !isVisible;
-			});
-		}
-		return hidden;
-	}, [sectionVisibility, template?.sections]);
+	// Sync when invitation changes
+	useEffect(() => {
+		if (!invitation) return;
+		editor.setDraft(invitation.content);
+		editor.setSectionVisibility(invitation.sectionVisibility);
+		editor.setActiveSection(template?.sections[0]?.id ?? "hero");
+	}, [invitation?.id, template?.sections[0]?.id]);
 
+	// Guards
 	if (!user) return <Navigate to="/auth/login" />;
+	if (!isHydrated) return <FullPageLoader message="Loading editor..." />;
 	if (!invitation) {
 		return (
 			<div className="min-h-screen bg-[color:var(--dm-bg)] px-6 py-10">
@@ -307,57 +221,24 @@ export function EditorScreen() {
 		);
 	}
 
-	const canUndo = history.length > 0;
-	const canRedo = future.length > 0;
 	const planLimit = aiUsageLimit(user.plan);
 	const remainingAi = Math.max(0, planLimit - invitation.aiGenerationsUsed);
+	const activeSectionConfig: SectionConfig | undefined =
+		template?.sections.find((s) => s.id === editor.activeSection);
 
-	const updateDraft = (next: InvitationContent) => {
-		setHistory((prev) => [...prev.slice(-19), draft]);
-		setFuture([]);
-		setDraft(next);
-	};
-
-	const handleUndo = () => {
-		if (!canUndo) return;
-		const previous = history[history.length - 1];
-		setHistory((prev) => prev.slice(0, -1));
-		setFuture((prev) => [draft, ...prev].slice(0, 20));
-		setDraft(previous);
-	};
-
-	const handleRedo = () => {
-		if (!canRedo) return;
-		const next = future[0];
-		setFuture((prev) => prev.slice(1));
-		setHistory((prev) => [...prev.slice(-19), draft]);
-		setDraft(next);
-	};
-
-	const handleFieldChange = (fieldPath: string, value: string | boolean) => {
-		const normalized =
-			typeof value === "string" && fieldPath.endsWith("maxPlusOnes")
-				? Number(value || 0)
-				: value;
-		const next = setValueByPath(draft, fieldPath, normalized);
-		updateDraft(next);
-	};
-
-	const handleInlineSave = () => {
-		if (!inlineEdit) return;
-		const next = setValueByPath(draft, inlineEdit.fieldPath, inlineEdit.value);
-		updateDraft(next);
-		setInlineEdit(null);
-	};
-
+	// Handlers
 	const handleImageUpload = async (fieldPath: string, file: File) => {
-		const uploaded = await uploadImage(file);
-		handleFieldChange(fieldPath, uploaded.url);
+		setUploadingField(fieldPath);
+		try {
+			const uploaded = await uploadImage(file);
+			editor.handleFieldChange(fieldPath, uploaded.url);
+		} finally {
+			setUploadingField(null);
+		}
 	};
 
 	const handlePublish = () => {
-		const isPremium = user.plan === "premium";
-		if (!isPremium) {
+		if (user.plan !== "premium") {
 			setUpgradeOpen(true);
 			return;
 		}
@@ -368,70 +249,6 @@ export function EditorScreen() {
 	const handleShare = () => {
 		updateInvitation(invitation.id, { status: "published" });
 		navigate({ to: `/dashboard/${invitation.id}`, search: { share: "true" } });
-	};
-
-	const activeSectionConfig: SectionConfig | undefined =
-		template?.sections.find((section) => section.id === activeSection);
-
-	const handleAiGenerate = async () => {
-		if (remainingAi <= 0) {
-			setAiPanel((prev) => ({
-				...prev,
-				error: "AI limit reached. Upgrade for more.",
-			}));
-			return;
-		}
-		setAiPanel((prev) => ({ ...prev, error: undefined }));
-		const result = await generateAiContent({
-			type: aiPanel.type,
-			sectionId: aiPanel.sectionId,
-			prompt: aiPanel.prompt,
-			context: draft,
-		});
-		const generation = recordAiGeneration(
-			invitation.id,
-			aiPanel.sectionId,
-			aiPanel.prompt,
-			result,
-		);
-		incrementAiUsage(invitation.id);
-		setAiPanel((prev) => ({
-			...prev,
-			result,
-			generationId: generation.id,
-		}));
-	};
-
-	const handleAiApply = () => {
-		if (!aiPanel.result) return;
-		const next = structuredClone(draft);
-		if (aiPanel.type === "style") {
-			const overrides = (aiPanel.result?.cssVars ?? aiPanel.result) as Record<
-				string,
-				string
-			>;
-			updateInvitation(invitation.id, { designOverrides: overrides });
-		} else if (aiPanel.type === "translate") {
-			next.announcement.formalText = String(aiPanel.result.translation ?? "");
-			updateDraft(next);
-		} else if (aiPanel.sectionId === "schedule") {
-			next.schedule.events = (aiPanel.result.events ??
-				[]) as InvitationContent["schedule"]["events"];
-			updateDraft(next);
-		} else if (aiPanel.sectionId === "faq") {
-			next.faq.items = (aiPanel.result.items ??
-				[]) as InvitationContent["faq"]["items"];
-			updateDraft(next);
-		} else if (aiPanel.sectionId === "story") {
-			next.story.milestones = (aiPanel.result.milestones ??
-				[]) as InvitationContent["story"]["milestones"];
-			updateDraft(next);
-		} else if (aiPanel.sectionId === "hero") {
-			next.hero.tagline = String(aiPanel.result.tagline ?? "");
-			updateDraft(next);
-		}
-		if (aiPanel.generationId) markAiGenerationAccepted(aiPanel.generationId);
-		setAiPanel((prev) => ({ ...prev, result: undefined }));
 	};
 
 	const openAiPanel = (sectionId: string) => {
@@ -445,391 +262,262 @@ export function EditorScreen() {
 						: sectionId === "hero"
 							? "tagline"
 							: "style";
-		setAiPanel({
-			open: true,
-			sectionId,
-			prompt: "",
-			type: defaultType,
-		});
+		setAiPanel({ open: true, sectionId, prompt: "", type: defaultType });
+	};
+
+	const handleAiGenerate = async () => {
+		if (remainingAi <= 0) {
+			setAiPanel((prev) => ({
+				...prev,
+				error: "AI limit reached. Upgrade for more.",
+			}));
+			return;
+		}
+		setAiPanel((prev) => ({ ...prev, error: undefined }));
+		setAiGenerating(true);
+		try {
+			const result = (await generateAiContent({
+				type: aiPanel.type,
+				sectionId: aiPanel.sectionId,
+				prompt: aiPanel.prompt,
+				context: editor.draft,
+			})) as Record<string, unknown>;
+			const generation = recordAiGeneration(
+				invitation.id,
+				aiPanel.sectionId,
+				aiPanel.prompt,
+				result,
+			);
+			incrementAiUsage(invitation.id);
+			setAiPanel((prev) => ({
+				...prev,
+				result,
+				generationId: generation.id,
+			}));
+		} finally {
+			setAiGenerating(false);
+		}
+	};
+
+	const handleAiApply = () => {
+		if (!aiPanel.result) return;
+		const next = structuredClone(editor.draft);
+		if (aiPanel.type === "style") {
+			const overrides = (aiPanel.result?.cssVars ?? aiPanel.result) as Record<
+				string,
+				string
+			>;
+			updateInvitation(invitation.id, { designOverrides: overrides });
+		} else if (aiPanel.type === "translate") {
+			next.announcement.formalText = String(aiPanel.result.translation ?? "");
+			editor.updateDraft(next);
+		} else if (aiPanel.sectionId === "schedule") {
+			next.schedule.events = (aiPanel.result.events ??
+				[]) as InvitationContent["schedule"]["events"];
+			editor.updateDraft(next);
+		} else if (aiPanel.sectionId === "faq") {
+			next.faq.items = (aiPanel.result.items ??
+				[]) as InvitationContent["faq"]["items"];
+			editor.updateDraft(next);
+		} else if (aiPanel.sectionId === "story") {
+			next.story.milestones = (aiPanel.result.milestones ??
+				[]) as InvitationContent["story"]["milestones"];
+			editor.updateDraft(next);
+		} else if (aiPanel.sectionId === "hero") {
+			next.hero.tagline = String(aiPanel.result.tagline ?? "");
+			editor.updateDraft(next);
+		}
+		if (aiPanel.generationId) markAiGenerationAccepted(aiPanel.generationId);
+		setAiPanel((prev) => ({ ...prev, result: undefined }));
 	};
 
 	const handleInlineEdit = (fieldPath: string) => {
-		if (!isMobile) return;
 		setInlineEdit({
 			fieldPath,
-			value: String(getValueByPath(draft, fieldPath) ?? ""),
+			value: String(getValueByPath(editor.draft, fieldPath) ?? ""),
 		});
 	};
 
-	const renderListEditor = (sectionId: string) => {
-		const listConfig = listFieldMap[sectionId];
-		if (!listConfig) return null;
-		const listValue = (getDefaultSection(sectionId, draft) ?? {}) as Record<
-			string,
-			unknown
-		>;
-		const items =
-			sectionId === "story"
-				? listValue.milestones
-				: sectionId === "schedule"
-					? listValue.events
-					: sectionId === "faq"
-						? listValue.items
-						: sectionId === "gallery"
-							? listValue.photos
-							: listValue.members;
-		const safeItems = (Array.isArray(items) ? items : []) as Array<
-			Record<string, unknown>
-		>;
-
-		const updateItems = (nextItems: Array<Record<string, unknown>>) => {
-			const next = structuredClone(draft);
-			if (sectionId === "story") {
-				next.story.milestones = nextItems as typeof next.story.milestones;
-			}
-			if (sectionId === "schedule") {
-				next.schedule.events = nextItems as typeof next.schedule.events;
-			}
-			if (sectionId === "faq") {
-				next.faq.items = nextItems as typeof next.faq.items;
-			}
-			if (sectionId === "gallery") {
-				next.gallery.photos = nextItems as typeof next.gallery.photos;
-			}
-			if (sectionId === "entourage") {
-				next.entourage.members = nextItems as typeof next.entourage.members;
-			}
-			updateDraft(next);
-		};
-
-		return (
-			<div className="space-y-3">
-				<p className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">
-					{listConfig.label}
-				</p>
-				{safeItems.map((item, index) => (
-					<div
-						key={`${sectionId}-${JSON.stringify(item)}`}
-						className="grid gap-2 rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-4"
-					>
-						{listConfig.fields.map((field) => (
-							<label
-								key={field.key}
-								className="grid gap-1 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]"
-							>
-								{field.label}
-								<input
-									name={`${sectionId}.${field.key}.${index}`}
-									autoComplete="off"
-									value={String(item[field.key] ?? "")}
-									onChange={(event) => {
-										const nextItems = safeItems.map((currentItem, itemIndex) =>
-											itemIndex === index
-												? { ...currentItem, [field.key]: event.target.value }
-												: currentItem,
-										);
-										updateItems(nextItems);
-									}}
-									className="h-10 rounded-xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] px-3 text-base text-[color:var(--dm-ink)]"
-								/>
-							</label>
-						))}
-						<button
-							type="button"
-							className="rounded-full border border-[color:var(--dm-border)] px-3 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-accent-strong)]"
-							onClick={() =>
-								updateItems(safeItems.filter((_, i) => i !== index))
-							}
-						>
-							Remove
-						</button>
-					</div>
-				))}
-				<button
-					type="button"
-					className="rounded-full border border-[color:var(--dm-accent-strong)]/40 px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-accent-strong)]"
-					onClick={() =>
-						updateItems([
-							...safeItems,
-							Object.fromEntries(
-								listConfig.fields.map((field) => [field.key, ""]),
-							),
-						])
-					}
-				>
-					Add Item
-				</button>
-			</div>
+	const handleInlineSave = () => {
+		if (!inlineEdit) return;
+		const next = setValueByPath(
+			editor.draft,
+			inlineEdit.fieldPath,
+			inlineEdit.value,
 		);
+		editor.updateDraft(next);
+		setInlineEdit(null);
 	};
 
-	const renderField = (sectionId: string, field: FieldConfig) => {
-		const fieldPath = `${sectionId}.${field.id}`;
-		const value = String(getValueByPath(draft, fieldPath) ?? "");
-		const error = errors[fieldPath];
+	const handleSectionChange = (sectionId: string) => {
+		editor.setActiveSection(sectionId);
+		scrollToSection(sectionId);
+	};
 
-		if (field.type === "list") {
-			return renderListEditor(sectionId);
-		}
+	const handleSectionSelectFromPreview = (sectionId: string) => {
+		editor.setActiveSection(sectionId);
+		if (isMobile) setMobileEditorOpen(true);
+	};
 
-		if (field.type === "toggle") {
-			const checked = Boolean(getValueByPath(draft, fieldPath));
-			return (
-				<label className="flex items-center justify-between gap-4 rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] px-4 py-3">
-					<span className="text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
-						{field.label}
-					</span>
-					<input
-						type="checkbox"
-						checked={checked}
-						onChange={(event) =>
-							handleFieldChange(fieldPath, event.target.checked)
-						}
-						className="h-5 w-5"
-					/>
-				</label>
-			);
-		}
+	// Pill bar sections with completion data
+	const pillSections = useMemo(
+		() =>
+			(template?.sections ?? []).map((s) => ({
+				id: s.id,
+				label: s.id,
+				completion: sectionProgress[s.id] ?? 0,
+			})),
+		[template?.sections, sectionProgress],
+	);
 
-		if (field.type === "image") {
-			return (
-				<div className="space-y-2">
-					<p className="text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
-						{field.label}
-					</p>
-					<input
-						type="file"
-						accept="image/*"
-						name={fieldPath}
-						aria-label={field.label}
-						onChange={(event) => {
-							const file = event.target.files?.[0];
-							if (file) void handleImageUpload(fieldPath, file);
-						}}
-						className="w-full rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] px-4 py-3 text-base text-[color:var(--dm-ink)]"
-					/>
-					{value && (
-						<img
-							src={value}
-							alt="Uploaded"
-							width={320}
-							height={128}
-							className="h-32 w-full rounded-2xl object-cover"
-							loading="lazy"
+	// Context panel content: section fields
+	const contextPanelContent = (
+		<div className="space-y-4 p-5">
+			{/* Section visibility toggle */}
+			<ToggleSwitch
+				label={`Show ${editor.activeSection}`}
+				checked={editor.sectionVisibility[editor.activeSection] ?? true}
+				onChange={(checked) =>
+					editor.setSectionVisibility((prev) => ({
+						...prev,
+						[editor.activeSection]: checked,
+					}))
+				}
+			/>
+
+			{/* AI Helper button */}
+			<button
+				type="button"
+				className="flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-[color:var(--dm-border)] px-4 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)] active:bg-[color:var(--dm-surface-muted)]"
+				onClick={() => {
+					if (isMobile) setMobileEditorOpen(false);
+					openAiPanel(editor.activeSection);
+				}}
+			>
+				AI Helper
+			</button>
+
+			{/* Section fields */}
+			<div className="space-y-4">
+				{activeSectionConfig?.fields.map((field) => {
+					const fieldPath = `${activeSectionConfig.id}.${field.id}`;
+					const value = getValueByPath(editor.draft, fieldPath);
+					return (
+						<FieldRenderer
+							key={field.id}
+							sectionId={activeSectionConfig.id}
+							field={field}
+							value={value}
+							onChange={editor.handleFieldChange}
+							onBlur={(path) => {
+								const val = getValueByPath(editor.draft, path);
+								editor.setErrors((prev) => {
+									const error =
+										field.required && !val?.trim()
+											? `${field.label} is required`
+											: "";
+									return { ...prev, [path]: error };
+								});
+							}}
+							error={editor.errors[fieldPath]}
+							uploadingField={uploadingField}
+							onImageUpload={(path, file) => void handleImageUpload(path, file)}
+							listItems={getListItems(activeSectionConfig.id, editor.draft)}
+							onListItemsChange={(items) => {
+								const next = updateListItems(
+									editor.draft,
+									activeSectionConfig.id,
+									items,
+								);
+								editor.updateDraft(next);
+							}}
 						/>
-					)}
-					{value ? (
-						<button
-							type="button"
-							className="rounded-full border border-[color:var(--dm-border)] px-3 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]"
-							onClick={() => handleFieldChange(fieldPath, "")}
-						>
-							Remove Image
-						</button>
-					) : null}
-				</div>
-			);
-		}
-
-		const inputProps = {
-			value,
-			onChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-				handleFieldChange(fieldPath, event.target.value),
-			onBlur: () => {
-				const nextError = validateField(field, value);
-				setErrors((prev) => ({ ...prev, [fieldPath]: nextError }));
-			},
-			name: fieldPath,
-			autoComplete: "off",
-			className:
-				"h-11 w-full rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] px-4 text-base text-[color:var(--dm-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--dm-focus)]/60",
-		};
-
-		const inputId = fieldPath.replace(/\./g, "-");
-
-		return (
-			<div className="grid gap-2">
-				<label
-					htmlFor={inputId}
-					className="text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]"
-				>
-					{field.label}
-				</label>
-				{field.type === "textarea" ? (
-					<textarea
-						{...inputProps}
-						id={inputId}
-						className="min-h-[110px] w-full rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] px-4 py-3 text-base text-[color:var(--dm-ink)]"
-					/>
-				) : (
-					<input
-						{...inputProps}
-						id={inputId}
-						type={
-							field.type === "date"
-								? "date"
-								: field.type === "time"
-									? "time"
-									: "text"
-						}
-					/>
-				)}
-				{error ? (
-					<output className="text-[11px] text-[#b91c1c]" aria-live="polite">
-						{error}
-					</output>
-				) : null}
+					);
+				})}
 			</div>
-		);
-	};
+		</div>
+	);
+
+	// Build the toolbar
+	const toolbar = (
+		<EditorToolbar
+			title={invitation.title}
+			canUndo={editor.canUndo}
+			canRedo={editor.canRedo}
+			onUndo={editor.handleUndo}
+			onRedo={editor.handleRedo}
+			onPreview={() => setPreviewMode(true)}
+			onPublish={handlePublish}
+			saveStatus={saveStatus}
+			autosaveAt={autosaveAt}
+			isMobile={isMobile}
+		/>
+	);
+
+	// Build the preview
+	const preview = (
+		<EditorPreviewFrame
+			templateId={template?.id ?? "blush-romance"}
+			content={editor.draft}
+			hiddenSections={editor.hiddenSections}
+			activeSection={editor.activeSection}
+			styleOverrides={styleOverrides}
+			onSectionSelect={handleSectionSelectFromPreview}
+			onAiClick={openAiPanel}
+			onInlineEdit={handleInlineEdit}
+			previewRef={previewRef}
+		/>
+	);
+
+	// Build the pill bar
+	const pillBar = (
+		<SectionPillBar
+			sections={pillSections}
+			activeSection={editor.activeSection}
+			onSectionChange={handleSectionChange}
+		/>
+	);
+
+	// Build the context panel (wrapped in bottom sheet for mobile)
+	const contextPanel = isMobile ? (
+		<MobileBottomSheet
+			open={mobileEditorOpen}
+			onClose={() => setMobileEditorOpen(false)}
+			title="Section Editor"
+			snapPoints={[40, 50, 85]}
+			initialSnap={1}
+		>
+			{contextPanelContent}
+		</MobileBottomSheet>
+	) : (
+		contextPanelContent
+	);
 
 	return (
-		<div className="min-h-screen bg-[color:var(--dm-bg)] px-4 py-8">
-			<div className="mx-auto max-w-6xl space-y-6">
-				<div className="flex flex-wrap items-center justify-between gap-4">
-					<div>
-						<p className="text-xs uppercase tracking-[0.4em] text-[color:var(--dm-accent-strong)]">
-							Editor
-						</p>
-						<h1 className="mt-2 text-2xl font-semibold text-[color:var(--dm-ink)]">
-							{invitation.title}
-						</h1>
-					</div>
-					<div className="flex flex-wrap gap-3 text-xs uppercase tracking-[0.2em]">
-						<Link
-							to="/dashboard"
-							className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)]"
-						>
-							Dashboard
-						</Link>
-						<button
-							type="button"
-							className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)]"
-							onClick={handleUndo}
-							disabled={!canUndo}
-						>
-							Undo
-						</button>
-						<button
-							type="button"
-							className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)]"
-							onClick={handleRedo}
-							disabled={!canRedo}
-						>
-							Redo
-						</button>
-						<button
-							type="button"
-							className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)]"
-							onClick={() => setPreviewMode(true)}
-						>
-							Preview
-						</button>
-						<button
-							type="button"
-							className="rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-[color:var(--dm-on-accent)]"
-							onClick={handlePublish}
-						>
-							Publish
-						</button>
-					</div>
-				</div>
-				{!previewMode && (
-				<>
-					<p className="text-xs text-[color:var(--dm-muted)]">
-						AI Usage: {invitation.aiGenerationsUsed}/{planLimit} · Autosave{" "}
-						{autosaveAt || "Pending"}
-					</p>
-					<div className="grid gap-6 lg:grid-cols-[0.6fr_0.4fr]">
-						<div className="rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-4 lg:sticky lg:top-8 lg:self-start lg:max-h-[calc(100vh-4rem)]">
-							<div className="flex items-center justify-between">
-								<p className="text-xs uppercase tracking-[0.4em] text-[color:var(--dm-accent-strong)]">
-									Live Preview
-								</p>
-								{isMobile && (
-									<button
-										type="button"
-										className="rounded-full border border-[color:var(--dm-border)] px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-[color:var(--dm-ink)]"
-										onClick={() => setPreviewMode((prev) => !prev)}
-									>
-										{previewMode ? "Edit" : "Preview"}
-									</button>
-								)}
-							</div>
-							<div
-								ref={previewRef}
-								className="mt-4 overflow-y-auto rounded-3xl border border-[color:var(--dm-border)] lg:max-h-[calc(100vh-8rem)]"
-								style={styleOverrides}
-							>
-								<InvitationRenderer
-									templateId={template?.id ?? "blush-romance"}
-									content={draft}
-									hiddenSections={hiddenSections}
-									mode="editor"
-									onSectionSelect={(sectionId) => setActiveSection(sectionId)}
-									onAiClick={openAiPanel}
-									onInlineEdit={handleInlineEdit}
-								/>
-							</div>
-						</div>
+		<>
+			<EditorLayout
+				toolbar={toolbar}
+				preview={preview}
+				pillBar={pillBar}
+				contextPanel={contextPanel}
+				isMobile={isMobile}
+				isTablet={isTablet}
+				bottomSheetOpen={mobileEditorOpen}
+			/>
 
-						{!isMobile || !previewMode ? (
-							<div className="rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-5">
-								<div className="flex items-center justify-between">
-									<p className="text-xs uppercase tracking-[0.4em] text-[color:var(--dm-accent-strong)]">
-										Section Editor
-									</p>
-									<button
-										type="button"
-										className="rounded-full border border-[color:var(--dm-border)] px-3 py-2 text-[10px] uppercase tracking-[0.2em] text-[color:var(--dm-muted)]"
-										onClick={() => openAiPanel(activeSection)}
-									>
-										AI Helper
-									</button>
-								</div>
-								<div className="mt-4 space-y-4">
-									<p className="text-sm text-[color:var(--dm-muted)]">
-										Active: {activeSectionConfig?.id ?? activeSection}
-									</p>
-									<div className="space-y-3">
-										{template?.sections.map((section) => (
-											<label
-												key={section.id}
-												className="flex items-center justify-between rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]"
-											>
-												<span>{section.id}</span>
-												<input
-													type="checkbox"
-													checked={sectionVisibility[section.id] ?? true}
-													onChange={(event) =>
-														setSectionVisibility((prev) => ({
-															...prev,
-															[section.id]: event.target.checked,
-														}))
-													}
-												/>
-											</label>
-										))}
-									</div>
-									<div className="mt-6 space-y-4">
-										{activeSectionConfig?.fields.map((field) => (
-											<div key={field.id}>
-												{renderField(activeSectionConfig.id, field)}
-											</div>
-										))}
-									</div>
-								</div>
-							</div>
-						) : null}
-					</div>
-				</>
-			)}
-			</div>
-
+			{/* Inline edit dialog */}
 			{inlineEdit && (
-				<div className="dm-inline-edit">
+				<div
+					className="dm-inline-edit"
+					role="dialog"
+					aria-modal="true"
+					aria-labelledby={inlineEditTitleId}
+				>
 					<div className="dm-inline-card">
-						<p className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">
+						<p
+							id={inlineEditTitleId}
+							className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]"
+						>
 							Quick Edit
 						</p>
 						<input
@@ -863,10 +551,19 @@ export function EditorScreen() {
 				</div>
 			)}
 
+			{/* AI panel dialog */}
 			{aiPanel.open && (
-				<div className="dm-inline-edit">
+				<div
+					className="dm-inline-edit"
+					role="dialog"
+					aria-modal="true"
+					aria-labelledby={aiPanelTitleId}
+				>
 					<div className="dm-inline-card">
-						<p className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">
+						<p
+							id={aiPanelTitleId}
+							className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]"
+						>
 							AI Assistant
 						</p>
 						<select
@@ -894,9 +591,12 @@ export function EditorScreen() {
 							name="aiPrompt"
 							autoComplete="off"
 							onChange={(event) =>
-								setAiPanel((prev) => ({ ...prev, prompt: event.target.value }))
+								setAiPanel((prev) => ({
+									...prev,
+									prompt: event.target.value,
+								}))
 							}
-							placeholder="Describe what you want (e.g., “Romantic schedule”)…"
+							placeholder='Describe what you want (e.g., "Romantic schedule")...'
 							className="mt-3 min-h-[120px] w-full rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] px-4 py-3 text-base text-[color:var(--dm-ink)]"
 						/>
 						{aiPanel.error ? (
@@ -910,23 +610,28 @@ export function EditorScreen() {
 						<div className="mt-4 flex flex-wrap gap-3">
 							<button
 								type="button"
-								className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-ink)]"
+								className="inline-flex items-center gap-2 rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-ink)] disabled:cursor-not-allowed disabled:opacity-50"
 								onClick={handleAiGenerate}
+								disabled={aiGenerating || !aiPanel.prompt.trim()}
 							>
-								Generate
+								{aiGenerating && <LoadingSpinner size="sm" />}
+								{aiGenerating ? "Generating..." : "Generate"}
 							</button>
 							<button
 								type="button"
-								className="rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)]"
+								className="rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)] disabled:cursor-not-allowed disabled:opacity-50"
 								onClick={handleAiApply}
-								disabled={!aiPanel.result}
+								disabled={!aiPanel.result || aiGenerating}
 							>
 								Apply
 							</button>
 							<button
 								type="button"
 								className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-ink)]"
-								onClick={() => setAiPanel((prev) => ({ ...prev, open: false }))}
+								onClick={() =>
+									setAiPanel((prev) => ({ ...prev, open: false }))
+								}
+								disabled={aiGenerating}
 							>
 								Close
 							</button>
@@ -940,6 +645,7 @@ export function EditorScreen() {
 				</div>
 			)}
 
+			{/* Preview mode overlay */}
 			{previewMode && (
 				<div
 					className={`dm-preview ${
@@ -951,6 +657,7 @@ export function EditorScreen() {
 							type="button"
 							className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-ink)]"
 							onClick={() => setPreviewMode(false)}
+							aria-label="Switch to edit mode"
 						>
 							Back to Edit
 						</button>
@@ -965,18 +672,27 @@ export function EditorScreen() {
 					<div className="dm-preview-body" style={styleOverrides}>
 						<InvitationRenderer
 							templateId={template?.id ?? "blush-romance"}
-							content={draft}
-							hiddenSections={hiddenSections}
+							content={editor.draft}
+							hiddenSections={editor.hiddenSections}
 							mode="preview"
 						/>
 					</div>
 				</div>
 			)}
 
+			{/* Upgrade dialog */}
 			{upgradeOpen && (
-				<div className="dm-inline-edit">
+				<div
+					className="dm-inline-edit"
+					role="dialog"
+					aria-modal="true"
+					aria-labelledby={upgradeTitleId}
+				>
 					<div className="dm-inline-card">
-						<p className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">
+						<p
+							id={upgradeTitleId}
+							className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]"
+						>
 							Upgrade to Premium
 						</p>
 						<ul className="mt-3 space-y-2 text-sm text-[color:var(--dm-muted)]">
@@ -1007,6 +723,6 @@ export function EditorScreen() {
 					</div>
 				</div>
 			)}
-		</div>
+		</>
 	);
 }

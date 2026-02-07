@@ -1,4 +1,6 @@
-import { useMemo } from "react";
+import { Link } from "@tanstack/react-router";
+import { type KeyboardEvent, type MouseEvent, useMemo, useState } from "react";
+import { LoadingSpinner } from "../../ui/LoadingSpinner";
 import { useParallax, useScrollReveal } from "../../../lib/scroll-effects";
 import type { InvitationContent } from "../../../lib/types";
 import SectionShell from "../SectionShell";
@@ -22,6 +24,7 @@ export default function LoveAtDuskInvitation({
 	useParallax();
 
 	const data = useMemo(() => content, [content]);
+	const [isSubmitting, setIsSubmitting] = useState(false);
 	const parseAttendance = (
 		value: FormDataEntryValue | null,
 	): RsvpPayload["attendance"] => {
@@ -36,13 +39,17 @@ export default function LoveAtDuskInvitation({
 		return "attending";
 	};
 	const editableProps = (fieldPath: string, className: string) => ({
-		onClick: mode === "editor" ? () => onInlineEdit?.(fieldPath) : undefined,
+		onClick:
+			mode === "editor"
+				? (event: MouseEvent<HTMLElement>) =>
+						onInlineEdit?.(fieldPath, event.currentTarget)
+				: undefined,
 		onKeyDown:
 			mode === "editor"
-				? (event) => {
+				? (event: KeyboardEvent<HTMLElement>) => {
 						if (event.key === "Enter" || event.key === " ") {
 							event.preventDefault();
-							onInlineEdit?.(fieldPath);
+							onInlineEdit?.(fieldPath, event.currentTarget);
 						}
 					}
 				: undefined,
@@ -280,7 +287,7 @@ export default function LoveAtDuskInvitation({
 							>
 								<img
 									src={item.url || "/placeholders/photo-dark.svg"}
-									alt=""
+									alt={item.caption || "Wedding photo"}
 									loading="lazy"
 									width={360}
 									height={128}
@@ -385,7 +392,7 @@ export default function LoveAtDuskInvitation({
 					>
 						<img
 							src="/placeholders/photo-dark.svg"
-							alt=""
+							alt={`Map showing location of ${data.venue.name}`}
 							loading="lazy"
 							width={480}
 							height={192}
@@ -489,18 +496,24 @@ export default function LoveAtDuskInvitation({
 					<form
 						data-reveal
 						className="dm-reveal rounded-3xl border border-white/10 bg-[#140d0b]/80 p-6"
-						onSubmit={(event) => {
+						noValidate
+						onSubmit={async (event) => {
 							event.preventDefault();
-							if (!onRsvpSubmit) return;
-							const formData = new FormData(event.currentTarget);
-							onRsvpSubmit({
-								name: String(formData.get("name") ?? ""),
-								attendance: parseAttendance(formData.get("attendance")),
-								guestCount: Number(formData.get("guestCount") ?? 1),
-								dietaryRequirements: String(formData.get("dietary") ?? ""),
-								message: String(formData.get("message") ?? ""),
-								email: String(formData.get("email") ?? ""),
-							});
+							if (!onRsvpSubmit || isSubmitting) return;
+							setIsSubmitting(true);
+							try {
+								const formData = new FormData(event.currentTarget);
+								await onRsvpSubmit({
+									name: String(formData.get("name") ?? ""),
+									attendance: parseAttendance(formData.get("attendance")),
+									guestCount: Number(formData.get("guestCount") ?? 1),
+									dietaryRequirements: String(formData.get("dietary") ?? ""),
+									message: String(formData.get("message") ?? ""),
+									email: String(formData.get("email") ?? ""),
+								});
+							} finally {
+								setIsSubmitting(false);
+							}
 						}}
 					>
 						<div className="grid gap-4 sm:grid-cols-2">
@@ -512,6 +525,7 @@ export default function LoveAtDuskInvitation({
 									placeholder="Sarah Lim…"
 									autoComplete="off"
 									required
+									aria-required="true"
 								/>
 							</label>
 							<label className="grid gap-2 text-xs uppercase tracking-[0.3em] text-[var(--love-accent)]">
@@ -567,6 +581,30 @@ export default function LoveAtDuskInvitation({
 								autoComplete="off"
 							/>
 						</label>
+						<label className="mt-4 flex items-start gap-3 cursor-pointer">
+							<input
+								type="checkbox"
+								name="consent"
+								required
+								aria-describedby="love-consent-description"
+								className="mt-0.5 h-4 w-4 rounded border border-white/10 bg-[#0f0c0a] accent-[var(--love-accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--love-accent)]/30"
+							/>
+							<span
+								id="love-consent-description"
+								className="text-xs leading-relaxed text-[var(--love-muted)]"
+							>
+								I consent to the collection of my personal data as described in
+								the{" "}
+								<Link
+									to="/privacy"
+									className="text-[var(--love-accent)] underline hover:no-underline"
+									target="_blank"
+									rel="noopener noreferrer"
+								>
+									Privacy Policy
+								</Link>
+							</span>
+						</label>
 						{rsvpStatus ? (
 							<output
 								className="mt-3 text-xs text-[var(--love-accent)]"
@@ -577,9 +615,11 @@ export default function LoveAtDuskInvitation({
 						) : null}
 						<button
 							type="submit"
-							className="mt-6 w-full rounded-full bg-[var(--love-accent)] px-6 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-[var(--love-ink)]"
+							disabled={isSubmitting}
+							className="mt-6 w-full rounded-full bg-[var(--love-accent)] px-6 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-[var(--love-ink)] disabled:opacity-70 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
 						>
-							Submit RSVP
+							{isSubmitting && <LoadingSpinner size="sm" />}
+							{isSubmitting ? "Submitting..." : "Submit RSVP"}
 						</button>
 					</form>
 				</div>

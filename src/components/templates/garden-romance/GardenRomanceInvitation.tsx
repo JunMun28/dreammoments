@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import {
 	motion,
 	useReducedMotion,
@@ -5,7 +6,7 @@ import {
 	useTransform,
 	type Variants,
 } from "motion/react";
-import { type KeyboardEvent, useId, useMemo } from "react";
+import { type KeyboardEvent, type MouseEvent, useId, useMemo } from "react";
 import type { InvitationContent } from "../../../lib/types";
 import SectionShell from "../SectionShell";
 import type { RsvpPayload, TemplateInvitationProps } from "../types";
@@ -231,13 +232,17 @@ export default function GardenRomanceInvitation({
 	};
 
 	const editableProps = (fieldPath: string, className: string) => ({
-		onClick: mode === "editor" ? () => onInlineEdit?.(fieldPath) : undefined,
+		onClick:
+			mode === "editor"
+				? (event: MouseEvent<HTMLElement>) =>
+						onInlineEdit?.(fieldPath, event.currentTarget)
+				: undefined,
 		onKeyDown:
 			mode === "editor"
 				? (event: KeyboardEvent<HTMLElement>) => {
 						if (event.key === "Enter" || event.key === " ") {
 							event.preventDefault();
-							onInlineEdit?.(fieldPath);
+							onInlineEdit?.(fieldPath, event.currentTarget);
 						}
 					}
 				: undefined,
@@ -877,7 +882,7 @@ export default function GardenRomanceInvitation({
 					>
 						<img
 							src={SAMPLE_PHOTOS.venue}
-							alt="Venue"
+							alt={`${data.venue.name} wedding venue`}
 							loading="lazy"
 							width={1200}
 							height={760}
@@ -977,6 +982,7 @@ export default function GardenRomanceInvitation({
 							background: COLORS.cream,
 							border: "1px solid rgba(212,175,55,0.2)",
 						}}
+						noValidate
 						onSubmit={(event) => {
 							event.preventDefault();
 							if (!onRsvpSubmit) return;
@@ -1006,6 +1012,7 @@ export default function GardenRomanceInvitation({
 									placeholder="Rachel Lim"
 									autoComplete="name"
 									required
+									aria-required="true"
 									className="rounded-xl border bg-white px-4 py-3 text-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C41E3A]/30"
 									style={{
 										borderColor: "rgba(212,175,55,0.3)",
@@ -1100,6 +1107,33 @@ export default function GardenRomanceInvitation({
 										color: COLORS.textPrimary,
 									}}
 								/>
+							</label>
+							<label className="flex items-start gap-3 sm:col-span-2 mt-2 cursor-pointer">
+								<input
+									type="checkbox"
+									name="consent"
+									required
+									aria-describedby="gr-consent-description"
+									className="mt-0.5 h-4 w-4 rounded border-2 accent-[#C41E3A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C41E3A]/30"
+									style={{ borderColor: "rgba(212,175,55,0.3)" }}
+								/>
+								<span
+									id="gr-consent-description"
+									className="text-xs leading-relaxed"
+									style={{ color: COLORS.textSecondary }}
+								>
+									I consent to the collection of my personal data as described
+									in the{" "}
+									<Link
+										to="/privacy"
+										className="underline hover:no-underline"
+										style={{ color: COLORS.crimson }}
+										target="_blank"
+										rel="noopener noreferrer"
+									>
+										Privacy Policy
+									</Link>
+								</span>
 							</label>
 						</div>
 						{rsvpStatus ? (

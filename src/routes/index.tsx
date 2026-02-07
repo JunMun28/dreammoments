@@ -1,5 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, Heart, Monitor, Play, Smartphone, Sparkles, Star } from "lucide-react";
+import {
+	Check,
+	Heart,
+	Monitor,
+	Play,
+	Smartphone,
+	Sparkles,
+	Star,
+} from "lucide-react";
 import { motion, useScroll, useTransform } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
@@ -139,7 +147,10 @@ type PreviewLayout = "web" | "mobile";
 function LayoutToggle({
 	layout,
 	onChange,
-}: { layout: PreviewLayout; onChange: (l: PreviewLayout) => void }) {
+}: {
+	layout: PreviewLayout;
+	onChange: (l: PreviewLayout) => void;
+}) {
 	return (
 		<div className="inline-flex items-center rounded-full border border-dm-border bg-dm-surface p-1 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)]">
 			{(["web", "mobile"] as const).map((mode) => (
@@ -257,11 +268,7 @@ function Showcase() {
 								...REVEAL_TRANSITION,
 								layout: { duration: 0.4, ease: REVEAL_EASE },
 							}}
-							className={
-								isMobile
-									? "shrink-0 w-[280px] snap-center"
-									: ""
-							}
+							className={isMobile ? "shrink-0 w-[280px] snap-center" : ""}
 						>
 							<Link
 								to="/invite/$slug"
@@ -270,9 +277,7 @@ function Showcase() {
 							>
 								<div
 									className={`rounded-[3rem] overflow-hidden mb-6 relative transition-transform duration-800 ease-out group-hover:-translate-y-2 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)] ${
-										isMobile
-											? "aspect-9/16"
-											: "aspect-3/4"
+										isMobile ? "aspect-9/16" : "aspect-3/4"
 									}`}
 								>
 									<img
@@ -302,14 +307,15 @@ function Showcase() {
 												<p className="font-accent text-3xl text-white/85 -rotate-1 drop-shadow-sm">
 													Sarah & Tom
 												</p>
-												<h3 className="font-heading text-3xl text-white drop-shadow-sm mt-1">
+												<p
+													className="font-heading text-3xl text-white drop-shadow-sm mt-1"
+													aria-hidden="true"
+												>
 													We&rsquo;re getting married.
-												</h3>
+												</p>
 												<div className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-black/25 text-white/85 border border-white/15 text-xs uppercase tracking-[0.2em]">
 													<span>Sept 24</span>
-													<span className="opacity-40">
-														&middot;
-													</span>
+													<span className="opacity-40">&middot;</span>
 													<span>RSVP</span>
 												</div>
 											</div>
@@ -523,8 +529,8 @@ function Features() {
 								<span className="italic">like a living room.</span>
 							</h2>
 							<p className="text-lg sm:text-xl text-dm-muted leading-relaxed mb-12">
-								No clutter, no noise. Just a serene space for your guests
-								to feel the love, get the details, and say yes.
+								No clutter, no noise. Just a serene space for your guests to
+								feel the love, get the details, and say yes.
 							</p>
 
 							<div className="space-y-7">
@@ -532,32 +538,17 @@ function Features() {
 									{
 										title: "Tactile textures",
 										desc: "Grainy, paper-like feel.",
-										icon: (
-											<Sparkles
-												aria-hidden="true"
-												className="w-5 h-5"
-											/>
-										),
+										icon: <Sparkles aria-hidden="true" className="w-5 h-5" />,
 									},
 									{
 										title: "Fluid motion",
 										desc: "Slow, calming transitions.",
-										icon: (
-											<Play
-												aria-hidden="true"
-												className="w-5 h-5"
-											/>
-										),
+										icon: <Play aria-hidden="true" className="w-5 h-5" />,
 									},
 									{
 										title: "Guest ease",
 										desc: "One-tap RSVP, no logins.",
-										icon: (
-											<Check
-												aria-hidden="true"
-												className="w-5 h-5"
-											/>
-										),
+										icon: <Check aria-hidden="true" className="w-5 h-5" />,
 									},
 								].map((item, i) => (
 									<motion.div
@@ -575,12 +566,10 @@ function Features() {
 											{item.icon}
 										</div>
 										<div>
-											<h4 className="font-heading font-semibold text-lg">
+											<h3 className="font-heading font-semibold text-lg">
 												{item.title}
-											</h4>
-											<p className="text-dm-muted">
-												{item.desc}
-											</p>
+											</h3>
+											<p className="text-dm-muted">{item.desc}</p>
 										</div>
 									</motion.div>
 								))}
@@ -609,13 +598,11 @@ function Features() {
 									<div className="dm-blob dm-blob-sage w-20 h-20 top-1/4 left-1/4" />
 									<div className="dm-blob dm-blob-peach w-32 h-32 bottom-1/4 right-1/4" />
 
-									<div className="relative z-10">
-										<p className="font-accent text-3xl mb-2">
-											Sarah & Tom
-										</p>
-										<h3 className="font-heading text-3xl sm:text-4xl mb-6">
+									<div className="relative z-10" aria-hidden="true">
+										<p className="font-accent text-3xl mb-2">Sarah & Tom</p>
+										<p className="font-heading text-3xl sm:text-4xl mb-6">
 											We're getting married.
-										</h3>
+										</p>
 										<div className="inline-block px-6 py-2 rounded-full border border-dm-border bg-dm-surface/80 backdrop-blur-md text-sm uppercase tracking-widest text-dm-muted">
 											Sept 24
 										</div>
@@ -644,16 +631,37 @@ function Footer() {
 					<Star aria-hidden="true" className="w-4 h-4" />
 					<Star aria-hidden="true" className="w-4 h-4" />
 				</div>
-				<p className="font-heading text-2xl text-dm-ink mb-2">
-					DreamMoments
-				</p>
+				<p className="font-heading text-2xl text-dm-ink mb-2">DreamMoments</p>
 				<p className="text-sm">
 					Made with{" "}
-					<Heart
-						aria-hidden="true"
-						className="w-3 h-3 inline text-dm-peach"
-					/>{" "}
+					<Heart aria-hidden="true" className="w-3 h-3 inline text-dm-peach" />{" "}
 					for love.
+				</p>
+
+				{/* Legal Links */}
+				<nav
+					aria-label="Legal"
+					className="mt-8 flex justify-center gap-6 text-sm"
+				>
+					<Link
+						to="/privacy"
+						className="text-dm-muted hover:text-dm-ink transition-colors duration-300"
+					>
+						Privacy Policy
+					</Link>
+					<span className="text-dm-border" aria-hidden="true">
+						|
+					</span>
+					<Link
+						to="/terms"
+						className="text-dm-muted hover:text-dm-ink transition-colors duration-300"
+					>
+						Terms of Service
+					</Link>
+				</nav>
+
+				<p className="mt-6 text-xs text-dm-muted/60">
+					PDPA compliant for Malaysia and Singapore
 				</p>
 			</div>
 		</footer>

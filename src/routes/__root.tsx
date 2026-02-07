@@ -6,7 +6,6 @@ import {
 	Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-import { useRef } from "react";
 import Header from "../components/Header";
 
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
@@ -49,10 +48,6 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
 	const showDevtools = import.meta.env.DEV;
-	const mainRef = useRef<HTMLMainElement | null>(null);
-	const handleSkipToContent = () => {
-		mainRef.current?.focus();
-	};
 
 	return (
 		<html lang="en">
@@ -61,15 +56,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			</head>
 			<body>
 				<AuthProvider>
-					<button
-						type="button"
-						className="dm-skip-link"
-						onClick={handleSkipToContent}
-					>
-						Skip to Content
-					</button>
+					<a href="#main-content" className="dm-skip-link">
+						Skip to main content
+					</a>
 					<Header />
-					<main ref={mainRef} tabIndex={-1} className="pt-20">
+					{/* biome-ignore lint/correctness/useUniqueElementIds: Root layout renders once; skip link requires stable ID */}
+					<main id="main-content" tabIndex={-1} className="pt-20">
 						{children}
 					</main>
 				</AuthProvider>

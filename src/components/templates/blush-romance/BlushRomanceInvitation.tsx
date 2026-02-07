@@ -1,4 +1,6 @@
-import { useMemo } from "react";
+import { Link } from "@tanstack/react-router";
+import { type KeyboardEvent, type MouseEvent, useMemo, useState } from "react";
+import { LoadingSpinner } from "../../ui/LoadingSpinner";
 import { useScrollReveal } from "../../../lib/scroll-effects";
 import type { InvitationContent } from "../../../lib/types";
 import SectionShell from "../SectionShell";
@@ -20,6 +22,7 @@ export default function BlushRomanceInvitation({
 }: BlushRomanceInvitationProps) {
 	useScrollReveal();
 	const data = useMemo(() => content, [content]);
+	const [isSubmitting, setIsSubmitting] = useState(false);
 	const parseAttendance = (
 		value: FormDataEntryValue | null,
 	): RsvpPayload["attendance"] => {
@@ -34,13 +37,17 @@ export default function BlushRomanceInvitation({
 		return "attending";
 	};
 	const editableProps = (fieldPath: string, className: string) => ({
-		onClick: mode === "editor" ? () => onInlineEdit?.(fieldPath) : undefined,
+		onClick:
+			mode === "editor"
+				? (event: MouseEvent<HTMLElement>) =>
+						onInlineEdit?.(fieldPath, event.currentTarget)
+				: undefined,
 		onKeyDown:
 			mode === "editor"
-				? (event) => {
+				? (event: KeyboardEvent<HTMLElement>) => {
 						if (event.key === "Enter" || event.key === " ") {
 							event.preventDefault();
-							onInlineEdit?.(fieldPath);
+							onInlineEdit?.(fieldPath, event.currentTarget);
 						}
 					}
 				: undefined,
@@ -157,7 +164,7 @@ export default function BlushRomanceInvitation({
 							>
 								<img
 									src={photo.url || "/placeholders/photo-light.svg"}
-									alt=""
+									alt={photo.caption || "Wedding photo"}
 									loading="lazy"
 									width={360}
 									height={140}
@@ -221,7 +228,7 @@ export default function BlushRomanceInvitation({
 					<div className="blush-map">
 						<img
 							src="/placeholders/photo-light.svg"
-							alt=""
+							alt={`Map showing location of ${data.venue.name}`}
 							loading="lazy"
 							width={800}
 							height={450}
@@ -242,67 +249,122 @@ export default function BlushRomanceInvitation({
 					<p className="blush-kicker">RSVP</p>
 					<form
 						className="mt-6 blush-form"
-						onSubmit={(event) => {
+						noValidate
+						onSubmit={async (event) => {
 							event.preventDefault();
-							if (!onRsvpSubmit) return;
-							const formData = new FormData(event.currentTarget);
-							onRsvpSubmit({
-								name: String(formData.get("name") ?? ""),
-								attendance: parseAttendance(formData.get("attendance")),
-								guestCount: Number(formData.get("guestCount") ?? 1),
-								dietaryRequirements: String(formData.get("dietary") ?? ""),
-								message: String(formData.get("message") ?? ""),
-								email: String(formData.get("email") ?? ""),
-							});
+							if (!onRsvpSubmit || isSubmitting) return;
+							setIsSubmitting(true);
+							try {
+								const formData = new FormData(event.currentTarget);
+								await onRsvpSubmit({
+									name: String(formData.get("name") ?? ""),
+									attendance: parseAttendance(formData.get("attendance")),
+									guestCount: Number(formData.get("guestCount") ?? 1),
+									dietaryRequirements: String(formData.get("dietary") ?? ""),
+									message: String(formData.get("message") ?? ""),
+									email: String(formData.get("email") ?? ""),
+								});
+							} finally {
+								setIsSubmitting(false);
+							}
 						}}
 					>
-						<input
-							name="name"
-							placeholder="Rachel Lim…"
-							aria-label="Name"
-							autoComplete="off"
-							required
-						/>
-						<select name="attendance" aria-label="Attendance">
-							<option value="attending">Attending</option>
-							<option value="not_attending">Not Attending</option>
-							<option value="undecided">Undecided</option>
-						</select>
-						<input
-							name="email"
-							placeholder="rachel@example.com…"
-							aria-label="Email"
-							type="email"
-							autoComplete="off"
-							spellCheck={false}
-						/>
-						<input
-							name="guestCount"
-							placeholder="2…"
-							aria-label="Guest count"
-							type="number"
-							min={1}
-							inputMode="numeric"
-							autoComplete="off"
-						/>
-						<input
-							name="dietary"
-							placeholder="Vegetarian, no pork…"
-							aria-label="Dietary requirements"
-							autoComplete="off"
-						/>
-						<textarea
-							name="message"
-							placeholder="Can’t wait to celebrate with you…"
-							aria-label="Message"
-							autoComplete="off"
-						/>
+						<label className="grid gap-1.5 text-xs uppercase tracking-[0.15em] text-[color:var(--dm-muted)]">
+							Name
+							<input
+								name="name"
+								placeholder="Rachel Lim…"
+								autoComplete="off"
+								required
+								aria-required="true"
+								className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30"
+							/>
+						</label>
+						<label className="grid gap-1.5 text-xs uppercase tracking-[0.15em] text-[color:var(--dm-muted)]">
+							Attendance
+							<select
+								name="attendance"
+								className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30"
+							>
+								<option value="attending">Attending</option>
+								<option value="not_attending">Not Attending</option>
+								<option value="undecided">Undecided</option>
+							</select>
+						</label>
+						<label className="grid gap-1.5 text-xs uppercase tracking-[0.15em] text-[color:var(--dm-muted)]">
+							Email
+							<input
+								name="email"
+								placeholder="rachel@example.com…"
+								type="email"
+								autoComplete="off"
+								spellCheck={false}
+								className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30"
+							/>
+						</label>
+						<label className="grid gap-1.5 text-xs uppercase tracking-[0.15em] text-[color:var(--dm-muted)]">
+							Guest count
+							<input
+								name="guestCount"
+								placeholder="2…"
+								type="number"
+								min={1}
+								inputMode="numeric"
+								autoComplete="off"
+								className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30"
+							/>
+						</label>
+						<label className="grid gap-1.5 text-xs uppercase tracking-[0.15em] text-[color:var(--dm-muted)]">
+							Dietary requirements
+							<input
+								name="dietary"
+								placeholder="Vegetarian, no pork…"
+								autoComplete="off"
+								className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30"
+							/>
+						</label>
+						<label className="grid gap-1.5 text-xs uppercase tracking-[0.15em] text-[color:var(--dm-muted)]">
+							Message
+							<textarea
+								name="message"
+								placeholder="Can't wait to celebrate with you…"
+								autoComplete="off"
+								className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30"
+							/>
+						</label>
+						<label className="blush-consent">
+							<input
+								type="checkbox"
+								name="consent"
+								required
+								aria-describedby="consent-description"
+							/>
+							<span id="consent-description">
+								I consent to the collection of my personal data as described in
+								the{" "}
+								<Link
+									to="/privacy"
+									className="blush-consent-link"
+									target="_blank"
+									rel="noopener noreferrer"
+								>
+									Privacy Policy
+								</Link>
+							</span>
+						</label>
 						{rsvpStatus ? (
 							<output className="blush-meta" aria-live="polite">
 								{rsvpStatus}
 							</output>
 						) : null}
-						<button type="submit">Send RSVP</button>
+						<button
+							type="submit"
+							disabled={isSubmitting}
+							className="inline-flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+						>
+							{isSubmitting && <LoadingSpinner size="sm" />}
+							{isSubmitting ? "Sending..." : "Send RSVP"}
+						</button>
 					</form>
 				</div>
 			</SectionShell>

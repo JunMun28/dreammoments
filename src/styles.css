@@ -68,7 +68,7 @@ code {
   --dm-lavender: #EFEDF4;
   --dm-peach: #FFB7B2;
   --dm-ink: #292524;
-  --dm-muted: #78716C;
+  --dm-muted: #5C5856;
   --dm-border: #E7E5E4;
 
   /* Accent Colors for CTAs */
@@ -554,38 +554,112 @@ h4 {
 .blush-form select,
 .blush-form textarea {
   width: 100%;
+  min-height: 44px; /* Touch-friendly target (WCAG 2.1 AAA) */
   padding: 1rem 1.5rem;
   border-radius: 1rem;
   border: 1px solid var(--dm-border);
   background: var(--dm-surface);
   font-family: var(--font-body);
+  font-size: 1rem;
   color: var(--dm-ink);
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.blush-form input::placeholder,
+.blush-form textarea::placeholder {
+  color: var(--dm-muted);
+  opacity: 0.7;
 }
 
 .blush-form input:focus,
 .blush-form select:focus,
 .blush-form textarea:focus {
-  outline: 2px solid var(--dm-peach);
-  outline-offset: 2px;
+  outline: none;
   border-color: var(--dm-peach);
+  box-shadow: 0 0 0 3px rgba(255, 183, 178, 0.3);
   background: #fff;
 }
 
+.blush-form textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
 .blush-form button {
+  min-height: 44px; /* Touch-friendly target */
   background: var(--dm-ink);
   color: white;
-  padding: 1rem;
+  padding: 1rem 2rem;
   border-radius: 999px;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
   font-weight: 500;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   margin-top: 1rem;
-  transition: opacity 0.2s;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .blush-form button:hover {
-  opacity: 0.9;
+  background: #3a3835;
+}
+
+.blush-form button:focus-visible {
+  outline: 2px solid var(--dm-peach);
+  outline-offset: 2px;
+}
+
+.blush-form button:active {
+  transform: scale(0.98);
+}
+
+/* Consent checkbox for Blush Romance */
+.blush-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+
+.blush-consent input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  min-height: 18px;
+  margin-top: 0.125rem;
+  accent-color: var(--dm-peach);
+  cursor: pointer;
+}
+
+.blush-consent span {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--dm-muted);
+}
+
+.blush-consent-link {
+  color: var(--dm-peach);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.blush-consent-link:hover {
+  text-decoration: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blush-form input,
+  .blush-form select,
+  .blush-form textarea,
+  .blush-form button {
+    transition: none;
+  }
+  .blush-form button:active {
+    transform: none;
+  }
 }
 
 .blush-faq {
@@ -888,6 +962,675 @@ h4 {
 
 @media (prefers-reduced-motion: reduce) {
   .dm-timeline-step {
+    transition: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ETERNAL ELEGANCE TEMPLATE
+
+   A sophisticated black & gold theme with monogram branding.
+   Colors: Primary #1C1C1C (charcoal), Secondary #C9A962 (champagne gold),
+           Accent #FFFFFF (white), Background #FFFFFF
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.eternal-elegance {
+  --eternal-primary: #1C1C1C;
+  --eternal-secondary: #C9A962;
+  --eternal-accent: #FFFFFF;
+  --eternal-bg: #FFFFFF;
+  --eternal-surface: #FAFAFA;
+  --eternal-muted: #6B6B6B;
+  --eternal-border: #E5E5E5;
+
+  font-family: var(--font-body);
+  color: var(--eternal-primary);
+  background: var(--eternal-bg);
+  min-height: 100%;
+}
+
+/* Section base styles with consistent padding */
+.eternal-section {
+  padding: 5rem 1.5rem;
+  position: relative;
+}
+
+@media (min-width: 768px) {
+  .eternal-section {
+    padding: 6rem 2rem;
+  }
+}
+
+/* Hero section with elegant framing */
+.eternal-hero {
+  min-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: var(--eternal-primary);
+  color: var(--eternal-accent);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Panel variant - alternating background */
+.eternal-panel {
+  background: var(--eternal-surface);
+}
+
+/* Footer section */
+.eternal-footer {
+  padding-bottom: 6rem;
+  background: var(--eternal-primary);
+  color: var(--eternal-accent);
+}
+
+.eternal-footer .eternal-heading {
+  color: var(--eternal-accent);
+}
+
+.eternal-footer .eternal-kicker {
+  color: var(--eternal-secondary);
+}
+
+/* Monogram SVG styling */
+.eternal-monogram {
+  position: absolute;
+  top: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 80px;
+  opacity: 0.3;
+}
+
+.eternal-monogram-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.eternal-monogram-svg circle {
+  fill: none;
+  stroke: var(--eternal-secondary);
+  stroke-width: 1;
+}
+
+.eternal-monogram-svg text {
+  fill: var(--eternal-secondary);
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 300;
+  letter-spacing: 0.1em;
+}
+
+/* Typography */
+.eternal-kicker {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  color: var(--eternal-secondary);
+  margin-bottom: 1.5rem;
+}
+
+.eternal-title {
+  font-family: var(--font-heading);
+  font-size: clamp(2.5rem, 7vw, 4.5rem);
+  font-weight: 300;
+  letter-spacing: 0.05em;
+  line-height: 1.15;
+  margin-bottom: 1.5rem;
+}
+
+.eternal-tagline {
+  font-size: 1.25rem;
+  font-weight: 300;
+  letter-spacing: 0.15em;
+  color: var(--eternal-secondary);
+  margin-bottom: 2rem;
+}
+
+/* Letter animation for tagline */
+.eternal-letter {
+  display: inline-block;
+  animation: eternal-letter-fade 0.5s ease forwards;
+  opacity: 0;
+}
+
+@keyframes eternal-letter-fade {
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eternal-letter {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+.eternal-date {
+  font-size: 1rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--eternal-muted);
+}
+
+.eternal-hero .eternal-date {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.eternal-heading {
+  font-family: var(--font-heading);
+  font-size: 1.75rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.75rem;
+  color: var(--eternal-primary);
+}
+
+.eternal-body {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--eternal-muted);
+  max-width: 55ch;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Cards */
+.eternal-card {
+  background: var(--eternal-bg);
+  padding: 2rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--eternal-border);
+  text-align: center;
+  transition: box-shadow 0.3s ease;
+}
+
+.eternal-card:hover {
+  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eternal-card {
+    transition: none;
+  }
+  .eternal-card:hover {
+    box-shadow: none;
+  }
+}
+
+/* Photo gallery items */
+.eternal-photo {
+  position: relative;
+  aspect-ratio: 4/3;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: var(--eternal-surface);
+  border: 1px solid var(--eternal-border);
+}
+
+.eternal-photo span {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem;
+  background: linear-gradient(to top, rgba(28, 28, 28, 0.8), transparent);
+  color: var(--eternal-accent);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ─── Eternal Elegance RSVP Form ───
+   Consistent touch targets (min 44px), focus rings, and spacing */
+.eternal-form {
+  display: grid;
+  gap: 1rem;
+  max-width: 480px;
+  margin: 2rem auto 0;
+}
+
+.eternal-form input,
+.eternal-form select,
+.eternal-form textarea {
+  width: 100%;
+  min-height: 44px; /* Touch-friendly target */
+  padding: 0.875rem 1.25rem;
+  border-radius: 0.25rem;
+  border: 1px solid var(--eternal-border);
+  background: var(--eternal-bg);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--eternal-primary);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.eternal-form input::placeholder,
+.eternal-form textarea::placeholder {
+  color: var(--eternal-muted);
+  opacity: 0.7;
+}
+
+.eternal-form input:focus,
+.eternal-form select:focus,
+.eternal-form textarea:focus {
+  outline: none;
+  border-color: var(--eternal-secondary);
+  box-shadow: 0 0 0 3px rgba(201, 169, 98, 0.2);
+}
+
+.eternal-form textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.eternal-form button {
+  min-height: 44px; /* Touch-friendly target */
+  padding: 1rem 2rem;
+  border-radius: 0.25rem;
+  background: var(--eternal-primary);
+  color: var(--eternal-accent);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.eternal-form button:hover {
+  background: #2a2a2a;
+}
+
+.eternal-form button:focus-visible {
+  outline: 2px solid var(--eternal-secondary);
+  outline-offset: 2px;
+}
+
+.eternal-form button:active {
+  transform: scale(0.98);
+}
+
+/* Consent checkbox for Eternal Elegance */
+.eternal-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+
+.eternal-consent input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  min-height: 18px;
+  margin-top: 0.125rem;
+  accent-color: var(--eternal-secondary);
+  cursor: pointer;
+}
+
+.eternal-consent span {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--eternal-muted);
+}
+
+.eternal-consent-link {
+  color: var(--eternal-secondary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.eternal-consent-link:hover {
+  text-decoration: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eternal-form input,
+  .eternal-form select,
+  .eternal-form textarea,
+  .eternal-form button {
+    transition: none;
+  }
+  .eternal-form button:active {
+    transform: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LOVE AT DUSK TEMPLATE
+
+   A romantic dark theme with crimson/gold accents for evening ceremonies.
+   Inspired by twilight and Chinese wedding traditions.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.love-at-dusk {
+  /* Color palette for Love at Dusk theme */
+  --love-ink: #0d0a09;           /* Deep charcoal background */
+  --love-primary: #8B2942;       /* Deep crimson */
+  --love-secondary: #D4AF37;     /* Gold */
+  --love-accent: #C9A962;        /* Champagne gold for highlights */
+  --love-cream: #FFF8E7;         /* Warm cream for text */
+  --love-muted: #A89F91;         /* Muted text */
+  --love-surface: #140d0b;       /* Card backgrounds */
+  --love-border: rgba(255, 255, 255, 0.1);
+
+  font-family: var(--font-body);
+  background: var(--love-ink);
+  color: var(--love-cream);
+  min-height: 100%;
+}
+
+/* Section base styles */
+.love-section {
+  padding: 5rem 1.5rem;
+  position: relative;
+}
+
+@media (min-width: 768px) {
+  .love-section {
+    padding: 6rem 2rem;
+  }
+}
+
+/* Hero section with parallax background */
+.love-hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+/* Hero background with gradient overlay */
+.love-hero-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    #2a1b13 0%,
+    #0f0c0a 40%,
+    #5b2f22 100%
+  );
+  z-index: 0;
+}
+
+/* Subtle glow effect behind hero content */
+.love-hero-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%;
+  height: 60%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(139, 41, 66, 0.25) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Panel variant with subtle background difference */
+.love-panel {
+  background: rgba(20, 13, 11, 0.5);
+}
+
+/* Typography */
+.love-heading {
+  font-family: var(--font-heading);
+  font-weight: 500;
+  color: var(--love-cream);
+}
+
+/* Pill-style tags for date/venue */
+.love-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1.25rem;
+  border-radius: 999px;
+  border: 1px solid var(--love-border);
+  background: rgba(20, 13, 11, 0.6);
+  backdrop-filter: blur(8px);
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+}
+
+/* Slide animations for reveal effects */
+.slide-left {
+  --reveal-translate-x: -20px;
+}
+
+.slide-right {
+  --reveal-translate-x: 20px;
+}
+
+.dm-reveal.slide-left,
+.dm-reveal.slide-right {
+  transform: translateX(var(--reveal-translate-x, 0)) translateY(30px);
+}
+
+@keyframes dm-reveal-slide {
+  to {
+    opacity: 1;
+    transform: translateX(0) translateY(0);
+  }
+}
+
+/* ─── Love at Dusk RSVP Form ───
+   Dark theme form with consistent touch targets and focus states */
+.love-at-dusk form input,
+.love-at-dusk form select,
+.love-at-dusk form textarea {
+  min-height: 44px; /* Touch-friendly target */
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.love-at-dusk form input::placeholder,
+.love-at-dusk form textarea::placeholder {
+  color: var(--love-muted);
+  opacity: 0.6;
+}
+
+.love-at-dusk form input:focus,
+.love-at-dusk form select:focus,
+.love-at-dusk form textarea:focus {
+  outline: none;
+  border-color: var(--love-accent);
+  box-shadow: 0 0 0 3px rgba(201, 169, 98, 0.2);
+}
+
+.love-at-dusk form button:focus-visible {
+  outline: 2px solid var(--love-cream);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .love-at-dusk form input,
+  .love-at-dusk form select,
+  .love-at-dusk form textarea {
+    transition: none;
+  }
+  .dm-reveal.slide-left,
+  .dm-reveal.slide-right {
+    transform: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SHARED RSVP FORM STANDARDS
+
+   Ensures consistency across all templates:
+   - Minimum 44px touch targets for accessibility (WCAG 2.1 Level AAA)
+   - Consistent focus ring styles using template accent colors
+   - Uniform padding and spacing
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Editable field indicator for editor mode */
+.dm-editable {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.25rem;
+  margin: -0.125rem -0.25rem;
+}
+
+.dm-editable:hover {
+  background-color: rgba(201, 169, 98, 0.1);
+}
+
+.dm-editable:focus-visible {
+  outline: 2px solid var(--dm-peach);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dm-editable {
+    transition: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GARDEN ROMANCE TEMPLATE (Chinese Red Theme)
+
+   Note: This template uses inline styles and Tailwind classes for most styling.
+   These base styles ensure RSVP form inputs meet accessibility standards.
+   Colors: Crimson #C41E3A, Gold #D4AF37, Rich Black #1A1A1A, Warm Ivory #FFF8E7
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Garden Romance form inputs - ensure consistent touch targets */
+.gr-lattice-pattern + * form input,
+.gr-lattice-pattern + * form select,
+.gr-lattice-pattern + * form textarea {
+  min-height: 44px; /* Touch-friendly target */
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GLOBAL REDUCED MOTION
+
+   Catches any animations/transitions not explicitly handled above.
+   Ensures all motion is suppressed for users who prefer reduced motion.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ─── Section Rail ─── */
+
+.dm-section-rail {
+  width: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 1rem 0;
+  border-right: 1px solid var(--dm-border);
+  background: var(--dm-surface);
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.dm-section-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.dm-section-rail-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  color: var(--dm-muted);
+}
+
+.dm-section-rail-item:hover {
+  background: var(--dm-surface-muted);
+}
+
+.dm-section-rail-item[aria-selected="true"] {
+  background: var(--dm-accent-strong);
+  color: var(--dm-on-accent);
+}
+
+.dm-section-rail-item:focus-visible {
+  outline: 2px solid var(--dm-peach);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dm-section-rail-item {
+    transition: none;
+  }
+}
+
+/* ─── Editor Layout ─── */
+
+.dm-editor-active {
+  outline: 2px solid var(--dm-peach);
+  outline-offset: -2px;
+  border-radius: 1rem;
+}
+
+[data-editor-active="true"] {
+  outline: 2px solid var(--dm-peach);
+  outline-offset: -2px;
+  transition: outline-color 0.2s ease;
+}
+
+.dm-pill-bar {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 0.5rem 1rem;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.dm-pill-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.dm-completion-ring {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dm-completion-ring[data-complete="full"] {
+  background: #22c55e;
+}
+
+.dm-completion-ring[data-complete="partial"] {
+  background: #eab308;
+}
+
+.dm-completion-ring[data-complete="empty"] {
+  background: var(--dm-border);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-editor-active="true"] {
     transition: none;
   }
 }

@@ -12,6 +12,7 @@ function ResetScreen() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [message, setMessage] = useState("");
+	const [submitting, setSubmitting] = useState(false);
 	const redirectTarget =
 		typeof window === "undefined"
 			? "/dashboard"
@@ -34,10 +35,20 @@ function ResetScreen() {
 				<div className="rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-6">
 					<form
 						className="space-y-4"
-						onSubmit={(event) => {
+						onSubmit={async (event) => {
 							event.preventDefault();
-							const error = resetPassword({ email, password });
-							setMessage(error ?? "Password updated. Please sign in again.");
+							setSubmitting(true);
+							setMessage("");
+							try {
+								const error = await resetPassword({ email, password });
+								setMessage(
+									error ?? "Password updated. Please sign in again.",
+								);
+							} catch {
+								setMessage("Something went wrong. Please try again.");
+							} finally {
+								setSubmitting(false);
+							}
 						}}
 					>
 						<label className="grid gap-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
@@ -75,9 +86,10 @@ function ResetScreen() {
 						) : null}
 						<button
 							type="submit"
-							className="w-full rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-3 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)]"
+							disabled={submitting}
+							className="w-full rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-3 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)] disabled:opacity-50"
 						>
-							Update Password
+							{submitting ? "Updating..." : "Update Password"}
 						</button>
 					</form>
 				</div>

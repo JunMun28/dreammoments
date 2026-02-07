@@ -17,7 +17,7 @@ export type TemplateInvitationProps = {
 	mode?: TemplateRenderMode;
 	onSectionSelect?: (sectionId: string) => void;
 	onAiClick?: (sectionId: string) => void;
-	onInlineEdit?: (fieldPath: string) => void;
+	onInlineEdit?: (fieldPath: string, element?: HTMLElement) => void;
 	onRsvpSubmit?: (payload: RsvpPayload) => void;
 	rsvpStatus?: string;
 };

@@ -12,6 +12,7 @@ function LoginScreen() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [error, setError] = useState("");
+	const [submitting, setSubmitting] = useState(false);
 	const redirectTarget =
 		typeof window === "undefined"
 			? "/dashboard"
@@ -45,10 +46,18 @@ function LoginScreen() {
 				<div className="rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-6">
 					<form
 						className="space-y-4"
-						onSubmit={(event) => {
+						onSubmit={async (event) => {
 							event.preventDefault();
-							const message = signInWithEmail({ email, password });
-							setError(message ?? "");
+							setSubmitting(true);
+							setError("");
+							try {
+								const message = await signInWithEmail({ email, password });
+								setError(message ?? "");
+							} catch {
+								setError("Something went wrong. Please try again.");
+							} finally {
+								setSubmitting(false);
+							}
 						}}
 					>
 						<label className="grid gap-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
@@ -83,9 +92,10 @@ function LoginScreen() {
 						) : null}
 						<button
 							type="submit"
-							className="w-full rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-3 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)]"
+							disabled={submitting}
+							className="w-full rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-3 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)] disabled:opacity-50"
 						>
-							Sign In
+							{submitting ? "Signing In..." : "Sign In"}
 						</button>
 					</form>
 				</div>

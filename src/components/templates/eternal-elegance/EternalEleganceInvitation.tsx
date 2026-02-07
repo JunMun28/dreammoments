@@ -1,4 +1,6 @@
-import { useMemo } from "react";
+import { Link } from "@tanstack/react-router";
+import { type KeyboardEvent, type MouseEvent, useMemo, useState } from "react";
+import { LoadingSpinner } from "../../ui/LoadingSpinner";
 import { useScrollReveal } from "../../../lib/scroll-effects";
 import type { InvitationContent } from "../../../lib/types";
 import SectionShell from "../SectionShell";
@@ -20,6 +22,7 @@ export default function EternalEleganceInvitation({
 }: EternalEleganceInvitationProps) {
 	useScrollReveal();
 	const data = useMemo(() => content, [content]);
+	const [isSubmitting, setIsSubmitting] = useState(false);
 	const monogram = `${data.hero.partnerOneName.charAt(0)}${data.hero.partnerTwoName.charAt(0)}`;
 	const taglineLetters = data.hero.tagline.split("");
 	const parseAttendance = (
@@ -36,13 +39,17 @@ export default function EternalEleganceInvitation({
 		return "attending";
 	};
 	const editableProps = (fieldPath: string, className: string) => ({
-		onClick: mode === "editor" ? () => onInlineEdit?.(fieldPath) : undefined,
+		onClick:
+			mode === "editor"
+				? (event: MouseEvent<HTMLElement>) =>
+						onInlineEdit?.(fieldPath, event.currentTarget)
+				: undefined,
 		onKeyDown:
 			mode === "editor"
-				? (event) => {
+				? (event: KeyboardEvent<HTMLElement>) => {
 						if (event.key === "Enter" || event.key === " ") {
 							event.preventDefault();
-							onInlineEdit?.(fieldPath);
+							onInlineEdit?.(fieldPath, event.currentTarget);
 						}
 					}
 				: undefined,
@@ -189,7 +196,7 @@ export default function EternalEleganceInvitation({
 							>
 								<img
 									src={photo.url || "/placeholders/photo-light.svg"}
-									alt=""
+									alt={photo.caption || "Wedding photo"}
 									loading="lazy"
 									width={360}
 									height={140}
@@ -233,67 +240,140 @@ export default function EternalEleganceInvitation({
 					<p className="eternal-kicker">RSVP</p>
 					<form
 						className="eternal-form"
-						onSubmit={(event) => {
+						noValidate
+						onSubmit={async (event) => {
 							event.preventDefault();
-							if (!onRsvpSubmit) return;
-							const formData = new FormData(event.currentTarget);
-							onRsvpSubmit({
-								name: String(formData.get("name") ?? ""),
-								attendance: parseAttendance(formData.get("attendance")),
-								guestCount: Number(formData.get("guestCount") ?? 1),
-								dietaryRequirements: String(formData.get("dietary") ?? ""),
-								message: String(formData.get("message") ?? ""),
-								email: String(formData.get("email") ?? ""),
-							});
+							if (!onRsvpSubmit || isSubmitting) return;
+							setIsSubmitting(true);
+							try {
+								const formData = new FormData(event.currentTarget);
+								await onRsvpSubmit({
+									name: String(formData.get("name") ?? ""),
+									attendance: parseAttendance(formData.get("attendance")),
+									guestCount: Number(formData.get("guestCount") ?? 1),
+									dietaryRequirements: String(formData.get("dietary") ?? ""),
+									message: String(formData.get("message") ?? ""),
+									email: String(formData.get("email") ?? ""),
+								});
+							} finally {
+								setIsSubmitting(false);
+							}
 						}}
 					>
-						<input
-							name="name"
-							placeholder="James Tan…"
-							aria-label="Name"
-							autoComplete="off"
-							required
-						/>
-						<select name="attendance" aria-label="Attendance">
-							<option value="attending">Attending</option>
-							<option value="not_attending">Not Attending</option>
-							<option value="undecided">Undecided</option>
-						</select>
-						<input
-							name="email"
-							placeholder="james@example.com…"
-							aria-label="Email"
-							type="email"
-							autoComplete="off"
-							spellCheck={false}
-						/>
-						<input
-							name="guestCount"
-							placeholder="2…"
-							aria-label="Guest count"
-							type="number"
-							min={1}
-							inputMode="numeric"
-							autoComplete="off"
-						/>
-						<input
-							name="dietary"
-							placeholder="No seafood…"
-							aria-label="Dietary requirements"
-							autoComplete="off"
-						/>
-						<textarea
-							name="message"
-							placeholder="We’re honored to attend…"
-							aria-label="Message"
-							autoComplete="off"
-						/>
+						<label
+							className="grid gap-1.5 text-xs uppercase tracking-[0.15em]"
+							style={{ color: "var(--eternal-muted)" }}
+						>
+							Name
+							<input
+								name="name"
+								placeholder="James Tan…"
+								autoComplete="off"
+								required
+								aria-required="true"
+								className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-lavender)]/30"
+							/>
+						</label>
+						<label
+							className="grid gap-1.5 text-xs uppercase tracking-[0.15em]"
+							style={{ color: "var(--eternal-muted)" }}
+						>
+							Attendance
+							<select
+								name="attendance"
+								className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-lavender)]/30"
+							>
+								<option value="attending">Attending</option>
+								<option value="not_attending">Not Attending</option>
+								<option value="undecided">Undecided</option>
+							</select>
+						</label>
+						<label
+							className="grid gap-1.5 text-xs uppercase tracking-[0.15em]"
+							style={{ color: "var(--eternal-muted)" }}
+						>
+							Email
+							<input
+								name="email"
+								placeholder="james@example.com…"
+								type="email"
+								autoComplete="off"
+								spellCheck={false}
+								className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-lavender)]/30"
+							/>
+						</label>
+						<label
+							className="grid gap-1.5 text-xs uppercase tracking-[0.15em]"
+							style={{ color: "var(--eternal-muted)" }}
+						>
+							Guest count
+							<input
+								name="guestCount"
+								placeholder="2…"
+								type="number"
+								min={1}
+								inputMode="numeric"
+								autoComplete="off"
+								className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-lavender)]/30"
+							/>
+						</label>
+						<label
+							className="grid gap-1.5 text-xs uppercase tracking-[0.15em]"
+							style={{ color: "var(--eternal-muted)" }}
+						>
+							Dietary requirements
+							<input
+								name="dietary"
+								placeholder="No seafood…"
+								autoComplete="off"
+								className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-lavender)]/30"
+							/>
+						</label>
+						<label
+							className="grid gap-1.5 text-xs uppercase tracking-[0.15em]"
+							style={{ color: "var(--eternal-muted)" }}
+						>
+							Message
+							<textarea
+								name="message"
+								placeholder="We're honored to attend…"
+								autoComplete="off"
+								className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-lavender)]/30"
+							/>
+						</label>
+						<label className="eternal-consent">
+							<input
+								type="checkbox"
+								name="consent"
+								required
+								aria-describedby="consent-description"
+							/>
+							<span id="consent-description">
+								I consent to the collection of my personal data as described in
+								the{" "}
+								<Link
+									to="/privacy"
+									className="eternal-consent-link"
+									target="_blank"
+									rel="noopener noreferrer"
+								>
+									Privacy Policy
+								</Link>
+							</span>
+						</label>
 						{rsvpStatus ? (
 							<output className="eternal-body" aria-live="polite">
 								{rsvpStatus}
 							</output>
 						) : null}
-						<button type="submit">Submit RSVP</button>
+						<button
+							type="submit"
+							disabled={isSubmitting}
+							className="inline-flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+						>
+							{isSubmitting && <LoadingSpinner size="sm" />}
+							{isSubmitting ? "Submitting..." : "Submit RSVP"}
+						</button>
 					</form>
 				</div>
 			</SectionShell>

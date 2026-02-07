@@ -1,4 +1,7 @@
+import { generateAiContentFn } from "@/api/ai";
 import type { InvitationContent } from "./types";
+
+// ── Romantic tagline pool for mock fallback ─────────────────────────
 
 const romanticWords = [
 	"Two hearts, one promise",
@@ -10,7 +13,44 @@ function pick(list: string[]) {
 	return list[Math.floor(Math.random() * list.length)];
 }
 
+// ── Main export: tries real AI, falls back to mock ──────────────────
+
 export async function generateAiContent({
+	type,
+	sectionId,
+	prompt,
+	context,
+}: {
+	type: "schedule" | "faq" | "story" | "tagline" | "style" | "translate";
+	sectionId: string;
+	prompt: string;
+	context: InvitationContent;
+}) {
+	try {
+		const result = await generateAiContentFn({
+			data: {
+				type,
+				sectionId,
+				prompt,
+				context: context as unknown as Record<string, unknown>,
+			},
+		});
+		return result;
+	} catch (error) {
+		// If the server indicates AI is not configured, use mock data silently
+		if (error instanceof Error && error.message.includes("AI_NOT_CONFIGURED")) {
+			return generateMockContent({ type, sectionId, prompt, context });
+		}
+
+		// For other errors, log and fall back to mock data
+		console.warn("AI generation failed, using mock data:", error);
+		return generateMockContent({ type, sectionId, prompt, context });
+	}
+}
+
+// ── Mock content generator (fallback) ───────────────────────────────
+
+function generateMockContent({
 	type,
 	sectionId: _sectionId,
 	prompt,
@@ -25,9 +65,17 @@ export async function generateAiContent({
 		return {
 			events: [
 				{ time: "3:00 PM", title: "Arrival", description: "Welcome drinks" },
-				{ time: "3:30 PM", title: "Ceremony", description: "Exchange of vows" },
+				{
+					time: "3:30 PM",
+					title: "Ceremony",
+					description: "Exchange of vows",
+				},
 				{ time: "4:30 PM", title: "Photos", description: "Group portraits" },
-				{ time: "6:00 PM", title: "Dinner", description: "Reception begins" },
+				{
+					time: "6:00 PM",
+					title: "Dinner",
+					description: "Reception begins",
+				},
 				{
 					time: "8:30 PM",
 					title: "Celebration",
@@ -42,7 +90,10 @@ export async function generateAiContent({
 			items: [
 				{ question: "Dress code?", answer: "Smart casual with soft tones." },
 				{ question: "Parking?", answer: "Valet parking is available." },
-				{ question: "Plus ones?", answer: "Please RSVP for allocated seats." },
+				{
+					question: "Plus ones?",
+					answer: "Please RSVP for allocated seats.",
+				},
 				{ question: "Dietary needs?", answer: "Let us know in RSVP." },
 			],
 		};

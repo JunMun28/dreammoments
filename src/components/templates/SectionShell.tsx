@@ -5,6 +5,7 @@ type SectionShellProps = {
 	sectionId: string;
 	mode?: TemplateRenderMode;
 	hidden?: boolean;
+	isActive?: boolean;
 	onSelect?: (sectionId: string) => void;
 	onAiClick?: (sectionId: string) => void;
 	className?: string;
@@ -16,6 +17,7 @@ export default function SectionShell({
 	sectionId,
 	mode = "public",
 	hidden,
+	isActive,
 	onSelect,
 	onAiClick,
 	className,
@@ -43,7 +45,12 @@ export default function SectionShell({
 
 	if (!interactive) {
 		return (
-			<section data-section={sectionId} className={className} style={style}>
+			<section
+				data-section={sectionId}
+				data-editor-active={isActive ? "true" : undefined}
+				className={className}
+				style={style}
+			>
 				{aiButton}
 				{children}
 			</section>
@@ -54,13 +61,17 @@ export default function SectionShell({
 		// biome-ignore lint: editor preview uses a section as an interactive surface
 		<div
 			data-section={sectionId}
+			data-editor-active={isActive ? "true" : undefined}
 			className={className}
 			style={style}
 			role="button"
 			tabIndex={0}
 			onClick={() => onSelect?.(sectionId)}
 			onKeyDown={(event) => {
-				if (event.key === "Enter") onSelect?.(sectionId);
+				if (event.key === "Enter" || event.key === " ") {
+					event.preventDefault();
+					onSelect?.(sectionId);
+				}
 			}}
 			onFocus={(event) => {
 				event.currentTarget.scrollIntoView({ block: "nearest" });
