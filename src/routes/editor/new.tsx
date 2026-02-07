@@ -1,34 +1,37 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { buildRedirectFromLocation } from "../../lib/auth-redirect";
-import { createInvitation, getCurrentUserId } from "../../lib/data";
+import { createInvitation, createUser, getCurrentUserId } from "../../lib/data";
 
 export const Route = createFileRoute("/editor/new")({
 	component: NewEditorRedirect,
 });
 
+/** Bypass login for testing: create demo user + invitation when not logged in. */
+function ensureDemoUserAndInvitation(): string | null {
+	let userId = getCurrentUserId();
+	if (!userId) {
+		const user = createUser({
+			email: "demo@test.local",
+			name: "Demo",
+			authProvider: "email",
+		});
+		userId = user.id;
+	}
+	const params = new URLSearchParams(
+		typeof window === "undefined" ? "" : window.location.search,
+	);
+	const templateId = params.get("template") ?? "blush-romance";
+	const invitation = createInvitation(userId, templateId);
+	return invitation.id;
+}
+
 function NewEditorRedirect() {
 	const [invitationId, setInvitationId] = useState<string | null>(null);
-	const userId = getCurrentUserId();
-	const redirectTarget =
-		typeof window === "undefined"
-			? "/editor/new"
-			: buildRedirectFromLocation(
-					window.location.pathname,
-					window.location.search,
-				);
 
 	useEffect(() => {
-		if (!userId) return;
-		const params = new URLSearchParams(window.location.search);
-		const templateId = params.get("template") ?? "blush-romance";
-		const invitation = createInvitation(userId, templateId);
-		setInvitationId(invitation.id);
-	}, [userId]);
-
-	if (!userId) {
-		return <Navigate to="/auth/login" search={{ redirect: redirectTarget }} />;
-	}
+		const id = ensureDemoUserAndInvitation();
+		setInvitationId(id);
+	}, []);
 
 	if (!invitationId) return null;
 	return <Navigate to={`/editor/${invitationId}`} />;

@@ -1,6 +1,7 @@
 import type { RefObject } from "react";
 import type { InvitationContent } from "../../lib/types";
 import InvitationRenderer from "../templates/InvitationRenderer";
+import type { PreviewLayout } from "./LayoutToggle";
 
 type EditorPreviewFrameProps = {
 	templateId: string;
@@ -12,6 +13,7 @@ type EditorPreviewFrameProps = {
 	onAiClick: (sectionId: string) => void;
 	onInlineEdit: (fieldPath: string) => void;
 	previewRef: RefObject<HTMLDivElement | null>;
+	previewLayout?: PreviewLayout;
 };
 
 export function EditorPreviewFrame({
@@ -24,13 +26,22 @@ export function EditorPreviewFrame({
 	onAiClick,
 	onInlineEdit,
 	previewRef,
+	previewLayout = "web",
 }: EditorPreviewFrameProps) {
+	const isMobilePreview = previewLayout === "mobile";
+
 	return (
 		<div
 			ref={previewRef}
-			className="h-full overflow-y-auto rounded-3xl border border-[color:var(--dm-border)]"
-			style={styleOverrides}
+			className={`h-full overflow-y-auto rounded-3xl border border-dm-border ${
+				isMobilePreview ? "mx-auto max-w-[390px]" : ""
+			}`}
+			style={{
+				...styleOverrides,
+				...(isMobilePreview ? { minHeight: "640px" } : {}),
+			}}
 			data-active-section={activeSection}
+			data-preview-layout={previewLayout}
 		>
 			<InvitationRenderer
 				templateId={templateId}

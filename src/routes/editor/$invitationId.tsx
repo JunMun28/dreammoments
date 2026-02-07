@@ -8,6 +8,7 @@ import { EditorLayout } from "../../components/editor/EditorLayout";
 import { EditorPreviewFrame } from "../../components/editor/EditorPreviewFrame";
 import { EditorToolbar } from "../../components/editor/EditorToolbar";
 import { FieldRenderer } from "../../components/editor/FieldRenderer";
+import { LayoutToggle, type PreviewLayout } from "../../components/editor/LayoutToggle";
 import MobileBottomSheet from "../../components/editor/MobileBottomSheet";
 import { SectionPillBar } from "../../components/editor/SectionPillBar";
 import { ToggleSwitch } from "../../components/editor/ToggleSwitch";
@@ -29,6 +30,7 @@ import { buildSampleContent } from "../../data/sample-invitation";
 import { generateAiContent } from "../../lib/ai";
 import {
 	aiUsageLimit,
+	createUser,
 	getCurrentUser,
 	incrementAiUsage,
 	markAiGenerationAccepted,
@@ -119,7 +121,19 @@ export function EditorScreen() {
 	const invitation = useStore((store) =>
 		store.invitations.find((item) => item.id === invitationId),
 	);
+	const [loginBypassDone, setLoginBypassDone] = useState(false);
 	const user = getCurrentUser();
+
+	// Bypass login for testing: ensure demo user exists so editor can load
+	useEffect(() => {
+		if (user) return;
+		createUser({
+			email: "demo@test.local",
+			name: "Demo",
+			authProvider: "email",
+		});
+		setLoginBypassDone(true);
+	}, [user]);
 
 	const isMobile = useMediaQuery("(max-width: 767px)");
 	const isTablet = useMediaQuery("(min-width: 768px) and (max-width: 1023px)");
@@ -178,6 +192,7 @@ export function EditorScreen() {
 
 	// Local UI state
 	const [previewMode, setPreviewMode] = useState(false);
+	const [previewLayout, setPreviewLayout] = useState<PreviewLayout>("web");
 	const [mobileEditorOpen, setMobileEditorOpen] = useState(false);
 	const [inlineEdit, setInlineEdit] = useState<InlineEditState | null>(null);
 	const [aiPanel, setAiPanel] = useState<AiPanelState>({
@@ -208,13 +223,25 @@ export function EditorScreen() {
 		editor.setActiveSection(template?.sections[0]?.id ?? "hero");
 	}, [invitation?.id, template?.sections[0]?.id]);
 
-	// Guards
+	// Pill bar sections (must run before any conditional return to satisfy hooks order)
+	const pillSections = useMemo(
+		() =>
+			(template?.sections ?? []).map((s) => ({
+				id: s.id,
+				label: s.id,
+				completion: sectionProgress[s.id] ?? 0,
+			})),
+		[template?.sections, sectionProgress],
+	);
+
+	// Guards (login bypass for testing: show loader until demo user is created)
+	if (!user && !loginBypassDone) return <FullPageLoader message="Loading editor..." />;
 	if (!user) return <Navigate to="/auth/login" />;
 	if (!isHydrated) return <FullPageLoader message="Loading editor..." />;
 	if (!invitation) {
 		return (
-			<div className="min-h-screen bg-[color:var(--dm-bg)] px-6 py-10">
-				<p className="text-sm text-[color:var(--dm-muted)]">
+			<div className="min-h-screen bg-dm-bg px-6 py-10">
+				<p className="text-sm text-dm-muted">
 					Invitation not found.
 				</p>
 			</div>
@@ -359,17 +386,6 @@ export function EditorScreen() {
 		if (isMobile) setMobileEditorOpen(true);
 	};
 
-	// Pill bar sections with completion data
-	const pillSections = useMemo(
-		() =>
-			(template?.sections ?? []).map((s) => ({
-				id: s.id,
-				label: s.id,
-				completion: sectionProgress[s.id] ?? 0,
-			})),
-		[template?.sections, sectionProgress],
-	);
-
 	// Context panel content: section fields
 	const contextPanelContent = (
 		<div className="space-y-4 p-5">
@@ -454,19 +470,27 @@ export function EditorScreen() {
 		/>
 	);
 
-	// Build the preview
+	// Build the preview (with Web/Mobile layout toggle)
 	const preview = (
-		<EditorPreviewFrame
-			templateId={template?.id ?? "blush-romance"}
-			content={editor.draft}
-			hiddenSections={editor.hiddenSections}
-			activeSection={editor.activeSection}
-			styleOverrides={styleOverrides}
-			onSectionSelect={handleSectionSelectFromPreview}
-			onAiClick={openAiPanel}
-			onInlineEdit={handleInlineEdit}
-			previewRef={previewRef}
-		/>
+		<div className="flex h-full flex-col">
+			<div className="flex shrink-0 justify-center border-b border-dm-border bg-dm-bg py-3">
+				<LayoutToggle layout={previewLayout} onChange={setPreviewLayout} />
+			</div>
+			<div className="min-h-0 flex-1 p-4">
+				<EditorPreviewFrame
+					templateId={template?.id ?? "blush-romance"}
+					content={editor.draft}
+					hiddenSections={editor.hiddenSections}
+					activeSection={editor.activeSection}
+					styleOverrides={styleOverrides}
+					onSectionSelect={handleSectionSelectFromPreview}
+					onAiClick={openAiPanel}
+					onInlineEdit={handleInlineEdit}
+					previewRef={previewRef}
+					previewLayout={previewLayout}
+				/>
+			</div>
+		</div>
 	);
 
 	// Build the pill bar

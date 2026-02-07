@@ -1,13 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-	Check,
-	Heart,
-	Monitor,
-	Play,
-	Smartphone,
-	Sparkles,
-	Star,
-} from "lucide-react";
+import { Check, Heart, Play, Sparkles, Star } from "lucide-react";
 import { motion, useScroll, useTransform } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
@@ -142,44 +134,7 @@ function Hero() {
 	);
 }
 
-type PreviewLayout = "web" | "mobile";
-
-function LayoutToggle({
-	layout,
-	onChange,
-}: {
-	layout: PreviewLayout;
-	onChange: (l: PreviewLayout) => void;
-}) {
-	return (
-		<div className="inline-flex items-center rounded-full border border-dm-border bg-dm-surface p-1 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)]">
-			{(["web", "mobile"] as const).map((mode) => (
-				<button
-					key={mode}
-					type="button"
-					onClick={() => onChange(mode)}
-					aria-pressed={layout === mode}
-					className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium tracking-wide uppercase transition-all duration-300 ${
-						layout === mode
-							? "bg-dm-ink text-white shadow-sm"
-							: "text-dm-muted hover:text-dm-ink"
-					}`}
-				>
-					{mode === "web" ? (
-						<Monitor aria-hidden="true" className="w-3.5 h-3.5" />
-					) : (
-						<Smartphone aria-hidden="true" className="w-3.5 h-3.5" />
-					)}
-					{mode === "web" ? "Web" : "Mobile"}
-				</button>
-			))}
-		</div>
-	);
-}
-
 function Showcase() {
-	const [layout, setLayout] = useState<PreviewLayout>("web");
-	const isMobile = layout === "mobile";
 
 	const templates = [
 		{
@@ -243,43 +198,25 @@ function Showcase() {
 					</motion.p>
 				</div>
 
-				{/* Layout toggle */}
-				<div className="flex justify-center mb-14">
-					<LayoutToggle layout={layout} onChange={setLayout} />
-				</div>
-
-				{/* Template grid — switches between web (3-col) and mobile (single scroll) */}
-				<div
-					className={`transition-all duration-500 ease-out ${
-						isMobile
-							? "flex gap-8 overflow-x-auto snap-x snap-mandatory pb-6 -mx-6 px-6 scroll-smooth"
-							: "grid md:grid-cols-3 gap-8"
-					}`}
-				>
+				{/* Template grid */}
+				<div className="grid md:grid-cols-3 gap-8">
 					{templates.map((t, i) => (
 						<motion.div
 							key={t.id}
-							layout
 							initial={{ opacity: 0, y: 30 }}
 							whileInView={{ opacity: 1, y: 0 }}
 							viewport={{ once: true, margin: "-50px" }}
 							transition={{
 								delay: i * 0.15,
 								...REVEAL_TRANSITION,
-								layout: { duration: 0.4, ease: REVEAL_EASE },
 							}}
-							className={isMobile ? "shrink-0 w-[280px] snap-center" : ""}
 						>
 							<Link
 								to="/invite/$slug"
 								params={{ slug: `${t.id}-sample` }}
 								className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dm-peach focus-visible:ring-offset-2 rounded-[2.5rem]"
 							>
-								<div
-									className={`rounded-[3rem] overflow-hidden mb-6 relative transition-transform duration-800 ease-out group-hover:-translate-y-2 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)] ${
-										isMobile ? "aspect-9/16" : "aspect-3/4"
-									}`}
-								>
+								<div className="rounded-[3rem] overflow-hidden mb-6 relative transition-transform duration-800 ease-out group-hover:-translate-y-2 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)] aspect-3/4">
 									<img
 										src={t.photo}
 										alt={`${t.title} wedding invitation mood preview`}
