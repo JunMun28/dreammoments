@@ -34,7 +34,7 @@ export function ContextPanelHeader({
 						type="button"
 						onClick={onAiClick}
 						aria-label={`Generate AI content for ${sectionLabel}`}
-						className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-[color:var(--dm-border)] text-[color:var(--dm-muted)] transition-colors hover:bg-[color:var(--dm-surface-muted)] hover:text-[color:var(--dm-ink)]"
+						className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[color:var(--dm-border)] text-[color:var(--dm-muted)] transition-colors hover:bg-[color:var(--dm-surface-muted)] hover:text-[color:var(--dm-ink)]"
 					>
 						<Sparkles className="h-4 w-4" aria-hidden="true" />
 					</button>

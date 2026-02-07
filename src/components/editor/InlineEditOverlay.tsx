@@ -41,6 +41,7 @@ export default function InlineEditOverlay({
 }: InlineEditOverlayProps) {
 	const popoverRef = useRef<HTMLDivElement>(null);
 	const inputRef = useRef<HTMLTextAreaElement>(null);
+	const previousFocusRef = useRef<HTMLElement | null>(null);
 	const [liveRect, setLiveRect] = useState<DOMRect | null>(rect);
 	const [position, setPosition] = useState<{
 		top: number;
@@ -52,6 +53,17 @@ export default function InlineEditOverlay({
 	const label = formatFieldLabel(fieldPath);
 	const shouldRenderDesktop = !isMobile && liveRect != null;
 	const shouldRenderMobile = isMobile && rect != null;
+	const isOpen = shouldRenderDesktop || shouldRenderMobile;
+
+	// Focus restore on close
+	useEffect(() => {
+		if (isOpen) {
+			previousFocusRef.current = document.activeElement as HTMLElement;
+		} else if (previousFocusRef.current) {
+			previousFocusRef.current.focus();
+			previousFocusRef.current = null;
+		}
+	}, [isOpen]);
 
 	// Keep rect fresh on scroll/resize (desktop only)
 	useLayoutEffect(() => {
@@ -179,6 +191,7 @@ export default function InlineEditOverlay({
 			<div
 				ref={popoverRef}
 				role="dialog"
+				aria-modal="true"
 				aria-label={`Edit ${label}`}
 				onKeyDown={handleKeyDown}
 				className="fixed inset-0 z-50 flex flex-col justify-end"
@@ -253,6 +266,7 @@ export default function InlineEditOverlay({
 		<div
 			ref={popoverRef}
 			role="dialog"
+			aria-modal="true"
 			aria-label={`Edit ${label}`}
 			onKeyDown={handleKeyDown}
 			className={cn(

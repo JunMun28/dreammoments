@@ -39,19 +39,34 @@ test.describe("mobile editor", () => {
 		if (await sectionEl.isVisible()) {
 			await sectionEl.click()
 			await expect(page.getByText("Section Editor")).toBeVisible()
+
+			// Visual regression: bottom sheet open state
+			await expect(page).toHaveScreenshot("mobile-bottom-sheet-open.png", {
+				maxDiffPixelRatio: 0.01,
+				animations: "disabled",
+			})
 		}
 	})
 
-	test("mobile section nav renders with dots", async ({ page }) => {
+	test("mobile section nav renders scrollable tab strip", async ({ page }) => {
 		await setupMobileEditor(page)
 		await page.goto(`/editor/${seedInvitations.love.id}`)
 		await waitForStoreHydration(page)
 
-		// MobileSectionNav should have tablist role
+		// MobileSectionNav should have tablist role on the pill container
 		const tablist = page.getByRole("tablist", { name: "Invitation sections" })
 		await expect(tablist).toBeVisible()
 
-		// Should have navigation buttons
+		// Should have tab pills with labels (not just dots)
+		const tabs = tablist.getByRole("tab")
+		const tabCount = await tabs.count()
+		expect(tabCount).toBeGreaterThan(0)
+
+		// Active tab should have aria-selected=true
+		const activeTab = tablist.getByRole("tab", { selected: true })
+		await expect(activeTab).toBeVisible()
+
+		// Should have navigation buttons outside the tablist
 		await expect(page.getByRole("button", { name: "Previous section" })).toBeVisible()
 		await expect(page.getByRole("button", { name: "Next section" })).toBeVisible()
 	})

@@ -4,7 +4,8 @@ import { cn } from "../../lib/utils";
 import type { SectionConfig } from "../../templates/types";
 import { ContextPanelHeader } from "./ContextPanelHeader";
 import { FieldRenderer } from "./FieldRenderer";
-import { getValueByPath, listFieldMap } from "./hooks/useEditorState";
+import { getValueByPath } from "./hooks/useEditorState";
+import { listFieldMap } from "./listFieldMap";
 
 type ContextPanelProps = {
 	sectionId: string;
@@ -21,6 +22,8 @@ type ContextPanelProps = {
 	completion: number;
 	collapsed?: boolean;
 	onToggleCollapse?: () => void;
+	sections?: SectionConfig[];
+	onSectionChange?: (sectionId: string) => void;
 };
 
 export function ContextPanel({
@@ -38,6 +41,8 @@ export function ContextPanel({
 	completion,
 	collapsed = false,
 	onToggleCollapse,
+	sections,
+	onSectionChange,
 }: ContextPanelProps) {
 	const isVisible = sectionVisibility[sectionId] ?? true;
 	const sectionLabel =
@@ -51,7 +56,7 @@ export function ContextPanel({
 					type="button"
 					onClick={onToggleCollapse}
 					aria-label="Expand editor panel"
-					className="mt-3 inline-flex h-9 w-9 items-center justify-center rounded-xl text-[color:var(--dm-muted)] hover:bg-[color:var(--dm-surface-muted)]"
+					className="mt-3 inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl text-[color:var(--dm-muted)] hover:bg-[color:var(--dm-surface-muted)]"
 				>
 					<ChevronLeft className="h-4 w-4" aria-hidden="true" />
 				</button>
@@ -72,7 +77,7 @@ export function ContextPanel({
 					type="button"
 					onClick={onToggleCollapse}
 					aria-label="Collapse editor panel"
-					className="absolute -left-3 top-5 z-20 hidden h-6 w-6 items-center justify-center rounded-full border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] text-[color:var(--dm-muted)] shadow-sm hover:bg-[color:var(--dm-surface-muted)] lg:inline-flex"
+					className="absolute -left-5 top-3 z-20 hidden min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] text-[color:var(--dm-muted)] shadow-sm hover:bg-[color:var(--dm-surface-muted)] lg:inline-flex"
 				>
 					<ChevronRight className="h-3 w-3" aria-hidden="true" />
 				</button>
@@ -88,8 +93,9 @@ export function ContextPanel({
 				completion={completion}
 			/>
 
-			{/* Scrollable fields */}
+			{/* Scrollable fields — key triggers re-mount for fade animation on section change */}
 			<div
+				key={sectionId}
 				className="flex-1 overflow-y-auto px-5 py-4"
 				role="tabpanel"
 				aria-label={`${sectionLabel} fields`}
@@ -166,6 +172,24 @@ export function ContextPanel({
 							No editable fields for this section.
 						</p>
 					)}
+
+					{/* "Next Section" button */}
+					{sections && onSectionChange && (() => {
+						const currentIndex = sections.findIndex((s) => s.id === sectionId);
+						const nextSection = sections[currentIndex + 1];
+						if (!nextSection) return null;
+						const nextLabel = nextSection.id.replace(/^\w/, (c) => c.toUpperCase());
+						return (
+							<button
+								type="button"
+								onClick={() => onSectionChange(nextSection.id)}
+								className="mt-2 flex w-full items-center justify-end gap-1 py-2 text-sm text-[color:var(--dm-muted)] transition-colors hover:text-[color:var(--dm-ink)]"
+							>
+								Next: {nextLabel}
+								<ChevronRight className="h-4 w-4" aria-hidden="true" />
+							</button>
+						);
+					})()}
 				</div>
 			</div>
 		</aside>

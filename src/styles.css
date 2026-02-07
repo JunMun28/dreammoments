@@ -76,6 +76,10 @@ code {
   --dm-on-accent: #ffffff;
   --dm-ease-slow: cubic-bezier(0.25, 0.1, 0.25, 1);
 
+  /* Semantic tokens */
+  --dm-error: #b91c1c;
+  --dm-focus: var(--dm-peach);
+
   --radius: 2rem;
   --border-hairline: 1px;
 
@@ -97,6 +101,7 @@ code {
   --color-dm-border: var(--dm-border);
   --color-dm-accent-strong: var(--dm-accent-strong);
   --color-dm-on-accent: var(--dm-on-accent);
+  --color-dm-error: var(--dm-error);
 
   --font-heading: var(--font-heading);
   --font-body: var(--font-body);
@@ -1542,6 +1547,14 @@ h4 {
   background-color: rgba(201, 169, 98, 0.1);
 }
 
+/* Desktop-only dashed outline on hover to indicate clickability */
+@media (hover: hover) {
+  .dm-editable:hover {
+    outline: 1px dashed var(--dm-border);
+    outline-offset: 2px;
+  }
+}
+
 .dm-editable:focus-visible {
   outline: 2px solid var(--dm-peach);
   outline-offset: 2px;
@@ -1573,6 +1586,11 @@ h4 {
 
    Catches any animations/transitions not explicitly handled above.
    Ensures all motion is suppressed for users who prefer reduced motion.
+   This covers ALL animated components including:
+   - AiAssistantDrawer (tw-animate-css: animate-in/out, fade-in/out, slide-in/out)
+   - Section transitions ([role="tabpanel"] dm-section-slide-in)
+   - Preview overlay (dm-preview-enter)
+   - All template-specific animations
    ═══════════════════════════════════════════════════════════════════════════ */
 
 @media (prefers-reduced-motion: reduce) {

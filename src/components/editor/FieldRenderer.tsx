@@ -1,4 +1,5 @@
 import type { ChangeEvent } from "react";
+import { cn } from "../../lib/utils";
 import type { FieldConfig } from "../../templates/types";
 import { ImageUploadField } from "./ImageUploadField";
 import { ListFieldEditor } from "./ListFieldEditor";
@@ -88,18 +89,26 @@ export function FieldRenderer({
 	};
 
 	return (
-		<div className="grid gap-2">
+		<div
+			className={cn(
+				"grid gap-2",
+				error && "border-l-2 border-[color:var(--dm-error)] pl-3",
+			)}
+		>
 			<label
 				htmlFor={inputId}
 				className="text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]"
 			>
 				{field.label}
+				{field.required && (
+					<span className="ml-0.5 text-[color:var(--dm-error)]" aria-hidden="true">*</span>
+				)}
 			</label>
 			{field.type === "textarea" ? (
 				<textarea
 					{...sharedProps}
 					id={inputId}
-					className="min-h-[110px] w-full rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] px-4 py-3 text-base text-[color:var(--dm-ink)]"
+					className="min-h-[110px] w-full rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] px-4 py-3 text-base text-[color:var(--dm-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--dm-focus)]/60"
 				/>
 			) : (
 				<input
@@ -116,7 +125,7 @@ export function FieldRenderer({
 				/>
 			)}
 			{error ? (
-				<output className="text-[11px] text-[#b91c1c]" aria-live="polite">
+				<output className="text-[11px] text-dm-error" aria-live="polite">
 					{error}
 				</output>
 			) : null}

@@ -14,6 +14,7 @@ import { EditorPreviewFrame } from "../../components/editor/EditorPreviewFrame";
 import { EditorToolbar } from "../../components/editor/EditorToolbar";
 import { useAiAssistant } from "../../components/editor/hooks/useAiAssistant";
 import { useAutoSave } from "../../components/editor/hooks/useAutoSave";
+import { useFocusTrap } from "../../components/editor/hooks/useFocusTrap";
 import {
 	getValueByPath,
 	setValueByPath,
@@ -62,6 +63,7 @@ export function EditorScreen() {
 	const navigate = useNavigate();
 	const rawId = useId();
 	const upgradeTitleId = `upgrade-title-${rawId.replaceAll(":", "")}`;
+	const slugInputId = `slug-input-${rawId.replaceAll(":", "")}`;
 
 	const invitation = useStore((store) =>
 		store.invitations.find((item) => item.id === invitationId),
@@ -69,9 +71,11 @@ export function EditorScreen() {
 	const [loginBypassDone, setLoginBypassDone] = useState(false);
 	const user = getCurrentUser();
 
-	// Bypass login for testing: ensure demo user exists so editor can load
+	// DEV-only bypass: create a demo user so the editor loads without login.
+	// Gated behind import.meta.env.DEV to prevent unauthenticated user creation in production.
 	useEffect(() => {
 		if (user) return;
+		if (!import.meta.env.DEV) return;
 		createUser({
 			email: "demo@test.local",
 			name: "Demo",
@@ -122,6 +126,7 @@ export function EditorScreen() {
 		invitationId: invitation?.id ?? "",
 		draftRef,
 		visibilityRef,
+		version: editor.version,
 	});
 
 	// Section progress
@@ -173,6 +178,14 @@ export function EditorScreen() {
 	const [upgradeOpen, setUpgradeOpen] = useState(false);
 	const [panelCollapsed, setPanelCollapsed] = useState(false);
 	const [isHydrated, setIsHydrated] = useState(false);
+	const [slugDialogOpen, setSlugDialogOpen] = useState(false);
+	const [slugValue, setSlugValue] = useState("");
+
+	// Refs for focus trap containers
+	const previewDialogRef = useRef<HTMLDivElement | null>(null);
+	const slugDialogRef = useRef<HTMLDivElement | null>(null);
+	const upgradeDialogRef = useRef<HTMLDivElement | null>(null);
+	const shortcutsDialogRef = useRef<HTMLDivElement | null>(null);
 
 	const styleOverrides = (invitation?.designOverrides ?? {}) as Record<
 		string,
@@ -194,6 +207,24 @@ export function EditorScreen() {
 			},
 			{ enabled: !isMobile },
 		);
+
+	// Focus traps for dialogs
+	useFocusTrap(previewDialogRef, {
+		enabled: previewMode,
+		onEscape: () => setPreviewMode(false),
+	});
+	useFocusTrap(slugDialogRef, {
+		enabled: slugDialogOpen,
+		onEscape: () => setSlugDialogOpen(false),
+	});
+	useFocusTrap(upgradeDialogRef, {
+		enabled: upgradeOpen,
+		onEscape: () => setUpgradeOpen(false),
+	});
+	useFocusTrap(shortcutsDialogRef, {
+		enabled: showShortcutsHelp,
+		onEscape: () => setShowShortcutsHelp(false),
+	});
 
 	useEffect(() => {
 		setIsHydrated(true);
@@ -251,8 +282,15 @@ export function EditorScreen() {
 			setUpgradeOpen(true);
 			return;
 		}
-		const slug = prompt("Set your custom slug", invitation.slug);
-		publishInvitation(invitation.id, { slug: slug ?? invitation.slug });
+		setSlugValue(invitation.slug);
+		setSlugDialogOpen(true);
+	};
+
+	const handleSlugConfirm = () => {
+		publishInvitation(invitation.id, {
+			slug: slugValue.trim() || invitation.slug,
+		});
+		setSlugDialogOpen(false);
 	};
 
 	const handleShare = () => {
@@ -379,6 +417,8 @@ export function EditorScreen() {
 			completion={sectionProgress[editor.activeSection] ?? 0}
 			collapsed={!isMobile && panelCollapsed}
 			onToggleCollapse={() => setPanelCollapsed((prev) => !prev)}
+			sections={template?.sections}
+			onSectionChange={handleSectionChange}
 		/>
 	);
 
@@ -391,6 +431,7 @@ export function EditorScreen() {
 			initialSnap={1}
 			activeSnapIndex={mobileSnapIndex}
 			onSnapChange={setMobileSnapIndex}
+			isDirty={editor.version > 0}
 		>
 			{contextPanelInner}
 		</MobileBottomSheet>
@@ -447,6 +488,10 @@ export function EditorScreen() {
 			{/* Preview mode overlay */}
 			{previewMode && (
 				<div
+					ref={previewDialogRef}
+					role="dialog"
+					aria-modal="true"
+					aria-label="Invitation preview"
 					className={`dm-preview ${
 						isLightTemplate ? "dm-shell-light" : "dm-shell-dark"
 					}`}
@@ -482,6 +527,7 @@ export function EditorScreen() {
 			{/* Upgrade dialog */}
 			{upgradeOpen && (
 				<div
+					ref={upgradeDialogRef}
 					className="dm-inline-edit"
 					role="dialog"
 					aria-modal="true"
@@ -526,6 +572,7 @@ export function EditorScreen() {
 			{/* Keyboard shortcuts help */}
 			{showShortcutsHelp && (
 				<div
+					ref={shortcutsDialogRef}
 					className="dm-inline-edit"
 					role="dialog"
 					aria-modal="true"
@@ -560,6 +607,56 @@ export function EditorScreen() {
 						>
 							Close
 						</button>
+					</div>
+				</div>
+			)}
+
+			{/* Custom slug input dialog (replaces native prompt()) */}
+			{slugDialogOpen && (
+				<div
+					ref={slugDialogRef}
+					className="dm-inline-edit"
+					role="dialog"
+					aria-modal="true"
+					aria-label="Set custom slug"
+				>
+					<div className="dm-inline-card">
+						<p className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">
+							Set Your Custom URL
+						</p>
+						<label
+							htmlFor={slugInputId}
+							className="mt-3 block text-sm text-[color:var(--dm-muted)]"
+						>
+							Invitation slug
+						</label>
+						<input
+							id={slugInputId}
+							type="text"
+							value={slugValue}
+							onChange={(e) => setSlugValue(e.target.value)}
+							onKeyDown={(e) => {
+								if (e.key === "Enter") handleSlugConfirm();
+							}}
+							className="mt-1 w-full rounded-lg border border-[color:var(--dm-border)] bg-[color:var(--dm-bg)] px-3 py-2 text-sm text-[color:var(--dm-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--dm-focus)]/60"
+							autoComplete="off"
+						/>
+						<div className="mt-4 flex gap-3">
+							<button
+								type="button"
+								className="flex-1 rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-ink)]"
+								onClick={() => setSlugDialogOpen(false)}
+							>
+								Cancel
+							</button>
+							<button
+								type="button"
+								className="flex-1 rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)]"
+								onClick={handleSlugConfirm}
+							>
+								Save
+							</button>
+						</div>
 					</div>
 				</div>
 			)}

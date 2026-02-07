@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft, Eye, Redo2, Send, Undo2 } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "../../lib/utils";
 import { SaveStatusBadge } from "./SaveStatusBadge";
 
@@ -30,6 +30,101 @@ export function EditorToolbar({
 	isMobile,
 }: EditorToolbarProps) {
 	const [overflowOpen, setOverflowOpen] = useState(false);
+	const [focusedIndex, setFocusedIndex] = useState(-1);
+	const triggerRef = useRef<HTMLButtonElement>(null);
+	const menuItemRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+	const menuItems = [
+		{
+			label: "Undo",
+			icon: Undo2,
+			action: onUndo,
+			disabled: !canUndo,
+			accent: false,
+		},
+		{
+			label: "Redo",
+			icon: Redo2,
+			action: onRedo,
+			disabled: !canRedo,
+			accent: false,
+		},
+		{
+			label: "Preview",
+			icon: Eye,
+			action: onPreview,
+			disabled: false,
+			accent: false,
+		},
+		{
+			label: "Publish",
+			icon: Send,
+			action: onPublish,
+			disabled: false,
+			accent: true,
+		},
+	];
+
+	const closeMenu = useCallback(() => {
+		setOverflowOpen(false);
+		setFocusedIndex(-1);
+		triggerRef.current?.focus();
+	}, []);
+
+	// Focus the first menu item when menu opens
+	useEffect(() => {
+		if (overflowOpen) {
+			setFocusedIndex(0);
+			requestAnimationFrame(() => {
+				menuItemRefs.current[0]?.focus();
+			});
+		}
+	}, [overflowOpen]);
+
+	const handleMenuKeyDown = useCallback(
+		(e: React.KeyboardEvent) => {
+			switch (e.key) {
+				case "ArrowDown": {
+					e.preventDefault();
+					const next = (focusedIndex + 1) % menuItems.length;
+					setFocusedIndex(next);
+					menuItemRefs.current[next]?.focus();
+					break;
+				}
+				case "ArrowUp": {
+					e.preventDefault();
+					const prev = (focusedIndex - 1 + menuItems.length) % menuItems.length;
+					setFocusedIndex(prev);
+					menuItemRefs.current[prev]?.focus();
+					break;
+				}
+				case "Home": {
+					e.preventDefault();
+					setFocusedIndex(0);
+					menuItemRefs.current[0]?.focus();
+					break;
+				}
+				case "End": {
+					e.preventDefault();
+					const last = menuItems.length - 1;
+					setFocusedIndex(last);
+					menuItemRefs.current[last]?.focus();
+					break;
+				}
+				case "Escape": {
+					e.preventDefault();
+					closeMenu();
+					break;
+				}
+				case "Tab": {
+					e.preventDefault();
+					closeMenu();
+					break;
+				}
+			}
+		},
+		[focusedIndex, menuItems.length, closeMenu],
+	);
 
 	if (isMobile) {
 		return (
@@ -43,15 +138,28 @@ export function EditorToolbar({
 					Back
 				</Link>
 
-				<h1 className="max-w-[40vw] truncate text-sm font-semibold text-[color:var(--dm-ink)]">
-					{title}
-				</h1>
+				<div className="flex items-center gap-1.5">
+					<output
+						className={cn(
+							"block h-1.5 w-1.5 shrink-0 rounded-full",
+							saveStatus === "saved" && "bg-[#22c55e]",
+							saveStatus === "saving" && "bg-[#eab308]",
+							saveStatus === "unsaved" && "bg-[color:var(--dm-muted)]",
+						)}
+						aria-label={`Save status: ${saveStatus}`}
+					/>
+					<h1 className="max-w-[40vw] truncate text-sm font-semibold text-[color:var(--dm-ink)]">
+						{title}
+					</h1>
+				</div>
 
 				<div className="relative">
 					<button
+						ref={triggerRef}
 						type="button"
 						className="inline-flex min-h-11 min-w-11 items-center justify-center text-[color:var(--dm-ink)]"
 						aria-label="More actions"
+						aria-haspopup="true"
 						aria-expanded={overflowOpen}
 						onClick={() => setOverflowOpen((prev) => !prev)}
 					>
@@ -73,60 +181,53 @@ export function EditorToolbar({
 							{/* biome-ignore lint/a11y/noStaticElementInteractions: backdrop dismiss pattern */}
 							<div
 								className="fixed inset-0 z-40"
-								onClick={() => setOverflowOpen(false)}
+								onClick={closeMenu}
 								onKeyDown={(e) => {
-									if (e.key === "Escape") setOverflowOpen(false);
+									if (e.key === "Escape") closeMenu();
 								}}
 							/>
-							<div className="absolute right-0 top-full z-50 mt-1 min-w-[180px] rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-2 shadow-lg">
-								<button
-									type="button"
-									disabled={!canUndo}
-									className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-sm text-[color:var(--dm-ink)] disabled:opacity-40 active:bg-[color:var(--dm-surface-muted)]"
-									onClick={() => {
-										onUndo();
-										setOverflowOpen(false);
-									}}
-								>
-									<Undo2 className="h-4 w-4" aria-hidden="true" />
-									Undo
-								</button>
-								<button
-									type="button"
-									disabled={!canRedo}
-									className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-sm text-[color:var(--dm-ink)] disabled:opacity-40 active:bg-[color:var(--dm-surface-muted)]"
-									onClick={() => {
-										onRedo();
-										setOverflowOpen(false);
-									}}
-								>
-									<Redo2 className="h-4 w-4" aria-hidden="true" />
-									Redo
-								</button>
-								<button
-									type="button"
-									className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-sm text-[color:var(--dm-ink)] active:bg-[color:var(--dm-surface-muted)]"
-									onClick={() => {
-										onPreview();
-										setOverflowOpen(false);
-									}}
-								>
-									<Eye className="h-4 w-4" aria-hidden="true" />
-									Preview
-								</button>
-								<div className="my-1 border-t border-[color:var(--dm-border)]" />
-								<button
-									type="button"
-									className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-sm font-medium text-[color:var(--dm-accent-strong)] active:bg-[color:var(--dm-surface-muted)]"
-									onClick={() => {
-										onPublish();
-										setOverflowOpen(false);
-									}}
-								>
-									<Send className="h-4 w-4" aria-hidden="true" />
-									Publish
-								</button>
-								<div className="mt-1 border-t border-[color:var(--dm-border)] pt-2 px-3">
+							<div
+								role="menu"
+								aria-label="More actions"
+								onKeyDown={handleMenuKeyDown}
+								className="absolute right-0 top-full z-50 mt-1 min-w-[180px] rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-2 shadow-lg"
+							>
+								{menuItems.map((item, index) => {
+									const Icon = item.icon;
+									const isSeparatorBefore = index === 3;
+									return (
+										<div key={item.label}>
+											{isSeparatorBefore && (
+												<hr className="my-1 border-t border-[color:var(--dm-border)]" />
+											)}
+											<button
+												ref={(el) => {
+													menuItemRefs.current[index] = el;
+												}}
+												type="button"
+												role="menuitem"
+												tabIndex={focusedIndex === index ? 0 : -1}
+												disabled={item.disabled}
+												className={cn(
+													"flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-sm active:bg-[color:var(--dm-surface-muted)]",
+													item.accent
+														? "font-medium text-[color:var(--dm-accent-strong)]"
+														: "text-[color:var(--dm-ink)]",
+													item.disabled && "opacity-40",
+												)}
+												onClick={() => {
+													item.action();
+													closeMenu();
+												}}
+											>
+												<Icon className="h-4 w-4" aria-hidden="true" />
+												{item.label}
+											</button>
+										</div>
+									);
+								})}
+								<hr className="mt-1 border-t border-[color:var(--dm-border)]" />
+								<div className="px-3 pt-2">
 									<SaveStatusBadge
 										status={saveStatus}
 										autosaveAt={autosaveAt}

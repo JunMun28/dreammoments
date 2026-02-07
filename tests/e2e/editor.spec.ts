@@ -39,8 +39,7 @@ const setupEditor = async (
 	await stubBrowserApis(page)
 }
 
-test("editor layout + section switching", async ({ page }, testInfo) => {
-	if (testInfo.project.name !== "chromium") test.skip()
+test("editor layout + section switching", async ({ page }) => {
 	await setupEditor(page)
 	await page.goto(`/editor/${seedInvitations.love.id}`)
 	await waitForStoreHydration(page)
@@ -55,8 +54,7 @@ test("editor layout + section switching", async ({ page }, testInfo) => {
 	await expect(page.getByText("Active: schedule")).toBeVisible()
 })
 
-test("editor visibility toggle", async ({ page }, testInfo) => {
-	if (testInfo.project.name !== "chromium") test.skip()
+test("editor visibility toggle", async ({ page }) => {
 	await setupEditor(page)
 	await page.goto(`/editor/${seedInvitations.love.id}`)
 	await waitForStoreHydration(page)
@@ -67,8 +65,7 @@ test("editor visibility toggle", async ({ page }, testInfo) => {
 	await expect(page.locator('[data-section="story"]')).toHaveCount(1)
 })
 
-test("editor field types + list + image", async ({ page }, testInfo) => {
-	if (testInfo.project.name !== "chromium") test.skip()
+test("editor field types + list + image", async ({ page }) => {
 	await setupEditor(page)
 	await page.goto(`/editor/${seedInvitations.love.id}`)
 	await waitForStoreHydration(page)
@@ -109,8 +106,7 @@ test("editor field types + list + image", async ({ page }, testInfo) => {
 	await expect(removeButtons).toHaveCount(removeCount)
 })
 
-test("editor validation + undo/redo", async ({ page }, testInfo) => {
-	if (testInfo.project.name !== "chromium") test.skip()
+test("editor validation + undo/redo", async ({ page }) => {
 	await setupEditor(page)
 	await page.goto(`/editor/${seedInvitations.love.id}`)
 	await waitForStoreHydration(page)
@@ -127,8 +123,7 @@ test("editor validation + undo/redo", async ({ page }, testInfo) => {
 	await expect(page.locator('[data-section="hero"]')).toContainText("Nova")
 })
 
-test("editor autosave label", async ({ page }, testInfo) => {
-	if (testInfo.project.name !== "chromium") test.skip()
+test("editor autosave label", async ({ page }) => {
 	await page.addInitScript(() => {
 		const original = window.setInterval
 		window.setInterval = (handler, timeout, ...args) =>
@@ -141,6 +136,7 @@ test("editor autosave label", async ({ page }, testInfo) => {
 	await expect(page.getByText(/AI Usage:/)).not.toContainText("Pending")
 })
 
+// beforeunload dialog behavior varies across browser engines
 test("editor beforeunload prompt", async ({ page }, testInfo) => {
 	if (testInfo.project.name !== "chromium") test.skip()
 	await page.addInitScript(() => {
@@ -161,8 +157,7 @@ test("editor beforeunload prompt", async ({ page }, testInfo) => {
 	expect(dialogType).toBe("beforeunload")
 })
 
-test("editor preview + share", async ({ page }, testInfo) => {
-	if (testInfo.project.name !== "chromium") test.skip()
+test("editor preview + share", async ({ page }) => {
 	await setupEditor(page)
 	await page.goto(`/editor/${seedInvitations.love.id}`)
 	await waitForStoreHydration(page)
@@ -179,8 +174,7 @@ test("editor preview + share", async ({ page }, testInfo) => {
 	expect(updated?.status).toBe("published")
 })
 
-test("editor publish flow free + premium", async ({ page }, testInfo) => {
-	if (testInfo.project.name !== "chromium") test.skip()
+test("editor publish flow free + premium", async ({ page }) => {
 	await setupEditor(page)
 	await page.goto(`/editor/${seedInvitations.love.id}`)
 	await waitForStoreHydration(page)
@@ -194,15 +188,16 @@ test("editor publish flow free + premium", async ({ page }, testInfo) => {
 	await setupEditor(page, { currentUserId: testUsers.premium.id, invitationId: seedInvitations.garden.id })
 	await page.goto(`/editor/${seedInvitations.garden.id}`)
 	await waitForStoreHydration(page)
-	page.on("dialog", (dialog) => dialog.accept("My Cool Slug!!"))
 	await page.getByRole("button", { name: "Publish" }).click()
+	// Custom slug dialog replaces native prompt() — fill in the slug input and confirm
+	await page.getByRole("textbox", { name: /slug/i }).fill("My Cool Slug!!")
+	await page.getByRole("button", { name: /save/i }).click()
 	const premiumStore = await getStore(page)
 	const premiumInvitation = premiumStore.invitations.find((item: any) => item.id === seedInvitations.garden.id)
 	expect(premiumInvitation?.slug).toBe("my-cool-slug")
 })
 
-test("editor ai panel + limit", async ({ page }, testInfo) => {
-	if (testInfo.project.name !== "chromium") test.skip()
+test("editor ai panel + limit", async ({ page }) => {
 	await setupEditor(page)
 	await page.goto(`/editor/${seedInvitations.love.id}`)
 	await waitForStoreHydration(page)
@@ -228,8 +223,7 @@ test("editor ai panel + limit", async ({ page }, testInfo) => {
 	await expect(limitPanel.getByText("AI limit reached")).toBeVisible()
 })
 
-test("inline edit mobile", async ({ page }, testInfo) => {
-	if (testInfo.project.name !== "chromium") test.skip()
+test("inline edit mobile", async ({ page }) => {
 	await mockMobileMatchMedia(page, true)
 	await setupEditor(page)
 	await page.setViewportSize({ width: 1024, height: 768 })

@@ -1,0 +1,10 @@
+{
+  "session_id": "7eb72fd1-3ae0-4b5f-9089-8d3ce5c4c3e0",
+  "transcript_path": "/Users/wongjunmun/.claude/projects/-Users-wongjunmun-Developer-tanstack-projects-dreammoments/7eb72fd1-3ae0-4b5f-9089-8d3ce5c4c3e0.jsonl",
+  "cwd": "/Users/wongjunmun/Developer/tanstack_projects/dreammoments",
+  "permission_mode": "bypassPermissions",
+  "hook_event_name": "PreToolUse",
+  "tool_name": "TeamDelete",
+  "tool_input": {},
+  "tool_use_id": "toolu_01Kmh7mJvZcFFphLdu8uRGg2"
+}

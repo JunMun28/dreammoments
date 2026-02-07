@@ -2,53 +2,12 @@ import { useMemo, useState } from "react";
 import type { InvitationContent } from "../../../lib/types";
 import type { FieldConfig } from "../../../templates/types";
 
+export { listFieldMap } from "../listFieldMap";
+
 export type UseEditorStateParams = {
 	initialContent: InvitationContent;
 	initialVisibility: Record<string, boolean>;
 	initialSection: string;
-};
-
-export const listFieldMap: Record<
-	string,
-	{ label: string; fields: Array<{ key: string; label: string }> }
-> = {
-	story: {
-		label: "Milestones",
-		fields: [
-			{ key: "date", label: "Date" },
-			{ key: "title", label: "Title" },
-			{ key: "description", label: "Description" },
-		],
-	},
-	schedule: {
-		label: "Events",
-		fields: [
-			{ key: "time", label: "Time" },
-			{ key: "title", label: "Title" },
-			{ key: "description", label: "Description" },
-		],
-	},
-	faq: {
-		label: "FAQ Items",
-		fields: [
-			{ key: "question", label: "Question" },
-			{ key: "answer", label: "Answer" },
-		],
-	},
-	gallery: {
-		label: "Gallery",
-		fields: [
-			{ key: "url", label: "Image URL" },
-			{ key: "caption", label: "Caption" },
-		],
-	},
-	entourage: {
-		label: "Entourage",
-		fields: [
-			{ key: "role", label: "Role" },
-			{ key: "name", label: "Name" },
-		],
-	},
 };
 
 export function getValueByPath(
@@ -111,6 +70,7 @@ export function useEditorState({
 	const [errors, setErrors] = useState<Record<string, string>>({});
 	const [history, setHistory] = useState<InvitationContent[]>([]);
 	const [future, setFuture] = useState<InvitationContent[]>([]);
+	const [version, setVersion] = useState(0);
 
 	const canUndo = history.length > 0;
 	const canRedo = future.length > 0;
@@ -119,6 +79,7 @@ export function useEditorState({
 		setHistory((prev) => [...prev.slice(-19), draft]);
 		setFuture([]);
 		setDraft(next);
+		setVersion((v) => v + 1);
 	};
 
 	const handleUndo = () => {
@@ -127,6 +88,7 @@ export function useEditorState({
 		setHistory((prev) => prev.slice(0, -1));
 		setFuture((prev) => [draft, ...prev].slice(0, 20));
 		setDraft(previous);
+		setVersion((v) => v + 1);
 	};
 
 	const handleRedo = () => {
@@ -135,6 +97,7 @@ export function useEditorState({
 		setFuture((prev) => prev.slice(1));
 		setHistory((prev) => [...prev.slice(-19), draft]);
 		setDraft(next);
+		setVersion((v) => v + 1);
 	};
 
 	const handleFieldChange = (fieldPath: string, value: string | boolean) => {
@@ -170,5 +133,6 @@ export function useEditorState({
 		handleRedo,
 		handleFieldChange,
 		hiddenSections,
+		version,
 	};
 }

@@ -41,10 +41,10 @@ for (const viewport of VIEWPORTS) {
 			await waitForStoreHydration(page)
 
 			await expect(page.getByRole("heading", { name: "Sarah & Michael", exact: true })).toBeVisible()
-			await page.screenshot({
-				path: `tests/e2e/__screenshots__/${viewport.name.replace(/\s/g, "-")}-initial.png`,
-				fullPage: false,
-			})
+			await expect(page).toHaveScreenshot(
+				`${viewport.name.replace(/\s/g, "-")}-initial.png`,
+				{ maxDiffPixelRatio: 0.01, animations: "disabled" },
+			)
 		})
 
 		test("editor preview mode", async ({ page }) => {
@@ -64,10 +64,10 @@ for (const viewport of VIEWPORTS) {
 				}
 			}
 
-			await page.screenshot({
-				path: `tests/e2e/__screenshots__/${viewport.name.replace(/\s/g, "-")}-preview.png`,
-				fullPage: false,
-			})
+			await expect(page).toHaveScreenshot(
+				`${viewport.name.replace(/\s/g, "-")}-preview.png`,
+				{ maxDiffPixelRatio: 0.01, animations: "disabled" },
+			)
 		})
 	})
 }

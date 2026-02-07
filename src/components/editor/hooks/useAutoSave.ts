@@ -10,6 +10,7 @@ export type UseAutoSaveParams = {
 	invitationId: string;
 	draftRef: React.RefObject<InvitationContent>;
 	visibilityRef: React.RefObject<Record<string, boolean>>;
+	version: number;
 };
 
 export type SaveStatus = "saved" | "saving" | "unsaved";
@@ -18,19 +19,22 @@ export function useAutoSave({
 	invitationId,
 	draftRef,
 	visibilityRef,
+	version,
 }: UseAutoSaveParams) {
 	const [autosaveAt, setAutosaveAt] = useState<string>("");
 	const [saveStatus, setSaveStatus] = useState<SaveStatus>("saved");
-	const lastSavedSnapshotRef = useRef<string>(JSON.stringify(draftRef.current));
+	const lastSavedVersionRef = useRef(0);
+	const versionRef = useRef(version);
+	versionRef.current = version;
 
-	const hasUnsavedChanges =
-		JSON.stringify(draftRef.current) !== lastSavedSnapshotRef.current;
+	const hasUnsavedChanges = version !== lastSavedVersionRef.current;
 
 	const saveNow = useCallback(() => {
+		if (versionRef.current === lastSavedVersionRef.current) return;
 		setSaveStatus("saving");
 		updateInvitationContent(invitationId, draftRef.current);
 		setInvitationVisibility(invitationId, visibilityRef.current);
-		lastSavedSnapshotRef.current = JSON.stringify(draftRef.current);
+		lastSavedVersionRef.current = versionRef.current;
 		setAutosaveAt(new Date().toLocaleTimeString());
 		setSaveStatus("saved");
 	}, [invitationId, draftRef, visibilityRef]);

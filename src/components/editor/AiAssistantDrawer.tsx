@@ -3,6 +3,7 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { cn } from "../../lib/utils";
 import { AiSuggestionCard } from "./AiSuggestionCard";
 import type { AiTaskType } from "./hooks/useAiAssistant";
+import { useFocusTrap } from "./hooks/useFocusTrap";
 import MobileBottomSheet from "./MobileBottomSheet";
 
 export type AiAssistantDrawerProps = {
@@ -82,6 +83,7 @@ function DrawerContent({
 							<button
 								key={option.value}
 								type="button"
+								aria-pressed={type === option.value}
 								onClick={() => onTypeChange(option.value)}
 								className={cn(
 									"min-h-11 rounded-full px-4 text-xs uppercase tracking-[0.15em] transition-colors",
@@ -140,7 +142,7 @@ function DrawerContent({
 
 				{/* Error display */}
 				{error && (
-					<output className="block text-xs text-[#b91c1c]" aria-live="polite">
+					<output className="block text-xs text-dm-error" aria-live="polite">
 						{error}
 					</output>
 				)}
@@ -189,50 +191,11 @@ export function AiAssistantDrawer(props: AiAssistantDrawerProps) {
 		}, 300);
 	}, [onClose, generating]);
 
-	// Close on Escape for desktop
-	useEffect(() => {
-		if (!open || isMobile) return;
-		const handler = (e: KeyboardEvent) => {
-			if (e.key === "Escape" && !generating) {
-				e.preventDefault();
-				handleClose();
-			}
-		};
-		document.addEventListener("keydown", handler);
-		return () => document.removeEventListener("keydown", handler);
-	}, [open, isMobile, generating, handleClose]);
-
-	// Full focus trap for desktop drawer
-	useEffect(() => {
-		if (!open || isMobile || !drawerRef.current) return;
-		const drawer = drawerRef.current;
-		const focusable = drawer.querySelectorAll<HTMLElement>(
-			'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-		);
-		const first = focusable[0];
-		first?.focus();
-
-		const handleTabKey = (e: KeyboardEvent) => {
-			if (e.key !== "Tab" || !drawerRef.current) return;
-			const currentFocusable = drawerRef.current.querySelectorAll<HTMLElement>(
-				'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-			);
-			if (currentFocusable.length === 0) return;
-
-			const firstEl = currentFocusable[0];
-			const lastEl = currentFocusable[currentFocusable.length - 1];
-
-			if (e.shiftKey && document.activeElement === firstEl) {
-				e.preventDefault();
-				lastEl?.focus();
-			} else if (!e.shiftKey && document.activeElement === lastEl) {
-				e.preventDefault();
-				firstEl?.focus();
-			}
-		};
-		document.addEventListener("keydown", handleTabKey);
-		return () => document.removeEventListener("keydown", handleTabKey);
-	}, [open, isMobile]);
+	// Focus trap for desktop drawer (delegates to shared hook)
+	useFocusTrap(drawerRef, {
+		enabled: open && !isMobile,
+		onEscape: handleClose,
+	});
 
 	// Prevent body scroll when desktop drawer is open
 	useEffect(() => {
