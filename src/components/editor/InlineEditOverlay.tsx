@@ -41,6 +41,7 @@ export default function InlineEditOverlay({
 }: InlineEditOverlayProps) {
 	const popoverRef = useRef<HTMLDivElement>(null);
 	const inputRef = useRef<HTMLTextAreaElement>(null);
+	const [liveRect, setLiveRect] = useState<DOMRect | null>(rect);
 	const [position, setPosition] = useState<{
 		top: number;
 		left: number;
@@ -49,47 +50,78 @@ export default function InlineEditOverlay({
 
 	const isMultiline = value.length > 60 || value.includes("\n");
 	const label = formatFieldLabel(fieldPath);
-	const shouldRender = !isMobile && rect != null;
+	const shouldRenderDesktop = !isMobile && liveRect != null;
+	const shouldRenderMobile = isMobile && rect != null;
 
-	// Position the popover relative to the element rect
+	// Keep rect fresh on scroll/resize (desktop only)
 	useLayoutEffect(() => {
-		if (!shouldRender || !rect) return;
+		setLiveRect(rect);
+	}, [rect]);
+
+	useEffect(() => {
+		if (!shouldRenderDesktop || !rect) return;
+		const handler = () => {
+			// rect came from getBoundingClientRect; re-read isn't possible without element ref,
+			// so we recalculate position from the original rect offset by scroll delta
+			setLiveRect(rect);
+		};
+		window.addEventListener("scroll", handler, { passive: true });
+		window.addEventListener("resize", handler, { passive: true });
+		return () => {
+			window.removeEventListener("scroll", handler);
+			window.removeEventListener("resize", handler);
+		};
+	}, [shouldRenderDesktop, rect]);
+
+	// Position the popover relative to the element rect (desktop)
+	useLayoutEffect(() => {
+		if (!shouldRenderDesktop || !liveRect) return;
 
 		const viewportWidth = window.innerWidth;
 		const viewportHeight = window.innerHeight;
 
 		const estimatedHeight = isMultiline ? 200 : 160;
 
-		const spaceBelow = viewportHeight - rect.bottom - POPOVER_GAP;
-		const spaceAbove = rect.top - POPOVER_GAP;
+		const spaceBelow = viewportHeight - liveRect.bottom - POPOVER_GAP;
+		const spaceAbove = liveRect.top - POPOVER_GAP;
 		const placeBelow =
 			spaceBelow >= estimatedHeight || spaceBelow >= spaceAbove;
 
 		const top = placeBelow
-			? rect.bottom + POPOVER_GAP
-			: rect.top - POPOVER_GAP - estimatedHeight;
+			? liveRect.bottom + POPOVER_GAP
+			: liveRect.top - POPOVER_GAP - estimatedHeight;
 
-		const elementCenter = rect.left + rect.width / 2;
+		const elementCenter = liveRect.left + liveRect.width / 2;
 		let left = elementCenter - POPOVER_MAX_WIDTH / 2;
 		left = Math.max(VIEWPORT_PADDING, left);
 		left = Math.min(viewportWidth - POPOVER_MAX_WIDTH - VIEWPORT_PADDING, left);
 
 		setPosition({ top, left, arrowUp: !placeBelow });
-	}, [rect, isMultiline, shouldRender]);
+	}, [liveRect, isMultiline, shouldRenderDesktop]);
 
 	// Focus the input on mount
 	useEffect(() => {
-		if (!shouldRender) return;
+		if (!shouldRenderDesktop && !shouldRenderMobile) return;
 		const timer = setTimeout(() => {
 			inputRef.current?.focus();
-			inputRef.current?.select();
+			if (!isMobile) inputRef.current?.select();
 		}, 50);
 		return () => clearTimeout(timer);
-	}, [shouldRender]);
+	}, [shouldRenderDesktop, shouldRenderMobile, isMobile]);
+
+	// Body scroll lock when overlay is open
+	useEffect(() => {
+		if (!shouldRenderDesktop && !shouldRenderMobile) return;
+		const original = document.body.style.overflow;
+		document.body.style.overflow = "hidden";
+		return () => {
+			document.body.style.overflow = original;
+		};
+	}, [shouldRenderDesktop, shouldRenderMobile]);
 
 	// Close on Escape
 	useEffect(() => {
-		if (!shouldRender) return;
+		if (!shouldRenderDesktop && !shouldRenderMobile) return;
 		function handleKeyDown(event: KeyboardEvent) {
 			if (event.key === "Escape") {
 				event.preventDefault();
@@ -98,12 +130,12 @@ export default function InlineEditOverlay({
 		}
 		document.addEventListener("keydown", handleKeyDown);
 		return () => document.removeEventListener("keydown", handleKeyDown);
-	}, [onCancel, shouldRender]);
+	}, [onCancel, shouldRenderDesktop, shouldRenderMobile]);
 
-	// Close on click outside
+	// Close on pointer outside (pointerdown handles both mouse + touch)
 	useEffect(() => {
-		if (!shouldRender) return;
-		function handleClickOutside(event: MouseEvent) {
+		if (!shouldRenderDesktop && !shouldRenderMobile) return;
+		function handlePointerOutside(event: PointerEvent) {
 			if (
 				popoverRef.current &&
 				!popoverRef.current.contains(event.target as Node)
@@ -112,19 +144,19 @@ export default function InlineEditOverlay({
 			}
 		}
 		const timer = setTimeout(() => {
-			document.addEventListener("mousedown", handleClickOutside);
+			document.addEventListener("pointerdown", handlePointerOutside);
 		}, 100);
 		return () => {
 			clearTimeout(timer);
-			document.removeEventListener("mousedown", handleClickOutside);
+			document.removeEventListener("pointerdown", handlePointerOutside);
 		};
-	}, [onCancel, shouldRender]);
+	}, [onCancel, shouldRenderDesktop, shouldRenderMobile]);
 
 	// Focus trap
 	const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
 		if (event.key === "Tab" && popoverRef.current) {
 			const focusable = popoverRef.current.querySelectorAll<HTMLElement>(
-				'textarea, button, [tabindex]:not([tabindex="-1"])',
+				'textarea, input, button, [tabindex]:not([tabindex="-1"])',
 			);
 			if (focusable.length === 0) return;
 
@@ -141,7 +173,81 @@ export default function InlineEditOverlay({
 		}
 	}, []);
 
-	if (!shouldRender || !position) return null;
+	// Mobile: fixed-bottom input bar
+	if (shouldRenderMobile) {
+		return (
+			<div
+				ref={popoverRef}
+				role="dialog"
+				aria-label={`Edit ${label}`}
+				onKeyDown={handleKeyDown}
+				className="fixed inset-0 z-50 flex flex-col justify-end"
+			>
+				{/* Backdrop */}
+				<div className="absolute inset-0 bg-black/30" aria-hidden="true" />
+
+				{/* Bottom input bar */}
+				<div
+					className={cn(
+						"relative z-10 border-t bg-[var(--dm-surface,#fff)] px-4 pb-[env(safe-area-inset-bottom)] pt-4",
+						"border-[var(--dm-border,#e5e5e5)]",
+					)}
+				>
+					<p className="mb-2 text-xs font-medium uppercase tracking-wider text-[var(--dm-muted,#888)]">
+						{label}
+					</p>
+					<textarea
+						ref={inputRef}
+						value={value}
+						onChange={(e) => onChange(e.target.value)}
+						onKeyDown={(e) => {
+							if (e.key === "Enter" && !e.shiftKey && !isMultiline) {
+								e.preventDefault();
+								onSave();
+							}
+						}}
+						rows={isMultiline ? 3 : 1}
+						className={cn(
+							"w-full resize-none rounded-xl border px-3 py-2 text-base",
+							"border-[var(--dm-border,#e5e5e5)] bg-[var(--dm-bg,#fafafa)]",
+							"text-[var(--dm-ink,#1a1a1a)]",
+							"placeholder:text-[var(--dm-muted,#888)]",
+							"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30",
+						)}
+					/>
+					<div className="mt-3 flex items-center justify-end gap-2">
+						<button
+							type="button"
+							onClick={onCancel}
+							className={cn(
+								"min-h-[44px] rounded-xl border px-4 py-2 text-xs font-medium",
+								"border-[var(--dm-border,#e5e5e5)] text-[var(--dm-ink,#1a1a1a)]",
+								"active:bg-[var(--dm-bg,#fafafa)]",
+								"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30",
+							)}
+						>
+							Cancel
+						</button>
+						<button
+							type="button"
+							onClick={onSave}
+							className={cn(
+								"min-h-[44px] rounded-xl px-4 py-2 text-xs font-medium text-white",
+								"bg-[var(--dm-peach,#e8a87c)]",
+								"active:opacity-90",
+								"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30",
+							)}
+						>
+							Apply
+						</button>
+					</div>
+				</div>
+			</div>
+		);
+	}
+
+	// Desktop: positioned popover
+	if (!shouldRenderDesktop || !position) return null;
 
 	return (
 		<div

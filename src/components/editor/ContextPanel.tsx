@@ -62,7 +62,7 @@ export function ContextPanel({
 	return (
 		<aside
 			className={cn(
-				"flex h-full flex-col border-l border-[color:var(--dm-border)] bg-[color:var(--dm-surface)]",
+				"relative flex h-full flex-col border-l border-[color:var(--dm-border)] bg-[color:var(--dm-surface)]",
 				"w-full md:w-[320px] lg:w-[380px]",
 			)}
 		>

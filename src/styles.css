@@ -792,6 +792,24 @@ h4 {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  animation: dm-preview-enter 300ms ease-out;
+}
+
+@keyframes dm-preview-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dm-preview {
+    animation: none;
+  }
 }
 
 .dm-preview-toolbar {
@@ -817,6 +835,29 @@ h4 {
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+}
+
+/* ─── Section Change Transition ─── */
+
+@keyframes dm-section-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+[role="tabpanel"] {
+  animation: dm-section-slide-in 200ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [role="tabpanel"] {
+    animation: none;
+  }
 }
 
 /* ─── Modal Overlay (inline-edit, AI, upgrade, share) ─── */
@@ -887,35 +928,47 @@ h4 {
 
 .dm-petal {
   position: absolute;
+  top: var(--petal-top, 50%);
   background: var(--dm-peach);
   border-radius: 50% 50% 50% 20%;
   pointer-events: none;
-  animation: dm-petal-fall linear infinite;
+  opacity: 0;
+  animation:
+    dm-petal-rise 2.5s ease-out var(--rise-delay, 0s) forwards,
+    dm-petal-drift var(--drift-dur, 8s) ease-in-out calc(2.5s + var(--rise-delay, 0s)) infinite;
 }
 
-@keyframes dm-petal-fall {
+/* Phase 1: Expand from center to scattered positions */
+@keyframes dm-petal-rise {
   0% {
-    transform: translateY(-5%) translateX(0) rotate(0deg);
+    transform: translate(calc(50vw - var(--petal-left, 50%)), calc(50vh - var(--petal-top, 50%))) scale(0);
     opacity: 0;
   }
-  5% {
-    opacity: 1;
-  }
-  25% {
-    transform: translateY(25%) translateX(15px) rotate(90deg);
-  }
-  50% {
-    transform: translateY(50%) translateX(-10px) rotate(180deg);
-  }
-  75% {
-    transform: translateY(75%) translateX(12px) rotate(270deg);
-  }
-  95% {
-    opacity: 1;
+  15% {
+    opacity: var(--petal-opacity, 0.3);
   }
   100% {
-    transform: translateY(105%) translateX(-5px) rotate(360deg);
-    opacity: 0;
+    transform: translate(0, 0) scale(1);
+    opacity: var(--petal-opacity, 0.3);
+  }
+}
+
+/* Phase 2: Gentle floating drift in place */
+@keyframes dm-petal-drift {
+  0% {
+    transform: translateX(0) translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateX(15px) translateY(-12px) rotate(8deg);
+  }
+  50% {
+    transform: translateX(-10px) translateY(8px) rotate(-5deg);
+  }
+  75% {
+    transform: translateX(12px) translateY(-6px) rotate(6deg);
+  }
+  100% {
+    transform: translateX(0) translateY(0) rotate(0deg);
   }
 }
 

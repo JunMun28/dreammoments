@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 type InlineEditState = {
 	fieldPath: string;
@@ -20,9 +20,11 @@ type UseInlineEditReturn = {
 
 export function useInlineEdit(): UseInlineEditReturn {
 	const [inlineEdit, setInlineEdit] = useState<InlineEditState | null>(null);
+	const valueRef = useRef<string>("");
 
 	const openInlineEdit = useCallback(
 		(fieldPath: string, value: string, element?: HTMLElement) => {
+			valueRef.current = value;
 			setInlineEdit({
 				fieldPath,
 				value,
@@ -37,14 +39,15 @@ export function useInlineEdit(): UseInlineEditReturn {
 	}, []);
 
 	const updateInlineValue = useCallback((value: string) => {
+		valueRef.current = value;
 		setInlineEdit((prev) => (prev ? { ...prev, value } : null));
 	}, []);
 
 	const saveInlineEdit = useCallback(() => {
-		const value = inlineEdit?.value ?? "";
+		const value = valueRef.current;
 		setInlineEdit(null);
 		return value;
-	}, [inlineEdit]);
+	}, []);
 
 	return {
 		inlineEdit,

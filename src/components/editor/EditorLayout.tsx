@@ -8,6 +8,9 @@ type EditorLayoutProps = {
 	sectionRail?: ReactNode;
 	isMobile: boolean;
 	isTablet: boolean;
+	isTabletLandscape?: boolean;
+	isMobileLandscape?: boolean;
+	panelCollapsed?: boolean;
 	bottomSheetOpen: boolean;
 };
 
@@ -19,14 +22,45 @@ export function EditorLayout({
 	sectionRail,
 	isMobile,
 	isTablet,
+	isTabletLandscape = false,
+	isMobileLandscape = false,
+	panelCollapsed = false,
 	bottomSheetOpen,
 }: EditorLayoutProps) {
-	// Mobile layout: toolbar (sticky top) + preview (flex-1) + pillBar (sticky bottom)
+	// Mobile landscape: split view (60% preview, 40% fields) - no bottom sheet
+	if (isMobile && isMobileLandscape) {
+		return (
+			<div className="flex h-[100dvh] flex-col bg-[color:var(--dm-bg)]">
+				<div className="shrink-0">{toolbar}</div>
+				<div className="flex min-h-0 flex-1">
+					<div className="min-w-0" style={{ flex: "0 0 60%" }}>
+						{preview}
+					</div>
+					<div
+						className="overflow-y-auto border-l border-[color:var(--dm-border)] bg-[color:var(--dm-surface)]"
+						style={{ flex: "0 0 40%" }}
+					>
+						<div className="border-b border-[color:var(--dm-border)]">
+							{pillBar}
+						</div>
+						{contextPanel}
+					</div>
+				</div>
+			</div>
+		);
+	}
+
+	// Mobile portrait layout: toolbar (sticky top) + preview (flex-1) + pillBar (sticky bottom)
 	if (isMobile) {
 		return (
 			<div className="flex h-[100dvh] flex-col bg-[color:var(--dm-bg)]">
 				{/* Sticky toolbar at top */}
-				<div className="shrink-0">{toolbar}</div>
+				<div
+					className="shrink-0"
+					style={{ paddingTop: "env(safe-area-inset-top)" }}
+				>
+					{toolbar}
+				</div>
 
 				{/* Scrollable preview area */}
 				<div className="min-h-0 flex-1">{preview}</div>
@@ -42,8 +76,9 @@ export function EditorLayout({
 		);
 	}
 
-	// Tablet layout: toolbar + preview + collapsible context panel
-	if (isTablet) {
+	// Tablet portrait: 2-column (preview + context panel)
+	// Tablet landscape: use 3-column desktop layout
+	if (isTablet && !isTabletLandscape) {
 		return (
 			<div className="flex h-[100dvh] flex-col bg-[color:var(--dm-bg)]">
 				<div className="shrink-0">{toolbar}</div>
@@ -60,15 +95,16 @@ export function EditorLayout({
 		);
 	}
 
-	// Desktop layout: toolbar + sectionRail + preview + contextPanel
+	// Desktop / tablet landscape layout
+	const panelWidth = panelCollapsed ? "40px" : "380px";
+	const columns = sectionRail ? `64px 1fr ${panelWidth}` : `1fr ${panelWidth}`;
+
 	return (
 		<div className="flex h-[100dvh] flex-col bg-[color:var(--dm-bg)]">
 			<div className="shrink-0">{toolbar}</div>
 			<div
-				className="grid min-h-0 flex-1"
-				style={{
-					gridTemplateColumns: sectionRail ? "64px 1fr 380px" : "1fr 380px",
-				}}
+				className="mx-auto grid min-h-0 w-full max-w-[1440px] flex-1"
+				style={{ gridTemplateColumns: columns }}
 			>
 				{sectionRail && (
 					<div className="overflow-y-auto border-r border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)]">
@@ -77,9 +113,11 @@ export function EditorLayout({
 				)}
 				<div className="min-w-0 overflow-hidden">{preview}</div>
 				<div className="overflow-y-auto border-l border-[color:var(--dm-border)] bg-[color:var(--dm-surface)]">
-					<div className="border-b border-[color:var(--dm-border)]">
-						{pillBar}
-					</div>
+					{!panelCollapsed && (
+						<div className="border-b border-[color:var(--dm-border)]">
+							{pillBar}
+						</div>
+					)}
 					{contextPanel}
 				</div>
 			</div>

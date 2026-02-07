@@ -1,5 +1,5 @@
 import { Loader2, Sparkles, Wand2, X } from "lucide-react";
-import { useCallback, useEffect, useId, useRef } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { cn } from "../../lib/utils";
 import { AiSuggestionCard } from "./AiSuggestionCard";
 import type { AiTaskType } from "./hooks/useAiAssistant";
@@ -178,6 +178,16 @@ function DrawerContent({
 export function AiAssistantDrawer(props: AiAssistantDrawerProps) {
 	const { open, isMobile, onClose, generating } = props;
 	const drawerRef = useRef<HTMLDivElement>(null);
+	const [isClosing, setIsClosing] = useState(false);
+
+	const handleClose = useCallback(() => {
+		if (generating) return;
+		setIsClosing(true);
+		setTimeout(() => {
+			setIsClosing(false);
+			onClose();
+		}, 300);
+	}, [onClose, generating]);
 
 	// Close on Escape for desktop
 	useEffect(() => {
@@ -185,14 +195,14 @@ export function AiAssistantDrawer(props: AiAssistantDrawerProps) {
 		const handler = (e: KeyboardEvent) => {
 			if (e.key === "Escape" && !generating) {
 				e.preventDefault();
-				onClose();
+				handleClose();
 			}
 		};
 		document.addEventListener("keydown", handler);
 		return () => document.removeEventListener("keydown", handler);
-	}, [open, isMobile, onClose, generating]);
+	}, [open, isMobile, generating, handleClose]);
 
-	// Focus trap for desktop drawer
+	// Full focus trap for desktop drawer
 	useEffect(() => {
 		if (!open || isMobile || !drawerRef.current) return;
 		const drawer = drawerRef.current;
@@ -201,6 +211,27 @@ export function AiAssistantDrawer(props: AiAssistantDrawerProps) {
 		);
 		const first = focusable[0];
 		first?.focus();
+
+		const handleTabKey = (e: KeyboardEvent) => {
+			if (e.key !== "Tab" || !drawerRef.current) return;
+			const currentFocusable = drawerRef.current.querySelectorAll<HTMLElement>(
+				'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+			);
+			if (currentFocusable.length === 0) return;
+
+			const firstEl = currentFocusable[0];
+			const lastEl = currentFocusable[currentFocusable.length - 1];
+
+			if (e.shiftKey && document.activeElement === firstEl) {
+				e.preventDefault();
+				lastEl?.focus();
+			} else if (!e.shiftKey && document.activeElement === lastEl) {
+				e.preventDefault();
+				firstEl?.focus();
+			}
+		};
+		document.addEventListener("keydown", handleTabKey);
+		return () => document.removeEventListener("keydown", handleTabKey);
 	}, [open, isMobile]);
 
 	// Prevent body scroll when desktop drawer is open
@@ -213,16 +244,16 @@ export function AiAssistantDrawer(props: AiAssistantDrawerProps) {
 		};
 	}, [open, isMobile]);
 
-	const handleBackdropClick = useCallback(
-		(e: React.MouseEvent) => {
+	const handleBackdropPointerDown = useCallback(
+		(e: React.PointerEvent) => {
 			if (e.target === e.currentTarget && !generating) {
-				onClose();
+				handleClose();
 			}
 		},
-		[onClose, generating],
+		[handleClose, generating],
 	);
 
-	if (!open) return null;
+	if (!open && !isClosing) return null;
 
 	// Mobile: use MobileBottomSheet
 	if (isMobile) {
@@ -240,26 +271,37 @@ export function AiAssistantDrawer(props: AiAssistantDrawerProps) {
 
 	// Desktop: right-side drawer with backdrop
 	return (
-		// biome-ignore lint/a11y/useKeyWithClickEvents: Escape key handled via document keydown listener above
 		<div
-			className="fixed inset-0 z-50 flex justify-end"
-			onClick={handleBackdropClick}
+			className={cn(
+				"fixed inset-0 z-50 flex justify-end",
+				isClosing ? "pointer-events-none" : "",
+			)}
+			onPointerDown={handleBackdropPointerDown}
 			role="dialog"
 			aria-modal="true"
 			aria-label={`AI Assistant - ${props.sectionId}`}
 		>
 			{/* Backdrop */}
-			<div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
+			<div
+				className={cn(
+					"absolute inset-0 bg-black/30 backdrop-blur-sm",
+					isClosing
+						? "animate-out fade-out duration-300"
+						: "animate-in fade-in duration-300",
+				)}
+			/>
 
 			{/* Drawer panel */}
 			<div
 				ref={drawerRef}
 				className={cn(
 					"relative z-10 flex h-full w-[480px] max-w-full flex-col bg-[color:var(--dm-surface)] shadow-xl",
-					"animate-in slide-in-from-right duration-300",
+					isClosing
+						? "animate-out slide-out-to-right duration-300"
+						: "animate-in slide-in-from-right duration-300",
 				)}
 			>
-				<DrawerContent {...props} />
+				<DrawerContent {...props} onClose={handleClose} />
 			</div>
 		</div>
 	);

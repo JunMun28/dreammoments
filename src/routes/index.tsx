@@ -30,21 +30,21 @@ const REVEAL_TRANSITION = { duration: 0.8, ease: REVEAL_EASE };
 
 // --- Static petal seed data (deterministic for SSR safety) ---
 const PETALS = [
-	{ left: 5, size: 10, duration: 12, delay: 0, opacity: 0.35 },
-	{ left: 12, size: 8, duration: 14, delay: 2.5, opacity: 0.3 },
-	{ left: 22, size: 12, duration: 10, delay: 1, opacity: 0.4 },
-	{ left: 30, size: 9, duration: 16, delay: 4, opacity: 0.25 },
-	{ left: 38, size: 11, duration: 11, delay: 6, opacity: 0.35 },
-	{ left: 45, size: 8, duration: 13, delay: 3, opacity: 0.3 },
-	{ left: 52, size: 14, duration: 9, delay: 8, opacity: 0.4 },
-	{ left: 60, size: 10, duration: 15, delay: 1.5, opacity: 0.3 },
-	{ left: 67, size: 9, duration: 12, delay: 5, opacity: 0.35 },
-	{ left: 74, size: 12, duration: 10, delay: 10, opacity: 0.25 },
-	{ left: 80, size: 8, duration: 14, delay: 7, opacity: 0.4 },
-	{ left: 86, size: 11, duration: 11, delay: 2, opacity: 0.3 },
-	{ left: 91, size: 10, duration: 13, delay: 9, opacity: 0.35 },
-	{ left: 17, size: 13, duration: 8, delay: 11, opacity: 0.3 },
-	{ left: 55, size: 9, duration: 16, delay: 12, opacity: 0.25 },
+	{ left: 5, top: 20, size: 22, riseDelay: 0, driftDur: 8, opacity: 0.35 },
+	{ left: 12, top: 55, size: 18, riseDelay: 0.3, driftDur: 10, opacity: 0.3 },
+	{ left: 22, top: 35, size: 26, riseDelay: 0.6, driftDur: 7, opacity: 0.4 },
+	{ left: 30, top: 70, size: 20, riseDelay: 0.2, driftDur: 12, opacity: 0.25 },
+	{ left: 38, top: 15, size: 24, riseDelay: 0.8, driftDur: 9, opacity: 0.35 },
+	{ left: 45, top: 45, size: 18, riseDelay: 0.5, driftDur: 11, opacity: 0.3 },
+	{ left: 52, top: 25, size: 30, riseDelay: 1.0, driftDur: 6, opacity: 0.4 },
+	{ left: 60, top: 60, size: 22, riseDelay: 0.4, driftDur: 10, opacity: 0.3 },
+	{ left: 67, top: 40, size: 20, riseDelay: 0.7, driftDur: 8, opacity: 0.35 },
+	{ left: 74, top: 10, size: 26, riseDelay: 1.2, driftDur: 9, opacity: 0.25 },
+	{ left: 80, top: 50, size: 18, riseDelay: 0.9, driftDur: 11, opacity: 0.4 },
+	{ left: 86, top: 30, size: 24, riseDelay: 0.1, driftDur: 7, opacity: 0.3 },
+	{ left: 91, top: 65, size: 22, riseDelay: 1.1, driftDur: 10, opacity: 0.35 },
+	{ left: 17, top: 80, size: 28, riseDelay: 0.6, driftDur: 8, opacity: 0.3 },
+	{ left: 55, top: 75, size: 20, riseDelay: 1.3, driftDur: 12, opacity: 0.25 },
 ];
 
 // --- Components ---
@@ -54,16 +54,20 @@ function FloatingPetals() {
 		<div className="dm-petals" aria-hidden="true">
 			{PETALS.map((p) => (
 				<div
-					key={`${p.left}-${p.delay}`}
+					key={`${p.left}-${p.top}`}
 					className="dm-petal"
-					style={{
-						left: `${p.left}%`,
-						width: `${p.size}px`,
-						height: `${p.size}px`,
-						opacity: p.opacity,
-						animationDuration: `${p.duration}s`,
-						animationDelay: `${p.delay}s`,
-					}}
+					style={
+						{
+							left: `${p.left}%`,
+							"--petal-left": `${p.left}%`,
+							"--petal-top": `${p.top}%`,
+							"--petal-opacity": p.opacity,
+							"--rise-delay": `${p.riseDelay}s`,
+							"--drift-dur": `${p.driftDur}s`,
+							width: `${p.size}px`,
+							height: `${p.size}px`,
+						} as React.CSSProperties
+					}
 				/>
 			))}
 		</div>

@@ -19,6 +19,8 @@ export type MobileBottomSheetProps = {
 	snapPoints?: number[];
 	/** Initial snap point index (default: 1) */
 	initialSnap?: number;
+	/** Controlled snap point index - overrides internal state when provided */
+	activeSnapIndex?: number;
 	/** Callback when snap point changes */
 	onSnapChange?: (snapIndex: number) => void;
 };
@@ -34,6 +36,7 @@ export default function MobileBottomSheet({
 	height = "half",
 	snapPoints,
 	initialSnap = 1,
+	activeSnapIndex,
 	onSnapChange,
 }: MobileBottomSheetProps) {
 	const titleId = useId();
@@ -70,6 +73,17 @@ export default function MobileBottomSheet({
 			setCurrentSnapIndex(initialSnap);
 		}
 	}, [open, initialSnap]);
+
+	// Sync with controlled activeSnapIndex
+	useEffect(() => {
+		if (
+			activeSnapIndex != null &&
+			hasSnaps &&
+			activeSnapIndex < (snapPoints?.length ?? 0)
+		) {
+			setCurrentSnapIndex(activeSnapIndex);
+		}
+	}, [activeSnapIndex, hasSnaps, snapPoints?.length]);
 
 	// Focus trap
 	// biome-ignore lint/correctness/useExhaustiveDependencies: re-run only when open changes; handleClose is stable via useCallback
