@@ -27,20 +27,30 @@ pnpm check            # Biome lint + format
 pnpm db:generate      # Generate Drizzle migrations
 pnpm db:migrate       # Run migrations
 pnpm db:push          # Push schema to DB
+pnpm db:pull          # Pull schema from DB
 pnpm db:studio        # Drizzle Studio GUI
+pnpm db:seed          # Seed database with sample data
 ```
 
 ## Directory Guide
 
 ```
 src/
+  api/                 # Server API route handlers (ai, auth, guests, invitations, public)
   routes/              # File-based router pages (TanStack Router)
+    auth/              # Login, signup, reset, OAuth callback
+    dashboard/         # User dashboard with invitation management
+    editor/            # Invitation editor ($invitationId)
+    invite/            # Public invitation view ($slug)
   components/
+    editor/            # Editor UI (context panel, toolbar, field renderers, inline edit, AI assistant)
+      hooks/           # Editor hooks (useAutoSave, useEditorState, useFieldValidation, useInlineEdit, etc.)
     templates/         # 4 wedding invitation templates (blush-romance, eternal-elegance, garden-romance, love-at-dusk)
     landing/           # Landing page sections
     share/             # Share/invite modal
-  lib/                 # Core utilities (auth, store, data, types, ai, slug, scroll-effects)
-  db/                  # Drizzle schema and DB connection
+    ui/                # Shared UI primitives (LoadingSpinner, Skeleton)
+  lib/                 # Core utilities (auth, ai, session, validation, store, slug, scroll-effects, utils)
+  db/                  # Drizzle schema, DB connection, seed data
   integrations/        # React Query configuration
   templates/           # Template definitions
   data/                # Sample data
@@ -51,8 +61,11 @@ tests/
 ## Key Patterns
 
 - **Routing**: `createFileRoute()` with `component` export; dynamic segments use `$` prefix (`$slug`, `$invitationId`)
+- **API routes**: Server functions in `src/api/` (auth, invitations, guests, ai, public)
 - **Templates**: Renderer pattern (`TemplateRenderer.tsx`, `InvitationRenderer.tsx`) with section visibility toggles
-- **Auth**: Google OAuth + email/password via `AuthContext` in `lib/auth.tsx`
+- **Editor**: Context panel + preview frame layout with auto-save, inline editing, AI assistant drawer, and section-based navigation
+- **Auth**: Google OAuth + email/password via `AuthContext` in `lib/auth.tsx`; JWT sessions via `jose` in `lib/session.ts`
+- **Validation**: Zod schemas in `lib/validation.ts` for input validation
 - **Database**: 6 tables (users, invitations, guests, invitation_views, ai_generations, payments), UUID PKs, JSONB for flexible content
 - **Design tokens**: CSS custom properties (`--dm-bg`, `--dm-ink`, `--dm-peach`, `--dm-sage`, `--dm-lavender`); fonts: Outfit (body) + Reenie Beanie (accents)
 - **Class merging**: `cn()` helper using `clsx` + `tailwind-merge`
