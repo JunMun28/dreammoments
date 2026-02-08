@@ -144,7 +144,7 @@ function validateSlug(slug: string): string {
 	return "";
 }
 
-export function EditorScreen() {
+function EditorScreen() {
 	const { invitationId } = Route.useParams();
 	const navigate = useNavigate();
 	const rawId = useId();

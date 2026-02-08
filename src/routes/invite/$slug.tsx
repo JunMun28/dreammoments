@@ -102,7 +102,7 @@ function resolveSampleTemplate(slug: string) {
 	return "love-at-dusk";
 }
 
-export function InviteScreen() {
+function InviteScreen() {
 	const { slug } = Route.useParams();
 	const { user } = useAuth();
 	const invitation = useStore((store) =>
