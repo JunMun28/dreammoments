@@ -10,12 +10,12 @@ test("landing hero + sections", async ({ page }) => {
 	await setup(page)
 	await page.goto("/")
 	await expect(
-		page.getByRole("heading", { name: /Digital invites that feel/i }),
+		page.getByRole("heading", { name: /Beautiful invitations your guests/i }),
 	).toBeVisible()
-	await page.getByRole("link", { name: "View Collection" }).click()
-	await expect(page).toHaveURL(/#showcase/)
+	await page.getByRole("link", { name: "Browse Templates" }).click()
+	await expect(page).toHaveURL(/#templates/)
 	await expect(page.locator("#showcase")).toBeVisible()
-	await expect(page.locator("#showcase h3")).toHaveCount(3)
+	await expect(page.locator("#showcase h3")).toHaveCount(4)
 	await expect(page.locator("footer")).toBeVisible()
 })
 

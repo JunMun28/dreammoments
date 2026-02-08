@@ -22,15 +22,25 @@ export interface HealthCheckResult {
 // Check if we're in a server environment
 const isServer = typeof window === "undefined";
 
+/** Read a server-side env var safely (returns undefined in the browser). */
+function env(key: string): string | undefined {
+	if (typeof process === "undefined") return undefined;
+	return process.env[key];
+}
+
 /**
- * Check if the app is running in production mode
+ * Check if the app is running in production mode.
+ * Uses process.env on the server, import.meta.env in the browser.
  */
 export function isProduction(): boolean {
-	return process.env.NODE_ENV === "production";
+	if (typeof process !== "undefined" && process.env.NODE_ENV !== undefined) {
+		return process.env.NODE_ENV === "production";
+	}
+	return import.meta.env.PROD;
 }
 
 // Get database URL from environment
-const databaseUrl = isServer ? process.env.DATABASE_URL : undefined;
+const databaseUrl = isServer ? env("DATABASE_URL") : undefined;
 
 // In production, DATABASE_URL is mandatory - fail hard at startup
 if (isServer && isProduction() && !databaseUrl) {
@@ -54,22 +64,18 @@ const poolConfig: PoolConfig | null = databaseUrl
 	? {
 			connectionString: databaseUrl,
 			// Connection pool settings optimized for Neon PostgreSQL
-			max: Number.parseInt(process.env.DB_POOL_MAX || "10", 10),
-			idleTimeoutMillis: Number.parseInt(
-				process.env.DB_IDLE_TIMEOUT || "30000",
-				10,
-			),
+			max: Number.parseInt(env("DB_POOL_MAX") || "10", 10),
+			idleTimeoutMillis: Number.parseInt(env("DB_IDLE_TIMEOUT") || "30000", 10),
 			connectionTimeoutMillis: Number.parseInt(
-				process.env.DB_CONNECTION_TIMEOUT || "10000",
+				env("DB_CONNECTION_TIMEOUT") || "10000",
 				10,
 			),
 			// Neon requires SSL — enforce certificate validation in production
-			ssl:
-				process.env.NODE_ENV === "production"
+			ssl: isProduction()
+				? { rejectUnauthorized: true }
+				: env("DB_SSL") === "true"
 					? { rejectUnauthorized: true }
-					: process.env.DB_SSL === "true"
-						? { rejectUnauthorized: true }
-						: undefined,
+					: undefined,
 		}
 	: null;
 
@@ -85,7 +91,7 @@ if (isServer && poolConfig) {
 	});
 
 	pool.on("connect", () => {
-		if (process.env.NODE_ENV === "development") {
+		if (!isProduction()) {
 			console.log("[Database] New client connected to pool");
 		}
 	});
