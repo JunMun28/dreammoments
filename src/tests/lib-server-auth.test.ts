@@ -4,7 +4,9 @@ import { createSession } from "../lib/session";
 
 describe("requireAuth", () => {
 	test("throws error when token is undefined", async () => {
-		await expect(requireAuth(undefined)).rejects.toThrow("Authentication required");
+		await expect(requireAuth(undefined)).rejects.toThrow(
+			"Authentication required",
+		);
 	});
 
 	test("throws error when token is empty", async () => {
@@ -12,7 +14,9 @@ describe("requireAuth", () => {
 	});
 
 	test("throws error for invalid token", async () => {
-		await expect(requireAuth("invalid-token")).rejects.toThrow("Invalid or expired session");
+		await expect(requireAuth("invalid-token")).rejects.toThrow(
+			"Invalid or expired session",
+		);
 	});
 
 	test("returns userId for valid token", async () => {
@@ -22,7 +26,7 @@ describe("requireAuth", () => {
 
 		const token = await createSession("user-123");
 		const result = await requireAuth(token);
-		
+
 		expect(result).toEqual({ userId: "user-123" });
 
 		process.env.JWT_SECRET = originalSecret;

@@ -1,4 +1,4 @@
-import { describe, expect, test, vi } from "vitest";
+import { describe, expect, test } from "vitest";
 import {
 	createRefreshToken,
 	createSession,
@@ -26,7 +26,9 @@ describe("getJwtSecret", () => {
 		process.env.NODE_ENV = "production";
 
 		// Should throw an error
-		expect(() => getJwtSecret()).toThrow("JWT_SECRET is required in production");
+		expect(() => getJwtSecret()).toThrow(
+			"JWT_SECRET is required in production",
+		);
 
 		process.env.JWT_SECRET = originalSecret;
 		process.env.NODE_ENV = originalEnv;
@@ -120,7 +122,7 @@ describe("refreshSession", () => {
 		expect(result?.refreshToken).toBeDefined();
 
 		// Verify new access token works
-		const session = await verifySession(result!.token, "access");
+		const session = await verifySession(result?.token ?? "", "access");
 		expect(session?.userId).toBe("user-123");
 
 		process.env.JWT_SECRET = originalSecret;

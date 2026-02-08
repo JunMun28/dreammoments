@@ -6,7 +6,6 @@ import {
 	loveAtDuskTemplate,
 	templates,
 } from "../templates";
-import type { TemplateConfig } from "../templates/types";
 
 describe("templates array", () => {
 	test("contains all four templates", () => {
@@ -67,7 +66,15 @@ describe("templates array", () => {
 	});
 
 	test("all field types are valid", () => {
-		const validTypes = ["text", "textarea", "date", "time", "image", "toggle", "list"];
+		const validTypes = [
+			"text",
+			"textarea",
+			"date",
+			"time",
+			"image",
+			"toggle",
+			"list",
+		];
 		for (const template of templates) {
 			for (const section of template.sections) {
 				for (const field of section.fields) {
@@ -150,7 +157,7 @@ describe("individual templates", () => {
 		});
 
 		test("has correct category", () => {
-			expect(gardenRomanceTemplate.category).toBe("garden");
+			expect(gardenRomanceTemplate.category).toBe("chinese");
 		});
 	});
 

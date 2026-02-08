@@ -40,7 +40,6 @@ export function ListFieldEditor({
 			</p>
 			{items.map((item, index) => (
 				<ListFieldItem
-					// biome-ignore lint/suspicious/noArrayIndexKey: list items lack stable IDs
 					key={`${sectionId}-${index}`}
 					sectionId={sectionId}
 					item={item}

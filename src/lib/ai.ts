@@ -1,6 +1,33 @@
 import { generateAiContentFn } from "@/api/ai";
 import type { InvitationContent } from "./types";
 
+// ── Return types for AI content generation ─────────────────────────
+
+export type ScheduleData = {
+	events: Array<{ time: string; title: string; description: string }>;
+};
+
+export type FaqData = {
+	items: Array<{ question: string; answer: string }>;
+};
+
+export type StoryData = {
+	milestones: Array<{ date: string; title: string; description: string }>;
+};
+
+export type TaglineData = {
+	tagline: string;
+};
+
+export type TranslateData = {
+	translation: string;
+};
+
+export type StyleData = {
+	cssVars: Record<string, string>;
+	animationIntensity: number;
+};
+
 // ── Romantic tagline pool for mock fallback ─────────────────────────
 
 const romanticWords = [
@@ -15,18 +42,47 @@ function pick(list: string[]) {
 
 // ── Main export: tries real AI, falls back to mock ──────────────────
 
+interface GenerateAiContentOptions {
+	sectionId: string;
+	prompt: string;
+	context: InvitationContent;
+	token?: string;
+}
+
+// Function overloads for type-safe returns
+export async function generateAiContent(
+	options: GenerateAiContentOptions & { type: "schedule" },
+): Promise<ScheduleData>;
+export async function generateAiContent(
+	options: GenerateAiContentOptions & { type: "faq" },
+): Promise<FaqData>;
+export async function generateAiContent(
+	options: GenerateAiContentOptions & { type: "story" },
+): Promise<StoryData>;
+export async function generateAiContent(
+	options: GenerateAiContentOptions & { type: "tagline" },
+): Promise<TaglineData>;
+export async function generateAiContent(
+	options: GenerateAiContentOptions & { type: "translate" },
+): Promise<TranslateData>;
+export async function generateAiContent(
+	options: GenerateAiContentOptions & { type: "style" },
+): Promise<StyleData>;
+export async function generateAiContent(
+	options: GenerateAiContentOptions & {
+		type: "schedule" | "faq" | "story" | "tagline" | "style" | "translate";
+	},
+): Promise<
+	ScheduleData | FaqData | StoryData | TaglineData | TranslateData | StyleData
+>;
 export async function generateAiContent({
 	type,
 	sectionId,
 	prompt,
 	context,
 	token,
-}: {
+}: GenerateAiContentOptions & {
 	type: "schedule" | "faq" | "story" | "tagline" | "style" | "translate";
-	sectionId: string;
-	prompt: string;
-	context: InvitationContent;
-	token?: string;
 }) {
 	try {
 		const result = await generateAiContentFn({
@@ -38,7 +94,13 @@ export async function generateAiContent({
 				context: context as unknown as Record<string, unknown>,
 			},
 		});
-		return result;
+		return result as
+			| ScheduleData
+			| FaqData
+			| StoryData
+			| TaglineData
+			| TranslateData
+			| StyleData;
 	} catch (error) {
 		// If the server indicates AI is not configured, use mock data silently
 		if (error instanceof Error && error.message.includes("AI_NOT_CONFIGURED")) {

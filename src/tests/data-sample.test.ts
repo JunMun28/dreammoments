@@ -84,7 +84,9 @@ describe("baseSampleContent", () => {
 describe("buildSampleContent", () => {
 	test("returns base content for unknown template", () => {
 		const content = buildSampleContent("unknown-template");
-		expect(content.hero.partnerOneName).toBe(baseSampleContent.hero.partnerOneName);
+		expect(content.hero.partnerOneName).toBe(
+			baseSampleContent.hero.partnerOneName,
+		);
 	});
 
 	test("customizes for love-at-dusk template", () => {
@@ -96,7 +98,9 @@ describe("buildSampleContent", () => {
 
 	test("customizes for blush-romance template", () => {
 		const content = buildSampleContent("blush-romance");
-		expect(content.hero.tagline).toBe("Soft blush tones for a timeless promise.");
+		expect(content.hero.tagline).toBe(
+			"Soft blush tones for a timeless promise.",
+		);
 		expect(content.announcement.title).toBe("Blush Romance");
 		expect(content.footer.message).toBe("With love, in gentle blush.");
 	});
@@ -121,6 +125,8 @@ describe("buildSampleContent", () => {
 
 		// Modifying one should not affect the other
 		content1.hero.partnerOneName = "Modified";
-		expect(content2.hero.partnerOneName).toBe(baseSampleContent.hero.partnerOneName);
+		expect(content2.hero.partnerOneName).toBe(
+			baseSampleContent.hero.partnerOneName,
+		);
 	});
 });

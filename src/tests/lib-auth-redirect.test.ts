@@ -35,7 +35,9 @@ describe("sanitizeRedirect", () => {
 	});
 
 	test("handles query strings", () => {
-		expect(sanitizeRedirect("/editor/123?template=blush")).toBe("/editor/123?template=blush");
+		expect(sanitizeRedirect("/editor/123?template=blush")).toBe(
+			"/editor/123?template=blush",
+		);
 	});
 
 	test("handles fragment identifiers", () => {
@@ -65,7 +67,9 @@ describe("readRedirectFromSearch", () => {
 
 	test("decodes URL-encoded redirect", () => {
 		const search = "?redirect=%2Feditor%2Fnew%3Ftemplate%3Dblush-romance";
-		expect(readRedirectFromSearch(search)).toBe("/editor/new?template=blush-romance");
+		expect(readRedirectFromSearch(search)).toBe(
+			"/editor/new?template=blush-romance",
+		);
 	});
 
 	test("rejects external redirect in query", () => {
@@ -103,7 +107,9 @@ describe("readRedirectFromStateSearch", () => {
 
 describe("buildRedirectFromLocation", () => {
 	test("builds redirect from pathname and search", () => {
-		expect(buildRedirectFromLocation("/editor/123", "?template=blush")).toBe("/editor/123?template=blush");
+		expect(buildRedirectFromLocation("/editor/123", "?template=blush")).toBe(
+			"/editor/123?template=blush",
+		);
 	});
 
 	test("returns pathname when no search", () => {
@@ -111,16 +117,23 @@ describe("buildRedirectFromLocation", () => {
 	});
 
 	test("returns default for non-internal path", () => {
-		expect(buildRedirectFromLocation("not-a-path", "")).toBe(DEFAULT_AUTH_REDIRECT);
+		expect(buildRedirectFromLocation("not-a-path", "")).toBe(
+			DEFAULT_AUTH_REDIRECT,
+		);
 	});
 
 	test("rejects external URL in pathname", () => {
-		expect(buildRedirectFromLocation("https://evil.com", "")).toBe(DEFAULT_AUTH_REDIRECT);
+		expect(buildRedirectFromLocation("https://evil.com", "")).toBe(
+			DEFAULT_AUTH_REDIRECT,
+		);
 	});
 
 	test("strips unsafe query params", () => {
 		// The sanitizeRedirect should catch any external URLs in the query
-		const result = buildRedirectFromLocation("/page", "?redirect=https://evil.com");
+		const result = buildRedirectFromLocation(
+			"/page",
+			"?redirect=https://evil.com",
+		);
 		// The query is preserved as part of the path, but if redirect points external, default is used
 		expect(result).toBe("/page?redirect=https%3A%2F%2Fevil.com");
 	});

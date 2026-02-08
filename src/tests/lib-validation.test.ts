@@ -350,7 +350,12 @@ describe("listGuestsSchema", () => {
 	});
 
 	test("accepts valid filter", () => {
-		for (const filter of ["attending", "not_attending", "undecided", "pending"]) {
+		for (const filter of [
+			"attending",
+			"not_attending",
+			"undecided",
+			"pending",
+		]) {
 			const result = listGuestsSchema.safeParse({
 				invitationId: "inv-123",
 				userId: "user-456",

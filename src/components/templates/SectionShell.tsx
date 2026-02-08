@@ -58,7 +58,6 @@ export default function SectionShell({
 	}
 
 	return (
-		// biome-ignore lint: editor preview uses a section as an interactive surface
 		<div
 			data-section={sectionId}
 			data-editor-active={isActive ? "true" : undefined}

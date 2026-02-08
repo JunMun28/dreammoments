@@ -13,11 +13,11 @@ describe("generateQrSvg", () => {
 		const pixelSize = 10;
 		const margin = 2;
 		const svg = generateQrSvg("test", pixelSize, margin);
-		
+
 		// Extract viewBox to check dimensions
 		const viewBoxMatch = svg.match(/viewBox="0 0 (\d+) (\d+)"/);
 		expect(viewBoxMatch).not.toBeNull();
-		
+
 		if (viewBoxMatch) {
 			const size = Number(viewBoxMatch[1]);
 			// Size should be based on QR version + margins
@@ -33,7 +33,7 @@ describe("generateQrSvg", () => {
 
 	test("SVG has white background rect", () => {
 		const svg = generateQrSvg("test");
-		expect(svg).toContain('<rect');
+		expect(svg).toContain("<rect");
 		expect(svg).toContain('fill="#fff"');
 	});
 
@@ -97,7 +97,9 @@ describe("generateQrDataUrl", () => {
 
 	test("generates valid SVG in data URL", () => {
 		const dataUrl = generateQrDataUrl("test");
-		const decoded = decodeURIComponent(dataUrl.replace("data:image/svg+xml,", ""));
+		const decoded = decodeURIComponent(
+			dataUrl.replace("data:image/svg+xml,", ""),
+		);
 		expect(decoded).toContain("<svg");
 		expect(decoded).toContain("</svg>");
 	});
