@@ -88,6 +88,22 @@ export default function BlushRomanceInvitation({
 			>
 				<div className="blush-hero-frame" />
 				<div className="blush-hero-bloom" />
+				<div
+					className="blush-hero-corner blush-hero-corner-tl"
+					aria-hidden="true"
+				/>
+				<div
+					className="blush-hero-corner blush-hero-corner-tr"
+					aria-hidden="true"
+				/>
+				<div
+					className="blush-hero-corner blush-hero-corner-bl"
+					aria-hidden="true"
+				/>
+				<div
+					className="blush-hero-corner blush-hero-corner-br"
+					aria-hidden="true"
+				/>
 				<div className="mx-auto flex max-w-4xl flex-col items-center text-center">
 					<p className="blush-kicker" style={bodyFont}>
 						Blush Romance
@@ -97,7 +113,9 @@ export default function BlushRomanceInvitation({
 						style={headingFont}
 						{...editableProps("hero.partnerOneName", "dm-reveal blush-title")}
 					>
-						{data.hero.partnerOneName} & {data.hero.partnerTwoName}
+						{data.hero.partnerOneName}{" "}
+						<span className="blush-ampersand">&amp;</span>{" "}
+						{data.hero.partnerTwoName}
 					</h1>
 					<p
 						data-reveal
@@ -112,10 +130,26 @@ export default function BlushRomanceInvitation({
 						style={bodyFont}
 					>
 						<span>{data.hero.date}</span>
+						<span className="blush-pill-dot" aria-hidden="true" />
 						<span>{data.venue.name}</span>
 					</div>
 				</div>
 			</SectionShell>
+
+			<div className="blush-floral-divider" aria-hidden="true">
+				<svg viewBox="0 0 200 24" className="blush-floral-svg">
+					<title>Decorative divider</title>
+					<path
+						d="M0 12 Q50 0 100 12 Q150 24 200 12"
+						fill="none"
+						stroke="currentColor"
+						strokeWidth="0.5"
+					/>
+					<circle cx="100" cy="12" r="3" fill="currentColor" />
+					<circle cx="80" cy="10" r="1.5" fill="currentColor" opacity="0.5" />
+					<circle cx="120" cy="14" r="1.5" fill="currentColor" opacity="0.5" />
+				</svg>
+			</div>
 
 			<SectionShell
 				sectionId="announcement"
@@ -149,6 +183,21 @@ export default function BlushRomanceInvitation({
 				</div>
 			</SectionShell>
 
+			<div className="blush-floral-divider" aria-hidden="true">
+				<svg viewBox="0 0 200 24" className="blush-floral-svg">
+					<title>Decorative divider</title>
+					<path
+						d="M0 12 Q50 0 100 12 Q150 24 200 12"
+						fill="none"
+						stroke="currentColor"
+						strokeWidth="0.5"
+					/>
+					<circle cx="100" cy="12" r="3" fill="currentColor" />
+					<circle cx="80" cy="10" r="1.5" fill="currentColor" opacity="0.5" />
+					<circle cx="120" cy="14" r="1.5" fill="currentColor" opacity="0.5" />
+				</svg>
+			</div>
+
 			<SectionShell
 				sectionId="story"
 				mode={mode}
@@ -158,16 +207,16 @@ export default function BlushRomanceInvitation({
 				className="blush-section blush-panel"
 			>
 				<div className="mx-auto max-w-4xl">
-					<p className="blush-kicker" style={bodyFont}>
+					<p className="blush-kicker blush-kicker-sage" style={bodyFont}>
 						Our Story
 					</p>
-					<div className="mt-6 grid gap-4">
+					<div className="mt-6 grid gap-5">
 						{data.story.milestones.map((milestone, index) => (
 							<div
 								key={`${milestone.date}-${milestone.title}`}
 								data-reveal
 								style={{ transitionDelay: `${index * 90}ms` }}
-								className="dm-reveal blush-card"
+								className="dm-reveal blush-card blush-card-accent"
 							>
 								<p className="blush-meta">{milestone.date}</p>
 								<p className="blush-heading" style={headingFont}>
@@ -215,16 +264,31 @@ export default function BlushRomanceInvitation({
 				</div>
 			</SectionShell>
 
+			<div className="blush-floral-divider" aria-hidden="true">
+				<svg viewBox="0 0 200 24" className="blush-floral-svg">
+					<title>Decorative divider</title>
+					<path
+						d="M0 12 Q50 0 100 12 Q150 24 200 12"
+						fill="none"
+						stroke="currentColor"
+						strokeWidth="0.5"
+					/>
+					<circle cx="100" cy="12" r="3" fill="currentColor" />
+					<circle cx="80" cy="10" r="1.5" fill="currentColor" opacity="0.5" />
+					<circle cx="120" cy="14" r="1.5" fill="currentColor" opacity="0.5" />
+				</svg>
+			</div>
+
 			<SectionShell
 				sectionId="schedule"
 				mode={mode}
 				hidden={hiddenSections?.schedule}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="blush-section blush-panel"
+				className="blush-section blush-panel-sage"
 			>
 				<div className="mx-auto max-w-4xl">
-					<p className="blush-kicker" style={bodyFont}>
+					<p className="blush-kicker blush-kicker-sage" style={bodyFont}>
 						Schedule
 					</p>
 					<div className="mt-6 grid gap-4">
@@ -291,6 +355,21 @@ export default function BlushRomanceInvitation({
 					</div>
 				</div>
 			</SectionShell>
+
+			<div className="blush-floral-divider" aria-hidden="true">
+				<svg viewBox="0 0 200 24" className="blush-floral-svg">
+					<title>Decorative divider</title>
+					<path
+						d="M0 12 Q50 0 100 12 Q150 24 200 12"
+						fill="none"
+						stroke="currentColor"
+						strokeWidth="0.5"
+					/>
+					<circle cx="100" cy="12" r="3" fill="currentColor" />
+					<circle cx="80" cy="10" r="1.5" fill="currentColor" opacity="0.5" />
+					<circle cx="120" cy="14" r="1.5" fill="currentColor" opacity="0.5" />
+				</svg>
+			</div>
 
 			<SectionShell
 				sectionId="rsvp"

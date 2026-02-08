@@ -39,6 +39,8 @@ export type UseAiAssistantReturn = {
 	aiPanel: AiPanelState;
 	aiGenerating: boolean;
 	remainingAi: number;
+	aiGenerationsUsed: number;
+	planLimit: number;
 	openAiPanel: (sectionId: string, type?: AiTaskType) => void;
 	closeAiPanel: () => void;
 	setAiPrompt: (prompt: string) => void;
@@ -193,6 +195,8 @@ export function useAiAssistant({
 		aiPanel,
 		aiGenerating,
 		remainingAi,
+		aiGenerationsUsed,
+		planLimit,
 		openAiPanel,
 		closeAiPanel,
 		setAiPrompt,

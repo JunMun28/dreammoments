@@ -1,5 +1,6 @@
-import { useId, useRef } from "react";
+import { useId, useMemo, useRef } from "react";
 import { PUBLIC_BASE_URL } from "../../lib/data";
+import { generateQrDataUrl } from "../../lib/qr";
 import type { Invitation } from "../../lib/types";
 import { useFocusTrap } from "../editor/hooks/useFocusTrap";
 
@@ -21,10 +22,14 @@ export default function ShareModal({
 		onEscape: onClose,
 	});
 
+	const url = useMemo(
+		() => (invitation ? `${PUBLIC_BASE_URL}/invite/${invitation.slug}` : ""),
+		[invitation],
+	);
+	const qrDataUrl = useMemo(() => (url ? generateQrDataUrl(url) : ""), [url]);
+
 	if (!open || !invitation) return null;
-	const url = `${PUBLIC_BASE_URL}/invite/${invitation.slug}`;
 	const message = `You're invited to ${invitation.content.hero.partnerOneName} & ${invitation.content.hero.partnerTwoName}'s wedding on ${invitation.content.hero.date}. ${url}`;
-	const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(url)}`;
 
 	return (
 		<div
@@ -64,8 +69,8 @@ export default function ShareModal({
 						WhatsApp
 					</button>
 					<a
-						href={qrUrl}
-						download={`invite-${invitation.slug}.png`}
+						href={qrDataUrl}
+						download={`invite-${invitation.slug}.svg`}
 						className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-accent-strong)]"
 					>
 						Download QR Code
@@ -73,8 +78,8 @@ export default function ShareModal({
 				</div>
 				<div className="mt-4 flex justify-center">
 					<img
-						src={qrUrl}
-						alt="Invitation QR"
+						src={qrDataUrl}
+						alt="Invitation QR code"
 						width={160}
 						height={160}
 						className="h-40 w-40 rounded-2xl"

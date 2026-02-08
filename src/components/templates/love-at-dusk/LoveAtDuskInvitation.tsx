@@ -80,6 +80,57 @@ export default function LoveAtDuskInvitation({
 
 	return (
 		<div className="love-at-dusk" style={bodyFont}>
+			<div className="love-starfield" aria-hidden="true">
+				<div
+					className="love-star"
+					style={{ left: "8%", top: "12%", animationDelay: "0s" }}
+				/>
+				<div
+					className="love-star"
+					style={{ left: "15%", top: "35%", animationDelay: "1.2s" }}
+				/>
+				<div
+					className="love-star"
+					style={{ left: "25%", top: "8%", animationDelay: "0.4s" }}
+				/>
+				<div
+					className="love-star"
+					style={{ left: "40%", top: "22%", animationDelay: "2.1s" }}
+				/>
+				<div
+					className="love-star"
+					style={{ left: "55%", top: "5%", animationDelay: "0.8s" }}
+				/>
+				<div
+					className="love-star"
+					style={{ left: "65%", top: "30%", animationDelay: "1.6s" }}
+				/>
+				<div
+					className="love-star"
+					style={{ left: "78%", top: "15%", animationDelay: "0.3s" }}
+				/>
+				<div
+					className="love-star"
+					style={{ left: "88%", top: "25%", animationDelay: "1.9s" }}
+				/>
+				<div
+					className="love-star"
+					style={{ left: "92%", top: "8%", animationDelay: "0.7s" }}
+				/>
+				<div
+					className="love-star"
+					style={{ left: "35%", top: "42%", animationDelay: "2.5s" }}
+				/>
+				<div
+					className="love-star"
+					style={{ left: "72%", top: "40%", animationDelay: "1.1s" }}
+				/>
+				<div
+					className="love-star"
+					style={{ left: "50%", top: "18%", animationDelay: "0.6s" }}
+				/>
+			</div>
+
 			<SectionShell
 				sectionId="hero"
 				mode={mode}
@@ -149,13 +200,18 @@ export default function LoveAtDuskInvitation({
 				</div>
 			</SectionShell>
 
+			<div
+				className="love-gradient-divider love-gradient-hero-to-section"
+				aria-hidden="true"
+			/>
+
 			<SectionShell
 				sectionId="announcement"
 				mode={mode}
 				hidden={hiddenSections?.announcement}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="love-section"
+				className="love-section love-section-wide"
 			>
 				<div className="mx-auto max-w-3xl text-center">
 					<p
@@ -169,7 +225,7 @@ export default function LoveAtDuskInvitation({
 						data-reveal
 						{...editableProps(
 							"announcement.message",
-							"dm-reveal mt-6 text-lg text-[var(--love-cream)]",
+							"dm-reveal mt-6 text-xl leading-relaxed text-[var(--love-cream)]",
 						)}
 					>
 						{data.announcement.message}
@@ -186,6 +242,11 @@ export default function LoveAtDuskInvitation({
 				</div>
 			</SectionShell>
 
+			<div
+				className="love-gradient-divider love-gradient-section-to-panel"
+				aria-hidden="true"
+			/>
+
 			<SectionShell
 				sectionId="couple"
 				mode={mode}
@@ -194,7 +255,7 @@ export default function LoveAtDuskInvitation({
 				onAiClick={onAiClick}
 				className="love-section love-panel"
 			>
-				<div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-2">
+				<div className="mx-auto grid max-w-5xl gap-8 md:grid-cols-2">
 					{[
 						{
 							label: "GROOM",
@@ -216,7 +277,7 @@ export default function LoveAtDuskInvitation({
 							data-reveal
 							className={`dm-reveal ${
 								index === 0 ? "slide-left" : "slide-right"
-							} rounded-3xl border border-white/10 bg-[#140d0b]/80 p-6`}
+							} love-couple-card`}
 						>
 							<div
 								className={`h-48 rounded-2xl bg-gradient-to-br ${person.accent}`}
@@ -225,9 +286,10 @@ export default function LoveAtDuskInvitation({
 								{person.label}
 							</p>
 							<p
+								style={headingFont}
 								{...editableProps(
 									`${person.fieldPrefix}.fullName`,
-									"mt-3 text-sm text-[var(--love-cream)]",
+									"mt-3 text-xl font-semibold text-[var(--love-cream)]",
 								)}
 							>
 								{person.name}
@@ -235,7 +297,7 @@ export default function LoveAtDuskInvitation({
 							<p
 								{...editableProps(
 									`${person.fieldPrefix}.bio`,
-									"mt-2 text-xs text-[var(--love-muted)]",
+									"mt-2 text-sm leading-relaxed text-[var(--love-muted)]",
 								)}
 							>
 								{person.bio}
@@ -251,42 +313,51 @@ export default function LoveAtDuskInvitation({
 				hidden={hiddenSections?.story}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="love-section"
+				className="love-section love-section-wide"
 			>
 				<div className="mx-auto max-w-4xl">
 					<p
 						data-reveal
-						className="dm-reveal text-xs uppercase tracking-[0.6em] text-[var(--love-accent)]"
+						className="dm-reveal text-center text-xs uppercase tracking-[0.6em] text-[var(--love-accent)]"
 					>
 						Love Story Timeline
 					</p>
-					<div className="mt-8 grid gap-6">
+					<div className="mt-8 love-story-timeline">
+						<div className="love-timeline-track" aria-hidden="true" />
 						{data.story.milestones.map((milestone, index) => (
 							<div
 								key={`${milestone.title}-${milestone.date}`}
 								data-reveal
 								style={{ transitionDelay: `${index * 80}ms` }}
-								className={`dm-reveal ${
-									index % 2 === 0 ? "slide-left" : "slide-right"
-								} rounded-3xl border border-white/10 bg-[#120c0a] p-6`}
+								className={`dm-reveal love-timeline-item ${
+									index % 2 === 0 ? "love-timeline-left" : "love-timeline-right"
+								}`}
 							>
-								<p className="text-xs uppercase tracking-[0.4em] text-[var(--love-accent)]">
-									{milestone.date}
-								</p>
-								<p
-									style={headingFont}
-									className="mt-2 text-sm text-[var(--love-cream)]"
-								>
-									{milestone.title}
-								</p>
-								<p className="mt-2 text-xs text-[var(--love-muted)]">
-									{milestone.description}
-								</p>
+								<div className="love-timeline-dot" aria-hidden="true" />
+								<div className="love-timeline-content">
+									<p className="text-xs uppercase tracking-[0.4em] text-[var(--love-accent)]">
+										{milestone.date}
+									</p>
+									<p
+										style={headingFont}
+										className="mt-2 text-lg font-semibold text-[var(--love-cream)]"
+									>
+										{milestone.title}
+									</p>
+									<p className="mt-2 text-sm leading-relaxed text-[var(--love-muted)]">
+										{milestone.description}
+									</p>
+								</div>
 							</div>
 						))}
 					</div>
 				</div>
 			</SectionShell>
+
+			<div
+				className="love-gradient-divider love-gradient-section-to-panel"
+				aria-hidden="true"
+			/>
 
 			<SectionShell
 				sectionId="gallery"
@@ -303,21 +374,21 @@ export default function LoveAtDuskInvitation({
 					>
 						Gallery
 					</p>
-					<div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+					<div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
 						{data.gallery.photos.map((item, index) => (
 							<div
 								key={`${item.url ?? "photo"}-${item.caption ?? "Photo"}`}
 								data-reveal
 								style={{ transitionDelay: `${index * 60}ms` }}
-								className="dm-reveal rounded-2xl border border-white/10 bg-gradient-to-br from-[#2a1b13] via-[#0f0c0a] to-[#5b2f22] p-6"
+								className="dm-reveal love-gallery-card"
 							>
 								<img
 									src={item.url || "/placeholders/photo-dark.svg"}
 									alt={item.caption || "Wedding photo"}
 									loading="lazy"
 									width={360}
-									height={128}
-									className="h-32 w-full rounded-xl border border-white/10 object-cover"
+									height={256}
+									className="h-56 w-full rounded-xl border border-white/10 object-cover"
 								/>
 								<p className="mt-4 text-xs uppercase tracking-[0.3em] text-[var(--love-accent)]">
 									{item.caption ?? `Photo ${index + 1}`}
@@ -334,7 +405,7 @@ export default function LoveAtDuskInvitation({
 				hidden={hiddenSections?.schedule}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="love-section"
+				className="love-section love-section-wide"
 			>
 				<div className="mx-auto max-w-4xl">
 					<p
@@ -349,24 +420,34 @@ export default function LoveAtDuskInvitation({
 								key={`${event.time}-${event.title}`}
 								data-reveal
 								style={{ transitionDelay: `${index * 70}ms` }}
-								className="dm-reveal rounded-2xl border border-white/10 bg-[#140d0b]/80 p-5"
+								className="dm-reveal love-schedule-item"
 							>
-								<div className="flex flex-wrap items-center justify-between gap-4">
-									<p className="text-sm font-semibold text-[var(--love-accent)] tabular-nums">
+								<div className="love-schedule-time">
+									<p className="text-base font-semibold text-[var(--love-accent)] tabular-nums">
 										{event.time}
 									</p>
-									<p className="text-sm text-[var(--love-cream)]">
+								</div>
+								<div className="love-schedule-details">
+									<p
+										style={headingFont}
+										className="text-lg text-[var(--love-cream)]"
+									>
 										{event.title}
 									</p>
+									<p className="mt-1 text-sm text-[var(--love-muted)]">
+										{event.description}
+									</p>
 								</div>
-								<p className="mt-2 text-xs text-[var(--love-muted)]">
-									{event.description}
-								</p>
 							</div>
 						))}
 					</div>
 				</div>
 			</SectionShell>
+
+			<div
+				className="love-gradient-divider love-gradient-section-to-panel"
+				aria-hidden="true"
+			/>
 
 			<SectionShell
 				sectionId="venue"
@@ -413,10 +494,7 @@ export default function LoveAtDuskInvitation({
 							{data.venue.directions}
 						</p>
 					</div>
-					<div
-						data-reveal
-						className="dm-reveal rounded-3xl border border-white/10 bg-gradient-to-br from-[#2a1b13] via-[#0f0c0a] to-[#5b2f22] p-6"
-					>
+					<div data-reveal className="dm-reveal love-venue-map">
 						<img
 							src="/placeholders/photo-dark.svg"
 							alt={`Map showing location of ${data.venue.name}`}
@@ -438,7 +516,7 @@ export default function LoveAtDuskInvitation({
 				hidden={hiddenSections?.entourage}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="love-section"
+				className="love-section love-section-wide"
 			>
 				<div className="mx-auto max-w-4xl">
 					<p
@@ -447,18 +525,21 @@ export default function LoveAtDuskInvitation({
 					>
 						Entourage
 					</p>
-					<div className="mt-6 grid gap-4 sm:grid-cols-3">
+					<div className="mt-6 grid gap-5 sm:grid-cols-3">
 						{data.entourage.members.map((person, index) => (
 							<div
 								key={`${person.role}-${person.name}`}
 								data-reveal
 								style={{ transitionDelay: `${index * 80}ms` }}
-								className="dm-reveal rounded-2xl border border-white/10 bg-[#140d0b]/80 p-5 text-center"
+								className="dm-reveal love-entourage-card"
 							>
 								<p className="text-xs uppercase tracking-[0.3em] text-[var(--love-accent)]">
 									{person.role}
 								</p>
-								<p className="mt-3 text-sm text-[var(--love-cream)]">
+								<p
+									style={headingFont}
+									className="mt-3 text-base text-[var(--love-cream)]"
+								>
 									{person.name}
 								</p>
 							</div>
@@ -609,13 +690,13 @@ export default function LoveAtDuskInvitation({
 								autoComplete="off"
 							/>
 						</label>
-						<label className="mt-4 flex items-start gap-3 cursor-pointer">
+						<label className="relative mt-4 flex min-h-[44px] cursor-pointer items-start gap-3">
 							<input
 								type="checkbox"
 								name="consent"
 								required
 								aria-describedby="love-consent-description"
-								className="mt-0.5 h-4 w-4 rounded border border-white/10 bg-[#0f0c0a] accent-[var(--love-accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--love-accent)]/30"
+								className="mt-0.5 h-4 w-4 rounded border border-white/10 bg-[#0f0c0a] accent-[var(--love-accent)] before:absolute before:left-0 before:top-1/2 before:h-[44px] before:w-[44px] before:-translate-x-[13px] before:-translate-y-1/2 before:content-[''] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--love-accent)]/30"
 							/>
 							<span
 								id="love-consent-description"

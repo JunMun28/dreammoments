@@ -578,7 +578,9 @@ export const googleCallbackFn = createServerFn({ method: "POST" })
 			}
 
 			// Dev-only fallback: in-memory store
-			console.warn("[Auth] googleCallback: using in-memory fallback (no DATABASE_URL)");
+			console.warn(
+				"[Auth] googleCallback: using in-memory fallback (no DATABASE_URL)",
+			);
 			let foundUser: FallbackUser | undefined;
 			for (const u of fallbackUsers.values()) {
 				if (u.email === email) {

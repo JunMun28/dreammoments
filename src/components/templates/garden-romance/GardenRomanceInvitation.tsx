@@ -1108,13 +1108,13 @@ export default function GardenRomanceInvitation({
 									}}
 								/>
 							</label>
-							<label className="flex items-start gap-3 sm:col-span-2 mt-2 cursor-pointer">
+							<label className="relative mt-2 flex min-h-[44px] cursor-pointer items-start gap-3 sm:col-span-2">
 								<input
 									type="checkbox"
 									name="consent"
 									required
 									aria-describedby="gr-consent-description"
-									className="mt-0.5 h-4 w-4 rounded border-2 accent-[#C41E3A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C41E3A]/30"
+									className="mt-0.5 h-4 w-4 rounded border-2 accent-[#C41E3A] before:absolute before:left-0 before:top-1/2 before:h-[44px] before:w-[44px] before:-translate-x-[13px] before:-translate-y-1/2 before:content-[''] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C41E3A]/30"
 									style={{ borderColor: "rgba(212,175,55,0.3)" }}
 								/>
 								<span

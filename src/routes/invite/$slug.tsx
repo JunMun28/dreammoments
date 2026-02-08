@@ -61,6 +61,7 @@ export const Route = createFileRoute("/invite/$slug")({
 		const coupleNames = parseCoupleNames(params.slug);
 		const title = `${coupleNames} | DreamMoments`;
 		const description = `You're invited to celebrate the wedding of ${coupleNames}. View the invitation and RSVP.`;
+		const ogImage = `/api/og/${encodeURIComponent(params.slug)}`;
 		return {
 			meta: [
 				{ title },
@@ -68,13 +69,13 @@ export const Route = createFileRoute("/invite/$slug")({
 				{ property: "og:title", content: title },
 				{ property: "og:description", content: description },
 				{ property: "og:type", content: "website" },
-				{ property: "og:image", content: "/og-default.svg" },
+				{ property: "og:image", content: ogImage },
 				{ property: "og:image:width", content: "1200" },
 				{ property: "og:image:height", content: "630" },
 				{ name: "twitter:card", content: "summary_large_image" },
 				{ name: "twitter:title", content: title },
 				{ name: "twitter:description", content: description },
-				{ name: "twitter:image", content: "/og-default.svg" },
+				{ name: "twitter:image", content: ogImage },
 			],
 		};
 	},

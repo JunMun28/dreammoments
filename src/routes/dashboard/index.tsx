@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ShareModal from "../../components/share/ShareModal";
 import { useAuth } from "../../lib/auth";
 import { deleteInvitation, getAnalytics, listGuests } from "../../lib/data";
@@ -17,6 +17,74 @@ const statusLabels: Record<InvitationStatus, string> = {
 	archived: "Archived",
 };
 
+function ConfirmDeleteDialog({
+	title,
+	onConfirm,
+	onCancel,
+}: {
+	title: string;
+	onConfirm: () => void;
+	onCancel: () => void;
+}) {
+	const dialogRef = useRef<HTMLDivElement>(null);
+	const cancelRef = useRef<HTMLButtonElement>(null);
+
+	useEffect(() => {
+		cancelRef.current?.focus();
+	}, []);
+
+	useEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (e.key === "Escape") onCancel();
+		};
+		document.addEventListener("keydown", handleKeyDown);
+		return () => document.removeEventListener("keydown", handleKeyDown);
+	}, [onCancel]);
+
+	return (
+		<div
+			className="dm-inline-edit"
+			onPointerDown={(e) => {
+				if (e.target === e.currentTarget) onCancel();
+			}}
+			role="dialog"
+			aria-modal="true"
+			aria-label="Confirm deletion"
+		>
+			<div
+				ref={dialogRef}
+				className="w-full max-w-sm rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-6 shadow-lg"
+			>
+				<p className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">
+					Delete Invitation
+				</p>
+				<p className="mt-3 text-sm text-[color:var(--dm-ink)]">
+					Are you sure you want to delete{" "}
+					<span className="font-semibold">{title}</span>? This action cannot be
+					undone.
+				</p>
+				<div className="mt-5 flex gap-3">
+					<button
+						ref={cancelRef}
+						type="button"
+						className="flex-1 rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-ink)]"
+						onClick={onCancel}
+					>
+						Cancel
+					</button>
+					<button
+						type="button"
+						className="flex-1 rounded-full bg-dm-error px-4 py-2 text-xs uppercase tracking-[0.2em] text-white"
+						onClick={onConfirm}
+					>
+						Delete
+					</button>
+				</div>
+			</div>
+		</div>
+	);
+}
+
 function DashboardScreen() {
 	const { user } = useAuth();
 	const invitations = useStore((store) =>
@@ -24,6 +92,14 @@ function DashboardScreen() {
 	);
 	const [shareOpen, setShareOpen] = useState(false);
 	const [selected, setSelected] = useState<Invitation | null>(null);
+	const [deleteTarget, setDeleteTarget] = useState<Invitation | null>(null);
+
+	const handleDeleteConfirm = useCallback(() => {
+		if (deleteTarget) {
+			deleteInvitation(deleteTarget.id);
+			setDeleteTarget(null);
+		}
+	}, [deleteTarget]);
 
 	const sortedInvitations = useMemo(
 		() =>
@@ -126,15 +202,9 @@ function DashboardScreen() {
 										<button
 											type="button"
 											className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)]"
-											onClick={() => {
-												const confirmed = window.confirm(
-													"Delete this invitation?",
-												);
-												if (!confirmed) return;
-												deleteInvitation(invitation.id);
-											}}
+											onClick={() => setDeleteTarget(invitation)}
 										>
-											Delete Invitation
+											Delete
 										</button>
 									</div>
 								</div>
@@ -175,6 +245,14 @@ function DashboardScreen() {
 				invitation={selected}
 				onClose={() => setShareOpen(false)}
 			/>
+
+			{deleteTarget && (
+				<ConfirmDeleteDialog
+					title={deleteTarget.title}
+					onConfirm={handleDeleteConfirm}
+					onCancel={() => setDeleteTarget(null)}
+				/>
+			)}
 		</div>
 	);
 }

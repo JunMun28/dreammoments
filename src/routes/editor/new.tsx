@@ -21,7 +21,11 @@ const categoryLabels: Record<string, string> = {
 	western: "Western",
 };
 
-function TemplateColorPreview({ tokens }: { tokens: TemplateConfig["tokens"] }) {
+function TemplateColorPreview({
+	tokens,
+}: {
+	tokens: TemplateConfig["tokens"];
+}) {
 	const colors = [
 		tokens.colors.primary,
 		tokens.colors.secondary,

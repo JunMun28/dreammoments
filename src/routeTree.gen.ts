@@ -13,7 +13,9 @@ import { Route as UpgradeRouteImport } from './routes/upgrade'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as UpgradeIndexRouteImport } from './routes/upgrade/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as UpgradeSuccessRouteImport } from './routes/upgrade/success'
 import { Route as InviteSlugRouteImport } from './routes/invite/$slug'
 import { Route as EditorNewRouteImport } from './routes/editor/new'
 import { Route as EditorInvitationIdRouteImport } from './routes/editor/$invitationId'
@@ -43,10 +45,20 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UpgradeIndexRoute = UpgradeIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => UpgradeRoute,
+} as any)
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/dashboard/',
   path: '/dashboard/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const UpgradeSuccessRoute = UpgradeSuccessRouteImport.update({
+  id: '/success',
+  path: '/success',
+  getParentRoute: () => UpgradeRoute,
 } as any)
 const InviteSlugRoute = InviteSlugRouteImport.update({
   id: '/invite/$slug',
@@ -94,7 +106,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
-  '/upgrade': typeof UpgradeRoute
+  '/upgrade': typeof UpgradeRouteWithChildren
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset': typeof AuthResetRoute
@@ -102,14 +114,15 @@ export interface FileRoutesByFullPath {
   '/editor/$invitationId': typeof EditorInvitationIdRoute
   '/editor/new': typeof EditorNewRoute
   '/invite/$slug': typeof InviteSlugRoute
+  '/upgrade/success': typeof UpgradeSuccessRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/upgrade/': typeof UpgradeIndexRoute
   '/dashboard/$invitationId/': typeof DashboardInvitationIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
-  '/upgrade': typeof UpgradeRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset': typeof AuthResetRoute
@@ -117,7 +130,9 @@ export interface FileRoutesByTo {
   '/editor/$invitationId': typeof EditorInvitationIdRoute
   '/editor/new': typeof EditorNewRoute
   '/invite/$slug': typeof InviteSlugRoute
+  '/upgrade/success': typeof UpgradeSuccessRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/upgrade': typeof UpgradeIndexRoute
   '/dashboard/$invitationId': typeof DashboardInvitationIdIndexRoute
 }
 export interface FileRoutesById {
@@ -125,7 +140,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
-  '/upgrade': typeof UpgradeRoute
+  '/upgrade': typeof UpgradeRouteWithChildren
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset': typeof AuthResetRoute
@@ -133,7 +148,9 @@ export interface FileRoutesById {
   '/editor/$invitationId': typeof EditorInvitationIdRoute
   '/editor/new': typeof EditorNewRoute
   '/invite/$slug': typeof InviteSlugRoute
+  '/upgrade/success': typeof UpgradeSuccessRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/upgrade/': typeof UpgradeIndexRoute
   '/dashboard/$invitationId/': typeof DashboardInvitationIdIndexRoute
 }
 export interface FileRouteTypes {
@@ -150,14 +167,15 @@ export interface FileRouteTypes {
     | '/editor/$invitationId'
     | '/editor/new'
     | '/invite/$slug'
+    | '/upgrade/success'
     | '/dashboard/'
+    | '/upgrade/'
     | '/dashboard/$invitationId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/privacy'
     | '/terms'
-    | '/upgrade'
     | '/auth/callback'
     | '/auth/login'
     | '/auth/reset'
@@ -165,7 +183,9 @@ export interface FileRouteTypes {
     | '/editor/$invitationId'
     | '/editor/new'
     | '/invite/$slug'
+    | '/upgrade/success'
     | '/dashboard'
+    | '/upgrade'
     | '/dashboard/$invitationId'
   id:
     | '__root__'
@@ -180,7 +200,9 @@ export interface FileRouteTypes {
     | '/editor/$invitationId'
     | '/editor/new'
     | '/invite/$slug'
+    | '/upgrade/success'
     | '/dashboard/'
+    | '/upgrade/'
     | '/dashboard/$invitationId/'
   fileRoutesById: FileRoutesById
 }
@@ -188,7 +210,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
-  UpgradeRoute: typeof UpgradeRoute
+  UpgradeRoute: typeof UpgradeRouteWithChildren
   AuthCallbackRoute: typeof AuthCallbackRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthResetRoute: typeof AuthResetRoute
@@ -230,12 +252,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/upgrade/': {
+      id: '/upgrade/'
+      path: '/'
+      fullPath: '/upgrade/'
+      preLoaderRoute: typeof UpgradeIndexRouteImport
+      parentRoute: typeof UpgradeRoute
+    }
     '/dashboard/': {
       id: '/dashboard/'
       path: '/dashboard'
       fullPath: '/dashboard/'
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/upgrade/success': {
+      id: '/upgrade/success'
+      path: '/success'
+      fullPath: '/upgrade/success'
+      preLoaderRoute: typeof UpgradeSuccessRouteImport
+      parentRoute: typeof UpgradeRoute
     }
     '/invite/$slug': {
       id: '/invite/$slug'
@@ -296,11 +332,24 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface UpgradeRouteChildren {
+  UpgradeSuccessRoute: typeof UpgradeSuccessRoute
+  UpgradeIndexRoute: typeof UpgradeIndexRoute
+}
+
+const UpgradeRouteChildren: UpgradeRouteChildren = {
+  UpgradeSuccessRoute: UpgradeSuccessRoute,
+  UpgradeIndexRoute: UpgradeIndexRoute,
+}
+
+const UpgradeRouteWithChildren =
+  UpgradeRoute._addFileChildren(UpgradeRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
-  UpgradeRoute: UpgradeRoute,
+  UpgradeRoute: UpgradeRouteWithChildren,
   AuthCallbackRoute: AuthCallbackRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthResetRoute: AuthResetRoute,

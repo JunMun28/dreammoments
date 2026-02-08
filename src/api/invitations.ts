@@ -23,6 +23,44 @@ import {
 	updateInvitationSchema,
 } from "@/lib/validation";
 
+// ── Check slug availability ─────────────────────────────────────────
+
+const checkSlugSchema = z.object({
+	token: z.string().min(1, "Token is required"),
+	slug: z.string().min(1, "Slug is required"),
+	invitationId: z.string().optional(),
+});
+
+export const checkSlugAvailabilityFn = createServerFn({
+	method: "GET",
+})
+	.inputValidator(
+		(data: { token: string; slug: string; invitationId?: string }) => {
+			const result = checkSlugSchema.safeParse(data);
+			if (!result.success) {
+				throw new Error(result.error.issues[0].message);
+			}
+			return result.data;
+		},
+	)
+	.handler(async ({ data }) => {
+		await requireAuth(data.token);
+
+		const db = getDbOrNull();
+
+		if (db) {
+			const rows = await db
+				.select({ id: schema.invitations.id })
+				.from(schema.invitations)
+				.where(eq(schema.invitations.slug, data.slug));
+
+			const taken = rows.some((r) => r.id !== data.invitationId);
+			return { available: !taken };
+		}
+
+		return { available: true };
+	});
+
 // ── List user invitations ───────────────────────────────────────────
 
 const getInvitationsSchema = z.object({

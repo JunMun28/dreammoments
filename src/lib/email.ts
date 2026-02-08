@@ -24,10 +24,7 @@ export async function sendEmail({
 	const apiKey = getApiKey();
 
 	if (!apiKey) {
-		console.warn(
-			"[email] RESEND_API_KEY not set — skipping email send to",
-			to,
-		);
+		console.warn("[email] RESEND_API_KEY not set — skipping email send to", to);
 		return { success: false, error: "No API key configured" };
 	}
 

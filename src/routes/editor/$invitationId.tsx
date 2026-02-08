@@ -13,6 +13,7 @@ import {
 	useRef,
 	useState,
 } from "react";
+import { checkSlugAvailabilityFn } from "../../api/invitations";
 import { AiAssistantDrawer } from "../../components/editor/AiAssistantDrawer";
 import { ContextPanel } from "../../components/editor/ContextPanel";
 import { EditorLayout } from "../../components/editor/EditorLayout";
@@ -107,6 +108,41 @@ const lightTemplates = new Set([
 	"eternal-elegance",
 	"blush-romance",
 ]);
+
+// ── Slug validation ─────────────────────────────────────────────────
+
+const SLUG_REGEX = /^[a-z0-9][a-z0-9-]*[a-z0-9]$/;
+const SLUG_MIN = 3;
+const SLUG_MAX = 50;
+const RESERVED_SLUGS = new Set([
+	"admin",
+	"api",
+	"auth",
+	"dashboard",
+	"editor",
+	"upgrade",
+	"invite",
+	"login",
+	"signup",
+	"settings",
+	"help",
+	"support",
+	"about",
+	"privacy",
+	"terms",
+]);
+
+function validateSlug(slug: string): string {
+	if (!slug) return "";
+	if (slug.length < SLUG_MIN)
+		return `Slug must be at least ${SLUG_MIN} characters`;
+	if (slug.length > SLUG_MAX)
+		return `Slug must be at most ${SLUG_MAX} characters`;
+	if (!SLUG_REGEX.test(slug))
+		return "Only lowercase letters, numbers, and hyphens allowed. Must start and end with a letter or number.";
+	if (RESERVED_SLUGS.has(slug)) return `"${slug}" is a reserved word`;
+	return "";
+}
 
 export function EditorScreen() {
 	const { invitationId } = Route.useParams();
@@ -240,6 +276,11 @@ export function EditorScreen() {
 	const [isHydrated, setIsHydrated] = useState(false);
 	const [slugDialogOpen, setSlugDialogOpen] = useState(false);
 	const [slugValue, setSlugValue] = useState("");
+	const [slugError, setSlugError] = useState("");
+	const [slugAvailability, setSlugAvailability] = useState<
+		"idle" | "checking" | "available" | "taken"
+	>("idle");
+	const slugCheckTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const [shareModalOpen, setShareModalOpen] = useState(false);
 	const [publishSuccess, setPublishSuccess] = useState(false);
 
@@ -350,12 +391,56 @@ export function EditorScreen() {
 			return;
 		}
 		setSlugValue(invitation.slug);
+		setSlugError("");
+		setSlugAvailability("idle");
 		setSlugDialogOpen(true);
 	};
 
+	const handleSlugChange = (value: string) => {
+		const normalized = value.toLowerCase().replace(/\s+/g, "-");
+		setSlugValue(normalized);
+
+		if (slugCheckTimer.current) clearTimeout(slugCheckTimer.current);
+
+		const error = validateSlug(normalized);
+		setSlugError(error);
+
+		if (error || !normalized) {
+			setSlugAvailability("idle");
+			return;
+		}
+
+		setSlugAvailability("checking");
+		slugCheckTimer.current = setTimeout(() => {
+			const token = window.localStorage.getItem("dm-auth-token");
+			if (!token) return;
+			void checkSlugAvailabilityFn({
+				data: { token, slug: normalized, invitationId: invitation.id },
+			})
+				.then((result: { available: boolean }) => {
+					setSlugAvailability(result.available ? "available" : "taken");
+				})
+				.catch(() => {
+					setSlugAvailability("idle");
+				});
+		}, 400);
+	};
+
+	const slugIsValid =
+		!slugError &&
+		(slugAvailability === "available" || slugAvailability === "idle");
+
 	const handleSlugConfirm = () => {
+		const trimmed = slugValue.trim();
+		const error = validateSlug(trimmed);
+		if (error) {
+			setSlugError(error);
+			return;
+		}
+		if (slugAvailability === "taken") return;
+
 		publishInvitation(invitation.id, {
-			slug: slugValue.trim() || invitation.slug,
+			slug: trimmed || invitation.slug,
 		});
 		setSlugDialogOpen(false);
 		setPublishSuccess(true);
@@ -599,6 +684,8 @@ export function EditorScreen() {
 				error={aiAssistant.aiPanel.error}
 				generating={aiAssistant.aiGenerating}
 				remainingAi={aiAssistant.remainingAi}
+				aiGenerationsUsed={aiAssistant.aiGenerationsUsed}
+				planLimit={aiAssistant.planLimit}
 				isMobile={isMobile}
 				onClose={aiAssistant.closeAiPanel}
 				onPromptChange={aiAssistant.setAiPrompt}
@@ -753,14 +840,44 @@ export function EditorScreen() {
 							id={slugInputId}
 							type="text"
 							value={slugValue}
-							onChange={(e) => setSlugValue(e.target.value)}
+							onChange={(e) => handleSlugChange(e.target.value)}
 							onKeyDown={(e) => {
-								if (e.key === "Enter") handleSlugConfirm();
+								if (e.key === "Enter" && slugIsValid) handleSlugConfirm();
 							}}
-							className="mt-1 w-full rounded-lg border border-[color:var(--dm-border)] bg-[color:var(--dm-bg)] px-3 py-2 text-sm text-[color:var(--dm-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--dm-focus)]/60"
+							className={`mt-1 w-full rounded-lg bg-[color:var(--dm-bg)] px-3 py-2 text-sm text-[color:var(--dm-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--dm-focus)]/60 ${
+								slugError || slugAvailability === "taken"
+									? "border border-[color:var(--dm-error)]"
+									: slugAvailability === "available"
+										? "border border-green-500"
+										: "border border-[color:var(--dm-border)]"
+							}`}
+							aria-invalid={!!slugError || slugAvailability === "taken"}
+							aria-describedby="slug-feedback"
 							autoComplete="off"
 						/>
-						<div className="mt-4 flex gap-3">
+						<p
+							id="slug-feedback"
+							className={`mt-1 text-xs ${
+								slugError || slugAvailability === "taken"
+									? "text-[color:var(--dm-error)]"
+									: slugAvailability === "available"
+										? "text-green-600"
+										: slugAvailability === "checking"
+											? "text-[color:var(--dm-muted)]"
+											: "text-transparent"
+							}`}
+							aria-live="polite"
+						>
+							{slugError ||
+								(slugAvailability === "taken"
+									? "Already taken"
+									: slugAvailability === "available"
+										? "Available"
+										: slugAvailability === "checking"
+											? "Checking..."
+											: "\u00A0")}
+						</p>
+						<div className="mt-3 flex gap-3">
 							<button
 								type="button"
 								className="flex-1 rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-ink)]"
@@ -770,7 +887,12 @@ export function EditorScreen() {
 							</button>
 							<button
 								type="button"
-								className="flex-1 rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)]"
+								disabled={
+									!!slugError ||
+									slugAvailability === "taken" ||
+									slugAvailability === "checking"
+								}
+								className="flex-1 rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)] disabled:opacity-50"
 								onClick={handleSlugConfirm}
 							>
 								Save

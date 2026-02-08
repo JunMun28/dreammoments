@@ -23,7 +23,10 @@ export function getJwtSecret(): Uint8Array {
 		}
 		return new TextEncoder().encode(devFallbackSecret);
 	}
-	if (secret.length < MIN_SECRET_LENGTH && process.env.NODE_ENV !== "production") {
+	if (
+		secret.length < MIN_SECRET_LENGTH &&
+		process.env.NODE_ENV !== "production"
+	) {
 		console.warn(
 			`[Session] JWT_SECRET is shorter than ${MIN_SECRET_LENGTH} characters. Use a longer secret for better security.`,
 		);

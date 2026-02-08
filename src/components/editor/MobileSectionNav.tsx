@@ -10,12 +10,72 @@ export type MobileSectionNavProps = {
 	embedded?: boolean;
 };
 
-function completionStatus(
-	completion: number | undefined,
-): "full" | "partial" | "empty" {
-	if (completion != null && completion >= 100) return "full";
-	if (completion != null && completion > 0) return "partial";
-	return "empty";
+function CompletionIcon({ completion }: { completion: number | undefined }) {
+	const value = completion ?? 0;
+	if (value >= 100) {
+		return (
+			<svg
+				width="12"
+				height="12"
+				viewBox="0 0 12 12"
+				fill="none"
+				aria-hidden="true"
+				className="shrink-0"
+			>
+				<circle
+					cx="6"
+					cy="6"
+					r="5.5"
+					stroke="currentColor"
+					strokeWidth="1"
+					fill="currentColor"
+					opacity="0.15"
+				/>
+				<path
+					d="M3.5 6L5.5 8L8.5 4"
+					stroke="currentColor"
+					strokeWidth="1.5"
+					strokeLinecap="round"
+					strokeLinejoin="round"
+					fill="none"
+				/>
+			</svg>
+		);
+	}
+	if (value > 0) {
+		return (
+			<svg
+				width="12"
+				height="12"
+				viewBox="0 0 12 12"
+				fill="none"
+				aria-hidden="true"
+				className="shrink-0"
+			>
+				<circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1" />
+				<path d="M6 1A5 5 0 0 0 6 11Z" fill="currentColor" opacity="0.4" />
+			</svg>
+		);
+	}
+	return (
+		<svg
+			width="12"
+			height="12"
+			viewBox="0 0 12 12"
+			fill="none"
+			aria-hidden="true"
+			className="shrink-0"
+		>
+			<circle
+				cx="6"
+				cy="6"
+				r="5"
+				stroke="currentColor"
+				strokeWidth="1"
+				opacity="0.4"
+			/>
+		</svg>
+	);
 }
 
 export default function MobileSectionNav({
@@ -123,7 +183,6 @@ export default function MobileSectionNav({
 			>
 				{sections.map((section) => {
 					const isActive = section.id === activeSection;
-					const status = completionStatus(section.completion);
 					return (
 						<button
 							key={section.id}
@@ -154,11 +213,7 @@ export default function MobileSectionNav({
 							onKeyDown={handleTabKeyDown}
 						>
 							{section.label || section.id}
-							<span
-								className="dm-completion-ring"
-								data-complete={status}
-								aria-hidden="true"
-							/>
+							<CompletionIcon completion={section.completion} />
 						</button>
 					);
 				})}

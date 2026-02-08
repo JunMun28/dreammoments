@@ -15,6 +15,8 @@ export type AiAssistantDrawerProps = {
 	error?: string;
 	generating: boolean;
 	remainingAi: number;
+	aiGenerationsUsed: number;
+	planLimit: number;
 	isMobile: boolean;
 	onClose: () => void;
 	onPromptChange: (prompt: string) => void;
@@ -40,6 +42,8 @@ function DrawerContent({
 	error,
 	generating,
 	remainingAi,
+	aiGenerationsUsed,
+	planLimit,
 	onClose,
 	onPromptChange,
 	onTypeChange,
@@ -47,6 +51,8 @@ function DrawerContent({
 	onApply,
 }: Omit<AiAssistantDrawerProps, "open" | "isMobile">) {
 	const promptId = useId();
+	const nearLimit = remainingAi <= 2 && remainingAi > 0;
+	const atLimit = remainingAi === 0;
 	return (
 		<div className="flex h-full flex-col">
 			{/* Header */}
@@ -167,11 +173,33 @@ function DrawerContent({
 				)}
 			</div>
 
-			{/* Footer: remaining badge */}
+			{/* Footer: usage counter */}
 			<div className="shrink-0 border-t border-[color:var(--dm-border)] px-5 py-3">
 				<p className="text-center text-[10px] uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
-					{remainingAi} generation{remainingAi !== 1 ? "s" : ""} remaining
+					{aiGenerationsUsed}/{planLimit} AI generations used
 				</p>
+				{nearLimit && (
+					<p className="mt-1 text-center text-[10px] tracking-[0.1em] text-[color:var(--dm-peach)]">
+						Running low &mdash;{" "}
+						<a
+							href="/dashboard?upgrade=true"
+							className="underline underline-offset-2"
+						>
+							Upgrade for more
+						</a>
+					</p>
+				)}
+				{atLimit && (
+					<p className="mt-1 text-center text-[10px] tracking-[0.1em] text-dm-error">
+						Limit reached &mdash;{" "}
+						<a
+							href="/dashboard?upgrade=true"
+							className="underline underline-offset-2"
+						>
+							Upgrade to Premium
+						</a>
+					</p>
+				)}
 			</div>
 		</div>
 	);

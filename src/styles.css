@@ -355,9 +355,51 @@ h4 {
   position: absolute;
   inset: 1.5rem;
   border: 1px solid var(--dm-peach);
-  opacity: 0.3;
+  opacity: 0.55;
   border-radius: 50% 50% 0 0;
   pointer-events: none;
+}
+
+/* Decorative corner flourishes */
+.blush-hero-corner {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-color: #B8605B;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.blush-hero-corner-tl {
+  top: 2rem;
+  left: 2rem;
+  border-top: 2px solid;
+  border-left: 2px solid;
+  border-top-left-radius: 12px;
+}
+
+.blush-hero-corner-tr {
+  top: 2rem;
+  right: 2rem;
+  border-top: 2px solid;
+  border-right: 2px solid;
+  border-top-right-radius: 12px;
+}
+
+.blush-hero-corner-bl {
+  bottom: 2rem;
+  left: 2rem;
+  border-bottom: 2px solid;
+  border-left: 2px solid;
+  border-bottom-left-radius: 12px;
+}
+
+.blush-hero-corner-br {
+  bottom: 2rem;
+  right: 2rem;
+  border-bottom: 2px solid;
+  border-right: 2px solid;
+  border-bottom-right-radius: 12px;
 }
 
 .blush-hero-bloom {
@@ -625,6 +667,8 @@ h4 {
   gap: 0.75rem;
   cursor: pointer;
   margin-top: 0.5rem;
+  position: relative;
+  min-height: 44px;
 }
 
 .blush-consent input[type="checkbox"] {
@@ -635,6 +679,17 @@ h4 {
   margin-top: 0.125rem;
   accent-color: var(--dm-peach);
   cursor: pointer;
+}
+
+/* Expand touch target to 44x44px while keeping visual checkbox small */
+.blush-consent input[type="checkbox"]::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 44px;
+  height: 44px;
+  transform: translate(-13px, -50%);
 }
 
 .blush-consent span {
@@ -685,6 +740,54 @@ h4 {
 
 .blush-footer {
   padding-bottom: 6rem;
+}
+
+/* Ampersand accent in hero */
+.blush-ampersand {
+  color: #B8605B;
+  font-style: italic;
+}
+
+/* Pill dot separator */
+.blush-pill-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #B8605B;
+  display: inline-block;
+}
+
+/* Sage green accent kicker */
+.blush-kicker-sage {
+  color: #6B8F71;
+}
+
+/* Sage green panel variant */
+.blush-panel-sage {
+  background: #F2F5F0;
+  border-radius: 2rem;
+  margin: 2rem 1rem;
+  padding: 4rem 2rem;
+}
+
+/* Card with left accent border */
+.blush-card-accent {
+  border-left: 3px solid #B8605B;
+  text-align: left;
+}
+
+/* Floral SVG divider between sections */
+.blush-floral-divider {
+  display: flex;
+  justify-content: center;
+  padding: 1rem 0;
+  color: var(--dm-peach);
+  opacity: 0.5;
+}
+
+.blush-floral-svg {
+  width: 140px;
+  height: 24px;
 }
 
 /* Reveal-on-scroll animation */
@@ -1321,6 +1424,8 @@ h4 {
   gap: 0.75rem;
   cursor: pointer;
   margin-top: 0.5rem;
+  position: relative;
+  min-height: 44px;
 }
 
 .eternal-consent input[type="checkbox"] {
@@ -1331,6 +1436,17 @@ h4 {
   margin-top: 0.125rem;
   accent-color: var(--eternal-secondary);
   cursor: pointer;
+}
+
+/* Expand touch target to 44x44px while keeping visual checkbox small */
+.eternal-consent input[type="checkbox"]::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 44px;
+  height: 44px;
+  transform: translate(-13px, -50%);
 }
 
 .eternal-consent span {
@@ -1523,6 +1639,217 @@ h4 {
   }
 }
 
+/* ─── Love at Dusk Elevation Styles ─── */
+
+/* Starfield background decoration */
+.love-starfield {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.love-star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: var(--love-accent);
+  animation: love-star-twinkle 3s ease-in-out infinite;
+}
+
+@keyframes love-star-twinkle {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 0.6; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .love-star {
+    animation: none;
+    opacity: 0.3;
+  }
+}
+
+/* Full-width section variant (no card wrapping) */
+.love-section-wide {
+  border-top: 1px solid rgba(201, 169, 98, 0.08);
+  border-bottom: 1px solid rgba(201, 169, 98, 0.08);
+}
+
+/* Gradient dividers between sections */
+.love-gradient-divider {
+  height: 80px;
+  pointer-events: none;
+}
+
+.love-gradient-hero-to-section {
+  background: linear-gradient(to bottom, transparent, var(--love-ink));
+}
+
+.love-gradient-section-to-panel {
+  background: linear-gradient(to bottom, var(--love-ink), rgba(20, 13, 11, 0.5));
+}
+
+/* Couple card with glow border */
+.love-couple-card {
+  padding: 1.5rem;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(201, 169, 98, 0.15);
+  background: linear-gradient(135deg, rgba(20, 13, 11, 0.9), rgba(43, 27, 19, 0.5));
+  box-shadow: 0 0 40px -10px rgba(139, 41, 66, 0.15);
+  transition: box-shadow 0.3s ease;
+}
+
+.love-couple-card:hover {
+  box-shadow: 0 0 50px -10px rgba(139, 41, 66, 0.25);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .love-couple-card {
+    transition: none;
+  }
+}
+
+/* Story timeline with center line */
+.love-story-timeline {
+  position: relative;
+  display: grid;
+  gap: 2rem;
+}
+
+.love-timeline-track {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(to bottom, transparent, var(--love-accent), transparent);
+  opacity: 0.3;
+}
+
+.love-timeline-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+  position: relative;
+}
+
+.love-timeline-dot {
+  position: absolute;
+  left: calc(50% - 4px);
+  top: 0.5rem;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--love-accent);
+  box-shadow: 0 0 12px rgba(201, 169, 98, 0.4);
+}
+
+.love-timeline-content {
+  width: calc(50% - 2rem);
+}
+
+.love-timeline-left .love-timeline-content {
+  margin-right: auto;
+  text-align: right;
+  padding-right: 2rem;
+}
+
+.love-timeline-right .love-timeline-content {
+  margin-left: auto;
+  text-align: left;
+  padding-left: 2rem;
+}
+
+@media (max-width: 640px) {
+  .love-timeline-track {
+    left: 1rem;
+  }
+  .love-timeline-dot {
+    left: calc(1rem - 4px);
+  }
+  .love-timeline-content {
+    width: auto;
+    margin-left: 2.5rem !important;
+    margin-right: 0 !important;
+    text-align: left !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
+
+/* Gallery card with varied styling */
+.love-gallery-card {
+  padding: 0.75rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(20, 13, 11, 0.6);
+  transition: transform 0.3s ease;
+}
+
+.love-gallery-card:hover {
+  transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .love-gallery-card {
+    transition: none;
+  }
+  .love-gallery-card:hover {
+    transform: none;
+  }
+}
+
+/* Schedule items with left border accent */
+.love-schedule-item {
+  display: flex;
+  gap: 1.5rem;
+  padding: 1.25rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.love-schedule-item:last-child {
+  border-bottom: none;
+}
+
+.love-schedule-time {
+  flex-shrink: 0;
+  width: 80px;
+  padding-top: 0.125rem;
+}
+
+.love-schedule-details {
+  flex: 1;
+}
+
+/* Venue map card */
+.love-venue-map {
+  padding: 1rem;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(201, 169, 98, 0.12);
+  background: linear-gradient(135deg, rgba(43, 27, 19, 0.6), rgba(15, 12, 10, 0.8));
+}
+
+/* Entourage card with subtle glow */
+.love-entourage-card {
+  padding: 1.5rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(135deg, rgba(20, 13, 11, 0.8), rgba(43, 27, 19, 0.3));
+  text-align: center;
+  transition: border-color 0.3s ease;
+}
+
+.love-entourage-card:hover {
+  border-color: rgba(201, 169, 98, 0.2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .love-entourage-card {
+    transition: none;
+  }
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    SHARED RSVP FORM STANDARDS
 
@@ -1710,24 +2037,6 @@ h4 {
   border-radius: 2px;
 }
 
-.dm-completion-ring {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.dm-completion-ring[data-complete="full"] {
-  background: #22c55e;
-}
-
-.dm-completion-ring[data-complete="partial"] {
-  background: #eab308;
-}
-
-.dm-completion-ring[data-complete="empty"] {
-  background: var(--dm-border);
-}
 
 @media (prefers-reduced-motion: reduce) {
   [data-editor-active="true"] {

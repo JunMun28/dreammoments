@@ -182,6 +182,13 @@ function Showcase() {
 			photo: "/photos/floral-detail.jpg",
 			accent: "bg-dm-peach/40",
 		},
+		{
+			id: "eternal-elegance",
+			title: "Golden hour",
+			desc: "Timeless black & gold sophistication.",
+			photo: "/photos/golden-hour.jpg",
+			accent: "bg-[#C9A962]/50",
+		},
 	];
 
 	return (
@@ -223,7 +230,7 @@ function Showcase() {
 				</div>
 
 				{/* Template grid */}
-				<div className="grid md:grid-cols-3 gap-8">
+				<div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
 					{templates.map((t, i) => (
 						<motion.div
 							key={t.id}
@@ -597,10 +604,7 @@ const PREMIUM_FEATURES = [
 
 function Pricing() {
 	return (
-		<section
-			id="pricing"
-			className="relative py-32 px-6 overflow-hidden"
-		>
+		<section id="pricing" className="relative py-32 px-6 overflow-hidden">
 			{/* Background blobs */}
 			<div className="dm-blob dm-blob-peach w-[420px] h-[420px] -top-[60px] -left-[100px]" />
 			<div
