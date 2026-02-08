@@ -43,7 +43,8 @@ export type SectionType =
 	| "calendar"
 	| "countdown"
 	| "details"
-	| "extra";
+	| "extra"
+	| "faq";
 
 /** When set, an AI rewrite (magic) button is shown next to this field. */
 export type FieldAiTaskType =

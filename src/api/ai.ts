@@ -277,6 +277,7 @@ export const generateAiContentFn = createServerFn({
 			return result.data;
 		},
 	)
+	// @ts-expect-error ServerFn inference expects stricter JSON type than Record<string, unknown>
 	.handler(async ({ data }) => {
 		await requireAuth(data.token);
 

@@ -182,7 +182,7 @@ export function publishInvitation(
 		status: "published",
 		publishedAt: now(),
 		templateVersion: template.version,
-		templateSnapshot: template,
+		templateSnapshot: template as unknown as Record<string, unknown>,
 	});
 }
 

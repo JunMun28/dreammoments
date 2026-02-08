@@ -150,6 +150,7 @@ export function EditorScreen() {
 	const rawId = useId();
 	const upgradeTitleId = `upgrade-title-${rawId.replaceAll(":", "")}`;
 	const slugInputId = `slug-input-${rawId.replaceAll(":", "")}`;
+	const slugFeedbackId = useId();
 
 	const invitation = useStore((store) =>
 		store.invitations.find((item) => item.id === invitationId),
@@ -852,11 +853,11 @@ export function EditorScreen() {
 										: "border border-[color:var(--dm-border)]"
 							}`}
 							aria-invalid={!!slugError || slugAvailability === "taken"}
-							aria-describedby="slug-feedback"
+							aria-describedby={slugFeedbackId}
 							autoComplete="off"
 						/>
 						<p
-							id="slug-feedback"
+							id={slugFeedbackId}
 							className={`mt-1 text-xs ${
 								slugError || slugAvailability === "taken"
 									? "text-[color:var(--dm-error)]"

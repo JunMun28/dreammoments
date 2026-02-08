@@ -199,6 +199,7 @@ export default function GardenRomanceInvitation({
 	const data = useMemo(() => content, [content]);
 	const rawRsvpSceneId = useId();
 	const rsvpSceneId = `rsvp-scene-${rawRsvpSceneId.replaceAll(":", "")}`;
+	const consentDescriptionId = useId();
 
 	const weddingDateZh = useMemo(
 		() => formatDisplayDate(data.hero.date, "zh-CN"),
@@ -1113,12 +1114,12 @@ export default function GardenRomanceInvitation({
 									type="checkbox"
 									name="consent"
 									required
-									aria-describedby="gr-consent-description"
+									aria-describedby={consentDescriptionId}
 									className="mt-0.5 h-4 w-4 rounded border-2 accent-[#C41E3A] before:absolute before:left-0 before:top-1/2 before:h-[44px] before:w-[44px] before:-translate-x-[13px] before:-translate-y-1/2 before:content-[''] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C41E3A]/30"
 									style={{ borderColor: "rgba(212,175,55,0.3)" }}
 								/>
 								<span
-									id="gr-consent-description"
+									id={consentDescriptionId}
 									className="text-xs leading-relaxed"
 									style={{ color: COLORS.textSecondary }}
 								>

@@ -380,7 +380,7 @@ export const getSessionFn = createServerFn({ method: "POST" })
 
 				return {
 					user: sanitizeUser(row),
-					...(newToken ? { newToken } : {}),
+					...(newToken ? { newToken: newToken.token } : {}),
 				};
 			}
 
@@ -408,7 +408,7 @@ export const getSessionFn = createServerFn({ method: "POST" })
 					createdAt: fallbackUser.createdAt,
 					updatedAt: fallbackUser.updatedAt,
 				},
-				...(newToken ? { newToken } : {}),
+				...(newToken ? { newToken: newToken.token } : {}),
 			};
 		},
 	);

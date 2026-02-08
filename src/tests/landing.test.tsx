@@ -15,8 +15,8 @@ describe("landing page", () => {
 		const markup = renderToString(<Landing />);
 		expect(markup).toContain("Wedding invitations that feel like");
 		expect(markup).toContain("home.");
-		expect(markup).toContain("Start free trial");
-		expect(markup).toContain("See real invites");
+		expect(markup).toContain("Get Started Free");
+		expect(markup).toContain("View Templates");
 		expect(markup).toContain("your love story, softly told");
 		expect(markup).toContain("The collection");
 		expect(markup).toContain("From sign up to RSVPs in 5 steps");
@@ -37,9 +37,9 @@ describe("landing page", () => {
 
 	test("renders feature pills in hero", () => {
 		const markup = renderToString(<Landing />);
+		expect(markup).toContain("Tactile textures");
+		expect(markup).toContain("Fluid motion");
+		expect(markup).toContain("Guest ease");
 		expect(markup).toContain("One-tap RSVP");
-		expect(markup).toContain("AI-written vows");
-		expect(markup).toContain("Photo gallery");
-		expect(markup).toContain("Live replies");
 	});
 });

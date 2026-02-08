@@ -168,9 +168,7 @@ async function sendToSentry(
 /**
  * Parse an Error stack string into Sentry-compatible frames.
  */
-function parseStack(
-	stack: string,
-): Array<{
+function parseStack(stack: string): Array<{
 	filename: string;
 	function: string;
 	lineno?: number;

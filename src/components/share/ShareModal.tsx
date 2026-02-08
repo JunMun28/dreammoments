@@ -1,4 +1,4 @@
-import { useId, useMemo, useRef } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { PUBLIC_BASE_URL } from "../../lib/data";
 import { generateQrDataUrl } from "../../lib/qr";
 import type { Invitation } from "../../lib/types";
@@ -16,6 +16,23 @@ export default function ShareModal({
 	const rawId = useId();
 	const titleId = `share-modal-title-${rawId.replaceAll(":", "")}`;
 	const dialogRef = useRef<HTMLDivElement>(null);
+	const [copied, setCopied] = useState(false);
+	const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+	useEffect(() => {
+		if (!open) {
+			setCopied(false);
+			if (copyTimeoutRef.current) {
+				clearTimeout(copyTimeoutRef.current);
+				copyTimeoutRef.current = null;
+			}
+		}
+		return () => {
+			if (copyTimeoutRef.current) {
+				clearTimeout(copyTimeoutRef.current);
+			}
+		};
+	}, [open]);
 
 	useFocusTrap(dialogRef, {
 		enabled: open && invitation != null,
@@ -47,17 +64,38 @@ export default function ShareModal({
 					Share Invitation
 				</p>
 				<p className="mt-2 text-sm text-[color:var(--dm-muted)]">{url}</p>
-				<div className="mt-4 flex flex-wrap gap-3">
+				<div className="mt-4 flex flex-col flex-nowrap gap-3">
 					<button
 						type="button"
-						className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-accent-strong)]"
-						onClick={() => navigator.clipboard.writeText(url)}
+						className={`rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--dm-accent-strong)] focus-visible:ring-offset-2 active:scale-[0.98] ${
+							copied
+								? "border-[color:var(--dm-sage)] bg-[color:var(--dm-sage)] text-[color:var(--dm-ink)]"
+								: "border-[color:var(--dm-border)] text-[color:var(--dm-accent-strong)] hover:bg-[color:var(--dm-surface-muted)] hover:border-[color:var(--dm-accent-strong)]"
+						}`}
+						onClick={async () => {
+							try {
+								await navigator.clipboard.writeText(url);
+								if (copyTimeoutRef.current)
+									clearTimeout(copyTimeoutRef.current);
+								setCopied(true);
+								copyTimeoutRef.current = setTimeout(() => {
+									setCopied(false);
+									copyTimeoutRef.current = null;
+								}, 2000);
+							} catch {
+								// clipboard failed (e.g. insecure context)
+							}
+						}}
+						aria-live="polite"
+						aria-label={
+							copied ? "Link copied to clipboard" : "Copy link to clipboard"
+						}
 					>
-						Copy Link
+						{copied ? "Copied!" : "Copy Link"}
 					</button>
 					<button
 						type="button"
-						className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-accent-strong)]"
+						className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-accent-strong)] transition-colors hover:bg-[color:var(--dm-surface-muted)] hover:border-[color:var(--dm-accent-strong)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--dm-accent-strong)] focus-visible:ring-offset-2 active:scale-[0.98]"
 						onClick={() =>
 							window.open(
 								`https://wa.me/?text=${encodeURIComponent(message)}`,
@@ -71,7 +109,7 @@ export default function ShareModal({
 					<a
 						href={qrDataUrl}
 						download={`invite-${invitation.slug}.svg`}
-						className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-accent-strong)]"
+						className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-center text-xs uppercase tracking-[0.2em] text-[color:var(--dm-accent-strong)] transition-colors hover:bg-[color:var(--dm-surface-muted)] hover:border-[color:var(--dm-accent-strong)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--dm-accent-strong)] focus-visible:ring-offset-2 active:scale-[0.98]"
 					>
 						Download QR Code
 					</a>

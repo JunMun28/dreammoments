@@ -28,7 +28,6 @@ if (!("hash" in globalCrypto)) {
 }
 
 if (!globalThis.crypto) {
-	// @ts-expect-error - assign global crypto for Vite hashing
 	globalThis.crypto = globalCrypto;
 }
 

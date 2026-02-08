@@ -604,6 +604,7 @@ const PREMIUM_FEATURES = [
 
 function Pricing() {
 	return (
+		// biome-ignore lint/correctness/useUniqueElementIds: intentional anchor id for URL hash #pricing
 		<section id="pricing" className="relative py-32 px-6 overflow-hidden">
 			{/* Background blobs */}
 			<div className="dm-blob dm-blob-peach w-[420px] h-[420px] -top-[60px] -left-[100px]" />

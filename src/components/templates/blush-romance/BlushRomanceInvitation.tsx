@@ -3,6 +3,7 @@ import {
 	type CSSProperties,
 	type KeyboardEvent,
 	type MouseEvent,
+	useId,
 	useMemo,
 	useState,
 } from "react";
@@ -41,6 +42,7 @@ export default function BlushRomanceInvitation({
 	rsvpStatus,
 }: BlushRomanceInvitationProps) {
 	useScrollReveal();
+	const consentDescriptionId = useId();
 	const data = useMemo(() => content, [content]);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const parseAttendance = (
@@ -473,9 +475,9 @@ export default function BlushRomanceInvitation({
 								type="checkbox"
 								name="consent"
 								required
-								aria-describedby="consent-description"
+								aria-describedby={consentDescriptionId}
 							/>
-							<span id="consent-description">
+							<span id={consentDescriptionId}>
 								I consent to the collection of my personal data as described in
 								the{" "}
 								<Link

@@ -3,6 +3,7 @@ import {
 	type CSSProperties,
 	type KeyboardEvent,
 	type MouseEvent,
+	useId,
 	useMemo,
 	useState,
 } from "react";
@@ -43,6 +44,7 @@ export default function LoveAtDuskInvitation({
 	useScrollReveal();
 	useParallax();
 
+	const consentDescriptionId = useId();
 	const data = useMemo(() => content, [content]);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const parseAttendance = (
@@ -695,11 +697,11 @@ export default function LoveAtDuskInvitation({
 								type="checkbox"
 								name="consent"
 								required
-								aria-describedby="love-consent-description"
+								aria-describedby={consentDescriptionId}
 								className="mt-0.5 h-4 w-4 rounded border border-white/10 bg-[#0f0c0a] accent-[var(--love-accent)] before:absolute before:left-0 before:top-1/2 before:h-[44px] before:w-[44px] before:-translate-x-[13px] before:-translate-y-1/2 before:content-[''] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--love-accent)]/30"
 							/>
 							<span
-								id="love-consent-description"
+								id={consentDescriptionId}
 								className="text-xs leading-relaxed text-[var(--love-muted)]"
 							>
 								I consent to the collection of my personal data as described in

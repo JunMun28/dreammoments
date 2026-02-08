@@ -21,6 +21,7 @@ export const getPublicInvitation = createServerFn({
 		}
 		return result.data;
 	})
+	// @ts-expect-error ServerFn inference expects stricter JSON type than Record<string, unknown>
 	.handler(async ({ data }) => {
 		const db = getDbOrNull();
 

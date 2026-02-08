@@ -77,6 +77,7 @@ export const getInvitations = createServerFn({
 		}
 		return result.data;
 	})
+	// @ts-expect-error ServerFn inference expects stricter JSON type than Record<string, unknown>
 	.handler(async ({ data }) => {
 		const { userId } = await requireAuth(data.token);
 
@@ -111,6 +112,7 @@ export const getInvitation = createServerFn({
 		}
 		return result.data;
 	})
+	// @ts-expect-error ServerFn inference expects stricter JSON type than Record<string, unknown>
 	.handler(async ({ data }) => {
 		const { userId } = await requireAuth(data.token);
 
@@ -159,6 +161,7 @@ export const createInvitationFn = createServerFn({
 		}
 		return data;
 	})
+	// @ts-expect-error ServerFn inference expects stricter JSON type than Record<string, unknown>
 	.handler(async ({ data }) => {
 		const { userId } = await requireAuth(data.token);
 
@@ -237,6 +240,7 @@ export const updateInvitationFn = createServerFn({
 			return data;
 		},
 	)
+	// @ts-expect-error ServerFn inference expects stricter JSON type than Record<string, unknown>
 	.handler(async ({ data }) => {
 		const { userId } = await requireAuth(data.token);
 
@@ -289,7 +293,7 @@ export const updateInvitationFn = createServerFn({
 		const patch: Partial<Invitation> = {};
 		if (data.title !== undefined) patch.title = data.title;
 		if (data.content !== undefined)
-			patch.content = data.content as Invitation["content"];
+			patch.content = data.content as unknown as Invitation["content"];
 		if (data.sectionVisibility !== undefined)
 			patch.sectionVisibility = data.sectionVisibility;
 		if (data.designOverrides !== undefined)
@@ -378,6 +382,7 @@ export const publishInvitationFn = createServerFn({
 			return data;
 		},
 	)
+	// @ts-expect-error ServerFn inference expects stricter JSON type than Record<string, unknown>
 	.handler(async ({ data }) => {
 		const { userId } = await requireAuth(data.token);
 
@@ -474,6 +479,7 @@ export const unpublishInvitationFn = createServerFn({
 		}
 		return data;
 	})
+	// @ts-expect-error ServerFn inference expects stricter JSON type than Record<string, unknown>
 	.handler(async ({ data }) => {
 		const { userId } = await requireAuth(data.token);
 
