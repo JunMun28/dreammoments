@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { readRedirectFromSearch } from "../../lib/auth-redirect";
 import { useAuth } from "../../lib/auth";
+import { readRedirectFromSearch } from "../../lib/auth-redirect";
 
 export const Route = createFileRoute("/auth/reset")({
 	component: ResetScreen,
@@ -41,9 +41,7 @@ function ResetScreen() {
 							setMessage("");
 							try {
 								const error = await resetPassword({ email, password });
-								setMessage(
-									error ?? "Password updated. Please sign in again.",
-								);
+								setMessage(error ?? "Password updated. Please sign in again.");
 							} catch {
 								setMessage("Something went wrong. Please try again.");
 							} finally {

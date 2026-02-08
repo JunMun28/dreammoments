@@ -1,7 +1,11 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { InvitationContent } from "../../lib/types";
 import { cn } from "../../lib/utils";
-import type { SectionConfig } from "../../templates/types";
+import {
+	type FieldAiTaskType,
+	getSectionLabel,
+	type SectionConfig,
+} from "../../templates/types";
 import { ContextPanelHeader } from "./ContextPanelHeader";
 import { FieldRenderer } from "./FieldRenderer";
 import { getValueByPath } from "./hooks/useEditorState";
@@ -18,12 +22,10 @@ type ContextPanelProps = {
 	onFieldBlur?: (fieldPath: string) => void;
 	onImageUpload: (fieldPath: string, file: File) => void;
 	onVisibilityChange: (sectionId: string, visible: boolean) => void;
-	onAiClick: (sectionId: string) => void;
+	onAiClick: (sectionId: string, aiType?: FieldAiTaskType) => void;
 	completion: number;
 	collapsed?: boolean;
 	onToggleCollapse?: () => void;
-	sections?: SectionConfig[];
-	onSectionChange?: (sectionId: string) => void;
 };
 
 export function ContextPanel({
@@ -41,12 +43,9 @@ export function ContextPanel({
 	completion,
 	collapsed = false,
 	onToggleCollapse,
-	sections,
-	onSectionChange,
 }: ContextPanelProps) {
 	const isVisible = sectionVisibility[sectionId] ?? true;
-	const sectionLabel =
-		sectionConfig?.id?.replace(/^\w/, (c) => c.toUpperCase()) ?? sectionId;
+	const sectionLabel = getSectionLabel(sectionConfig?.id ?? sectionId);
 	const fields = sectionConfig?.fields ?? [];
 
 	if (collapsed) {
@@ -67,8 +66,8 @@ export function ContextPanel({
 	return (
 		<aside
 			className={cn(
-				"relative flex h-full flex-col border-l border-[color:var(--dm-border)] bg-[color:var(--dm-surface)]",
-				"w-full md:w-[320px] lg:w-[380px]",
+				"relative flex h-full flex-col bg-[color:var(--dm-surface)]",
+				"w-full",
 			)}
 		>
 			{/* Collapse button */}
@@ -96,7 +95,7 @@ export function ContextPanel({
 			{/* Scrollable fields — key triggers re-mount for fade animation on section change */}
 			<div
 				key={sectionId}
-				className="flex-1 overflow-y-auto px-5 py-4"
+				className="dm-scroll-thin flex-1 px-5 py-4"
 				role="tabpanel"
 				aria-label={`${sectionLabel} fields`}
 			>
@@ -163,6 +162,11 @@ export function ContextPanel({
 											}
 										: undefined
 								}
+								onAiClick={
+									field.aiTaskType
+										? () => onAiClick(sectionId, field.aiTaskType)
+										: undefined
+								}
 							/>
 						);
 					})}
@@ -172,24 +176,6 @@ export function ContextPanel({
 							No editable fields for this section.
 						</p>
 					)}
-
-					{/* "Next Section" button */}
-					{sections && onSectionChange && (() => {
-						const currentIndex = sections.findIndex((s) => s.id === sectionId);
-						const nextSection = sections[currentIndex + 1];
-						if (!nextSection) return null;
-						const nextLabel = nextSection.id.replace(/^\w/, (c) => c.toUpperCase());
-						return (
-							<button
-								type="button"
-								onClick={() => onSectionChange(nextSection.id)}
-								className="mt-2 flex w-full items-center justify-end gap-1 py-2 text-sm text-[color:var(--dm-muted)] transition-colors hover:text-[color:var(--dm-ink)]"
-							>
-								Next: {nextLabel}
-								<ChevronRight className="h-4 w-4" aria-hidden="true" />
-							</button>
-						);
-					})()}
 				</div>
 			</div>
 		</aside>

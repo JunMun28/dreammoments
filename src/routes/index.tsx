@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, Heart, Play, Sparkles, Star } from "lucide-react";
+import { Check, Crown, Heart, Play, Sparkles, Star } from "lucide-react";
 import { motion, useScroll, useTransform } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
@@ -131,6 +131,27 @@ function Hero() {
 							DreamMoments turns your wedding details into a warm, beautiful
 							page your guests will love — before they even tap RSVP.
 						</motion.p>
+
+						<motion.div
+							initial={reducedMotion ? false : { opacity: 0, y: 30 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={{ ...REVEAL_TRANSITION, delay: 0.5 }}
+							className="flex flex-col sm:flex-row items-center gap-4"
+						>
+							<Link
+								to="/auth/signup"
+								className="dm-cta-primary text-sm uppercase tracking-[0.15em]"
+							>
+								Get Started Free
+							</Link>
+							<Link
+								to="/"
+								hash="showcase"
+								className="dm-cta-secondary text-sm uppercase tracking-[0.15em]"
+							>
+								View Templates
+							</Link>
+						</motion.div>
 					</div>
 				</div>
 			</div>
@@ -139,7 +160,6 @@ function Hero() {
 }
 
 function Showcase() {
-
 	const templates = [
 		{
 			id: "garden-romance",
@@ -558,13 +578,170 @@ function Features() {
 	);
 }
 
+const FREE_FEATURES = [
+	"3 AI content generations",
+	"4 premium templates",
+	"Standard slug (your-name.dreammoments.app)",
+	"RSVP management",
+	"Basic analytics",
+];
+
+const PREMIUM_FEATURES = [
+	"100 AI content generations",
+	"Custom slug",
+	"CSV guest import / export",
+	"Detailed analytics",
+	"Priority support",
+	'Remove "Made with DreamMoments" branding',
+];
+
+function Pricing() {
+	return (
+		<section
+			id="pricing"
+			className="relative py-32 px-6 overflow-hidden"
+		>
+			{/* Background blobs */}
+			<div className="dm-blob dm-blob-peach w-[420px] h-[420px] -top-[60px] -left-[100px]" />
+			<div
+				className="dm-blob dm-blob-lavender w-[380px] h-[380px] bottom-[10%] -right-[80px]"
+				style={{ animationDelay: "2s" }}
+			/>
+			<div className="dm-grain absolute inset-0" />
+
+			<div className="relative z-10 max-w-5xl mx-auto">
+				{/* Section header */}
+				<div className="text-center mb-14">
+					<motion.p
+						initial={{ opacity: 0, y: 20 }}
+						whileInView={{ opacity: 1, y: 0 }}
+						viewport={{ once: true, margin: "-60px" }}
+						transition={REVEAL_TRANSITION}
+						className="font-accent text-3xl text-dm-peach mb-2"
+					>
+						simple pricing
+					</motion.p>
+					<motion.h2
+						initial={{ opacity: 0, y: 30 }}
+						whileInView={{ opacity: 1, y: 0 }}
+						viewport={{ once: true, margin: "-60px" }}
+						transition={{ ...REVEAL_TRANSITION, delay: 0.1 }}
+						className="font-heading text-4xl sm:text-5xl mb-4"
+					>
+						Start free, upgrade when ready
+					</motion.h2>
+					<motion.p
+						initial={{ opacity: 0, y: 20 }}
+						whileInView={{ opacity: 1, y: 0 }}
+						viewport={{ once: true, margin: "-60px" }}
+						transition={{ ...REVEAL_TRANSITION, delay: 0.2 }}
+						className="max-w-2xl mx-auto text-dm-muted text-lg leading-relaxed"
+					>
+						RM49 (Malaysia) / SGD19 (Singapore) — one-time, per invitation.
+					</motion.p>
+				</div>
+
+				{/* Pricing cards */}
+				<div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+					{/* Free tier */}
+					<motion.div
+						initial={{ opacity: 0, y: 30 }}
+						whileInView={{ opacity: 1, y: 0 }}
+						viewport={{ once: true, margin: "-50px" }}
+						transition={REVEAL_TRANSITION}
+						className="rounded-[2.5rem] border border-dm-border bg-dm-surface/90 p-8 sm:p-10 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)] flex flex-col"
+					>
+						<div className="mb-8">
+							<span className="text-sm uppercase tracking-[0.15em] text-dm-muted font-semibold">
+								Free
+							</span>
+							<div className="mt-3 font-heading text-5xl font-semibold text-dm-ink">
+								RM0
+							</div>
+							<p className="mt-2 text-dm-muted">
+								Everything you need to get started.
+							</p>
+						</div>
+
+						<ul className="space-y-4 flex-1">
+							{FREE_FEATURES.map((feature) => (
+								<li
+									key={feature}
+									className="flex items-start gap-3 text-dm-ink"
+								>
+									<Check
+										aria-hidden="true"
+										className="w-5 h-5 mt-0.5 text-dm-peach flex-shrink-0"
+									/>
+									<span>{feature}</span>
+								</li>
+							))}
+						</ul>
+
+						<Link
+							to="/auth/signup"
+							className="dm-cta-secondary mt-10 text-sm uppercase tracking-[0.15em] w-full text-center"
+						>
+							Get Started Free
+						</Link>
+					</motion.div>
+
+					{/* Premium tier */}
+					<motion.div
+						initial={{ opacity: 0, y: 30 }}
+						whileInView={{ opacity: 1, y: 0 }}
+						viewport={{ once: true, margin: "-50px" }}
+						transition={{ ...REVEAL_TRANSITION, delay: 0.15 }}
+						className="rounded-[2.5rem] border-2 border-dm-peach bg-dm-surface/90 p-8 sm:p-10 shadow-[0_8px_28px_-4px_rgba(0,0,0,0.08)] flex flex-col relative"
+					>
+						<div className="absolute -top-4 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-dm-ink text-white text-xs uppercase tracking-[0.15em] font-semibold">
+							<Crown aria-hidden="true" className="w-3.5 h-3.5" />
+							Popular
+						</div>
+
+						<div className="mb-8">
+							<span className="text-sm uppercase tracking-[0.15em] text-dm-muted font-semibold">
+								Premium
+							</span>
+							<div className="mt-3 font-heading text-5xl font-semibold text-dm-ink">
+								RM49
+							</div>
+							<p className="mt-2 text-dm-muted">
+								One-time upgrade per invitation.
+							</p>
+						</div>
+
+						<ul className="space-y-4 flex-1">
+							{PREMIUM_FEATURES.map((feature) => (
+								<li
+									key={feature}
+									className="flex items-start gap-3 text-dm-ink"
+								>
+									<Check
+										aria-hidden="true"
+										className="w-5 h-5 mt-0.5 text-dm-peach flex-shrink-0"
+									/>
+									<span>{feature}</span>
+								</li>
+							))}
+						</ul>
+
+						<Link
+							to="/auth/signup"
+							className="dm-cta-primary mt-10 text-sm uppercase tracking-[0.15em] w-full text-center"
+						>
+							Upgrade for RM49
+						</Link>
+					</motion.div>
+				</div>
+			</div>
+		</section>
+	);
+}
+
 function Footer() {
 	return (
-		// biome-ignore lint: used for in-page navigation from header
-		<footer
-			id="pricing"
-			className="relative py-20 text-center text-dm-muted overflow-hidden"
-		>
+		<footer className="relative py-20 text-center text-dm-muted overflow-hidden">
 			<div className="dm-grain absolute inset-0" />
 			<div className="relative z-10">
 				<div className="flex justify-center gap-2 mb-8 opacity-40">
@@ -616,6 +793,7 @@ export function Landing() {
 			<Showcase />
 			<GettingStartedTimeline />
 			<Features />
+			<Pricing />
 			<Footer />
 		</div>
 	);

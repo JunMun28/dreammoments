@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { readRedirectFromSearch } from "../../lib/auth-redirect";
 import { useAuth } from "../../lib/auth";
+import { readRedirectFromSearch } from "../../lib/auth-redirect";
 
 export const Route = createFileRoute("/auth/login")({
 	component: LoginScreen,

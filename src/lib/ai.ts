@@ -20,15 +20,18 @@ export async function generateAiContent({
 	sectionId,
 	prompt,
 	context,
+	token,
 }: {
 	type: "schedule" | "faq" | "story" | "tagline" | "style" | "translate";
 	sectionId: string;
 	prompt: string;
 	context: InvitationContent;
+	token?: string;
 }) {
 	try {
 		const result = await generateAiContentFn({
 			data: {
+				token: token ?? localStorage.getItem("dm-auth-token") ?? "",
 				type,
 				sectionId,
 				prompt,

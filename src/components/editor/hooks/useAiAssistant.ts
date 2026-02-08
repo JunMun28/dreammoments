@@ -39,7 +39,7 @@ export type UseAiAssistantReturn = {
 	aiPanel: AiPanelState;
 	aiGenerating: boolean;
 	remainingAi: number;
-	openAiPanel: (sectionId: string) => void;
+	openAiPanel: (sectionId: string, type?: AiTaskType) => void;
 	closeAiPanel: () => void;
 	setAiPrompt: (prompt: string) => void;
 	setAiType: (type: AiTaskType) => void;
@@ -75,12 +75,12 @@ export function useAiAssistant({
 
 	const remainingAi = Math.max(0, planLimit - aiGenerationsUsed);
 
-	const openAiPanel = useCallback((sectionId: string) => {
+	const openAiPanel = useCallback((sectionId: string, type?: AiTaskType) => {
 		setAiPanel({
 			open: true,
 			sectionId,
 			prompt: "",
-			type: inferDefaultType(sectionId),
+			type: type ?? inferDefaultType(sectionId),
 		});
 	}, []);
 

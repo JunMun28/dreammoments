@@ -56,6 +56,7 @@ export const loveAtDuskTemplate: TemplateConfig = {
 					id: "tagline",
 					label: "Tagline",
 					type: "text",
+					aiTaskType: "tagline",
 					sample: "Two hearts, one beautiful journey",
 				},
 				{

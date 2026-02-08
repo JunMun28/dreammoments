@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import {
-	DEFAULT_AUTH_REDIRECT,
 	buildRedirectFromLocation,
+	DEFAULT_AUTH_REDIRECT,
 	readRedirectFromSearch,
 	readRedirectFromStateSearch,
 	sanitizeRedirect,

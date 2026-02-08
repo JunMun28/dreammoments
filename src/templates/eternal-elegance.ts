@@ -50,7 +50,12 @@ export const eternalEleganceTemplate: TemplateConfig = {
 					type: "text",
 					required: true,
 				},
-				{ id: "tagline", label: "Tagline", type: "text" },
+				{
+					id: "tagline",
+					label: "Tagline",
+					type: "text",
+					aiTaskType: "tagline",
+				},
 				{ id: "heroImageUrl", label: "Hero photo", type: "image" },
 			],
 		},

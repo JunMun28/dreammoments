@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Reenie+Beanie&family=Noto+Serif+SC:wght@400;600;700;900&display=swap");
-
 @import 'tw-animate-css';
 
 @import 'tailwindcss';
@@ -205,7 +203,7 @@ h4 {
 }
 
 .dm-hero-highlight {
-  color: var(--dm-peach);
+  color: #C4706B;
 }
 
 /* Floating background blobs */
@@ -397,7 +395,7 @@ h4 {
 .blush-tagline {
   font-family: var(--font-accent);
   font-size: 1.75rem;
-  color: var(--dm-peach);
+  color: #B8605B;
   margin-bottom: 2.5rem;
   transform: rotate(-2deg);
 }
@@ -473,7 +471,7 @@ h4 {
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  color: var(--dm-peach);
+  color: #B8605B;
   margin-bottom: 0.75rem;
   font-weight: 600;
 }
@@ -646,7 +644,7 @@ h4 {
 }
 
 .blush-consent-link {
-  color: var(--dm-peach);
+  color: #B8605B;
   text-decoration: underline;
   text-underline-offset: 2px;
 }
@@ -1128,7 +1126,7 @@ h4 {
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.25em;
-  color: var(--eternal-secondary);
+  color: #8B7332;
   margin-bottom: 1.5rem;
 }
 
@@ -1342,7 +1340,7 @@ h4 {
 }
 
 .eternal-consent-link {
-  color: var(--eternal-secondary);
+  color: #8B7332;
   text-decoration: underline;
   text-underline-offset: 2px;
 }
@@ -1679,6 +1677,37 @@ h4 {
 
 .dm-pill-bar::-webkit-scrollbar {
   display: none;
+}
+
+/* Hidden scrollbar — still scrollable but no visible scrollbar */
+.dm-scroll-hidden {
+  overflow-y: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.dm-scroll-hidden::-webkit-scrollbar {
+  display: none;
+}
+
+/* Thin styled scrollbar with brand colors */
+.dm-scroll-thin {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--dm-border) transparent;
+}
+
+.dm-scroll-thin::-webkit-scrollbar {
+  width: 4px;
+}
+
+.dm-scroll-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dm-scroll-thin::-webkit-scrollbar-thumb {
+  background: var(--dm-border);
+  border-radius: 2px;
 }
 
 .dm-completion-ring {

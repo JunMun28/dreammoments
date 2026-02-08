@@ -1,5 +1,33 @@
 export type TemplateCategory = "chinese" | "garden" | "western";
 
+/** Human-readable display names for section IDs */
+export const sectionDisplayNames: Record<string, string> = {
+	hero: "Welcome",
+	couple: "Couple",
+	story: "Our Story",
+	gallery: "Gallery",
+	schedule: "Schedule",
+	venue: "Venue",
+	rsvp: "RSVP",
+	faq: "FAQ",
+	footer: "Footer",
+	announcement: "Announcement",
+	entourage: "Entourage",
+	registry: "Registry",
+	calendar: "Calendar",
+	countdown: "Countdown",
+	details: "Details",
+	extra: "Extra",
+};
+
+/** Get a human-readable label for a section ID */
+export function getSectionLabel(sectionId: string): string {
+	return (
+		sectionDisplayNames[sectionId] ??
+		sectionId.replace(/^\w/, (c) => c.toUpperCase())
+	);
+}
+
 export type SectionType =
 	| "hero"
 	| "announcement"
@@ -17,12 +45,23 @@ export type SectionType =
 	| "details"
 	| "extra";
 
+/** When set, an AI rewrite (magic) button is shown next to this field. */
+export type FieldAiTaskType =
+	| "tagline"
+	| "story"
+	| "schedule"
+	| "faq"
+	| "style"
+	| "translate";
+
 export interface FieldConfig {
 	id: string;
 	label: string;
 	type: "text" | "textarea" | "date" | "time" | "image" | "toggle" | "list";
 	sample?: string;
 	required?: boolean;
+	/** If set, show an AI magic button to rewrite this field's content. */
+	aiTaskType?: FieldAiTaskType;
 }
 
 export interface AnimationConfig {

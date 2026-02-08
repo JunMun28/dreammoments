@@ -1,7 +1,7 @@
 import { cn } from "../../lib/utils";
 
 type SaveStatusBadgeProps = {
-	status: "saved" | "saving" | "unsaved";
+	status: "saved" | "saving" | "unsaved" | "error";
 	autosaveAt?: string;
 };
 
@@ -17,6 +17,7 @@ export function SaveStatusBadge({ status, autosaveAt }: SaveStatusBadgeProps) {
 					"bg-[color:var(--dm-accent-strong)]/10 text-[color:var(--dm-accent-strong)]",
 				status === "unsaved" &&
 					"bg-amber-500/10 text-amber-600 dark:text-amber-400",
+				status === "error" && "bg-red-500/10 text-red-600 dark:text-red-400",
 			)}
 		>
 			{status === "saved" && (
@@ -44,6 +45,15 @@ export function SaveStatusBadge({ status, autosaveAt }: SaveStatusBadgeProps) {
 						aria-hidden="true"
 					/>
 					Unsaved changes
+				</>
+			)}
+			{status === "error" && (
+				<>
+					<span
+						className="inline-block h-1.5 w-1.5 rounded-full bg-red-500"
+						aria-hidden="true"
+					/>
+					Save failed
 				</>
 			)}
 		</span>

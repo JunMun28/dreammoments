@@ -36,63 +36,63 @@ export default function Header() {
 						))}
 					</nav>
 
-				<div className="flex items-center justify-end gap-2">
-					<div className="hidden items-center gap-2 md:flex">
-						{user ? (
-							<button
-								type="button"
-								onClick={signOut}
-								className="rounded-full inline-flex items-center justify-center border border-dm-border bg-dm-surface/60 px-4 py-2 text-xs font-semibold leading-none text-dm-ink"
-							>
-								Sign out
-							</button>
-						) : (
-							<Link
-								to="/auth/login"
-								className="rounded-full inline-flex items-center justify-center border border-dm-border bg-dm-surface/60 px-4 py-2 text-xs font-semibold leading-none text-dm-ink"
-							>
-								Sign in
-							</Link>
-						)}
-						{user?.plan === "free" ? (
-							<Link
-								to="/upgrade"
-								className="rounded-full inline-flex items-center justify-center border border-dm-peach/40 bg-dm-surface px-4 py-2 text-xs font-semibold leading-none text-dm-ink"
-							>
-								Upgrade
-							</Link>
-						) : null}
-						{user ? (
-							<Link
-								to="/dashboard"
-								className="rounded-full inline-flex items-center justify-center bg-dm-ink px-5 py-2.5 text-sm font-semibold leading-none text-white shadow-[0_4px_20px_-2px_rgba(0,0,0,0.12)]"
-							>
-								Open App
-							</Link>
-						) : (
-							<Link
-								to="/editor/new"
-								search={{ template: "love-at-dusk" }}
-								className="rounded-full inline-flex items-center justify-center bg-dm-ink px-5 py-2.5 text-sm font-semibold leading-none text-white shadow-[0_4px_20px_-2px_rgba(0,0,0,0.12)]"
-							>
-								Start Free Trial
-							</Link>
-						)}
+					<div className="flex items-center justify-end gap-2">
+						<div className="hidden items-center gap-2 md:flex">
+							{user ? (
+								<button
+									type="button"
+									onClick={signOut}
+									className="rounded-full inline-flex items-center justify-center border border-dm-border bg-dm-surface/60 px-4 py-2 text-xs font-semibold leading-none text-dm-ink"
+								>
+									Sign out
+								</button>
+							) : (
+								<Link
+									to="/auth/login"
+									className="rounded-full inline-flex items-center justify-center border border-dm-border bg-dm-surface/60 px-4 py-2 text-xs font-semibold leading-none text-dm-ink"
+								>
+									Sign in
+								</Link>
+							)}
+							{user?.plan === "free" ? (
+								<Link
+									to="/upgrade"
+									className="rounded-full inline-flex items-center justify-center border border-dm-peach/40 bg-dm-surface px-4 py-2 text-xs font-semibold leading-none text-dm-ink"
+								>
+									Upgrade
+								</Link>
+							) : null}
+							{user ? (
+								<Link
+									to="/dashboard"
+									className="rounded-full inline-flex items-center justify-center bg-dm-ink px-5 py-2.5 text-sm font-semibold leading-none text-white shadow-[0_4px_20px_-2px_rgba(0,0,0,0.12)]"
+								>
+									Open App
+								</Link>
+							) : (
+								<Link
+									to="/editor/new"
+									search={{ template: "love-at-dusk" }}
+									className="rounded-full inline-flex items-center justify-center bg-dm-ink px-5 py-2.5 text-sm font-semibold leading-none text-white shadow-[0_4px_20px_-2px_rgba(0,0,0,0.12)]"
+								>
+									Start Free Trial
+								</Link>
+							)}
+						</div>
+						<button
+							type="button"
+							onClick={() => setOpen((prev) => !prev)}
+							className="rounded-full border border-dm-border bg-dm-surface/60 p-2 text-dm-ink md:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dm-peach focus-visible:ring-offset-2"
+							aria-label="Toggle navigation"
+							aria-expanded={open}
+						>
+							{open ? (
+								<X aria-hidden="true" size={18} />
+							) : (
+								<Menu aria-hidden="true" size={18} />
+							)}
+						</button>
 					</div>
-					<button
-						type="button"
-						onClick={() => setOpen((prev) => !prev)}
-						className="rounded-full border border-dm-border bg-dm-surface/60 p-2 text-dm-ink md:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dm-peach focus-visible:ring-offset-2"
-						aria-label="Toggle navigation"
-						aria-expanded={open}
-					>
-						{open ? (
-							<X aria-hidden="true" size={18} />
-						) : (
-							<Menu aria-hidden="true" size={18} />
-						)}
-					</button>
-				</div>
 				</div>
 			</div>
 			{open && (
@@ -135,26 +135,26 @@ export default function Header() {
 								Upgrade
 							</Link>
 						) : null}
-							{user ? (
-								<button
-									type="button"
-									onClick={() => {
-										signOut();
-										setOpen(false);
-									}}
-									className="rounded-full inline-flex items-center justify-center border border-dm-border px-4 py-2 text-xs font-semibold leading-none text-dm-ink"
-								>
-									Sign out
-								</button>
-							) : (
-								<Link
-									to="/auth/login"
-									className="rounded-full inline-flex items-center justify-center border border-dm-border px-4 py-2 text-xs font-semibold leading-none text-dm-ink"
-									onClick={() => setOpen(false)}
-								>
-									Sign in
-								</Link>
-							)}
+						{user ? (
+							<button
+								type="button"
+								onClick={() => {
+									signOut();
+									setOpen(false);
+								}}
+								className="rounded-full inline-flex items-center justify-center border border-dm-border px-4 py-2 text-xs font-semibold leading-none text-dm-ink"
+							>
+								Sign out
+							</button>
+						) : (
+							<Link
+								to="/auth/login"
+								className="rounded-full inline-flex items-center justify-center border border-dm-border px-4 py-2 text-xs font-semibold leading-none text-dm-ink"
+								onClick={() => setOpen(false)}
+							>
+								Sign in
+							</Link>
+						)}
 					</div>
 				</div>
 			)}

@@ -1,13 +1,33 @@
 import { Link } from "@tanstack/react-router";
-import { type KeyboardEvent, type MouseEvent, useMemo, useState } from "react";
-import { LoadingSpinner } from "../../ui/LoadingSpinner";
+import {
+	type CSSProperties,
+	type KeyboardEvent,
+	type MouseEvent,
+	useMemo,
+	useState,
+} from "react";
 import { useScrollReveal } from "../../../lib/scroll-effects";
 import type { InvitationContent } from "../../../lib/types";
+import { LoadingSpinner } from "../../ui/LoadingSpinner";
 import SectionShell from "../SectionShell";
 import type { RsvpPayload, TemplateInvitationProps } from "../types";
 
 type EternalEleganceInvitationProps = TemplateInvitationProps & {
 	content: InvitationContent;
+};
+
+/* ─── Typography ─── */
+
+const headingFont: CSSProperties = {
+	fontFamily: "'Didot', 'Bodoni MT', 'Cormorant Garamond', serif",
+};
+
+const bodyFont: CSSProperties = {
+	fontFamily: "'Garamond', 'Cormorant Garamond', serif",
+};
+
+const accentFont: CSSProperties = {
+	fontFamily: "'Pinyon Script', 'Garamond', serif",
 };
 
 export default function EternalEleganceInvitation({
@@ -59,7 +79,7 @@ export default function EternalEleganceInvitation({
 	});
 
 	return (
-		<div className="eternal-elegance">
+		<div className="eternal-elegance" style={bodyFont}>
 			<SectionShell
 				sectionId="hero"
 				mode={mode}
@@ -78,15 +98,19 @@ export default function EternalEleganceInvitation({
 					</svg>
 				</div>
 				<div className="mx-auto max-w-4xl text-center">
-					<p className="eternal-kicker">Eternal Elegance</p>
+					<p className="eternal-kicker" style={bodyFont}>
+						Eternal Elegance
+					</p>
 					<h1
 						data-reveal
+						style={headingFont}
 						{...editableProps("hero.partnerOneName", "dm-reveal eternal-title")}
 					>
 						{data.hero.partnerOneName} & {data.hero.partnerTwoName}
 					</h1>
 					<p
 						data-reveal
+						style={accentFont}
 						{...editableProps("hero.tagline", "dm-reveal eternal-tagline")}
 					>
 						{taglineLetters.map((char, index) => (
@@ -99,7 +123,7 @@ export default function EternalEleganceInvitation({
 							</span>
 						))}
 					</p>
-					<p data-reveal className="dm-reveal eternal-date">
+					<p data-reveal className="dm-reveal eternal-date" style={bodyFont}>
 						{data.hero.date}
 					</p>
 				</div>
@@ -114,9 +138,12 @@ export default function EternalEleganceInvitation({
 				className="eternal-section"
 			>
 				<div className="mx-auto max-w-3xl text-center">
-					<p className="eternal-kicker">Invitation</p>
+					<p className="eternal-kicker" style={bodyFont}>
+						Invitation
+					</p>
 					<h2
 						data-reveal
+						style={headingFont}
 						{...editableProps(
 							"announcement.title",
 							"dm-reveal eternal-heading",
@@ -126,6 +153,7 @@ export default function EternalEleganceInvitation({
 					</h2>
 					<p
 						data-reveal
+						style={bodyFont}
 						{...editableProps("announcement.message", "dm-reveal eternal-body")}
 					>
 						{data.announcement.message}
@@ -158,6 +186,7 @@ export default function EternalEleganceInvitation({
 							className="dm-reveal eternal-card"
 						>
 							<p
+								style={headingFont}
 								{...editableProps(
 									`couple.${person.name === data.couple.partnerOne.fullName ? "partnerOne" : "partnerTwo"}.fullName`,
 									"eternal-heading",
@@ -166,6 +195,7 @@ export default function EternalEleganceInvitation({
 								{person.name}
 							</p>
 							<p
+								style={bodyFont}
 								{...editableProps(
 									`couple.${person.name === data.couple.partnerOne.fullName ? "partnerOne" : "partnerTwo"}.bio`,
 									"eternal-body",
@@ -187,7 +217,9 @@ export default function EternalEleganceInvitation({
 				className="eternal-section"
 			>
 				<div className="mx-auto max-w-5xl">
-					<p className="eternal-kicker">Gallery</p>
+					<p className="eternal-kicker" style={bodyFont}>
+						Gallery
+					</p>
 					<div className="mt-6 grid gap-4 md:grid-cols-3">
 						{data.gallery.photos.map((photo) => (
 							<div
@@ -218,11 +250,19 @@ export default function EternalEleganceInvitation({
 				className="eternal-section eternal-panel"
 			>
 				<div className="mx-auto max-w-4xl text-center">
-					<p className="eternal-kicker">Details</p>
-					<p {...editableProps("details.scheduleSummary", "eternal-heading")}>
+					<p className="eternal-kicker" style={bodyFont}>
+						Details
+					</p>
+					<p
+						style={headingFont}
+						{...editableProps("details.scheduleSummary", "eternal-heading")}
+					>
 						{data.details.scheduleSummary}
 					</p>
-					<p {...editableProps("details.venueSummary", "eternal-body")}>
+					<p
+						style={bodyFont}
+						{...editableProps("details.venueSummary", "eternal-body")}
+					>
 						{data.details.venueSummary}
 					</p>
 				</div>
@@ -237,7 +277,9 @@ export default function EternalEleganceInvitation({
 				className="eternal-section"
 			>
 				<div className="mx-auto max-w-4xl">
-					<p className="eternal-kicker">RSVP</p>
+					<p className="eternal-kicker" style={bodyFont}>
+						RSVP
+					</p>
 					<form
 						className="eternal-form"
 						noValidate
@@ -387,8 +429,13 @@ export default function EternalEleganceInvitation({
 				className="eternal-section eternal-panel"
 			>
 				<div className="mx-auto max-w-3xl text-center">
-					<p className="eternal-kicker">Registry</p>
-					<p {...editableProps("registry.note", "eternal-body")}>
+					<p className="eternal-kicker" style={bodyFont}>
+						Registry
+					</p>
+					<p
+						style={bodyFont}
+						{...editableProps("registry.note", "eternal-body")}
+					>
 						{data.registry.note}
 					</p>
 				</div>
@@ -403,10 +450,15 @@ export default function EternalEleganceInvitation({
 				className="eternal-section eternal-footer"
 			>
 				<div className="mx-auto max-w-3xl text-center">
-					<p {...editableProps("footer.message", "eternal-heading")}>
+					<p
+						style={headingFont}
+						{...editableProps("footer.message", "eternal-heading")}
+					>
 						{data.footer.message}
 					</p>
-					<p className="eternal-kicker">Eternal Elegance</p>
+					<p className="eternal-kicker" style={bodyFont}>
+						Eternal Elegance
+					</p>
 				</div>
 			</SectionShell>
 		</div>

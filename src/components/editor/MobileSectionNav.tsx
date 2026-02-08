@@ -6,6 +6,8 @@ export type MobileSectionNavProps = {
 	sections: Array<{ id: string; label?: string; completion?: number }>;
 	activeSection: string;
 	onSectionChange: (sectionId: string) => void;
+	/** When true, removes border-t, background, and safe-area padding (for use inside bottom sheet header) */
+	embedded?: boolean;
 };
 
 function completionStatus(
@@ -20,6 +22,7 @@ export default function MobileSectionNav({
 	sections,
 	activeSection,
 	onSectionChange,
+	embedded = false,
 }: MobileSectionNavProps) {
 	const activeRef = useRef<HTMLButtonElement>(null);
 	const tabRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
@@ -85,8 +88,14 @@ export default function MobileSectionNav({
 
 	return (
 		<nav
-			className="flex items-center gap-2 border-t border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] px-2 py-2"
-			style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+			className={cn(
+				"flex items-center gap-2 px-2 py-2",
+				!embedded &&
+					"border-t border-[color:var(--dm-border)] bg-[color:var(--dm-surface)]",
+			)}
+			style={
+				!embedded ? { paddingBottom: "env(safe-area-inset-bottom)" } : undefined
+			}
 			aria-label="Section navigation"
 		>
 			{/* Previous button - outside tablist */}
@@ -125,7 +134,9 @@ export default function MobileSectionNav({
 									tabRefs.current.delete(section.id);
 								}
 								if (isActive) {
-									(activeRef as React.MutableRefObject<HTMLButtonElement | null>).current = el;
+									(
+										activeRef as React.MutableRefObject<HTMLButtonElement | null>
+									).current = el;
 								}
 							}}
 							type="button"

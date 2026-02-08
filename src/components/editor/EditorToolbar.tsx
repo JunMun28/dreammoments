@@ -12,7 +12,7 @@ type EditorToolbarProps = {
 	onRedo: () => void;
 	onPreview: () => void;
 	onPublish: () => void;
-	saveStatus: "saved" | "saving" | "unsaved";
+	saveStatus: "saved" | "saving" | "unsaved" | "error";
 	autosaveAt: string;
 	isMobile: boolean;
 };
@@ -145,6 +145,7 @@ export function EditorToolbar({
 							saveStatus === "saved" && "bg-[#22c55e]",
 							saveStatus === "saving" && "bg-[#eab308]",
 							saveStatus === "unsaved" && "bg-[color:var(--dm-muted)]",
+							saveStatus === "error" && "bg-[#ef4444]",
 						)}
 						aria-label={`Save status: ${saveStatus}`}
 					/>

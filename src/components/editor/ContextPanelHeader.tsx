@@ -1,5 +1,5 @@
 import { Sparkles } from "lucide-react";
-import { ToggleSwitch } from "./ToggleSwitch";
+import { cn } from "../../lib/utils";
 
 type ContextPanelHeaderProps = {
 	sectionId: string;
@@ -19,11 +19,37 @@ export function ContextPanelHeader({
 	completion,
 }: ContextPanelHeaderProps) {
 	return (
-		<div className="sticky top-0 z-10 border-b border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] px-5 py-4">
-			<div className="flex items-center justify-between gap-3">
-				<h2 className="text-sm font-semibold uppercase tracking-[0.15em] text-[color:var(--dm-ink)]">
-					{sectionLabel}
-				</h2>
+		<div className="sticky top-0 z-10 border-b border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] px-5 py-3">
+			<div className="flex items-center justify-between gap-2">
+				<div className="flex items-center gap-2">
+					<h2 className="text-sm font-semibold uppercase tracking-[0.15em] text-[color:var(--dm-ink)]">
+						{sectionLabel}
+					</h2>
+
+					<button
+						id={`visibility-${sectionId}`}
+						type="button"
+						role="switch"
+						aria-checked={visible}
+						aria-label={`Show ${sectionLabel} section`}
+						onClick={() => onVisibilityChange(!visible)}
+						className={cn(
+							"relative inline-flex h-4 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--dm-focus)]/60",
+							visible
+								? "bg-[color:var(--dm-accent-strong)]"
+								: "bg-[color:var(--dm-border)]",
+						)}
+						style={{ minHeight: 0 }}
+					>
+						<span
+							aria-hidden="true"
+							className={cn(
+								"pointer-events-none inline-block h-2.5 w-2.5 shrink-0 rounded-full bg-white shadow-sm transition-transform duration-200",
+								visible ? "translate-x-[7px]" : "-translate-x-[7px]",
+							)}
+						/>
+					</button>
+				</div>
 
 				<div className="flex items-center gap-2">
 					<span className="text-xs tabular-nums text-[color:var(--dm-muted)]">
@@ -34,20 +60,11 @@ export function ContextPanelHeader({
 						type="button"
 						onClick={onAiClick}
 						aria-label={`Generate AI content for ${sectionLabel}`}
-						className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-[color:var(--dm-border)] text-[color:var(--dm-muted)] transition-colors hover:bg-[color:var(--dm-surface-muted)] hover:text-[color:var(--dm-ink)]"
+						className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-[color:var(--dm-border)] text-[color:var(--dm-muted)] transition-colors hover:bg-[color:var(--dm-surface-muted)] hover:text-[color:var(--dm-ink)]"
 					>
 						<Sparkles className="h-4 w-4" aria-hidden="true" />
 					</button>
 				</div>
-			</div>
-
-			<div className="mt-3">
-				<ToggleSwitch
-					label="Show section"
-					checked={visible}
-					onChange={onVisibilityChange}
-					id={`visibility-${sectionId}`}
-				/>
 			</div>
 		</div>
 	);

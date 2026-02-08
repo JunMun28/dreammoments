@@ -24,11 +24,11 @@ export function LayoutToggle({ layout, onChange }: LayoutToggleProps) {
 								: "text-dm-muted hover:text-dm-ink"
 						}`}
 					>
-					{mode === "web" ? (
-						<Monitor aria-hidden="true" className="h-3.5 w-3.5" />
-					) : (
-						<Smartphone aria-hidden="true" className="h-3.5 w-3.5" />
-					)}
+						{mode === "web" ? (
+							<Monitor aria-hidden="true" className="h-3.5 w-3.5" />
+						) : (
+							<Smartphone aria-hidden="true" className="h-3.5 w-3.5" />
+						)}
 						{mode === "web" ? "Web" : "Mobile"}
 					</button>
 				))}

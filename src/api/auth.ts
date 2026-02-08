@@ -1,14 +1,20 @@
+import { createServerFn } from "@tanstack/react-start";
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
-import { createServerFn } from "@tanstack/react-start";
-import { getDbOrNull, schema } from "@/db/index";
-import { createSession, refreshSession, verifySession } from "@/lib/session";
+import { z } from "zod";
+import { getDbOrNull, isProduction, schema } from "@/db/index";
+import { authRateLimit } from "@/lib/rate-limit";
+import {
+	createRefreshToken,
+	createSession,
+	refreshSession,
+	verifySession,
+} from "@/lib/session";
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const BCRYPT_COST = 12;
 
 interface AuthSuccess {
@@ -23,6 +29,7 @@ interface AuthSuccess {
 		updatedAt: string;
 	};
 	token: string;
+	refreshToken: string;
 }
 
 interface AuthError {
@@ -91,22 +98,30 @@ function generateId(): string {
  * - Creates session token (JWT)
  * - Returns { user, token } or { error }
  */
+const signupSchema = z.object({
+	email: z.string().email("Invalid email address"),
+	password: z.string().min(8, "Password must be at least 8 characters"),
+	name: z.string().max(100).optional(),
+});
+
 export const signupFn = createServerFn({ method: "POST" })
 	.inputValidator(
-		(data: { email: string; password: string; name?: string }) => data,
+		(data: { email: string; password: string; name?: string }) => {
+			const result = signupSchema.safeParse(data);
+			if (!result.success) {
+				throw new Error(result.error.issues[0].message);
+			}
+			return result.data;
+		},
 	)
 	.handler(async ({ data }): Promise<AuthResult> => {
 		const email = data.email.trim().toLowerCase();
 		const { password, name } = data;
 
-		// Validate email format
-		if (!EMAIL_RE.test(email)) {
-			return { error: "Invalid email address" };
-		}
-
-		// Validate password strength
-		if (!password || password.length < 8) {
-			return { error: "Password must be at least 8 characters" };
+		// Rate limit by email
+		const limit = authRateLimit(email);
+		if (!limit.allowed) {
+			return { error: "Too many attempts. Please try again later." };
 		}
 
 		const passwordHash = await bcrypt.hash(password, BCRYPT_COST);
@@ -129,20 +144,29 @@ export const signupFn = createServerFn({ method: "POST" })
 				.values({
 					email,
 					name: name || null,
+					passwordHash,
 					authProvider: "email",
 					plan: "free",
 				})
 				.returning();
 
 			const token = await createSession(created.id);
+			const refreshToken = await createRefreshToken(created.id);
 
 			return {
 				user: sanitizeUser(created),
 				token,
+				refreshToken,
 			};
 		}
 
-		// Fallback: in-memory store
+		// In production, DB is required (startup check prevents reaching here)
+		if (isProduction()) {
+			return { error: "Service unavailable. Please try again later." };
+		}
+
+		// Dev-only fallback: in-memory store
+		console.warn("[Auth] signup: using in-memory fallback (no DATABASE_URL)");
 		for (const u of fallbackUsers.values()) {
 			if (u.email === email) {
 				return { error: "Email already registered" };
@@ -164,6 +188,7 @@ export const signupFn = createServerFn({ method: "POST" })
 		fallbackUsers.set(id, user);
 
 		const token = await createSession(id);
+		const refreshToken = await createRefreshToken(id);
 
 		return {
 			user: {
@@ -177,6 +202,7 @@ export const signupFn = createServerFn({ method: "POST" })
 				updatedAt: user.updatedAt,
 			},
 			token,
+			refreshToken,
 		};
 	});
 
@@ -187,14 +213,27 @@ export const signupFn = createServerFn({ method: "POST" })
  * - Creates session token
  * - Returns { user, token } or { error }
  */
+const loginSchema = z.object({
+	email: z.string().email("Invalid email address"),
+	password: z.string().min(1, "Password is required"),
+});
+
 export const loginFn = createServerFn({ method: "POST" })
-	.inputValidator((data: { email: string; password: string }) => data)
+	.inputValidator((data: { email: string; password: string }) => {
+		const result = loginSchema.safeParse(data);
+		if (!result.success) {
+			throw new Error(result.error.issues[0].message);
+		}
+		return result.data;
+	})
 	.handler(async ({ data }): Promise<AuthResult> => {
 		const email = data.email.trim().toLowerCase();
 		const { password } = data;
 
-		if (!email || !password) {
-			return { error: "Email and password are required" };
+		// Rate limit by email
+		const limit = authRateLimit(email);
+		if (!limit.allowed) {
+			return { error: "Too many attempts. Please try again later." };
 		}
 
 		const db = getDbOrNull();
@@ -215,15 +254,27 @@ export const loginFn = createServerFn({ method: "POST" })
 				};
 			}
 
-			// Note: DB schema doesn't store password hash directly on users table.
-			// For a full production setup you'd add a password_hash column.
-			// For now, this validates via bcrypt against the fallback store if
-			// the user was created there, or returns a helpful error.
-			// In a complete migration you'd add a password_hash column to users.
-			return { error: "Password verification unavailable for this account. Please reset your password." };
+			if (!row.passwordHash) {
+				return { error: "Please reset your password to continue." };
+			}
+
+			const valid = await bcrypt.compare(password, row.passwordHash);
+			if (!valid) {
+				return { error: "Invalid password" };
+			}
+
+			const token = await createSession(row.id);
+			const refreshToken = await createRefreshToken(row.id);
+			return { user: sanitizeUser(row), token, refreshToken };
 		}
 
-		// Fallback: in-memory store
+		// In production, DB is required
+		if (isProduction()) {
+			return { error: "Service unavailable. Please try again later." };
+		}
+
+		// Dev-only fallback: in-memory store
+		console.warn("[Auth] login: using in-memory fallback (no DATABASE_URL)");
 		let foundUser: FallbackUser | undefined;
 		for (const u of fallbackUsers.values()) {
 			if (u.email === email) {
@@ -246,6 +297,7 @@ export const loginFn = createServerFn({ method: "POST" })
 		}
 
 		const token = await createSession(foundUser.id);
+		const refreshToken = await createRefreshToken(foundUser.id);
 
 		return {
 			user: {
@@ -259,6 +311,7 @@ export const loginFn = createServerFn({ method: "POST" })
 				updatedAt: foundUser.updatedAt,
 			},
 			token,
+			refreshToken,
 		};
 	});
 
@@ -280,8 +333,18 @@ export const logoutFn = createServerFn({ method: "POST" }).handler(
  * Get the current session from a JWT token.
  * Verifies the JWT and returns user data or null.
  */
+const getSessionSchema = z.object({
+	token: z.string().min(1, "Token is required"),
+});
+
 export const getSessionFn = createServerFn({ method: "POST" })
-	.inputValidator((data: { token: string }) => data)
+	.inputValidator((data: { token: string }) => {
+		const result = getSessionSchema.safeParse(data);
+		if (!result.success) {
+			throw new Error(result.error.issues[0].message);
+		}
+		return result.data;
+	})
 	.handler(
 		async ({
 			data,
@@ -321,7 +384,12 @@ export const getSessionFn = createServerFn({ method: "POST" })
 				};
 			}
 
-			// Fallback: in-memory store
+			// In production, DB is required
+			if (isProduction()) {
+				return { user: null };
+			}
+
+			// Dev-only fallback: in-memory store
 			const fallbackUser = fallbackUsers.get(session.userId);
 			if (!fallbackUser) {
 				return { user: null };
@@ -353,10 +421,19 @@ export const getSessionFn = createServerFn({ method: "POST" })
  * - Creates a session token
  * - Returns { user, token, redirectTo } or { error }
  */
+const googleCallbackSchema = z.object({
+	code: z.string().min(1, "Authorization code is required"),
+	redirectTo: z.string().max(500).optional(),
+});
+
 export const googleCallbackFn = createServerFn({ method: "POST" })
-	.inputValidator(
-		(data: { code: string; redirectTo?: string }) => data,
-	)
+	.inputValidator((data: { code: string; redirectTo?: string }) => {
+		const result = googleCallbackSchema.safeParse(data);
+		if (!result.success) {
+			throw new Error(result.error.issues[0].message);
+		}
+		return result.data;
+	})
 	.handler(
 		async ({
 			data,
@@ -365,6 +442,13 @@ export const googleCallbackFn = createServerFn({ method: "POST" })
 			| AuthError
 		> => {
 			const { code, redirectTo } = data;
+
+			// Rate limit by code prefix (prevents replay/brute-force)
+			const limit = authRateLimit(`google:${code.slice(0, 16)}`);
+			if (!limit.allowed) {
+				return { error: "Too many attempts. Please try again later." };
+			}
+
 			const clientId = process.env.VITE_GOOGLE_CLIENT_ID;
 			const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
 			const redirectUri = process.env.VITE_GOOGLE_REDIRECT_URI;
@@ -488,7 +572,13 @@ export const googleCallbackFn = createServerFn({ method: "POST" })
 				};
 			}
 
-			// Fallback: in-memory store
+			// In production, DB is required
+			if (isProduction()) {
+				return { error: "Service unavailable. Please try again later." };
+			}
+
+			// Dev-only fallback: in-memory store
+			console.warn("[Auth] googleCallback: using in-memory fallback (no DATABASE_URL)");
 			let foundUser: FallbackUser | undefined;
 			for (const u of fallbackUsers.values()) {
 				if (u.email === email) {
@@ -559,18 +649,27 @@ export const googleCallbackFn = createServerFn({ method: "POST" })
  * Reset password server function.
  * Hashes the new password with bcrypt and updates the store.
  */
+const resetPasswordSchema = z.object({
+	email: z.string().email("Invalid email address"),
+	password: z.string().min(8, "Password must be at least 8 characters"),
+});
+
 export const resetPasswordFn = createServerFn({ method: "POST" })
-	.inputValidator((data: { email: string; password: string }) => data)
+	.inputValidator((data: { email: string; password: string }) => {
+		const result = resetPasswordSchema.safeParse(data);
+		if (!result.success) {
+			throw new Error(result.error.issues[0].message);
+		}
+		return result.data;
+	})
 	.handler(async ({ data }): Promise<{ success: boolean } | AuthError> => {
 		const email = data.email.trim().toLowerCase();
 		const { password } = data;
 
-		if (!EMAIL_RE.test(email)) {
-			return { error: "Invalid email address" };
-		}
-
-		if (!password || password.length < 8) {
-			return { error: "Password must be at least 8 characters" };
+		// Rate limit by email
+		const limit = authRateLimit(`reset:${email}`);
+		if (!limit.allowed) {
+			return { error: "Too many attempts. Please try again later." };
 		}
 
 		const passwordHash = await bcrypt.hash(password, BCRYPT_COST);
@@ -587,8 +686,11 @@ export const resetPasswordFn = createServerFn({ method: "POST" })
 				return { success: true };
 			}
 
-			// In a production setup with a password_hash column, you'd update it here.
-			// For now, return success (the user would receive a password reset email).
+			await db
+				.update(schema.users)
+				.set({ passwordHash, updatedAt: new Date() })
+				.where(eq(schema.users.id, row.id));
+
 			return { success: true };
 		}
 

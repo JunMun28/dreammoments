@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { and, desc, eq } from "drizzle-orm";
+import { z } from "zod";
 
 import { getDbOrNull, schema } from "@/db/index";
 import {
@@ -11,6 +12,7 @@ import {
 	unpublishInvitation as localUnpublishInvitation,
 	updateInvitation as localUpdateInvitation,
 } from "@/lib/data";
+import { requireAuth } from "@/lib/server-auth";
 import { generateSlug, slugify } from "@/lib/slug";
 import type { Invitation } from "@/lib/types";
 import {
@@ -23,14 +25,22 @@ import {
 
 // ── List user invitations ───────────────────────────────────────────
 
+const getInvitationsSchema = z.object({
+	token: z.string().min(1, "Token is required"),
+});
+
 export const getInvitations = createServerFn({
 	method: "GET",
 })
-	.inputValidator((data: { userId: string }) => data)
-	.handler(async ({ data }) => {
-		if (!data.userId) {
-			return { error: "userId is required" };
+	.inputValidator((data: { token: string }) => {
+		const result = getInvitationsSchema.safeParse(data);
+		if (!result.success) {
+			throw new Error(result.error.issues[0].message);
 		}
+		return result.data;
+	})
+	.handler(async ({ data }) => {
+		const { userId } = await requireAuth(data.token);
 
 		const db = getDbOrNull();
 
@@ -38,24 +48,33 @@ export const getInvitations = createServerFn({
 			const rows = await db
 				.select()
 				.from(schema.invitations)
-				.where(eq(schema.invitations.userId, data.userId))
+				.where(eq(schema.invitations.userId, userId))
 				.orderBy(desc(schema.invitations.updatedAt));
 			return rows;
 		}
 
-		return localListInvitationsByUser(data.userId);
+		return localListInvitationsByUser(userId);
 	});
 
 // ── Get single invitation ──────────────────────────────────────────
 
+const getInvitationSchema = z.object({
+	invitationId: z.string().min(1, "invitationId is required"),
+	token: z.string().min(1, "Token is required"),
+});
+
 export const getInvitation = createServerFn({
 	method: "GET",
 })
-	.inputValidator((data: { invitationId: string; userId: string }) => data)
-	.handler(async ({ data }) => {
-		if (!data.invitationId || !data.userId) {
-			return { error: "invitationId and userId are required" };
+	.inputValidator((data: { invitationId: string; token: string }) => {
+		const result = getInvitationSchema.safeParse(data);
+		if (!result.success) {
+			throw new Error(result.error.issues[0].message);
 		}
+		return result.data;
+	})
+	.handler(async ({ data }) => {
+		const { userId } = await requireAuth(data.token);
 
 		const db = getDbOrNull();
 
@@ -66,7 +85,7 @@ export const getInvitation = createServerFn({
 				.where(
 					and(
 						eq(schema.invitations.id, data.invitationId),
-						eq(schema.invitations.userId, data.userId),
+						eq(schema.invitations.userId, userId),
 					),
 				);
 
@@ -81,7 +100,7 @@ export const getInvitation = createServerFn({
 		if (!invitation) {
 			return { error: "Invitation not found" };
 		}
-		if (invitation.userId !== data.userId) {
+		if (invitation.userId !== userId) {
 			return { error: "Access denied" };
 		}
 		return invitation;
@@ -92,14 +111,19 @@ export const getInvitation = createServerFn({
 export const createInvitationFn = createServerFn({
 	method: "POST",
 })
-	.inputValidator((data: { userId: string; templateId: string }) => {
-		const result = createInvitationSchema.safeParse(data);
+	.inputValidator((data: { token: string; templateId: string }) => {
+		const result = createInvitationSchema.safeParse({
+			userId: "placeholder",
+			templateId: data.templateId,
+		});
 		if (!result.success) {
 			throw new Error(result.error.issues[0].message);
 		}
-		return result.data;
+		return data;
 	})
 	.handler(async ({ data }) => {
+		const { userId } = await requireAuth(data.token);
+
 		const db = getDbOrNull();
 
 		if (db) {
@@ -130,7 +154,7 @@ export const createInvitationFn = createServerFn({
 			const rows = await db
 				.insert(schema.invitations)
 				.values({
-					userId: data.userId,
+					userId,
 					slug,
 					title,
 					templateId: template.id,
@@ -147,7 +171,7 @@ export const createInvitationFn = createServerFn({
 			return rows[0];
 		}
 
-		return localCreateInvitation(data.userId, data.templateId);
+		return localCreateInvitation(userId, data.templateId);
 	});
 
 // ── Update invitation ──────────────────────────────────────────────
@@ -158,21 +182,26 @@ export const updateInvitationFn = createServerFn({
 	.inputValidator(
 		(data: {
 			invitationId: string;
-			userId: string;
+			token: string;
 			title?: string;
 			content?: Record<string, unknown>;
 			sectionVisibility?: Record<string, boolean>;
 			designOverrides?: Record<string, unknown>;
 			status?: "draft" | "published" | "archived";
 		}) => {
-			const result = updateInvitationSchema.safeParse(data);
+			const result = updateInvitationSchema.safeParse({
+				...data,
+				userId: "placeholder",
+			});
 			if (!result.success) {
 				throw new Error(result.error.issues[0].message);
 			}
-			return result.data;
+			return data;
 		},
 	)
 	.handler(async ({ data }) => {
+		const { userId } = await requireAuth(data.token);
+
 		const db = getDbOrNull();
 
 		if (db) {
@@ -185,7 +214,7 @@ export const updateInvitationFn = createServerFn({
 			if (existing.length === 0) {
 				return { error: "Invitation not found" };
 			}
-			if (existing[0].userId !== data.userId) {
+			if (existing[0].userId !== userId) {
 				return { error: "Access denied" };
 			}
 
@@ -215,7 +244,7 @@ export const updateInvitationFn = createServerFn({
 		if (!invitation) {
 			return { error: "Invitation not found" };
 		}
-		if (invitation.userId !== data.userId) {
+		if (invitation.userId !== userId) {
 			return { error: "Access denied" };
 		}
 
@@ -238,14 +267,19 @@ export const updateInvitationFn = createServerFn({
 export const deleteInvitationFn = createServerFn({
 	method: "POST",
 })
-	.inputValidator((data: { invitationId: string; userId: string }) => {
-		const result = deleteInvitationSchema.safeParse(data);
+	.inputValidator((data: { invitationId: string; token: string }) => {
+		const result = deleteInvitationSchema.safeParse({
+			invitationId: data.invitationId,
+			userId: "placeholder",
+		});
 		if (!result.success) {
 			throw new Error(result.error.issues[0].message);
 		}
-		return result.data;
+		return data;
 	})
 	.handler(async ({ data }) => {
+		const { userId } = await requireAuth(data.token);
+
 		const db = getDbOrNull();
 
 		if (db) {
@@ -258,7 +292,7 @@ export const deleteInvitationFn = createServerFn({
 			if (existing.length === 0) {
 				return { error: "Invitation not found" };
 			}
-			if (existing[0].userId !== data.userId) {
+			if (existing[0].userId !== userId) {
 				return { error: "Access denied" };
 			}
 
@@ -274,7 +308,7 @@ export const deleteInvitationFn = createServerFn({
 		if (!invitation) {
 			return { error: "Invitation not found" };
 		}
-		if (invitation.userId !== data.userId) {
+		if (invitation.userId !== userId) {
 			return { error: "Access denied" };
 		}
 
@@ -290,18 +324,25 @@ export const publishInvitationFn = createServerFn({
 	.inputValidator(
 		(data: {
 			invitationId: string;
-			userId: string;
+			token: string;
 			slug?: string;
 			randomize?: boolean;
 		}) => {
-			const result = publishInvitationSchema.safeParse(data);
+			const result = publishInvitationSchema.safeParse({
+				invitationId: data.invitationId,
+				userId: "placeholder",
+				slug: data.slug,
+				randomize: data.randomize,
+			});
 			if (!result.success) {
 				throw new Error(result.error.issues[0].message);
 			}
-			return result.data;
+			return data;
 		},
 	)
 	.handler(async ({ data }) => {
+		const { userId } = await requireAuth(data.token);
+
 		const db = getDbOrNull();
 
 		if (db) {
@@ -316,7 +357,7 @@ export const publishInvitationFn = createServerFn({
 			}
 
 			const invitation = rows[0];
-			if (invitation.userId !== data.userId) {
+			if (invitation.userId !== userId) {
 				return { error: "Access denied" };
 			}
 
@@ -369,7 +410,7 @@ export const publishInvitationFn = createServerFn({
 		if (!invitation) {
 			return { error: "Invitation not found" };
 		}
-		if (invitation.userId !== data.userId) {
+		if (invitation.userId !== userId) {
 			return { error: "Access denied" };
 		}
 
@@ -385,14 +426,19 @@ export const publishInvitationFn = createServerFn({
 export const unpublishInvitationFn = createServerFn({
 	method: "POST",
 })
-	.inputValidator((data: { invitationId: string; userId: string }) => {
-		const result = unpublishInvitationSchema.safeParse(data);
+	.inputValidator((data: { invitationId: string; token: string }) => {
+		const result = unpublishInvitationSchema.safeParse({
+			invitationId: data.invitationId,
+			userId: "placeholder",
+		});
 		if (!result.success) {
 			throw new Error(result.error.issues[0].message);
 		}
-		return result.data;
+		return data;
 	})
 	.handler(async ({ data }) => {
+		const { userId } = await requireAuth(data.token);
+
 		const db = getDbOrNull();
 
 		if (db) {
@@ -405,7 +451,7 @@ export const unpublishInvitationFn = createServerFn({
 			if (existing.length === 0) {
 				return { error: "Invitation not found" };
 			}
-			if (existing[0].userId !== data.userId) {
+			if (existing[0].userId !== userId) {
 				return { error: "Access denied" };
 			}
 
@@ -427,7 +473,7 @@ export const unpublishInvitationFn = createServerFn({
 		if (!invitation) {
 			return { error: "Invitation not found" };
 		}
-		if (invitation.userId !== data.userId) {
+		if (invitation.userId !== userId) {
 			return { error: "Access denied" };
 		}
 

@@ -33,7 +33,7 @@ export function EditorPreviewFrame({
 	return (
 		<div
 			ref={previewRef}
-			className={`h-full overflow-y-auto rounded-3xl border border-dm-border ${
+			className={`dm-scroll-hidden h-full rounded-3xl border border-dm-border ${
 				isMobilePreview ? "mx-auto max-w-[390px]" : "mx-auto max-w-[900px]"
 			}`}
 			style={{

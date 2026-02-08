@@ -1,4 +1,8 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	type ErrorComponentProps,
+	Link,
+} from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import InvitationRenderer from "../../components/templates/InvitationRenderer";
 import { buildSampleContent } from "../../data/sample-invitation";
@@ -6,8 +10,75 @@ import { useAuth } from "../../lib/auth";
 import { submitRsvp, trackInvitationView } from "../../lib/data";
 import { useStore } from "../../lib/store";
 
+function InviteErrorFallback({ reset }: ErrorComponentProps) {
+	return (
+		<div className="flex min-h-screen items-center justify-center bg-dm-bg px-6">
+			<div className="max-w-md text-center">
+				<h1 className="font-heading text-2xl font-semibold text-dm-ink">
+					Unable to load invitation
+				</h1>
+				<p className="mt-3 text-sm text-dm-muted">
+					Something went wrong while loading this invitation. Please try again.
+				</p>
+				<div className="mt-6 flex justify-center gap-3">
+					<button
+						type="button"
+						onClick={reset}
+						className="rounded-full bg-dm-accent-strong px-6 py-2 text-xs uppercase tracking-[0.2em] text-dm-on-accent"
+					>
+						Try Again
+					</button>
+					<Link
+						to="/"
+						className="rounded-full border border-dm-border px-6 py-2 text-xs uppercase tracking-[0.2em] text-dm-ink"
+					>
+						Go Home
+					</Link>
+				</div>
+			</div>
+		</div>
+	);
+}
+
+function parseCoupleNames(slug: string): string {
+	const cleaned = slug
+		.replace(/-sample$/, "")
+		.replace(
+			/-(blush-romance|garden-romance|eternal-elegance|love-at-dusk)$/,
+			"",
+		);
+	const parts = cleaned.split("-").filter(Boolean);
+	if (parts.length >= 2) {
+		const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+		return `${capitalize(parts[0])} & ${capitalize(parts[parts.length - 1])}`;
+	}
+	return "Wedding Invitation";
+}
+
 export const Route = createFileRoute("/invite/$slug")({
 	component: InviteScreen,
+	head: ({ params }) => {
+		const coupleNames = parseCoupleNames(params.slug);
+		const title = `${coupleNames} | DreamMoments`;
+		const description = `You're invited to celebrate the wedding of ${coupleNames}. View the invitation and RSVP.`;
+		return {
+			meta: [
+				{ title },
+				{ name: "description", content: description },
+				{ property: "og:title", content: title },
+				{ property: "og:description", content: description },
+				{ property: "og:type", content: "website" },
+				{ property: "og:image", content: "/og-default.svg" },
+				{ property: "og:image:width", content: "1200" },
+				{ property: "og:image:height", content: "630" },
+				{ name: "twitter:card", content: "summary_large_image" },
+				{ name: "twitter:title", content: title },
+				{ name: "twitter:description", content: description },
+				{ name: "twitter:image", content: "/og-default.svg" },
+			],
+		};
+	},
+	errorComponent: InviteErrorFallback,
 });
 
 const lightTemplates = new Set([

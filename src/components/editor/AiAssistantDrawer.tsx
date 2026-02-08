@@ -72,7 +72,7 @@ function DrawerContent({
 			</div>
 
 			{/* Scrollable body */}
-			<div className="min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain p-5">
+			<div className="dm-scroll-thin min-h-0 flex-1 space-y-5 overscroll-contain p-5">
 				{/* Task selector pills */}
 				<div>
 					<p className="mb-2 text-[10px] uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">

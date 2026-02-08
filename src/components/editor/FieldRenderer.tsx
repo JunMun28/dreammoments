@@ -1,3 +1,4 @@
+import { Sparkles } from "lucide-react";
 import type { ChangeEvent } from "react";
 import { cn } from "../../lib/utils";
 import type { FieldConfig } from "../../templates/types";
@@ -16,6 +17,8 @@ type FieldRendererProps = {
 	onImageUpload?: (fieldPath: string, file: File) => void;
 	listItems?: Array<Record<string, unknown>>;
 	onListItemsChange?: (items: Array<Record<string, unknown>>) => void;
+	/** When set, show an AI magic button to rewrite this field (e.g. tagline). */
+	onAiClick?: () => void;
 };
 
 export function FieldRenderer({
@@ -29,6 +32,7 @@ export function FieldRenderer({
 	onImageUpload,
 	listItems,
 	onListItemsChange,
+	onAiClick,
 }: FieldRendererProps) {
 	const fieldPath = `${sectionId}.${field.id}`;
 
@@ -88,6 +92,8 @@ export function FieldRenderer({
 		autoComplete: "off" as const,
 	};
 
+	const showAiButton = Boolean(onAiClick);
+
 	return (
 		<div
 			className={cn(
@@ -95,15 +101,32 @@ export function FieldRenderer({
 				error && "border-l-2 border-[color:var(--dm-error)] pl-3",
 			)}
 		>
-			<label
-				htmlFor={inputId}
-				className="text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]"
-			>
-				{field.label}
-				{field.required && (
-					<span className="ml-0.5 text-[color:var(--dm-error)]" aria-hidden="true">*</span>
+			<div className="flex items-center justify-between gap-2">
+				<label
+					htmlFor={inputId}
+					className="text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]"
+				>
+					{field.label}
+					{field.required && (
+						<span
+							className="ml-0.5 text-[color:var(--dm-error)]"
+							aria-hidden="true"
+						>
+							*
+						</span>
+					)}
+				</label>
+				{showAiButton && (
+					<button
+						type="button"
+						onClick={onAiClick}
+						aria-label={`AI rewrite for ${field.label}`}
+						className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[color:var(--dm-border)] text-[color:var(--dm-muted)] transition-colors hover:bg-[color:var(--dm-surface-muted)] hover:text-[color:var(--dm-ink)]"
+					>
+						<Sparkles className="h-4 w-4" aria-hidden="true" />
+					</button>
 				)}
-			</label>
+			</div>
 			{field.type === "textarea" ? (
 				<textarea
 					{...sharedProps}

@@ -1,13 +1,33 @@
 import { Link } from "@tanstack/react-router";
-import { type KeyboardEvent, type MouseEvent, useMemo, useState } from "react";
-import { LoadingSpinner } from "../../ui/LoadingSpinner";
+import {
+	type CSSProperties,
+	type KeyboardEvent,
+	type MouseEvent,
+	useMemo,
+	useState,
+} from "react";
 import { useParallax, useScrollReveal } from "../../../lib/scroll-effects";
 import type { InvitationContent } from "../../../lib/types";
+import { LoadingSpinner } from "../../ui/LoadingSpinner";
 import SectionShell from "../SectionShell";
 import type { RsvpPayload, TemplateInvitationProps } from "../types";
 
 type LoveAtDuskInvitationProps = TemplateInvitationProps & {
 	content: InvitationContent;
+};
+
+/* ─── Typography ─── */
+
+const headingFont: CSSProperties = {
+	fontFamily: "'Playfair Display', 'Noto Serif SC', serif",
+};
+
+const bodyFont: CSSProperties = {
+	fontFamily: "'Noto Serif SC', 'Manrope', serif",
+};
+
+const accentFont: CSSProperties = {
+	fontFamily: "'Noto Serif SC', serif",
 };
 
 export default function LoveAtDuskInvitation({
@@ -59,7 +79,7 @@ export default function LoveAtDuskInvitation({
 	});
 
 	return (
-		<div className="love-at-dusk">
+		<div className="love-at-dusk" style={bodyFont}>
 			<SectionShell
 				sectionId="hero"
 				mode={mode}
@@ -82,12 +102,14 @@ export default function LoveAtDuskInvitation({
 					</p>
 					<p
 						data-reveal
+						style={accentFont}
 						className="dm-reveal mt-6 text-5xl text-[var(--love-accent)] sm:text-6xl"
 					>
 						囍
 					</p>
 					<h1
 						data-reveal
+						style={headingFont}
 						className="dm-reveal mt-6 text-3xl font-semibold text-[var(--love-cream)] sm:text-5xl"
 					>
 						<span
@@ -138,6 +160,7 @@ export default function LoveAtDuskInvitation({
 				<div className="mx-auto max-w-3xl text-center">
 					<p
 						data-reveal
+						style={accentFont}
 						className="dm-reveal text-xs uppercase tracking-[0.6em] text-[var(--love-accent)]"
 					>
 						诚挚邀请
@@ -250,7 +273,10 @@ export default function LoveAtDuskInvitation({
 								<p className="text-xs uppercase tracking-[0.4em] text-[var(--love-accent)]">
 									{milestone.date}
 								</p>
-								<p className="mt-2 text-sm text-[var(--love-cream)]">
+								<p
+									style={headingFont}
+									className="mt-2 text-sm text-[var(--love-cream)]"
+								>
 									{milestone.title}
 								</p>
 								<p className="mt-2 text-xs text-[var(--love-muted)]">
@@ -360,6 +386,7 @@ export default function LoveAtDuskInvitation({
 						</p>
 						<h2
 							data-reveal
+							style={headingFont}
 							{...editableProps(
 								"venue.name",
 								"dm-reveal text-2xl font-semibold text-[var(--love-cream)]",
@@ -482,6 +509,7 @@ export default function LoveAtDuskInvitation({
 						</p>
 						<h2
 							data-reveal
+							style={headingFont}
 							className="dm-reveal mt-4 text-2xl font-semibold text-[var(--love-cream)]"
 						>
 							Join Us on Our Day
@@ -636,6 +664,7 @@ export default function LoveAtDuskInvitation({
 				<div className="mx-auto max-w-3xl text-center">
 					<p
 						data-reveal
+						style={bodyFont}
 						{...editableProps(
 							"footer.message",
 							"dm-reveal text-lg text-[var(--love-cream)]",

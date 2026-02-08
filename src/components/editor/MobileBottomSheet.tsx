@@ -12,6 +12,8 @@ export type MobileBottomSheetProps = {
 	open: boolean;
 	onClose: () => void;
 	title?: string;
+	/** Custom header content — replaces title+close block when provided */
+	headerContent?: ReactNode;
 	children: ReactNode;
 	/** Height of the sheet: "auto" | "half" | "full" */
 	height?: "auto" | "half" | "full";
@@ -36,6 +38,7 @@ export default function MobileBottomSheet({
 	open,
 	onClose,
 	title,
+	headerContent,
 	children,
 	height = "half",
 	snapPoints,
@@ -417,42 +420,46 @@ export default function MobileBottomSheet({
 				</button>
 
 				{/* Header */}
-				{title && (
-					<div className="shrink-0 border-b border-[color:var(--dm-border)] px-5 pb-4">
-						<div className="flex items-center justify-between">
-							<h2
-								id={titleId}
-								className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]"
-							>
-								{title}
-							</h2>
-							<button
-								type="button"
-								onClick={handleClose}
-								className="flex h-11 w-11 items-center justify-center rounded-full border border-[color:var(--dm-border)] text-[color:var(--dm-muted)] transition-colors hover:bg-[color:var(--dm-surface-muted)]"
-								aria-label="Close"
-							>
-								<svg
-									width="20"
-									height="20"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									strokeWidth="2"
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									aria-hidden="true"
+				{headerContent ? (
+					<div className="shrink-0">{headerContent}</div>
+				) : (
+					title && (
+						<div className="shrink-0 border-b border-[color:var(--dm-border)] px-5 pb-4">
+							<div className="flex items-center justify-between">
+								<h2
+									id={titleId}
+									className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]"
 								>
-									<path d="M18 6L6 18" />
-									<path d="M6 6l12 12" />
-								</svg>
-							</button>
+									{title}
+								</h2>
+								<button
+									type="button"
+									onClick={handleClose}
+									className="flex h-11 w-11 items-center justify-center rounded-full border border-[color:var(--dm-border)] text-[color:var(--dm-muted)] transition-colors hover:bg-[color:var(--dm-surface-muted)]"
+									aria-label="Close"
+								>
+									<svg
+										width="20"
+										height="20"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										strokeWidth="2"
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										aria-hidden="true"
+									>
+										<path d="M18 6L6 18" />
+										<path d="M6 6l12 12" />
+									</svg>
+								</button>
+							</div>
 						</div>
-					</div>
+					)
 				)}
 
 				{/* Content */}
-				<div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-8 pt-4">
+				<div className="flex min-h-0 flex-1 flex-col overscroll-contain pb-8">
 					{children}
 				</div>
 			</div>

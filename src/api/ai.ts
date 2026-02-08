@@ -1,4 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
+import { requireAuth } from "@/lib/server-auth";
 
 // ── Types ───────────────────────────────────────────────────────────
 
@@ -218,18 +220,38 @@ function parseAiResponse(
 
 // ── Server Function ─────────────────────────────────────────────────
 
+const generateAiContentSchema = z.object({
+	token: z.string().min(1, "Token is required"),
+	type: z.enum(["schedule", "faq", "story", "tagline", "style", "translate"]),
+	sectionId: z.string().min(1, "sectionId is required"),
+	prompt: z
+		.string()
+		.min(1, "Prompt is required")
+		.max(2000, "Prompt is too long"),
+	context: z.record(z.string(), z.unknown()),
+});
+
 export const generateAiContentFn = createServerFn({
 	method: "POST",
 })
 	.inputValidator(
 		(data: {
+			token: string;
 			type: "schedule" | "faq" | "story" | "tagline" | "style" | "translate";
 			sectionId: string;
 			prompt: string;
 			context: Record<string, unknown>;
-		}) => data,
+		}) => {
+			const result = generateAiContentSchema.safeParse(data);
+			if (!result.success) {
+				throw new Error(result.error.issues[0].message);
+			}
+			return result.data;
+		},
 	)
 	.handler(async ({ data }) => {
+		await requireAuth(data.token);
+
 		const apiKey = process.env.AI_API_KEY;
 
 		if (!apiKey) {

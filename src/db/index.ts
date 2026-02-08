@@ -22,8 +22,32 @@ export interface HealthCheckResult {
 // Check if we're in a server environment
 const isServer = typeof window === "undefined";
 
+/**
+ * Check if the app is running in production mode
+ */
+export function isProduction(): boolean {
+	return process.env.NODE_ENV === "production";
+}
+
 // Get database URL from environment
 const databaseUrl = isServer ? process.env.DATABASE_URL : undefined;
+
+// In production, DATABASE_URL is mandatory - fail hard at startup
+if (isServer && isProduction() && !databaseUrl) {
+	throw new Error(
+		"[Database] FATAL: DATABASE_URL is required in production. " +
+			"Set the DATABASE_URL environment variable to a valid PostgreSQL connection string.",
+	);
+}
+
+// In development without DATABASE_URL, log a clear warning
+if (isServer && !isProduction() && !databaseUrl) {
+	console.warn(
+		"[Database] WARNING: DATABASE_URL is not set. " +
+			"Running in development mode with limited functionality (in-memory fallback). " +
+			"Set DATABASE_URL to connect to PostgreSQL.",
+	);
+}
 
 // Connection pool configuration
 const poolConfig: PoolConfig | null = databaseUrl
@@ -39,12 +63,12 @@ const poolConfig: PoolConfig | null = databaseUrl
 				process.env.DB_CONNECTION_TIMEOUT || "10000",
 				10,
 			),
-			// Neon requires SSL
+			// Neon requires SSL — enforce certificate validation in production
 			ssl:
 				process.env.NODE_ENV === "production"
-					? { rejectUnauthorized: false }
+					? { rejectUnauthorized: true }
 					: process.env.DB_SSL === "true"
-						? { rejectUnauthorized: false }
+						? { rejectUnauthorized: true }
 						: undefined,
 		}
 	: null;
@@ -146,8 +170,10 @@ export async function closeDatabaseConnection(): Promise<void> {
 }
 
 /**
- * Get a database instance or throw an error
- * Use this when database is required (API routes, etc.)
+ * Get a database instance or throw an error.
+ * In production this always throws if DATABASE_URL is missing (the startup
+ * check already prevents that). In development it throws with a helpful
+ * message so callers can fall back to the in-memory store.
  */
 export function getDb(): DrizzleDB {
 	if (!db) {

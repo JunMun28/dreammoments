@@ -22,17 +22,13 @@ function CallbackScreen() {
 		async function handleCallback() {
 			const params = new URLSearchParams(window.location.search);
 			const code = params.get("code");
-			const stateRedirect = readRedirectFromStateSearch(
-				window.location.search,
-			);
+			const stateRedirect = readRedirectFromStateSearch(window.location.search);
 
 			if (!code) {
 				// No code present, check for error from Google
 				const googleError = params.get("error");
 				if (googleError) {
-					setError(
-						`Google sign-in was cancelled or failed: ${googleError}`,
-					);
+					setError(`Google sign-in was cancelled or failed: ${googleError}`);
 					return;
 				}
 				// No code and no error -- just redirect

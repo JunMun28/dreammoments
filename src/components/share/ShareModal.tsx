@@ -1,5 +1,7 @@
+import { useId, useRef } from "react";
 import { PUBLIC_BASE_URL } from "../../lib/data";
 import type { Invitation } from "../../lib/types";
+import { useFocusTrap } from "../editor/hooks/useFocusTrap";
 
 export default function ShareModal({
 	open,
@@ -10,15 +12,33 @@ export default function ShareModal({
 	invitation: Invitation | null;
 	onClose: () => void;
 }) {
+	const rawId = useId();
+	const titleId = `share-modal-title-${rawId.replaceAll(":", "")}`;
+	const dialogRef = useRef<HTMLDivElement>(null);
+
+	useFocusTrap(dialogRef, {
+		enabled: open && invitation != null,
+		onEscape: onClose,
+	});
+
 	if (!open || !invitation) return null;
 	const url = `${PUBLIC_BASE_URL}/invite/${invitation.slug}`;
-	const message = `You’re invited to ${invitation.content.hero.partnerOneName} & ${invitation.content.hero.partnerTwoName}’s wedding on ${invitation.content.hero.date}. ${url}`;
+	const message = `You're invited to ${invitation.content.hero.partnerOneName} & ${invitation.content.hero.partnerTwoName}'s wedding on ${invitation.content.hero.date}. ${url}`;
 	const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(url)}`;
 
 	return (
-		<div className="dm-inline-edit">
+		<div
+			ref={dialogRef}
+			className="dm-inline-edit"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby={titleId}
+		>
 			<div className="dm-inline-card">
-				<p className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">
+				<p
+					id={titleId}
+					className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]"
+				>
 					Share Invitation
 				</p>
 				<p className="mt-2 text-sm text-[color:var(--dm-muted)]">{url}</p>

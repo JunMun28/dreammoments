@@ -28,7 +28,8 @@ export function useFocusTrap(
 		const raf = requestAnimationFrame(() => {
 			const container = containerRef.current;
 			if (!container) return;
-			const focusable = container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
+			const focusable =
+				container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
 			if (focusable.length > 0) {
 				focusable[0].focus();
 			} else {

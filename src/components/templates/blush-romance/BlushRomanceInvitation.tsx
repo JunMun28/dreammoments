@@ -1,13 +1,33 @@
 import { Link } from "@tanstack/react-router";
-import { type KeyboardEvent, type MouseEvent, useMemo, useState } from "react";
-import { LoadingSpinner } from "../../ui/LoadingSpinner";
+import {
+	type CSSProperties,
+	type KeyboardEvent,
+	type MouseEvent,
+	useMemo,
+	useState,
+} from "react";
 import { useScrollReveal } from "../../../lib/scroll-effects";
 import type { InvitationContent } from "../../../lib/types";
+import { LoadingSpinner } from "../../ui/LoadingSpinner";
 import SectionShell from "../SectionShell";
 import type { RsvpPayload, TemplateInvitationProps } from "../types";
 
 type BlushRomanceInvitationProps = TemplateInvitationProps & {
 	content: InvitationContent;
+};
+
+/* ─── Typography ─── */
+
+const headingFont: CSSProperties = {
+	fontFamily: "'Cormorant Garamond', serif",
+};
+
+const bodyFont: CSSProperties = {
+	fontFamily: "'Lato', 'Manrope', sans-serif",
+};
+
+const accentFont: CSSProperties = {
+	fontFamily: "'Sacramento', 'Cormorant Garamond', serif",
 };
 
 export default function BlushRomanceInvitation({
@@ -57,7 +77,7 @@ export default function BlushRomanceInvitation({
 	});
 
 	return (
-		<div className="blush-romance">
+		<div className="blush-romance" style={bodyFont}>
 			<SectionShell
 				sectionId="hero"
 				mode={mode}
@@ -69,20 +89,28 @@ export default function BlushRomanceInvitation({
 				<div className="blush-hero-frame" />
 				<div className="blush-hero-bloom" />
 				<div className="mx-auto flex max-w-4xl flex-col items-center text-center">
-					<p className="blush-kicker">Blush Romance</p>
+					<p className="blush-kicker" style={bodyFont}>
+						Blush Romance
+					</p>
 					<h1
 						data-reveal
+						style={headingFont}
 						{...editableProps("hero.partnerOneName", "dm-reveal blush-title")}
 					>
 						{data.hero.partnerOneName} & {data.hero.partnerTwoName}
 					</h1>
 					<p
 						data-reveal
+						style={accentFont}
 						{...editableProps("hero.tagline", "dm-reveal blush-tagline")}
 					>
 						{data.hero.tagline}
 					</p>
-					<div data-reveal className="dm-reveal blush-pill-row">
+					<div
+						data-reveal
+						className="dm-reveal blush-pill-row"
+						style={bodyFont}
+					>
 						<span>{data.hero.date}</span>
 						<span>{data.venue.name}</span>
 					</div>
@@ -98,20 +126,24 @@ export default function BlushRomanceInvitation({
 				className="blush-section"
 			>
 				<div className="mx-auto max-w-3xl text-center">
-					<p className="blush-kicker">Invitation</p>
+					<p className="blush-kicker" style={bodyFont}>
+						Invitation
+					</p>
 					<h2
 						data-reveal
+						style={headingFont}
 						{...editableProps("announcement.title", "dm-reveal blush-heading")}
 					>
 						{data.announcement.title}
 					</h2>
 					<p
 						data-reveal
+						style={bodyFont}
 						{...editableProps("announcement.message", "dm-reveal blush-body")}
 					>
 						{data.announcement.message}
 					</p>
-					<p data-reveal className="dm-reveal blush-subtext">
+					<p data-reveal className="dm-reveal blush-subtext" style={bodyFont}>
 						{data.announcement.formalText}
 					</p>
 				</div>
@@ -126,7 +158,9 @@ export default function BlushRomanceInvitation({
 				className="blush-section blush-panel"
 			>
 				<div className="mx-auto max-w-4xl">
-					<p className="blush-kicker">Our Story</p>
+					<p className="blush-kicker" style={bodyFont}>
+						Our Story
+					</p>
 					<div className="mt-6 grid gap-4">
 						{data.story.milestones.map((milestone, index) => (
 							<div
@@ -136,8 +170,12 @@ export default function BlushRomanceInvitation({
 								className="dm-reveal blush-card"
 							>
 								<p className="blush-meta">{milestone.date}</p>
-								<p className="blush-heading">{milestone.title}</p>
-								<p className="blush-body">{milestone.description}</p>
+								<p className="blush-heading" style={headingFont}>
+									{milestone.title}
+								</p>
+								<p className="blush-body" style={bodyFont}>
+									{milestone.description}
+								</p>
 							</div>
 						))}
 					</div>
@@ -186,7 +224,9 @@ export default function BlushRomanceInvitation({
 				className="blush-section blush-panel"
 			>
 				<div className="mx-auto max-w-4xl">
-					<p className="blush-kicker">Schedule</p>
+					<p className="blush-kicker" style={bodyFont}>
+						Schedule
+					</p>
 					<div className="mt-6 grid gap-4">
 						{data.schedule.events.map((event, index) => (
 							<div
@@ -196,8 +236,12 @@ export default function BlushRomanceInvitation({
 								className="dm-reveal blush-timeline"
 							>
 								<p className="blush-meta">{event.time}</p>
-								<p className="blush-heading">{event.title}</p>
-								<p className="blush-body">{event.description}</p>
+								<p className="blush-heading" style={headingFont}>
+									{event.title}
+								</p>
+								<p className="blush-body" style={bodyFont}>
+									{event.description}
+								</p>
 							</div>
 						))}
 					</div>
@@ -214,14 +258,25 @@ export default function BlushRomanceInvitation({
 			>
 				<div className="mx-auto max-w-5xl blush-venue">
 					<div>
-						<p className="blush-kicker">Venue</p>
-						<h3 {...editableProps("venue.name", "blush-heading")}>
+						<p className="blush-kicker" style={bodyFont}>
+							Venue
+						</p>
+						<h3
+							style={headingFont}
+							{...editableProps("venue.name", "blush-heading")}
+						>
 							{data.venue.name}
 						</h3>
-						<p {...editableProps("venue.address", "blush-body")}>
+						<p
+							style={bodyFont}
+							{...editableProps("venue.address", "blush-body")}
+						>
 							{data.venue.address}
 						</p>
-						<p {...editableProps("venue.directions", "blush-subtext")}>
+						<p
+							style={bodyFont}
+							{...editableProps("venue.directions", "blush-subtext")}
+						>
 							{data.venue.directions}
 						</p>
 					</div>
@@ -246,7 +301,9 @@ export default function BlushRomanceInvitation({
 				className="blush-section blush-panel"
 			>
 				<div className="mx-auto max-w-3xl">
-					<p className="blush-kicker">RSVP</p>
+					<p className="blush-kicker" style={bodyFont}>
+						RSVP
+					</p>
 					<form
 						className="mt-6 blush-form"
 						noValidate
@@ -378,7 +435,9 @@ export default function BlushRomanceInvitation({
 				className="blush-section"
 			>
 				<div className="mx-auto max-w-4xl">
-					<p className="blush-kicker">FAQ</p>
+					<p className="blush-kicker" style={bodyFont}>
+						FAQ
+					</p>
 					<div className="mt-6 grid gap-4">
 						{data.faq.items.map((item, index) => (
 							<div
@@ -387,8 +446,12 @@ export default function BlushRomanceInvitation({
 								style={{ transitionDelay: `${index * 70}ms` }}
 								className="dm-reveal blush-faq"
 							>
-								<p className="blush-heading">{item.question}</p>
-								<p className="blush-body">{item.answer}</p>
+								<p className="blush-heading" style={headingFont}>
+									{item.question}
+								</p>
+								<p className="blush-body" style={bodyFont}>
+									{item.answer}
+								</p>
 							</div>
 						))}
 					</div>
@@ -406,6 +469,7 @@ export default function BlushRomanceInvitation({
 				<div className="mx-auto max-w-3xl text-center">
 					<p
 						data-reveal
+						style={bodyFont}
 						{...editableProps("footer.message", "dm-reveal blush-body")}
 					>
 						{data.footer.message}

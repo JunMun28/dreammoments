@@ -10,6 +10,8 @@ import {
 	submitRsvp as localSubmitRsvp,
 	updateGuest as localUpdateGuest,
 } from "@/lib/data";
+import { rsvpRateLimit } from "@/lib/rate-limit";
+import { requireAuth } from "@/lib/server-auth";
 import type { AttendanceStatus } from "@/lib/types";
 import {
 	exportGuestsSchema,
@@ -27,17 +29,23 @@ export const listGuestsFn = createServerFn({
 	.inputValidator(
 		(data: {
 			invitationId: string;
-			userId: string;
+			token: string;
 			filter?: "attending" | "not_attending" | "undecided" | "pending";
 		}) => {
-			const result = listGuestsSchema.safeParse(data);
+			const result = listGuestsSchema.safeParse({
+				invitationId: data.invitationId,
+				userId: "placeholder",
+				filter: data.filter,
+			});
 			if (!result.success) {
 				throw new Error(result.error.issues[0].message);
 			}
-			return result.data;
+			return data;
 		},
 	)
 	.handler(async ({ data }) => {
+		const { userId } = await requireAuth(data.token);
+
 		const db = getDbOrNull();
 
 		if (db) {
@@ -50,7 +58,7 @@ export const listGuestsFn = createServerFn({
 			if (invitation.length === 0) {
 				return { error: "Invitation not found" };
 			}
-			if (invitation[0].userId !== data.userId) {
+			if (invitation[0].userId !== userId) {
 				return { error: "Access denied" };
 			}
 
@@ -86,7 +94,7 @@ export const listGuestsFn = createServerFn({
 		if (!invitation) {
 			return { error: "Invitation not found" };
 		}
-		if (invitation.userId !== data.userId) {
+		if (invitation.userId !== userId) {
 			return { error: "Access denied" };
 		}
 
@@ -122,6 +130,12 @@ export const submitRsvpFn = createServerFn({
 		},
 	)
 	.handler(async ({ data }) => {
+		// Rate limit by visitorKey (10 per hour)
+		const limit = rsvpRateLimit(data.visitorKey);
+		if (!limit.allowed) {
+			return { error: "Too many submissions. Please try again later." };
+		}
+
 		const db = getDbOrNull();
 
 		if (db) {
@@ -204,7 +218,7 @@ export const updateGuestFn = createServerFn({
 	.inputValidator(
 		(data: {
 			guestId: string;
-			userId: string;
+			token: string;
 			invitationId: string;
 			name?: string;
 			email?: string;
@@ -215,14 +229,19 @@ export const updateGuestFn = createServerFn({
 			dietaryRequirements?: string;
 			message?: string;
 		}) => {
-			const result = updateGuestSchema.safeParse(data);
+			const result = updateGuestSchema.safeParse({
+				...data,
+				userId: "placeholder",
+			});
 			if (!result.success) {
 				throw new Error(result.error.issues[0].message);
 			}
-			return result.data;
+			return data;
 		},
 	)
 	.handler(async ({ data }) => {
+		const { userId } = await requireAuth(data.token);
+
 		const db = getDbOrNull();
 
 		if (db) {
@@ -235,7 +254,7 @@ export const updateGuestFn = createServerFn({
 			if (invitation.length === 0) {
 				return { error: "Invitation not found" };
 			}
-			if (invitation[0].userId !== data.userId) {
+			if (invitation[0].userId !== userId) {
 				return { error: "Access denied" };
 			}
 
@@ -279,13 +298,13 @@ export const updateGuestFn = createServerFn({
 		if (!invitation) {
 			return { error: "Invitation not found" };
 		}
-		if (invitation.userId !== data.userId) {
+		if (invitation.userId !== userId) {
 			return { error: "Access denied" };
 		}
 
 		const {
 			guestId,
-			userId: _userId,
+			token: _token,
 			invitationId: _invitationId,
 			...patch
 		} = data;
@@ -301,7 +320,7 @@ export const importGuestsFn = createServerFn({
 	.inputValidator(
 		(data: {
 			invitationId: string;
-			userId: string;
+			token: string;
 			guests: Array<{
 				name: string;
 				email?: string;
@@ -309,14 +328,20 @@ export const importGuestsFn = createServerFn({
 				relationship?: string;
 			}>;
 		}) => {
-			const result = guestImportSchema.safeParse(data);
+			const result = guestImportSchema.safeParse({
+				invitationId: data.invitationId,
+				userId: "placeholder",
+				guests: data.guests,
+			});
 			if (!result.success) {
 				throw new Error(result.error.issues[0].message);
 			}
-			return result.data;
+			return data;
 		},
 	)
 	.handler(async ({ data }) => {
+		const { userId } = await requireAuth(data.token);
+
 		const db = getDbOrNull();
 
 		if (db) {
@@ -329,7 +354,7 @@ export const importGuestsFn = createServerFn({
 			if (invitation.length === 0) {
 				return { error: "Invitation not found" };
 			}
-			if (invitation[0].userId !== data.userId) {
+			if (invitation[0].userId !== userId) {
 				return { error: "Access denied" };
 			}
 
@@ -352,7 +377,7 @@ export const importGuestsFn = createServerFn({
 		if (!invitation) {
 			return { error: "Invitation not found" };
 		}
-		if (invitation.userId !== data.userId) {
+		if (invitation.userId !== userId) {
 			return { error: "Access denied" };
 		}
 
@@ -364,14 +389,19 @@ export const importGuestsFn = createServerFn({
 export const exportGuestsCsvFn = createServerFn({
 	method: "GET",
 })
-	.inputValidator((data: { invitationId: string; userId: string }) => {
-		const result = exportGuestsSchema.safeParse(data);
+	.inputValidator((data: { invitationId: string; token: string }) => {
+		const result = exportGuestsSchema.safeParse({
+			invitationId: data.invitationId,
+			userId: "placeholder",
+		});
 		if (!result.success) {
 			throw new Error(result.error.issues[0].message);
 		}
-		return result.data;
+		return data;
 	})
 	.handler(async ({ data }) => {
+		const { userId } = await requireAuth(data.token);
+
 		const db = getDbOrNull();
 
 		if (db) {
@@ -384,7 +414,7 @@ export const exportGuestsCsvFn = createServerFn({
 			if (invitation.length === 0) {
 				return { error: "Invitation not found" };
 			}
-			if (invitation[0].userId !== data.userId) {
+			if (invitation[0].userId !== userId) {
 				return { error: "Access denied" };
 			}
 
@@ -424,7 +454,7 @@ export const exportGuestsCsvFn = createServerFn({
 		if (!invitation) {
 			return { error: "Invitation not found" };
 		}
-		if (invitation.userId !== data.userId) {
+		if (invitation.userId !== userId) {
 			return { error: "Access denied" };
 		}
 

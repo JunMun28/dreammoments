@@ -1,4 +1,10 @@
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import {
+	createContext,
+	useCallback,
+	useContext,
+	useEffect,
+	useState,
+} from "react";
 import {
 	getSessionFn,
 	loginFn,
@@ -68,12 +74,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	const [useServerAuth, setUseServerAuth] = useState(false);
 
 	// Legacy localStorage-based user (fallback when server auth is not available)
-	const legacyUserId = typeof window !== "undefined"
-		? getStore().sessions.currentUserId
-		: undefined;
-	const legacyUser = typeof window !== "undefined"
-		? getStore().users.find((item) => item.id === legacyUserId)
-		: undefined;
+	const legacyUserId =
+		typeof window !== "undefined"
+			? getStore().sessions.currentUserId
+			: undefined;
+	const legacyUser =
+		typeof window !== "undefined"
+			? getStore().users.find((item) => item.id === legacyUserId)
+			: undefined;
 
 	// The active user is the server-backed user if available, else the legacy one
 	const user = useServerAuth ? serverUser : (serverUser ?? legacyUser);

@@ -13,7 +13,7 @@ export type UseAutoSaveParams = {
 	version: number;
 };
 
-export type SaveStatus = "saved" | "saving" | "unsaved";
+export type SaveStatus = "saved" | "saving" | "unsaved" | "error";
 
 export function useAutoSave({
 	invitationId,
@@ -23,6 +23,7 @@ export function useAutoSave({
 }: UseAutoSaveParams) {
 	const [autosaveAt, setAutosaveAt] = useState<string>("");
 	const [saveStatus, setSaveStatus] = useState<SaveStatus>("saved");
+	const [saveError, setSaveError] = useState<string | null>(null);
 	const lastSavedVersionRef = useRef(0);
 	const versionRef = useRef(version);
 	versionRef.current = version;
@@ -32,11 +33,19 @@ export function useAutoSave({
 	const saveNow = useCallback(() => {
 		if (versionRef.current === lastSavedVersionRef.current) return;
 		setSaveStatus("saving");
-		updateInvitationContent(invitationId, draftRef.current);
-		setInvitationVisibility(invitationId, visibilityRef.current);
-		lastSavedVersionRef.current = versionRef.current;
-		setAutosaveAt(new Date().toLocaleTimeString());
-		setSaveStatus("saved");
+		setSaveError(null);
+		try {
+			updateInvitationContent(invitationId, draftRef.current);
+			setInvitationVisibility(invitationId, visibilityRef.current);
+			lastSavedVersionRef.current = versionRef.current;
+			setAutosaveAt(new Date().toLocaleTimeString());
+			setSaveStatus("saved");
+		} catch (err) {
+			const message =
+				err instanceof Error ? err.message : "Failed to save changes";
+			setSaveError(message);
+			setSaveStatus("error");
+		}
 	}, [invitationId, draftRef, visibilityRef]);
 
 	useEffect(() => {
@@ -63,5 +72,6 @@ export function useAutoSave({
 		hasUnsavedChanges,
 		saveNow,
 		saveStatus,
+		saveError,
 	};
 }

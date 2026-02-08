@@ -12,6 +12,7 @@ type EditorLayoutProps = {
 	isMobileLandscape?: boolean;
 	panelCollapsed?: boolean;
 	bottomSheetOpen: boolean;
+	onOpenBottomSheet?: () => void;
 };
 
 export function EditorLayout({
@@ -26,32 +27,10 @@ export function EditorLayout({
 	isMobileLandscape = false,
 	panelCollapsed = false,
 	bottomSheetOpen,
+	onOpenBottomSheet,
 }: EditorLayoutProps) {
-	// Mobile landscape: split view (60% preview, 40% fields) - no bottom sheet
-	if (isMobile && isMobileLandscape) {
-		return (
-			<div className="flex h-[100dvh] flex-col bg-[color:var(--dm-bg)]">
-				<div className="shrink-0">{toolbar}</div>
-				<div className="flex min-h-0 flex-1">
-					<div className="min-w-0" style={{ flex: "0 0 60%" }}>
-						{preview}
-					</div>
-					<div
-						className="overflow-y-auto border-l border-[color:var(--dm-border)] bg-[color:var(--dm-surface)]"
-						style={{ flex: "0 0 40%" }}
-					>
-						<div className="border-b border-[color:var(--dm-border)]">
-							{pillBar}
-						</div>
-						{contextPanel}
-					</div>
-				</div>
-			</div>
-		);
-	}
-
-	// Mobile portrait layout: toolbar (sticky top) + preview (flex-1) + pillBar (sticky bottom)
-	if (isMobile) {
+	// Non-desktop layout: toolbar (sticky top) + preview (flex-1) + pillBar (sticky bottom) + bottom sheet
+	if (isMobile || isTablet) {
 		return (
 			<div className="flex h-[100dvh] flex-col bg-[color:var(--dm-bg)]">
 				{/* Sticky toolbar at top */}
@@ -65,32 +44,41 @@ export function EditorLayout({
 				{/* Scrollable preview area */}
 				<div className="min-h-0 flex-1">{preview}</div>
 
-				{/* Sticky pill bar at bottom */}
-				<div className="shrink-0 border-t border-[color:var(--dm-border)] bg-[color:var(--dm-bg)]">
-					{pillBar}
-				</div>
+				{/* Sticky pill bar at bottom (hidden when bottom sheet is open) */}
+				{!bottomSheetOpen && (
+					<div className="shrink-0 border-t border-[color:var(--dm-border)] bg-[color:var(--dm-bg)]">
+						{pillBar}
+					</div>
+				)}
+
+				{/* Floating edit FAB - visible only when bottom sheet is closed */}
+				{!bottomSheetOpen && onOpenBottomSheet && (
+					<button
+						type="button"
+						onClick={onOpenBottomSheet}
+						className="fixed bottom-20 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[color:var(--dm-accent-strong)] text-[color:var(--dm-on-accent)] shadow-[0_4px_20px_-2px_rgba(0,0,0,0.25)] transition-transform active:scale-95"
+						style={{ marginBottom: "env(safe-area-inset-bottom)" }}
+						aria-label="Open editor"
+					>
+						<svg
+							width="22"
+							height="22"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							strokeWidth="2"
+							strokeLinecap="round"
+							strokeLinejoin="round"
+							aria-hidden="true"
+						>
+							<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+							<path d="m15 5 4 4" />
+						</svg>
+					</button>
+				)}
 
 				{/* Bottom sheet overlays from bottom when open */}
 				{bottomSheetOpen && contextPanel}
-			</div>
-		);
-	}
-
-	// Tablet portrait: 2-column (preview + context panel)
-	// Tablet landscape: use 3-column desktop layout
-	if (isTablet && !isTabletLandscape) {
-		return (
-			<div className="flex h-[100dvh] flex-col bg-[color:var(--dm-bg)]">
-				<div className="shrink-0">{toolbar}</div>
-				<div className="flex min-h-0 flex-1">
-					<div className="min-w-0 flex-1">{preview}</div>
-					<div className="w-80 shrink-0 overflow-y-auto border-l border-[color:var(--dm-border)] bg-[color:var(--dm-surface)]">
-						<div className="border-b border-[color:var(--dm-border)]">
-							{pillBar}
-						</div>
-						{contextPanel}
-					</div>
-				</div>
 			</div>
 		);
 	}
@@ -112,13 +100,13 @@ export function EditorLayout({
 					</div>
 				)}
 				<div className="min-w-0 overflow-hidden">{preview}</div>
-				<div className="overflow-y-auto border-l border-[color:var(--dm-border)] bg-[color:var(--dm-surface)]">
+				<div className="flex flex-col overflow-hidden border-l border-[color:var(--dm-border)] bg-[color:var(--dm-surface)]">
 					{!panelCollapsed && (
-						<div className="border-b border-[color:var(--dm-border)]">
+						<div className="shrink-0 border-b border-[color:var(--dm-border)]">
 							{pillBar}
 						</div>
 					)}
-					{contextPanel}
+					<div className="min-h-0 flex-1">{contextPanel}</div>
 				</div>
 			</div>
 		</div>

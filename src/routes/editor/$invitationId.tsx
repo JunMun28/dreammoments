@@ -1,4 +1,10 @@
-import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	type ErrorComponentProps,
+	Link,
+	Navigate,
+	useNavigate,
+} from "@tanstack/react-router";
 import {
 	useCallback,
 	useEffect,
@@ -12,27 +18,30 @@ import { ContextPanel } from "../../components/editor/ContextPanel";
 import { EditorLayout } from "../../components/editor/EditorLayout";
 import { EditorPreviewFrame } from "../../components/editor/EditorPreviewFrame";
 import { EditorToolbar } from "../../components/editor/EditorToolbar";
-import { useAiAssistant } from "../../components/editor/hooks/useAiAssistant";
+import {
+	type AiTaskType,
+	useAiAssistant,
+} from "../../components/editor/hooks/useAiAssistant";
 import { useAutoSave } from "../../components/editor/hooks/useAutoSave";
-import { useFocusTrap } from "../../components/editor/hooks/useFocusTrap";
 import {
 	getValueByPath,
 	setValueByPath,
 	useEditorState,
 } from "../../components/editor/hooks/useEditorState";
+import { useFocusTrap } from "../../components/editor/hooks/useFocusTrap";
+import { useFormScrollSpy } from "../../components/editor/hooks/useFormScrollSpy";
 import { useInlineEdit } from "../../components/editor/hooks/useInlineEdit";
 import { useKeyboardShortcuts } from "../../components/editor/hooks/useKeyboardShortcuts";
 import { useMediaQuery } from "../../components/editor/hooks/useMediaQuery";
 import { usePreviewScroll } from "../../components/editor/hooks/usePreviewScroll";
 import { useSectionProgress } from "../../components/editor/hooks/useSectionProgress";
 import InlineEditOverlay from "../../components/editor/InlineEditOverlay";
-import {
-	LayoutToggle,
-	type PreviewLayout,
-} from "../../components/editor/LayoutToggle";
+import type { PreviewLayout } from "../../components/editor/LayoutToggle";
+import { MobileAllSectionsPanel } from "../../components/editor/MobileAllSectionsPanel";
 import MobileBottomSheet from "../../components/editor/MobileBottomSheet";
 import MobileSectionNav from "../../components/editor/MobileSectionNav";
 import { SectionPillBar } from "../../components/editor/SectionPillBar";
+import ShareModal from "../../components/share/ShareModal";
 import InvitationRenderer from "../../components/templates/InvitationRenderer";
 import { FullPageLoader } from "../../components/ui/LoadingSpinner";
 import { buildSampleContent } from "../../data/sample-invitation";
@@ -40,16 +49,57 @@ import {
 	aiUsageLimit,
 	createUser,
 	getCurrentUser,
+	PUBLIC_BASE_URL,
 	publishInvitation,
 	updateInvitation,
 } from "../../lib/data";
 import { uploadImage } from "../../lib/storage";
 import { useStore } from "../../lib/store";
 import { templates } from "../../templates";
-import type { SectionConfig, TemplateConfig } from "../../templates/types";
+import {
+	getSectionLabel,
+	type SectionConfig,
+	type TemplateConfig,
+} from "../../templates/types";
+
+function EditorErrorFallback({ reset }: ErrorComponentProps) {
+	return (
+		<div className="flex min-h-screen items-center justify-center bg-dm-bg px-6">
+			<div className="max-w-md text-center">
+				<h1 className="font-heading text-2xl font-semibold text-dm-ink">
+					Editor encountered an error
+				</h1>
+				<p className="mt-3 text-sm text-dm-muted">
+					Something went wrong in the editor. Your changes are auto-saved.
+				</p>
+				{import.meta.env.DEV && (
+					<p className="mt-2 text-xs text-dm-error">
+						Check the browser console for details.
+					</p>
+				)}
+				<div className="mt-6 flex justify-center gap-3">
+					<button
+						type="button"
+						onClick={reset}
+						className="rounded-full bg-dm-accent-strong px-6 py-2 text-xs uppercase tracking-[0.2em] text-dm-on-accent"
+					>
+						Refresh Editor
+					</button>
+					<Link
+						to="/dashboard"
+						className="rounded-full border border-dm-border px-6 py-2 text-xs uppercase tracking-[0.2em] text-dm-ink"
+					>
+						Back to Dashboard
+					</Link>
+				</div>
+			</div>
+		</div>
+	);
+}
 
 export const Route = createFileRoute("/editor/$invitationId")({
 	component: EditorScreen,
+	errorComponent: EditorErrorFallback,
 });
 
 const lightTemplates = new Set([
@@ -110,8 +160,13 @@ export function EditorScreen() {
 		initialSection: template?.sections[0]?.id ?? "hero",
 	});
 
-	// Refs for auto-save
+	// Mobile bottom sheet state (declared early so useFormScrollSpy can depend on it)
+	const [mobileEditorOpen, setMobileEditorOpen] = useState(false);
+	const [mobileSnapIndex, setMobileSnapIndex] = useState(1);
+
+	// Refs for auto-save and form scroll
 	const previewRef = useRef<HTMLDivElement | null>(null);
+	const formScrollRef = useRef<HTMLDivElement | null>(null);
 	const draftRef = useRef(editor.draft);
 	const visibilityRef = useRef(editor.sectionVisibility);
 	useEffect(() => {
@@ -146,6 +201,13 @@ export function EditorScreen() {
 		onActiveSectionChange,
 	});
 
+	// Form scroll-spy (for mobile all-sections panel)
+	const { scrollToFormSection } = useFormScrollSpy({
+		scrollContainerRef: formScrollRef,
+		onActiveSectionChange,
+		enabled: mobileEditorOpen,
+	});
+
 	// Inline edit hook (replaces manual state)
 	const {
 		inlineEdit,
@@ -171,21 +233,22 @@ export function EditorScreen() {
 
 	// Local UI state
 	const [previewMode, setPreviewMode] = useState(false);
-	const [previewLayout, setPreviewLayout] = useState<PreviewLayout>("web");
-	const [mobileEditorOpen, setMobileEditorOpen] = useState(false);
-	const [mobileSnapIndex, setMobileSnapIndex] = useState(1);
+	const previewLayout: PreviewLayout = "web";
 	const [uploadingField, setUploadingField] = useState<string | null>(null);
 	const [upgradeOpen, setUpgradeOpen] = useState(false);
 	const [panelCollapsed, setPanelCollapsed] = useState(false);
 	const [isHydrated, setIsHydrated] = useState(false);
 	const [slugDialogOpen, setSlugDialogOpen] = useState(false);
 	const [slugValue, setSlugValue] = useState("");
+	const [shareModalOpen, setShareModalOpen] = useState(false);
+	const [publishSuccess, setPublishSuccess] = useState(false);
 
 	// Refs for focus trap containers
 	const previewDialogRef = useRef<HTMLDivElement | null>(null);
 	const slugDialogRef = useRef<HTMLDivElement | null>(null);
 	const upgradeDialogRef = useRef<HTMLDivElement | null>(null);
 	const shortcutsDialogRef = useRef<HTMLDivElement | null>(null);
+	const publishSuccessRef = useRef<HTMLDivElement | null>(null);
 
 	const styleOverrides = (invitation?.designOverrides ?? {}) as Record<
 		string,
@@ -225,6 +288,10 @@ export function EditorScreen() {
 		enabled: showShortcutsHelp,
 		onEscape: () => setShowShortcutsHelp(false),
 	});
+	useFocusTrap(publishSuccessRef, {
+		enabled: publishSuccess,
+		onEscape: () => setPublishSuccess(false),
+	});
 
 	useEffect(() => {
 		setIsHydrated(true);
@@ -244,7 +311,7 @@ export function EditorScreen() {
 		() =>
 			(template?.sections ?? []).map((s) => ({
 				id: s.id,
-				label: s.id,
+				label: getSectionLabel(s.id),
 				completion: sectionProgress[s.id] ?? 0,
 			})),
 		[template?.sections, sectionProgress],
@@ -291,11 +358,18 @@ export function EditorScreen() {
 			slug: slugValue.trim() || invitation.slug,
 		});
 		setSlugDialogOpen(false);
+		setPublishSuccess(true);
+	};
+
+	const handleContinueFree = () => {
+		publishInvitation(invitation.id, { randomize: true });
+		setUpgradeOpen(false);
+		setPublishSuccess(true);
 	};
 
 	const handleShare = () => {
-		updateInvitation(invitation.id, { status: "published" });
-		navigate({ to: `/dashboard/${invitation.id}`, search: { share: "true" } });
+		setPublishSuccess(false);
+		setShareModalOpen(true);
 	};
 
 	const handleInlineEdit = (fieldPath: string) => {
@@ -318,17 +392,24 @@ export function EditorScreen() {
 		scrollToSection(sectionId);
 	};
 
+	const handleMobileSectionChange = (sectionId: string) => {
+		editor.setActiveSection(sectionId);
+		scrollToFormSection(sectionId);
+		scrollToSection(sectionId);
+	};
+
 	const handleSectionSelectFromPreview = (sectionId: string) => {
 		editor.setActiveSection(sectionId);
-		if (isMobile) {
-			setMobileSnapIndex(1); // 60% snap for comfortable editing
+		if (isMobile || isTablet) {
+			setMobileSnapIndex(2); // 95% snap for full-screen editing
 			setMobileEditorOpen(true);
+			requestAnimationFrame(() => scrollToFormSection(sectionId));
 		}
 	};
 
-	const handleOpenAiPanel = (sectionId: string) => {
-		if (isMobile) setMobileEditorOpen(false);
-		aiAssistant.openAiPanel(sectionId);
+	const handleOpenAiPanel = (sectionId: string, type?: AiTaskType) => {
+		if (isMobile || isTablet) setMobileEditorOpen(false);
+		aiAssistant.openAiPanel(sectionId, type);
 	};
 
 	// Build the toolbar
@@ -347,12 +428,9 @@ export function EditorScreen() {
 		/>
 	);
 
-	// Build the preview (with Web/Mobile layout toggle)
+	// Build the preview
 	const preview = (
 		<div className="flex h-full flex-col">
-			<div className="flex shrink-0 justify-center border-b border-dm-border bg-dm-bg py-3">
-				<LayoutToggle layout={previewLayout} onChange={setPreviewLayout} />
-			</div>
 			<div className="min-h-0 flex-1 p-4">
 				<EditorPreviewFrame
 					templateId={template?.id ?? "blush-romance"}
@@ -371,19 +449,31 @@ export function EditorScreen() {
 	);
 
 	// Build the pill bar (SectionPillBar for desktop/tablet, MobileSectionNav for mobile)
-	const pillBar = isMobile ? (
+	const externalPillBar = (
 		<MobileSectionNav
 			sections={pillSections}
 			activeSection={editor.activeSection}
 			onSectionChange={handleSectionChange}
 		/>
-	) : (
-		<SectionPillBar
+	);
+	const sheetPillBar = (
+		<MobileSectionNav
 			sections={pillSections}
 			activeSection={editor.activeSection}
-			onSectionChange={handleSectionChange}
+			onSectionChange={handleMobileSectionChange}
+			embedded
 		/>
 	);
+	const pillBar =
+		isMobile || isTablet ? (
+			externalPillBar
+		) : (
+			<SectionPillBar
+				sections={pillSections}
+				activeSection={editor.activeSection}
+				onSectionChange={handleSectionChange}
+			/>
+		);
 
 	// Build the context panel
 	const contextPanelInner = (
@@ -415,29 +505,61 @@ export function EditorScreen() {
 			}
 			onAiClick={handleOpenAiPanel}
 			completion={sectionProgress[editor.activeSection] ?? 0}
-			collapsed={!isMobile && panelCollapsed}
+			collapsed={!(isMobile || isTablet) && panelCollapsed}
 			onToggleCollapse={() => setPanelCollapsed((prev) => !prev)}
-			sections={template?.sections}
-			onSectionChange={handleSectionChange}
 		/>
 	);
 
-	const contextPanel = isMobile ? (
-		<MobileBottomSheet
-			open={mobileEditorOpen}
-			onClose={() => setMobileEditorOpen(false)}
-			title="Section Editor"
-			snapPoints={[30, 60, 90]}
-			initialSnap={1}
-			activeSnapIndex={mobileSnapIndex}
-			onSnapChange={setMobileSnapIndex}
-			isDirty={editor.version > 0}
-		>
-			{contextPanelInner}
-		</MobileBottomSheet>
-	) : (
-		contextPanelInner
-	);
+	const contextPanel =
+		isMobile || isTablet ? (
+			<MobileBottomSheet
+				open={mobileEditorOpen}
+				onClose={() => setMobileEditorOpen(false)}
+				headerContent={sheetPillBar}
+				snapPoints={[30, 60, 95]}
+				initialSnap={2}
+				activeSnapIndex={mobileSnapIndex}
+				onSnapChange={setMobileSnapIndex}
+				isDirty={editor.version > 0}
+			>
+				<MobileAllSectionsPanel
+					sections={template?.sections ?? []}
+					draft={editor.draft}
+					sectionVisibility={editor.sectionVisibility}
+					sectionProgress={sectionProgress}
+					errors={editor.errors}
+					uploadingField={uploadingField}
+					onFieldChange={editor.handleFieldChange}
+					onFieldBlur={(path) => {
+						const section = template?.sections.find(
+							(s) => s.id === editor.activeSection,
+						);
+						const field = section?.fields.find(
+							(f) => `${section.id}.${f.id}` === path,
+						);
+						const val = getValueByPath(editor.draft, path);
+						editor.setErrors((prev) => {
+							const error =
+								field?.required && !val?.trim()
+									? `${field.label} is required`
+									: "";
+							return { ...prev, [path]: error };
+						});
+					}}
+					onImageUpload={(path, file) => void handleImageUpload(path, file)}
+					onVisibilityChange={(sectionId, visible) =>
+						editor.setSectionVisibility((prev) => ({
+							...prev,
+							[sectionId]: visible,
+						}))
+					}
+					onAiClick={handleOpenAiPanel}
+					scrollContainerRef={formScrollRef}
+				/>
+			</MobileBottomSheet>
+		) : (
+			contextPanelInner
+		);
 
 	return (
 		<>
@@ -550,10 +672,7 @@ export function EditorScreen() {
 							<button
 								type="button"
 								className="flex-1 rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-ink)]"
-								onClick={() => {
-									publishInvitation(invitation.id, { randomize: true });
-									setUpgradeOpen(false);
-								}}
+								onClick={handleContinueFree}
 							>
 								Continue Free
 							</button>
@@ -660,6 +779,52 @@ export function EditorScreen() {
 					</div>
 				</div>
 			)}
+
+			{/* Publish success celebration */}
+			{publishSuccess && (
+				<div
+					ref={publishSuccessRef}
+					className="dm-inline-edit"
+					role="dialog"
+					aria-modal="true"
+					aria-label="Invitation published"
+				>
+					<div className="dm-inline-card text-center">
+						<div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-[color:var(--dm-sage)]/20 text-3xl">
+							&#127881;
+						</div>
+						<p className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">
+							Your invitation is live!
+						</p>
+						<p className="mt-2 break-all text-sm text-[color:var(--dm-muted)]">
+							{`${PUBLIC_BASE_URL}/invite/${invitation.slug}`}
+						</p>
+						<div className="mt-4 flex gap-3">
+							<button
+								type="button"
+								className="flex-1 rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-ink)]"
+								onClick={() => setPublishSuccess(false)}
+							>
+								Close
+							</button>
+							<button
+								type="button"
+								className="flex-1 rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)]"
+								onClick={handleShare}
+							>
+								Share Now
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
+
+			{/* Share modal */}
+			<ShareModal
+				open={shareModalOpen}
+				invitation={invitation}
+				onClose={() => setShareModalOpen(false)}
+			/>
 		</>
 	);
 }
