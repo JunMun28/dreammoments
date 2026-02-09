@@ -58,55 +58,63 @@ code {
 }
 
 :root {
-  /* ─── Warm Luxury Palette ─── */
-  --dm-bg: #FAF8F5;
-  --dm-surface: #FFFFFF;
-  --dm-surface-muted: #F5F2EE;
-  --dm-surface-rose: #F9F2F0;
-  --dm-ink: #1C1917;
-  --dm-muted: #6B6560;
-  --dm-border: #E8E4DF;
+  /* ─── Core Surfaces ─── */
+  --dm-bg:             #FAFAF8;
+  --dm-surface:        #FFFFFF;
+  --dm-surface-muted:  #F3F2EF;
+  --dm-surface-rose:   #F9F2F0;
+  --dm-ink:            #0F0D0A;
+  --dm-muted:          #57534E;
+  --dm-border:         #E5E2DD;
 
-  /* Accent: Crimson (auspicious red — primary CTA color) */
-  --dm-crimson: #C1272D;
-  --dm-crimson-hover: #A12025;
-  --dm-crimson-soft: #F9E8E8;
+  /* ─── Crimson (Primary CTA, Auspicious Red) ─── */
+  --dm-crimson:        #D42040;
+  --dm-crimson-deep:   #A8182E;
+  --dm-crimson-soft:   #FDE0E6;
+  --dm-crimson-vivid:  #E8243C;
 
-  /* Accent: Gold (decorative only — NEVER for body text) */
-  --dm-gold: #B8965A;
-  --dm-gold-soft: #F5EDD5;
+  /* ─── Gold (Decorative, Cultural Elements) ─── */
+  --dm-gold:           #D4AF37;
+  --dm-gold-warm:      #C08B2E;
+  --dm-gold-soft:      #FBF0D0;
+  --dm-gold-electric:  #FFD700;
 
-  /* Accent: Rose (secondary warmth) */
-  --dm-rose: #C4706B;
-  --dm-rose-soft: #F2D5D3;
+  /* ─── Rose (Secondary Warmth) ─── */
+  --dm-rose:           #D95F5A;
+  --dm-rose-soft:      #FADBD6;
 
-  /* Accent: Sage (nature, success) */
-  --dm-sage: #8FA68E;
-  --dm-sage-soft: #E8EFE8;
+  /* ─── Sage (Nature, Success) ─── */
+  --dm-sage:           #7D9E7C;
+  --dm-sage-soft:      #E8EFE8;
 
-  /* Accent: Lavender (decorative only) */
-  --dm-lavender: #EFEDF4;
+  /* ─── Lavender, Peach (Backward Compat) ─── */
+  --dm-lavender:       #EFEDF4;
+  --dm-peach:          #C4706B;
 
-  /* Legacy alias (template code compatibility) */
-  --dm-peach: #C4706B;
+  /* ─── Dark Sections (Social Proof, Final CTA) ─── */
+  --dm-dark-bg:        #0D0D0D;
+  --dm-dark-surface:   #1A1A1A;
+  --dm-dark-text:      #FAFAF8;
+  --dm-dark-muted:     #A1A1AA;
+  --dm-dark-gold:      #D4AF37;
 
-  /* Dark section */
-  --dm-dark-bg: #1C1917;
-  --dm-dark-surface: #292524;
-  --dm-dark-text: #FAF8F5;
-  --dm-dark-muted: #A8A29E;
-  --dm-dark-gold: #D4AF37;
+  /* ─── Vermillion Section (Features) ─── */
+  --dm-vermillion:     #D42040;
+  --dm-vermillion-soft: #FDE0E6;
 
-  /* Semantic: CTAs */
-  --dm-cta-bg: var(--dm-crimson);
-  --dm-cta-hover: var(--dm-crimson-hover);
-  --dm-cta-text: #FFFFFF;
+  /* ─── Semantic ─── */
+  --dm-cta-bg:         var(--dm-crimson);
+  --dm-cta-hover:      var(--dm-crimson-deep);
+  --dm-cta-text:       #FFFFFF;
+  --dm-accent-strong:  var(--dm-crimson);
+  --dm-on-accent:      #FFFFFF;
+  --dm-error:          #B91C1C;
+  --dm-focus:          var(--dm-crimson);
 
-  /* Semantic: UI */
-  --dm-accent-strong: var(--dm-crimson);
-  --dm-on-accent: #FFFFFF;
-  --dm-error: #B91C1C;
-  --dm-focus: var(--dm-crimson);
+  /* ─── Aurora Gradients ─── */
+  --dm-aurora-1: radial-gradient(ellipse 80% 50% at 20% 40%, rgba(212, 32, 64, 0.08) 0%, transparent 60%);
+  --dm-aurora-2: radial-gradient(ellipse 60% 70% at 80% 20%, rgba(212, 175, 55, 0.06) 0%, transparent 50%);
+  --dm-aurora-3: radial-gradient(ellipse 70% 60% at 50% 90%, rgba(217, 95, 90, 0.05) 0%, transparent 55%);
 
   /* Motion */
   --dm-ease-slow: cubic-bezier(0.25, 0.1, 0.25, 1);
@@ -123,20 +131,26 @@ code {
   --font-accent: "Cormorant Garamond", "Noto Serif SC", Georgia, serif;
   --font-heading: "Playfair Display", "Noto Serif SC", Georgia, serif;
 
-  /* Type Scale */
-  --text-hero: clamp(2.75rem, 6vw + 1rem, 5rem);
-  --text-section: clamp(2rem, 4vw + 0.5rem, 3.5rem);
-  --text-card-title: clamp(1.25rem, 2vw + 0.25rem, 1.75rem);
-  --text-lg: clamp(1.0625rem, 1vw + 0.25rem, 1.25rem);
-  --text-base: 1rem;
-  --text-sm: 0.875rem;
-  --text-xs: 0.75rem;
+  /* ─── Type Scale ─── */
+  --text-hero:        clamp(4.5rem, 12vw + 1rem, 10rem);
+  --text-hero-accent: clamp(5rem, 13vw + 1rem, 11rem);
+  --text-section:     clamp(2.5rem, 5vw + 0.5rem, 4.5rem);
+  --text-subsection:  clamp(1.5rem, 3vw + 0.25rem, 2.5rem);
+  --text-kicker-cn:   clamp(1.5rem, 2.5vw + 0.25rem, 2.5rem);
+  --text-kicker-en:   0.8125rem;
+  --text-card-title:  clamp(1.25rem, 2vw + 0.25rem, 1.75rem);
+  --text-lg:          clamp(1.0625rem, 0.8vw + 0.5rem, 1.25rem);
+  --text-base:        1rem;
+  --text-sm:          0.875rem;
+  --text-xs:          0.75rem;
 
-  /* Tracking */
-  --tracking-tight: -0.025em;
-  --tracking-normal: 0;
-  --tracking-wide: 0.05em;
-  --tracking-wider: 0.12em;
+  /* ─── Tracking ─── */
+  --tracking-hero:    -0.04em;
+  --tracking-section: -0.03em;
+  --tracking-kicker:  0.15em;
+  --tracking-display: -0.025em;
+  --tracking-normal:  0;
+  --tracking-wide:    0.05em;
 
   /* Elevation / Shadows */
   --dm-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -162,16 +176,26 @@ code {
   --color-dm-muted: var(--dm-muted);
   --color-dm-border: var(--dm-border);
   --color-dm-crimson: var(--dm-crimson);
-  --color-dm-crimson-hover: var(--dm-crimson-hover);
+  --color-dm-crimson-deep: var(--dm-crimson-deep);
   --color-dm-crimson-soft: var(--dm-crimson-soft);
+  --color-dm-crimson-vivid: var(--dm-crimson-vivid);
   --color-dm-gold: var(--dm-gold);
   --color-dm-gold-soft: var(--dm-gold-soft);
+  --color-dm-gold-warm: var(--dm-gold-warm);
+  --color-dm-gold-electric: var(--dm-gold-electric);
   --color-dm-rose: var(--dm-rose);
   --color-dm-rose-soft: var(--dm-rose-soft);
   --color-dm-sage: var(--dm-sage);
   --color-dm-sage-soft: var(--dm-sage-soft);
   --color-dm-lavender: var(--dm-lavender);
   --color-dm-peach: var(--dm-peach);
+  --color-dm-dark-bg: var(--dm-dark-bg);
+  --color-dm-dark-surface: var(--dm-dark-surface);
+  --color-dm-dark-text: var(--dm-dark-text);
+  --color-dm-dark-muted: var(--dm-dark-muted);
+  --color-dm-dark-gold: var(--dm-dark-gold);
+  --color-dm-vermillion: var(--dm-vermillion);
+  --color-dm-vermillion-soft: var(--dm-vermillion-soft);
   --color-dm-accent-strong: var(--dm-accent-strong);
   --color-dm-on-accent: var(--dm-on-accent);
   --color-dm-error: var(--dm-error);
@@ -275,7 +299,7 @@ h4 {
   font-weight: 500;
   font-size: 1rem;
   letter-spacing: 0.01em;
-  box-shadow: 0 4px 20px -2px rgba(193, 39, 45, 0.2);
+  box-shadow: 0 4px 20px -2px rgba(212, 32, 64, 0.2);
   transition: transform 0.4s var(--dm-ease-slow), box-shadow 0.4s var(--dm-ease-slow), background-color 0.3s ease;
   touch-action: manipulation;
 }
@@ -299,9 +323,9 @@ h4 {
 
 @media (hover: hover) and (pointer: fine) {
   .dm-cta-primary:hover {
-    background: var(--dm-crimson-hover);
+    background: var(--dm-crimson-deep);
     transform: translateY(-2px);
-    box-shadow: 0 8px 28px -4px rgba(193, 39, 45, 0.3);
+    box-shadow: 0 8px 28px -4px rgba(212, 32, 64, 0.3);
   }
 
   .dm-cta-secondary:hover {
@@ -329,7 +353,7 @@ h4 {
   font-weight: 500;
   font-size: 1rem;
   letter-spacing: 0.01em;
-  box-shadow: 0 4px 20px -2px rgba(193, 39, 45, 0.3);
+  box-shadow: 0 4px 20px -2px rgba(212, 32, 64, 0.3);
   transition: transform 0.4s var(--dm-ease-slow), box-shadow 0.4s var(--dm-ease-slow);
   touch-action: manipulation;
   position: relative;
@@ -350,7 +374,7 @@ h4 {
 @media (hover: hover) and (pointer: fine) {
   .dm-cta-primary-dark:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 28px -4px rgba(193, 39, 45, 0.4);
+    box-shadow: 0 8px 28px -4px rgba(212, 32, 64, 0.4);
   }
   .dm-cta-primary-dark:hover::after {
     left: 100%;
@@ -379,6 +403,66 @@ h4 {
   }
   .dm-cta-primary-dark:hover::after {
     left: -100%;
+  }
+}
+
+/* ─── Cultural Editorial Animations ─── */
+
+@keyframes dm-shimmer-sweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes dm-cta-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(212, 175, 55, 0); }
+  50% { box-shadow: 0 0 30px rgba(212, 175, 55, 0.3); }
+}
+
+/* ─── Cultural Editorial Utilities ─── */
+
+.dm-gold-rule {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--dm-gold), transparent);
+}
+
+.dm-section-kicker {
+  font-family: var(--font-body);
+  font-size: var(--text-kicker-en);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+
+.dm-paper-cut-bottom {
+  clip-path: polygon(
+    0% 0%, 5% 0%, 5% 80%, 7.5% 100%, 10% 80%, 12.5% 100%, 15% 80%, 17.5% 100%, 20% 80%,
+    22.5% 100%, 25% 80%, 27.5% 100%, 30% 80%, 32.5% 100%, 35% 80%, 37.5% 100%, 40% 80%,
+    42.5% 100%, 45% 80%, 47.5% 100%, 50% 80%, 52.5% 100%, 55% 80%, 57.5% 100%, 60% 80%,
+    62.5% 100%, 65% 80%, 67.5% 100%, 70% 80%, 72.5% 100%, 75% 80%, 77.5% 100%, 80% 80%,
+    82.5% 100%, 85% 80%, 87.5% 100%, 90% 80%, 92.5% 100%, 95% 80%, 95% 0%, 100% 0%, 100% 100%, 0% 100%
+  );
+}
+
+.dm-cta-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.dm-cta-shimmer::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent 0%, rgba(212, 175, 55, 0.3) 50%, transparent 100%);
+  animation: dm-shimmer-sweep 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dm-cta-shimmer::after {
+    animation: none;
   }
 }
 
@@ -2256,7 +2340,7 @@ h4 {
 }
 
 .dm-onboarding-next:hover {
-  background: var(--dm-crimson-hover);
+  background: var(--dm-crimson-deep);
 }
 
 .dm-onboarding-next:focus-visible {
@@ -2957,6 +3041,131 @@ h4 {
   }
   .rsvp-confirm-edit {
     transition: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LANDING PAGE V3 KEYFRAMES & UTILITIES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Neon breathe for xi characters (gold) */
+@keyframes neon-breathe-gold {
+  0%, 100% {
+    opacity: 0.05;
+    text-shadow:
+      0 0 30px rgba(255, 215, 0, 0.35),
+      0 0 60px rgba(255, 215, 0, 0.18),
+      0 0 120px rgba(255, 215, 0, 0.08);
+  }
+  50% {
+    opacity: 0.08;
+    text-shadow:
+      0 0 35px rgba(255, 215, 0, 0.5),
+      0 0 70px rgba(255, 215, 0, 0.25),
+      0 0 140px rgba(255, 215, 0, 0.12);
+  }
+}
+
+/* Neon breathe for xi characters (crimson) */
+@keyframes neon-breathe-crimson {
+  0%, 100% {
+    opacity: 0.08;
+    text-shadow:
+      0 0 20px rgba(232, 36, 60, 0.5),
+      0 0 40px rgba(232, 36, 60, 0.25);
+  }
+  50% {
+    opacity: 0.12;
+    text-shadow:
+      0 0 25px rgba(232, 36, 60, 0.6),
+      0 0 50px rgba(232, 36, 60, 0.3);
+  }
+}
+
+/* Moving border button spin */
+@keyframes dm-border-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Gentle float for hero card */
+@keyframes dm-gentle-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+/* ─── Neon Xi Breathing ─── */
+.neon-xi-crimson {
+  animation: neon-breathe-crimson 4s ease-in-out infinite;
+}
+.neon-xi-gold {
+  animation: neon-breathe-gold 4s ease-in-out infinite;
+}
+
+/* ─── Moving Border Button ─── */
+.dm-moving-border-spin {
+  animation: dm-border-spin 3s linear infinite;
+}
+
+/* Reduced-motion fallback for moving border */
+@media (prefers-reduced-motion: reduce) {
+  .dm-moving-border-spin {
+    animation: none;
+    display: none;
+  }
+  .dm-moving-border .dm-moving-border-static {
+    display: block !important;
+  }
+}
+
+/* ─── Hero Card Float ─── */
+.dm-hero-card-float {
+  animation: dm-gentle-float 6s ease-in-out infinite;
+}
+
+/* ─── Aurora Background ─── */
+.dm-aurora-bg {
+  position: relative;
+  isolation: isolate;
+}
+.dm-aurora-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 40%, rgba(212,32,64,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 70% at 80% 20%, rgba(212,175,55,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse 70% 60% at 50% 90%, rgba(217,95,90,0.05) 0%, transparent 55%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ─── Dark Section Utility ─── */
+.dm-dark-section {
+  background: var(--dm-dark-bg);
+  color: var(--dm-dark-text);
+}
+
+/* ─── Vermillion Section Utility ─── */
+.dm-vermillion-section {
+  background: var(--dm-crimson);
+  color: #FFFFFF;
+}
+
+/* ─── Mobile Full-Width CTAs ─── */
+@media (max-width: 639px) {
+  .dm-cta-mobile-full {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ─── Landing V3 Reduced Motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  .neon-xi-crimson,
+  .neon-xi-gold,
+  .dm-hero-card-float {
+    animation: none !important;
   }
 }
 

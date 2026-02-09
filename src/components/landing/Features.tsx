@@ -1,11 +1,20 @@
-import { BarChart3, Check, Heart, Smartphone, Sparkles } from "lucide-react";
-import { motion } from "motion/react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
-	ANIMATION,
-	childReveal,
-	containerReveal,
-	mockupReveal,
-} from "./animation";
+	BarChart3,
+	Check,
+	Heart,
+	QrCode,
+	Share2,
+	Sparkles,
+} from "lucide-react";
+import { motion } from "motion/react";
+import { useEffect, useRef } from "react";
+import { ANIMATION, mockupReveal } from "./animation";
+import { PaperCutEdge } from "./motifs/PaperCutEdge";
+import { SectionHeader } from "./motifs/SectionHeader";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const FEATURES = [
 	{
@@ -14,7 +23,7 @@ const FEATURES = [
 		icon: Sparkles,
 	},
 	{
-		title: "Built for Chinese Weddings",
+		title: "Chinese Wedding Customs",
 		desc: "Double happiness motifs, tea ceremony sections, banquet seating, and bilingual support.",
 		icon: Heart,
 	},
@@ -24,147 +33,230 @@ const FEATURES = [
 		icon: Check,
 	},
 	{
+		title: "Angpao QR Code",
+		desc: "Let guests send digital angpao directly. QR code linked to your preferred payment method.",
+		icon: QrCode,
+	},
+	{
+		title: "WhatsApp Share",
+		desc: "Share your invitation via WhatsApp in one tap. Beautiful preview card auto-generated.",
+		icon: Share2,
+	},
+	{
 		title: "Real-Time Dashboard",
 		desc: "Track views, RSVPs, dietary preferences, and plus-ones at a glance.",
 		icon: BarChart3,
 	},
-	{
-		title: "Beautiful on Every Screen",
-		desc: "Mobile-first design. 80% of your guests will view on their phones — it'll look perfect.",
-		icon: Smartphone,
-	},
 ];
 
 export function Features({ reducedMotion }: { reducedMotion: boolean }) {
+	const sectionRef = useRef<HTMLElement>(null);
+	const featureItemsRef = useRef<HTMLDivElement[]>([]);
+
+	// GSAP stagger entrance for feature items
+	useEffect(() => {
+		if (reducedMotion || featureItemsRef.current.length === 0) return;
+
+		const ctx = gsap.context(() => {
+			gsap.fromTo(
+				featureItemsRef.current.filter(Boolean),
+				{ opacity: 0, y: 24 },
+				{
+					opacity: 1,
+					y: 0,
+					duration: 0.6,
+					ease: "power2.out",
+					stagger: 0.1,
+					scrollTrigger: {
+						trigger: sectionRef.current,
+						start: "top 80%",
+						toggleActions: "play none none none",
+					},
+				},
+			);
+		}, sectionRef);
+
+		return () => ctx.revert();
+	}, [reducedMotion]);
+
 	return (
 		<section
-			className="relative py-24 px-6"
-			style={{ background: "var(--dm-bg)" }}
+			ref={sectionRef}
+			className="dm-vermillion-section relative overflow-hidden"
+			style={{
+				background: "var(--dm-crimson)",
+				// Paper-cut SVG overlay at 4% white for subtle texture
+				backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Ccircle cx='40' cy='40' r='20' fill='none' stroke='white' stroke-width='0.5' opacity='0.04'/%3E%3Ccircle cx='0' cy='0' r='20' fill='none' stroke='white' stroke-width='0.5' opacity='0.04'/%3E%3Ccircle cx='80' cy='80' r='20' fill='none' stroke='white' stroke-width='0.5' opacity='0.04'/%3E%3C/svg%3E")`,
+			}}
 		>
-			<div className="mx-auto max-w-6xl">
-				<div
-					className="rounded-[2rem] border p-10 sm:p-14 lg:p-20"
-					style={{
-						background: "var(--dm-surface-muted)",
-						borderColor: "var(--dm-border)",
-					}}
-				>
-					<div className="grid items-center gap-16 lg:grid-cols-2 lg:gap-20">
-						{/* Left: features */}
-						<motion.div
-							initial={reducedMotion ? false : "hidden"}
-							whileInView="visible"
-							viewport={ANIMATION.viewport}
-							variants={containerReveal}
-						>
-							<span
-								className="text-sm font-medium uppercase tracking-[0.12em]"
-								style={{ color: "var(--dm-crimson)" }}
-							>
-								Why DreamMoments
-							</span>
-							<h2
-								className="mt-3 font-display font-semibold tracking-tight"
-								style={{
-									fontSize: "var(--text-section)",
-									color: "var(--dm-ink)",
-								}}
-							>
-								Everything you need.{" "}
-								<span
-									className="font-accent italic"
-									style={{ color: "var(--dm-rose)" }}
-								>
-									Nothing you don't.
-								</span>
-							</h2>
+			<div className="mx-auto max-w-6xl px-6 py-[clamp(5rem,10vw,10rem)]">
+				<div className="grid items-start gap-16 lg:grid-cols-2 lg:gap-20">
+					{/* Left: section header + feature list */}
+					<div>
+						<SectionHeader
+							kickerEn="WHY DREAMMOMENTS"
+							kickerCn="为何选择"
+							title=""
+							kickerColor="var(--dm-gold)"
+							kickerEnColor="rgba(255,255,255,0.7)"
+							light
+							reducedMotion={reducedMotion}
+						/>
 
-							<div className="mt-10 space-y-7">
-								{FEATURES.map((f) => (
-									<motion.div
-										key={f.title}
-										variants={childReveal}
-										className="flex items-start gap-4"
-									>
-										<div
-											className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border shadow-sm"
-											style={{
-												background: "var(--dm-surface)",
-												borderColor: "var(--dm-border)",
-												color: "var(--dm-ink)",
-											}}
-										>
-											<f.icon aria-hidden="true" className="h-5 w-5" />
-										</div>
-										<div>
-											<h3
-												className="font-display text-lg font-semibold"
-												style={{
-													color: "var(--dm-ink)",
-												}}
-											>
-												{f.title}
-											</h3>
-											<p
-												className="mt-1 text-sm leading-relaxed"
-												style={{
-													color: "var(--dm-muted)",
-												}}
-											>
-												{f.desc}
-											</p>
-										</div>
-									</motion.div>
-								))}
-							</div>
-						</motion.div>
-
-						{/* Right: product mockup */}
-						<motion.div
-							initial={reducedMotion ? false : "hidden"}
-							whileInView="visible"
-							viewport={ANIMATION.viewport}
-							variants={mockupReveal}
-							className="relative aspect-square rounded-[2rem] border p-8 shadow-sm"
+						{/* Custom heading below section header */}
+						<h2
+							className="-mt-12 font-display font-bold tracking-tight"
 							style={{
-								background: "var(--dm-surface)",
-								borderColor: "var(--dm-border)",
+								fontSize: "var(--text-subsection)",
+								color: "#FFFFFF",
+								letterSpacing: "-0.025em",
+								lineHeight: 1.2,
 							}}
 						>
+							Everything you need.{" "}
+							<span className="font-accent italic" style={{ color: "#FFFFFF" }}>
+								Nothing you don&apos;t.
+							</span>
+						</h2>
+
+						{/* Feature list */}
+						<div className="mt-10 space-y-6">
+							{FEATURES.map((f, i) => (
+								<div
+									key={f.title}
+									ref={(el) => {
+										if (el) featureItemsRef.current[i] = el;
+									}}
+									className="flex items-start gap-4 group"
+									style={reducedMotion ? undefined : { opacity: 0 }}
+								>
+									{/* Gold circular icon container */}
+									<div
+										className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full transition-transform duration-200 group-hover:scale-110"
+										style={{
+											background: "var(--dm-gold)",
+											color: "#FFFFFF",
+										}}
+									>
+										<f.icon aria-hidden="true" className="h-5 w-5" />
+									</div>
+									<div>
+										<h3
+											className="font-semibold"
+											style={{
+												color: "#FFFFFF",
+												fontSize: "1.0625rem",
+											}}
+										>
+											{f.title}
+										</h3>
+										<p
+											className="mt-1 text-sm leading-relaxed"
+											style={{
+												color: "rgba(255,255,255,0.85)",
+												fontSize: "0.9375rem",
+											}}
+										>
+											{f.desc}
+										</p>
+									</div>
+								</div>
+							))}
+						</div>
+					</div>
+
+					{/* Right: Phone mockup */}
+					<motion.div
+						initial={reducedMotion ? false : "hidden"}
+						whileInView="visible"
+						viewport={ANIMATION.viewport}
+						variants={mockupReveal}
+						className="relative flex items-center justify-center lg:sticky lg:top-32"
+					>
+						{/* Phone frame */}
+						<div className="relative w-full max-w-[280px]">
 							<div
-								className="h-full w-full overflow-hidden rounded-[1.5rem] flex flex-col"
-								style={{ background: "var(--dm-bg)" }}
+								className="overflow-hidden rounded-[2.5rem] border-[6px] shadow-xl"
+								style={{
+									borderColor: "#FFFFFF",
+									background: "var(--dm-surface)",
+									boxShadow: "0 20px 60px -12px rgba(0,0,0,0.25)",
+								}}
 							>
-								{/* Mock browser chrome */}
-								<div className="h-12 border-b border-dm-border flex items-center px-6 gap-2">
-									<div className="w-2 h-2 rounded-full bg-dm-border" />
-									<div className="w-2 h-2 rounded-full bg-dm-border" />
+								{/* Notch */}
+								<div className="relative">
+									<div
+										className="absolute top-0 left-1/2 -translate-x-1/2 h-6 w-28 rounded-b-2xl z-10"
+										style={{
+											background: "#1A1A1A",
+										}}
+									/>
 								</div>
 
-								{/* Mock invitation preview */}
-								<div className="flex-1 p-8 flex flex-col items-center justify-center text-center relative overflow-hidden">
-									<div className="relative z-10" aria-hidden="true">
-										<p className="font-accent text-3xl mb-2">Sarah & Tom</p>
-										<p className="font-heading text-3xl sm:text-4xl mb-6">
-											We're getting married.
-										</p>
-										<div
-											className="inline-block px-6 py-2 rounded-full border text-sm uppercase tracking-widest"
+								{/* Screen content */}
+								<div className="aspect-[9/19] overflow-hidden">
+									<div
+										className="h-full w-full flex flex-col items-center justify-center text-center p-8 pt-12"
+										style={{
+											background: "var(--dm-bg)",
+										}}
+									>
+										<p
+											className="text-xs uppercase tracking-[0.2em] mb-3"
 											style={{
-												borderColor: "var(--dm-border)",
-												background: "var(--dm-surface)",
 												color: "var(--dm-muted)",
 											}}
 										>
-											Sept 24
-										</div>
+											We&apos;re getting married
+										</p>
+										<p
+											className="font-accent text-2xl mb-1"
+											style={{
+												color: "var(--dm-ink)",
+											}}
+										>
+											Sarah &amp; Tom
+										</p>
+										<p
+											className="font-display text-xl mb-6"
+											style={{
+												color: "var(--dm-ink)",
+											}}
+										>
+											永结同心
+										</p>
+										<div
+											className="w-12 h-px mb-6"
+											style={{
+												background: "var(--dm-gold)",
+											}}
+										/>
+										<p
+											className="text-sm"
+											style={{
+												color: "var(--dm-muted)",
+											}}
+										>
+											September 24, 2026
+										</p>
+										<p
+											className="text-sm"
+											style={{
+												color: "var(--dm-muted)",
+											}}
+										>
+											Grand Ballroom, KL
+										</p>
 									</div>
 								</div>
 							</div>
-						</motion.div>
-					</div>
+						</div>
+					</motion.div>
 				</div>
 			</div>
+
+			{/* Paper-cut edge at bottom transitioning to Pricing */}
+			<PaperCutEdge position="bottom" color="var(--dm-crimson)" scallops={24} />
 		</section>
 	);
 }

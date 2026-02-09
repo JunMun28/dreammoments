@@ -1,11 +1,11 @@
-import { motion, useScroll, useTransform } from "motion/react";
-import { useEffect, useRef, useState } from "react";
-import { ANIMATION, sectionReveal } from "./animation";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useEffect, useRef } from "react";
+import { useStrokeDraw } from "./hooks/useStrokeDraw";
+import { PaperCutEdge } from "./motifs/PaperCutEdge";
+import { SectionHeader } from "./motifs/SectionHeader";
 
-const REVEAL_TRANSITION = {
-	duration: ANIMATION.duration.slow,
-	ease: ANIMATION.ease.default,
-};
+gsap.registerPlugin(ScrollTrigger);
 
 const TIMELINE_STEPS = [
 	{
@@ -24,7 +24,7 @@ const TIMELINE_STEPS = [
 		id: "03",
 		title: "Let AI write your story",
 		description:
-			"Our AI generates your couple story, schedule, and details. You just fill in the basics.",
+			"Our AI generates your couple story, schedule, and details in English and Chinese. You just fill in the basics.",
 	},
 	{
 		id: "04",
@@ -36,143 +36,173 @@ const TIMELINE_STEPS = [
 		id: "05",
 		title: "Share & track RSVPs",
 		description:
-			"Publish your unique link. Track who's viewed, who's replied, and dietary preferences.",
+			"Publish your unique link. Share via WhatsApp in one tap. Track who's viewed, who's replied, and dietary preferences.",
 	},
 ];
 
-function TimelineStep({
-	step,
-	index,
-	total,
-	scrollYProgress,
-	reducedMotion,
-}: {
-	step: (typeof TIMELINE_STEPS)[number];
-	index: number;
-	total: number;
-	scrollYProgress: ReturnType<typeof useScroll>["scrollYProgress"];
-	reducedMotion: boolean;
-}) {
-	const threshold = (index + 0.5) / total;
-	const isActive = useTransform(scrollYProgress, (v) => v >= threshold);
-	const [active, setActive] = useState(false);
-
-	useEffect(() => {
-		if (reducedMotion) return;
-		return isActive.on("change", (v) => setActive(v));
-	}, [isActive, reducedMotion]);
-
-	return (
-		<motion.li
-			initial={{ opacity: 0, y: 30 }}
-			whileInView={{ opacity: 1, y: 0 }}
-			viewport={{ once: true, margin: "-60px" }}
-			transition={{
-				...REVEAL_TRANSITION,
-				delay: index * 0.08,
-			}}
-			className="relative"
-		>
-			<span
-				className={`dm-timeline-step absolute -left-[46px] top-6 flex h-10 w-10 items-center justify-center rounded-full border font-display text-[11px] font-semibold tracking-[0.18em] ${
-					active
-						? "dm-timeline-step-active"
-						: "border-dm-border bg-dm-surface text-dm-muted"
-				}`}
-			>
-				{step.id}
-			</span>
-			<div className="rounded-4xl border border-dm-border bg-dm-surface/90 p-6 sm:p-7 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)]">
-				<h3 className="font-heading text-2xl sm:text-3xl text-dm-ink">
-					{step.title}
-				</h3>
-				<p className="mt-3 text-dm-muted text-base leading-relaxed">
-					{step.description}
-				</p>
-			</div>
-		</motion.li>
-	);
-}
-
 export function HowItWorks({ reducedMotion }: { reducedMotion: boolean }) {
-	const olRef = useRef<HTMLOListElement>(null);
+	const sectionRef = useRef<HTMLElement>(null);
+	const pathRef = useRef<SVGPathElement>(null);
+	const stepsRef = useRef<HTMLLIElement[]>([]);
 
-	const { scrollYProgress } = useScroll({
-		target: olRef,
-		offset: ["start 0.8", "end 0.6"],
+	useStrokeDraw({
+		pathRef,
+		triggerRef: sectionRef as React.RefObject<HTMLElement>,
+		scrub: 0.8,
+		reducedMotion,
 	});
 
-	const lineHeight = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
+	// GSAP per-step entrance
+	useEffect(() => {
+		if (reducedMotion || stepsRef.current.length === 0) return;
+
+		const ctx = gsap.context(() => {
+			for (const step of stepsRef.current) {
+				if (!step) continue;
+				gsap.fromTo(
+					step,
+					{ opacity: 0, y: 30 },
+					{
+						opacity: 1,
+						y: 0,
+						duration: 0.6,
+						ease: "power3.out",
+						scrollTrigger: {
+							trigger: step,
+							start: "top 85%",
+							end: "top 55%",
+							scrub: 0.3,
+						},
+					},
+				);
+			}
+		}, sectionRef);
+
+		return () => ctx.revert();
+	}, [reducedMotion]);
 
 	return (
 		<section
-			className="relative py-28 px-6 overflow-hidden"
-			style={{ background: "var(--dm-surface-rose)" }}
+			ref={sectionRef}
+			className="relative py-[clamp(5rem,10vw,10rem)] px-6 overflow-hidden"
+			style={{ background: "var(--dm-surface-muted)" }}
 		>
 			{/* biome-ignore lint/correctness/useUniqueElementIds: intentional anchor for in-page navigation */}
 			<div id="process" />
 
 			<div className="relative z-10 max-w-5xl mx-auto">
-				<div className="text-center mb-14">
-					<motion.span
-						initial={reducedMotion ? false : "hidden"}
-						whileInView="visible"
-						viewport={ANIMATION.viewport}
-						variants={sectionReveal}
-						className="text-sm font-medium uppercase tracking-[0.12em]"
-						style={{ color: "var(--dm-crimson)" }}
-					>
-						How It Works
-					</motion.span>
-					<motion.h2
-						initial={reducedMotion ? false : "hidden"}
-						whileInView="visible"
-						viewport={ANIMATION.viewport}
-						variants={sectionReveal}
-						className="mt-3 font-display font-semibold tracking-tight"
-						style={{
-							fontSize: "var(--text-section)",
-							color: "var(--dm-ink)",
-						}}
-					>
-						From sign up to RSVPs in 5 steps
-					</motion.h2>
-					<motion.p
-						initial={reducedMotion ? false : "hidden"}
-						whileInView="visible"
-						viewport={ANIMATION.viewport}
-						variants={sectionReveal}
-						className="mt-4 max-w-2xl mx-auto text-lg leading-relaxed"
-						style={{ color: "var(--dm-muted)" }}
-					>
-						Account, template, edits, publish, share.
-					</motion.p>
-				</div>
+				<SectionHeader
+					kickerEn="THE PROCESS"
+					kickerCn="五步成礼"
+					title="Five steps to your perfect invitation."
+					subtitle="From sign-up to RSVPs in minutes."
+					kickerColor="var(--dm-crimson)"
+					reducedMotion={reducedMotion}
+				/>
 
-				<ol ref={olRef} className="relative mx-auto max-w-3xl pl-7 space-y-6">
-					{/* Timeline track */}
-					<div className="dm-timeline-track" aria-hidden="true">
-						<div className="dm-timeline-bg" />
-						{!reducedMotion && (
-							<motion.div
-								className="dm-timeline-line"
-								style={{ height: lineHeight }}
+				<ol className="relative mx-auto max-w-3xl pl-7 space-y-6">
+					{/* Golden thread SVG */}
+					<div
+						className="absolute left-[14px] top-6 bottom-6 w-px"
+						aria-hidden="true"
+					>
+						<svg
+							className="absolute inset-0 w-full h-full"
+							preserveAspectRatio="none"
+							role="presentation"
+						>
+							{/* Background track */}
+							<line
+								x1="50%"
+								y1="0"
+								x2="50%"
+								y2="100%"
+								stroke="var(--dm-border)"
+								strokeWidth="2"
 							/>
-						)}
+							{/* Animated gold line */}
+							<path
+								ref={pathRef}
+								d="M 0.5 0 L 0.5 1"
+								stroke="var(--dm-gold)"
+								strokeWidth="2"
+								fill="none"
+								vectorEffect="non-scaling-stroke"
+								style={{
+									transform: "scaleY(1)",
+									transformOrigin: "top",
+								}}
+							/>
+						</svg>
 					</div>
 
 					{TIMELINE_STEPS.map((step, i) => (
-						<TimelineStep
+						<li
 							key={step.id}
-							step={step}
-							index={i}
-							total={TIMELINE_STEPS.length}
-							scrollYProgress={scrollYProgress}
-							reducedMotion={reducedMotion}
-						/>
+							ref={(el) => {
+								if (el) stepsRef.current[i] = el;
+							}}
+							className="relative"
+							style={reducedMotion ? undefined : { opacity: 0 }}
+						>
+							{/* Step number circle: gold border, white bg, gold text */}
+							<span
+								className="absolute -left-[46px] top-6 flex h-10 w-10 items-center justify-center rounded-full font-display text-[11px] font-semibold tracking-[0.18em]"
+								style={{
+									border: "2px solid var(--dm-gold)",
+									background: "var(--dm-surface)",
+									color: "var(--dm-gold)",
+								}}
+							>
+								{step.id}
+							</span>
+
+							{/* Card */}
+							<div
+								className="rounded-[1.5rem] border bg-[var(--dm-surface)] p-6 sm:p-7 relative overflow-hidden"
+								style={{
+									borderColor: "var(--dm-border)",
+									boxShadow: "0 4px 20px -2px rgba(0,0,0,0.05)",
+								}}
+							>
+								{/* Step number watermark */}
+								<span
+									className="absolute top-2 right-4 font-display font-bold pointer-events-none select-none"
+									style={{
+										fontSize: "clamp(2rem, 4vw, 3.5rem)",
+										color: "var(--dm-gold)",
+										opacity: 0.15,
+										lineHeight: 1,
+									}}
+									aria-hidden="true"
+								>
+									{step.id}
+								</span>
+
+								<h3
+									className="font-heading text-[var(--text-card-title)] font-semibold"
+									style={{ color: "var(--dm-ink)" }}
+								>
+									{step.title}
+								</h3>
+								<p
+									className="mt-3 text-base leading-relaxed"
+									style={{ color: "var(--dm-muted)" }}
+								>
+									{step.description}
+								</p>
+							</div>
+						</li>
 					))}
 				</ol>
 			</div>
+
+			{/* Paper-cut edge at bottom transitioning to Features */}
+			<PaperCutEdge
+				position="bottom"
+				color="var(--dm-surface-muted)"
+				scallops={20}
+			/>
 		</section>
 	);
 }

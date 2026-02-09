@@ -1,26 +1,57 @@
 import { Link } from "@tanstack/react-router";
+import { GoldRule } from "./motifs/GoldRule";
 
 export function Footer() {
 	return (
 		<footer
-			className="border-t py-16 px-6 text-center"
-			style={{
-				borderColor: "var(--dm-border)",
-				background: "var(--dm-bg)",
-			}}
+			className="relative px-6 py-12 text-center"
+			style={{ background: "var(--dm-bg)" }}
 		>
+			{/* Gold hairline at top */}
+			<GoldRule className="absolute top-0 left-0 right-0" />
+
 			<div className="mx-auto max-w-4xl">
-				<p
-					className="font-display text-2xl font-semibold"
-					style={{ color: "var(--dm-ink)" }}
-				>
-					DreamMoments
-				</p>
+				{/* Brand */}
+				<div className="flex items-center justify-center gap-3">
+					<span
+						className="select-none"
+						style={{
+							fontFamily: '"Noto Serif SC", serif',
+							fontSize: "1rem",
+							color: "var(--dm-gold)",
+							opacity: 0.4,
+						}}
+						aria-hidden="true"
+					>
+						囍
+					</span>
+					<p
+						className="font-display text-xl font-semibold"
+						style={{ color: "var(--dm-ink)" }}
+					>
+						DreamMoments
+					</p>
+					<span
+						className="select-none"
+						style={{
+							fontFamily: '"Noto Serif SC", serif',
+							fontSize: "1rem",
+							color: "var(--dm-gold)",
+							opacity: 0.4,
+						}}
+						aria-hidden="true"
+					>
+						囍
+					</span>
+				</div>
+
+				{/* Tagline */}
 				<p className="mt-2 text-sm" style={{ color: "var(--dm-muted)" }}>
-					AI-powered wedding invitations for Chinese couples in Malaysia and
+					AI-powered wedding invitations for Chinese couples in Malaysia &
 					Singapore.
 				</p>
 
+				{/* Links */}
 				<nav
 					aria-label="Footer"
 					className="mt-8 flex justify-center gap-6 text-sm"
@@ -44,6 +75,7 @@ export function Footer() {
 					</Link>
 				</nav>
 
+				{/* PDPA line */}
 				<p
 					className="mt-6 text-xs"
 					style={{ color: "var(--dm-muted)", opacity: 0.6 }}

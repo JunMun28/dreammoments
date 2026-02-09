@@ -1,94 +1,194 @@
-import { Link } from "@tanstack/react-router";
-import { motion } from "motion/react";
-import { ANIMATION, sectionReveal } from "./animation";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useEffect, useRef } from "react";
+import { MovingBorderButton } from "./MovingBorderButton";
+import { CalligraphyReveal } from "./motifs/CalligraphyReveal";
+import { GoldRule } from "./motifs/GoldRule";
+import { NeonXi } from "./NeonXi";
+
+gsap.registerPlugin(ScrollTrigger);
 
 export function FinalCTA({ reducedMotion }: { reducedMotion: boolean }) {
+	const sectionRef = useRef<HTMLElement>(null);
+	const xiRef = useRef<HTMLDivElement>(null);
+	const headlineRef = useRef<HTMLDivElement>(null);
+	const topRuleRef = useRef<HTMLDivElement>(null);
+	const bottomRuleRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		if (reducedMotion || !sectionRef.current) return;
+
+		const ctx = gsap.context(() => {
+			// Xi entrance: scale + rotation settle
+			if (xiRef.current) {
+				gsap.fromTo(
+					xiRef.current,
+					{ scale: 0.85, rotation: -5, opacity: 0 },
+					{
+						scale: 1,
+						rotation: 0,
+						opacity: 1,
+						duration: 1.5,
+						ease: "power2.out",
+						scrollTrigger: {
+							trigger: sectionRef.current,
+							start: "top 70%",
+							toggleActions: "play none none none",
+						},
+					},
+				);
+			}
+
+			// Headline entrance
+			if (headlineRef.current) {
+				gsap.fromTo(
+					headlineRef.current,
+					{ scale: 0.9, y: 30, opacity: 0 },
+					{
+						scale: 1,
+						y: 0,
+						opacity: 1,
+						duration: 1.0,
+						ease: "power3.out",
+						scrollTrigger: {
+							trigger: sectionRef.current,
+							start: "top 60%",
+							toggleActions: "play none none none",
+						},
+					},
+				);
+			}
+
+			// Gold rules: scaleX draw
+			const rules = [topRuleRef.current, bottomRuleRef.current].filter(Boolean);
+			for (const rule of rules) {
+				gsap.fromTo(
+					rule,
+					{ scaleX: 0 },
+					{
+						scaleX: 1,
+						duration: 0.8,
+						ease: "power2.out",
+						scrollTrigger: {
+							trigger: rule,
+							start: "top 90%",
+							toggleActions: "play none none none",
+						},
+					},
+				);
+			}
+		}, sectionRef);
+
+		return () => ctx.revert();
+	}, [reducedMotion]);
+
 	return (
 		<section
-			className="relative overflow-hidden py-28 px-6"
+			ref={sectionRef}
+			className="relative overflow-hidden"
 			style={{ background: "var(--dm-dark-bg)" }}
 		>
-			{/* Gold divider top */}
-			<div
-				className="absolute top-0 left-0 right-0 h-px"
-				style={{
-					background:
-						"linear-gradient(90deg, transparent, var(--dm-dark-gold), transparent)",
-				}}
-			/>
-
-			{/* Subtle 囍 watermark */}
-			<div
-				className="absolute inset-0 flex items-center justify-center pointer-events-none select-none"
-				aria-hidden="true"
-				style={{ opacity: 0.03 }}
-			>
-				<span
-					className="font-[Noto_Serif_SC] text-[20rem] font-bold"
-					style={{ color: "var(--dm-dark-gold)" }}
-				>
-					囍
-				</span>
+			{/* Gold rule top */}
+			<div ref={topRuleRef} className="origin-center">
+				<GoldRule className="absolute top-0 left-0 right-0" />
 			</div>
 
-			{/* Subtle radial glow */}
+			{/* Giant neon-glow xi behind content */}
 			<div
-				className="absolute inset-0 pointer-events-none"
-				style={{
-					background:
-						"radial-gradient(ellipse at center, rgba(193, 39, 45, 0.08) 0%, transparent 60%)",
-				}}
-			/>
-
-			<motion.div
-				initial={reducedMotion ? false : "hidden"}
-				whileInView="visible"
-				viewport={ANIMATION.viewport}
-				variants={sectionReveal}
-				className="relative z-10 mx-auto max-w-2xl text-center"
+				ref={xiRef}
+				className="absolute inset-0 flex items-center justify-center pointer-events-none"
+				style={reducedMotion ? undefined : { opacity: 0 }}
 			>
+				<NeonXi
+					size="clamp(12rem, 35vw, 22rem)"
+					variant="gold"
+					opacity={0.06}
+					breathe
+				/>
+			</div>
+
+			{/* Content */}
+			<div className="relative z-10 mx-auto max-w-4xl px-6 py-[clamp(6rem,14vw,12rem)] text-center">
+				{/* Calligraphy reveal */}
+				<div className="mb-6">
+					<CalligraphyReveal
+						color="var(--dm-gold-electric, #FFD700)"
+						reducedMotion={reducedMotion}
+					/>
+				</div>
+
+				{/* Sub-kicker */}
 				<p
 					className="font-accent text-lg italic"
-					style={{ color: "var(--dm-dark-gold)" }}
+					style={{ color: "var(--dm-gold)", opacity: 0.8 }}
 				>
 					Your love story awaits
 				</p>
-				<h2
-					className="mt-4 font-display font-semibold tracking-tight"
+
+				{/* Headline */}
+				<div ref={headlineRef}>
+					<h2
+						className="mt-4 font-display font-bold tracking-tight"
+						style={{
+							fontSize: "var(--text-section)",
+							color: "var(--dm-dark-text)",
+						}}
+					>
+						Create an invitation your guests will{" "}
+						<em
+							className="inline-block italic"
+							style={{ color: "var(--dm-crimson)" }}
+						>
+							treasure.
+						</em>
+					</h2>
+				</div>
+
+				<p
+					className="mx-auto mt-4 text-lg"
 					style={{
-						fontSize: "var(--text-section)",
-						color: "var(--dm-dark-text)",
+						color: "var(--dm-dark-muted)",
+						maxWidth: "48ch",
 					}}
 				>
-					Create an invitation your guests will treasure.
-				</h2>
-				<p className="mt-4 text-lg" style={{ color: "var(--dm-dark-muted)" }}>
 					Join hundreds of Malaysian and Singaporean couples who chose
 					DreamMoments for their special day.
 				</p>
 
+				{/* CTA */}
 				<div className="mt-8">
-					<Link
-						to="/auth/signup"
-						className="dm-cta-primary-dark text-sm uppercase tracking-[0.12em]"
-					>
+					<MovingBorderButton href="/auth/signup" variant="gold">
 						Create Your Invitation
-					</Link>
+						<span aria-hidden="true" className="ml-2">
+							&rarr;
+						</span>
+					</MovingBorderButton>
 				</div>
 
-				<p className="mt-4 text-sm" style={{ color: "var(--dm-dark-muted)" }}>
-					Free to start. No credit card required.
+				{/* Trust line */}
+				<p
+					className="mt-6 flex flex-wrap items-center justify-center gap-x-2 gap-y-1"
+					style={{
+						fontSize: "var(--text-sm)",
+						color: "var(--dm-dark-muted)",
+					}}
+				>
+					<span>Free to start</span>
+					<span aria-hidden="true" style={{ color: "var(--dm-dark-gold)" }}>
+						{"\u00B7"}
+					</span>
+					<span>No credit card</span>
+					<span aria-hidden="true" style={{ color: "var(--dm-dark-gold)" }}>
+						{"\u00B7"}
+					</span>
+					<span>3-minute setup</span>
 				</p>
-			</motion.div>
+			</div>
 
-			{/* Gold divider bottom */}
-			<div
-				className="absolute bottom-0 left-0 right-0 h-px"
-				style={{
-					background:
-						"linear-gradient(90deg, transparent, var(--dm-dark-gold), transparent)",
-				}}
-			/>
+			{/* Gold rule bottom */}
+			<div ref={bottomRuleRef} className="origin-center">
+				<GoldRule className="absolute bottom-0 left-0 right-0" />
+			</div>
 		</section>
 	);
 }
