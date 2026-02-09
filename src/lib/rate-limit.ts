@@ -17,6 +17,9 @@ interface RateLimiterOptions {
 
 const stores = new Map<string, Map<string, RateLimitEntry>>();
 
+/** Maximum entries per store to prevent memory exhaustion */
+const MAX_STORE_ENTRIES = 10_000;
+
 /** Cleanup interval: runs every 5 minutes */
 const CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
 let cleanupTimer: ReturnType<typeof setInterval> | null = null;
@@ -64,6 +67,21 @@ export function createRateLimiter(name: string, options: RateLimiterOptions) {
 		const entry = store.get(key);
 
 		if (!entry || now >= entry.resetAt) {
+			// Evict oldest entries if store is at capacity
+			if (store.size >= MAX_STORE_ENTRIES) {
+				let oldest: { key: string; resetAt: number } | null = null;
+				for (const [k, v] of store) {
+					if (now >= v.resetAt) {
+						store.delete(k);
+					} else if (!oldest || v.resetAt < oldest.resetAt) {
+						oldest = { key: k, resetAt: v.resetAt };
+					}
+				}
+				// If still at capacity after purging expired, evict oldest
+				if (store.size >= MAX_STORE_ENTRIES && oldest) {
+					store.delete(oldest.key);
+				}
+			}
 			// First request or window expired -- start a new window
 			store.set(key, { count: 1, resetAt: now + windowMs });
 			return {

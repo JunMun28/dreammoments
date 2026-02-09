@@ -174,7 +174,7 @@ describe("signupFn", () => {
 			name: "Second",
 		})) as { error: string };
 
-		expect(result.error).toBe("Email already registered");
+		expect(result.error).toContain("Unable to create account");
 	});
 
 	test("rate limiting returns error", async () => {
@@ -272,7 +272,7 @@ describe("signupFn", () => {
 			password: "strongpass123",
 		})) as { error: string };
 
-		expect(result.error).toContain("Email already registered");
+		expect(result.error).toContain("Unable to create account");
 	});
 });
 
@@ -283,7 +283,7 @@ describe("loginFn", () => {
 			password: "somepassword",
 		})) as { error: string };
 
-		expect(result.error).toBe("Account not found");
+		expect(result.error).toBe("Invalid email or password");
 	});
 
 	test("rate limiting returns error", async () => {
@@ -324,7 +324,7 @@ describe("loginFn", () => {
 			password: "somepassword",
 		})) as { error: string };
 
-		expect(result.error).toBe("Account not found");
+		expect(result.error).toBe("Invalid email or password");
 	});
 
 	test("wrong auth provider with DB path", async () => {
@@ -346,7 +346,7 @@ describe("loginFn", () => {
 			password: "somepassword",
 		})) as { error: string };
 
-		expect(result.error).toContain("google sign-in");
+		expect(result.error).toBe("Invalid email or password");
 	});
 
 	test("invalid password is rejected by validator", async () => {

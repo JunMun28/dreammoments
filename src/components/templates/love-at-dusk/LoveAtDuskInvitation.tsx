@@ -687,6 +687,8 @@ export default function LoveAtDuskInvitation({
 										guestCount,
 										dietaryRequirements,
 									});
+								} catch {
+									// Submission failed; form remains open for retry
 								} finally {
 									setIsSubmitting(false);
 								}

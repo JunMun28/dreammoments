@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 type TimeLeft = {
@@ -63,32 +63,38 @@ export function CountdownWidget({
 	className,
 }: CountdownWidgetProps) {
 	const [state, setState] = useState(() => getCountdownState(targetDate));
+	const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
 	useEffect(() => {
+		const startInterval = () => {
+			if (intervalRef.current) clearInterval(intervalRef.current);
+			intervalRef.current = setInterval(() => {
+				setState(getCountdownState(targetDate));
+			}, 1000);
+		};
+
+		const stopInterval = () => {
+			if (intervalRef.current) {
+				clearInterval(intervalRef.current);
+				intervalRef.current = null;
+			}
+		};
+
 		setState(getCountdownState(targetDate));
-		let interval: ReturnType<typeof setInterval> | null = setInterval(() => {
-			setState(getCountdownState(targetDate));
-		}, 1000);
+		startInterval();
 
 		const handleVisibility = () => {
 			if (document.hidden) {
-				if (interval) {
-					clearInterval(interval);
-					interval = null;
-				}
+				stopInterval();
 			} else {
 				setState(getCountdownState(targetDate));
-				if (!interval) {
-					interval = setInterval(() => {
-						setState(getCountdownState(targetDate));
-					}, 1000);
-				}
+				startInterval();
 			}
 		};
 
 		document.addEventListener("visibilitychange", handleVisibility);
 		return () => {
-			if (interval) clearInterval(interval);
+			stopInterval();
 			document.removeEventListener("visibilitychange", handleVisibility);
 		};
 	}, [targetDate]);

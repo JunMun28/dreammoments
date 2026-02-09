@@ -152,7 +152,7 @@ function InviteScreen() {
 		message?: string;
 		email?: string;
 	}) => {
-		if (!invitation) return;
+		if (!invitation || invitation.status !== "published") return;
 		try {
 			const visitorKey =
 				localStorage.getItem("dm-visitor") ?? `${Date.now()}-${Math.random()}`;

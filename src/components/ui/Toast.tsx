@@ -46,18 +46,28 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 		new Map(),
 	);
 
+	const dismissTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
+		new Map(),
+	);
+
 	const removeToast = useCallback((id: string) => {
 		const timer = timersRef.current.get(id);
 		if (timer) {
 			clearTimeout(timer);
 			timersRef.current.delete(id);
 		}
+		// Cancel any existing dismiss animation for this toast
+		const existingDismiss = dismissTimersRef.current.get(id);
+		if (existingDismiss) {
+			clearTimeout(existingDismiss);
+		}
 		setDismissing((prev) => {
 			const next = new Set(prev);
 			next.add(id);
 			return next;
 		});
-		setTimeout(() => {
+		const dismissTimer = setTimeout(() => {
+			dismissTimersRef.current.delete(id);
 			setToasts((prev) => prev.filter((t) => t.id !== id));
 			setDismissing((prev) => {
 				const next = new Set(prev);
@@ -65,6 +75,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 				return next;
 			});
 		}, 300);
+		dismissTimersRef.current.set(id, dismissTimer);
 	}, []);
 
 	const addToast = useCallback(

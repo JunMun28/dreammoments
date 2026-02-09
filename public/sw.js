@@ -25,11 +25,13 @@ self.addEventListener("fetch", (event) => {
 	const { request } = event;
 	if (request.method !== "GET") return;
 
-	// Network-first for API/HTML, cache-first for static assets
-	if (
-		request.url.includes("/api/") ||
-		request.headers.get("accept")?.includes("text/html")
-	) {
+	// Never cache API responses - always go to network
+	if (request.url.includes("/api/")) {
+		return;
+	}
+
+	// Network-first for HTML, cache-first for static assets
+	if (request.headers.get("accept")?.includes("text/html")) {
 		event.respondWith(fetch(request).catch(() => caches.match(request)));
 	} else {
 		event.respondWith(

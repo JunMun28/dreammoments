@@ -291,7 +291,7 @@ function EditorScreen() {
 		return <FullPageLoader message="Loading editor..." />;
 	if (!user) return <Navigate to="/auth/login" />;
 	if (!isHydrated) return <FullPageLoader message="Loading editor..." />;
-	if (!invitation) {
+	if (!invitation || invitation.userId !== user.id) {
 		return (
 			<div className="min-h-screen bg-dm-bg px-6 py-10">
 				<p className="text-sm text-dm-muted">Invitation not found.</p>

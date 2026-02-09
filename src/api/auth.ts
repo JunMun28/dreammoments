@@ -137,7 +137,9 @@ export const signupFn = createServerFn({ method: "POST" })
 
 			if (existing) {
 				return {
-					error: ApiError.badRequest("Email already registered").message,
+					error: ApiError.badRequest(
+						"Unable to create account. If you already have an account, try logging in.",
+					).message,
 				};
 			}
 
@@ -172,7 +174,9 @@ export const signupFn = createServerFn({ method: "POST" })
 		console.warn("[Auth] signup: using in-memory fallback (no DATABASE_URL)");
 		for (const u of fallbackUsers.values()) {
 			if (u.email === email) {
-				return { error: "Email already registered" };
+				return {
+				error: "Unable to create account. If you already have an account, try logging in.",
+			};
 			}
 		}
 
@@ -227,23 +231,18 @@ export const loginFn = createServerFn({ method: "POST" })
 				.from(schema.users)
 				.where(eq(schema.users.email, email));
 
-			if (!row) {
-				return { error: "Account not found" };
-			}
-
-			if (row.authProvider !== "email") {
-				return {
-					error: `This account uses ${row.authProvider} sign-in. Please use that method instead.`,
-				};
-			}
-
-			if (!row.passwordHash) {
-				return { error: "Please reset your password to continue." };
+			if (!row || row.authProvider !== "email" || !row.passwordHash) {
+				// Perform a dummy hash to prevent timing-based user enumeration
+				await bcrypt.compare(
+					password,
+					"$2a$12$000000000000000000000000000000000000000000000000000000",
+				);
+				return { error: "Invalid email or password" };
 			}
 
 			const valid = await bcrypt.compare(password, row.passwordHash);
 			if (!valid) {
-				return { error: "Invalid password" };
+				return { error: "Invalid email or password" };
 			}
 
 			const token = await createSession(row.id);
@@ -266,17 +265,17 @@ export const loginFn = createServerFn({ method: "POST" })
 			}
 		}
 
-		if (!foundUser) {
-			return { error: "Account not found" };
-		}
-
-		if (!foundUser.passwordHash) {
-			return { error: "This account uses a different sign-in method" };
+		if (!foundUser || !foundUser.passwordHash) {
+			await bcrypt.compare(
+				password,
+				"$2a$12$000000000000000000000000000000000000000000000000000000",
+			);
+			return { error: "Invalid email or password" };
 		}
 
 		const valid = await bcrypt.compare(password, foundUser.passwordHash);
 		if (!valid) {
-			return { error: "Invalid password" };
+			return { error: "Invalid email or password" };
 		}
 
 		const token = await createSession(foundUser.id);

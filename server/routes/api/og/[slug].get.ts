@@ -3,7 +3,19 @@ import {
 	getRouterParam,
 	setResponseHeader,
 } from "nitro/h3";
-import { Client } from "pg";
+import { Pool } from "pg";
+
+const SLUG_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9-]{0,253}[a-zA-Z0-9]$/;
+
+let pool: Pool | null = null;
+function getPool(): Pool | null {
+	const databaseUrl = process.env.DATABASE_URL;
+	if (!databaseUrl) return null;
+	if (!pool) {
+		pool = new Pool({ connectionString: databaseUrl, max: 5 });
+	}
+	return pool;
+}
 
 // Template colors aligned with actual template token definitions
 const templateColors: Record<
@@ -85,14 +97,11 @@ interface OgData {
 async function fetchInvitationBySlug(
 	slug: string,
 ): Promise<OgData | null> {
-	const databaseUrl = process.env.DATABASE_URL;
-	if (!databaseUrl) return null;
+	const db = getPool();
+	if (!db) return null;
 
-	let client: Client | null = null;
 	try {
-		client = new Client({ connectionString: databaseUrl });
-		await client.connect();
-		const result = await client.query(
+		const result = await db.query(
 			`SELECT content, template_id FROM invitations WHERE slug = $1 AND status = 'published' LIMIT 1`,
 			[slug],
 		);
@@ -111,10 +120,9 @@ async function fetchInvitationBySlug(
 			date: String(hero.date ?? ""),
 			templateId: String(row.template_id ?? ""),
 		};
-	} catch {
+	} catch (error) {
+		console.error("[OG] DB query failed for slug:", slug, error);
 		return null;
-	} finally {
-		await client?.end().catch(() => {});
 	}
 }
 
@@ -163,7 +171,7 @@ export default defineEventHandler(async (event) => {
 		"public, max-age=86400",
 	);
 
-	if (!slug) {
+	if (!slug || !SLUG_PATTERN.test(slug)) {
 		return generateFallbackSvg();
 	}
 

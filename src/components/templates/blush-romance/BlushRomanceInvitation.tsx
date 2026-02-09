@@ -447,6 +447,8 @@ export default function BlushRomanceInvitation({
 										guestCount,
 										dietaryRequirements,
 									});
+								} catch {
+									// Submission failed; form remains open for retry
 								} finally {
 									setIsSubmitting(false);
 								}

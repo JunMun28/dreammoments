@@ -46,6 +46,7 @@ export function useSlugValidation({ invitationId }: UseSlugValidationOptions) {
 	const [slugAvailability, setSlugAvailability] =
 		useState<SlugAvailability>("idle");
 	const slugCheckTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const slugCheckVersion = useRef(0);
 
 	useEffect(() => {
 		return () => {
@@ -69,6 +70,8 @@ export function useSlugValidation({ invitationId }: UseSlugValidationOptions) {
 			}
 
 			setSlugAvailability("checking");
+			slugCheckVersion.current += 1;
+			const currentVersion = slugCheckVersion.current;
 			slugCheckTimer.current = setTimeout(() => {
 				const token = window.localStorage.getItem("dm-auth-token");
 				if (!token) return;
@@ -76,9 +79,12 @@ export function useSlugValidation({ invitationId }: UseSlugValidationOptions) {
 					data: { token, slug: normalized, invitationId },
 				})
 					.then((result: { available: boolean }) => {
+						// Only apply if this is still the latest request
+						if (currentVersion !== slugCheckVersion.current) return;
 						setSlugAvailability(result.available ? "available" : "taken");
 					})
 					.catch(() => {
+						if (currentVersion !== slugCheckVersion.current) return;
 						setSlugAvailability("idle");
 					});
 			}, 400);

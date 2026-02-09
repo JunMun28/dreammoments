@@ -1074,7 +1074,7 @@ export default function GardenRomanceInvitation({
 								background: COLORS.cream,
 								border: "1px solid rgba(212,175,55,0.2)",
 							}}
-							onSubmit={(event) => {
+							onSubmit={async (event) => {
 								event.preventDefault();
 								if (!onRsvpSubmit) return;
 								const formData = new FormData(event.currentTarget);
@@ -1088,20 +1088,24 @@ export default function GardenRomanceInvitation({
 								const dietaryRequirements = String(
 									formData.get("dietary") ?? "",
 								);
-								onRsvpSubmit({
-									name,
-									attendance,
-									guestCount,
-									dietaryRequirements,
-									message: String(formData.get("message") ?? ""),
-									email: String(formData.get("email") ?? ""),
-								});
-								setRsvpData({
-									name,
-									attendance,
-									guestCount,
-									dietaryRequirements,
-								});
+								try {
+									await onRsvpSubmit({
+										name,
+										attendance,
+										guestCount,
+										dietaryRequirements,
+										message: String(formData.get("message") ?? ""),
+										email: String(formData.get("email") ?? ""),
+									});
+									setRsvpData({
+										name,
+										attendance,
+										guestCount,
+										dietaryRequirements,
+									});
+								} catch {
+									// Submission failed; form remains open for retry
+								}
 							}}
 						>
 							<div className="grid gap-4 sm:grid-cols-2">

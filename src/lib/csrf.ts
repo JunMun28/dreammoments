@@ -50,10 +50,13 @@ export function validateCsrfToken(token: string | null | undefined): boolean {
 	const entry = tokenStore.get(token);
 	if (!entry) return false;
 
+	// Check expiry before deleting to avoid race condition
+	if (Date.now() >= entry.expiresAt) {
+		tokenStore.delete(token);
+		return false;
+	}
+
 	// Remove the token (one-time use)
 	tokenStore.delete(token);
-
-	if (Date.now() >= entry.expiresAt) return false;
-
 	return true;
 }
