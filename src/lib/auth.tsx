@@ -9,7 +9,7 @@ import {
 	getSessionFn,
 	loginFn,
 	logoutFn,
-	resetPasswordFn,
+	requestPasswordResetFn,
 	signupFn,
 } from "@/api/auth";
 import { sanitizeRedirect } from "./auth-redirect";
@@ -22,6 +22,7 @@ import type { User } from "./types";
 // ---------------------------------------------------------------------------
 
 const TOKEN_KEY = "dm-auth-token";
+const REFRESH_TOKEN_KEY = "dm-refresh-token";
 
 function getStoredToken(): string | null {
 	if (typeof window === "undefined") return null;
@@ -34,6 +35,20 @@ function setStoredToken(token: string | null) {
 		window.localStorage.setItem(TOKEN_KEY, token);
 	} else {
 		window.localStorage.removeItem(TOKEN_KEY);
+	}
+}
+
+function getStoredRefreshToken(): string | null {
+	if (typeof window === "undefined") return null;
+	return window.localStorage.getItem(REFRESH_TOKEN_KEY);
+}
+
+function setStoredRefreshToken(token: string | null) {
+	if (typeof window === "undefined") return;
+	if (token) {
+		window.localStorage.setItem(REFRESH_TOKEN_KEY, token);
+	} else {
+		window.localStorage.removeItem(REFRESH_TOKEN_KEY);
 	}
 }
 
@@ -54,10 +69,7 @@ const AuthContext = createContext<{
 		email: string;
 		password: string;
 	}) => Promise<string | undefined>;
-	resetPassword: (payload: {
-		email: string;
-		password: string;
-	}) => Promise<string | undefined>;
+	resetPassword: (payload: { email: string }) => Promise<string | undefined>;
 	signOut: () => void;
 } | null>(null);
 
@@ -98,16 +110,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			}
 
 			try {
-				const result = await getSessionFn({ data: { token } });
+				const refreshToken = getStoredRefreshToken();
+				const result = await getSessionFn({
+					data: { token, refreshToken: refreshToken ?? undefined },
+				});
 				if (cancelled) return;
 
 				if (result.user) {
 					setServerUser(result.user as User);
 					setUseServerAuth(true);
 
-					// If the server gave us a refreshed token, store it
+					// If the server gave us refreshed tokens, store them
 					if (result.newToken) {
 						setStoredToken(result.newToken);
+					}
+					if (result.newRefreshToken) {
+						setStoredRefreshToken(result.newRefreshToken);
 					}
 
 					// Also sync to localStorage store so legacy code works
@@ -115,6 +133,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				} else {
 					// Token invalid, clear it
 					setStoredToken(null);
+					setStoredRefreshToken(null);
 				}
 			} catch {
 				// Server function unavailable, fall back to localStorage
@@ -171,8 +190,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 					return result.error;
 				}
 
-				// Store the JWT token
+				// Store the JWT token and refresh token
 				setStoredToken(result.token);
+				setStoredRefreshToken(result.refreshToken);
 				setServerUser(result.user as User);
 				setUseServerAuth(true);
 
@@ -181,8 +201,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 				return undefined;
 			} catch {
-				// If server function fails, fall back to localStorage-based auth
-				return signUpWithEmailFallback({ email, password, name });
+				return "Something went wrong. Please try again.";
 			}
 		},
 		[],
@@ -203,8 +222,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 					return result.error;
 				}
 
-				// Store the JWT token
+				// Store the JWT token and refresh token
 				setStoredToken(result.token);
+				setStoredRefreshToken(result.refreshToken);
 				setServerUser(result.user as User);
 				setUseServerAuth(true);
 
@@ -213,23 +233,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 				return undefined;
 			} catch {
-				// If server function fails, fall back to localStorage-based auth
-				return signInWithEmailFallback({ email, password });
+				return "Something went wrong. Please try again.";
 			}
 		},
 		[],
 	);
 
 	const resetPassword = useCallback(
-		async ({
-			email,
-			password,
-		}: {
-			email: string;
-			password: string;
-		}): Promise<string | undefined> => {
+		async ({ email }: { email: string }): Promise<string | undefined> => {
 			try {
-				const result = await resetPasswordFn({ data: { email, password } });
+				const result = await requestPasswordResetFn({ data: { email } });
 
 				if ("error" in result) {
 					return result.error;
@@ -237,19 +250,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 				return undefined;
 			} catch {
-				// Fallback: validate locally
-				if (password.length < 8) {
-					return "Password must be at least 8 characters";
-				}
-				return undefined;
+				return "Something went wrong. Please try again.";
 			}
 		},
 		[],
 	);
 
 	const signOut = useCallback(() => {
-		// Clear JWT token
+		// Clear JWT token and refresh token
 		setStoredToken(null);
+		setStoredRefreshToken(null);
 		setServerUser(undefined);
 		setUseServerAuth(false);
 
@@ -283,63 +293,6 @@ export function useAuth() {
 	const context = useContext(AuthContext);
 	if (!context) throw new Error("AuthProvider missing");
 	return context;
-}
-
-// ---------------------------------------------------------------------------
-// Legacy fallback helpers (localStorage-based, used when server is unavailable)
-// Uses bcryptjs even in fallback mode for proper password hashing.
-// ---------------------------------------------------------------------------
-
-async function hashPasswordSecure(value: string): Promise<string> {
-	const bcrypt = await import("bcryptjs");
-	return bcrypt.default.hash(value, 12);
-}
-
-async function verifyPasswordSecure(
-	value: string,
-	hash: string,
-): Promise<boolean> {
-	const bcrypt = await import("bcryptjs");
-	return bcrypt.default.compare(value, hash);
-}
-
-async function signUpWithEmailFallback({
-	email,
-	password,
-	name,
-}: {
-	email: string;
-	password: string;
-	name?: string;
-}): Promise<string | undefined> {
-	if (password.length < 8) return "Password must be at least 8 characters";
-	if (getStore().users.some((u) => u.email === email))
-		return "Email already registered";
-
-	const hash = await hashPasswordSecure(password);
-	updateStore((store) => ({
-		...store,
-		passwords: { ...store.passwords, [email]: hash },
-	}));
-	createUser({ email, name, authProvider: "email" });
-	return undefined;
-}
-
-async function signInWithEmailFallback({
-	email,
-	password,
-}: {
-	email: string;
-	password: string;
-}): Promise<string | undefined> {
-	const storedHash = getStore().passwords[email];
-	if (!storedHash) return "Account not found";
-
-	const valid = await verifyPasswordSecure(password, storedHash);
-	if (!valid) return "Invalid password";
-
-	createUser({ email, authProvider: "email" });
-	return undefined;
 }
 
 /**

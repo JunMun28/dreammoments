@@ -3,9 +3,17 @@ const publicBaseUrl = import.meta.env.VITE_R2_PUBLIC_BASE_URL as
 	| string
 	| undefined;
 
+// biome-ignore lint/suspicious/noControlCharactersInRegex: intentional stripping of control characters for security
+const CONTROL_CHARS = /[\x00-\x1f]/g;
+
+function sanitizeFilename(name: string): string {
+	const basename = name.split(/[\\/]/).pop() || "upload";
+	return basename.replace(CONTROL_CHARS, "").replace(/\.\./g, "") || "upload";
+}
+
 export async function uploadImage(file: File) {
 	if (uploadUrl && publicBaseUrl) {
-		const key = `${Date.now()}-${file.name}`;
+		const key = `${Date.now()}-${sanitizeFilename(file.name)}`;
 		await fetch(`${uploadUrl}/${key}`, {
 			method: "PUT",
 			body: file,

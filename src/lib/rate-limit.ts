@@ -86,6 +86,75 @@ export function createRateLimiter(name: string, options: RateLimiterOptions) {
 	};
 }
 
+// ── DB-backed rate limiter (multi-instance safe) ─────────────────────
+
+/**
+ * Create a DB-backed rate limiter that uses INSERT ... ON CONFLICT
+ * for atomic increments. Falls back to in-memory when DB is unavailable.
+ */
+export function createDbRateLimiter(name: string, options: RateLimiterOptions) {
+	const inMemoryFallback = createRateLimiter(`${name}:fallback`, options);
+	const { maxAttempts, windowMs } = options;
+
+	return async function checkDbRateLimit(
+		key: string,
+	): Promise<RateLimitResult> {
+		let db: Awaited<ReturnType<typeof getDbOrNull>>;
+		try {
+			const mod = await import("@/db/index");
+			db = mod.getDbOrNull();
+		} catch {
+			db = null;
+		}
+
+		if (!db) {
+			return inMemoryFallback(key);
+		}
+
+		try {
+			const { sql } = await import("drizzle-orm");
+			const now = new Date();
+			const resetAt = new Date(Date.now() + windowMs);
+
+			// Atomic upsert: insert or increment count, reset window if expired
+			const result = await db.execute(sql`
+				INSERT INTO rate_limit_entries (key, store_name, count, reset_at)
+				VALUES (${key}, ${name}, 1, ${resetAt})
+				ON CONFLICT (key, store_name) DO UPDATE SET
+					count = CASE
+						WHEN rate_limit_entries.reset_at <= ${now}
+						THEN 1
+						ELSE rate_limit_entries.count + 1
+					END,
+					reset_at = CASE
+						WHEN rate_limit_entries.reset_at <= ${now}
+						THEN ${resetAt}
+						ELSE rate_limit_entries.reset_at
+					END
+				RETURNING count, reset_at
+			`);
+
+			const row = (result as { rows: Array<{ count: number; reset_at: Date }> })
+				.rows[0];
+			if (!row) {
+				return inMemoryFallback(key);
+			}
+
+			const count = Number(row.count);
+			const entryResetAt = new Date(row.reset_at).getTime();
+
+			return {
+				allowed: count <= maxAttempts,
+				remaining: Math.max(0, maxAttempts - count),
+				resetAt: entryResetAt,
+			};
+		} catch {
+			// DB error -- fall back to in-memory
+			return inMemoryFallback(key);
+		}
+	};
+}
+
 // ── Pre-configured limiters ──────────────────────────────────────────
 
 /** Auth endpoints: 5 attempts per 15 minutes per key */

@@ -1,3 +1,12 @@
+function escapeHtml(str: string): string {
+	return str
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&#39;");
+}
+
 const RESEND_API_URL = "https://api.resend.com/emails";
 const FROM_EMAIL = "DreamMoments <noreply@dreammoments.app>";
 
@@ -84,7 +93,7 @@ function emailLayout(content: string): string {
 }
 
 export async function sendWelcomeEmail(email: string, name: string) {
-	const displayName = name || "there";
+	const displayName = escapeHtml(name || "there");
 	const html = emailLayout(`
     <h1 style="font-size:22px;font-weight:600;letter-spacing:-0.025em;margin:0 0 16px;">Welcome, ${displayName}!</h1>
     <p style="font-size:15px;line-height:1.7;color:${MUTED};margin:0 0 20px;">
@@ -114,6 +123,34 @@ export async function sendWelcomeEmail(email: string, name: string) {
 	});
 }
 
+export async function sendPasswordResetEmail(email: string, resetUrl: string) {
+	const html = emailLayout(`
+    <h1 style="font-size:22px;font-weight:600;letter-spacing:-0.025em;margin:0 0 16px;">Reset Your Password</h1>
+    <p style="font-size:15px;line-height:1.7;color:${MUTED};margin:0 0 20px;">
+      We received a request to reset your password. Click the button below to choose a new one.
+    </p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+      <tr><td align="center">
+        <a href="${resetUrl}"
+           style="display:inline-block;padding:14px 28px;background:${INK};color:#FFFFFF;
+                  border-radius:999px;font-size:14px;font-weight:500;text-decoration:none;
+                  letter-spacing:0.05em;text-transform:uppercase;">
+          Reset Password
+        </a>
+      </td></tr>
+    </table>
+    <p style="font-size:13px;line-height:1.7;color:${MUTED};margin:0;">
+      This link expires in 1 hour. If you didn't request this, you can safely ignore this email.
+    </p>
+  `);
+
+	return sendEmail({
+		to: email,
+		subject: "Reset your DreamMoments password",
+		html,
+	});
+}
+
 export async function sendRsvpNotificationEmail(
 	coupleEmail: string,
 	guestName: string,
@@ -134,15 +171,17 @@ export async function sendRsvpNotificationEmail(
 				? "#ef4444"
 				: "#eab308";
 
+	const safeGuestName = escapeHtml(guestName);
+	const safeTitle = escapeHtml(invitationTitle || "your invitation");
 	const html = emailLayout(`
     <h1 style="font-size:22px;font-weight:600;letter-spacing:-0.025em;margin:0 0 16px;">New RSVP for your invitation</h1>
     <p style="font-size:15px;line-height:1.7;color:${MUTED};margin:0 0 20px;">
-      Someone just responded to <strong style="color:${INK};">${invitationTitle || "your invitation"}</strong>.
+      Someone just responded to <strong style="color:${INK};">${safeTitle}</strong>.
     </p>
     <table width="100%" cellpadding="0" cellspacing="0" style="background:${BG};border-radius:16px;border:1px solid #E7E5E4;margin-bottom:24px;">
       <tr><td style="padding:20px 24px;">
         <p style="margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:0.15em;color:${MUTED};">Guest</p>
-        <p style="margin:0 0 16px;font-size:17px;font-weight:600;">${guestName}</p>
+        <p style="margin:0 0 16px;font-size:17px;font-weight:600;">${safeGuestName}</p>
         <p style="margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:0.15em;color:${MUTED};">Status</p>
         <p style="margin:0;font-size:15px;font-weight:600;color:${statusColor};">${statusLabel}</p>
       </td></tr>
@@ -161,7 +200,7 @@ export async function sendRsvpNotificationEmail(
 
 	return sendEmail({
 		to: coupleEmail,
-		subject: `New RSVP: ${guestName} — ${statusLabel}`,
+		subject: `New RSVP: ${safeGuestName} — ${statusLabel}`,
 		html,
 	});
 }

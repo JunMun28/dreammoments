@@ -6,6 +6,7 @@ import {
 	pgTable,
 	text,
 	timestamp,
+	uniqueIndex,
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
@@ -51,6 +52,7 @@ export const invitations = pgTable(
 	(table) => ({
 		userIdx: index("idx_invitations_user").on(table.userId),
 		slugIdx: index("idx_invitations_slug").on(table.slug),
+		statusIdx: index("idx_invitations_status").on(table.status),
 	}),
 );
 
@@ -76,6 +78,7 @@ export const guests = pgTable(
 	},
 	(table) => ({
 		invitationIdx: index("idx_guests_invitation").on(table.invitationId),
+		emailIdx: index("idx_guests_email").on(table.email),
 	}),
 );
 
@@ -93,8 +96,10 @@ export const invitationViews = pgTable(
 		deviceType: varchar("device_type", { length: 20 }).default("desktop"),
 	},
 	(table) => ({
-		invitationIdx: index("idx_views_invitation").on(table.invitationId),
-		dateIdx: index("idx_views_date").on(table.viewedAt),
+		invitationDateIdx: index("idx_views_invitation_date").on(
+			table.invitationId,
+			table.viewedAt,
+		),
 	}),
 );
 
@@ -117,16 +122,74 @@ export const aiGenerations = pgTable(
 	}),
 );
 
-export const payments = pgTable("payments", {
-	id: uuid("id").defaultRandom().primaryKey(),
-	userId: uuid("user_id")
-		.notNull()
-		.references(() => users.id),
-	invitationId: uuid("invitation_id").references(() => invitations.id),
-	stripePaymentIntentId: varchar("stripe_payment_intent_id", { length: 255 }),
-	stripeCustomerId: varchar("stripe_customer_id", { length: 255 }),
-	amountCents: integer("amount_cents").notNull(),
-	currency: varchar("currency", { length: 3 }).notNull(),
-	status: varchar("status", { length: 20 }).default("pending"),
-	createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+export const passwordResetTokens = pgTable(
+	"password_reset_tokens",
+	{
+		id: uuid("id").defaultRandom().primaryKey(),
+		userId: uuid("user_id")
+			.notNull()
+			.references(() => users.id, { onDelete: "cascade" }),
+		tokenHash: varchar("token_hash", { length: 64 }).notNull(),
+		expiresAt: timestamp("expires_at").notNull(),
+		usedAt: timestamp("used_at"),
+		createdAt: timestamp("created_at").defaultNow().notNull(),
+	},
+	(table) => ({
+		tokenHashIdx: index("idx_reset_token_hash").on(table.tokenHash),
+		userIdx: index("idx_reset_user").on(table.userId),
+	}),
+);
+
+export const tokenBlocklist = pgTable(
+	"token_blocklist",
+	{
+		id: uuid("id").defaultRandom().primaryKey(),
+		tokenHash: varchar("token_hash", { length: 64 }).notNull(),
+		expiresAt: timestamp("expires_at").notNull(),
+		createdAt: timestamp("created_at").defaultNow().notNull(),
+	},
+	(table) => ({
+		tokenHashIdx: index("idx_blocklist_token_hash").on(table.tokenHash),
+	}),
+);
+
+export const rateLimitEntries = pgTable(
+	"rate_limit_entries",
+	{
+		id: uuid("id").defaultRandom().primaryKey(),
+		key: varchar("key", { length: 255 }).notNull(),
+		storeName: varchar("store_name", { length: 100 }).notNull(),
+		count: integer("count").default(0).notNull(),
+		resetAt: timestamp("reset_at").notNull(),
+	},
+	(table) => ({
+		keyStoreIdx: uniqueIndex("idx_rate_limit_key_store").on(
+			table.key,
+			table.storeName,
+		),
+	}),
+);
+
+export const payments = pgTable(
+	"payments",
+	{
+		id: uuid("id").defaultRandom().primaryKey(),
+		userId: uuid("user_id").references(() => users.id, {
+			onDelete: "set null",
+		}),
+		invitationId: uuid("invitation_id").references(() => invitations.id, {
+			onDelete: "set null",
+		}),
+		stripePaymentIntentId: varchar("stripe_payment_intent_id", {
+			length: 255,
+		}),
+		stripeCustomerId: varchar("stripe_customer_id", { length: 255 }),
+		amountCents: integer("amount_cents").notNull(),
+		currency: varchar("currency", { length: 3 }).notNull(),
+		status: varchar("status", { length: 20 }).default("pending"),
+		createdAt: timestamp("created_at").defaultNow().notNull(),
+	},
+	(table) => ({
+		statusIdx: index("idx_payments_status").on(table.status),
+	}),
+);

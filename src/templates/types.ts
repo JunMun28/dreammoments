@@ -14,6 +14,7 @@ export const sectionDisplayNames: Record<string, string> = {
 	announcement: "Announcement",
 	entourage: "Entourage",
 	registry: "Registry",
+	gift: "Gift",
 	calendar: "Calendar",
 	countdown: "Countdown",
 	details: "Details",
@@ -38,6 +39,7 @@ export type SectionType =
 	| "venue"
 	| "entourage"
 	| "registry"
+	| "gift"
 	| "rsvp"
 	| "footer"
 	| "calendar"

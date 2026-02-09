@@ -1,5 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
-import { and, eq, gte } from "drizzle-orm";
+import {
+	and,
+	count,
+	countDistinct,
+	eq,
+	gte,
+	isNotNull,
+	sql,
+} from "drizzle-orm";
 import { z } from "zod";
 
 import { getDbOrNull, isProduction, schema } from "@/db/index";
@@ -71,74 +79,123 @@ export const getAnalyticsFn = createServerFn({
 			// Calculate period filter date
 			const periodStart = getPeriodStart(data.period);
 
-			// Fetch views with period filter
+			// Build shared WHERE conditions for view queries
 			const viewConditions = [
 				eq(schema.invitationViews.invitationId, data.invitationId),
 			];
 			if (periodStart) {
 				viewConditions.push(gte(schema.invitationViews.viewedAt, periodStart));
 			}
+			const viewWhere = and(...viewConditions);
 
-			const views = await db
-				.select()
-				.from(schema.invitationViews)
-				.where(and(...viewConditions));
+			// Run all aggregation queries in parallel
+			const [
+				totalViewsResult,
+				uniqueViewsResult,
+				viewsByDayResult,
+				deviceResult,
+				referrerResult,
+				rsvpResult,
+			] = await Promise.all([
+				// Total views
+				db
+					.select({ value: count() })
+					.from(schema.invitationViews)
+					.where(viewWhere),
 
-			// Total and unique views
-			const totalViews = views.length;
-			const uniqueHashes = new Set(views.map((v) => v.visitorHash));
-			const uniqueViews = uniqueHashes.size;
+				// Unique views (distinct visitor hashes)
+				db
+					.select({
+						value: countDistinct(schema.invitationViews.visitorHash),
+					})
+					.from(schema.invitationViews)
+					.where(viewWhere),
 
-			// Views by day
-			const dayMap = new Map<string, number>();
-			for (const view of views) {
-				const date = view.viewedAt.toISOString().slice(0, 10);
-				dayMap.set(date, (dayMap.get(date) ?? 0) + 1);
-			}
-			const viewsByDay = Array.from(dayMap.entries())
-				.map(([date, count]) => ({ date, count }))
-				.sort((a, b) => a.date.localeCompare(b.date));
+				// Views by day
+				db
+					.select({
+						date: sql<string>`date_trunc('day', ${schema.invitationViews.viewedAt})::date::text`,
+						count: count(),
+					})
+					.from(schema.invitationViews)
+					.where(viewWhere)
+					.groupBy(sql`date_trunc('day', ${schema.invitationViews.viewedAt})`)
+					.orderBy(sql`date_trunc('day', ${schema.invitationViews.viewedAt})`),
 
-			// Device breakdown
+				// Device breakdown
+				db
+					.select({
+						deviceType: schema.invitationViews.deviceType,
+						count: count(),
+					})
+					.from(schema.invitationViews)
+					.where(viewWhere)
+					.groupBy(schema.invitationViews.deviceType),
+
+				// Top referrers
+				db
+					.select({
+						referrer: schema.invitationViews.referrer,
+						count: count(),
+					})
+					.from(schema.invitationViews)
+					.where(
+						and(...viewConditions, isNotNull(schema.invitationViews.referrer)),
+					)
+					.groupBy(schema.invitationViews.referrer)
+					.orderBy(sql`count(*) desc`)
+					.limit(10),
+
+				// RSVP summary from guests table
+				db
+					.select({
+						attendance: schema.guests.attendance,
+						count: count(),
+					})
+					.from(schema.guests)
+					.where(eq(schema.guests.invitationId, data.invitationId))
+					.groupBy(schema.guests.attendance),
+			]);
+
+			const totalViews = totalViewsResult[0]?.value ?? 0;
+			const uniqueViews = uniqueViewsResult[0]?.value ?? 0;
+
+			const viewsByDay = viewsByDayResult.map((row) => ({
+				date: row.date,
+				count: row.count,
+			}));
+
 			const deviceBreakdown = { mobile: 0, desktop: 0, tablet: 0 };
-			for (const view of views) {
-				const device = (view.deviceType ??
+			for (const row of deviceResult) {
+				const device = (row.deviceType ??
 					"desktop") as keyof typeof deviceBreakdown;
 				if (device in deviceBreakdown) {
-					deviceBreakdown[device]++;
+					deviceBreakdown[device] = row.count;
 				}
 			}
 
-			// Top referrers
-			const refMap = new Map<string, number>();
-			for (const view of views) {
-				const ref = view.referrer?.trim();
-				if (ref) {
-					refMap.set(ref, (refMap.get(ref) ?? 0) + 1);
-				}
-			}
-			const topReferrers = Array.from(refMap.entries())
-				.map(([referrer, count]) => ({ referrer, count }))
-				.sort((a, b) => b.count - a.count)
-				.slice(0, 10);
-
-			// RSVP summary from guests table
-			const guests = await db
-				.select()
-				.from(schema.guests)
-				.where(eq(schema.guests.invitationId, data.invitationId));
+			const topReferrers = referrerResult
+				.filter(
+					(row): row is { referrer: string; count: number } =>
+						row.referrer !== null,
+				)
+				.map((row) => ({
+					referrer: row.referrer,
+					count: row.count,
+				}));
 
 			const rsvpSummary = {
 				attending: 0,
 				notAttending: 0,
 				pending: 0,
-				total: guests.length,
+				total: 0,
 			};
-			for (const guest of guests) {
-				if (guest.attendance === "attending") rsvpSummary.attending++;
-				else if (guest.attendance === "not_attending")
-					rsvpSummary.notAttending++;
-				else rsvpSummary.pending++;
+			for (const row of rsvpResult) {
+				rsvpSummary.total += row.count;
+				if (row.attendance === "attending") rsvpSummary.attending = row.count;
+				else if (row.attendance === "not_attending")
+					rsvpSummary.notAttending = row.count;
+				else rsvpSummary.pending += row.count;
 			}
 
 			return {

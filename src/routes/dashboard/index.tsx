@@ -1,6 +1,8 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
+import { Heart, Mail, Send, Sparkles } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ShareModal from "../../components/share/ShareModal";
+import { useToast } from "../../components/ui/Toast";
 import { useAuth } from "../../lib/auth";
 import { deleteInvitation, getAnalytics, listGuests } from "../../lib/data";
 import { useStore } from "../../lib/store";
@@ -87,6 +89,7 @@ function ConfirmDeleteDialog({
 
 function DashboardScreen() {
 	const { user } = useAuth();
+	const { addToast } = useToast();
 	const invitations = useStore((store) =>
 		store.invitations.filter((item) => item.userId === user?.id),
 	);
@@ -97,9 +100,10 @@ function DashboardScreen() {
 	const handleDeleteConfirm = useCallback(() => {
 		if (deleteTarget) {
 			deleteInvitation(deleteTarget.id);
+			addToast({ type: "success", message: "Invitation deleted" });
 			setDeleteTarget(null);
 		}
-	}, [deleteTarget]);
+	}, [deleteTarget, addToast]);
 
 	const sortedInvitations = useMemo(
 		() =>
@@ -108,6 +112,48 @@ function DashboardScreen() {
 	);
 
 	if (!user) return <Navigate to="/auth/login" />;
+
+	if (sortedInvitations.length === 0) {
+		return (
+			<div className="flex min-h-screen items-center justify-center bg-[color:var(--dm-bg)] px-6 py-10">
+				<div className="mx-auto max-w-md text-center">
+					<div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-[color:var(--dm-peach)]/10">
+						<div className="relative">
+							<Heart
+								className="h-10 w-10 text-[color:var(--dm-peach)]"
+								aria-hidden="true"
+							/>
+							<Sparkles
+								className="absolute -right-3 -top-3 h-5 w-5 text-[color:var(--dm-lavender)]"
+								aria-hidden="true"
+							/>
+							<Mail
+								className="absolute -bottom-2 -left-3 h-5 w-5 text-[color:var(--dm-sage)]"
+								aria-hidden="true"
+							/>
+						</div>
+					</div>
+					<p className="mt-6 text-xs uppercase tracking-[0.4em] text-[color:var(--dm-accent-strong)]">
+						Welcome
+					</p>
+					<h1 className="mt-3 text-3xl font-semibold text-[color:var(--dm-ink)]">
+						Create Your First Invitation
+					</h1>
+					<p className="mt-4 text-sm leading-relaxed text-[color:var(--dm-muted)]">
+						Design a beautiful digital wedding invitation in minutes. Choose
+						from our curated templates and personalize every detail.
+					</p>
+					<Link
+						to="/editor/new"
+						className="mt-8 inline-flex items-center gap-2 rounded-full bg-[color:var(--dm-accent-strong)] px-6 py-3.5 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)]"
+					>
+						<Sparkles className="h-4 w-4" aria-hidden="true" />
+						Get Started
+					</Link>
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className="min-h-screen bg-[color:var(--dm-bg)] px-6 py-10">
@@ -133,22 +179,6 @@ function DashboardScreen() {
 				</div>
 
 				<div className="grid gap-6 lg:grid-cols-2">
-					{!sortedInvitations.length ? (
-						<div className="rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-8 text-center">
-							<p className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">
-								No Invitations Yet
-							</p>
-							<p className="mt-3 text-sm text-[color:var(--dm-muted)]">
-								Start with a template and publish in minutes.
-							</p>
-							<Link
-								to="/editor/new"
-								className="mt-5 inline-flex rounded-full bg-[color:var(--dm-accent-strong)] px-5 py-3 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)]"
-							>
-								Create Invitation
-							</Link>
-						</div>
-					) : null}
 					{sortedInvitations.map((invitation) => {
 						const templateName =
 							templates.find(
@@ -213,17 +243,35 @@ function DashboardScreen() {
 										<p className="text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
 											Views
 										</p>
-										<p className="mt-2 text-lg font-semibold tabular-nums text-[color:var(--dm-ink)]">
-											{analytics.totalViews}
-										</p>
+										{analytics.totalViews > 0 ? (
+											<p className="mt-2 text-lg font-semibold tabular-nums text-[color:var(--dm-ink)]">
+												{analytics.totalViews}
+											</p>
+										) : (
+											<p className="mt-2 text-xs leading-relaxed text-[color:var(--dm-muted)]">
+												Your invitation hasn't been viewed yet
+											</p>
+										)}
 									</div>
 									<div className="rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-4">
 										<p className="text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
 											RSVPs
 										</p>
-										<p className="mt-2 text-lg font-semibold tabular-nums text-[color:var(--dm-ink)]">
-											{guests.length}
-										</p>
+										{guests.length > 0 ? (
+											<p className="mt-2 text-lg font-semibold tabular-nums text-[color:var(--dm-ink)]">
+												{guests.length}
+											</p>
+										) : (
+											<div className="mt-2 flex items-center gap-1.5">
+												<Send
+													className="h-3 w-3 text-[color:var(--dm-muted)]"
+													aria-hidden="true"
+												/>
+												<p className="text-xs leading-relaxed text-[color:var(--dm-muted)]">
+													Share to collect RSVPs
+												</p>
+											</div>
+										)}
 									</div>
 									<div className="rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-4">
 										<p className="text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">

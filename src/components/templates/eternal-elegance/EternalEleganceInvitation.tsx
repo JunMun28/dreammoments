@@ -1,8 +1,16 @@
 import { Link } from "@tanstack/react-router";
 import { type CSSProperties, useId, useState } from "react";
 import { useScrollReveal } from "../../../lib/scroll-effects";
+import { AddToCalendarButton } from "../../ui/AddToCalendarButton";
 import { LoadingSpinner } from "../../ui/LoadingSpinner";
+import AngpowQRCode from "../AngpowQRCode";
+import { DrawPath, Shimmer } from "../animations";
+import { CountdownWidget } from "../CountdownWidget";
 import { makeEditableProps, parseAttendance } from "../helpers";
+import {
+	RsvpConfirmation,
+	type RsvpConfirmationProps,
+} from "../RsvpConfirmation";
 import SectionShell from "../SectionShell";
 import type { TemplateInvitationProps } from "../types";
 
@@ -34,6 +42,10 @@ export default function EternalEleganceInvitation({
 	const consentDescriptionId = useId();
 	const data = content;
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [rsvpData, setRsvpData] = useState<Omit<
+		RsvpConfirmationProps,
+		"onEdit" | "className"
+	> | null>(null);
 	const monogram = `${data.hero.partnerOneName.charAt(0)}${data.hero.partnerTwoName.charAt(0)}`;
 	const taglineLetters = data.hero.tagline.split("");
 	const editableProps = makeEditableProps(mode, onInlineEdit);
@@ -57,6 +69,16 @@ export default function EternalEleganceInvitation({
 						</text>
 					</svg>
 				</div>
+				<DrawPath
+					d="M30 50 Q50 10 70 50 Q90 90 110 50 Q130 10 150 50"
+					stroke="rgba(201, 169, 98, 0.4)"
+					strokeWidth={1}
+					duration={2.5}
+					width={180}
+					height={80}
+					viewBox="0 0 180 100"
+					className="mx-auto mt-2"
+				/>
 				<div className="mx-auto max-w-4xl text-center">
 					<p className="eternal-kicker" style={bodyFont}>
 						Eternal Elegance
@@ -86,7 +108,29 @@ export default function EternalEleganceInvitation({
 					<p data-reveal className="dm-reveal eternal-date" style={bodyFont}>
 						{data.hero.date}
 					</p>
+					{mode !== "editor" && (
+						<div className="mt-4">
+							<AddToCalendarButton
+								title={`${data.hero.partnerOneName} & ${data.hero.partnerTwoName}'s Wedding`}
+								date={data.hero.date}
+								venue={data.venue.name}
+								address={data.venue.address}
+								variant="dark"
+							/>
+						</div>
+					)}
 				</div>
+			</SectionShell>
+
+			<SectionShell
+				sectionId="countdown"
+				mode={mode}
+				hidden={hiddenSections?.countdown}
+				onSelect={onSectionSelect}
+				onAiClick={onAiClick}
+				className="eternal-section"
+			>
+				<CountdownWidget targetDate={data.hero.date} />
 			</SectionShell>
 
 			<SectionShell
@@ -101,16 +145,18 @@ export default function EternalEleganceInvitation({
 					<p className="eternal-kicker" style={bodyFont}>
 						Invitation
 					</p>
-					<h2
-						data-reveal
-						style={headingFont}
-						{...editableProps(
-							"announcement.title",
-							"dm-reveal eternal-heading",
-						)}
-					>
-						{data.announcement.title}
-					</h2>
+					<Shimmer color="rgba(201, 169, 98, 0.15)">
+						<h2
+							data-reveal
+							style={headingFont}
+							{...editableProps(
+								"announcement.title",
+								"dm-reveal eternal-heading",
+							)}
+						>
+							{data.announcement.title}
+						</h2>
+					</Shimmer>
 					<p
 						data-reveal
 						style={bodyFont}
@@ -225,6 +271,27 @@ export default function EternalEleganceInvitation({
 					>
 						{data.details.venueSummary}
 					</p>
+					{data.venue.coordinates?.lat != null &&
+					data.venue.coordinates?.lng != null ? (
+						<div className="mt-3 flex flex-wrap justify-center gap-3">
+							<a
+								href={`https://www.google.com/maps/search/?api=1&query=${data.venue.coordinates.lat},${data.venue.coordinates.lng}`}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="inline-flex items-center gap-1.5 rounded-full border border-[var(--eternal-border)] px-4 py-2 text-xs uppercase tracking-[0.15em] text-[var(--eternal-muted)] transition-colors hover:border-[var(--eternal-secondary)] hover:text-[var(--eternal-primary)]"
+							>
+								Google Maps
+							</a>
+							<a
+								href={`https://www.waze.com/ul?ll=${data.venue.coordinates.lat},${data.venue.coordinates.lng}&navigate=yes`}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="inline-flex items-center gap-1.5 rounded-full border border-[var(--eternal-border)] px-4 py-2 text-xs uppercase tracking-[0.15em] text-[var(--eternal-muted)] transition-colors hover:border-[var(--eternal-secondary)] hover:text-[var(--eternal-primary)]"
+							>
+								Waze
+							</a>
+						</div>
+					) : null}
 				</div>
 			</SectionShell>
 
@@ -240,143 +307,174 @@ export default function EternalEleganceInvitation({
 					<p className="eternal-kicker" style={bodyFont}>
 						RSVP
 					</p>
-					<form
-						className="eternal-form"
-						noValidate
-						onSubmit={async (event) => {
-							event.preventDefault();
-							if (!onRsvpSubmit || isSubmitting) return;
-							setIsSubmitting(true);
-							try {
+					{rsvpData ? (
+						<RsvpConfirmation
+							{...rsvpData}
+							onEdit={() => setRsvpData(null)}
+							className="mt-4"
+						/>
+					) : (
+						<form
+							className="eternal-form"
+							onSubmit={async (event) => {
+								event.preventDefault();
+								if (!onRsvpSubmit || isSubmitting) return;
 								const formData = new FormData(event.currentTarget);
-								await onRsvpSubmit({
-									name: String(formData.get("name") ?? ""),
-									attendance: parseAttendance(formData.get("attendance")),
-									guestCount: Number(formData.get("guestCount") ?? 1),
-									dietaryRequirements: String(formData.get("dietary") ?? ""),
-									message: String(formData.get("message") ?? ""),
-									email: String(formData.get("email") ?? ""),
-								});
-							} finally {
-								setIsSubmitting(false);
-							}
-						}}
-					>
-						<label
-							className="grid gap-1.5 text-xs uppercase tracking-[0.15em]"
-							style={{ color: "var(--eternal-muted)" }}
+								const name = String(formData.get("name") ?? "").trim();
+								if (!name) return;
+								const maxGuests = data.rsvp.allowPlusOnes
+									? Math.max(1, data.rsvp.maxPlusOnes + 1)
+									: 1;
+								const rawGuestCount = Number(formData.get("guestCount") ?? 1);
+								const guestCount = Number.isFinite(rawGuestCount)
+									? Math.min(Math.max(rawGuestCount, 1), maxGuests)
+									: 1;
+								const attendance = parseAttendance(formData.get("attendance"));
+								const dietaryRequirements = String(
+									formData.get("dietary") ?? "",
+								);
+								setIsSubmitting(true);
+								try {
+									await onRsvpSubmit({
+										name,
+										attendance,
+										guestCount,
+										dietaryRequirements,
+										message: String(formData.get("message") ?? ""),
+										email: String(formData.get("email") ?? ""),
+									});
+									setRsvpData({
+										name,
+										attendance,
+										guestCount,
+										dietaryRequirements,
+									});
+								} finally {
+									setIsSubmitting(false);
+								}
+							}}
 						>
-							Name
-							<input
-								name="name"
-								placeholder="James Tan…"
-								autoComplete="off"
-								required
-								aria-required="true"
-								className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-lavender)]/30"
-							/>
-						</label>
-						<label
-							className="grid gap-1.5 text-xs uppercase tracking-[0.15em]"
-							style={{ color: "var(--eternal-muted)" }}
-						>
-							Attendance
-							<select
-								name="attendance"
-								className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-lavender)]/30"
+							<label
+								className="grid gap-1.5 text-xs uppercase tracking-[0.15em]"
+								style={{ color: "var(--eternal-muted)" }}
 							>
-								<option value="attending">Attending</option>
-								<option value="not_attending">Not Attending</option>
-								<option value="undecided">Undecided</option>
-							</select>
-						</label>
-						<label
-							className="grid gap-1.5 text-xs uppercase tracking-[0.15em]"
-							style={{ color: "var(--eternal-muted)" }}
-						>
-							Email
-							<input
-								name="email"
-								placeholder="james@example.com…"
-								type="email"
-								autoComplete="off"
-								spellCheck={false}
-								className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-lavender)]/30"
-							/>
-						</label>
-						<label
-							className="grid gap-1.5 text-xs uppercase tracking-[0.15em]"
-							style={{ color: "var(--eternal-muted)" }}
-						>
-							Guest count
-							<input
-								name="guestCount"
-								placeholder="2…"
-								type="number"
-								min={1}
-								inputMode="numeric"
-								autoComplete="off"
-								className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-lavender)]/30"
-							/>
-						</label>
-						<label
-							className="grid gap-1.5 text-xs uppercase tracking-[0.15em]"
-							style={{ color: "var(--eternal-muted)" }}
-						>
-							Dietary requirements
-							<input
-								name="dietary"
-								placeholder="No seafood…"
-								autoComplete="off"
-								className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-lavender)]/30"
-							/>
-						</label>
-						<label
-							className="grid gap-1.5 text-xs uppercase tracking-[0.15em]"
-							style={{ color: "var(--eternal-muted)" }}
-						>
-							Message
-							<textarea
-								name="message"
-								placeholder="We're honored to attend…"
-								autoComplete="off"
-								className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-lavender)]/30"
-							/>
-						</label>
-						<label className="eternal-consent">
-							<input
-								type="checkbox"
-								name="consent"
-								required
-								aria-describedby={consentDescriptionId}
-							/>
-							<span id={consentDescriptionId}>
-								I consent to the collection of my personal data as described in
-								the{" "}
-								<Link
-									to="/privacy"
-									className="eternal-consent-link"
-									target="_blank"
-									rel="noopener noreferrer"
+								Name
+								<input
+									name="name"
+									placeholder="James Tan…"
+									autoComplete="off"
+									required
+									aria-required="true"
+									className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-lavender)]/30"
+								/>
+							</label>
+							<label
+								className="grid gap-1.5 text-xs uppercase tracking-[0.15em]"
+								style={{ color: "var(--eternal-muted)" }}
+							>
+								Attendance
+								<select
+									name="attendance"
+									className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-lavender)]/30"
 								>
-									Privacy Policy
-								</Link>
-							</span>
-						</label>
-						{rsvpStatus ? (
-							<output className="eternal-body" aria-live="polite">
-								{rsvpStatus}
-							</output>
-						) : null}
-						<button
-							type="submit"
-							disabled={isSubmitting}
-							className="inline-flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
-						>
-							{isSubmitting && <LoadingSpinner size="sm" />}
-							{isSubmitting ? "Submitting..." : "Submit RSVP"}
-						</button>
-					</form>
+									<option value="attending">Attending</option>
+									<option value="not_attending">Not Attending</option>
+									<option value="undecided">Undecided</option>
+								</select>
+							</label>
+							<label
+								className="grid gap-1.5 text-xs uppercase tracking-[0.15em]"
+								style={{ color: "var(--eternal-muted)" }}
+							>
+								Email
+								<input
+									name="email"
+									placeholder="james@example.com…"
+									type="email"
+									autoComplete="off"
+									spellCheck={false}
+									className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-lavender)]/30"
+								/>
+							</label>
+							<label
+								className="grid gap-1.5 text-xs uppercase tracking-[0.15em]"
+								style={{ color: "var(--eternal-muted)" }}
+							>
+								Guest count
+								<input
+									name="guestCount"
+									placeholder="2…"
+									type="number"
+									min={1}
+									max={
+										data.rsvp.allowPlusOnes
+											? Math.max(1, data.rsvp.maxPlusOnes + 1)
+											: 1
+									}
+									inputMode="numeric"
+									autoComplete="off"
+									className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-lavender)]/30"
+								/>
+							</label>
+							<label
+								className="grid gap-1.5 text-xs uppercase tracking-[0.15em]"
+								style={{ color: "var(--eternal-muted)" }}
+							>
+								Dietary requirements
+								<input
+									name="dietary"
+									placeholder="No seafood…"
+									autoComplete="off"
+									className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-lavender)]/30"
+								/>
+							</label>
+							<label
+								className="grid gap-1.5 text-xs uppercase tracking-[0.15em]"
+								style={{ color: "var(--eternal-muted)" }}
+							>
+								Message
+								<textarea
+									name="message"
+									placeholder="We're honored to attend…"
+									autoComplete="off"
+									className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-lavender)]/30"
+								/>
+							</label>
+							<label className="eternal-consent">
+								<input
+									type="checkbox"
+									name="consent"
+									required
+									aria-describedby={consentDescriptionId}
+								/>
+								<span id={consentDescriptionId}>
+									I consent to the collection of my personal data as described
+									in the{" "}
+									<Link
+										to="/privacy"
+										className="eternal-consent-link"
+										target="_blank"
+										rel="noopener noreferrer"
+									>
+										Privacy Policy
+									</Link>
+								</span>
+							</label>
+							{rsvpStatus ? (
+								<output className="eternal-body" aria-live="polite">
+									{rsvpStatus}
+								</output>
+							) : null}
+							<button
+								type="submit"
+								disabled={isSubmitting}
+								className="inline-flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+							>
+								{isSubmitting && <LoadingSpinner size="sm" />}
+								{isSubmitting ? "Submitting..." : "Submit RSVP"}
+							</button>
+						</form>
+					)}
 				</div>
 			</SectionShell>
 
@@ -400,6 +498,23 @@ export default function EternalEleganceInvitation({
 					</p>
 				</div>
 			</SectionShell>
+
+			{data.gift && (
+				<SectionShell
+					sectionId="gift"
+					mode={mode}
+					hidden={hiddenSections?.gift}
+					onSelect={onSectionSelect}
+					onAiClick={onAiClick}
+					className="eternal-section"
+				>
+					<AngpowQRCode
+						paymentUrl={data.gift.paymentUrl}
+						paymentMethod={data.gift.paymentMethod}
+						recipientName={data.gift.recipientName}
+					/>
+				</SectionShell>
+			)}
 
 			<SectionShell
 				sectionId="footer"

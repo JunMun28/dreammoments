@@ -3,17 +3,8 @@ import {
 	type ErrorComponentProps,
 	Link,
 	Navigate,
-	useNavigate,
 } from "@tanstack/react-router";
-import {
-	useCallback,
-	useEffect,
-	useId,
-	useMemo,
-	useRef,
-	useState,
-} from "react";
-import { checkSlugAvailabilityFn } from "../../api/invitations";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AiAssistantDrawer } from "../../components/editor/AiAssistantDrawer";
 import { ContextPanel } from "../../components/editor/ContextPanel";
 import { EditorLayout } from "../../components/editor/EditorLayout";
@@ -29,28 +20,37 @@ import {
 	setValueByPath,
 	useEditorState,
 } from "../../components/editor/hooks/useEditorState";
-import { useFocusTrap } from "../../components/editor/hooks/useFocusTrap";
 import { useFormScrollSpy } from "../../components/editor/hooks/useFormScrollSpy";
 import { useInlineEdit } from "../../components/editor/hooks/useInlineEdit";
 import { useKeyboardShortcuts } from "../../components/editor/hooks/useKeyboardShortcuts";
 import { useMediaQuery } from "../../components/editor/hooks/useMediaQuery";
 import { usePreviewScroll } from "../../components/editor/hooks/usePreviewScroll";
 import { useSectionProgress } from "../../components/editor/hooks/useSectionProgress";
+import {
+	useSlugValidation,
+	validateSlug,
+} from "../../components/editor/hooks/useSlugValidation";
 import InlineEditOverlay from "../../components/editor/InlineEditOverlay";
+import { KeyboardShortcutsHelp } from "../../components/editor/KeyboardShortcutsHelp";
 import type { PreviewLayout } from "../../components/editor/LayoutToggle";
 import { MobileAllSectionsPanel } from "../../components/editor/MobileAllSectionsPanel";
 import MobileBottomSheet from "../../components/editor/MobileBottomSheet";
 import MobileSectionNav from "../../components/editor/MobileSectionNav";
+import { OnboardingTour } from "../../components/editor/OnboardingTour";
+import { PreviewDialog } from "../../components/editor/PreviewDialog";
+import { PublishDialog } from "../../components/editor/PublishDialog";
 import { SectionPillBar } from "../../components/editor/SectionPillBar";
+import { SectionRail } from "../../components/editor/SectionRail";
+import { SlugEditor } from "../../components/editor/SlugEditor";
+import { UpgradePrompt } from "../../components/editor/UpgradePrompt";
 import ShareModal from "../../components/share/ShareModal";
-import InvitationRenderer from "../../components/templates/InvitationRenderer";
 import { FullPageLoader } from "../../components/ui/LoadingSpinner";
+import { useToast } from "../../components/ui/Toast";
 import { buildSampleContent } from "../../data/sample-invitation";
 import {
 	aiUsageLimit,
 	createUser,
 	getCurrentUser,
-	PUBLIC_BASE_URL,
 	publishInvitation,
 	updateInvitation,
 } from "../../lib/data";
@@ -109,49 +109,10 @@ const lightTemplates = new Set([
 	"blush-romance",
 ]);
 
-// ── Slug validation ─────────────────────────────────────────────────
-
-const SLUG_REGEX = /^[a-z0-9][a-z0-9-]*[a-z0-9]$/;
-const SLUG_MIN = 3;
-const SLUG_MAX = 50;
-const RESERVED_SLUGS = new Set([
-	"admin",
-	"api",
-	"auth",
-	"dashboard",
-	"editor",
-	"upgrade",
-	"invite",
-	"login",
-	"signup",
-	"settings",
-	"help",
-	"support",
-	"about",
-	"privacy",
-	"terms",
-]);
-
-function validateSlug(slug: string): string {
-	if (!slug) return "";
-	if (slug.length < SLUG_MIN)
-		return `Slug must be at least ${SLUG_MIN} characters`;
-	if (slug.length > SLUG_MAX)
-		return `Slug must be at most ${SLUG_MAX} characters`;
-	if (!SLUG_REGEX.test(slug))
-		return "Only lowercase letters, numbers, and hyphens allowed. Must start and end with a letter or number.";
-	if (RESERVED_SLUGS.has(slug)) return `"${slug}" is a reserved word`;
-	return "";
-}
-
 function EditorScreen() {
 	const { invitationId } = Route.useParams();
-	const navigate = useNavigate();
-	const rawId = useId();
-	const upgradeTitleId = `upgrade-title-${rawId.replaceAll(":", "")}`;
-	const slugInputId = `slug-input-${rawId.replaceAll(":", "")}`;
-	const slugFeedbackId = useId();
 
+	const { addToast } = useToast();
 	const invitation = useStore((store) =>
 		store.invitations.find((item) => item.id === invitationId),
 	);
@@ -212,6 +173,8 @@ function EditorScreen() {
 		draftRef,
 		visibilityRef,
 		version: editor.version,
+		onSaveError: (message) =>
+			addToast({ type: "error", message: `Save failed: ${message}` }),
 	});
 
 	// Section progress
@@ -259,6 +222,9 @@ function EditorScreen() {
 				updateInvitation(invitation.id, { designOverrides: overrides });
 			}
 		},
+		onGenerateSuccess: () =>
+			addToast({ type: "success", message: "AI content generated!" }),
+		onGenerateError: (message) => addToast({ type: "error", message }),
 	});
 
 	// Local UI state
@@ -269,21 +235,11 @@ function EditorScreen() {
 	const [panelCollapsed, setPanelCollapsed] = useState(false);
 	const [isHydrated, setIsHydrated] = useState(false);
 	const [slugDialogOpen, setSlugDialogOpen] = useState(false);
-	const [slugValue, setSlugValue] = useState("");
-	const [slugError, setSlugError] = useState("");
-	const [slugAvailability, setSlugAvailability] = useState<
-		"idle" | "checking" | "available" | "taken"
-	>("idle");
-	const slugCheckTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const [shareModalOpen, setShareModalOpen] = useState(false);
 	const [publishSuccess, setPublishSuccess] = useState(false);
 
-	// Refs for focus trap containers
-	const previewDialogRef = useRef<HTMLDivElement | null>(null);
-	const slugDialogRef = useRef<HTMLDivElement | null>(null);
-	const upgradeDialogRef = useRef<HTMLDivElement | null>(null);
-	const shortcutsDialogRef = useRef<HTMLDivElement | null>(null);
-	const publishSuccessRef = useRef<HTMLDivElement | null>(null);
+	// Slug validation hook
+	const slug = useSlugValidation({ invitationId: invitation?.id ?? "" });
 
 	const styleOverrides = (invitation?.designOverrides ?? {}) as Record<
 		string,
@@ -305,28 +261,6 @@ function EditorScreen() {
 			},
 			{ enabled: !isMobile },
 		);
-
-	// Focus traps for dialogs
-	useFocusTrap(previewDialogRef, {
-		enabled: previewMode,
-		onEscape: () => setPreviewMode(false),
-	});
-	useFocusTrap(slugDialogRef, {
-		enabled: slugDialogOpen,
-		onEscape: () => setSlugDialogOpen(false),
-	});
-	useFocusTrap(upgradeDialogRef, {
-		enabled: upgradeOpen,
-		onEscape: () => setUpgradeOpen(false),
-	});
-	useFocusTrap(shortcutsDialogRef, {
-		enabled: showShortcutsHelp,
-		onEscape: () => setShowShortcutsHelp(false),
-	});
-	useFocusTrap(publishSuccessRef, {
-		enabled: publishSuccess,
-		onEscape: () => setPublishSuccess(false),
-	});
 
 	useEffect(() => {
 		setIsHydrated(true);
@@ -384,66 +318,29 @@ function EditorScreen() {
 			setUpgradeOpen(true);
 			return;
 		}
-		setSlugValue(invitation.slug);
-		setSlugError("");
-		setSlugAvailability("idle");
+		slug.reset(invitation.slug);
 		setSlugDialogOpen(true);
 	};
 
-	const handleSlugChange = (value: string) => {
-		const normalized = value.toLowerCase().replace(/\s+/g, "-");
-		setSlugValue(normalized);
-
-		if (slugCheckTimer.current) clearTimeout(slugCheckTimer.current);
-
-		const error = validateSlug(normalized);
-		setSlugError(error);
-
-		if (error || !normalized) {
-			setSlugAvailability("idle");
-			return;
-		}
-
-		setSlugAvailability("checking");
-		slugCheckTimer.current = setTimeout(() => {
-			const token = window.localStorage.getItem("dm-auth-token");
-			if (!token) return;
-			void checkSlugAvailabilityFn({
-				data: { token, slug: normalized, invitationId: invitation.id },
-			})
-				.then((result: { available: boolean }) => {
-					setSlugAvailability(result.available ? "available" : "taken");
-				})
-				.catch(() => {
-					setSlugAvailability("idle");
-				});
-		}, 400);
-	};
-
-	const slugIsValid =
-		!slugError &&
-		(slugAvailability === "available" || slugAvailability === "idle");
-
 	const handleSlugConfirm = () => {
-		const trimmed = slugValue.trim();
+		const trimmed = slug.slugValue.trim();
 		const error = validateSlug(trimmed);
-		if (error) {
-			setSlugError(error);
-			return;
-		}
-		if (slugAvailability === "taken") return;
+		if (error) return;
+		if (slug.slugAvailability === "taken") return;
 
 		publishInvitation(invitation.id, {
 			slug: trimmed || invitation.slug,
 		});
 		setSlugDialogOpen(false);
 		setPublishSuccess(true);
+		addToast({ type: "success", message: "Invitation published!" });
 	};
 
 	const handleContinueFree = () => {
 		publishInvitation(invitation.id, { randomize: true });
 		setUpgradeOpen(false);
 		setPublishSuccess(true);
+		addToast({ type: "success", message: "Invitation published!" });
 	};
 
 	const handleShare = () => {
@@ -647,11 +544,23 @@ function EditorScreen() {
 				preview={preview}
 				pillBar={pillBar}
 				contextPanel={contextPanel}
+				sectionRail={
+					!isMobile && !isTablet ? (
+						<SectionRail
+							sections={pillSections}
+							activeSection={editor.activeSection}
+							onSectionChange={handleSectionChange}
+						/>
+					) : undefined
+				}
 				isMobile={isMobile}
 				isTablet={isTablet}
 				panelCollapsed={panelCollapsed}
 				bottomSheetOpen={mobileEditorOpen}
+				onOpenBottomSheet={() => setMobileEditorOpen(true)}
 			/>
+
+			<OnboardingTour />
 
 			{/* Inline edit overlay (positioned popover on desktop, bottom bar on mobile) */}
 			{inlineEdit && (
@@ -687,251 +596,49 @@ function EditorScreen() {
 			/>
 
 			{/* Preview mode overlay */}
-			{previewMode && (
-				<div
-					ref={previewDialogRef}
-					role="dialog"
-					aria-modal="true"
-					aria-label="Invitation preview"
-					className={`dm-preview ${
-						isLightTemplate ? "dm-shell-light" : "dm-shell-dark"
-					}`}
-				>
-					<div className="dm-preview-toolbar">
-						<button
-							type="button"
-							className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-ink)]"
-							onClick={() => setPreviewMode(false)}
-							aria-label="Switch to edit mode"
-						>
-							Back to Edit
-						</button>
-						<button
-							type="button"
-							className="rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)]"
-							onClick={handleShare}
-						>
-							Share
-						</button>
-					</div>
-					<div className="dm-preview-body" style={styleOverrides}>
-						<InvitationRenderer
-							templateId={template?.id ?? "blush-romance"}
-							content={editor.draft}
-							hiddenSections={editor.hiddenSections}
-							mode="preview"
-						/>
-					</div>
-				</div>
-			)}
+			<PreviewDialog
+				open={previewMode}
+				onClose={() => setPreviewMode(false)}
+				templateId={template?.id ?? "blush-romance"}
+				content={editor.draft}
+				hiddenSections={editor.hiddenSections}
+				isLightTemplate={isLightTemplate}
+				styleOverrides={styleOverrides}
+				onShare={handleShare}
+			/>
 
 			{/* Upgrade dialog */}
-			{upgradeOpen && (
-				<div
-					ref={upgradeDialogRef}
-					className="dm-inline-edit"
-					role="dialog"
-					aria-modal="true"
-					aria-labelledby={upgradeTitleId}
-				>
-					<div className="dm-inline-card">
-						<p
-							id={upgradeTitleId}
-							className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]"
-						>
-							Upgrade to Premium
-						</p>
-						<ul className="mt-3 space-y-2 text-sm text-[color:var(--dm-muted)]">
-							<li>Custom URL slug</li>
-							<li>100 AI generations</li>
-							<li>CSV import + export</li>
-							<li>Advanced analytics</li>
-						</ul>
-						<div className="mt-4 flex gap-3">
-							<button
-								type="button"
-								className="flex-1 rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-ink)]"
-								onClick={handleContinueFree}
-							>
-								Continue Free
-							</button>
-							<button
-								type="button"
-								className="flex-1 rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)]"
-								onClick={() => navigate({ to: "/upgrade" })}
-							>
-								Upgrade
-							</button>
-						</div>
-					</div>
-				</div>
-			)}
+			<UpgradePrompt
+				open={upgradeOpen}
+				onClose={() => setUpgradeOpen(false)}
+				onContinueFree={handleContinueFree}
+			/>
 
 			{/* Keyboard shortcuts help */}
-			{showShortcutsHelp && (
-				<div
-					ref={shortcutsDialogRef}
-					className="dm-inline-edit"
-					role="dialog"
-					aria-modal="true"
-					aria-label="Keyboard shortcuts"
-				>
-					<div className="dm-inline-card">
-						<p className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">
-							Keyboard Shortcuts
-						</p>
-						<dl className="mt-3 space-y-2 text-sm">
-							{[
-								["Cmd/Ctrl+Z", "Undo"],
-								["Cmd/Ctrl+Shift+Z", "Redo"],
-								["Cmd/Ctrl+S", "Force save"],
-								["[", "Collapse panel"],
-								["]", "Expand panel"],
-								["Cmd/Ctrl+P", "Toggle preview"],
-								["?", "Toggle this help"],
-							].map(([key, desc]) => (
-								<div key={key} className="flex justify-between">
-									<dt className="font-mono text-xs text-[color:var(--dm-muted)]">
-										{key}
-									</dt>
-									<dd className="text-xs text-[color:var(--dm-ink)]">{desc}</dd>
-								</div>
-							))}
-						</dl>
-						<button
-							type="button"
-							className="mt-4 w-full rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-ink)]"
-							onClick={() => setShowShortcutsHelp(false)}
-						>
-							Close
-						</button>
-					</div>
-				</div>
-			)}
+			<KeyboardShortcutsHelp
+				open={showShortcutsHelp}
+				onClose={() => setShowShortcutsHelp(false)}
+			/>
 
-			{/* Custom slug input dialog (replaces native prompt()) */}
-			{slugDialogOpen && (
-				<div
-					ref={slugDialogRef}
-					className="dm-inline-edit"
-					role="dialog"
-					aria-modal="true"
-					aria-label="Set custom slug"
-				>
-					<div className="dm-inline-card">
-						<p className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">
-							Set Your Custom URL
-						</p>
-						<label
-							htmlFor={slugInputId}
-							className="mt-3 block text-sm text-[color:var(--dm-muted)]"
-						>
-							Invitation slug
-						</label>
-						<input
-							id={slugInputId}
-							type="text"
-							value={slugValue}
-							onChange={(e) => handleSlugChange(e.target.value)}
-							onKeyDown={(e) => {
-								if (e.key === "Enter" && slugIsValid) handleSlugConfirm();
-							}}
-							className={`mt-1 w-full rounded-lg bg-[color:var(--dm-bg)] px-3 py-2 text-sm text-[color:var(--dm-ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--dm-focus)]/60 ${
-								slugError || slugAvailability === "taken"
-									? "border border-[color:var(--dm-error)]"
-									: slugAvailability === "available"
-										? "border border-green-500"
-										: "border border-[color:var(--dm-border)]"
-							}`}
-							aria-invalid={!!slugError || slugAvailability === "taken"}
-							aria-describedby={slugFeedbackId}
-							autoComplete="off"
-						/>
-						<p
-							id={slugFeedbackId}
-							className={`mt-1 text-xs ${
-								slugError || slugAvailability === "taken"
-									? "text-[color:var(--dm-error)]"
-									: slugAvailability === "available"
-										? "text-green-600"
-										: slugAvailability === "checking"
-											? "text-[color:var(--dm-muted)]"
-											: "text-transparent"
-							}`}
-							aria-live="polite"
-						>
-							{slugError ||
-								(slugAvailability === "taken"
-									? "Already taken"
-									: slugAvailability === "available"
-										? "Available"
-										: slugAvailability === "checking"
-											? "Checking..."
-											: "\u00A0")}
-						</p>
-						<div className="mt-3 flex gap-3">
-							<button
-								type="button"
-								className="flex-1 rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-ink)]"
-								onClick={() => setSlugDialogOpen(false)}
-							>
-								Cancel
-							</button>
-							<button
-								type="button"
-								disabled={
-									!!slugError ||
-									slugAvailability === "taken" ||
-									slugAvailability === "checking"
-								}
-								className="flex-1 rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)] disabled:opacity-50"
-								onClick={handleSlugConfirm}
-							>
-								Save
-							</button>
-						</div>
-					</div>
-				</div>
-			)}
+			{/* Custom slug input dialog */}
+			<SlugEditor
+				open={slugDialogOpen}
+				onClose={() => setSlugDialogOpen(false)}
+				slugValue={slug.slugValue}
+				slugError={slug.slugError}
+				slugAvailability={slug.slugAvailability}
+				slugIsValid={slug.slugIsValid}
+				onSlugChange={slug.setSlugValue}
+				onConfirm={handleSlugConfirm}
+			/>
 
 			{/* Publish success celebration */}
-			{publishSuccess && (
-				<div
-					ref={publishSuccessRef}
-					className="dm-inline-edit"
-					role="dialog"
-					aria-modal="true"
-					aria-label="Invitation published"
-				>
-					<div className="dm-inline-card text-center">
-						<div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-[color:var(--dm-sage)]/20 text-3xl">
-							&#127881;
-						</div>
-						<p className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">
-							Your invitation is live!
-						</p>
-						<p className="mt-2 break-all text-sm text-[color:var(--dm-muted)]">
-							{`${PUBLIC_BASE_URL}/invite/${invitation.slug}`}
-						</p>
-						<div className="mt-4 flex gap-3">
-							<button
-								type="button"
-								className="flex-1 rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-ink)]"
-								onClick={() => setPublishSuccess(false)}
-							>
-								Close
-							</button>
-							<button
-								type="button"
-								className="flex-1 rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)]"
-								onClick={handleShare}
-							>
-								Share Now
-							</button>
-						</div>
-					</div>
-				</div>
-			)}
+			<PublishDialog
+				open={publishSuccess}
+				onClose={() => setPublishSuccess(false)}
+				slug={invitation.slug}
+				onShare={handleShare}
+			/>
 
 			{/* Share modal */}
 			<ShareModal

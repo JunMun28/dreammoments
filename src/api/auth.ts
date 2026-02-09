@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import bcrypt from "bcryptjs";
-import { eq } from "drizzle-orm";
+import { and, eq, gt, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { getDbOrNull, isProduction, schema } from "@/db/index";
 import { authRateLimit } from "@/lib/rate-limit";
@@ -10,6 +10,7 @@ import {
 	refreshSession,
 	verifySession,
 } from "@/lib/session";
+import { ApiError } from "./errors";
 import { parseInput } from "./validate";
 
 // ---------------------------------------------------------------------------
@@ -121,7 +122,7 @@ export const signupFn = createServerFn({ method: "POST" })
 		// Rate limit by email
 		const limit = authRateLimit(email);
 		if (!limit.allowed) {
-			return { error: "Too many attempts. Please try again later." };
+			return { error: ApiError.rateLimit().message };
 		}
 
 		const passwordHash = await bcrypt.hash(password, BCRYPT_COST);
@@ -135,7 +136,9 @@ export const signupFn = createServerFn({ method: "POST" })
 				.where(eq(schema.users.email, email));
 
 			if (existing) {
-				return { error: "Email already registered" };
+				return {
+					error: ApiError.badRequest("Email already registered").message,
+				};
 			}
 
 			// Insert new user
@@ -286,21 +289,48 @@ export const loginFn = createServerFn({ method: "POST" })
 		};
 	});
 
-export const logoutFn = createServerFn({ method: "POST" }).handler(
-	async (): Promise<{ success: boolean }> => {
-		// With stateless JWTs, the server doesn't track sessions.
-		// The client is responsible for discarding the token.
-		// A production enhancement would use a blocklist/deny list in Redis.
-		return { success: true };
-	},
-);
-
-const getSessionSchema = z.object({
+const logoutSchema = z.object({
 	token: z.string().min(1, "Token is required"),
 });
 
+export const logoutFn = createServerFn({ method: "POST" })
+	.inputValidator((data: { token: string }) => parseInput(logoutSchema, data))
+	.handler(async ({ data }): Promise<{ success: boolean }> => {
+		const db = getDbOrNull();
+
+		if (db) {
+			const tokenHash = await hashToken(data.token);
+
+			// Decode JWT to get expiry (best-effort; if invalid, use 1h default)
+			let expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+			try {
+				const parts = data.token.split(".");
+				if (parts[1]) {
+					const payload = JSON.parse(atob(parts[1]));
+					if (typeof payload.exp === "number") {
+						expiresAt = new Date(payload.exp * 1000);
+					}
+				}
+			} catch {
+				// Use default expiry
+			}
+
+			await db.insert(schema.tokenBlocklist).values({
+				tokenHash,
+				expiresAt,
+			});
+		}
+
+		return { success: true };
+	});
+
+const getSessionSchema = z.object({
+	token: z.string().min(1, "Token is required"),
+	refreshToken: z.string().optional(),
+});
+
 export const getSessionFn = createServerFn({ method: "POST" })
-	.inputValidator((data: { token: string }) =>
+	.inputValidator((data: { token: string; refreshToken?: string }) =>
 		parseInput(getSessionSchema, data),
 	)
 	.handler(
@@ -309,6 +339,7 @@ export const getSessionFn = createServerFn({ method: "POST" })
 		}): Promise<{
 			user: AuthSuccess["user"] | null;
 			newToken?: string;
+			newRefreshToken?: string;
 		}> => {
 			const { token } = data;
 
@@ -316,7 +347,56 @@ export const getSessionFn = createServerFn({ method: "POST" })
 				return { user: null };
 			}
 
-			const session = await verifySession(token);
+			// First try to verify the access token
+			const session = await verifySession(token, "access");
+
+			// If access token is expired but we have a refresh token, try refreshing
+			if (!session && data.refreshToken) {
+				const refreshed = await refreshSession(data.refreshToken);
+				if (refreshed) {
+					const refreshedSession = await verifySession(
+						refreshed.token,
+						"access",
+					);
+					if (refreshedSession) {
+						const db = getDbOrNull();
+
+						if (db) {
+							const [row] = await db
+								.select()
+								.from(schema.users)
+								.where(eq(schema.users.id, refreshedSession.userId));
+
+							if (!row) {
+								return { user: null };
+							}
+
+							return {
+								user: sanitizeUser(row),
+								newToken: refreshed.token,
+								newRefreshToken: refreshed.refreshToken,
+							};
+						}
+
+						if (isProduction()) {
+							return { user: null };
+						}
+
+						const fallbackUser = fallbackUsers.get(refreshedSession.userId);
+						if (!fallbackUser) {
+							return { user: null };
+						}
+
+						return {
+							user: sanitizeFallbackUser(fallbackUser),
+							newToken: refreshed.token,
+							newRefreshToken: refreshed.refreshToken,
+						};
+					}
+				}
+				return { user: null };
+			}
+
 			if (!session) {
 				return { user: null };
 			}
@@ -333,13 +413,7 @@ export const getSessionFn = createServerFn({ method: "POST" })
 					return { user: null };
 				}
 
-				// Check if token needs refresh
-				const newToken = await refreshSession(token);
-
-				return {
-					user: sanitizeUser(row),
-					...(newToken ? { newToken: newToken.token } : {}),
-				};
+				return { user: sanitizeUser(row) };
 			}
 
 			// In production, DB is required
@@ -353,12 +427,7 @@ export const getSessionFn = createServerFn({ method: "POST" })
 				return { user: null };
 			}
 
-			const newToken = await refreshSession(token);
-
-			return {
-				user: sanitizeFallbackUser(fallbackUser),
-				...(newToken ? { newToken: newToken.token } : {}),
-			};
+			return { user: sanitizeFallbackUser(fallbackUser) };
 		},
 	);
 
@@ -458,7 +527,11 @@ export const googleCallbackFn = createServerFn({ method: "POST" })
 			const avatarUrl = googleUser.picture || undefined;
 
 			const db = getDbOrNull();
-			const safeRedirectTo = redirectTo || "/dashboard";
+			// Validate redirectTo is a safe relative URL (prevent open redirect)
+			const safeRedirectTo =
+				redirectTo?.startsWith("/") && !redirectTo.startsWith("//")
+					? redirectTo
+					: "/dashboard";
 
 			if (db) {
 				// Check if user exists
@@ -566,18 +639,28 @@ export const googleCallbackFn = createServerFn({ method: "POST" })
 		},
 	);
 
-const resetPasswordSchema = z.object({
+// ── Token hashing helper ─────────────────────────────────────────
+
+async function hashToken(token: string): Promise<string> {
+	const encoded = new TextEncoder().encode(token);
+	const hashBuffer = await crypto.subtle.digest("SHA-256", encoded);
+	return Array.from(new Uint8Array(hashBuffer))
+		.map((b) => b.toString(16).padStart(2, "0"))
+		.join("");
+}
+
+// ── Request password reset ──────────────────────────────────────
+
+const requestPasswordResetSchema = z.object({
 	email: z.string().email("Invalid email address"),
-	password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
-export const resetPasswordFn = createServerFn({ method: "POST" })
-	.inputValidator((data: { email: string; password: string }) =>
-		parseInput(resetPasswordSchema, data),
+export const requestPasswordResetFn = createServerFn({ method: "POST" })
+	.inputValidator((data: { email: string }) =>
+		parseInput(requestPasswordResetSchema, data),
 	)
 	.handler(async ({ data }): Promise<{ success: boolean } | AuthError> => {
 		const email = data.email.trim().toLowerCase();
-		const { password } = data;
 
 		// Rate limit by email
 		const limit = authRateLimit(`reset:${email}`);
@@ -585,7 +668,6 @@ export const resetPasswordFn = createServerFn({ method: "POST" })
 			return { error: "Too many attempts. Please try again later." };
 		}
 
-		const passwordHash = await bcrypt.hash(password, BCRYPT_COST);
 		const db = getDbOrNull();
 
 		if (db) {
@@ -599,22 +681,81 @@ export const resetPasswordFn = createServerFn({ method: "POST" })
 				return { success: true };
 			}
 
-			await db
-				.update(schema.users)
-				.set({ passwordHash, updatedAt: new Date() })
-				.where(eq(schema.users.id, row.id));
+			// Generate a random token and hash it for storage
+			const rawToken = crypto.randomUUID();
+			const tokenHash = await hashToken(rawToken);
+			const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
-			return { success: true };
+			await db.insert(schema.passwordResetTokens).values({
+				userId: row.id,
+				tokenHash,
+				expiresAt,
+			});
+
+			// Build reset URL and send email
+			const baseUrl = process.env.VITE_APP_URL ?? "https://dreammoments.app";
+			const resetUrl = `${baseUrl}/auth/reset?token=${rawToken}`;
+
+			const { sendPasswordResetEmail } = await import("@/lib/email");
+			await sendPasswordResetEmail(email, resetUrl);
 		}
 
-		// Fallback: in-memory store
-		for (const u of fallbackUsers.values()) {
-			if (u.email === email) {
-				u.passwordHash = passwordHash;
-				u.updatedAt = new Date().toISOString();
-				break;
-			}
+		// Always return success to avoid email enumeration
+		return { success: true };
+	});
+
+// ── Confirm password reset ──────────────────────────────────────
+
+const confirmPasswordResetSchema = z.object({
+	token: z.string().min(1, "Token is required"),
+	password: z.string().min(8, "Password must be at least 8 characters"),
+});
+
+export const confirmPasswordResetFn = createServerFn({ method: "POST" })
+	.inputValidator((data: { token: string; password: string }) =>
+		parseInput(confirmPasswordResetSchema, data),
+	)
+	.handler(async ({ data }): Promise<{ success: boolean } | AuthError> => {
+		const { token, password } = data;
+
+		// Rate limit by token prefix
+		const limit = authRateLimit(`confirm-reset:${token.slice(0, 8)}`);
+		if (!limit.allowed) {
+			return { error: "Too many attempts. Please try again later." };
 		}
+
+		const db = getDbOrNull();
+
+		if (!db) {
+			return {
+				error: "Password reset is not available without a database.",
+			};
+		}
+
+		const tokenHash = await hashToken(token);
+		const passwordHash = await bcrypt.hash(password, BCRYPT_COST);
+
+		// Atomically consume the token: only succeeds if unused and not expired
+		const [consumed] = await db
+			.update(schema.passwordResetTokens)
+			.set({ usedAt: new Date() })
+			.where(
+				and(
+					eq(schema.passwordResetTokens.tokenHash, tokenHash),
+					isNull(schema.passwordResetTokens.usedAt),
+					gt(schema.passwordResetTokens.expiresAt, new Date()),
+				),
+			)
+			.returning();
+
+		if (!consumed) {
+			return { error: "Invalid, expired, or already used reset link." };
+		}
+
+		await db
+			.update(schema.users)
+			.set({ passwordHash, updatedAt: new Date() })
+			.where(eq(schema.users.id, consumed.userId));
 
 		return { success: true };
 	});

@@ -4,7 +4,10 @@ import {
 	Navigate,
 	useNavigate,
 } from "@tanstack/react-router";
-import { useState } from "react";
+import { Eye } from "lucide-react";
+import { useCallback, useState } from "react";
+import InvitationRenderer from "../../components/templates/InvitationRenderer";
+import { buildSampleContent } from "../../data/sample-invitation";
 import { useAuth } from "../../lib/auth";
 import { createInvitation } from "../../lib/data";
 import { templates } from "../../templates";
@@ -48,17 +51,19 @@ function TemplateColorPreview({
 function TemplateCard({
 	template,
 	onSelect,
+	onPreview,
 	isCreating,
 }: {
 	template: TemplateConfig;
 	onSelect: (templateId: string) => void;
+	onPreview: (templateId: string) => void;
 	isCreating: boolean;
 }) {
 	return (
 		<div className="group rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-6 transition-shadow duration-300 hover:shadow-[0_8px_28px_-4px_rgba(0,0,0,0.07)]">
 			{/* Color preview strip */}
 			<div
-				className="mb-5 flex h-32 items-end rounded-2xl p-4"
+				className="relative mb-5 flex h-32 items-end rounded-2xl p-4"
 				style={{
 					background: `linear-gradient(135deg, ${template.tokens.colors.background} 0%, ${template.tokens.colors.primary} 100%)`,
 				}}
@@ -72,6 +77,15 @@ function TemplateCard({
 				>
 					{template.nameZh}
 				</div>
+				<button
+					type="button"
+					onClick={() => onPreview(template.id)}
+					className="absolute right-3 top-3 flex h-9 items-center gap-1.5 rounded-full border border-white/30 bg-white/80 px-3 text-[10px] uppercase tracking-[0.15em] text-[color:var(--dm-ink)] opacity-0 backdrop-blur-sm transition-opacity group-hover:opacity-100"
+					aria-label={`Preview ${template.name} template`}
+				>
+					<Eye size={14} aria-hidden="true" />
+					Preview
+				</button>
 			</div>
 
 			{/* Template info */}
@@ -135,10 +149,65 @@ function TemplateCard({
 	);
 }
 
+function TemplatePreviewModal({
+	templateId,
+	onClose,
+}: {
+	templateId: string;
+	onClose: () => void;
+}) {
+	const content = buildSampleContent(templateId);
+	const template = templates.find((t) => t.id === templateId);
+	const sectionVisibility = template
+		? Object.fromEntries(template.sections.map((s) => [s.id, s.defaultVisible]))
+		: {};
+
+	return (
+		<div
+			className="fixed inset-0 z-[var(--dm-z-modal)] flex flex-col bg-black/50 backdrop-blur-sm"
+			onClick={onClose}
+			onKeyDown={(e) => e.key === "Escape" && onClose()}
+			role="dialog"
+			aria-modal="true"
+			aria-label={`Preview ${template?.name ?? "template"}`}
+		>
+			<div className="flex items-center justify-between border-b border-[color:var(--dm-border)] bg-[color:var(--dm-bg)] px-6 py-3">
+				<span className="text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
+					Preview &mdash; {template?.name}
+				</span>
+				<button
+					type="button"
+					onClick={onClose}
+					className="rounded-full px-4 py-2 text-xs uppercase tracking-[0.15em] text-[color:var(--dm-muted)] transition-colors hover:text-[color:var(--dm-ink)]"
+				>
+					Close
+				</button>
+			</div>
+			{/* biome-ignore lint/a11y/noStaticElementInteractions: stop propagation for modal content */}
+			<div
+				className="flex-1 overflow-y-auto"
+				onClick={(e) => e.stopPropagation()}
+				onKeyDown={() => {}}
+			>
+				<InvitationRenderer
+					templateId={templateId}
+					content={content}
+					sectionVisibility={sectionVisibility}
+				/>
+			</div>
+		</div>
+	);
+}
+
 function TemplateSelectionPage() {
 	const { user } = useAuth();
 	const navigate = useNavigate();
 	const [creatingId, setCreatingId] = useState<string | null>(null);
+	const [previewId, setPreviewId] = useState<string | null>(null);
+
+	const handlePreview = useCallback((templateId: string) => {
+		setPreviewId(templateId);
+	}, []);
 
 	if (!user) return <Navigate to="/auth/login" />;
 
@@ -198,11 +267,19 @@ function TemplateSelectionPage() {
 							key={template.id}
 							template={template}
 							onSelect={handleSelect}
+							onPreview={handlePreview}
 							isCreating={creatingId === template.id}
 						/>
 					))}
 				</div>
 			</div>
+
+			{previewId && (
+				<TemplatePreviewModal
+					templateId={previewId}
+					onClose={() => setPreviewId(null)}
+				/>
+			)}
 		</div>
 	);
 }

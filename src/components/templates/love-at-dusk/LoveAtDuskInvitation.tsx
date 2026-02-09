@@ -1,8 +1,16 @@
 import { Link } from "@tanstack/react-router";
 import { type CSSProperties, useId, useState } from "react";
 import { useParallax, useScrollReveal } from "../../../lib/scroll-effects";
+import { AddToCalendarButton } from "../../ui/AddToCalendarButton";
 import { LoadingSpinner } from "../../ui/LoadingSpinner";
+import AngpowQRCode from "../AngpowQRCode";
+import { ParticleField } from "../animations";
+import { CountdownWidget } from "../CountdownWidget";
 import { makeEditableProps, parseAttendance } from "../helpers";
+import {
+	RsvpConfirmation,
+	type RsvpConfirmationProps,
+} from "../RsvpConfirmation";
 import SectionShell from "../SectionShell";
 import type { TemplateInvitationProps } from "../types";
 
@@ -36,6 +44,10 @@ export default function LoveAtDuskInvitation({
 	const consentDescriptionId = useId();
 	const data = content;
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [rsvpData, setRsvpData] = useState<Omit<
+		RsvpConfirmationProps,
+		"onEdit" | "className"
+	> | null>(null);
 	const editableProps = makeEditableProps(mode, onInlineEdit);
 
 	return (
@@ -101,6 +113,12 @@ export default function LoveAtDuskInvitation({
 			>
 				<div className="love-hero-bg dm-parallax" data-parallax="0.06" />
 				<div className="love-hero-glow" />
+				<ParticleField
+					count={20}
+					color="rgba(212, 175, 55, 0.4)"
+					shape="sparkle"
+					className="z-[1]"
+				/>
 				<div className="relative z-10 mx-auto flex max-w-4xl flex-col items-center text-center">
 					<p
 						data-reveal
@@ -157,7 +175,29 @@ export default function LoveAtDuskInvitation({
 						<span className="love-pill">{data.hero.date}</span>
 						<span className="love-pill">{data.venue.name}</span>
 					</div>
+					{mode !== "editor" && (
+						<div className="mt-6">
+							<AddToCalendarButton
+								title={`${data.hero.partnerOneName} & ${data.hero.partnerTwoName}'s Wedding`}
+								date={data.hero.date}
+								venue={data.venue.name}
+								address={data.venue.address}
+								variant="dark"
+							/>
+						</div>
+					)}
 				</div>
+			</SectionShell>
+
+			<SectionShell
+				sectionId="countdown"
+				mode={mode}
+				hidden={hiddenSections?.countdown}
+				onSelect={onSectionSelect}
+				onAiClick={onAiClick}
+				className="love-section"
+			>
+				<CountdownWidget targetDate={data.hero.date} />
 			</SectionShell>
 
 			<div
@@ -453,6 +493,27 @@ export default function LoveAtDuskInvitation({
 						>
 							{data.venue.directions}
 						</p>
+						{data.venue.coordinates?.lat != null &&
+						data.venue.coordinates?.lng != null ? (
+							<div className="mt-3 flex flex-wrap gap-3">
+								<a
+									href={`https://www.google.com/maps/search/?api=1&query=${data.venue.coordinates.lat},${data.venue.coordinates.lng}`}
+									target="_blank"
+									rel="noopener noreferrer"
+									className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.15em] text-[var(--love-accent)] transition-colors hover:bg-white/10"
+								>
+									Google Maps
+								</a>
+								<a
+									href={`https://www.waze.com/ul?ll=${data.venue.coordinates.lat},${data.venue.coordinates.lng}&navigate=yes`}
+									target="_blank"
+									rel="noopener noreferrer"
+									className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.15em] text-[var(--love-accent)] transition-colors hover:bg-white/10"
+								>
+									Waze
+								</a>
+							</div>
+						) : null}
 					</div>
 					<div data-reveal className="dm-reveal love-venue-map">
 						<img
@@ -532,6 +593,23 @@ export default function LoveAtDuskInvitation({
 				</div>
 			</SectionShell>
 
+			{data.gift && (
+				<SectionShell
+					sectionId="gift"
+					mode={mode}
+					hidden={hiddenSections?.gift}
+					onSelect={onSectionSelect}
+					onAiClick={onAiClick}
+					className="love-section"
+				>
+					<AngpowQRCode
+						paymentUrl={data.gift.paymentUrl}
+						paymentMethod={data.gift.paymentMethod}
+						recipientName={data.gift.recipientName}
+					/>
+				</SectionShell>
+			)}
+
 			<SectionShell
 				sectionId="rsvp"
 				mode={mode}
@@ -562,135 +640,170 @@ export default function LoveAtDuskInvitation({
 							{data.rsvp.customMessage}
 						</p>
 					</div>
-					<form
-						data-reveal
-						className="dm-reveal rounded-3xl border border-white/10 bg-[#140d0b]/80 p-6"
-						noValidate
-						onSubmit={async (event) => {
-							event.preventDefault();
-							if (!onRsvpSubmit || isSubmitting) return;
-							setIsSubmitting(true);
-							try {
-								const formData = new FormData(event.currentTarget);
-								await onRsvpSubmit({
-									name: String(formData.get("name") ?? ""),
-									attendance: parseAttendance(formData.get("attendance")),
-									guestCount: Number(formData.get("guestCount") ?? 1),
-									dietaryRequirements: String(formData.get("dietary") ?? ""),
-									message: String(formData.get("message") ?? ""),
-									email: String(formData.get("email") ?? ""),
-								});
-							} finally {
-								setIsSubmitting(false);
-							}
-						}}
-					>
-						<div className="grid gap-4 sm:grid-cols-2">
-							<label className="grid gap-2 text-xs uppercase tracking-[0.3em] text-[var(--love-accent)]">
-								Name
-								<input
-									name="name"
-									className="h-11 rounded-2xl border border-white/10 bg-[#0f0c0a] px-4 text-base text-[var(--love-cream)]"
-									placeholder="Sarah Lim…"
-									autoComplete="off"
-									required
-									aria-required="true"
-								/>
-							</label>
-							<label className="grid gap-2 text-xs uppercase tracking-[0.3em] text-[var(--love-accent)]">
-								Attendance
-								<select
-									name="attendance"
-									className="h-11 rounded-2xl border border-white/10 bg-[#0f0c0a] px-4 text-base text-[var(--love-cream)]"
-								>
-									<option value="attending">Attending</option>
-									<option value="not_attending">Not Attending</option>
-									<option value="undecided">Undecided</option>
-								</select>
-							</label>
-							<label className="grid gap-2 text-xs uppercase tracking-[0.3em] text-[var(--love-accent)]">
-								Email
-								<input
-									name="email"
-									type="email"
-									className="h-11 rounded-2xl border border-white/10 bg-[#0f0c0a] px-4 text-base text-[var(--love-cream)]"
-									placeholder="sarah@example.com…"
-									autoComplete="off"
-									spellCheck={false}
-								/>
-							</label>
-							<label className="grid gap-2 text-xs uppercase tracking-[0.3em] text-[var(--love-accent)]">
-								Guests
-								<input
-									name="guestCount"
-									className="h-11 rounded-2xl border border-white/10 bg-[#0f0c0a] px-4 text-base text-[var(--love-cream)]"
-									placeholder="2…"
-									type="number"
-									min={1}
-									inputMode="numeric"
-									autoComplete="off"
-								/>
-							</label>
-							<label className="grid gap-2 text-xs uppercase tracking-[0.3em] text-[var(--love-accent)]">
-								Dietary
-								<input
-									name="dietary"
-									className="h-11 rounded-2xl border border-white/10 bg-[#0f0c0a] px-4 text-base text-[var(--love-cream)]"
-									placeholder="Vegetarian, no pork…"
-									autoComplete="off"
-								/>
-							</label>
-						</div>
-						<label className="mt-4 grid gap-2 text-xs uppercase tracking-[0.3em] text-[var(--love-accent)]">
-							Message
-							<textarea
-								name="message"
-								className="min-h-[120px] rounded-2xl border border-white/10 bg-[#0f0c0a] px-4 py-3 text-base text-[var(--love-cream)]"
-								placeholder="Congratulations and love…"
-								autoComplete="off"
-							/>
-						</label>
-						<label className="relative mt-4 flex min-h-[44px] cursor-pointer items-start gap-3">
-							<input
-								type="checkbox"
-								name="consent"
-								required
-								aria-describedby={consentDescriptionId}
-								className="mt-0.5 h-4 w-4 rounded border border-white/10 bg-[#0f0c0a] accent-[var(--love-accent)] before:absolute before:left-0 before:top-1/2 before:h-[44px] before:w-[44px] before:-translate-x-[13px] before:-translate-y-1/2 before:content-[''] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--love-accent)]/30"
-							/>
-							<span
-								id={consentDescriptionId}
-								className="text-xs leading-relaxed text-[var(--love-muted)]"
-							>
-								I consent to the collection of my personal data as described in
-								the{" "}
-								<Link
-									to="/privacy"
-									className="text-[var(--love-accent)] underline hover:no-underline"
-									target="_blank"
-									rel="noopener noreferrer"
-								>
-									Privacy Policy
-								</Link>
-							</span>
-						</label>
-						{rsvpStatus ? (
-							<output
-								className="mt-3 text-xs text-[var(--love-accent)]"
-								aria-live="polite"
-							>
-								{rsvpStatus}
-							</output>
-						) : null}
-						<button
-							type="submit"
-							disabled={isSubmitting}
-							className="mt-6 w-full rounded-full bg-[var(--love-accent)] px-6 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-[var(--love-ink)] disabled:opacity-70 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
+					{rsvpData ? (
+						<div
+							data-reveal
+							className="dm-reveal flex items-center justify-center rounded-3xl border border-white/10 bg-[#140d0b]/80 p-6"
 						>
-							{isSubmitting && <LoadingSpinner size="sm" />}
-							{isSubmitting ? "Submitting..." : "Submit RSVP"}
-						</button>
-					</form>
+							<RsvpConfirmation
+								{...rsvpData}
+								onEdit={() => setRsvpData(null)}
+							/>
+						</div>
+					) : (
+						<form
+							data-reveal
+							className="dm-reveal rounded-3xl border border-white/10 bg-[#140d0b]/80 p-6"
+							onSubmit={async (event) => {
+								event.preventDefault();
+								if (!onRsvpSubmit || isSubmitting) return;
+								const formData = new FormData(event.currentTarget);
+								const name = String(formData.get("name") ?? "").trim();
+								if (!name) return;
+								const maxGuests = data.rsvp.allowPlusOnes
+									? Math.max(1, data.rsvp.maxPlusOnes + 1)
+									: 1;
+								const rawGuestCount = Number(formData.get("guestCount") ?? 1);
+								const guestCount = Number.isFinite(rawGuestCount)
+									? Math.min(Math.max(rawGuestCount, 1), maxGuests)
+									: 1;
+								const attendance = parseAttendance(formData.get("attendance"));
+								const dietaryRequirements = String(
+									formData.get("dietary") ?? "",
+								);
+								setIsSubmitting(true);
+								try {
+									await onRsvpSubmit({
+										name,
+										attendance,
+										guestCount,
+										dietaryRequirements,
+										message: String(formData.get("message") ?? ""),
+										email: String(formData.get("email") ?? ""),
+									});
+									setRsvpData({
+										name,
+										attendance,
+										guestCount,
+										dietaryRequirements,
+									});
+								} finally {
+									setIsSubmitting(false);
+								}
+							}}
+						>
+							<div className="grid gap-4 sm:grid-cols-2">
+								<label className="grid gap-2 text-xs uppercase tracking-[0.3em] text-[var(--love-accent)]">
+									Name
+									<input
+										name="name"
+										className="h-11 rounded-2xl border border-white/10 bg-[#0f0c0a] px-4 text-base text-[var(--love-cream)]"
+										placeholder="Sarah Lim…"
+										autoComplete="off"
+										required
+										aria-required="true"
+									/>
+								</label>
+								<label className="grid gap-2 text-xs uppercase tracking-[0.3em] text-[var(--love-accent)]">
+									Attendance
+									<select
+										name="attendance"
+										className="h-11 rounded-2xl border border-white/10 bg-[#0f0c0a] px-4 text-base text-[var(--love-cream)]"
+									>
+										<option value="attending">Attending</option>
+										<option value="not_attending">Not Attending</option>
+										<option value="undecided">Undecided</option>
+									</select>
+								</label>
+								<label className="grid gap-2 text-xs uppercase tracking-[0.3em] text-[var(--love-accent)]">
+									Email
+									<input
+										name="email"
+										type="email"
+										className="h-11 rounded-2xl border border-white/10 bg-[#0f0c0a] px-4 text-base text-[var(--love-cream)]"
+										placeholder="sarah@example.com…"
+										autoComplete="off"
+										spellCheck={false}
+									/>
+								</label>
+								<label className="grid gap-2 text-xs uppercase tracking-[0.3em] text-[var(--love-accent)]">
+									Guests
+									<input
+										name="guestCount"
+										className="h-11 rounded-2xl border border-white/10 bg-[#0f0c0a] px-4 text-base text-[var(--love-cream)]"
+										placeholder="2…"
+										type="number"
+										min={1}
+										max={
+											data.rsvp.allowPlusOnes
+												? Math.max(1, data.rsvp.maxPlusOnes + 1)
+												: 1
+										}
+										inputMode="numeric"
+										autoComplete="off"
+									/>
+								</label>
+								<label className="grid gap-2 text-xs uppercase tracking-[0.3em] text-[var(--love-accent)]">
+									Dietary
+									<input
+										name="dietary"
+										className="h-11 rounded-2xl border border-white/10 bg-[#0f0c0a] px-4 text-base text-[var(--love-cream)]"
+										placeholder="Vegetarian, no pork…"
+										autoComplete="off"
+									/>
+								</label>
+							</div>
+							<label className="mt-4 grid gap-2 text-xs uppercase tracking-[0.3em] text-[var(--love-accent)]">
+								Message
+								<textarea
+									name="message"
+									className="min-h-[120px] rounded-2xl border border-white/10 bg-[#0f0c0a] px-4 py-3 text-base text-[var(--love-cream)]"
+									placeholder="Congratulations and love…"
+									autoComplete="off"
+								/>
+							</label>
+							<label className="relative mt-4 flex min-h-[44px] cursor-pointer items-start gap-3">
+								<input
+									type="checkbox"
+									name="consent"
+									required
+									aria-describedby={consentDescriptionId}
+									className="mt-0.5 h-4 w-4 rounded border border-white/10 bg-[#0f0c0a] accent-[var(--love-accent)] before:absolute before:left-0 before:top-1/2 before:h-[44px] before:w-[44px] before:-translate-x-[13px] before:-translate-y-1/2 before:content-[''] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--love-accent)]/30"
+								/>
+								<span
+									id={consentDescriptionId}
+									className="text-xs leading-relaxed text-[var(--love-muted)]"
+								>
+									I consent to the collection of my personal data as described
+									in the{" "}
+									<Link
+										to="/privacy"
+										className="text-[var(--love-accent)] underline hover:no-underline"
+										target="_blank"
+										rel="noopener noreferrer"
+									>
+										Privacy Policy
+									</Link>
+								</span>
+							</label>
+							{rsvpStatus ? (
+								<output
+									className="mt-3 text-xs text-[var(--love-accent)]"
+									aria-live="polite"
+								>
+									{rsvpStatus}
+								</output>
+							) : null}
+							<button
+								type="submit"
+								disabled={isSubmitting}
+								className="mt-6 w-full rounded-full bg-[var(--love-accent)] px-6 py-3 text-xs font-semibold uppercase tracking-[0.3em] text-[var(--love-ink)] disabled:opacity-70 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
+							>
+								{isSubmitting && <LoadingSpinner size="sm" />}
+								{isSubmitting ? "Submitting..." : "Submit RSVP"}
+							</button>
+						</form>
+					)}
 				</div>
 			</SectionShell>
 
@@ -702,6 +815,35 @@ export default function LoveAtDuskInvitation({
 				onAiClick={onAiClick}
 				className="love-section love-panel"
 			>
+				<div
+					className="pointer-events-none absolute inset-0 overflow-hidden"
+					aria-hidden="true"
+				>
+					<div
+						className="absolute left-[10%] top-[20%] h-8 w-5 rounded-b-full opacity-20"
+						style={{
+							background:
+								"linear-gradient(to bottom, rgba(212,175,55,0.6), rgba(196,30,58,0.3))",
+							animation: "dm-lantern-float 8s ease-in-out infinite",
+						}}
+					/>
+					<div
+						className="absolute right-[15%] top-[30%] h-6 w-4 rounded-b-full opacity-15"
+						style={{
+							background:
+								"linear-gradient(to bottom, rgba(212,175,55,0.5), rgba(196,30,58,0.25))",
+							animation: "dm-lantern-float 10s ease-in-out 2s infinite",
+						}}
+					/>
+					<div
+						className="absolute left-[50%] top-[10%] h-7 w-4.5 rounded-b-full opacity-18"
+						style={{
+							background:
+								"linear-gradient(to bottom, rgba(212,175,55,0.55), rgba(196,30,58,0.28))",
+							animation: "dm-lantern-float 9s ease-in-out 1s infinite",
+						}}
+					/>
+				</div>
 				<div className="mx-auto max-w-3xl text-center">
 					<p
 						data-reveal

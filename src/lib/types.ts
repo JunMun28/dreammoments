@@ -111,6 +111,12 @@ export interface InvitationContent {
 	countdown: {
 		targetDate: string;
 	};
+	gift?: {
+		paymentUrl: string;
+		paymentMethod: "duitnow" | "paynow" | "tng";
+		recipientName?: string;
+	};
+	musicUrl?: string;
 }
 
 export interface Invitation {

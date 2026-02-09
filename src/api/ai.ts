@@ -328,8 +328,12 @@ export const generateAiContentFn = createServerFn({
 						"AI service authentication failed. Please contact support.",
 					);
 				}
+				console.error(
+					`[AI] API error (${response.status}):`,
+					errorBody.slice(0, 500),
+				);
 				throw new Error(
-					`AI service error (${response.status}): ${errorBody.slice(0, 200)}`,
+					"AI content generation failed. Please try again later.",
 				);
 			}
 

@@ -1,8 +1,16 @@
 import { Link } from "@tanstack/react-router";
 import { type CSSProperties, useId, useState } from "react";
 import { useScrollReveal } from "../../../lib/scroll-effects";
+import { AddToCalendarButton } from "../../ui/AddToCalendarButton";
 import { LoadingSpinner } from "../../ui/LoadingSpinner";
+import AngpowQRCode from "../AngpowQRCode";
+import { Parallax, ParticleField } from "../animations";
+import { CountdownWidget } from "../CountdownWidget";
 import { makeEditableProps, parseAttendance } from "../helpers";
+import {
+	RsvpConfirmation,
+	type RsvpConfirmationProps,
+} from "../RsvpConfirmation";
 import SectionShell from "../SectionShell";
 import type { TemplateInvitationProps } from "../types";
 
@@ -34,6 +42,10 @@ export default function BlushRomanceInvitation({
 	const consentDescriptionId = useId();
 	const data = content;
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [rsvpData, setRsvpData] = useState<Omit<
+		RsvpConfirmationProps,
+		"onEdit" | "className"
+	> | null>(null);
 	const editableProps = makeEditableProps(mode, onInlineEdit);
 
 	return (
@@ -46,6 +58,11 @@ export default function BlushRomanceInvitation({
 				onAiClick={onAiClick}
 				className="blush-section blush-hero"
 			>
+				<ParticleField
+					count={15}
+					color="rgba(232, 160, 152, 0.5)"
+					shape="petal"
+				/>
 				<div className="blush-hero-frame" />
 				<div className="blush-hero-bloom" />
 				<div
@@ -93,7 +110,29 @@ export default function BlushRomanceInvitation({
 						<span className="blush-pill-dot" aria-hidden="true" />
 						<span>{data.venue.name}</span>
 					</div>
+					{mode !== "editor" && (
+						<div className="mt-4">
+							<AddToCalendarButton
+								title={`${data.hero.partnerOneName} & ${data.hero.partnerTwoName}'s Wedding`}
+								date={data.hero.date}
+								venue={data.venue.name}
+								address={data.venue.address}
+								variant="light"
+							/>
+						</div>
+					)}
 				</div>
+			</SectionShell>
+
+			<SectionShell
+				sectionId="countdown"
+				mode={mode}
+				hidden={hiddenSections?.countdown}
+				onSelect={onSectionSelect}
+				onAiClick={onAiClick}
+				className="blush-section"
+			>
+				<CountdownWidget targetDate={data.hero.date} />
 			</SectionShell>
 
 			<div className="blush-floral-divider" aria-hidden="true">
@@ -201,26 +240,28 @@ export default function BlushRomanceInvitation({
 			>
 				<div className="mx-auto max-w-5xl">
 					<p className="blush-kicker">Gallery</p>
-					<div className="mt-6 grid gap-4 md:grid-cols-3">
-						{data.gallery.photos.map((photo, index) => (
-							<div
-								key={`${photo.url ?? "photo"}-${photo.caption ?? "Moment"}`}
-								data-reveal
-								style={{ transitionDelay: `${index * 70}ms` }}
-								className="dm-reveal blush-photo"
-							>
-								<img
-									src={photo.url || "/placeholders/photo-light.svg"}
-									alt={photo.caption || "Wedding photo"}
-									loading="lazy"
-									width={360}
-									height={140}
-									className="blush-photo-frame w-full object-cover"
-								/>
-								<p className="blush-meta">{photo.caption ?? "Moment"}</p>
-							</div>
-						))}
-					</div>
+					<Parallax speed={0.15}>
+						<div className="mt-6 grid gap-4 md:grid-cols-3">
+							{data.gallery.photos.map((photo, index) => (
+								<div
+									key={`${photo.url ?? "photo"}-${photo.caption ?? "Moment"}`}
+									data-reveal
+									style={{ transitionDelay: `${index * 70}ms` }}
+									className="dm-reveal blush-photo"
+								>
+									<img
+										src={photo.url || "/placeholders/photo-light.svg"}
+										alt={photo.caption || "Wedding photo"}
+										loading="lazy"
+										width={360}
+										height={140}
+										className="blush-photo-frame w-full object-cover"
+									/>
+									<p className="blush-meta">{photo.caption ?? "Moment"}</p>
+								</div>
+							))}
+						</div>
+					</Parallax>
 				</div>
 			</SectionShell>
 
@@ -303,6 +344,27 @@ export default function BlushRomanceInvitation({
 						>
 							{data.venue.directions}
 						</p>
+						{data.venue.coordinates?.lat != null &&
+						data.venue.coordinates?.lng != null ? (
+							<div className="mt-3 flex flex-wrap justify-center gap-3">
+								<a
+									href={`https://www.google.com/maps/search/?api=1&query=${data.venue.coordinates.lat},${data.venue.coordinates.lng}`}
+									target="_blank"
+									rel="noopener noreferrer"
+									className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.15em] text-[color:var(--dm-muted)] transition-colors hover:border-[color:var(--dm-peach)] hover:text-[color:var(--dm-ink)]"
+								>
+									Google Maps
+								</a>
+								<a
+									href={`https://www.waze.com/ul?ll=${data.venue.coordinates.lat},${data.venue.coordinates.lng}&navigate=yes`}
+									target="_blank"
+									rel="noopener noreferrer"
+									className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.15em] text-[color:var(--dm-muted)] transition-colors hover:border-[color:var(--dm-peach)] hover:text-[color:var(--dm-ink)]"
+								>
+									Waze
+								</a>
+							</div>
+						) : null}
 					</div>
 					<div className="blush-map">
 						<img
@@ -343,125 +405,156 @@ export default function BlushRomanceInvitation({
 					<p className="blush-kicker" style={bodyFont}>
 						RSVP
 					</p>
-					<form
-						className="mt-6 blush-form"
-						noValidate
-						onSubmit={async (event) => {
-							event.preventDefault();
-							if (!onRsvpSubmit || isSubmitting) return;
-							setIsSubmitting(true);
-							try {
+					{rsvpData ? (
+						<RsvpConfirmation
+							{...rsvpData}
+							onEdit={() => setRsvpData(null)}
+							className="mt-6"
+						/>
+					) : (
+						<form
+							className="mt-6 blush-form"
+							onSubmit={async (event) => {
+								event.preventDefault();
+								if (!onRsvpSubmit || isSubmitting) return;
 								const formData = new FormData(event.currentTarget);
-								await onRsvpSubmit({
-									name: String(formData.get("name") ?? ""),
-									attendance: parseAttendance(formData.get("attendance")),
-									guestCount: Number(formData.get("guestCount") ?? 1),
-									dietaryRequirements: String(formData.get("dietary") ?? ""),
-									message: String(formData.get("message") ?? ""),
-									email: String(formData.get("email") ?? ""),
-								});
-							} finally {
-								setIsSubmitting(false);
-							}
-						}}
-					>
-						<label className="grid gap-1.5 text-xs uppercase tracking-[0.15em] text-[color:var(--dm-muted)]">
-							Name
-							<input
-								name="name"
-								placeholder="Rachel Lim…"
-								autoComplete="off"
-								required
-								aria-required="true"
-								className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30"
-							/>
-						</label>
-						<label className="grid gap-1.5 text-xs uppercase tracking-[0.15em] text-[color:var(--dm-muted)]">
-							Attendance
-							<select
-								name="attendance"
-								className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30"
-							>
-								<option value="attending">Attending</option>
-								<option value="not_attending">Not Attending</option>
-								<option value="undecided">Undecided</option>
-							</select>
-						</label>
-						<label className="grid gap-1.5 text-xs uppercase tracking-[0.15em] text-[color:var(--dm-muted)]">
-							Email
-							<input
-								name="email"
-								placeholder="rachel@example.com…"
-								type="email"
-								autoComplete="off"
-								spellCheck={false}
-								className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30"
-							/>
-						</label>
-						<label className="grid gap-1.5 text-xs uppercase tracking-[0.15em] text-[color:var(--dm-muted)]">
-							Guest count
-							<input
-								name="guestCount"
-								placeholder="2…"
-								type="number"
-								min={1}
-								inputMode="numeric"
-								autoComplete="off"
-								className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30"
-							/>
-						</label>
-						<label className="grid gap-1.5 text-xs uppercase tracking-[0.15em] text-[color:var(--dm-muted)]">
-							Dietary requirements
-							<input
-								name="dietary"
-								placeholder="Vegetarian, no pork…"
-								autoComplete="off"
-								className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30"
-							/>
-						</label>
-						<label className="grid gap-1.5 text-xs uppercase tracking-[0.15em] text-[color:var(--dm-muted)]">
-							Message
-							<textarea
-								name="message"
-								placeholder="Can't wait to celebrate with you…"
-								autoComplete="off"
-								className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30"
-							/>
-						</label>
-						<label className="blush-consent">
-							<input
-								type="checkbox"
-								name="consent"
-								required
-								aria-describedby={consentDescriptionId}
-							/>
-							<span id={consentDescriptionId}>
-								I consent to the collection of my personal data as described in
-								the{" "}
-								<Link
-									to="/privacy"
-									className="blush-consent-link"
-									target="_blank"
-									rel="noopener noreferrer"
-								>
-									Privacy Policy
-								</Link>
-							</span>
-						</label>
-						{rsvpStatus ? (
-							<output className="blush-meta" aria-live="polite">
-								{rsvpStatus}
-							</output>
-						) : null}
-						<button
-							type="submit"
-							disabled={isSubmitting}
-							className="inline-flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+								const name = String(formData.get("name") ?? "").trim();
+								if (!name) return;
+								const maxGuests = data.rsvp.allowPlusOnes
+									? Math.max(1, data.rsvp.maxPlusOnes + 1)
+									: 1;
+								const rawGuestCount = Number(formData.get("guestCount") ?? 1);
+								const guestCount = Number.isFinite(rawGuestCount)
+									? Math.min(Math.max(rawGuestCount, 1), maxGuests)
+									: 1;
+								const attendance = parseAttendance(formData.get("attendance"));
+								const dietaryRequirements = String(
+									formData.get("dietary") ?? "",
+								);
+								setIsSubmitting(true);
+								try {
+									await onRsvpSubmit({
+										name,
+										attendance,
+										guestCount,
+										dietaryRequirements,
+										message: String(formData.get("message") ?? ""),
+										email: String(formData.get("email") ?? ""),
+									});
+									setRsvpData({
+										name,
+										attendance,
+										guestCount,
+										dietaryRequirements,
+									});
+								} finally {
+									setIsSubmitting(false);
+								}
+							}}
 						>
-							{isSubmitting && <LoadingSpinner size="sm" />}
-							{isSubmitting ? "Sending..." : "Send RSVP"}
-						</button>
-					</form>
+							<label className="grid gap-1.5 text-xs uppercase tracking-[0.15em] text-[color:var(--dm-muted)]">
+								Name
+								<input
+									name="name"
+									placeholder="Rachel Lim…"
+									autoComplete="off"
+									required
+									aria-required="true"
+									className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30"
+								/>
+							</label>
+							<label className="grid gap-1.5 text-xs uppercase tracking-[0.15em] text-[color:var(--dm-muted)]">
+								Attendance
+								<select
+									name="attendance"
+									className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30"
+								>
+									<option value="attending">Attending</option>
+									<option value="not_attending">Not Attending</option>
+									<option value="undecided">Undecided</option>
+								</select>
+							</label>
+							<label className="grid gap-1.5 text-xs uppercase tracking-[0.15em] text-[color:var(--dm-muted)]">
+								Email
+								<input
+									name="email"
+									placeholder="rachel@example.com…"
+									type="email"
+									autoComplete="off"
+									spellCheck={false}
+									className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30"
+								/>
+							</label>
+							<label className="grid gap-1.5 text-xs uppercase tracking-[0.15em] text-[color:var(--dm-muted)]">
+								Guest count
+								<input
+									name="guestCount"
+									placeholder="2…"
+									type="number"
+									min={1}
+									max={
+										data.rsvp.allowPlusOnes
+											? Math.max(1, data.rsvp.maxPlusOnes + 1)
+											: 1
+									}
+									inputMode="numeric"
+									autoComplete="off"
+									className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30"
+								/>
+							</label>
+							<label className="grid gap-1.5 text-xs uppercase tracking-[0.15em] text-[color:var(--dm-muted)]">
+								Dietary requirements
+								<input
+									name="dietary"
+									placeholder="Vegetarian, no pork…"
+									autoComplete="off"
+									className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30"
+								/>
+							</label>
+							<label className="grid gap-1.5 text-xs uppercase tracking-[0.15em] text-[color:var(--dm-muted)]">
+								Message
+								<textarea
+									name="message"
+									placeholder="Can't wait to celebrate with you…"
+									autoComplete="off"
+									className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30"
+								/>
+							</label>
+							<label className="blush-consent">
+								<input
+									type="checkbox"
+									name="consent"
+									required
+									aria-describedby={consentDescriptionId}
+								/>
+								<span id={consentDescriptionId}>
+									I consent to the collection of my personal data as described
+									in the{" "}
+									<Link
+										to="/privacy"
+										className="blush-consent-link"
+										target="_blank"
+										rel="noopener noreferrer"
+									>
+										Privacy Policy
+									</Link>
+								</span>
+							</label>
+							{rsvpStatus ? (
+								<output className="blush-meta" aria-live="polite">
+									{rsvpStatus}
+								</output>
+							) : null}
+							<button
+								type="submit"
+								disabled={isSubmitting}
+								className="inline-flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+							>
+								{isSubmitting && <LoadingSpinner size="sm" />}
+								{isSubmitting ? "Sending..." : "Send RSVP"}
+							</button>
+						</form>
+					)}
 				</div>
 			</SectionShell>
 
@@ -496,6 +589,23 @@ export default function BlushRomanceInvitation({
 					</div>
 				</div>
 			</SectionShell>
+
+			{data.gift && (
+				<SectionShell
+					sectionId="gift"
+					mode={mode}
+					hidden={hiddenSections?.gift}
+					onSelect={onSectionSelect}
+					onAiClick={onAiClick}
+					className="blush-section"
+				>
+					<AngpowQRCode
+						paymentUrl={data.gift.paymentUrl}
+						paymentMethod={data.gift.paymentMethod}
+						recipientName={data.gift.recipientName}
+					/>
+				</SectionShell>
+			)}
 
 			<SectionShell
 				sectionId="footer"

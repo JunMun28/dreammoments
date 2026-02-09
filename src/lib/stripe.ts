@@ -37,6 +37,12 @@ export const PRICING: Record<
 	SGD: { amountCents: 1900, label: "$19" },
 };
 
+/** Regional payment methods supported per currency. */
+const PAYMENT_METHODS: Record<"MYR" | "SGD", string[]> = {
+	MYR: ["card", "fpx", "grabpay"],
+	SGD: ["card", "paynow", "grabpay"],
+};
+
 // ── Checkout Session ────────────────────────────────────────────────
 
 export interface CreateCheckoutParams {
@@ -63,11 +69,18 @@ export async function createCheckoutSession(
 ): Promise<StripeCheckoutSession> {
 	const price = PRICING[params.currency];
 
+	const methods = PAYMENT_METHODS[params.currency];
+	const methodParams: Record<string, string> = {};
+	for (let i = 0; i < methods.length; i++) {
+		methodParams[`payment_method_types[${i}]`] = methods[i];
+	}
+
 	const body = new URLSearchParams({
 		mode: "payment",
 		success_url: params.successUrl,
 		cancel_url: params.cancelUrl,
 		customer_email: params.email,
+		...methodParams,
 		"line_items[0][price_data][currency]": params.currency.toLowerCase(),
 		"line_items[0][price_data][unit_amount]": String(price.amountCents),
 		"line_items[0][price_data][product_data][name]": "DreamMoments Premium",

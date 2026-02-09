@@ -6,8 +6,15 @@ import {
 	useTransform,
 	type Variants,
 } from "motion/react";
-import { useId, useMemo } from "react";
+import { useId, useMemo, useState } from "react";
+import { AddToCalendarButton } from "../../ui/AddToCalendarButton";
+import AngpowQRCode from "../AngpowQRCode";
+import { CountdownWidget } from "../CountdownWidget";
 import { makeEditableProps, parseAttendance } from "../helpers";
+import {
+	RsvpConfirmation,
+	type RsvpConfirmationProps,
+} from "../RsvpConfirmation";
 import SectionShell from "../SectionShell";
 import type { TemplateInvitationProps } from "../types";
 
@@ -213,6 +220,10 @@ export default function GardenRomanceInvitation({
 	);
 
 	const editableProps = makeEditableProps(mode, onInlineEdit);
+	const [rsvpData, setRsvpData] = useState<Omit<
+		RsvpConfirmationProps,
+		"onEdit" | "className"
+	> | null>(null);
 
 	const maxGuests = data.rsvp.allowPlusOnes
 		? Math.max(1, data.rsvp.maxPlusOnes + 1)
@@ -359,6 +370,18 @@ export default function GardenRomanceInvitation({
 						</div>
 					</motion.div>
 
+					{mode !== "editor" && (
+						<div className="mt-6">
+							<AddToCalendarButton
+								title={`${data.hero.partnerOneName} & ${data.hero.partnerTwoName}'s Wedding`}
+								date={data.hero.date}
+								venue={data.venue.name}
+								address={data.venue.address}
+								variant="dark"
+							/>
+						</div>
+					)}
+
 					{/* CTA */}
 					<motion.div
 						{...reveal(fadeUp, 0.8)}
@@ -415,6 +438,21 @@ export default function GardenRomanceInvitation({
 			</SectionShell>
 
 			{/* ════════════════════════════════════════════
+			    COUNTDOWN — Between hero and announcement
+			    ════════════════════════════════════════════ */}
+			<SectionShell
+				sectionId="countdown"
+				mode={mode}
+				hidden={hiddenSections?.countdown}
+				onSelect={onSectionSelect}
+				onAiClick={onAiClick}
+				className="relative px-6 py-16 sm:px-10 lg:px-16"
+				style={{ background: COLORS.cream }}
+			>
+				<CountdownWidget targetDate={data.hero.date} />
+			</SectionShell>
+
+			{/* ════════════════════════════════════════════
 			    2. ANNOUNCEMENT — Warm ivory card
 			    ════════════════════════════════════════════ */}
 			<SectionShell
@@ -431,6 +469,53 @@ export default function GardenRomanceInvitation({
 						{...reveal(scaleIn)}
 						className="gr-gold-divider mx-auto mb-10 w-32"
 					/>
+
+					<div className="mx-auto mb-6 w-40 overflow-hidden" aria-hidden="true">
+						<svg
+							viewBox="0 0 160 30"
+							fill="none"
+							className="w-full"
+							style={{ animation: "dm-vine-grow 2s ease-out forwards" }}
+						>
+							<title>Decorative vine</title>
+							<path
+								d="M0 15 C40 5, 60 25, 80 15 C100 5, 120 25, 160 15"
+								stroke="rgba(196,30,58,0.25)"
+								strokeWidth="1.5"
+								strokeLinecap="round"
+							/>
+							<circle
+								cx="40"
+								cy="10"
+								r="3"
+								fill="rgba(196,30,58,0.15)"
+								style={{
+									animation: "dm-bloom 1.5s ease-out 0.8s forwards",
+									opacity: 0,
+								}}
+							/>
+							<circle
+								cx="80"
+								cy="15"
+								r="4"
+								fill="rgba(196,30,58,0.2)"
+								style={{
+									animation: "dm-bloom 1.5s ease-out 1s forwards",
+									opacity: 0,
+								}}
+							/>
+							<circle
+								cx="120"
+								cy="10"
+								r="3"
+								fill="rgba(196,30,58,0.15)"
+								style={{
+									animation: "dm-bloom 1.5s ease-out 1.2s forwards",
+									opacity: 0,
+								}}
+							/>
+						</svg>
+					</div>
 
 					<motion.p
 						{...reveal(fadeUp, 0.1)}
@@ -666,6 +751,14 @@ export default function GardenRomanceInvitation({
 								<figcaption className="absolute bottom-4 left-4 right-4 text-sm font-medium text-white">
 									{photo.caption || "Memory"}
 								</figcaption>
+								<div
+									className="pointer-events-none absolute inset-0 rounded-[inherit] opacity-0 group-hover:opacity-100 transition-opacity duration-700"
+									style={{
+										background:
+											"radial-gradient(circle at center, rgba(196,30,58,0.08) 0%, transparent 70%)",
+									}}
+									aria-hidden="true"
+								/>
 							</motion.figure>
 						))}
 					</motion.div>
@@ -836,6 +929,27 @@ export default function GardenRomanceInvitation({
 							{data.venue.coordinates.lat.toFixed(4)},{" "}
 							{data.venue.coordinates.lng.toFixed(4)}
 						</div>
+						{data.venue.coordinates?.lat != null &&
+						data.venue.coordinates?.lng != null ? (
+							<div className="mt-3 flex flex-wrap gap-3">
+								<a
+									href={`https://www.google.com/maps/search/?api=1&query=${data.venue.coordinates.lat},${data.venue.coordinates.lng}`}
+									target="_blank"
+									rel="noopener noreferrer"
+									className="inline-flex items-center gap-1.5 rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/10 px-4 py-2 text-xs uppercase tracking-[0.15em] text-[#D4AF37] transition-colors hover:bg-[#D4AF37]/20"
+								>
+									Google Maps
+								</a>
+								<a
+									href={`https://www.waze.com/ul?ll=${data.venue.coordinates.lat},${data.venue.coordinates.lng}&navigate=yes`}
+									target="_blank"
+									rel="noopener noreferrer"
+									className="inline-flex items-center gap-1.5 rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/10 px-4 py-2 text-xs uppercase tracking-[0.15em] text-[#D4AF37] transition-colors hover:bg-[#D4AF37]/20"
+								>
+									Waze
+								</a>
+							</div>
+						) : null}
 					</motion.div>
 
 					{/* Right: venue image */}
@@ -937,187 +1051,214 @@ export default function GardenRomanceInvitation({
 						</div>
 					</motion.div>
 
-					{/* Right: form */}
-					<motion.form
-						{...reveal(slideFromRight)}
-						className="rounded-[2rem] p-6 shadow-[0_22px_64px_-24px_rgba(0,0,0,0.5)] sm:p-8"
-						style={{
-							background: COLORS.cream,
-							border: "1px solid rgba(212,175,55,0.2)",
-						}}
-						noValidate
-						onSubmit={(event) => {
-							event.preventDefault();
-							if (!onRsvpSubmit) return;
-							const formData = new FormData(event.currentTarget);
-							const rawGuestCount = Number(formData.get("guestCount") ?? 1);
-							const safeGuestCount = Number.isFinite(rawGuestCount)
-								? Math.min(Math.max(rawGuestCount, 1), maxGuests)
-								: 1;
-							onRsvpSubmit({
-								name: String(formData.get("name") ?? ""),
-								attendance: parseAttendance(formData.get("attendance")),
-								guestCount: safeGuestCount,
-								dietaryRequirements: String(formData.get("dietary") ?? ""),
-								message: String(formData.get("message") ?? ""),
-								email: String(formData.get("email") ?? ""),
-							});
-						}}
-					>
-						<div className="grid gap-4 sm:grid-cols-2">
-							<label
-								className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em] sm:col-span-2"
-								style={{ color: COLORS.goldDark }}
-							>
-								Name
-								<input
-									name="name"
-									placeholder="Rachel Lim"
-									autoComplete="name"
-									required
-									aria-required="true"
-									className="rounded-xl border bg-white px-4 py-3 text-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C41E3A]/30"
-									style={{
-										borderColor: "rgba(212,175,55,0.3)",
-										color: COLORS.textPrimary,
-									}}
-								/>
-							</label>
-							<label
-								className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
-								style={{ color: COLORS.goldDark }}
-							>
-								Attendance
-								<select
-									name="attendance"
-									defaultValue="attending"
-									className="rounded-xl border bg-white px-4 py-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C41E3A]/30"
-									style={{
-										borderColor: "rgba(212,175,55,0.3)",
-										color: COLORS.textPrimary,
-									}}
-								>
-									<option value="attending">Attending</option>
-									<option value="not_attending">Not Attending</option>
-									<option value="undecided">Undecided</option>
-								</select>
-							</label>
-							<label
-								className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
-								style={{ color: COLORS.goldDark }}
-							>
-								Guest Count
-								<input
-									name="guestCount"
-									type="number"
-									min={1}
-									max={maxGuests}
-									defaultValue={1}
-									inputMode="numeric"
-									className="rounded-xl border bg-white px-4 py-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C41E3A]/30"
-									style={{
-										borderColor: "rgba(212,175,55,0.3)",
-										color: COLORS.textPrimary,
-									}}
-								/>
-							</label>
-							<label
-								className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em] sm:col-span-2"
-								style={{ color: COLORS.goldDark }}
-							>
-								Email
-								<input
-									name="email"
-									type="email"
-									placeholder="rachel@example.com"
-									autoComplete="email"
-									spellCheck={false}
-									className="rounded-xl border bg-white px-4 py-3 text-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C41E3A]/30"
-									style={{
-										borderColor: "rgba(212,175,55,0.3)",
-										color: COLORS.textPrimary,
-									}}
-								/>
-							</label>
-							<label
-								className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em] sm:col-span-2"
-								style={{ color: COLORS.goldDark }}
-							>
-								Dietary Requirements
-								<input
-									name="dietary"
-									placeholder="Vegetarian, halal, no pork..."
-									autoComplete="off"
-									className="rounded-xl border bg-white px-4 py-3 text-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C41E3A]/30"
-									style={{
-										borderColor: "rgba(212,175,55,0.3)",
-										color: COLORS.textPrimary,
-									}}
-								/>
-							</label>
-							<label
-								className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em] sm:col-span-2"
-								style={{ color: COLORS.goldDark }}
-							>
-								Message
-								<textarea
-									name="message"
-									placeholder="Can't wait to celebrate your wedding"
-									autoComplete="off"
-									className="min-h-24 rounded-xl border bg-white px-4 py-3 text-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C41E3A]/30"
-									style={{
-										borderColor: "rgba(212,175,55,0.3)",
-										color: COLORS.textPrimary,
-									}}
-								/>
-							</label>
-							<label className="relative mt-2 flex min-h-[44px] cursor-pointer items-start gap-3 sm:col-span-2">
-								<input
-									type="checkbox"
-									name="consent"
-									required
-									aria-describedby={consentDescriptionId}
-									className="mt-0.5 h-4 w-4 rounded border-2 accent-[#C41E3A] before:absolute before:left-0 before:top-1/2 before:h-[44px] before:w-[44px] before:-translate-x-[13px] before:-translate-y-1/2 before:content-[''] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C41E3A]/30"
-									style={{ borderColor: "rgba(212,175,55,0.3)" }}
-								/>
-								<span
-									id={consentDescriptionId}
-									className="text-xs leading-relaxed"
-									style={{ color: COLORS.textSecondary }}
-								>
-									I consent to the collection of my personal data as described
-									in the{" "}
-									<Link
-										to="/privacy"
-										className="underline hover:no-underline"
-										style={{ color: COLORS.crimson }}
-										target="_blank"
-										rel="noopener noreferrer"
-									>
-										Privacy Policy
-									</Link>
-								</span>
-							</label>
-						</div>
-						{rsvpStatus ? (
-							<output
-								className="mt-4 block text-sm"
-								style={{ color: COLORS.textSecondary }}
-								aria-live="polite"
-							>
-								{rsvpStatus}
-							</output>
-						) : null}
-						<motion.button
-							type="submit"
-							className="mt-6 w-full rounded-full px-5 py-3.5 text-xs font-semibold uppercase tracking-[0.3em] text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C41E3A]/50"
-							style={{ background: COLORS.crimson }}
-							whileHover={skip ? undefined : { scale: 1.02 }}
-							whileTap={skip ? undefined : { scale: 0.98 }}
+					{/* Right: form or confirmation */}
+					{rsvpData ? (
+						<motion.div
+							{...reveal(slideFromRight)}
+							className="flex items-center justify-center rounded-[2rem] p-6 shadow-[0_22px_64px_-24px_rgba(0,0,0,0.5)] sm:p-8"
+							style={{
+								background: COLORS.cream,
+								border: "1px solid rgba(212,175,55,0.2)",
+							}}
 						>
-							Send RSVP
-						</motion.button>
-					</motion.form>
+							<RsvpConfirmation
+								{...rsvpData}
+								onEdit={() => setRsvpData(null)}
+							/>
+						</motion.div>
+					) : (
+						<motion.form
+							{...reveal(slideFromRight)}
+							className="rounded-[2rem] p-6 shadow-[0_22px_64px_-24px_rgba(0,0,0,0.5)] sm:p-8"
+							style={{
+								background: COLORS.cream,
+								border: "1px solid rgba(212,175,55,0.2)",
+							}}
+							onSubmit={(event) => {
+								event.preventDefault();
+								if (!onRsvpSubmit) return;
+								const formData = new FormData(event.currentTarget);
+								const name = String(formData.get("name") ?? "").trim();
+								if (!name) return;
+								const rawGuestCount = Number(formData.get("guestCount") ?? 1);
+								const guestCount = Number.isFinite(rawGuestCount)
+									? Math.min(Math.max(rawGuestCount, 1), maxGuests)
+									: 1;
+								const attendance = parseAttendance(formData.get("attendance"));
+								const dietaryRequirements = String(
+									formData.get("dietary") ?? "",
+								);
+								onRsvpSubmit({
+									name,
+									attendance,
+									guestCount,
+									dietaryRequirements,
+									message: String(formData.get("message") ?? ""),
+									email: String(formData.get("email") ?? ""),
+								});
+								setRsvpData({
+									name,
+									attendance,
+									guestCount,
+									dietaryRequirements,
+								});
+							}}
+						>
+							<div className="grid gap-4 sm:grid-cols-2">
+								<label
+									className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em] sm:col-span-2"
+									style={{ color: COLORS.goldDark }}
+								>
+									Name
+									<input
+										name="name"
+										placeholder="Rachel Lim"
+										autoComplete="name"
+										required
+										aria-required="true"
+										className="rounded-xl border bg-white px-4 py-3 text-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C41E3A]/30"
+										style={{
+											borderColor: "rgba(212,175,55,0.3)",
+											color: COLORS.textPrimary,
+										}}
+									/>
+								</label>
+								<label
+									className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
+									style={{ color: COLORS.goldDark }}
+								>
+									Attendance
+									<select
+										name="attendance"
+										defaultValue="attending"
+										className="rounded-xl border bg-white px-4 py-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C41E3A]/30"
+										style={{
+											borderColor: "rgba(212,175,55,0.3)",
+											color: COLORS.textPrimary,
+										}}
+									>
+										<option value="attending">Attending</option>
+										<option value="not_attending">Not Attending</option>
+										<option value="undecided">Undecided</option>
+									</select>
+								</label>
+								<label
+									className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
+									style={{ color: COLORS.goldDark }}
+								>
+									Guest Count
+									<input
+										name="guestCount"
+										type="number"
+										min={1}
+										max={maxGuests}
+										defaultValue={1}
+										inputMode="numeric"
+										className="rounded-xl border bg-white px-4 py-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C41E3A]/30"
+										style={{
+											borderColor: "rgba(212,175,55,0.3)",
+											color: COLORS.textPrimary,
+										}}
+									/>
+								</label>
+								<label
+									className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em] sm:col-span-2"
+									style={{ color: COLORS.goldDark }}
+								>
+									Email
+									<input
+										name="email"
+										type="email"
+										placeholder="rachel@example.com"
+										autoComplete="email"
+										spellCheck={false}
+										className="rounded-xl border bg-white px-4 py-3 text-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C41E3A]/30"
+										style={{
+											borderColor: "rgba(212,175,55,0.3)",
+											color: COLORS.textPrimary,
+										}}
+									/>
+								</label>
+								<label
+									className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em] sm:col-span-2"
+									style={{ color: COLORS.goldDark }}
+								>
+									Dietary Requirements
+									<input
+										name="dietary"
+										placeholder="Vegetarian, halal, no pork..."
+										autoComplete="off"
+										className="rounded-xl border bg-white px-4 py-3 text-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C41E3A]/30"
+										style={{
+											borderColor: "rgba(212,175,55,0.3)",
+											color: COLORS.textPrimary,
+										}}
+									/>
+								</label>
+								<label
+									className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em] sm:col-span-2"
+									style={{ color: COLORS.goldDark }}
+								>
+									Message
+									<textarea
+										name="message"
+										placeholder="Can't wait to celebrate your wedding"
+										autoComplete="off"
+										className="min-h-24 rounded-xl border bg-white px-4 py-3 text-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C41E3A]/30"
+										style={{
+											borderColor: "rgba(212,175,55,0.3)",
+											color: COLORS.textPrimary,
+										}}
+									/>
+								</label>
+								<label className="relative mt-2 flex min-h-[44px] cursor-pointer items-start gap-3 sm:col-span-2">
+									<input
+										type="checkbox"
+										name="consent"
+										required
+										aria-describedby={consentDescriptionId}
+										className="mt-0.5 h-4 w-4 rounded border-2 accent-[#C41E3A] before:absolute before:left-0 before:top-1/2 before:h-[44px] before:w-[44px] before:-translate-x-[13px] before:-translate-y-1/2 before:content-[''] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C41E3A]/30"
+										style={{ borderColor: "rgba(212,175,55,0.3)" }}
+									/>
+									<span
+										id={consentDescriptionId}
+										className="text-xs leading-relaxed"
+										style={{ color: COLORS.textSecondary }}
+									>
+										I consent to the collection of my personal data as described
+										in the{" "}
+										<Link
+											to="/privacy"
+											className="underline hover:no-underline"
+											style={{ color: COLORS.crimson }}
+											target="_blank"
+											rel="noopener noreferrer"
+										>
+											Privacy Policy
+										</Link>
+									</span>
+								</label>
+							</div>
+							{rsvpStatus ? (
+								<output
+									className="mt-4 block text-sm"
+									style={{ color: COLORS.textSecondary }}
+									aria-live="polite"
+								>
+									{rsvpStatus}
+								</output>
+							) : null}
+							<motion.button
+								type="submit"
+								className="mt-6 w-full rounded-full px-5 py-3.5 text-xs font-semibold uppercase tracking-[0.3em] text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C41E3A]/50"
+								style={{ background: COLORS.crimson }}
+								whileHover={skip ? undefined : { scale: 1.02 }}
+								whileTap={skip ? undefined : { scale: 0.98 }}
+							>
+								Send RSVP
+							</motion.button>
+						</motion.form>
+					)}
 				</div>
 			</SectionShell>
 
@@ -1183,6 +1324,24 @@ export default function GardenRomanceInvitation({
 					</motion.div>
 				</div>
 			</SectionShell>
+
+			{data.gift && (
+				<SectionShell
+					sectionId="gift"
+					mode={mode}
+					hidden={hiddenSections?.gift}
+					onSelect={onSectionSelect}
+					onAiClick={onAiClick}
+					className="relative px-6 py-24 sm:px-10 lg:px-16"
+					style={{ background: COLORS.cream }}
+				>
+					<AngpowQRCode
+						paymentUrl={data.gift.paymentUrl}
+						paymentMethod={data.gift.paymentMethod}
+						recipientName={data.gift.recipientName}
+					/>
+				</SectionShell>
+			)}
 
 			{/* ════════════════════════════════════════════
 			    9. FOOTER — Soft cream closing

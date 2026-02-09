@@ -29,7 +29,7 @@ const pool = new Pool({
 	connectionString: databaseUrl,
 	ssl:
 		process.env.NODE_ENV === "production"
-			? { rejectUnauthorized: false }
+			? { rejectUnauthorized: true }
 			: undefined,
 });
 

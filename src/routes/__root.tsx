@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import Header from "../components/Header";
+import { ToastProvider } from "../components/ui/Toast";
 
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import { AuthProvider } from "../lib/auth";
@@ -38,6 +39,10 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 			},
 		],
 		links: [
+			{
+				rel: "manifest",
+				href: "/manifest.json",
+			},
 			{
 				rel: "preconnect",
 				href: "https://fonts.googleapis.com",
@@ -101,18 +106,20 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			</head>
 			<body>
 				<AuthProvider>
-					<a href="#main-content" className="dm-skip-link">
-						Skip to main content
-					</a>
-					{!isEditor && <Header />}
-					{/* biome-ignore lint/correctness/useUniqueElementIds: Root layout renders once; skip link requires stable ID */}
-					<main
-						id="main-content"
-						tabIndex={-1}
-						className={isEditor ? "" : "pt-20"}
-					>
-						{children}
-					</main>
+					<ToastProvider>
+						<a href="#main-content" className="dm-skip-link">
+							Skip to main content
+						</a>
+						{!isEditor && <Header />}
+						{/* biome-ignore lint/correctness/useUniqueElementIds: Root layout renders once; skip link requires stable ID */}
+						<main
+							id="main-content"
+							tabIndex={-1}
+							className={isEditor ? "" : "pt-20"}
+						>
+							{children}
+						</main>
+					</ToastProvider>
 				</AuthProvider>
 				{showDevtools && (
 					<TanStackDevtools
@@ -129,6 +136,14 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 					/>
 				)}
 				<Scripts />
+				{!import.meta.env.DEV && (
+					<script
+						// biome-ignore lint/security/noDangerouslySetInnerHtml: inline SW registration script
+						dangerouslySetInnerHTML={{
+							__html: `if("serviceWorker"in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("/sw.js")})}`,
+						}}
+					/>
+				)}
 			</body>
 		</html>
 	);

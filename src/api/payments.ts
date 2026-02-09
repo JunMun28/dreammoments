@@ -149,7 +149,8 @@ export const handleStripeWebhookFn = createServerFn({ method: "POST" })
 				return { error: "Invalid webhook signature." };
 			}
 
-			const event = JSON.parse(data.payload) as {
+			let event: {
+				id: string;
 				type: string;
 				data: {
 					object: {
@@ -162,6 +163,12 @@ export const handleStripeWebhookFn = createServerFn({ method: "POST" })
 					};
 				};
 			};
+
+			try {
+				event = JSON.parse(data.payload);
+			} catch {
+				return { error: "Invalid payload" };
+			}
 
 			if (event.type === "checkout.session.completed") {
 				const session = event.data.object;
@@ -179,8 +186,19 @@ export const handleStripeWebhookFn = createServerFn({ method: "POST" })
 				}
 
 				const db = getDbOrNull();
+				const paymentIntentId = session.payment_intent ?? session.id;
 
 				if (db) {
+					// Idempotency: skip if this payment was already processed
+					const [existing] = await db
+						.select({ id: schema.payments.id })
+						.from(schema.payments)
+						.where(eq(schema.payments.stripePaymentIntentId, paymentIntentId));
+
+					if (existing) {
+						return { received: true };
+					}
+
 					// Upgrade user to premium
 					await db
 						.update(schema.users)
@@ -191,7 +209,7 @@ export const handleStripeWebhookFn = createServerFn({ method: "POST" })
 					await db.insert(schema.payments).values({
 						userId,
 						invitationId: invitationId || null,
-						stripePaymentIntentId: session.payment_intent ?? session.id,
+						stripePaymentIntentId: paymentIntentId,
 						stripeCustomerId: session.customer ?? null,
 						amountCents:
 							session.amount_total ??

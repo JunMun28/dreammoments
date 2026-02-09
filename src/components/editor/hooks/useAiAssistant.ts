@@ -33,6 +33,8 @@ export type UseAiAssistantParams = {
 	draft: InvitationContent;
 	onApplyResult: (next: InvitationContent) => void;
 	onApplyStyleOverrides?: (overrides: Record<string, string>) => void;
+	onGenerateSuccess?: () => void;
+	onGenerateError?: (message: string) => void;
 };
 
 export type UseAiAssistantReturn = {
@@ -71,6 +73,8 @@ export function useAiAssistant({
 	draft,
 	onApplyResult,
 	onApplyStyleOverrides,
+	onGenerateSuccess,
+	onGenerateError,
 }: UseAiAssistantParams): UseAiAssistantReturn {
 	const [aiPanel, setAiPanel] = useState<AiPanelState>(defaultAiPanel);
 	const [aiGenerating, setAiGenerating] = useState(false);
@@ -127,11 +131,14 @@ export function useAiAssistant({
 				result,
 				generationId: generation.id,
 			}));
+			onGenerateSuccess?.();
 		} catch {
+			const errorMessage = "Generation failed. Please try again.";
 			setAiPanel((prev) => ({
 				...prev,
-				error: "Generation failed. Please try again.",
+				error: errorMessage,
 			}));
+			onGenerateError?.(errorMessage);
 		} finally {
 			setAiGenerating(false);
 		}
@@ -142,6 +149,8 @@ export function useAiAssistant({
 		aiPanel.prompt,
 		draft,
 		invitationId,
+		onGenerateSuccess,
+		onGenerateError,
 	]);
 
 	const applyResult = useCallback(() => {

@@ -3,7 +3,8 @@ import {
 	type ErrorComponentProps,
 	Link,
 } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import EnvelopeAnimation from "../../components/templates/EnvelopeAnimation";
 import InvitationRenderer from "../../components/templates/InvitationRenderer";
 import { buildSampleContent } from "../../data/sample-invitation";
 import { useAuth } from "../../lib/auth";
@@ -102,6 +103,7 @@ function InviteScreen() {
 		store.invitations.find((item) => item.slug === slug),
 	);
 	const [rsvpStatus, setRsvpStatus] = useState("");
+	const handleEnvelopeComplete = useCallback(() => {}, []);
 	const isSample = slug.endsWith("-sample") || !invitation;
 	const templateId =
 		(invitation?.templateSnapshot as { id?: string } | undefined)?.id ??
@@ -163,28 +165,30 @@ function InviteScreen() {
 	};
 
 	return (
-		<div className={`min-h-screen ${shellClass}`}>
-			<header className="border-b border-[color:var(--dm-border)] px-6 py-6 text-xs uppercase tracking-[0.4em] text-[color:var(--dm-accent-strong)]">
-				<div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
-					<p className="text-center">{headerLabel}</p>
-					{isSample ? (
-						<Link
-							to="/editor/new"
-							search={{ template: templateId }}
-							className="rounded-full border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] px-4 py-2 text-[10px] font-semibold tracking-[0.22em] text-[color:var(--dm-accent-strong)]"
-						>
-							{user ? "Use this template" : "Create your own"}
-						</Link>
-					) : null}
-				</div>
-			</header>
-			<InvitationRenderer
-				templateId={templateId}
-				content={content}
-				hiddenSections={hiddenSections}
-				onRsvpSubmit={handleRsvpSubmit}
-				rsvpStatus={rsvpStatus}
-			/>
-		</div>
+		<EnvelopeAnimation slug={slug} onComplete={handleEnvelopeComplete}>
+			<div className={`min-h-screen ${shellClass}`}>
+				<header className="border-b border-[color:var(--dm-border)] px-6 py-6 text-xs uppercase tracking-[0.4em] text-[color:var(--dm-accent-strong)]">
+					<div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
+						<p className="text-center">{headerLabel}</p>
+						{isSample ? (
+							<Link
+								to="/editor/new"
+								search={{ template: templateId }}
+								className="rounded-full border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] px-4 py-2 text-[10px] font-semibold tracking-[0.22em] text-[color:var(--dm-accent-strong)]"
+							>
+								{user ? "Use this template" : "Create your own"}
+							</Link>
+						) : null}
+					</div>
+				</header>
+				<InvitationRenderer
+					templateId={templateId}
+					content={content}
+					hiddenSections={hiddenSections}
+					onRsvpSubmit={handleRsvpSubmit}
+					rsvpStatus={rsvpStatus}
+				/>
+			</div>
+		</EnvelopeAnimation>
 	);
 }
