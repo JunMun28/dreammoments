@@ -1,21 +1,10 @@
 import { Link } from "@tanstack/react-router";
-import {
-	type CSSProperties,
-	type KeyboardEvent,
-	type MouseEvent,
-	useId,
-	useMemo,
-	useState,
-} from "react";
+import { type CSSProperties, useId, useState } from "react";
 import { useScrollReveal } from "../../../lib/scroll-effects";
-import type { InvitationContent } from "../../../lib/types";
 import { LoadingSpinner } from "../../ui/LoadingSpinner";
+import { makeEditableProps, parseAttendance } from "../helpers";
 import SectionShell from "../SectionShell";
-import type { RsvpPayload, TemplateInvitationProps } from "../types";
-
-type EternalEleganceInvitationProps = TemplateInvitationProps & {
-	content: InvitationContent;
-};
+import type { TemplateInvitationProps } from "../types";
 
 /* ─── Typography ─── */
 
@@ -40,45 +29,14 @@ export default function EternalEleganceInvitation({
 	onInlineEdit,
 	onRsvpSubmit,
 	rsvpStatus,
-}: EternalEleganceInvitationProps) {
+}: TemplateInvitationProps) {
 	useScrollReveal();
 	const consentDescriptionId = useId();
-	const data = useMemo(() => content, [content]);
+	const data = content;
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const monogram = `${data.hero.partnerOneName.charAt(0)}${data.hero.partnerTwoName.charAt(0)}`;
 	const taglineLetters = data.hero.tagline.split("");
-	const parseAttendance = (
-		value: FormDataEntryValue | null,
-	): RsvpPayload["attendance"] => {
-		const candidate = String(value ?? "attending");
-		if (
-			candidate === "attending" ||
-			candidate === "not_attending" ||
-			candidate === "undecided"
-		) {
-			return candidate;
-		}
-		return "attending";
-	};
-	const editableProps = (fieldPath: string, className: string) => ({
-		onClick:
-			mode === "editor"
-				? (event: MouseEvent<HTMLElement>) =>
-						onInlineEdit?.(fieldPath, event.currentTarget)
-				: undefined,
-		onKeyDown:
-			mode === "editor"
-				? (event: KeyboardEvent<HTMLElement>) => {
-						if (event.key === "Enter" || event.key === " ") {
-							event.preventDefault();
-							onInlineEdit?.(fieldPath, event.currentTarget);
-						}
-					}
-				: undefined,
-		role: mode === "editor" ? "button" : undefined,
-		tabIndex: mode === "editor" ? 0 : undefined,
-		className: mode === "editor" ? `${className} dm-editable` : className,
-	});
+	const editableProps = makeEditableProps(mode, onInlineEdit);
 
 	return (
 		<div className="eternal-elegance" style={bodyFont}>

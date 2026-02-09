@@ -34,11 +34,7 @@ function startCleanup() {
 		}
 	}, CLEANUP_INTERVAL_MS);
 	// Allow the process to exit even if the timer is running
-	if (
-		cleanupTimer &&
-		typeof cleanupTimer === "object" &&
-		"unref" in cleanupTimer
-	) {
+	if (typeof cleanupTimer === "object" && "unref" in cleanupTimer) {
 		cleanupTimer.unref();
 	}
 }

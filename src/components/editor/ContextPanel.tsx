@@ -1,6 +1,5 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { InvitationContent } from "../../lib/types";
-import { cn } from "../../lib/utils";
 import {
 	type FieldAiTaskType,
 	getSectionLabel,
@@ -10,6 +9,45 @@ import { ContextPanelHeader } from "./ContextPanelHeader";
 import { FieldRenderer } from "./FieldRenderer";
 import { getValueByPath } from "./hooks/useEditorState";
 import { listFieldMap } from "./listFieldMap";
+
+function getListItems(
+	draft: InvitationContent,
+	sectionId: string,
+): Array<Record<string, unknown>> | undefined {
+	if (!listFieldMap[sectionId]) return undefined;
+
+	const sectionData = draft[sectionId as keyof InvitationContent] as
+		| Record<string, unknown>
+		| undefined;
+	if (!sectionData) return undefined;
+
+	const arrayKey = Object.keys(sectionData).find((k) =>
+		Array.isArray(sectionData[k]),
+	);
+	if (!arrayKey) return undefined;
+
+	return (sectionData[arrayKey] as Array<Record<string, unknown>>) ?? [];
+}
+
+function getListItemsChangeHandler(
+	draft: InvitationContent,
+	sectionId: string,
+	onFieldChange: (fieldPath: string, value: string | boolean) => void,
+): ((items: Array<Record<string, unknown>>) => void) | undefined {
+	const sectionData = draft[sectionId as keyof InvitationContent] as
+		| Record<string, unknown>
+		| undefined;
+	if (!sectionData) return undefined;
+
+	const arrayKey = Object.keys(sectionData).find((k) =>
+		Array.isArray(sectionData[k]),
+	);
+	if (!arrayKey) return undefined;
+
+	return (items) => {
+		onFieldChange(`${sectionId}.${arrayKey}`, JSON.stringify(items));
+	};
+}
 
 type ContextPanelProps = {
 	sectionId: string;
@@ -64,12 +102,7 @@ export function ContextPanel({
 	}
 
 	return (
-		<aside
-			className={cn(
-				"relative flex h-full flex-col bg-[color:var(--dm-surface)]",
-				"w-full",
-			)}
-		>
+		<aside className="relative flex h-full w-full flex-col bg-[color:var(--dm-surface)]">
 			{/* Collapse button */}
 			{onToggleCollapse && (
 				<button
@@ -103,32 +136,6 @@ export function ContextPanel({
 					{fields.map((field) => {
 						const fieldPath = `${sectionId}.${field.id}`;
 						const value = getValueByPath(draft, fieldPath);
-						const listConfig = listFieldMap[sectionId];
-						const listItems =
-							field.type === "list" && listConfig
-								? (((
-										draft[sectionId as keyof InvitationContent] as Record<
-											string,
-											unknown
-										>
-									)?.[
-										Object.keys(
-											(draft[sectionId as keyof InvitationContent] as Record<
-												string,
-												unknown
-											>) ?? {},
-										).find((k) =>
-											Array.isArray(
-												(
-													draft[sectionId as keyof InvitationContent] as Record<
-														string,
-														unknown
-													>
-												)?.[k],
-											),
-										) ?? ""
-									] as Array<Record<string, unknown>>) ?? [])
-								: undefined;
 
 						return (
 							<FieldRenderer
@@ -141,25 +148,14 @@ export function ContextPanel({
 								error={errors[fieldPath]}
 								uploadingField={uploadingField}
 								onImageUpload={onImageUpload}
-								listItems={listItems}
+								listItems={
+									field.type === "list"
+										? getListItems(draft, sectionId)
+										: undefined
+								}
 								onListItemsChange={
 									field.type === "list"
-										? (items) => {
-												// Find the array key in the section
-												const sectionData = draft[
-													sectionId as keyof InvitationContent
-												] as Record<string, unknown> | undefined;
-												if (!sectionData) return;
-												const arrayKey = Object.keys(sectionData).find((k) =>
-													Array.isArray(sectionData[k]),
-												);
-												if (arrayKey) {
-													onFieldChange(
-														`${sectionId}.${arrayKey}`,
-														JSON.stringify(items),
-													);
-												}
-											}
+										? getListItemsChangeHandler(draft, sectionId, onFieldChange)
 										: undefined
 								}
 								onAiClick={
@@ -181,5 +177,3 @@ export function ContextPanel({
 		</aside>
 	);
 }
-
-export default ContextPanel;

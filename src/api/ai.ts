@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireAuth } from "@/lib/server-auth";
+import { parseInput } from "./validate";
 
 // ── Types ───────────────────────────────────────────────────────────
 
@@ -269,13 +270,7 @@ export const generateAiContentFn = createServerFn({
 			sectionId: string;
 			prompt: string;
 			context: Record<string, unknown>;
-		}) => {
-			const result = generateAiContentSchema.safeParse(data);
-			if (!result.success) {
-				throw new Error(result.error.issues[0].message);
-			}
-			return result.data;
-		},
+		}) => parseInput(generateAiContentSchema, data),
 	)
 	// @ts-expect-error ServerFn inference expects stricter JSON type than Record<string, unknown>
 	.handler(async ({ data }) => {

@@ -1,5 +1,10 @@
-import type React from "react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+	type RefObject,
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 import {
 	setInvitationVisibility,
 	updateInvitationContent,
@@ -8,8 +13,8 @@ import type { InvitationContent } from "../../../lib/types";
 
 export type UseAutoSaveParams = {
 	invitationId: string;
-	draftRef: React.RefObject<InvitationContent>;
-	visibilityRef: React.RefObject<Record<string, boolean>>;
+	draftRef: RefObject<InvitationContent>;
+	visibilityRef: RefObject<Record<string, boolean>>;
 	version: number;
 };
 

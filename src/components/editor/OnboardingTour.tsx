@@ -330,5 +330,3 @@ export function OnboardingTour() {
 		</div>
 	);
 }
-
-export default OnboardingTour;

@@ -59,5 +59,3 @@ export function SaveStatusBadge({ status, autosaveAt }: SaveStatusBadgeProps) {
 		</span>
 	);
 }
-
-export default SaveStatusBadge;

@@ -42,5 +42,3 @@ export function ListFieldItem({
 		</div>
 	);
 }
-
-export default ListFieldItem;

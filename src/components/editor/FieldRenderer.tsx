@@ -92,8 +92,6 @@ export function FieldRenderer({
 		autoComplete: "off" as const,
 	};
 
-	const showAiButton = Boolean(onAiClick);
-
 	return (
 		<div
 			className={cn(
@@ -116,7 +114,7 @@ export function FieldRenderer({
 						</span>
 					)}
 				</label>
-				{showAiButton && (
+				{onAiClick && (
 					<button
 						type="button"
 						onClick={onAiClick}
@@ -155,5 +153,3 @@ export function FieldRenderer({
 		</div>
 	);
 }
-
-export default FieldRenderer;

@@ -129,5 +129,3 @@ export function ProgressIndicator({
 		</div>
 	);
 }
-
-export default ProgressIndicator;

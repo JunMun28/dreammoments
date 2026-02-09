@@ -7,13 +7,19 @@ import {
 	sectionReveal,
 } from "./animation";
 
-const templates = [
+const templates: {
+	id: string;
+	title: string;
+	desc: string;
+	photo: string;
+	culturalBadge: string | null;
+}[] = [
 	{
 		id: "garden-romance",
 		title: "Garden Romance",
 		desc: "Chinese tradition with modern warmth.",
 		photo: "/photos/golden-hour.jpg",
-		culturalBadge: "Chinese Tradition" as string | null,
+		culturalBadge: "Chinese Tradition",
 	},
 	{
 		id: "love-at-dusk",

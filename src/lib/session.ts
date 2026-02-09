@@ -39,13 +39,11 @@ export function getJwtSecret(): Uint8Array {
  * Token expires in 1 hour.
  */
 export async function createSession(userId: string): Promise<string> {
-	const secret = getJwtSecret();
-	const token = await new SignJWT({ userId, type: "access" })
+	return new SignJWT({ userId, type: "access" })
 		.setProtectedHeader({ alg: "HS256" })
 		.setExpirationTime("1h")
 		.setIssuedAt()
-		.sign(secret);
-	return token;
+		.sign(getJwtSecret());
 }
 
 /**
@@ -53,13 +51,11 @@ export async function createSession(userId: string): Promise<string> {
  * Token expires in 7 days.
  */
 export async function createRefreshToken(userId: string): Promise<string> {
-	const secret = getJwtSecret();
-	const token = await new SignJWT({ userId, type: "refresh" })
+	return new SignJWT({ userId, type: "refresh" })
 		.setProtectedHeader({ alg: "HS256" })
 		.setExpirationTime("7d")
 		.setIssuedAt()
-		.sign(secret);
-	return token;
+		.sign(getJwtSecret());
 }
 
 /**

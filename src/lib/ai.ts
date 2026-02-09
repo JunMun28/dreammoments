@@ -104,12 +104,12 @@ export async function generateAiContent({
 	} catch (error) {
 		// If the server indicates AI is not configured, use mock data silently
 		if (error instanceof Error && error.message.includes("AI_NOT_CONFIGURED")) {
-			return generateMockContent({ type, sectionId, prompt, context });
+			return generateMockContent({ type, prompt, context });
 		}
 
 		// For other errors, log and fall back to mock data
 		console.warn("AI generation failed, using mock data:", error);
-		return generateMockContent({ type, sectionId, prompt, context });
+		return generateMockContent({ type, prompt, context });
 	}
 }
 
@@ -117,12 +117,10 @@ export async function generateAiContent({
 
 function generateMockContent({
 	type,
-	sectionId: _sectionId,
 	prompt,
 	context,
 }: {
 	type: "schedule" | "faq" | "story" | "tagline" | "style" | "translate";
-	sectionId: string;
 	prompt: string;
 	context: InvitationContent;
 }) {

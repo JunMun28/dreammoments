@@ -3,35 +3,16 @@ import { Pool, type PoolConfig } from "pg";
 
 import * as schema from "./schema";
 
-// Database configuration types
-export type DrizzleDB = NodePgDatabase<typeof schema>;
-
-export interface DatabaseConfig {
-	connectionString: string;
-	maxConnections?: number;
-	idleTimeoutMs?: number;
-	connectionTimeoutMs?: number;
-}
-
-export interface HealthCheckResult {
-	connected: boolean;
-	latencyMs: number;
-	error?: string;
-}
+type DrizzleDB = NodePgDatabase<typeof schema>;
 
 // Check if we're in a server environment
 const isServer = typeof window === "undefined";
 
-/** Read a server-side env var safely (returns undefined in the browser). */
 function env(key: string): string | undefined {
 	if (typeof process === "undefined") return undefined;
 	return process.env[key];
 }
 
-/**
- * Check if the app is running in production mode.
- * Uses process.env on the server, import.meta.env in the browser.
- */
 export function isProduction(): boolean {
 	if (typeof process !== "undefined" && process.env.NODE_ENV !== undefined) {
 		return process.env.NODE_ENV === "production";
@@ -63,14 +44,12 @@ if (isServer && !isProduction() && !databaseUrl) {
 const poolConfig: PoolConfig | null = databaseUrl
 	? {
 			connectionString: databaseUrl,
-			// Connection pool settings optimized for Neon PostgreSQL
 			max: Number.parseInt(env("DB_POOL_MAX") || "10", 10),
 			idleTimeoutMillis: Number.parseInt(env("DB_IDLE_TIMEOUT") || "30000", 10),
 			connectionTimeoutMillis: Number.parseInt(
 				env("DB_CONNECTION_TIMEOUT") || "10000",
 				10,
 			),
-			// Neon requires SSL — enforce certificate validation in production
 			ssl: isProduction()
 				? { rejectUnauthorized: true }
 				: env("DB_SSL") === "true"
@@ -85,7 +64,6 @@ let pool: Pool | null = null;
 if (isServer && poolConfig) {
 	pool = new Pool(poolConfig);
 
-	// Handle pool errors gracefully
 	pool.on("error", (err) => {
 		console.error("[Database] Unexpected pool error:", err.message);
 	});
@@ -101,17 +79,15 @@ if (isServer && poolConfig) {
 export const db: DrizzleDB | null =
 	pool && isServer ? drizzle(pool, { schema }) : null;
 
-/**
- * Check if database is available
- */
 export function isDatabaseAvailable(): boolean {
 	return db !== null;
 }
 
-/**
- * Perform a health check on the database connection
- */
-export async function checkDatabaseHealth(): Promise<HealthCheckResult> {
+export async function checkDatabaseHealth(): Promise<{
+	connected: boolean;
+	latencyMs: number;
+	error?: string;
+}> {
 	if (!pool) {
 		return {
 			connected: false,
@@ -126,87 +102,24 @@ export async function checkDatabaseHealth(): Promise<HealthCheckResult> {
 		const client = await pool.connect();
 		try {
 			await client.query("SELECT 1 as health_check");
-			const latencyMs = Date.now() - startTime;
 			return {
 				connected: true,
-				latencyMs,
+				latencyMs: Date.now() - startTime,
 			};
 		} finally {
 			client.release();
 		}
 	} catch (error) {
-		const latencyMs = Date.now() - startTime;
 		return {
 			connected: false,
-			latencyMs,
+			latencyMs: Date.now() - startTime,
 			error: error instanceof Error ? error.message : "Unknown error",
 		};
 	}
 }
 
-/**
- * Get pool statistics for monitoring
- */
-export function getPoolStats(): {
-	totalCount: number;
-	idleCount: number;
-	waitingCount: number;
-} | null {
-	if (!pool) {
-		return null;
-	}
-
-	return {
-		totalCount: pool.totalCount,
-		idleCount: pool.idleCount,
-		waitingCount: pool.waitingCount,
-	};
-}
-
-/**
- * Gracefully close the database connection pool
- * Call this during application shutdown
- */
-export async function closeDatabaseConnection(): Promise<void> {
-	if (pool) {
-		console.log("[Database] Closing connection pool...");
-		await pool.end();
-		console.log("[Database] Connection pool closed");
-	}
-}
-
-/**
- * Get a database instance or throw an error.
- * In production this always throws if DATABASE_URL is missing (the startup
- * check already prevents that). In development it throws with a helpful
- * message so callers can fall back to the in-memory store.
- */
-export function getDb(): DrizzleDB {
-	if (!db) {
-		throw new Error(
-			"Database not available. Please set DATABASE_URL environment variable.",
-		);
-	}
-	return db;
-}
-
-/**
- * Get a database instance or null
- * Use this when database is optional (graceful fallback to localStorage)
- */
 export function getDbOrNull(): DrizzleDB | null {
 	return db;
 }
 
-// Export schema for use in queries
 export { schema };
-
-// Export types from schema for convenience
-export type {
-	aiGenerations,
-	guests,
-	invitations,
-	invitationViews,
-	payments,
-	users,
-} from "./schema";

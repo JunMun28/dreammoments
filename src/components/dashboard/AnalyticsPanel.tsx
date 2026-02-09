@@ -116,8 +116,6 @@ export function AnalyticsPanel({ invitationId }: AnalyticsPanelProps) {
 	);
 }
 
-// ── Sub-components ──────────────────────────────────────────────────
-
 function SummaryCard({
 	label,
 	value,
@@ -329,8 +327,6 @@ function ReferrerList({
 		</div>
 	);
 }
-
-// ── Skeleton ────────────────────────────────────────────────────────
 
 function AnalyticsSkeleton() {
 	return (

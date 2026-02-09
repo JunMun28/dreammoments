@@ -1,5 +1,6 @@
 import type { RefObject } from "react";
 import type { InvitationContent } from "../../lib/types";
+import { cn } from "../../lib/utils";
 import InvitationRenderer from "../templates/InvitationRenderer";
 import type { PreviewLayout } from "./LayoutToggle";
 
@@ -33,9 +34,10 @@ export function EditorPreviewFrame({
 	return (
 		<div
 			ref={previewRef}
-			className={`dm-scroll-hidden h-full rounded-3xl border border-dm-border ${
-				isMobilePreview ? "mx-auto max-w-[390px]" : "mx-auto max-w-[900px]"
-			}`}
+			className={cn(
+				"dm-scroll-hidden h-full rounded-3xl border border-dm-border mx-auto",
+				isMobilePreview ? "max-w-[390px]" : "max-w-[900px]",
+			)}
 			style={{
 				...styleOverrides,
 				...(isMobilePreview ? { minHeight: "640px" } : {}),
@@ -55,5 +57,3 @@ export function EditorPreviewFrame({
 		</div>
 	);
 }
-
-export default EditorPreviewFrame;

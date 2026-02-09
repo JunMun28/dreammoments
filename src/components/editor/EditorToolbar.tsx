@@ -308,5 +308,3 @@ export function EditorToolbar({
 		</header>
 	);
 }
-
-export default EditorToolbar;

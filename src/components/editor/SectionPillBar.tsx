@@ -82,7 +82,6 @@ export function SectionPillBar({
 	activeSection,
 	onSectionChange,
 }: SectionPillBarProps) {
-	const containerRef = useRef<HTMLDivElement>(null);
 	const activeRef = useRef<HTMLButtonElement>(null);
 
 	// Auto-scroll active pill into view
@@ -99,7 +98,6 @@ export function SectionPillBar({
 
 	return (
 		<div
-			ref={containerRef}
 			className="dm-pill-bar"
 			role="tablist"
 			aria-label="Invitation sections"
@@ -131,5 +129,3 @@ export function SectionPillBar({
 		</div>
 	);
 }
-
-export default SectionPillBar;

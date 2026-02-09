@@ -43,5 +43,3 @@ export function ToggleSwitch({
 		</div>
 	);
 }
-
-export default ToggleSwitch;

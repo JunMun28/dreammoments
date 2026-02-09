@@ -69,5 +69,3 @@ export function ImageUploadField({
 		</div>
 	);
 }
-
-export default ImageUploadField;

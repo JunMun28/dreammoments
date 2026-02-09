@@ -4,10 +4,6 @@ import type { Store } from "./types";
 const STORAGE_KEY = "dm-store-v1";
 const STORE_EVENT = "dm-store";
 
-type DmWindow = Window & {
-	__dmStoreHydrated?: boolean;
-};
-
 const defaultStore: Store = {
 	users: [],
 	invitations: [],
@@ -55,7 +51,6 @@ export function useStore<T>(selector: (store: Store) => T) {
 		if (!win) return;
 		const handler = () => setStoreState(getStore());
 		handler();
-		(win as DmWindow).__dmStoreHydrated = true;
 		win.addEventListener(STORE_EVENT, handler);
 		return () => win.removeEventListener(STORE_EVENT, handler);
 	}, []);

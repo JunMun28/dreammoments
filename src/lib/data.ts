@@ -376,17 +376,11 @@ export function trackInvitationView(
 	userAgent: string,
 	referrer?: string,
 ) {
-	const encoder =
+	const raw = `${userAgent}-${Date.now().toString(36)}`;
+	const visitorHash =
 		typeof btoa !== "undefined"
-			? (value: string) => btoa(value)
-			: (value: string) =>
-					typeof Buffer !== "undefined"
-						? Buffer.from(value).toString("base64")
-						: value;
-	const visitorHash = encoder(`${userAgent}-${Date.now().toString(36)}`).slice(
-		0,
-		12,
-	);
+			? btoa(raw).slice(0, 12)
+			: Buffer.from(raw).toString("base64").slice(0, 12);
 	const view: InvitationView = {
 		id: createId(),
 		invitationId,

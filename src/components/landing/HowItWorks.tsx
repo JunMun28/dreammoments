@@ -2,8 +2,10 @@ import { motion, useScroll, useTransform } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { ANIMATION, sectionReveal } from "./animation";
 
-const REVEAL_EASE: [number, number, number, number] = [0.25, 0.1, 0.25, 1];
-const REVEAL_TRANSITION = { duration: 0.8, ease: REVEAL_EASE };
+const REVEAL_TRANSITION = {
+	duration: ANIMATION.duration.slow,
+	ease: ANIMATION.ease.default,
+};
 
 const TIMELINE_STEPS = [
 	{

@@ -6,10 +6,6 @@ type LoadingSpinnerProps = {
 	label?: string;
 };
 
-/**
- * LoadingSpinner component with --dm-accent-strong color.
- * Accessible with proper aria attributes.
- */
 export function LoadingSpinner({
 	size = "md",
 	className,
@@ -38,43 +34,6 @@ export function LoadingSpinner({
 	);
 }
 
-/**
- * LoadingButton - Button content with spinner for loading state
- */
-export function LoadingButton({
-	children,
-	isLoading,
-	loadingText,
-	disabled,
-	className,
-	...props
-}: {
-	children: React.ReactNode;
-	isLoading: boolean;
-	loadingText?: string;
-	disabled?: boolean;
-	className?: string;
-} & React.ButtonHTMLAttributes<HTMLButtonElement>) {
-	return (
-		<button
-			type="button"
-			disabled={disabled || isLoading}
-			className={cn(
-				"inline-flex items-center justify-center gap-2 transition-opacity",
-				(disabled || isLoading) && "opacity-70 cursor-not-allowed",
-				className,
-			)}
-			{...props}
-		>
-			{isLoading && <LoadingSpinner size="sm" />}
-			{isLoading && loadingText ? loadingText : children}
-		</button>
-	);
-}
-
-/**
- * FullPageLoader - Centered loading spinner for page-level loading
- */
 export function FullPageLoader({
 	message = "Loading...",
 }: {

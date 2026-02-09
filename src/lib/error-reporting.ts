@@ -93,20 +93,13 @@ export function reportError(
 ): void {
 	const err = error instanceof Error ? error : new Error(String(error));
 
-	// Always log in development
-	if (
-		typeof process !== "undefined" &&
-		process.env?.NODE_ENV !== "production"
-	) {
-		console.error("[error-reporting]", err, context);
-		return;
-	}
+	const isDev =
+		(typeof process !== "undefined" &&
+			process.env?.NODE_ENV !== "production") ||
+		(typeof window !== "undefined" &&
+			(import.meta as { env?: Record<string, string> }).env?.DEV === "true");
 
-	// Client dev check
-	if (
-		typeof window !== "undefined" &&
-		(import.meta as { env?: Record<string, string> }).env?.DEV === "true"
-	) {
+	if (isDev) {
 		console.error("[error-reporting]", err, context);
 		return;
 	}

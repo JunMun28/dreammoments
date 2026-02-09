@@ -88,13 +88,6 @@ const lightTemplates = new Set([
 	"blush-romance",
 ]);
 
-function formatTemplateName(templateId: string) {
-	return templateId
-		.split("-")
-		.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-		.join(" ");
-}
-
 function resolveSampleTemplate(slug: string) {
 	if (slug.includes("blush-romance")) return "blush-romance";
 	if (slug.includes("garden-romance")) return "garden-romance";
@@ -131,18 +124,19 @@ function InviteScreen() {
 		trackInvitationView(invitation.id, navigator.userAgent, document.referrer);
 	}, [invitation]);
 
-	const templateLabel = useMemo(
-		() => formatTemplateName(templateId),
-		[templateId],
-	);
 	const headerLabel = useMemo(() => {
-		if (isSample) return `${templateLabel} Sample Invitation`;
-		return `${content.hero.partnerOneName} & ${content.hero.partnerTwoName}`;
+		if (!isSample)
+			return `${content.hero.partnerOneName} & ${content.hero.partnerTwoName}`;
+		const label = templateId
+			.split("-")
+			.map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+			.join(" ");
+		return `${label} Sample Invitation`;
 	}, [
 		content.hero.partnerOneName,
 		content.hero.partnerTwoName,
 		isSample,
-		templateLabel,
+		templateId,
 	]);
 	const shellClass = lightTemplates.has(templateId)
 		? "dm-shell-light"

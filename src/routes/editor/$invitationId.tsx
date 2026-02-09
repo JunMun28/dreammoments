@@ -173,13 +173,6 @@ function EditorScreen() {
 
 	const isMobile = useMediaQuery("(max-width: 767px)");
 	const isTablet = useMediaQuery("(min-width: 768px) and (max-width: 1023px)");
-	const isTabletLandscape = useMediaQuery(
-		"(orientation: landscape) and (min-width: 768px) and (max-width: 1023px)",
-	);
-	const isMobileLandscape = useMediaQuery(
-		"(max-height: 500px) and (orientation: landscape) and (max-width: 767px)",
-	);
-
 	const template = useMemo<TemplateConfig | undefined>(
 		() => templates.find((item) => item.id === invitation?.templateId),
 		[invitation?.templateId],
@@ -656,8 +649,6 @@ function EditorScreen() {
 				contextPanel={contextPanel}
 				isMobile={isMobile}
 				isTablet={isTablet}
-				isTabletLandscape={isTabletLandscape}
-				isMobileLandscape={isMobileLandscape}
 				panelCollapsed={panelCollapsed}
 				bottomSheetOpen={mobileEditorOpen}
 			/>

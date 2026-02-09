@@ -11,6 +11,7 @@ import {
 	PRICING,
 	verifyWebhookSignature,
 } from "@/lib/stripe";
+import { parseInput } from "./validate";
 
 // ── Create Checkout Session ─────────────────────────────────────────
 
@@ -22,17 +23,8 @@ const createCheckoutSchema = z.object({
 
 export const createCheckoutSessionFn = createServerFn({ method: "POST" })
 	.inputValidator(
-		(data: {
-			token: string;
-			currency: "MYR" | "SGD";
-			invitationId?: string;
-		}) => {
-			const result = createCheckoutSchema.safeParse(data);
-			if (!result.success) {
-				throw new Error(result.error.issues[0].message);
-			}
-			return result.data;
-		},
+		(data: { token: string; currency: "MYR" | "SGD"; invitationId?: string }) =>
+			parseInput(createCheckoutSchema, data),
 	)
 	.handler(async ({ data }): Promise<{ url: string } | { error: string }> => {
 		const { userId } = await requireAuth(data.token);
@@ -136,13 +128,9 @@ const webhookSchema = z.object({
 });
 
 export const handleStripeWebhookFn = createServerFn({ method: "POST" })
-	.inputValidator((data: { payload: string; signature: string }) => {
-		const result = webhookSchema.safeParse(data);
-		if (!result.success) {
-			throw new Error(result.error.issues[0].message);
-		}
-		return result.data;
-	})
+	.inputValidator((data: { payload: string; signature: string }) =>
+		parseInput(webhookSchema, data),
+	)
 	.handler(
 		async ({ data }): Promise<{ received: boolean } | { error: string }> => {
 			const stripeConfig = getStripeConfig();
@@ -236,13 +224,9 @@ const paymentStatusSchema = z.object({
 });
 
 export const getPaymentStatusFn = createServerFn({ method: "GET" })
-	.inputValidator((data: { token: string }) => {
-		const result = paymentStatusSchema.safeParse(data);
-		if (!result.success) {
-			throw new Error(result.error.issues[0].message);
-		}
-		return result.data;
-	})
+	.inputValidator((data: { token: string }) =>
+		parseInput(paymentStatusSchema, data),
+	)
 	.handler(
 		async ({
 			data,

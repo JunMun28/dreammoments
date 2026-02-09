@@ -10,6 +10,7 @@ import {
 	refreshSession,
 	verifySession,
 } from "@/lib/session";
+import { parseInput } from "./validate";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -79,6 +80,19 @@ interface FallbackUser {
 
 const fallbackUsers: Map<string, FallbackUser> = new Map();
 
+function sanitizeFallbackUser(u: FallbackUser): AuthSuccess["user"] {
+	return {
+		id: u.id,
+		email: u.email,
+		name: u.name,
+		avatarUrl: u.avatarUrl,
+		authProvider: u.authProvider,
+		plan: u.plan,
+		createdAt: u.createdAt,
+		updatedAt: u.updatedAt,
+	};
+}
+
 function generateId(): string {
 	return (
 		globalThis.crypto?.randomUUID?.() ??
@@ -90,14 +104,6 @@ function generateId(): string {
 // Server Functions
 // ---------------------------------------------------------------------------
 
-/**
- * Sign up with email and password.
- * - Validates email format and password strength (min 8 chars)
- * - Hashes password with bcryptjs (cost factor 12)
- * - Stores user in database (or in-memory fallback)
- * - Creates session token (JWT)
- * - Returns { user, token } or { error }
- */
 const signupSchema = z.object({
 	email: z.string().email("Invalid email address"),
 	password: z.string().min(8, "Password must be at least 8 characters"),
@@ -105,14 +111,8 @@ const signupSchema = z.object({
 });
 
 export const signupFn = createServerFn({ method: "POST" })
-	.inputValidator(
-		(data: { email: string; password: string; name?: string }) => {
-			const result = signupSchema.safeParse(data);
-			if (!result.success) {
-				throw new Error(result.error.issues[0].message);
-			}
-			return result.data;
-		},
+	.inputValidator((data: { email: string; password: string; name?: string }) =>
+		parseInput(signupSchema, data),
 	)
 	.handler(async ({ data }): Promise<AuthResult> => {
 		const email = data.email.trim().toLowerCase();
@@ -191,41 +191,21 @@ export const signupFn = createServerFn({ method: "POST" })
 		const refreshToken = await createRefreshToken(id);
 
 		return {
-			user: {
-				id: user.id,
-				email: user.email,
-				name: user.name,
-				avatarUrl: undefined,
-				authProvider: user.authProvider,
-				plan: user.plan,
-				createdAt: user.createdAt,
-				updatedAt: user.updatedAt,
-			},
+			user: sanitizeFallbackUser(user),
 			token,
 			refreshToken,
 		};
 	});
 
-/**
- * Log in with email and password.
- * - Looks up user by email
- * - Verifies password with bcryptjs compare
- * - Creates session token
- * - Returns { user, token } or { error }
- */
 const loginSchema = z.object({
 	email: z.string().email("Invalid email address"),
 	password: z.string().min(1, "Password is required"),
 });
 
 export const loginFn = createServerFn({ method: "POST" })
-	.inputValidator((data: { email: string; password: string }) => {
-		const result = loginSchema.safeParse(data);
-		if (!result.success) {
-			throw new Error(result.error.issues[0].message);
-		}
-		return result.data;
-	})
+	.inputValidator((data: { email: string; password: string }) =>
+		parseInput(loginSchema, data),
+	)
 	.handler(async ({ data }): Promise<AuthResult> => {
 		const email = data.email.trim().toLowerCase();
 		const { password } = data;
@@ -300,26 +280,12 @@ export const loginFn = createServerFn({ method: "POST" })
 		const refreshToken = await createRefreshToken(foundUser.id);
 
 		return {
-			user: {
-				id: foundUser.id,
-				email: foundUser.email,
-				name: foundUser.name,
-				avatarUrl: foundUser.avatarUrl,
-				authProvider: foundUser.authProvider,
-				plan: foundUser.plan,
-				createdAt: foundUser.createdAt,
-				updatedAt: foundUser.updatedAt,
-			},
+			user: sanitizeFallbackUser(foundUser),
 			token,
 			refreshToken,
 		};
 	});
 
-/**
- * Log out (invalidate session).
- * Client-side removes the token from localStorage.
- * Server-side is a no-op for stateless JWT (returns success).
- */
 export const logoutFn = createServerFn({ method: "POST" }).handler(
 	async (): Promise<{ success: boolean }> => {
 		// With stateless JWTs, the server doesn't track sessions.
@@ -329,22 +295,14 @@ export const logoutFn = createServerFn({ method: "POST" }).handler(
 	},
 );
 
-/**
- * Get the current session from a JWT token.
- * Verifies the JWT and returns user data or null.
- */
 const getSessionSchema = z.object({
 	token: z.string().min(1, "Token is required"),
 });
 
 export const getSessionFn = createServerFn({ method: "POST" })
-	.inputValidator((data: { token: string }) => {
-		const result = getSessionSchema.safeParse(data);
-		if (!result.success) {
-			throw new Error(result.error.issues[0].message);
-		}
-		return result.data;
-	})
+	.inputValidator((data: { token: string }) =>
+		parseInput(getSessionSchema, data),
+	)
 	.handler(
 		async ({
 			data,
@@ -398,42 +356,21 @@ export const getSessionFn = createServerFn({ method: "POST" })
 			const newToken = await refreshSession(token);
 
 			return {
-				user: {
-					id: fallbackUser.id,
-					email: fallbackUser.email,
-					name: fallbackUser.name,
-					avatarUrl: fallbackUser.avatarUrl,
-					authProvider: fallbackUser.authProvider,
-					plan: fallbackUser.plan,
-					createdAt: fallbackUser.createdAt,
-					updatedAt: fallbackUser.updatedAt,
-				},
+				user: sanitizeFallbackUser(fallbackUser),
 				...(newToken ? { newToken: newToken.token } : {}),
 			};
 		},
 	);
 
-/**
- * Handle Google OAuth callback.
- * - Exchanges the authorization code for tokens with Google
- * - Gets user info from Google userinfo endpoint
- * - Creates or updates user in the database
- * - Creates a session token
- * - Returns { user, token, redirectTo } or { error }
- */
 const googleCallbackSchema = z.object({
 	code: z.string().min(1, "Authorization code is required"),
 	redirectTo: z.string().max(500).optional(),
 });
 
 export const googleCallbackFn = createServerFn({ method: "POST" })
-	.inputValidator((data: { code: string; redirectTo?: string }) => {
-		const result = googleCallbackSchema.safeParse(data);
-		if (!result.success) {
-			throw new Error(result.error.issues[0].message);
-		}
-		return result.data;
-	})
+	.inputValidator((data: { code: string; redirectTo?: string }) =>
+		parseInput(googleCallbackSchema, data),
+	)
 	.handler(
 		async ({
 			data,
@@ -600,16 +537,7 @@ export const googleCallbackFn = createServerFn({ method: "POST" })
 				const token = await createSession(foundUser.id);
 
 				return {
-					user: {
-						id: foundUser.id,
-						email: foundUser.email,
-						name: foundUser.name,
-						avatarUrl: foundUser.avatarUrl,
-						authProvider: foundUser.authProvider,
-						plan: foundUser.plan,
-						createdAt: foundUser.createdAt,
-						updatedAt: foundUser.updatedAt,
-					},
+					user: sanitizeFallbackUser(foundUser),
 					token,
 					redirectTo: safeRedirectTo,
 				};
@@ -631,39 +559,22 @@ export const googleCallbackFn = createServerFn({ method: "POST" })
 			const token = await createSession(id);
 
 			return {
-				user: {
-					id: newUser.id,
-					email: newUser.email,
-					name: newUser.name,
-					avatarUrl: newUser.avatarUrl,
-					authProvider: newUser.authProvider,
-					plan: newUser.plan,
-					createdAt: newUser.createdAt,
-					updatedAt: newUser.updatedAt,
-				},
+				user: sanitizeFallbackUser(newUser),
 				token,
 				redirectTo: safeRedirectTo,
 			};
 		},
 	);
 
-/**
- * Reset password server function.
- * Hashes the new password with bcrypt and updates the store.
- */
 const resetPasswordSchema = z.object({
 	email: z.string().email("Invalid email address"),
 	password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
 export const resetPasswordFn = createServerFn({ method: "POST" })
-	.inputValidator((data: { email: string; password: string }) => {
-		const result = resetPasswordSchema.safeParse(data);
-		if (!result.success) {
-			throw new Error(result.error.issues[0].message);
-		}
-		return result.data;
-	})
+	.inputValidator((data: { email: string; password: string }) =>
+		parseInput(resetPasswordSchema, data),
+	)
 	.handler(async ({ data }): Promise<{ success: boolean } | AuthError> => {
 		const email = data.email.trim().toLowerCase();
 		const { password } = data;

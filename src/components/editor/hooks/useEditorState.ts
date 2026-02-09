@@ -2,8 +2,6 @@ import { useMemo, useState } from "react";
 import type { InvitationContent } from "../../../lib/types";
 import type { FieldConfig } from "../../../templates/types";
 
-export { listFieldMap } from "../listFieldMap";
-
 export type UseEditorStateParams = {
 	initialContent: InvitationContent;
 	initialVisibility: Record<string, boolean>;

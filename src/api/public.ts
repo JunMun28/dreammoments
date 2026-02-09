@@ -8,56 +8,29 @@ import {
 	trackInvitationView as localTrackInvitationView,
 } from "@/lib/data";
 import { getPublicInvitationSchema, trackViewSchema } from "@/lib/validation";
+import { parseInput } from "./validate";
 
 // ── Get public invitation by slug ───────────────────────────────────
 
 export const getPublicInvitation = createServerFn({
 	method: "GET",
 })
-	.inputValidator((data: { slug: string }) => {
-		const result = getPublicInvitationSchema.safeParse(data);
-		if (!result.success) {
-			throw new Error(result.error.issues[0].message);
-		}
-		return result.data;
-	})
+	.inputValidator((data: { slug: string }) =>
+		parseInput(getPublicInvitationSchema, data),
+	)
 	// @ts-expect-error ServerFn inference expects stricter JSON type than Record<string, unknown>
 	.handler(async ({ data }) => {
 		const db = getDbOrNull();
 
-		if (db) {
-			const rows = await db
-				.select()
-				.from(schema.invitations)
-				.where(eq(schema.invitations.slug, data.slug));
+		const invitation = db
+			? (
+					await db
+						.select()
+						.from(schema.invitations)
+						.where(eq(schema.invitations.slug, data.slug))
+				)[0]
+			: localGetInvitationBySlug(data.slug);
 
-			if (rows.length === 0) {
-				return { error: "Invitation not found" };
-			}
-
-			const invitation = rows[0];
-			if (invitation.status !== "published") {
-				return { error: "Invitation is not published" };
-			}
-
-			// Return only public-safe fields (exclude userId, internal settings)
-			return {
-				id: invitation.id,
-				slug: invitation.slug,
-				title: invitation.title,
-				templateId: invitation.templateId,
-				templateVersion: invitation.templateVersion,
-				templateSnapshot: invitation.templateSnapshot,
-				content: invitation.content,
-				sectionVisibility: invitation.sectionVisibility,
-				designOverrides: invitation.designOverrides,
-				status: invitation.status,
-				publishedAt: invitation.publishedAt,
-			};
-		}
-
-		// localStorage fallback
-		const invitation = localGetInvitationBySlug(data.slug);
 		if (!invitation) {
 			return { error: "Invitation not found" };
 		}
@@ -86,13 +59,8 @@ export const trackViewFn = createServerFn({
 	method: "POST",
 })
 	.inputValidator(
-		(data: { invitationId: string; userAgent?: string; referrer?: string }) => {
-			const result = trackViewSchema.safeParse(data);
-			if (!result.success) {
-				throw new Error(result.error.issues[0].message);
-			}
-			return result.data;
-		},
+		(data: { invitationId: string; userAgent?: string; referrer?: string }) =>
+			parseInput(trackViewSchema, data),
 	)
 	.handler(async ({ data }) => {
 		const db = getDbOrNull();
@@ -132,7 +100,5 @@ export const trackViewFn = createServerFn({
 			return rows[0];
 		}
 
-		// localStorage fallback
-		const view = localTrackInvitationView(data.invitationId, ua, data.referrer);
-		return view;
+		return localTrackInvitationView(data.invitationId, ua, data.referrer);
 	});

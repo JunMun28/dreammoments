@@ -168,5 +168,3 @@ export function SectionRail({
 		</div>
 	);
 }
-
-export default SectionRail;

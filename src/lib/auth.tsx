@@ -303,7 +303,7 @@ async function verifyPasswordSecure(
 	return bcrypt.default.compare(value, hash);
 }
 
-function signUpWithEmailFallback({
+async function signUpWithEmailFallback({
 	email,
 	password,
 	name,
@@ -312,38 +312,34 @@ function signUpWithEmailFallback({
 	password: string;
 	name?: string;
 }): Promise<string | undefined> {
-	return (async () => {
-		if (password.length < 8) return "Password must be at least 8 characters";
-		if (getStore().users.some((u) => u.email === email))
-			return "Email already registered";
+	if (password.length < 8) return "Password must be at least 8 characters";
+	if (getStore().users.some((u) => u.email === email))
+		return "Email already registered";
 
-		const hash = await hashPasswordSecure(password);
-		updateStore((store) => ({
-			...store,
-			passwords: { ...store.passwords, [email]: hash },
-		}));
-		createUser({ email, name, authProvider: "email" });
-		return undefined;
-	})();
+	const hash = await hashPasswordSecure(password);
+	updateStore((store) => ({
+		...store,
+		passwords: { ...store.passwords, [email]: hash },
+	}));
+	createUser({ email, name, authProvider: "email" });
+	return undefined;
 }
 
-function signInWithEmailFallback({
+async function signInWithEmailFallback({
 	email,
 	password,
 }: {
 	email: string;
 	password: string;
 }): Promise<string | undefined> {
-	return (async () => {
-		const storedHash = getStore().passwords[email];
-		if (!storedHash) return "Account not found";
+	const storedHash = getStore().passwords[email];
+	if (!storedHash) return "Account not found";
 
-		const valid = await verifyPasswordSecure(password, storedHash);
-		if (!valid) return "Invalid password";
+	const valid = await verifyPasswordSecure(password, storedHash);
+	if (!valid) return "Invalid password";
 
-		createUser({ email, authProvider: "email" });
-		return undefined;
-	})();
+	createUser({ email, authProvider: "email" });
+	return undefined;
 }
 
 /**

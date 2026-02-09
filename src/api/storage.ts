@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { requireAuth } from "@/lib/server-auth";
+import { parseInput } from "./validate";
 
 // ── R2 configuration (server-only) ─────────────────────────────────
 
@@ -31,13 +32,8 @@ export const getUploadUrlFn = createServerFn({
 	method: "POST",
 })
 	.inputValidator(
-		(data: { token: string; filename: string; contentType: string }) => {
-			const result = getUploadUrlSchema.safeParse(data);
-			if (!result.success) {
-				throw new Error(result.error.issues[0].message);
-			}
-			return result.data;
-		},
+		(data: { token: string; filename: string; contentType: string }) =>
+			parseInput(getUploadUrlSchema, data),
 	)
 	.handler(async ({ data }) => {
 		await requireAuth(data.token);
@@ -72,13 +68,9 @@ const confirmUploadSchema = z.object({
 export const confirmUploadFn = createServerFn({
 	method: "POST",
 })
-	.inputValidator((data: { token: string; key: string }) => {
-		const result = confirmUploadSchema.safeParse(data);
-		if (!result.success) {
-			throw new Error(result.error.issues[0].message);
-		}
-		return result.data;
-	})
+	.inputValidator((data: { token: string; key: string }) =>
+		parseInput(confirmUploadSchema, data),
+	)
 	.handler(async ({ data }) => {
 		await requireAuth(data.token);
 

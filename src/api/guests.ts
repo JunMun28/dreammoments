@@ -20,6 +20,7 @@ import {
 	submitRsvpSchema,
 	updateGuestSchema,
 } from "@/lib/validation";
+import { parseInput } from "./validate";
 
 // ── List guests for an invitation ───────────────────────────────────
 
@@ -32,14 +33,11 @@ export const listGuestsFn = createServerFn({
 			token: string;
 			filter?: "attending" | "not_attending" | "undecided" | "pending";
 		}) => {
-			const result = listGuestsSchema.safeParse({
+			parseInput(listGuestsSchema, {
 				invitationId: data.invitationId,
 				userId: "placeholder",
 				filter: data.filter,
 			});
-			if (!result.success) {
-				throw new Error(result.error.issues[0].message);
-			}
 			return data;
 		},
 	)
@@ -121,13 +119,7 @@ export const submitRsvpFn = createServerFn({
 			dietaryRequirements?: string;
 			message?: string;
 			visitorKey: string;
-		}) => {
-			const result = submitRsvpSchema.safeParse(data);
-			if (!result.success) {
-				throw new Error(result.error.issues[0].message);
-			}
-			return result.data;
-		},
+		}) => parseInput(submitRsvpSchema, data),
 	)
 	.handler(async ({ data }) => {
 		// Rate limit by visitorKey (10 per hour)
@@ -229,13 +221,7 @@ export const updateGuestFn = createServerFn({
 			dietaryRequirements?: string;
 			message?: string;
 		}) => {
-			const result = updateGuestSchema.safeParse({
-				...data,
-				userId: "placeholder",
-			});
-			if (!result.success) {
-				throw new Error(result.error.issues[0].message);
-			}
+			parseInput(updateGuestSchema, { ...data, userId: "placeholder" });
 			return data;
 		},
 	)
@@ -302,12 +288,7 @@ export const updateGuestFn = createServerFn({
 			return { error: "Access denied" };
 		}
 
-		const {
-			guestId,
-			token: _token,
-			invitationId: _invitationId,
-			...patch
-		} = data;
+		const { guestId, token: _, invitationId: __, ...patch } = data;
 		localUpdateGuest(guestId, patch);
 		return { success: true };
 	});
@@ -328,14 +309,11 @@ export const importGuestsFn = createServerFn({
 				relationship?: string;
 			}>;
 		}) => {
-			const result = guestImportSchema.safeParse({
+			parseInput(guestImportSchema, {
 				invitationId: data.invitationId,
 				userId: "placeholder",
 				guests: data.guests,
 			});
-			if (!result.success) {
-				throw new Error(result.error.issues[0].message);
-			}
 			return data;
 		},
 	)
@@ -390,13 +368,10 @@ export const exportGuestsCsvFn = createServerFn({
 	method: "GET",
 })
 	.inputValidator((data: { invitationId: string; token: string }) => {
-		const result = exportGuestsSchema.safeParse({
+		parseInput(exportGuestsSchema, {
 			invitationId: data.invitationId,
 			userId: "placeholder",
 		});
-		if (!result.success) {
-			throw new Error(result.error.issues[0].message);
-		}
 		return data;
 	})
 	.handler(async ({ data }) => {

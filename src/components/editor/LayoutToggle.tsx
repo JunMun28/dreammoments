@@ -36,5 +36,3 @@ export function LayoutToggle({ layout, onChange }: LayoutToggleProps) {
 		</fieldset>
 	);
 }
-
-export default LayoutToggle;

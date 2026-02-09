@@ -1,4 +1,3 @@
-import { cn } from "../../lib/utils";
 import type { AiTaskType } from "./hooks/useAiAssistant";
 
 export type AiSuggestionCardProps = {
@@ -151,11 +150,7 @@ function EmptyState() {
 
 export function AiSuggestionCard({ type, result }: AiSuggestionCardProps) {
 	return (
-		<div
-			className={cn(
-				"rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-4",
-			)}
-		>
+		<div className="rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-4">
 			<p className="mb-3 text-[10px] uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">
 				AI Suggestion
 			</p>

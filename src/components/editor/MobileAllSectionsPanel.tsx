@@ -144,5 +144,3 @@ export function MobileAllSectionsPanel({
 		</div>
 	);
 }
-
-export default MobileAllSectionsPanel;

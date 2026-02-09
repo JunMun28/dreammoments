@@ -10,6 +10,7 @@ import {
 	listGuests as localListGuests,
 } from "@/lib/data";
 import { requireAuth } from "@/lib/server-auth";
+import { parseInput } from "./validate";
 
 // ── Analytics schema ────────────────────────────────────────────────
 
@@ -45,13 +46,8 @@ export const getAnalyticsFn = createServerFn({
 	method: "GET",
 })
 	.inputValidator(
-		(data: { token: string; invitationId: string; period?: string }) => {
-			const result = getAnalyticsSchema.safeParse(data);
-			if (!result.success) {
-				throw new Error(result.error.issues[0].message);
-			}
-			return result.data;
-		},
+		(data: { token: string; invitationId: string; period?: string }) =>
+			parseInput(getAnalyticsSchema, data),
 	)
 	.handler(async ({ data }): Promise<AnalyticsData | { error: string }> => {
 		const { userId } = await requireAuth(data.token);

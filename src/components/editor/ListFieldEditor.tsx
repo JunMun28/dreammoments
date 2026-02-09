@@ -59,5 +59,3 @@ export function ListFieldEditor({
 		</div>
 	);
 }
-
-export default ListFieldEditor;

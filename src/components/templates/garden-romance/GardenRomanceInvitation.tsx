@@ -6,16 +6,10 @@ import {
 	useTransform,
 	type Variants,
 } from "motion/react";
-import { type KeyboardEvent, type MouseEvent, useId, useMemo } from "react";
-import type { InvitationContent } from "../../../lib/types";
+import { useId, useMemo } from "react";
+import { makeEditableProps, parseAttendance } from "../helpers";
 import SectionShell from "../SectionShell";
-import type { RsvpPayload, TemplateInvitationProps } from "../types";
-
-/* ─── Types ─── */
-
-type GardenRomanceInvitationProps = TemplateInvitationProps & {
-	content: InvitationContent;
-};
+import type { TemplateInvitationProps } from "../types";
 
 /* ─── Design Tokens (Light Theme) ─── */
 
@@ -192,11 +186,11 @@ export default function GardenRomanceInvitation({
 	onInlineEdit,
 	onRsvpSubmit,
 	rsvpStatus,
-}: GardenRomanceInvitationProps) {
+}: TemplateInvitationProps) {
 	const prefersReducedMotion = useReducedMotion();
 	const skip = Boolean(prefersReducedMotion);
 
-	const data = useMemo(() => content, [content]);
+	const data = content;
 	const rawRsvpSceneId = useId();
 	const rsvpSceneId = `rsvp-scene-${rawRsvpSceneId.replaceAll(":", "")}`;
 	const consentDescriptionId = useId();
@@ -218,39 +212,7 @@ export default function GardenRomanceInvitation({
 		[data.rsvp.deadline],
 	);
 
-	const parseAttendance = (
-		value: FormDataEntryValue | null,
-	): RsvpPayload["attendance"] => {
-		const candidate = String(value ?? "attending");
-		if (
-			candidate === "attending" ||
-			candidate === "not_attending" ||
-			candidate === "undecided"
-		) {
-			return candidate;
-		}
-		return "attending";
-	};
-
-	const editableProps = (fieldPath: string, className: string) => ({
-		onClick:
-			mode === "editor"
-				? (event: MouseEvent<HTMLElement>) =>
-						onInlineEdit?.(fieldPath, event.currentTarget)
-				: undefined,
-		onKeyDown:
-			mode === "editor"
-				? (event: KeyboardEvent<HTMLElement>) => {
-						if (event.key === "Enter" || event.key === " ") {
-							event.preventDefault();
-							onInlineEdit?.(fieldPath, event.currentTarget);
-						}
-					}
-				: undefined,
-		role: mode === "editor" ? "button" : undefined,
-		tabIndex: mode === "editor" ? 0 : undefined,
-		className: mode === "editor" ? `${className} dm-editable` : className,
-	});
+	const editableProps = makeEditableProps(mode, onInlineEdit);
 
 	const maxGuests = data.rsvp.allowPlusOnes
 		? Math.max(1, data.rsvp.maxPlusOnes + 1)

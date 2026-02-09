@@ -22,6 +22,7 @@ import {
 	unpublishInvitationSchema,
 	updateInvitationSchema,
 } from "@/lib/validation";
+import { parseInput } from "./validate";
 
 // ── Check slug availability ─────────────────────────────────────────
 
@@ -35,13 +36,8 @@ export const checkSlugAvailabilityFn = createServerFn({
 	method: "GET",
 })
 	.inputValidator(
-		(data: { token: string; slug: string; invitationId?: string }) => {
-			const result = checkSlugSchema.safeParse(data);
-			if (!result.success) {
-				throw new Error(result.error.issues[0].message);
-			}
-			return result.data;
-		},
+		(data: { token: string; slug: string; invitationId?: string }) =>
+			parseInput(checkSlugSchema, data),
 	)
 	.handler(async ({ data }) => {
 		await requireAuth(data.token);
@@ -70,13 +66,9 @@ const getInvitationsSchema = z.object({
 export const getInvitations = createServerFn({
 	method: "GET",
 })
-	.inputValidator((data: { token: string }) => {
-		const result = getInvitationsSchema.safeParse(data);
-		if (!result.success) {
-			throw new Error(result.error.issues[0].message);
-		}
-		return result.data;
-	})
+	.inputValidator((data: { token: string }) =>
+		parseInput(getInvitationsSchema, data),
+	)
 	// @ts-expect-error ServerFn inference expects stricter JSON type than Record<string, unknown>
 	.handler(async ({ data }) => {
 		const { userId } = await requireAuth(data.token);
@@ -105,13 +97,9 @@ const getInvitationSchema = z.object({
 export const getInvitation = createServerFn({
 	method: "GET",
 })
-	.inputValidator((data: { invitationId: string; token: string }) => {
-		const result = getInvitationSchema.safeParse(data);
-		if (!result.success) {
-			throw new Error(result.error.issues[0].message);
-		}
-		return result.data;
-	})
+	.inputValidator((data: { invitationId: string; token: string }) =>
+		parseInput(getInvitationSchema, data),
+	)
 	// @ts-expect-error ServerFn inference expects stricter JSON type than Record<string, unknown>
 	.handler(async ({ data }) => {
 		const { userId } = await requireAuth(data.token);
@@ -152,13 +140,10 @@ export const createInvitationFn = createServerFn({
 	method: "POST",
 })
 	.inputValidator((data: { token: string; templateId: string }) => {
-		const result = createInvitationSchema.safeParse({
+		parseInput(createInvitationSchema, {
 			userId: "placeholder",
 			templateId: data.templateId,
 		});
-		if (!result.success) {
-			throw new Error(result.error.issues[0].message);
-		}
 		return data;
 	})
 	// @ts-expect-error ServerFn inference expects stricter JSON type than Record<string, unknown>
@@ -230,13 +215,10 @@ export const updateInvitationFn = createServerFn({
 			designOverrides?: Record<string, unknown>;
 			status?: "draft" | "published" | "archived";
 		}) => {
-			const result = updateInvitationSchema.safeParse({
+			parseInput(updateInvitationSchema, {
 				...data,
 				userId: "placeholder",
 			});
-			if (!result.success) {
-				throw new Error(result.error.issues[0].message);
-			}
 			return data;
 		},
 	)
@@ -310,13 +292,10 @@ export const deleteInvitationFn = createServerFn({
 	method: "POST",
 })
 	.inputValidator((data: { invitationId: string; token: string }) => {
-		const result = deleteInvitationSchema.safeParse({
+		parseInput(deleteInvitationSchema, {
 			invitationId: data.invitationId,
 			userId: "placeholder",
 		});
-		if (!result.success) {
-			throw new Error(result.error.issues[0].message);
-		}
 		return data;
 	})
 	.handler(async ({ data }) => {
@@ -370,15 +349,12 @@ export const publishInvitationFn = createServerFn({
 			slug?: string;
 			randomize?: boolean;
 		}) => {
-			const result = publishInvitationSchema.safeParse({
+			parseInput(publishInvitationSchema, {
 				invitationId: data.invitationId,
 				userId: "placeholder",
 				slug: data.slug,
 				randomize: data.randomize,
 			});
-			if (!result.success) {
-				throw new Error(result.error.issues[0].message);
-			}
 			return data;
 		},
 	)
@@ -470,13 +446,10 @@ export const unpublishInvitationFn = createServerFn({
 	method: "POST",
 })
 	.inputValidator((data: { invitationId: string; token: string }) => {
-		const result = unpublishInvitationSchema.safeParse({
+		parseInput(unpublishInvitationSchema, {
 			invitationId: data.invitationId,
 			userId: "placeholder",
 		});
-		if (!result.success) {
-			throw new Error(result.error.issues[0].message);
-		}
 		return data;
 	})
 	// @ts-expect-error ServerFn inference expects stricter JSON type than Record<string, unknown>

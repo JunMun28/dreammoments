@@ -8,8 +8,6 @@ type EditorLayoutProps = {
 	sectionRail?: ReactNode;
 	isMobile: boolean;
 	isTablet: boolean;
-	isTabletLandscape?: boolean;
-	isMobileLandscape?: boolean;
 	panelCollapsed?: boolean;
 	bottomSheetOpen: boolean;
 	onOpenBottomSheet?: () => void;
@@ -23,8 +21,6 @@ export function EditorLayout({
 	sectionRail,
 	isMobile,
 	isTablet,
-	isTabletLandscape: _isTabletLandscape = false,
-	isMobileLandscape: _isMobileLandscape = false,
 	panelCollapsed = false,
 	bottomSheetOpen,
 	onOpenBottomSheet,
@@ -112,5 +108,3 @@ export function EditorLayout({
 		</div>
 	);
 }
-
-export default EditorLayout;

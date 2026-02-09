@@ -69,5 +69,3 @@ export function ContextPanelHeader({
 		</div>
 	);
 }
-
-export default ContextPanelHeader;
