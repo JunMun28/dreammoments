@@ -1,6 +1,7 @@
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useEffect, useRef } from "react";
+import { MeshGradientBackground } from "./MeshGradientBackground";
 import { MovingBorderButton } from "./MovingBorderButton";
 import { CalligraphyReveal } from "./motifs/CalligraphyReveal";
 import { GoldRule } from "./motifs/GoldRule";
@@ -86,8 +87,15 @@ export function FinalCTA({ reducedMotion }: { reducedMotion: boolean }) {
 		<section
 			ref={sectionRef}
 			className="relative overflow-hidden"
-			style={{ background: "var(--dm-dark-bg)" }}
+			style={{ background: "var(--dm-crimson)" }}
 		>
+			{/* Mesh gradient overlay */}
+			<div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+				<MeshGradientBackground variant="intense" className="h-full" reducedMotion={reducedMotion}>
+					<div />
+				</MeshGradientBackground>
+			</div>
+
 			{/* Gold rule top */}
 			<div ref={topRuleRef} className="origin-center">
 				<GoldRule className="absolute top-0 left-0 right-0" />
@@ -102,7 +110,7 @@ export function FinalCTA({ reducedMotion }: { reducedMotion: boolean }) {
 				<NeonXi
 					size="clamp(12rem, 35vw, 22rem)"
 					variant="gold"
-					opacity={0.06}
+					opacity={0.1}
 					breathe
 				/>
 			</div>
@@ -120,7 +128,7 @@ export function FinalCTA({ reducedMotion }: { reducedMotion: boolean }) {
 				{/* Sub-kicker */}
 				<p
 					className="font-accent text-lg italic"
-					style={{ color: "var(--dm-gold)", opacity: 0.8 }}
+					style={{ color: "var(--dm-gold-electric)" }}
 				>
 					Your love story awaits
 				</p>
@@ -131,13 +139,13 @@ export function FinalCTA({ reducedMotion }: { reducedMotion: boolean }) {
 						className="mt-4 font-display font-bold tracking-tight"
 						style={{
 							fontSize: "var(--text-section)",
-							color: "var(--dm-dark-text)",
+							color: "#FFFFFF",
 						}}
 					>
 						Create an invitation your guests will{" "}
 						<em
 							className="inline-block italic"
-							style={{ color: "var(--dm-crimson)" }}
+							style={{ color: "var(--dm-gold-electric)" }}
 						>
 							treasure.
 						</em>
@@ -147,7 +155,7 @@ export function FinalCTA({ reducedMotion }: { reducedMotion: boolean }) {
 				<p
 					className="mx-auto mt-4 text-lg"
 					style={{
-						color: "var(--dm-dark-muted)",
+						color: "rgba(255,255,255,0.8)",
 						maxWidth: "48ch",
 					}}
 				>
@@ -170,15 +178,15 @@ export function FinalCTA({ reducedMotion }: { reducedMotion: boolean }) {
 					className="mt-6 flex flex-wrap items-center justify-center gap-x-2 gap-y-1"
 					style={{
 						fontSize: "var(--text-sm)",
-						color: "var(--dm-dark-muted)",
+						color: "rgba(255,255,255,0.8)",
 					}}
 				>
 					<span>Free to start</span>
-					<span aria-hidden="true" style={{ color: "var(--dm-dark-gold)" }}>
+					<span aria-hidden="true" style={{ color: "rgba(255,255,255,0.5)" }}>
 						{"\u00B7"}
 					</span>
 					<span>No credit card</span>
-					<span aria-hidden="true" style={{ color: "var(--dm-dark-gold)" }}>
+					<span aria-hidden="true" style={{ color: "rgba(255,255,255,0.5)" }}>
 						{"\u00B7"}
 					</span>
 					<span>3-minute setup</span>

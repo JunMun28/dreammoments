@@ -140,6 +140,22 @@ export const GSAP_SECTIONS = {
 	clipWipe: { ease: GSAP_EASE.scrub },
 } as const;
 
+// ─── V4 Vivid Celebration Presets ───
+
+export const GSAP_MESH = {
+	drift: { duration: 20, ease: GSAP_EASE.float },
+	driftRange: 40,
+} as const;
+
+export const GSAP_TRACING_BEAM = {
+	dotTravel: { ease: GSAP_EASE.scrub },
+	glowPulse: { duration: 1.5, ease: GSAP_EASE.float },
+} as const;
+
+export const GSAP_GRADIENT = {
+	entrance: { duration: 0.8, ease: GSAP_EASE.entranceSoft },
+} as const;
+
 // ─── ScrollTrigger Defaults ───
 
 export const ST_DEFAULTS = {

@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { ANIMATION, sectionReveal } from "./animation";
 import { LatticeOverlay } from "./motifs/LatticeOverlay";
+import { MeshGradientBackground } from "./MeshGradientBackground";
 import { SectionHeader } from "./motifs/SectionHeader";
 import { PerspectiveCardStack } from "./PerspectiveCardStack";
 
@@ -43,8 +44,15 @@ export function Showcase({ reducedMotion }: { reducedMotion: boolean }) {
 				padding: "clamp(5rem, 10vw, 10rem) 0",
 			}}
 		>
-			{/* Lattice overlay at 8% */}
-			<LatticeOverlay color="var(--dm-gold)" opacity={0.08} />
+			{/* Mesh gradient background */}
+			<div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+				<MeshGradientBackground variant="warm" className="h-full" reducedMotion={reducedMotion}>
+					<div />
+				</MeshGradientBackground>
+			</div>
+
+			{/* Lattice overlay at 10% */}
+			<LatticeOverlay color="var(--dm-gold)" opacity={0.10} />
 
 			<div className="relative z-10 mx-auto max-w-7xl px-6">
 				{/* biome-ignore lint/correctness/useUniqueElementIds: intentional anchor for header nav */}
@@ -58,11 +66,23 @@ export function Showcase({ reducedMotion }: { reducedMotion: boolean }) {
 					reducedMotion={reducedMotion}
 				/>
 
-				{/* Card gallery */}
-				<PerspectiveCardStack
-					templates={templates}
-					reducedMotion={reducedMotion}
-				/>
+				{/* Card gallery with ambient glow */}
+				<div className="relative">
+					{/* Ambient glow behind cards */}
+					<div
+						className="pointer-events-none absolute inset-0 -inset-x-12 -inset-y-8"
+						aria-hidden="true"
+						style={{
+							background:
+								"radial-gradient(ellipse 60% 50% at 50% 50%, rgba(232,24,64,0.08) 0%, rgba(212,175,55,0.06) 40%, transparent 70%)",
+							filter: "blur(40px)",
+						}}
+					/>
+					<PerspectiveCardStack
+						templates={templates}
+						reducedMotion={reducedMotion}
+					/>
+				</div>
 
 				{/* See a live invitation link */}
 				<motion.div

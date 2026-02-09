@@ -11,6 +11,7 @@ import {
 import { motion } from "motion/react";
 import { useEffect, useRef } from "react";
 import { ANIMATION, mockupReveal } from "./animation";
+import { MeshGradientBackground } from "./MeshGradientBackground";
 import { PaperCutEdge } from "./motifs/PaperCutEdge";
 import { SectionHeader } from "./motifs/SectionHeader";
 
@@ -52,6 +53,7 @@ const FEATURES = [
 export function Features({ reducedMotion }: { reducedMotion: boolean }) {
 	const sectionRef = useRef<HTMLElement>(null);
 	const featureItemsRef = useRef<HTMLDivElement[]>([]);
+	const mockupRef = useRef<HTMLDivElement>(null);
 
 	// GSAP stagger entrance for feature items
 	useEffect(() => {
@@ -74,6 +76,54 @@ export function Features({ reducedMotion }: { reducedMotion: boolean }) {
 					},
 				},
 			);
+			// Icon glow on entrance
+			const icons = sectionRef.current?.querySelectorAll(".dm-feature-icon");
+			if (icons) {
+				gsap.fromTo(
+					icons,
+					{ boxShadow: "0 0 0px rgba(212,175,55,0)" },
+					{
+						boxShadow: "0 0 20px rgba(212,175,55,0.4)",
+						duration: 0.6,
+						stagger: 0.1,
+						ease: "power2.out",
+						scrollTrigger: {
+							trigger: sectionRef.current,
+							start: "top 80%",
+							toggleActions: "play none none none",
+						},
+						onComplete: () => {
+							// Fade the glow back after entrance
+							if (icons) {
+								gsap.to(icons, {
+									boxShadow: "0 0 0px rgba(212,175,55,0)",
+									duration: 1.0,
+									stagger: 0.1,
+									delay: 0.3,
+								});
+							}
+						},
+					},
+				);
+			}
+
+			// Subtle scroll-driven tilt on phone mockup
+			if (mockupRef.current) {
+				gsap.fromTo(
+					mockupRef.current,
+					{ rotateY: -5 },
+					{
+						rotateY: 5,
+						ease: "none",
+						scrollTrigger: {
+							trigger: sectionRef.current,
+							start: "top bottom",
+							end: "bottom top",
+							scrub: true,
+						},
+					},
+				);
+			}
 		}, sectionRef);
 
 		return () => ctx.revert();
@@ -86,9 +136,16 @@ export function Features({ reducedMotion }: { reducedMotion: boolean }) {
 			style={{
 				background: "var(--dm-crimson)",
 				// Paper-cut SVG overlay at 4% white for subtle texture
-				backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Ccircle cx='40' cy='40' r='20' fill='none' stroke='white' stroke-width='0.5' opacity='0.04'/%3E%3Ccircle cx='0' cy='0' r='20' fill='none' stroke='white' stroke-width='0.5' opacity='0.04'/%3E%3Ccircle cx='80' cy='80' r='20' fill='none' stroke='white' stroke-width='0.5' opacity='0.04'/%3E%3C/svg%3E")`,
+				backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Ccircle cx='40' cy='40' r='20' fill='none' stroke='white' stroke-width='0.5' opacity='0.08'/%3E%3Ccircle cx='0' cy='0' r='20' fill='none' stroke='white' stroke-width='0.5' opacity='0.08'/%3E%3Ccircle cx='80' cy='80' r='20' fill='none' stroke='white' stroke-width='0.5' opacity='0.08'/%3E%3C/svg%3E")`,
 			}}
 		>
+			{/* Mesh gradient overlay */}
+			<div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+				<MeshGradientBackground variant="intense" className="h-full" reducedMotion={reducedMotion}>
+					<div />
+				</MeshGradientBackground>
+			</div>
+
 			<div className="mx-auto max-w-6xl px-6 py-[clamp(5rem,10vw,10rem)]">
 				<div className="grid items-start gap-16 lg:grid-cols-2 lg:gap-20">
 					{/* Left: section header + feature list */}
@@ -132,7 +189,7 @@ export function Features({ reducedMotion }: { reducedMotion: boolean }) {
 								>
 									{/* Gold circular icon container */}
 									<div
-										className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full transition-transform duration-200 group-hover:scale-110"
+										className="dm-feature-icon flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full transition-transform duration-200 group-hover:scale-110"
 										style={{
 											background: "var(--dm-gold)",
 											color: "#FFFFFF",
@@ -172,9 +229,10 @@ export function Features({ reducedMotion }: { reducedMotion: boolean }) {
 						viewport={ANIMATION.viewport}
 						variants={mockupReveal}
 						className="relative flex items-center justify-center lg:sticky lg:top-32"
+						style={{ perspective: "800px" }}
 					>
 						{/* Phone frame */}
-						<div className="relative w-full max-w-[280px]">
+						<div ref={mockupRef} className="relative w-full max-w-[280px]">
 							<div
 								className="overflow-hidden rounded-[2.5rem] border-[6px] shadow-xl"
 								style={{

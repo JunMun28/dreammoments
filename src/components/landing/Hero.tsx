@@ -2,10 +2,14 @@ import { Link } from "@tanstack/react-router";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useEffect, useRef } from "react";
-import { use3DTilt } from "./hooks/use3DTilt";
+import { GradientText } from "./GradientText";
+import { MeshGradientBackground } from "./MeshGradientBackground";
 import { MovingBorderButton } from "./MovingBorderButton";
-import { LatticeOverlay } from "./motifs/LatticeOverlay";
 import { NeonXi } from "./NeonXi";
+import { SparkleEffect } from "./SparkleEffect";
+import { SpotlightCursor } from "./SpotlightCursor";
+import { use3DTilt } from "./hooks/use3DTilt";
+import { LatticeOverlay } from "./motifs/LatticeOverlay";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -120,11 +124,24 @@ export function Hero({ reducedMotion }: { reducedMotion: boolean }) {
 	return (
 		<section
 			ref={sectionRef}
-			className="dm-aurora-bg relative min-h-svh overflow-hidden"
+			className="relative min-h-svh overflow-hidden"
 			style={{ background: "var(--dm-bg)" }}
 		>
+			{/* Mesh gradient background */}
+			<div className="absolute inset-0">
+				<MeshGradientBackground variant="warm" className="h-full" reducedMotion={reducedMotion}>
+					<div />
+				</MeshGradientBackground>
+			</div>
+
+			{/* Spotlight cursor */}
+			<SpotlightCursor />
+
 			{/* Lattice overlay */}
 			<LatticeOverlay color="var(--dm-gold)" opacity={0.1} />
+
+			{/* Sparkle effect near headline */}
+			<SparkleEffect count={8} className="z-[2]" />
 
 			{/* Content */}
 			<div className="relative z-10 mx-auto max-w-5xl px-6 pt-28 pb-16 lg:pt-32">
@@ -190,12 +207,11 @@ export function Hero({ reducedMotion }: { reducedMotion: boolean }) {
 						<span
 							ref={accentRef}
 							className="inline-block italic"
-							style={{
-								fontSize: "var(--text-hero-accent)",
-								color: "var(--dm-crimson-vivid)",
-							}}
+							style={{ fontSize: "var(--text-hero-accent)" }}
 						>
-							remember.
+							<GradientText gradient="linear-gradient(135deg, var(--dm-crimson-bold), var(--dm-gold-bold))">
+								remember.
+							</GradientText>
 						</span>
 					</h1>
 

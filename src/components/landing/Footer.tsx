@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { MeshGradientBackground } from "./MeshGradientBackground";
 import { GoldRule } from "./motifs/GoldRule";
 
 export function Footer() {
@@ -7,6 +8,13 @@ export function Footer() {
 			className="relative px-6 py-12 text-center"
 			style={{ background: "var(--dm-bg)" }}
 		>
+			{/* Subtle mesh gradient strip */}
+			<div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+				<MeshGradientBackground variant="warm" className="h-full">
+					<div />
+				</MeshGradientBackground>
+			</div>
+
 			{/* Gold hairline at top */}
 			<GoldRule className="absolute top-0 left-0 right-0" />
 
@@ -18,8 +26,9 @@ export function Footer() {
 						style={{
 							fontFamily: '"Noto Serif SC", serif',
 							fontSize: "1rem",
-							color: "var(--dm-gold)",
-							opacity: 0.4,
+							color: "var(--dm-gold-electric)",
+							opacity: 0.6,
+							textShadow: "0 0 8px rgba(255,215,0,0.4)",
 						}}
 						aria-hidden="true"
 					>
@@ -36,8 +45,9 @@ export function Footer() {
 						style={{
 							fontFamily: '"Noto Serif SC", serif',
 							fontSize: "1rem",
-							color: "var(--dm-gold)",
-							opacity: 0.4,
+							color: "var(--dm-gold-electric)",
+							opacity: 0.6,
+							textShadow: "0 0 8px rgba(255,215,0,0.4)",
 						}}
 						aria-hidden="true"
 					>

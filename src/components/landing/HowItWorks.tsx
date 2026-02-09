@@ -1,7 +1,7 @@
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useEffect, useRef } from "react";
-import { useStrokeDraw } from "./hooks/useStrokeDraw";
+import { TracingBeam } from "./TracingBeam";
 import { PaperCutEdge } from "./motifs/PaperCutEdge";
 import { SectionHeader } from "./motifs/SectionHeader";
 
@@ -42,15 +42,7 @@ const TIMELINE_STEPS = [
 
 export function HowItWorks({ reducedMotion }: { reducedMotion: boolean }) {
 	const sectionRef = useRef<HTMLElement>(null);
-	const pathRef = useRef<SVGPathElement>(null);
 	const stepsRef = useRef<HTMLLIElement[]>([]);
-
-	useStrokeDraw({
-		pathRef,
-		triggerRef: sectionRef as React.RefObject<HTMLElement>,
-		scrub: 0.8,
-		reducedMotion,
-	});
 
 	// GSAP per-step entrance
 	useEffect(() => {
@@ -59,6 +51,7 @@ export function HowItWorks({ reducedMotion }: { reducedMotion: boolean }) {
 		const ctx = gsap.context(() => {
 			for (const step of stepsRef.current) {
 				if (!step) continue;
+				const card = step.querySelector<HTMLElement>(".rounded-\\[1\\.5rem\\]");
 				gsap.fromTo(
 					step,
 					{ opacity: 0, y: 30 },
@@ -75,6 +68,24 @@ export function HowItWorks({ reducedMotion }: { reducedMotion: boolean }) {
 						},
 					},
 				);
+				if (card) {
+					gsap.fromTo(
+						card,
+						{ boxShadow: "0 4px 20px -2px rgba(0,0,0,0.05)" },
+						{
+							boxShadow:
+								"0 4px 20px -2px rgba(0,0,0,0.05), 0 0 20px -4px rgba(212,175,55,0.25)",
+							duration: 0.6,
+							ease: "power3.out",
+							scrollTrigger: {
+								trigger: step,
+								start: "top 85%",
+								end: "top 55%",
+								scrub: 0.3,
+							},
+						},
+					);
+				}
 			}
 		}, sectionRef);
 
@@ -85,7 +96,7 @@ export function HowItWorks({ reducedMotion }: { reducedMotion: boolean }) {
 		<section
 			ref={sectionRef}
 			className="relative py-[clamp(5rem,10vw,10rem)] px-6 overflow-hidden"
-			style={{ background: "var(--dm-surface-muted)" }}
+			style={{ background: "linear-gradient(180deg, var(--dm-surface-rose) 0%, var(--dm-gold-soft) 100%)" }}
 		>
 			{/* biome-ignore lint/correctness/useUniqueElementIds: intentional anchor for in-page navigation */}
 			<div id="process" />
@@ -101,40 +112,7 @@ export function HowItWorks({ reducedMotion }: { reducedMotion: boolean }) {
 				/>
 
 				<ol className="relative mx-auto max-w-3xl pl-7 space-y-6">
-					{/* Golden thread SVG */}
-					<div
-						className="absolute left-[14px] top-6 bottom-6 w-px"
-						aria-hidden="true"
-					>
-						<svg
-							className="absolute inset-0 w-full h-full"
-							preserveAspectRatio="none"
-							role="presentation"
-						>
-							{/* Background track */}
-							<line
-								x1="50%"
-								y1="0"
-								x2="50%"
-								y2="100%"
-								stroke="var(--dm-border)"
-								strokeWidth="2"
-							/>
-							{/* Animated gold line */}
-							<path
-								ref={pathRef}
-								d="M 0.5 0 L 0.5 1"
-								stroke="var(--dm-gold)"
-								strokeWidth="2"
-								fill="none"
-								vectorEffect="non-scaling-stroke"
-								style={{
-									transform: "scaleY(1)",
-									transformOrigin: "top",
-								}}
-							/>
-						</svg>
-					</div>
+					<TracingBeam triggerRef={sectionRef as React.RefObject<HTMLElement>} reducedMotion={reducedMotion} />
 
 					{TIMELINE_STEPS.map((step, i) => (
 						<li

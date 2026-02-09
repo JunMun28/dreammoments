@@ -7,6 +7,7 @@ import {
 	containerReveal,
 	sectionReveal,
 } from "./animation";
+import { GradientText } from "./GradientText";
 import { HongbaoBadge } from "./HongbaoBadge";
 import { useCountUp } from "./hooks/useCountUp";
 import { MovingBorderButton } from "./MovingBorderButton";
@@ -134,67 +135,92 @@ export function Pricing({ reducedMotion }: { reducedMotion: boolean }) {
 					{/* Premium Card */}
 					<motion.div
 						variants={childReveal}
-						className="relative flex flex-col rounded-2xl p-8 sm:p-10 order-1 md:order-2 md:-translate-y-3"
-						style={{
-							border: "3px solid var(--dm-gold)",
-							background: "var(--dm-gold-soft)",
-							boxShadow: "0 12px 48px -12px rgba(212, 175, 55, 0.15)",
-						}}
+						className="relative order-1 md:order-2 md:-translate-y-3"
 					>
-						<HongbaoBadge label="Most Popular" />
-
-						<span
-							className="mt-2 text-sm font-medium uppercase tracking-[0.12em]"
-							style={{ color: "var(--dm-muted)" }}
+						{/* Animated gradient border wrapper */}
+						<div
+							className="dm-pricing-glow relative overflow-hidden rounded-2xl p-[3px]"
 						>
-							Premium
-						</span>
-						<div className="mt-3">
 							<span
-								className="font-display font-semibold"
+								className="dm-pricing-glow-spin pointer-events-none absolute inset-[-200%]"
 								style={{
-									fontSize: "3.5rem",
-									color: "var(--dm-gold-warm)",
+									background: "conic-gradient(from 0deg, transparent 0deg 200deg, var(--dm-gold-bold) 240deg, var(--dm-crimson-bold) 280deg, transparent 320deg 360deg)",
+								}}
+								aria-hidden="true"
+							/>
+							<div
+								className="relative z-10 flex flex-col rounded-[calc(1rem-3px)] p-8 sm:p-10"
+								style={{
+									background: "var(--dm-gold-soft)",
+									boxShadow: "0 12px 48px -12px rgba(212, 175, 55, 0.15)",
 								}}
 							>
-								RM
-								<span ref={priceRef as React.RefObject<HTMLSpanElement>}>
-									49
+								<HongbaoBadge label="Most Popular" />
+
+								<span
+									className="mt-2 text-sm font-medium uppercase tracking-[0.12em]"
+									style={{ color: "var(--dm-muted)" }}
+								>
+									Premium
 								</span>
-							</span>
-							<span
-								className="ml-2 text-sm"
-								style={{ color: "var(--dm-muted)" }}
-							>
-								/ SGD19
-							</span>
-						</div>
-						<p className="mt-2" style={{ color: "var(--dm-muted)" }}>
-							One-time per invitation. Not a subscription.
-						</p>
+								<div className="mt-3">
+									<span
+										className="font-display font-semibold"
+										style={{ fontSize: "3.5rem" }}
+									>
+										<GradientText gradient="linear-gradient(135deg, var(--dm-gold-warm), var(--dm-crimson-bold))">
+											RM<span ref={priceRef as React.RefObject<HTMLSpanElement>}>49</span>
+										</GradientText>
+									</span>
+									<span
+										className="ml-2 text-sm"
+										style={{ color: "var(--dm-muted)" }}
+									>
+										/ SGD19
+									</span>
+								</div>
+								<p className="mt-2" style={{ color: "var(--dm-muted)" }}>
+									One-time per invitation. Not a subscription.
+								</p>
 
-						<ul className="mt-8 flex-1 space-y-4">
-							{PREMIUM_FEATURES.map((f) => (
-								<li key={f} className="flex items-start gap-3">
-									<Check
-										aria-hidden="true"
-										className="mt-0.5 h-5 w-5 flex-shrink-0"
-										style={{ color: "var(--dm-gold-warm)" }}
-									/>
-									<span style={{ color: "var(--dm-ink)" }}>{f}</span>
-								</li>
-							))}
-						</ul>
+								<ul className="mt-8 flex-1 space-y-4">
+									{PREMIUM_FEATURES.map((f) => (
+										<li key={f} className="flex items-start gap-3">
+											<Check
+												aria-hidden="true"
+												className="mt-0.5 h-5 w-5 flex-shrink-0"
+												style={{ color: "var(--dm-gold-warm)" }}
+											/>
+											<span style={{ color: "var(--dm-ink)" }}>{f}</span>
+										</li>
+									))}
+								</ul>
 
-						<div className="mt-10 w-full">
-							<MovingBorderButton
-								href="/auth/signup"
-								variant="gold"
-								className="w-full justify-center"
-							>
-								Upgrade for RM49
-							</MovingBorderButton>
+								<div className="mt-10 w-full">
+									<MovingBorderButton
+										href="/auth/signup"
+										variant="gold"
+										className="w-full justify-center"
+									>
+										Upgrade for RM49
+									</MovingBorderButton>
+								</div>
+							</div>
 						</div>
+						<style>{`
+							.dm-pricing-glow-spin {
+								animation: dm-pricing-spin 8s linear infinite;
+							}
+							@keyframes dm-pricing-spin {
+								from { transform: rotate(0deg); }
+								to { transform: rotate(360deg); }
+							}
+							@media (prefers-reduced-motion: reduce) {
+								.dm-pricing-glow-spin { animation: none; display: none; }
+								.dm-pricing-glow { border: 3px solid var(--dm-gold); border-radius: 1rem; padding: 0; }
+								.dm-pricing-glow > div:last-of-type { border-radius: 1rem; }
+							}
+						`}</style>
 					</motion.div>
 				</motion.div>
 

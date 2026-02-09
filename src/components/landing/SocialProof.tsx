@@ -1,8 +1,9 @@
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useEffect, useRef } from "react";
-import { GoldRule } from "./motifs/GoldRule";
+import { MeshGradientBackground } from "./MeshGradientBackground";
 import { SplitWords } from "./SplitWords";
+import { GoldRule } from "./motifs/GoldRule";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -120,8 +121,15 @@ export function SocialProof({ reducedMotion }: { reducedMotion: boolean }) {
 		<section
 			ref={sectionRef}
 			className="relative"
-			style={{ background: "var(--dm-dark-bg)" }}
+			style={{ background: "var(--dm-crimson-soft)" }}
 		>
+			{/* Mesh gradient overlay */}
+			<div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+				<MeshGradientBackground variant="crimson" className="h-full" reducedMotion={reducedMotion}>
+					<div />
+				</MeshGradientBackground>
+			</div>
+
 			<GoldRule className="absolute top-0 left-0 right-0 z-10" />
 
 			<div
@@ -147,7 +155,7 @@ export function SocialProof({ reducedMotion }: { reducedMotion: boolean }) {
 										height: "60%",
 										minHeight: "3rem",
 										background: "var(--dm-gold)",
-										opacity: 0.2,
+										opacity: 0.3,
 										alignSelf: "center",
 									}}
 									aria-hidden="true"
@@ -161,7 +169,7 @@ export function SocialProof({ reducedMotion }: { reducedMotion: boolean }) {
 										width: "4rem",
 										height: "1px",
 										background: "var(--dm-gold)",
-										opacity: 0.2,
+										opacity: 0.3,
 										position: "absolute",
 										marginTop: "-1rem",
 									}}
@@ -184,7 +192,7 @@ export function SocialProof({ reducedMotion }: { reducedMotion: boolean }) {
 											'"Playfair Display", "Noto Serif SC", Georgia, serif',
 										fontWeight: 800,
 										fontSize: "clamp(2.5rem, 6vw, 4rem)",
-										color: "var(--dm-dark-text)",
+										color: "var(--dm-ink)",
 										lineHeight: 1.1,
 									}}
 								>
@@ -199,7 +207,7 @@ export function SocialProof({ reducedMotion }: { reducedMotion: boolean }) {
 										fontFamily: '"Inter", system-ui, sans-serif',
 										fontWeight: 400,
 										fontSize: "var(--text-sm)",
-										color: "var(--dm-dark-muted)",
+										color: "var(--dm-muted)",
 									}}
 								>
 									{stat.label}
@@ -225,7 +233,7 @@ export function SocialProof({ reducedMotion }: { reducedMotion: boolean }) {
 							fontWeight: 400,
 							fontStyle: "italic",
 							fontSize: "clamp(1.125rem, 2vw, 1.5rem)",
-							color: "var(--dm-dark-text)",
+							color: "var(--dm-ink)",
 							lineHeight: 1.7,
 						}}
 					>
@@ -241,7 +249,7 @@ export function SocialProof({ reducedMotion }: { reducedMotion: boolean }) {
 							fontWeight: 400,
 							fontVariant: "small-caps",
 							fontSize: "var(--text-sm)",
-							color: "var(--dm-dark-muted)",
+							color: "var(--dm-muted)",
 						}}
 					>
 						Wei Lin &amp; Jun Hao, Kuala Lumpur

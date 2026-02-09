@@ -98,6 +98,17 @@ code {
   --dm-dark-muted:     #A1A1AA;
   --dm-dark-gold:      #D4AF37;
 
+  /* ─── Bold Accents (V4 Vivid Celebration) ─── */
+  --dm-crimson-bold:   #E81840;
+  --dm-gold-bold:      #FFB800;
+  --dm-rose-bold:      #FF6B6B;
+  --dm-coral:          #FF7F50;
+
+  /* ─── Mesh Gradient Opacity Tokens ─── */
+  --dm-mesh-opacity-subtle:  0.12;
+  --dm-mesh-opacity-medium:  0.20;
+  --dm-mesh-opacity-bold:    0.30;
+
   /* ─── Vermillion Section (Features) ─── */
   --dm-vermillion:     #D42040;
   --dm-vermillion-soft: #FDE0E6;
@@ -196,6 +207,10 @@ code {
   --color-dm-dark-gold: var(--dm-dark-gold);
   --color-dm-vermillion: var(--dm-vermillion);
   --color-dm-vermillion-soft: var(--dm-vermillion-soft);
+  --color-dm-crimson-bold: var(--dm-crimson-bold);
+  --color-dm-gold-bold: var(--dm-gold-bold);
+  --color-dm-rose-bold: var(--dm-rose-bold);
+  --color-dm-coral: var(--dm-coral);
   --color-dm-accent-strong: var(--dm-accent-strong);
   --color-dm-on-accent: var(--dm-on-accent);
   --color-dm-error: var(--dm-error);
@@ -416,6 +431,15 @@ h4 {
 @keyframes dm-cta-glow {
   0%, 100% { box-shadow: 0 0 20px rgba(212, 175, 55, 0); }
   50% { box-shadow: 0 0 30px rgba(212, 175, 55, 0.3); }
+}
+
+/* ─── V4 Vivid Celebration Utilities ─── */
+
+.dm-gradient-text {
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
 }
 
 /* ─── Cultural Editorial Utilities ─── */
