@@ -1,16 +1,44 @@
-import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
-import { Heart, Mail, Send, Sparkles } from "lucide-react";
+import {
+	createFileRoute,
+	Link,
+	Navigate,
+	useNavigate,
+} from "@tanstack/react-router";
+import {
+	Copy,
+	Eye,
+	Heart,
+	Mail,
+	MoreHorizontal,
+	Send,
+	Share2,
+	Sparkles,
+	Trash2,
+} from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ShareModal from "../../components/share/ShareModal";
+import { RouteErrorFallback } from "../../components/ui/RouteErrorFallback";
+import { RouteLoadingSpinner } from "../../components/ui/RouteLoadingSpinner";
 import { useToast } from "../../components/ui/Toast";
+import {
+	useDeleteInvitation,
+	useInvitations,
+} from "../../hooks/useInvitations";
 import { useAuth } from "../../lib/auth";
-import { deleteInvitation, getAnalytics, listGuests } from "../../lib/data";
+import {
+	createInvitation,
+	getAnalytics,
+	listGuests,
+	updateInvitation,
+} from "../../lib/data";
 import { useStore } from "../../lib/store";
 import type { Invitation, InvitationStatus } from "../../lib/types";
 import { templates } from "../../templates";
 
 export const Route = createFileRoute("/dashboard/")({
 	component: DashboardScreen,
+	pendingComponent: RouteLoadingSpinner,
+	errorComponent: RouteErrorFallback,
 });
 
 const statusLabels: Record<InvitationStatus, string> = {
@@ -88,32 +116,149 @@ function ConfirmDeleteDialog({
 }
 
 function DashboardScreen() {
-	const { user } = useAuth();
+	const { user, loading } = useAuth();
 	const { addToast } = useToast();
-	const invitations = useStore((store) =>
+	const navigate = useNavigate();
+	const { data: serverInvitations } = useInvitations();
+	const localInvitations = useStore((store) =>
 		store.invitations.filter((item) => item.userId === user?.id),
 	);
+	const invitations = serverInvitations ?? localInvitations;
+	const deleteMutation = useDeleteInvitation();
 	const [shareOpen, setShareOpen] = useState(false);
 	const [selected, setSelected] = useState<Invitation | null>(null);
 	const [deleteTarget, setDeleteTarget] = useState<Invitation | null>(null);
+	const [search, setSearch] = useState("");
+	const [statusFilter, setStatusFilter] = useState<
+		"all" | "draft" | "published" | "archived"
+	>("all");
+	const [page, setPage] = useState(1);
+	const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
+	const [openOverflowId, setOpenOverflowId] = useState<string | null>(null);
+	const overflowRef = useRef<HTMLDivElement>(null);
+	const perPage = 9;
 
-	const handleDeleteConfirm = useCallback(() => {
-		if (deleteTarget) {
-			deleteInvitation(deleteTarget.id);
+	const handleDeleteConfirm = useCallback(async () => {
+		if (!deleteTarget) return;
+		try {
+			await deleteMutation.mutateAsync(deleteTarget.id);
 			addToast({ type: "success", message: "Invitation deleted" });
+		} catch {
+			addToast({
+				type: "error",
+				message: "Failed to delete invitation. Please try again.",
+			});
+		} finally {
 			setDeleteTarget(null);
 		}
-	}, [deleteTarget, addToast]);
+	}, [deleteTarget, addToast, deleteMutation]);
+
+	const handleDuplicate = useCallback(
+		async (invitation: Invitation) => {
+			setDuplicatingId(invitation.id);
+			try {
+				const newInv = createInvitation(
+					invitation.userId,
+					invitation.templateId,
+				);
+				updateInvitation(newInv.id, {
+					title: `${invitation.title} (Copy)`,
+					content: invitation.content,
+					sectionVisibility: invitation.sectionVisibility,
+					designOverrides: invitation.designOverrides,
+				});
+				addToast({
+					type: "success",
+					message: "Invitation duplicated — opening editor",
+				});
+				await navigate({
+					to: "/editor/$invitationId",
+					params: { invitationId: newInv.id },
+				});
+			} finally {
+				setDuplicatingId(null);
+			}
+		},
+		[addToast, navigate],
+	);
+
+	// Close overflow menu when clicking outside
+	useEffect(() => {
+		if (!openOverflowId) return;
+		const handleClick = (e: MouseEvent) => {
+			if (
+				overflowRef.current &&
+				!overflowRef.current.contains(e.target as Node)
+			) {
+				setOpenOverflowId(null);
+			}
+		};
+		document.addEventListener("pointerdown", handleClick);
+		return () => document.removeEventListener("pointerdown", handleClick);
+	}, [openOverflowId]);
+
+	const filteredInvitations = useMemo(() => {
+		return invitations.filter((inv) => {
+			const matchesSearch = inv.title
+				?.toLowerCase()
+				.includes(search.toLowerCase());
+			const matchesStatus =
+				statusFilter === "all" || inv.status === statusFilter;
+			return matchesSearch && matchesStatus;
+		});
+	}, [invitations, search, statusFilter]);
 
 	const sortedInvitations = useMemo(
 		() =>
-			[...invitations].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
-		[invitations],
+			[...filteredInvitations].sort((a, b) =>
+				b.updatedAt.localeCompare(a.updatedAt),
+			),
+		[filteredInvitations],
 	);
+
+	const totalPages = Math.ceil(sortedInvitations.length / perPage);
+	const paginatedInvitations = sortedInvitations.slice(
+		(page - 1) * perPage,
+		page * perPage,
+	);
+
+	// Reset to page 1 when filters change
+	// biome-ignore lint/correctness/useExhaustiveDependencies: intentionally re-run when search/statusFilter change
+	useEffect(() => {
+		setPage(1);
+	}, [search, statusFilter]);
+
+	if (!user && !loading) return <Navigate to="/auth/login" />;
+
+	if (loading) {
+		return (
+			<div className="min-h-screen bg-[color:var(--dm-bg)] px-6 py-10">
+				<div className="mx-auto max-w-6xl space-y-8">
+					<div>
+						<div className="mb-2 h-4 w-20 animate-pulse rounded bg-[color:var(--dm-border)]" />
+						<div className="mb-2 h-8 w-48 animate-pulse rounded bg-[color:var(--dm-border)]" />
+						<div className="h-4 w-64 animate-pulse rounded bg-[color:var(--dm-border)]" />
+					</div>
+					<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+						{[1, 2, 3].map((i) => (
+							<div
+								key={i}
+								className="animate-pulse rounded-2xl border border-[color:var(--dm-border)] p-6"
+							>
+								<div className="mb-4 h-40 rounded-lg bg-[color:var(--dm-border)]" />
+								<div className="mb-2 h-5 w-2/3 rounded bg-[color:var(--dm-border)]" />
+								<div className="h-4 w-1/3 rounded bg-[color:var(--dm-border)]" />
+							</div>
+						))}
+					</div>
+				</div>
+			</div>
+		);
+	}
 
 	if (!user) return <Navigate to="/auth/login" />;
 
-	if (sortedInvitations.length === 0) {
+	if (invitations.length === 0) {
 		return (
 			<div className="flex min-h-screen items-center justify-center bg-[color:var(--dm-bg)] px-6 py-10">
 				<div className="mx-auto max-w-md text-center">
@@ -140,8 +285,10 @@ function DashboardScreen() {
 						Create Your First Invitation
 					</h1>
 					<p className="mt-4 text-sm leading-relaxed text-[color:var(--dm-muted)]">
-						Design a beautiful digital wedding invitation in minutes. Choose
-						from our curated templates and personalize every detail.
+						Design a stunning Chinese wedding invitation in minutes. Choose from
+						templates crafted for Malaysian and Singaporean couples, with
+						bilingual support, double happiness motifs, and hongbao-inspired
+						themes.
 					</p>
 					<Link
 						to="/editor/new"
@@ -178,8 +325,57 @@ function DashboardScreen() {
 					</Link>
 				</div>
 
-				<div className="grid gap-6 lg:grid-cols-2">
-					{sortedInvitations.map((invitation) => {
+				{/* Search and filter controls */}
+				<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+					<input
+						placeholder="Search invitations..."
+						aria-label="Search invitations"
+						value={search}
+						onChange={(e) => setSearch(e.target.value)}
+						className="h-10 flex-1 rounded-full border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] px-4 text-sm text-[color:var(--dm-ink)]"
+						autoComplete="off"
+						type="search"
+					/>
+					<div className="flex gap-2 text-xs uppercase tracking-[0.2em]">
+						{(["all", "draft", "published", "archived"] as const).map(
+							(status) => (
+								<button
+									key={status}
+									type="button"
+									onClick={() => setStatusFilter(status)}
+									className={`rounded-full px-3 py-2 transition-colors ${
+										statusFilter === status
+											? "bg-[color:var(--dm-accent-strong)] text-[color:var(--dm-on-accent)]"
+											: "border border-[color:var(--dm-border)] text-[color:var(--dm-ink)]"
+									}`}
+								>
+									{status === "all" ? "All" : statusLabels[status]}
+								</button>
+							),
+						)}
+					</div>
+				</div>
+
+				<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+					{paginatedInvitations.length === 0 &&
+						(search || statusFilter !== "all") && (
+							<div className="col-span-full flex flex-col items-center justify-center rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] px-6 py-16 text-center">
+								<p className="text-sm text-[color:var(--dm-muted)]">
+									No invitations match your search or filter.
+								</p>
+								<button
+									type="button"
+									className="mt-4 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-accent-strong)] hover:underline"
+									onClick={() => {
+										setSearch("");
+										setStatusFilter("all");
+									}}
+								>
+									Clear Filters
+								</button>
+							</div>
+						)}
+					{paginatedInvitations.map((invitation) => {
 						const templateName =
 							templates.find(
 								(template) => template.id === invitation.templateId,
@@ -200,42 +396,144 @@ function DashboardScreen() {
 										<h2 className="mt-2 text-xl font-semibold text-[color:var(--dm-ink)] break-words">
 											{invitation.title}
 										</h2>
-										<p className="mt-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
+										<span
+											className={`mt-2 inline-block rounded-full px-2.5 py-0.5 text-xs uppercase tracking-[0.2em] ${
+												invitation.status === "published"
+													? "bg-dm-success/10 text-dm-success"
+													: invitation.status === "archived"
+														? "bg-[color:var(--dm-border)] text-[color:var(--dm-muted)]"
+														: "bg-[color:var(--dm-peach)]/10 text-[color:var(--dm-peach)]"
+											}`}
+										>
 											{statusLabels[invitation.status]}
-										</p>
+										</span>
 									</div>
 									<div className="flex flex-wrap gap-2 text-xs uppercase tracking-[0.2em]">
+										{/* Edit - always visible, links directly to editor */}
 										<Link
 											to="/editor/$invitationId"
 											params={{ invitationId: invitation.id }}
-											className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)]"
+											className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)]"
 										>
 											Edit
 										</Link>
-										<Link
-											to="/invite/$slug"
-											params={{ slug: invitation.slug }}
-											className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)]"
-										>
-											Preview
-										</Link>
+										{/* Share - always visible */}
 										<button
 											type="button"
-											className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)]"
+											className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)]"
 											onClick={() => {
 												setSelected(invitation);
 												setShareOpen(true);
 											}}
 										>
+											<Share2
+												className="h-3 w-3 sm:hidden"
+												aria-hidden="true"
+											/>
 											Share
+										</button>
+										{/* Desktop-only buttons: Preview, Duplicate, Delete */}
+										<Link
+											to="/invite/$slug"
+											params={{ slug: invitation.slug }}
+											className="hidden rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)] sm:inline-flex"
+										>
+											Preview
+										</Link>
+										<button
+											type="button"
+											className="hidden items-center gap-1.5 rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)] sm:inline-flex"
+											onClick={() => handleDuplicate(invitation)}
+											disabled={duplicatingId === invitation.id}
+										>
+											<Copy className="h-3 w-3" aria-hidden="true" />
+											{duplicatingId === invitation.id
+												? "Duplicating..."
+												: "Duplicate"}
 										</button>
 										<button
 											type="button"
-											className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)]"
+											className="hidden rounded-full border border-dm-error/30 px-4 py-2 text-dm-error hover:bg-dm-error/5 sm:inline-flex"
 											onClick={() => setDeleteTarget(invitation)}
+											disabled={deleteMutation.isPending}
 										>
-											Delete
+											{deleteMutation.isPending &&
+											deleteTarget?.id === invitation.id
+												? "Deleting..."
+												: "Delete"}
 										</button>
+										{/* Mobile overflow menu */}
+										<div
+											className="relative sm:hidden"
+											ref={
+												openOverflowId === invitation.id
+													? overflowRef
+													: undefined
+											}
+										>
+											<button
+												type="button"
+												className="inline-flex items-center justify-center rounded-full border border-[color:var(--dm-border)] px-2.5 py-2 text-[color:var(--dm-ink)]"
+												onClick={() =>
+													setOpenOverflowId(
+														openOverflowId === invitation.id
+															? null
+															: invitation.id,
+													)
+												}
+												aria-label="More actions"
+											>
+												<MoreHorizontal
+													className="h-4 w-4"
+													aria-hidden="true"
+												/>
+											</button>
+											{openOverflowId === invitation.id && (
+												<div className="absolute right-0 top-full z-10 mt-1 w-40 rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] py-1 shadow-lg">
+													<Link
+														to="/invite/$slug"
+														params={{ slug: invitation.slug }}
+														className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-xs uppercase tracking-[0.15em] text-[color:var(--dm-ink)]"
+														onClick={() => setOpenOverflowId(null)}
+													>
+														<Eye className="h-3.5 w-3.5" aria-hidden="true" />
+														Preview
+													</Link>
+													<button
+														type="button"
+														className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-xs uppercase tracking-[0.15em] text-[color:var(--dm-ink)]"
+														onClick={() => {
+															setOpenOverflowId(null);
+															handleDuplicate(invitation);
+														}}
+														disabled={duplicatingId === invitation.id}
+													>
+														<Copy className="h-3.5 w-3.5" aria-hidden="true" />
+														{duplicatingId === invitation.id
+															? "Duplicating..."
+															: "Duplicate"}
+													</button>
+													<button
+														type="button"
+														className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-xs uppercase tracking-[0.15em] text-dm-error"
+														onClick={() => {
+															setOpenOverflowId(null);
+															setDeleteTarget(invitation);
+														}}
+														disabled={deleteMutation.isPending}
+													>
+														<Trash2
+															className="h-3.5 w-3.5"
+															aria-hidden="true"
+														/>
+														{deleteMutation.isPending &&
+														deleteTarget?.id === invitation.id
+															? "Deleting..."
+															: "Delete"}
+													</button>
+												</div>
+											)}
+										</div>
 									</div>
 								</div>
 								<div className="mt-4 grid gap-3 sm:grid-cols-3">
@@ -286,6 +584,31 @@ function DashboardScreen() {
 						);
 					})}
 				</div>
+
+				{/* Pagination */}
+				{totalPages > 1 && (
+					<div className="mt-8 flex items-center justify-center gap-2">
+						<button
+							type="button"
+							onClick={() => setPage((p) => Math.max(1, p - 1))}
+							disabled={page === 1}
+							className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-ink)] disabled:opacity-40"
+						>
+							Previous
+						</button>
+						<span className="text-sm text-[color:var(--dm-muted)]">
+							Page {page} of {totalPages}
+						</span>
+						<button
+							type="button"
+							onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+							disabled={page === totalPages}
+							className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-ink)] disabled:opacity-40"
+						>
+							Next
+						</button>
+					</div>
+				)}
 			</div>
 
 			<ShareModal

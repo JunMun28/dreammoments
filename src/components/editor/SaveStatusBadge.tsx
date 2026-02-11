@@ -3,9 +3,61 @@ import { cn } from "../../lib/utils";
 type SaveStatusBadgeProps = {
 	status: "saved" | "saving" | "unsaved" | "error";
 	autosaveAt?: string;
+	onRetry?: () => void;
+	onRevert?: () => void;
+	retriesExhausted?: boolean;
+	isLocalOnly?: boolean;
 };
 
-export function SaveStatusBadge({ status, autosaveAt }: SaveStatusBadgeProps) {
+export function SaveStatusBadge({
+	status,
+	autosaveAt,
+	onRetry,
+	onRevert,
+	retriesExhausted,
+	isLocalOnly,
+}: SaveStatusBadgeProps) {
+	// Persistent error banner when all retries are exhausted
+	if (status === "error" && retriesExhausted) {
+		return (
+			<div
+				role="alert"
+				className="flex flex-col gap-2 rounded-xl border border-red-300 bg-red-50 px-3 py-2.5 text-xs text-red-700 dark:border-red-700 dark:bg-red-950/40 dark:text-red-300"
+			>
+				<div className="flex items-center gap-1.5">
+					<span
+						className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-red-500"
+						aria-hidden="true"
+					/>
+					<span className="font-medium">Changes couldn't be saved</span>
+				</div>
+				<p className="text-[11px] leading-snug opacity-80">
+					Your work is stored locally.
+				</p>
+				<div className="flex items-center gap-2">
+					{onRetry && (
+						<button
+							type="button"
+							onClick={onRetry}
+							className="rounded-lg bg-red-600 px-2.5 py-1 text-[11px] font-medium text-white hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-400"
+						>
+							Retry Now
+						</button>
+					)}
+					{onRevert && (
+						<button
+							type="button"
+							onClick={onRevert}
+							className="rounded-lg border border-red-300 px-2.5 py-1 text-[11px] font-medium hover:bg-red-100 dark:border-red-700 dark:hover:bg-red-900/40"
+						>
+							Revert to Last Saved
+						</button>
+					)}
+				</div>
+			</div>
+		);
+	}
+
 	return (
 		<span
 			aria-live="polite"
@@ -26,7 +78,9 @@ export function SaveStatusBadge({ status, autosaveAt }: SaveStatusBadgeProps) {
 						className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500"
 						aria-hidden="true"
 					/>
-					Saved{autosaveAt ? ` at ${autosaveAt}` : ""}
+					{isLocalOnly
+						? "Saved locally"
+						: `Saved${autosaveAt ? ` at ${autosaveAt}` : ""}`}
 				</>
 			)}
 			{status === "saving" && (
@@ -50,10 +104,19 @@ export function SaveStatusBadge({ status, autosaveAt }: SaveStatusBadgeProps) {
 			{status === "error" && (
 				<>
 					<span
-						className="inline-block h-1.5 w-1.5 rounded-full bg-red-500"
+						className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-red-500"
 						aria-hidden="true"
 					/>
 					Save failed
+					{onRetry && (
+						<button
+							type="button"
+							onClick={onRetry}
+							className="ml-1 underline underline-offset-2 hover:no-underline"
+						>
+							Retry
+						</button>
+					)}
 				</>
 			)}
 		</span>

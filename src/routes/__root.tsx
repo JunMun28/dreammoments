@@ -4,13 +4,16 @@ import {
 	createRootRouteWithContext,
 	type ErrorComponentProps,
 	HeadContent,
+	Link,
 	Scripts,
 	useLocation,
+	useRouter,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { useEffect } from "react";
+
 import Header from "../components/Header";
 import { ToastProvider } from "../components/ui/Toast";
-
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import { AuthProvider } from "../lib/auth";
 import appCss from "../styles.css?url";
@@ -53,8 +56,13 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 				crossOrigin: "anonymous",
 			},
 			{
+				rel: "preload",
+				as: "style",
+				href: "https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Reenie+Beanie&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Serif+SC:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&family=Sacramento&family=Pinyon+Script&family=Manrope:wght@300;400;500;600;700&display=swap",
+			},
+			{
 				rel: "stylesheet",
-				href: "https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Reenie+Beanie&family=Noto+Serif+SC:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&family=Sacramento&family=Pinyon+Script&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700&display=swap",
+				href: "https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Reenie+Beanie&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Serif+SC:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&family=Sacramento&family=Pinyon+Script&family=Manrope:wght@300;400;500;600;700&display=swap",
 			},
 			{
 				rel: "stylesheet",
@@ -65,6 +73,22 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 
 	shellComponent: RootDocument,
 	errorComponent: RootErrorFallback,
+	notFoundComponent: () => (
+		<div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
+			<h1 className="font-display text-4xl font-bold text-[color:var(--dm-ink)]">
+				404
+			</h1>
+			<p className="text-lg text-[color:var(--dm-muted)]">
+				This page doesn't exist.
+			</p>
+			<Link
+				to="/"
+				className="rounded-full bg-[color:var(--dm-accent-strong)] px-6 py-2 text-sm font-medium text-white transition-colors hover:opacity-90"
+			>
+				Back to Home
+			</Link>
+		</div>
+	),
 });
 
 function RootErrorFallback({ error, reset }: ErrorComponentProps) {
@@ -95,9 +119,17 @@ function RootErrorFallback({ error, reset }: ErrorComponentProps) {
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
-	const showDevtools = import.meta.env.DEV;
 	const { pathname } = useLocation();
-	const isEditor = pathname.startsWith("/editor/");
+	const router = useRouter();
+	const isFullScreen =
+		pathname.startsWith("/editor/") || pathname.startsWith("/invite/");
+
+	useEffect(() => {
+		const unsubscribe = router.subscribe("onResolved", () => {
+			document.getElementById("main-content")?.focus({ preventScroll: true });
+		});
+		return unsubscribe;
+	}, [router]);
 
 	return (
 		<html lang="en">
@@ -110,22 +142,20 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 						<a href="#main-content" className="dm-skip-link">
 							Skip to main content
 						</a>
-						{!isEditor && <Header />}
+						{!isFullScreen && <Header />}
 						{/* biome-ignore lint/correctness/useUniqueElementIds: Root layout renders once; skip link requires stable ID */}
 						<main
 							id="main-content"
 							tabIndex={-1}
-							className={isEditor ? "" : "pt-20"}
+							className={isFullScreen ? "" : "pt-20"}
 						>
 							{children}
 						</main>
 					</ToastProvider>
 				</AuthProvider>
-				{showDevtools && (
+				{import.meta.env.DEV && (
 					<TanStackDevtools
-						config={{
-							position: "bottom-right",
-						}}
+						config={{ position: "bottom-right" }}
 						plugins={[
 							{
 								name: "Tanstack Router",

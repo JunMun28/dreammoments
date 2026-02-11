@@ -1,0 +1,274 @@
+[     694ms] [WARNING] [tanstack-router] These exports from "/Users/wongjunmun/Developer/tanstack_projects/dreammoments/src/routes/dashboard/$invitationId/index.tsx" will not be code-split and will increase your bundle size:
+- InvitationDashboard
+For the best optimization, these items should either have their export statements removed, or be imported from another location that is not a route file. @ http://localhost:3000/src/routes/dashboard/$invitationId/index.tsx?t=1770771695633:2
+[     829ms] [ERROR] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <Suspense fallback={null}>
+      <MatchImpl matchId="//">
+        <SafeFragment>
+          <SafeFragment fallback={null}>
+            <SafeFragment getResetKey={function getResetKey} errorComponent={function ErrorComponent} ...>
+              <SafeFragment fallback={function fallback}>
+                <MatchInnerImpl matchId="//">
+                  <Landing>
+                    <div ref={{current:null}} className="min-h-scre..." data-tsd-source="/src/route...">
+                      <Hero reducedMotion={false} data-tsd-source="/src/route...">
+                        <section ref={{current:null}} className="relative m..." style={{...}} ...>
+                          <div>
+                          <FloatingHearts reducedMotion={false} data-tsd-source="/src/compo...">
+                            <div className="pointer-ev..." aria-hidden="true" data-tsd-source="/src/compo...">
+                              <svg>
+                              <svg>
+                              <svg
+                                className="absolute"
+                                width={19.734666794774967}
+                                height={19.734666794774967}
+                                viewBox="0 0 24 24"
+                                fill="var(--dm-crimson)"
+                                role="presentation"
+                                style={{
++                                 left: "12.006496354588307%"
+-                                 left: "12.0065%"
++                                 bottom: "-5%"
+-                                 bottom: "-5%"
++                                 opacity: 0.1691298424859724
+-                                 opacity: "0.16913"
++                                 animation: "dm-heart-float 14.632579777141018s 3.620058210217394s ease-in-out infinite"
++                                 --heart-sway: "26.127707211198867px"
+-                                 --heart-sway: "26.127707211198867px"
+-                                 animation-duration: "14.6326s"
+-                                 animation-timing-function: "ease-in-out"
+-                                 animation-delay: "3.62006s"
+-                                 animation-iteration-count: "infinite"
+-                                 animation-direction: "normal"
+-                                 animation-fill-mode: "none"
+-                                 animation-play-state: "running"
+-                                 animation-name: "dm-heart-float"
+-                                 animation-timeline: "auto"
+-                                 animation-range-start: "normal"
+-                                 animation-range-end: "normal"
+                                }}
+                                data-tsd-source="/src/components/landing/motifs/FloatingHearts.tsx:42:5"
+                              >
+                              <svg
+                                className="absolute"
+                                width={18.36766598635586}
+                                height={18.36766598635586}
+                                viewBox="0 0 24 24"
+                                fill="var(--dm-crimson)"
+                                role="presentation"
+                                style={{
++                                 left: "27.310394700907636%"
+-                                 left: "27.3104%"
++                                 bottom: "-5%"
+-                                 bottom: "-5%"
++                                 opacity: 0.2223748533404432
+-                                 opacity: "0.222375"
++                                 animation: "dm-heart-float 13.507028776159132s 6.0742723602452315s ease-in-out infinite"
++                                 --heart-sway: "16.157661573806763px"
+-                                 --heart-sway: "16.157661573806763px"
+-                                 animation-duration: "13.507s"
+-                                 animation-timing-function: "ease-in-out"
+-                                 animation-delay: "6.07427s"
+-                                 animation-iteration-count: "infinite"
+-                                 animation-direction: "normal"
+-                                 animation-fill-mode: "none"
+-                                 animation-play-state: "running"
+-                                 animation-name: "dm-heart-float"
+-                                 animation-timeline: "auto"
+-                                 animation-range-start: "normal"
+-                                 animation-range-end: "normal"
+                                }}
+                                data-tsd-source="/src/components/landing/motifs/FloatingHearts.tsx:42:5"
+                              >
+                              ...
+                          ...
+                      <Showcase>
+                      <SocialProof reducedMotion={false} data-tsd-source="/src/route...">
+                        <section ref={{current:null}} className="relative" style={{...}} data-tsd-source="/src/compo...">
+                          <div>
+                          <PetalShower reducedMotion={false} data-tsd-source="/src/compo...">
+                            <div className="pointer-ev..." aria-hidden="true" data-tsd-source="/src/compo...">
+                              <svg>
+                              <svg
+                                className="absolute"
+                                width={8.587606957793469}
+                                height={6.083279982602107}
+                                viewBox="0 0 14 10"
+                                role="presentation"
+                                style={{
++                                 left: "65.3331439768317%"
+-                                 left: "65.3331%"
++                                 top: "-5%"
+-                                 top: "-5%"
++                                 opacity: 0.15735569487042084
+-                                 opacity: "0.157356"
++                                 transform: "rotate(9.029233595647383deg)"
+-                                 transform: "rotate(9.02923deg)"
++                                 animation: "dm-petal-fall 15.270409427008417s 9.668333493468708s ease-in-out infinite"
++                                 --petal-drift: "35.10129132959264px"
+-                                 --petal-drift: "35.10129132951988px"
+-                                 animation-duration: "15.2704s"
+-                                 animation-timing-function: "ease-in-out"
+-                                 animation-delay: "9.66833s"
+-                                 animation-iteration-count: "infinite"
+-                                 animation-direction: "normal"
+-                                 animation-fill-mode: "none"
+-                                 animation-play-state: "running"
+-                                 animation-name: "dm-petal-fall"
+-                                 animation-timeline: "auto"
+-                                 animation-range-start: "normal"
+-                                 animation-range-end: "normal"
+                                }}
+                                data-tsd-source="/src/components/landing/motifs/PetalShower.tsx:33:5"
+                              >
+                              <svg
+                                className="absolute"
+                                width={10.715043657663045}
+                                height={7.2255414422397735}
+                                viewBox="0 0 14 10"
+                                role="presentation"
+                                style={{
++                                 left: "48.821638636511864%"
+-                                 left: "48.8216%"
++                                 top: "-5%"
+-                                 top: "-5%"
++                                 opacity: 0.22959582482944824
+-                                 opacity: "0.229596"
++                                 transform: "rotate(210.4217265695479deg)"
+-                                 transform: "rotate(210.422deg)"
++                                 animation: "dm-petal-fall 11.298279602568073s 4.824990222696215s ease-in-out infinite"
++                                 --petal-drift: "60.37136180122616px"
+-                                 --petal-drift: "60.37136180122616px"
+-                                 animation-duration: "11.2983s"
+-                                 animation-timing-function: "ease-in-out"
+-                                 animation-delay: "4.82499s"
+-                                 animation-iteration-count: "infinite"
+-                                 animation-direction: "normal"
+-                                 animation-fill-mode: "none"
+-                                 animation-play-state: "running"
+-                                 animation-name: "dm-petal-fall"
+-                                 animation-timeline: "auto"
+-                                 animation-range-start: "normal"
+-                                 animation-range-end: "normal"
+                                }}
+                                data-tsd-source="/src/components/landing/motifs/PetalShower.tsx:33:5"
+                              >
+                              <svg>
+                              <svg>
+                              <svg>
+                              <svg
+                                className="absolute"
+                                width={10.939874785290158}
+                                height={7.590209912996215}
+                                viewBox="0 0 14 10"
+                                role="presentation"
+                                style={{
++                                 left: "70.38327608339387%"
+-                                 left: "70.3833%"
++                                 top: "-5%"
+-                                 top: "-5%"
++                                 opacity: 0.18800713913788059
+-                                 opacity: "0.188007"
++                                 transform: "rotate(69.49206279801729deg)"
+-                                 transform: "rotate(69.4921deg)"
++                                 animation: "dm-petal-fall 15.362733866998497s 8.222999160698237s ease-in-out infinite"
++                                 --petal-drift: "52.280121122767014px"
+-                                 --petal-drift: "52.280121122767014px"
+-                                 animation-duration: "15.3627s"
+-                                 animation-timing-function: "ease-in-out"
+-                                 animation-delay: "8.223s"
+-                                 animation-iteration-count: "infinite"
+-                                 animation-direction: "normal"
+-                                 animation-fill-mode: "none"
+-                                 animation-play-state: "running"
+-                                 animation-name: "dm-petal-fall"
+-                                 animation-timeline: "auto"
+-                                 animation-range-start: "normal"
+-                                 animation-range-end: "normal"
+                                }}
+                                data-tsd-source="/src/components/landing/motifs/PetalShower.tsx:33:5"
+                              >
+                              ...
+                          ...
+                      <HowItWorks>
+                      <Features>
+                      <Pricing>
+                      <FinalCTA reducedMotion={false} data-tsd-source="/src/route...">
+                        <section ref={{current:null}} className="relative o..." style={{...}} ...>
+                          <div>
+                          <RisingLanterns reducedMotion={false} data-tsd-source="/src/compo...">
+                            <div className="pointer-ev..." aria-hidden="true" data-tsd-source="/src/compo...">
+                              <svg>
+                              <svg>
+                              <svg>
+                              <svg
+                                className="absolute"
+                                width={16.20064963545883}
+                                height={22.68090948964236}
+                                viewBox="0 0 20 28"
+                                role="presentation"
+                                style={{
++                                 left: "18.712711792144546%"
+-                                 left: "18.7127%"
++                                 bottom: "-10%"
+-                                 bottom: "-10%"
++                                 opacity: 0.1772096629523503
+-                                 opacity: "0.17721"
++                                 animation: "dm-lantern-rise 14.715043657663045s 5.563853605599434s ease-in-out infinite"
+-                                 animation-duration: "14.715s"
+-                                 animation-timing-function: "ease-in-out"
+-                                 animation-delay: "5.56385s"
+-                                 animation-iteration-count: "infinite"
+-                                 animation-direction: "normal"
+-                                 animation-fill-mode: "none"
+-                                 animation-play-state: "running"
+-                                 animation-name: "dm-lantern-rise"
+-                                 animation-timeline: "auto"
+-                                 animation-range-start: "normal"
+-                                 animation-range-end: "normal"
+                                }}
+                                data-tsd-source="/src/components/landing/motifs/RisingLanterns.tsx:29:5"
+                              >
+                              <svg
+                                className="absolute"
+                                width={19.895256767689943}
+                                height={27.85335947476592}
+                                viewBox="0 0 20 28"
+                                role="presentation"
+                                style={{
++                                 left: "74.86049285673653%"
+-                                 left: "74.8605%"
++                                 bottom: "-10%"
+-                                 bottom: "-10%"
++                                 opacity: 0.12163799337613455
+-                                 opacity: "0.121638"
++                                 animation: "dm-lantern-rise 14.894994133617729s 5.8450479602652194s ease-in-out infi..."
+-                                 animation-duration: "14.895s"
+-                                 animation-timing-function: "ease-in-out"
+-                                 animation-delay: "5.84505s"
+-                                 animation-iteration-count: "infinite"
+-                                 animation-direction: "normal"
+-                                 animation-fill-mode: "none"
+-                                 animation-play-state: "running"
+-                                 animation-name: "dm-lantern-rise"
+-                                 animation-timeline: "auto"
+-                                 animation-range-start: "normal"
+-                                 animation-range-end: "normal"
+                                }}
+                                data-tsd-source="/src/components/landing/motifs/RisingLanterns.tsx:29:5"
+                              >
+                          ...
+                      ...
+ @ http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=129d1a15:4072

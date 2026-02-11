@@ -8,6 +8,7 @@ type ContextPanelHeaderProps = {
 	onVisibilityChange: (visible: boolean) => void;
 	onAiClick: () => void;
 	completion: number;
+	hasErrors?: boolean;
 };
 
 export function ContextPanelHeader({
@@ -17,6 +18,7 @@ export function ContextPanelHeader({
 	onVisibilityChange,
 	onAiClick,
 	completion,
+	hasErrors,
 }: ContextPanelHeaderProps) {
 	return (
 		<div className="sticky top-0 z-10 border-b border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] px-5 py-3">
@@ -25,6 +27,12 @@ export function ContextPanelHeader({
 					<h2 className="text-sm font-semibold uppercase tracking-[0.15em] text-[color:var(--dm-ink)]">
 						{sectionLabel}
 					</h2>
+					{hasErrors && (
+						<span
+							className="inline-block h-2 w-2 shrink-0 rounded-full bg-red-500"
+							aria-label="Section has validation errors"
+						/>
+					)}
 
 					<button
 						id={`visibility-${sectionId}`}
@@ -32,19 +40,20 @@ export function ContextPanelHeader({
 						role="switch"
 						aria-checked={visible}
 						aria-label={`Show ${sectionLabel} section`}
+						title="Toggle section visibility"
 						onClick={() => onVisibilityChange(!visible)}
 						className={cn(
-							"relative inline-flex h-4 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--dm-focus)]/60",
+							"relative inline-flex h-5 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--dm-focus)]/60",
 							visible
 								? "bg-[color:var(--dm-accent-strong)]"
 								: "bg-[color:var(--dm-border)]",
 						)}
-						style={{ minHeight: 0 }}
+						style={{ minHeight: 20, minWidth: 32 }}
 					>
 						<span
 							aria-hidden="true"
 							className={cn(
-								"pointer-events-none inline-block h-2.5 w-2.5 shrink-0 rounded-full bg-white shadow-sm transition-transform duration-200",
+								"pointer-events-none inline-block h-3.5 w-3.5 shrink-0 rounded-full bg-white shadow-sm transition-transform duration-200",
 								visible ? "translate-x-[7px]" : "-translate-x-[7px]",
 							)}
 						/>

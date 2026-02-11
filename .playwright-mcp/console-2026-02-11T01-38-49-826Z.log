@@ -1,0 +1,3 @@
+[     446ms] [WARNING] [tanstack-router] These exports from "/Users/wongjunmun/Developer/tanstack_projects/dreammoments/src/routes/dashboard/$invitationId/index.tsx" will not be code-split and will increase your bundle size:
+- InvitationDashboard
+For the best optimization, these items should either have their export statements removed, or be imported from another location that is not a route file. @ http://localhost:3000/src/routes/dashboard/$invitationId/index.tsx?t=1770771695633:2

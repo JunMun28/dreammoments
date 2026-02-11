@@ -8,7 +8,7 @@ interface GradientTextProps {
 
 export function GradientText({
 	children,
-	gradient = "linear-gradient(135deg, var(--dm-crimson-bold), var(--dm-gold-bold), var(--dm-rose-bold))",
+	gradient = "linear-gradient(135deg, var(--dm-crimson-bold), var(--dm-gold-bold))",
 	className,
 }: GradientTextProps) {
 	return (

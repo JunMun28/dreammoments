@@ -95,7 +95,7 @@ export function EditorLayout({
 						{sectionRail}
 					</div>
 				)}
-				<div className="min-w-0 overflow-hidden">{preview}</div>
+				<div className="min-w-0 overflow-y-auto">{preview}</div>
 				<div className="flex flex-col overflow-hidden border-l border-[color:var(--dm-border)] bg-[color:var(--dm-surface)]">
 					{!panelCollapsed && (
 						<div className="shrink-0 border-b border-[color:var(--dm-border)]">

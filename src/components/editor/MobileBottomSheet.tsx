@@ -12,7 +12,7 @@ export type MobileBottomSheetProps = {
 	open: boolean;
 	onClose: () => void;
 	title?: string;
-	/** Custom header content — replaces title+close block when provided */
+	/** Custom header content -- replaces title+close block when provided */
 	headerContent?: ReactNode;
 	children: ReactNode;
 	/** Height of the sheet: "auto" | "half" | "full" */
@@ -25,7 +25,7 @@ export type MobileBottomSheetProps = {
 	activeSnapIndex?: number;
 	/** Callback when snap point changes */
 	onSnapChange?: (snapIndex: number) => void;
-	/** Whether the form has unsaved changes — increases dismiss thresholds */
+	/** Whether the form has unsaved changes -- increases dismiss thresholds */
 	isDirty?: boolean;
 };
 
@@ -68,7 +68,6 @@ export default function MobileBottomSheet({
 		? (snapPoints[currentSnapIndex] ?? snapPoints[0])
 		: undefined;
 
-	// Compute effective dismiss thresholds based on isDirty state
 	const effectiveSwipeThreshold = isDirty
 		? DIRTY_SWIPE_THRESHOLD
 		: SWIPE_THRESHOLD;
@@ -88,13 +87,11 @@ export default function MobileBottomSheet({
 			const currentHeight = viewport.height;
 			const heightDiff = initialHeight - currentHeight;
 
-			// If viewport shrank by more than 100px, keyboard is likely open
 			if (heightDiff > 100) {
 				if (!keyboardActiveRef.current) {
 					keyboardActiveRef.current = true;
 					setKeyboardHeight(heightDiff);
 				}
-				// Scroll the focused input into view
 				const focused = document.activeElement as HTMLElement | null;
 				if (focused && sheetRef.current?.contains(focused)) {
 					focused.scrollIntoView({ block: "nearest", behavior: "smooth" });
@@ -163,7 +160,7 @@ export default function MobileBottomSheet({
 		}, 300);
 	}, [onClose, prefersReducedMotion]);
 
-	// Focus trap — re-queries focusable elements on every Tab press
+	// Focus trap -- re-queries focusable elements on every Tab press
 	// to handle dynamic content changes (section switches, fields appearing/disappearing)
 	useEffect(() => {
 		if (!open || !sheetRef.current) return;
@@ -172,7 +169,6 @@ export default function MobileBottomSheet({
 		const focusableSelector =
 			'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
-		// Focus first element when opened
 		const initialFocusable =
 			sheet.querySelectorAll<HTMLElement>(focusableSelector);
 		initialFocusable[0]?.focus();
@@ -186,7 +182,6 @@ export default function MobileBottomSheet({
 
 			if (e.key !== "Tab") return;
 
-			// Re-query on every Tab press to capture dynamic content changes
 			const focusableElements =
 				sheet.querySelectorAll<HTMLElement>(focusableSelector);
 			if (focusableElements.length === 0) return;
@@ -229,7 +224,7 @@ export default function MobileBottomSheet({
 			const viewportHeight = window.innerHeight;
 			const currentHeightPx =
 				(viewportHeight * (currentSnapPercent ?? 50)) / 100;
-			const targetHeightPx = currentHeightPx - deltaY; // negative delta = drag up = taller
+			const targetHeightPx = currentHeightPx - deltaY;
 			const targetPercent = (targetHeightPx / viewportHeight) * 100;
 
 			let nearestIndex = 0;
@@ -248,7 +243,6 @@ export default function MobileBottomSheet({
 		[hasSnaps, snapPoints, currentSnapPercent],
 	);
 
-	// Touch handlers for drag-to-resize / drag-to-dismiss
 	const handleTouchStart = useCallback((e: React.TouchEvent) => {
 		const touch = e.touches[0];
 		dragStartY.current = touch.clientY;
@@ -262,16 +256,9 @@ export default function MobileBottomSheet({
 			if (!isDragging) return;
 			const touch = e.touches[0];
 			dragCurrentY.current = touch.clientY;
-
-			if (hasSnaps) {
-				// Allow dragging in both directions for snap points
-				const deltaY = touch.clientY - dragStartY.current;
-				setTranslateY(deltaY);
-			} else {
-				// Original behavior: only allow dragging down
-				const deltaY = Math.max(0, touch.clientY - dragStartY.current);
-				setTranslateY(deltaY);
-			}
+			const deltaY = touch.clientY - dragStartY.current;
+			// Snap mode allows dragging both directions; default only allows down
+			setTranslateY(hasSnaps ? deltaY : Math.max(0, deltaY));
 		},
 		[isDragging, hasSnaps],
 	);
@@ -285,7 +272,6 @@ export default function MobileBottomSheet({
 		const velocity = deltaY / deltaTime;
 
 		if (hasSnaps) {
-			// Check if we should dismiss (dragged below lowest snap by threshold)
 			const viewportHeight = window.innerHeight;
 			const lowestSnapPercent = Math.min(...snapPoints);
 			const lowestSnapPx = (viewportHeight * lowestSnapPercent) / 100;
@@ -302,7 +288,6 @@ export default function MobileBottomSheet({
 				return;
 			}
 
-			// Snap to nearest snap point
 			const nearestIndex = findNearestSnap(deltaY);
 			if (nearestIndex !== null) {
 				setCurrentSnapIndex(nearestIndex);
@@ -310,7 +295,6 @@ export default function MobileBottomSheet({
 			}
 			setTranslateY(0);
 		} else {
-			// Original dismiss behavior with dirty-aware thresholds
 			if (
 				deltaY > effectiveSwipeThreshold ||
 				velocity > effectiveVelocityThreshold
@@ -332,7 +316,6 @@ export default function MobileBottomSheet({
 		effectiveVelocityThreshold,
 	]);
 
-	// Handle backdrop click
 	const handleBackdropClick = useCallback(
 		(e: React.MouseEvent) => {
 			if (e.target === backdropRef.current) {
@@ -344,10 +327,9 @@ export default function MobileBottomSheet({
 
 	if (!open && !isClosing) return null;
 
-	// Compute height class — when keyboard is active, expand to fill available space
+	// Compute height style -- when keyboard is active, expand to fill available space
 	let heightStyle: string | undefined;
 	if (keyboardHeight > 0) {
-		// Keyboard is open: use ~85% of available viewport (viewport minus keyboard)
 		const availableHeight = window?.visualViewport
 			? window.visualViewport.height
 			: window.innerHeight;
@@ -356,18 +338,19 @@ export default function MobileBottomSheet({
 		heightStyle = `${currentSnapPercent}vh`;
 	}
 
-	const heightClass =
-		keyboardHeight > 0 || hasSnaps
-			? ""
-			: height === "full"
-				? "max-h-[90vh]"
-				: height === "half"
-					? "max-h-[60vh]"
-					: "max-h-[80vh]";
+	let heightClass = "";
+	if (keyboardHeight === 0 && !hasSnaps) {
+		if (height === "full") {
+			heightClass = "max-h-[90vh]";
+		} else if (height === "half") {
+			heightClass = "max-h-[60vh]";
+		} else {
+			heightClass = "max-h-[80vh]";
+		}
+	}
 
-	const transitionClass = prefersReducedMotion
-		? ""
-		: isDragging
+	const transitionClass =
+		prefersReducedMotion || isDragging
 			? ""
 			: "transition-all duration-300 ease-out";
 
@@ -407,16 +390,19 @@ export default function MobileBottomSheet({
 					...(heightStyle ? { height: heightStyle } : {}),
 				}}
 			>
-				{/* Drag handle — dismiss via drag gesture only, not tap */}
+				{/* Drag handle */}
 				<button
 					type="button"
-					className="flex shrink-0 cursor-grab touch-none items-center justify-center border-none bg-transparent py-3 active:cursor-grabbing"
+					className="flex shrink-0 cursor-grab touch-none flex-col items-center justify-center gap-1 border-none bg-transparent py-3 active:cursor-grabbing"
 					onTouchStart={handleTouchStart}
 					onTouchMove={handleTouchMove}
 					onTouchEnd={handleTouchEnd}
 					aria-label="Drag to resize or dismiss"
 				>
-					<div className="h-1.5 w-12 rounded-full bg-[color:var(--dm-border)]" />
+					<div className="h-1 w-10 rounded-full bg-[color:var(--dm-muted)]/40" />
+					<span className="text-[9px] uppercase tracking-[0.15em] text-[color:var(--dm-muted)]/60">
+						Drag
+					</span>
 				</button>
 
 				{/* Header */}

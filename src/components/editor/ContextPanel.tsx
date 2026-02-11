@@ -8,46 +8,7 @@ import {
 import { ContextPanelHeader } from "./ContextPanelHeader";
 import { FieldRenderer } from "./FieldRenderer";
 import { getValueByPath } from "./hooks/useEditorState";
-import { listFieldMap } from "./listFieldMap";
-
-function getListItems(
-	draft: InvitationContent,
-	sectionId: string,
-): Array<Record<string, unknown>> | undefined {
-	if (!listFieldMap[sectionId]) return undefined;
-
-	const sectionData = draft[sectionId as keyof InvitationContent] as
-		| Record<string, unknown>
-		| undefined;
-	if (!sectionData) return undefined;
-
-	const arrayKey = Object.keys(sectionData).find((k) =>
-		Array.isArray(sectionData[k]),
-	);
-	if (!arrayKey) return undefined;
-
-	return (sectionData[arrayKey] as Array<Record<string, unknown>>) ?? [];
-}
-
-function getListItemsChangeHandler(
-	draft: InvitationContent,
-	sectionId: string,
-	onFieldChange: (fieldPath: string, value: string | boolean) => void,
-): ((items: Array<Record<string, unknown>>) => void) | undefined {
-	const sectionData = draft[sectionId as keyof InvitationContent] as
-		| Record<string, unknown>
-		| undefined;
-	if (!sectionData) return undefined;
-
-	const arrayKey = Object.keys(sectionData).find((k) =>
-		Array.isArray(sectionData[k]),
-	);
-	if (!arrayKey) return undefined;
-
-	return (items) => {
-		onFieldChange(`${sectionId}.${arrayKey}`, JSON.stringify(items));
-	};
-}
+import { getListItems, getListItemsChangeHandler } from "./listFieldHelpers";
 
 type ContextPanelProps = {
 	sectionId: string;
@@ -103,7 +64,6 @@ export function ContextPanel({
 
 	return (
 		<aside className="relative flex h-full w-full flex-col bg-[color:var(--dm-surface)]">
-			{/* Collapse button */}
 			{onToggleCollapse && (
 				<button
 					type="button"
@@ -115,7 +75,6 @@ export function ContextPanel({
 				</button>
 			)}
 
-			{/* Header */}
 			<ContextPanelHeader
 				sectionId={sectionId}
 				sectionLabel={sectionLabel}
@@ -123,9 +82,11 @@ export function ContextPanel({
 				onVisibilityChange={(visible) => onVisibilityChange(sectionId, visible)}
 				onAiClick={() => onAiClick(sectionId)}
 				completion={completion}
+				hasErrors={Object.entries(errors).some(
+					([key, val]) => key.startsWith(`${sectionId}.`) && !!val,
+				)}
 			/>
 
-			{/* Scrollable fields — key triggers re-mount for fade animation on section change */}
 			<div
 				key={sectionId}
 				className="dm-scroll-thin flex-1 px-5 py-4"

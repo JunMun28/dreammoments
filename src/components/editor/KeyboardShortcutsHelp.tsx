@@ -12,7 +12,7 @@ const SHORTCUTS: [string, string][] = [
 	["Cmd/Ctrl+S", "Force save"],
 	["[", "Collapse panel"],
 	["]", "Expand panel"],
-	["Cmd/Ctrl+P", "Toggle preview"],
+	["Cmd/Ctrl+Shift+P", "Toggle preview"],
 	["?", "Toggle this help"],
 ];
 

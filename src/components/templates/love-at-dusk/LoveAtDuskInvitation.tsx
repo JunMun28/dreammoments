@@ -44,6 +44,8 @@ export default function LoveAtDuskInvitation({
 	const consentDescriptionId = useId();
 	const data = content;
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [submitError, setSubmitError] = useState("");
+	const [errors, setErrors] = useState<Record<string, string>>({});
 	const [rsvpData, setRsvpData] = useState<Omit<
 		RsvpConfirmationProps,
 		"onEdit" | "className"
@@ -197,7 +199,10 @@ export default function LoveAtDuskInvitation({
 				onAiClick={onAiClick}
 				className="love-section"
 			>
-				<CountdownWidget targetDate={data.hero.date} />
+				<CountdownWidget
+					targetDate={data.hero.date}
+					eventTime={data.schedule.events[0]?.time}
+				/>
 			</SectionShell>
 
 			<div
@@ -386,9 +391,11 @@ export default function LoveAtDuskInvitation({
 									src={item.url || "/placeholders/photo-dark.svg"}
 									alt={item.caption || "Wedding photo"}
 									loading="lazy"
+									decoding="async"
 									width={360}
 									height={256}
 									className="h-56 w-full rounded-xl border border-white/10 object-cover"
+									style={{ backgroundColor: "#2a1f1a" }}
 								/>
 								<p className="mt-4 text-xs uppercase tracking-[0.3em] text-[var(--love-accent)]">
 									{item.caption ?? `Photo ${index + 1}`}
@@ -520,9 +527,11 @@ export default function LoveAtDuskInvitation({
 							src="/placeholders/photo-dark.svg"
 							alt={`Map showing location of ${data.venue.name}`}
 							loading="lazy"
+							decoding="async"
 							width={480}
 							height={192}
 							className="h-48 w-full rounded-2xl border border-white/10 object-cover"
+							style={{ backgroundColor: "#2a1f1a" }}
 						/>
 						<p className="mt-3 text-xs uppercase tracking-[0.3em] text-[var(--love-accent)]">
 							Map preview
@@ -659,7 +668,19 @@ export default function LoveAtDuskInvitation({
 								if (!onRsvpSubmit || isSubmitting) return;
 								const formData = new FormData(event.currentTarget);
 								const name = String(formData.get("name") ?? "").trim();
-								if (!name) return;
+								const email = String(formData.get("email") ?? "").trim();
+								const newErrors: Record<string, string> = {};
+								if (!name) {
+									newErrors.name = "Please enter your name";
+								}
+								if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+									newErrors.email = "Please enter a valid email address";
+								}
+								if (Object.keys(newErrors).length > 0) {
+									setErrors(newErrors);
+									return;
+								}
+								setErrors({});
 								const maxGuests = data.rsvp.allowPlusOnes
 									? Math.max(1, data.rsvp.maxPlusOnes + 1)
 									: 1;
@@ -679,8 +700,9 @@ export default function LoveAtDuskInvitation({
 										guestCount,
 										dietaryRequirements,
 										message: String(formData.get("message") ?? ""),
-										email: String(formData.get("email") ?? ""),
+										email,
 									});
+									setSubmitError("");
 									setRsvpData({
 										name,
 										attendance,
@@ -688,7 +710,7 @@ export default function LoveAtDuskInvitation({
 										dietaryRequirements,
 									});
 								} catch {
-									// Submission failed; form remains open for retry
+									setSubmitError("Something went wrong. Please try again.");
 								} finally {
 									setIsSubmitting(false);
 								}
@@ -704,7 +726,27 @@ export default function LoveAtDuskInvitation({
 										autoComplete="off"
 										required
 										aria-required="true"
+										aria-invalid={!!errors.name}
+										onBlur={(e) => {
+											if (!e.target.value.trim()) {
+												setErrors((prev) => ({
+													...prev,
+													name: "Please enter your name",
+												}));
+											}
+										}}
+										onChange={() =>
+											setErrors((prev) => {
+												const { name: _, ...rest } = prev;
+												return rest;
+											})
+										}
 									/>
+									{errors.name && (
+										<p className="text-red-400 text-xs mt-1" role="alert">
+											{errors.name}
+										</p>
+									)}
 								</label>
 								<label className="grid gap-2 text-xs uppercase tracking-[0.3em] text-[var(--love-accent)]">
 									Attendance
@@ -726,10 +768,41 @@ export default function LoveAtDuskInvitation({
 										placeholder="sarah@example.com…"
 										autoComplete="off"
 										spellCheck={false}
+										aria-invalid={!!errors.email}
+										onBlur={(e) => {
+											const v = e.target.value.trim();
+											if (v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
+												setErrors((prev) => ({
+													...prev,
+													email: "Please enter a valid email address",
+												}));
+											}
+										}}
+										onChange={() =>
+											setErrors((prev) => {
+												const { email: _, ...rest } = prev;
+												return rest;
+											})
+										}
 									/>
+									{errors.email && (
+										<p className="text-red-400 text-xs mt-1" role="alert">
+											{errors.email}
+										</p>
+									)}
 								</label>
 								<label className="grid gap-2 text-xs uppercase tracking-[0.3em] text-[var(--love-accent)]">
-									Guests
+									Guests{" "}
+									<span className="normal-case tracking-normal text-[var(--love-muted)]">
+										(Max:{" "}
+										{data.rsvp.allowPlusOnes
+											? Math.max(1, data.rsvp.maxPlusOnes + 1)
+											: 1}{" "}
+										{data.rsvp.allowPlusOnes && data.rsvp.maxPlusOnes + 1 > 1
+											? "guests"
+											: "guest"}
+										)
+									</span>
 									<input
 										name="guestCount"
 										className="h-11 rounded-2xl border border-white/10 bg-[#0f0c0a] px-4 text-base text-[var(--love-cream)]"
@@ -750,7 +823,7 @@ export default function LoveAtDuskInvitation({
 									<input
 										name="dietary"
 										className="h-11 rounded-2xl border border-white/10 bg-[#0f0c0a] px-4 text-base text-[var(--love-cream)]"
-										placeholder="Vegetarian, no pork…"
+										placeholder="e.g., Vegetarian, no pork, gluten-free"
 										autoComplete="off"
 									/>
 								</label>
@@ -804,6 +877,14 @@ export default function LoveAtDuskInvitation({
 								{isSubmitting && <LoadingSpinner size="sm" />}
 								{isSubmitting ? "Submitting..." : "Submit RSVP"}
 							</button>
+							{submitError && (
+								<p
+									className="mt-3 text-center text-sm text-red-400"
+									role="alert"
+								>
+									{submitError}
+								</p>
+							)}
 						</form>
 					)}
 				</div>

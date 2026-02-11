@@ -1,5 +1,3 @@
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
 	BarChart3,
 	Check,
@@ -8,14 +6,10 @@ import {
 	Share2,
 	Sparkles,
 } from "lucide-react";
-import { motion } from "motion/react";
 import { useEffect, useRef } from "react";
-import { ANIMATION, mockupReveal } from "./animation";
 import { MeshGradientBackground } from "./MeshGradientBackground";
 import { PaperCutEdge } from "./motifs/PaperCutEdge";
 import { SectionHeader } from "./motifs/SectionHeader";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const FEATURES = [
 	{
@@ -55,78 +49,85 @@ export function Features({ reducedMotion }: { reducedMotion: boolean }) {
 	const featureItemsRef = useRef<HTMLDivElement[]>([]);
 	const mockupRef = useRef<HTMLDivElement>(null);
 
-	// GSAP stagger entrance for feature items
 	useEffect(() => {
 		if (reducedMotion || featureItemsRef.current.length === 0) return;
 
-		const ctx = gsap.context(() => {
-			gsap.fromTo(
-				featureItemsRef.current.filter(Boolean),
-				{ opacity: 0, y: 24 },
-				{
-					opacity: 1,
-					y: 0,
-					duration: 0.6,
-					ease: "power2.out",
-					stagger: 0.1,
-					scrollTrigger: {
-						trigger: sectionRef.current,
-						start: "top 80%",
-						toggleActions: "play none none none",
-					},
-				},
-			);
-			// Icon glow on entrance
-			const icons = sectionRef.current?.querySelectorAll(".dm-feature-icon");
-			if (icons) {
+		let ctx: gsap.Context | undefined;
+
+		async function initGSAP() {
+			const gsap = (await import("gsap")).default;
+			const { ScrollTrigger } = await import("gsap/ScrollTrigger");
+			gsap.registerPlugin(ScrollTrigger);
+
+			if (!sectionRef.current) return;
+
+			ctx = gsap.context(() => {
 				gsap.fromTo(
-					icons,
-					{ boxShadow: "0 0 0px rgba(212,175,55,0)" },
+					featureItemsRef.current.filter(Boolean),
+					{ opacity: 0, y: 24 },
 					{
-						boxShadow: "0 0 20px rgba(212,175,55,0.4)",
+						opacity: 1,
+						y: 0,
 						duration: 0.6,
-						stagger: 0.1,
 						ease: "power2.out",
+						stagger: 0.1,
 						scrollTrigger: {
 							trigger: sectionRef.current,
 							start: "top 80%",
 							toggleActions: "play none none none",
 						},
-						onComplete: () => {
-							// Fade the glow back after entrance
-							if (icons) {
-								gsap.to(icons, {
-									boxShadow: "0 0 0px rgba(212,175,55,0)",
-									duration: 1.0,
-									stagger: 0.1,
-									delay: 0.3,
-								});
-							}
-						},
 					},
 				);
-			}
-
-			// Subtle scroll-driven tilt on phone mockup
-			if (mockupRef.current) {
-				gsap.fromTo(
-					mockupRef.current,
-					{ rotateY: -5 },
-					{
-						rotateY: 5,
-						ease: "none",
-						scrollTrigger: {
-							trigger: sectionRef.current,
-							start: "top bottom",
-							end: "bottom top",
-							scrub: true,
+				const icons = sectionRef.current?.querySelectorAll(".dm-feature-icon");
+				if (icons) {
+					gsap.fromTo(
+						icons,
+						{ boxShadow: "0 0 0px rgba(212,184,122,0)" },
+						{
+							boxShadow: "0 0 20px rgba(212,184,122,0.4)",
+							duration: 0.6,
+							stagger: 0.1,
+							ease: "power2.out",
+							scrollTrigger: {
+								trigger: sectionRef.current,
+								start: "top 80%",
+								toggleActions: "play none none none",
+							},
+							onComplete: () => {
+								if (icons) {
+									gsap.to(icons, {
+										boxShadow: "0 0 0px rgba(212,184,122,0)",
+										duration: 1.0,
+										stagger: 0.1,
+										delay: 0.3,
+									});
+								}
+							},
 						},
-					},
-				);
-			}
-		}, sectionRef);
+					);
+				}
 
-		return () => ctx.revert();
+				if (mockupRef.current) {
+					gsap.fromTo(
+						mockupRef.current,
+						{ rotateY: -5 },
+						{
+							rotateY: 5,
+							ease: "none",
+							scrollTrigger: {
+								trigger: sectionRef.current,
+								start: "top bottom",
+								end: "bottom top",
+								scrub: true,
+							},
+						},
+					);
+				}
+			}, sectionRef);
+		}
+
+		initGSAP();
+		return () => ctx?.revert();
 	}, [reducedMotion]);
 
 	return (
@@ -134,14 +135,18 @@ export function Features({ reducedMotion }: { reducedMotion: boolean }) {
 			ref={sectionRef}
 			className="dm-vermillion-section relative overflow-hidden"
 			style={{
-				background: "var(--dm-crimson)",
-				// Paper-cut SVG overlay at 4% white for subtle texture
-				backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Ccircle cx='40' cy='40' r='20' fill='none' stroke='white' stroke-width='0.5' opacity='0.08'/%3E%3Ccircle cx='0' cy='0' r='20' fill='none' stroke='white' stroke-width='0.5' opacity='0.08'/%3E%3Ccircle cx='80' cy='80' r='20' fill='none' stroke='white' stroke-width='0.5' opacity='0.08'/%3E%3C/svg%3E")`,
+				background: "var(--dm-vermillion)",
+				// Paper-cut SVG overlay at subtler opacity for texture on crimson bg
+				backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Ccircle cx='40' cy='40' r='20' fill='none' stroke='white' stroke-width='0.5' opacity='0.06'/%3E%3Ccircle cx='0' cy='0' r='20' fill='none' stroke='white' stroke-width='0.5' opacity='0.06'/%3E%3Ccircle cx='80' cy='80' r='20' fill='none' stroke='white' stroke-width='0.5' opacity='0.06'/%3E%3C/svg%3E")`,
 			}}
 		>
 			{/* Mesh gradient overlay */}
 			<div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-				<MeshGradientBackground variant="intense" className="h-full" reducedMotion={reducedMotion}>
+				<MeshGradientBackground
+					variant="intense"
+					className="h-full"
+					reducedMotion={reducedMotion}
+				>
 					<div />
 				</MeshGradientBackground>
 			</div>
@@ -161,7 +166,7 @@ export function Features({ reducedMotion }: { reducedMotion: boolean }) {
 						/>
 
 						{/* Custom heading below section header */}
-						<h2
+						<h3
 							className="-mt-12 font-display font-bold tracking-tight"
 							style={{
 								fontSize: "var(--text-subsection)",
@@ -174,7 +179,7 @@ export function Features({ reducedMotion }: { reducedMotion: boolean }) {
 							<span className="font-accent italic" style={{ color: "#FFFFFF" }}>
 								Nothing you don&apos;t.
 							</span>
-						</h2>
+						</h3>
 
 						{/* Feature list */}
 						<div className="mt-10 space-y-6">
@@ -185,13 +190,12 @@ export function Features({ reducedMotion }: { reducedMotion: boolean }) {
 										if (el) featureItemsRef.current[i] = el;
 									}}
 									className="flex items-start gap-4 group"
-									style={reducedMotion ? undefined : { opacity: 0 }}
 								>
 									{/* Gold circular icon container */}
 									<div
 										className="dm-feature-icon flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full transition-transform duration-200 group-hover:scale-110"
 										style={{
-											background: "var(--dm-gold)",
+											background: "var(--dm-gold-electric)",
 											color: "#FFFFFF",
 										}}
 									>
@@ -223,12 +227,9 @@ export function Features({ reducedMotion }: { reducedMotion: boolean }) {
 					</div>
 
 					{/* Right: Phone mockup */}
-					<motion.div
-						initial={reducedMotion ? false : "hidden"}
-						whileInView="visible"
-						viewport={ANIMATION.viewport}
-						variants={mockupReveal}
-						className="relative flex items-center justify-center lg:sticky lg:top-32"
+					<div
+						data-scroll-reveal
+						className="dm-reveal-scale relative flex items-center justify-center lg:sticky lg:top-32"
 						style={{ perspective: "800px" }}
 					>
 						{/* Phone frame */}
@@ -309,12 +310,16 @@ export function Features({ reducedMotion }: { reducedMotion: boolean }) {
 								</div>
 							</div>
 						</div>
-					</motion.div>
+					</div>
 				</div>
 			</div>
 
 			{/* Paper-cut edge at bottom transitioning to Pricing */}
-			<PaperCutEdge position="bottom" color="var(--dm-crimson)" scallops={24} />
+			<PaperCutEdge
+				position="bottom"
+				color="var(--dm-vermillion)"
+				scallops={24}
+			/>
 		</section>
 	);
 }

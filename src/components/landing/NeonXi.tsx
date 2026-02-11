@@ -20,22 +20,22 @@ interface NeonXiProps {
 
 const GLOW_SHADOWS: Record<string, string> = {
 	crimson: [
-		"0 0 20px rgba(232,36,60,0.6)",
-		"0 0 40px rgba(232,36,60,0.3)",
-		"0 0 80px rgba(232,36,60,0.15)",
-		"0 0 120px rgba(232,36,60,0.05)",
+		"0 0 20px rgba(200,64,64,0.6)",
+		"0 0 40px rgba(200,64,64,0.3)",
+		"0 0 80px rgba(200,64,64,0.15)",
+		"0 0 120px rgba(200,64,64,0.05)",
 	].join(", "),
 	gold: [
-		"0 0 20px rgba(255,215,0,0.6)",
-		"0 0 40px rgba(255,215,0,0.3)",
-		"0 0 80px rgba(255,215,0,0.15)",
-		"0 0 120px rgba(255,215,0,0.05)",
+		"0 0 20px rgba(212,184,122,0.6)",
+		"0 0 40px rgba(212,184,122,0.3)",
+		"0 0 80px rgba(212,184,122,0.15)",
+		"0 0 120px rgba(212,184,122,0.05)",
 	].join(", "),
 };
 
 const GLOW_COLORS: Record<string, string> = {
-	crimson: "var(--dm-crimson-vivid, #E8243C)",
-	gold: "var(--dm-gold-electric, #FFD700)",
+	crimson: "var(--dm-crimson-vivid, #D4483B)",
+	gold: "var(--dm-gold-electric, #D4B87A)",
 };
 
 export function NeonXi({
@@ -45,11 +45,7 @@ export function NeonXi({
 	breathe = false,
 	className,
 }: NeonXiProps) {
-	const breatheClass = breathe
-		? variant === "crimson"
-			? "neon-xi-crimson"
-			: "neon-xi-gold"
-		: undefined;
+	const breatheClass = breathe ? `neon-xi-${variant}` : undefined;
 
 	return (
 		<span

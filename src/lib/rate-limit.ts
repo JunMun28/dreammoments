@@ -117,7 +117,8 @@ export function createDbRateLimiter(name: string, options: RateLimiterOptions) {
 	return async function checkDbRateLimit(
 		key: string,
 	): Promise<RateLimitResult> {
-		let db: Awaited<ReturnType<typeof getDbOrNull>>;
+		// biome-ignore lint/suspicious/noExplicitAny: dynamic import avoids circular dep
+		let db: any;
 		try {
 			const mod = await import("@/db/index");
 			db = mod.getDbOrNull();
@@ -175,11 +176,17 @@ export function createDbRateLimiter(name: string, options: RateLimiterOptions) {
 
 // ── Pre-configured limiters ──────────────────────────────────────────
 
-/** Auth endpoints: 5 attempts per 15 minutes per key */
+/** Auth endpoints: 10 attempts per 15 minutes per key */
 export const authRateLimit = createRateLimiter("auth", {
-	maxAttempts: 5,
+	maxAttempts: 10,
 	windowMs: 15 * 60 * 1000,
 });
+
+/** Format a resetAt timestamp into a user-friendly rate limit message */
+export function formatRateLimitMessage(resetAt: number): string {
+	const minutes = Math.max(1, Math.ceil((resetAt - Date.now()) / 60_000));
+	return `Too many attempts. Try again in ${minutes} minute${minutes === 1 ? "" : "s"}.`;
+}
 
 /** RSVP submissions: 10 per hour per key */
 export const rsvpRateLimit = createRateLimiter("rsvp", {

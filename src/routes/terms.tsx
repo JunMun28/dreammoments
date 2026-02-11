@@ -2,10 +2,33 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/terms")({ component: TermsOfService });
 
+const tocItems = [
+	{ id: "agreement-to-terms", label: "1. Agreement to Terms" },
+	{ id: "service-description", label: "2. Service Description" },
+	{ id: "account-registration", label: "3. Account Registration" },
+	{ id: "user-responsibilities", label: "4. User Responsibilities" },
+	{ id: "intellectual-property", label: "5. Intellectual Property" },
+	{ id: "payment-terms", label: "6. Payment Terms" },
+	{ id: "limitation-of-liability", label: "7. Limitation of Liability" },
+	{ id: "indemnification", label: "8. Indemnification" },
+	{ id: "termination", label: "9. Termination" },
+	{ id: "dispute-resolution", label: "10. Dispute Resolution" },
+	{ id: "governing-law", label: "11. Governing Law" },
+	{ id: "modifications-to-terms", label: "12. Modifications to Terms" },
+	{ id: "severability", label: "13. Severability" },
+	{ id: "contact-information", label: "14. Contact Information" },
+];
+
 function TermsOfService() {
 	return (
 		<div className="min-h-screen bg-dm-bg">
 			<div className="mx-auto max-w-3xl px-6 py-16 sm:py-24">
+				<Link
+					to="/"
+					className="inline-flex items-center gap-1 text-sm text-dm-muted transition-colors hover:text-dm-ink mb-8"
+				>
+					&larr; Back to Home
+				</Link>
 				<header className="mb-12">
 					<p className="font-accent text-2xl text-dm-peach">
 						Legal Information
@@ -16,10 +39,33 @@ function TermsOfService() {
 					<p className="mt-4 text-dm-muted">Last updated: February 2026</p>
 				</header>
 
+				{/* Table of Contents */}
+				<nav
+					aria-label="Table of contents"
+					className="mb-12 rounded-2xl border border-dm-border bg-dm-surface p-6"
+				>
+					<p className="text-xs uppercase tracking-[0.3em] text-dm-accent-strong mb-4">
+						Table of Contents
+					</p>
+					<ol className="columns-1 gap-x-8 space-y-2 text-sm sm:columns-2">
+						{tocItems.map((item) => (
+							<li key={item.id}>
+								<a
+									href={`#${item.id}`}
+									className="text-dm-muted transition-colors hover:text-dm-ink"
+								>
+									{item.label}
+								</a>
+							</li>
+						))}
+					</ol>
+				</nav>
+
 				<article className="prose prose-dm max-w-none space-y-10 text-dm-ink">
 					{/* Introduction */}
 					<section>
-						<h2 className="font-heading text-2xl mb-4">
+						{/* biome-ignore lint/correctness/useUniqueElementIds: TOC anchor target */}
+						<h2 id="agreement-to-terms" className="font-heading text-2xl mb-4">
 							1. Agreement to Terms
 						</h2>
 						<p className="text-dm-muted leading-relaxed">
@@ -36,7 +82,8 @@ function TermsOfService() {
 
 					{/* Service Description */}
 					<section>
-						<h2 className="font-heading text-2xl mb-4">
+						{/* biome-ignore lint/correctness/useUniqueElementIds: TOC anchor target */}
+						<h2 id="service-description" className="font-heading text-2xl mb-4">
 							2. Service Description
 						</h2>
 						<p className="text-dm-muted leading-relaxed mb-4">
@@ -56,7 +103,11 @@ function TermsOfService() {
 
 					{/* Account Registration */}
 					<section>
-						<h2 className="font-heading text-2xl mb-4">
+						{/* biome-ignore lint/correctness/useUniqueElementIds: TOC anchor target */}
+						<h2
+							id="account-registration"
+							className="font-heading text-2xl mb-4"
+						>
 							3. Account Registration
 						</h2>
 						<p className="text-dm-muted leading-relaxed mb-4">
@@ -77,7 +128,11 @@ function TermsOfService() {
 
 					{/* User Responsibilities */}
 					<section>
-						<h2 className="font-heading text-2xl mb-4">
+						{/* biome-ignore lint/correctness/useUniqueElementIds: TOC anchor target */}
+						<h2
+							id="user-responsibilities"
+							className="font-heading text-2xl mb-4"
+						>
 							4. User Responsibilities
 						</h2>
 						<p className="text-dm-muted leading-relaxed mb-4">
@@ -125,7 +180,11 @@ function TermsOfService() {
 
 					{/* Intellectual Property */}
 					<section>
-						<h2 className="font-heading text-2xl mb-4">
+						{/* biome-ignore lint/correctness/useUniqueElementIds: TOC anchor target */}
+						<h2
+							id="intellectual-property"
+							className="font-heading text-2xl mb-4"
+						>
 							5. Intellectual Property
 						</h2>
 						<h3 className="font-heading text-lg mb-3">5.1 Our Content</h3>
@@ -146,7 +205,10 @@ function TermsOfService() {
 
 					{/* Payment Terms */}
 					<section>
-						<h2 className="font-heading text-2xl mb-4">6. Payment Terms</h2>
+						{/* biome-ignore lint/correctness/useUniqueElementIds: TOC anchor target */}
+						<h2 id="payment-terms" className="font-heading text-2xl mb-4">
+							6. Payment Terms
+						</h2>
 						<p className="text-dm-muted leading-relaxed mb-4">
 							Certain features may require payment. By purchasing a subscription
 							or service:
@@ -168,7 +230,11 @@ function TermsOfService() {
 
 					{/* Limitation of Liability */}
 					<section>
-						<h2 className="font-heading text-2xl mb-4">
+						{/* biome-ignore lint/correctness/useUniqueElementIds: TOC anchor target */}
+						<h2
+							id="limitation-of-liability"
+							className="font-heading text-2xl mb-4"
+						>
 							7. Limitation of Liability
 						</h2>
 						<p className="text-dm-muted leading-relaxed mb-4">
@@ -201,7 +267,10 @@ function TermsOfService() {
 
 					{/* Indemnification */}
 					<section>
-						<h2 className="font-heading text-2xl mb-4">8. Indemnification</h2>
+						{/* biome-ignore lint/correctness/useUniqueElementIds: TOC anchor target */}
+						<h2 id="indemnification" className="font-heading text-2xl mb-4">
+							8. Indemnification
+						</h2>
 						<p className="text-dm-muted leading-relaxed">
 							You agree to indemnify and hold harmless DreamMoments, its
 							officers, directors, employees, and agents from any claims,
@@ -217,7 +286,10 @@ function TermsOfService() {
 
 					{/* Termination */}
 					<section>
-						<h2 className="font-heading text-2xl mb-4">9. Termination</h2>
+						{/* biome-ignore lint/correctness/useUniqueElementIds: TOC anchor target */}
+						<h2 id="termination" className="font-heading text-2xl mb-4">
+							9. Termination
+						</h2>
 						<p className="text-dm-muted leading-relaxed mb-4">
 							We may suspend or terminate your account if you:
 						</p>
@@ -236,7 +308,8 @@ function TermsOfService() {
 
 					{/* Dispute Resolution */}
 					<section>
-						<h2 className="font-heading text-2xl mb-4">
+						{/* biome-ignore lint/correctness/useUniqueElementIds: TOC anchor target */}
+						<h2 id="dispute-resolution" className="font-heading text-2xl mb-4">
 							10. Dispute Resolution
 						</h2>
 						<p className="text-dm-muted leading-relaxed">
@@ -249,7 +322,10 @@ function TermsOfService() {
 
 					{/* Governing Law */}
 					<section>
-						<h2 className="font-heading text-2xl mb-4">11. Governing Law</h2>
+						{/* biome-ignore lint/correctness/useUniqueElementIds: TOC anchor target */}
+						<h2 id="governing-law" className="font-heading text-2xl mb-4">
+							11. Governing Law
+						</h2>
 						<div className="grid gap-4 sm:grid-cols-2">
 							<div className="p-4 rounded-xl bg-dm-surface border border-dm-border">
 								<p className="font-medium text-dm-ink text-sm">
@@ -276,7 +352,11 @@ function TermsOfService() {
 
 					{/* Modifications */}
 					<section>
-						<h2 className="font-heading text-2xl mb-4">
+						{/* biome-ignore lint/correctness/useUniqueElementIds: TOC anchor target */}
+						<h2
+							id="modifications-to-terms"
+							className="font-heading text-2xl mb-4"
+						>
 							12. Modifications to Terms
 						</h2>
 						<p className="text-dm-muted leading-relaxed">
@@ -289,7 +369,10 @@ function TermsOfService() {
 
 					{/* Severability */}
 					<section>
-						<h2 className="font-heading text-2xl mb-4">13. Severability</h2>
+						{/* biome-ignore lint/correctness/useUniqueElementIds: TOC anchor target */}
+						<h2 id="severability" className="font-heading text-2xl mb-4">
+							13. Severability
+						</h2>
 						<p className="text-dm-muted leading-relaxed">
 							If any provision of these Terms is found to be unenforceable, the
 							remaining provisions will continue in full force and effect.
@@ -298,7 +381,8 @@ function TermsOfService() {
 
 					{/* Contact */}
 					<section>
-						<h2 className="font-heading text-2xl mb-4">
+						{/* biome-ignore lint/correctness/useUniqueElementIds: TOC anchor target */}
+						<h2 id="contact-information" className="font-heading text-2xl mb-4">
 							14. Contact Information
 						</h2>
 						<p className="text-dm-muted leading-relaxed">

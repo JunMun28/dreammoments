@@ -121,15 +121,14 @@ export default function InlineEditOverlay({
 		return () => clearTimeout(timer);
 	}, [shouldRenderDesktop, shouldRenderMobile, isMobile]);
 
-	// Body scroll lock when overlay is open
-	useEffect(() => {
-		if (!shouldRenderDesktop && !shouldRenderMobile) return;
-		const original = document.body.style.overflow;
-		document.body.style.overflow = "hidden";
-		return () => {
-			document.body.style.overflow = original;
-		};
-	}, [shouldRenderDesktop, shouldRenderMobile]);
+	// Cancel toast state
+	const [showCancelToast, setShowCancelToast] = useState(false);
+
+	const handleCancel = useCallback(() => {
+		setShowCancelToast(true);
+		setTimeout(() => setShowCancelToast(false), 1500);
+		onCancel();
+	}, [onCancel]);
 
 	// Close on Escape
 	useEffect(() => {
@@ -137,14 +136,14 @@ export default function InlineEditOverlay({
 		function handleKeyDown(event: KeyboardEvent) {
 			if (event.key === "Escape") {
 				event.preventDefault();
-				onCancel();
+				handleCancel();
 			}
 		}
 		document.addEventListener("keydown", handleKeyDown);
 		return () => document.removeEventListener("keydown", handleKeyDown);
-	}, [onCancel, shouldRenderDesktop, shouldRenderMobile]);
+	}, [handleCancel, shouldRenderDesktop, shouldRenderMobile]);
 
-	// Close on pointer outside (pointerdown handles both mouse + touch)
+	// Click outside cancels — use explicit Apply button to save
 	useEffect(() => {
 		if (!shouldRenderDesktop && !shouldRenderMobile) return;
 		function handlePointerOutside(event: PointerEvent) {
@@ -152,7 +151,7 @@ export default function InlineEditOverlay({
 				popoverRef.current &&
 				!popoverRef.current.contains(event.target as Node)
 			) {
-				onCancel();
+				handleCancel();
 			}
 		}
 		const timer = setTimeout(() => {
@@ -162,7 +161,7 @@ export default function InlineEditOverlay({
 			clearTimeout(timer);
 			document.removeEventListener("pointerdown", handlePointerOutside);
 		};
-	}, [onCancel, shouldRenderDesktop, shouldRenderMobile]);
+	}, [handleCancel, shouldRenderDesktop, shouldRenderMobile]);
 
 	// Focus trap
 	const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
@@ -188,74 +187,85 @@ export default function InlineEditOverlay({
 	// Mobile: fixed-bottom input bar
 	if (shouldRenderMobile) {
 		return (
-			<div
-				ref={popoverRef}
-				role="dialog"
-				aria-modal="true"
-				aria-label={`Edit ${label}`}
-				onKeyDown={handleKeyDown}
-				className="fixed inset-0 z-50 flex flex-col justify-end"
-			>
-				{/* Backdrop */}
-				<div className="absolute inset-0 bg-black/30" aria-hidden="true" />
-
-				{/* Bottom input bar */}
+			<>
+				{showCancelToast && (
+					<div
+						className="fixed top-4 left-1/2 z-[100] -translate-x-1/2 rounded-full bg-[var(--dm-ink,#1a1a1a)] px-4 py-2 text-xs text-white shadow-lg"
+						role="status"
+						aria-live="polite"
+					>
+						Edit cancelled
+					</div>
+				)}
 				<div
-					className={cn(
-						"relative z-10 border-t bg-[var(--dm-surface,#fff)] px-4 pb-[env(safe-area-inset-bottom)] pt-4",
-						"border-[var(--dm-border,#e5e5e5)]",
-					)}
+					ref={popoverRef}
+					role="dialog"
+					aria-modal="true"
+					aria-label={`Edit ${label}`}
+					onKeyDown={handleKeyDown}
+					className="fixed inset-0 z-50 flex flex-col justify-end"
 				>
-					<p className="mb-2 text-xs font-medium uppercase tracking-wider text-[var(--dm-muted,#888)]">
-						{label}
-					</p>
-					<textarea
-						ref={inputRef}
-						value={value}
-						onChange={(e) => onChange(e.target.value)}
-						onKeyDown={(e) => {
-							if (e.key === "Enter" && !e.shiftKey && !isMultiline) {
-								e.preventDefault();
-								onSave();
-							}
-						}}
-						rows={isMultiline ? 3 : 1}
+					{/* Backdrop */}
+					<div className="absolute inset-0 bg-black/30" aria-hidden="true" />
+
+					{/* Bottom input bar */}
+					<div
 						className={cn(
-							"w-full resize-none rounded-xl border px-3 py-2 text-base",
-							"border-[var(--dm-border,#e5e5e5)] bg-[var(--dm-bg,#fafafa)]",
-							"text-[var(--dm-ink,#1a1a1a)]",
-							"placeholder:text-[var(--dm-muted,#888)]",
-							"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30",
+							"relative z-10 border-t bg-[var(--dm-surface,#fff)] px-4 pb-[env(safe-area-inset-bottom)] pt-4",
+							"border-[var(--dm-border,#e5e5e5)]",
 						)}
-					/>
-					<div className="mt-3 flex items-center justify-end gap-2">
-						<button
-							type="button"
-							onClick={onCancel}
+					>
+						<p className="mb-2 text-xs font-medium uppercase tracking-wider text-[var(--dm-muted,#888)]">
+							{label}
+						</p>
+						<textarea
+							ref={inputRef}
+							value={value}
+							onChange={(e) => onChange(e.target.value)}
+							onKeyDown={(e) => {
+								if (e.key === "Enter" && !e.shiftKey && !isMultiline) {
+									e.preventDefault();
+									onSave();
+								}
+							}}
+							rows={isMultiline ? 3 : 1}
 							className={cn(
-								"min-h-[44px] rounded-xl border px-4 py-2 text-xs font-medium",
-								"border-[var(--dm-border,#e5e5e5)] text-[var(--dm-ink,#1a1a1a)]",
-								"active:bg-[var(--dm-bg,#fafafa)]",
+								"w-full resize-none rounded-xl border px-3 py-2 text-base",
+								"border-[var(--dm-border,#e5e5e5)] bg-[var(--dm-bg,#fafafa)]",
+								"text-[var(--dm-ink,#1a1a1a)]",
+								"placeholder:text-[var(--dm-muted,#888)]",
 								"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30",
 							)}
-						>
-							Cancel
-						</button>
-						<button
-							type="button"
-							onClick={onSave}
-							className={cn(
-								"min-h-[44px] rounded-xl px-4 py-2 text-xs font-medium text-white",
-								"bg-[var(--dm-peach,#e8a87c)]",
-								"active:opacity-90",
-								"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30",
-							)}
-						>
-							Apply
-						</button>
+						/>
+						<div className="mt-3 flex items-center justify-end gap-2">
+							<button
+								type="button"
+								onClick={handleCancel}
+								className={cn(
+									"min-h-11 min-w-11 rounded-xl border px-4 py-2 text-xs font-medium",
+									"border-[var(--dm-border,#e5e5e5)] text-[var(--dm-ink,#1a1a1a)]",
+									"active:bg-[var(--dm-bg,#fafafa)]",
+									"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30",
+								)}
+							>
+								Discard
+							</button>
+							<button
+								type="button"
+								onClick={onSave}
+								className={cn(
+									"min-h-11 min-w-11 rounded-xl px-4 py-2 text-xs font-medium text-white",
+									"bg-[var(--dm-peach,#e8a87c)]",
+									"active:opacity-90",
+									"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30",
+								)}
+							>
+								Apply
+							</button>
+						</div>
 					</div>
 				</div>
-			</div>
+			</>
 		);
 	}
 
@@ -263,87 +273,98 @@ export default function InlineEditOverlay({
 	if (!shouldRenderDesktop || !position) return null;
 
 	return (
-		<div
-			ref={popoverRef}
-			role="dialog"
-			aria-modal="true"
-			aria-label={`Edit ${label}`}
-			onKeyDown={handleKeyDown}
-			className={cn(
-				"fixed z-80 w-full rounded-2xl border bg-[var(--dm-surface,#fff)] p-4 shadow-xl",
-				"border-[var(--dm-border,#e5e5e5)]",
+		<>
+			{showCancelToast && (
+				<div
+					className="fixed top-4 left-1/2 z-[100] -translate-x-1/2 rounded-full bg-[var(--dm-ink,#1a1a1a)] px-4 py-2 text-xs text-white shadow-lg"
+					role="status"
+					aria-live="polite"
+				>
+					Edit cancelled
+				</div>
 			)}
-			style={{
-				top: position.top,
-				left: position.left,
-				maxWidth: POPOVER_MAX_WIDTH,
-				zIndex: 80,
-			}}
-		>
-			{/* Arrow */}
 			<div
+				ref={popoverRef}
+				role="dialog"
+				aria-modal="true"
+				aria-label={`Edit ${label}`}
+				onKeyDown={handleKeyDown}
 				className={cn(
-					"absolute left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border bg-[var(--dm-surface,#fff)]",
+					"fixed z-80 w-full rounded-2xl border bg-[var(--dm-surface,#fff)] p-4 shadow-xl",
 					"border-[var(--dm-border,#e5e5e5)]",
-					position.arrowUp
-						? "bottom-[-7px] border-l-0 border-t-0"
-						: "top-[-7px] border-b-0 border-r-0",
 				)}
-			/>
-
-			{/* Label */}
-			<p className="mb-2 text-xs font-medium uppercase tracking-wider text-[var(--dm-muted,#888)]">
-				{label}
-			</p>
-
-			{/* Input */}
-			<textarea
-				ref={inputRef}
-				value={value}
-				onChange={(e) => onChange(e.target.value)}
-				onKeyDown={(e) => {
-					if (e.key === "Enter" && !e.shiftKey && !isMultiline) {
-						e.preventDefault();
-						onSave();
-					}
+				style={{
+					top: position.top,
+					left: position.left,
+					maxWidth: POPOVER_MAX_WIDTH,
+					zIndex: 80,
 				}}
-				rows={isMultiline ? 3 : 1}
-				className={cn(
-					"w-full resize-none rounded-xl border px-3 py-2 text-sm",
-					"border-[var(--dm-border,#e5e5e5)] bg-[var(--dm-bg,#fafafa)]",
-					"text-[var(--dm-ink,#1a1a1a)]",
-					"placeholder:text-[var(--dm-muted,#888)]",
-					"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30",
-				)}
-			/>
+			>
+				{/* Arrow */}
+				<div
+					className={cn(
+						"absolute left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border bg-[var(--dm-surface,#fff)]",
+						"border-[var(--dm-border,#e5e5e5)]",
+						position.arrowUp
+							? "bottom-[-7px] border-l-0 border-t-0"
+							: "top-[-7px] border-b-0 border-r-0",
+					)}
+				/>
 
-			{/* Buttons */}
-			<div className="mt-3 flex items-center justify-end gap-2">
-				<button
-					type="button"
-					onClick={onCancel}
+				{/* Label */}
+				<p className="mb-2 text-xs font-medium uppercase tracking-wider text-[var(--dm-muted,#888)]">
+					{label}
+				</p>
+
+				{/* Input */}
+				<textarea
+					ref={inputRef}
+					value={value}
+					onChange={(e) => onChange(e.target.value)}
+					onKeyDown={(e) => {
+						if (e.key === "Enter" && !e.shiftKey && !isMultiline) {
+							e.preventDefault();
+							onSave();
+						}
+					}}
+					rows={isMultiline ? 3 : 1}
 					className={cn(
-						"min-h-[44px] rounded-xl border px-4 py-2 text-xs font-medium",
-						"border-[var(--dm-border,#e5e5e5)] text-[var(--dm-ink,#1a1a1a)]",
-						"hover:bg-[var(--dm-bg,#fafafa)]",
+						"w-full resize-none rounded-xl border px-3 py-2 text-sm",
+						"border-[var(--dm-border,#e5e5e5)] bg-[var(--dm-bg,#fafafa)]",
+						"text-[var(--dm-ink,#1a1a1a)]",
+						"placeholder:text-[var(--dm-muted,#888)]",
 						"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30",
 					)}
-				>
-					Cancel
-				</button>
-				<button
-					type="button"
-					onClick={onSave}
-					className={cn(
-						"min-h-[44px] rounded-xl px-4 py-2 text-xs font-medium text-white",
-						"bg-[var(--dm-peach,#e8a87c)]",
-						"hover:opacity-90",
-						"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30",
-					)}
-				>
-					Apply
-				</button>
+				/>
+
+				{/* Buttons */}
+				<div className="mt-3 flex items-center justify-end gap-2">
+					<button
+						type="button"
+						onClick={handleCancel}
+						className={cn(
+							"min-h-11 min-w-11 rounded-xl border px-4 py-2 text-xs font-medium",
+							"border-[var(--dm-border,#e5e5e5)] text-[var(--dm-ink,#1a1a1a)]",
+							"hover:bg-[var(--dm-bg,#fafafa)]",
+							"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30",
+						)}
+					>
+						Discard
+					</button>
+					<button
+						type="button"
+						onClick={onSave}
+						className={cn(
+							"min-h-11 min-w-11 rounded-xl px-4 py-2 text-xs font-medium text-white",
+							"bg-[var(--dm-peach,#e8a87c)]",
+							"hover:opacity-90",
+							"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30",
+						)}
+					>
+						Apply
+					</button>
+				</div>
 			</div>
-		</div>
+		</>
 	);
 }

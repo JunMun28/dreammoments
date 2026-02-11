@@ -3,6 +3,7 @@ import {
 	type ErrorComponentProps,
 	Link,
 	Navigate,
+	useBlocker,
 } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AiAssistantDrawer } from "../../components/editor/AiAssistantDrawer";
@@ -168,7 +169,16 @@ function EditorScreen() {
 	}, [editor.sectionVisibility]);
 
 	// Auto-save
-	const { autosaveAt, saveStatus } = useAutoSave({
+	const {
+		autosaveAt,
+		saveStatus,
+		saveNow,
+		markDirty,
+		hasUnsavedChanges,
+		retrySave,
+		revertToLastSaved,
+		retriesExhausted,
+	} = useAutoSave({
 		invitationId: invitation?.id ?? "",
 		draftRef,
 		visibilityRef,
@@ -176,6 +186,12 @@ function EditorScreen() {
 		onSaveError: (message) =>
 			addToast({ type: "error", message: `Save failed: ${message}` }),
 	});
+
+	// Trigger debounced save on every version change
+	// biome-ignore lint/correctness/useExhaustiveDependencies: markDirty is stable
+	useEffect(() => {
+		if (editor.version > 0) markDirty();
+	}, [editor.version]);
 
 	// Section progress
 	const sectionProgress = useSectionProgress({
@@ -238,6 +254,22 @@ function EditorScreen() {
 	const [shareModalOpen, setShareModalOpen] = useState(false);
 	const [publishSuccess, setPublishSuccess] = useState(false);
 
+	// Navigation guard for unsaved changes – flush pending save before leaving
+	const {
+		status: blockerStatus,
+		proceed,
+		reset,
+	} = useBlocker({
+		shouldBlockFn: () => {
+			if (hasUnsavedChanges) {
+				// Fire off a save attempt so data isn't lost even if user proceeds
+				void saveNow();
+			}
+			return hasUnsavedChanges;
+		},
+		withResolver: true,
+	});
+
 	// Slug validation hook
 	const slug = useSlugValidation({ invitationId: invitation?.id ?? "" });
 
@@ -253,7 +285,7 @@ function EditorScreen() {
 				onUndo: () => editor.handleUndo(),
 				onRedo: () => editor.handleRedo(),
 				onSave: () => {
-					/* auto-save handles this; force-save could trigger manual save */
+					void saveNow();
 				},
 				onCollapsePanel: () => setPanelCollapsed(true),
 				onExpandPanel: () => setPanelCollapsed(false),
@@ -282,8 +314,11 @@ function EditorScreen() {
 				id: s.id,
 				label: getSectionLabel(s.id),
 				completion: sectionProgress[s.id] ?? 0,
+				hasErrors: Object.entries(editor.errors).some(
+					([key, val]) => key.startsWith(`${s.id}.`) && !!val,
+				),
 			})),
-		[template?.sections, sectionProgress],
+		[template?.sections, sectionProgress, editor.errors],
 	);
 
 	// Guards (login bypass for testing: show loader until demo user is created)
@@ -304,16 +339,70 @@ function EditorScreen() {
 
 	// Handlers
 	const handleImageUpload = async (fieldPath: string, file: File) => {
+		if (file.size > 10 * 1024 * 1024) {
+			addToast({ type: "error", message: "Image must be under 10MB" });
+			return;
+		}
+		if (!file.type.startsWith("image/")) {
+			addToast({ type: "error", message: "Please upload an image file" });
+			return;
+		}
 		setUploadingField(fieldPath);
 		try {
 			const uploaded = await uploadImage(file);
 			editor.handleFieldChange(fieldPath, uploaded.url);
+		} catch {
+			addToast({
+				type: "error",
+				message: "Failed to upload image. Please try again.",
+			});
 		} finally {
 			setUploadingField(null);
 		}
 	};
 
+	const validateAllFields = (): string[] => {
+		const missingFields: string[] = [];
+		for (const section of template?.sections ?? []) {
+			for (const field of section.fields) {
+				if (!field.required) continue;
+				const path = `${section.id}.${field.id}`;
+				const val = getValueByPath(editor.draft, path);
+				if (!val?.trim()) {
+					missingFields.push(path);
+				}
+			}
+		}
+		return missingFields;
+	};
+
 	const handlePublish = () => {
+		const missing = validateAllFields();
+		if (missing.length > 0) {
+			addToast({
+				type: "error",
+				message: `Please fix ${missing.length} required field${missing.length > 1 ? "s" : ""} before publishing`,
+			});
+			// Navigate to the section of the first error
+			const firstErrorSection = missing[0].split(".")[0];
+			if (firstErrorSection) {
+				editor.setActiveSection(firstErrorSection);
+				scrollToSection(firstErrorSection);
+			}
+			// Set errors on all missing fields
+			const errorMap: Record<string, string> = {};
+			for (const path of missing) {
+				const section = template?.sections.find(
+					(s) => s.id === path.split(".")[0],
+				);
+				const field = section?.fields.find(
+					(f) => `${section.id}.${f.id}` === path,
+				);
+				errorMap[path] = `${field?.label ?? "Field"} is required`;
+			}
+			editor.setErrors((prev) => ({ ...prev, ...errorMap }));
+			return;
+		}
 		if (user.plan !== "premium") {
 			setUpgradeOpen(true);
 			return;
@@ -401,6 +490,10 @@ function EditorScreen() {
 			saveStatus={saveStatus}
 			autosaveAt={autosaveAt}
 			isMobile={isMobile}
+			onRetrySave={retrySave}
+			onRevertSave={revertToLastSaved}
+			retriesExhausted={retriesExhausted}
+			onShowShortcuts={() => setShowShortcutsHelp(true)}
 		/>
 	);
 
@@ -593,6 +686,7 @@ function EditorScreen() {
 				onTypeChange={aiAssistant.setAiType}
 				onGenerate={() => void aiAssistant.generate()}
 				onApply={aiAssistant.applyResult}
+				onCancelGeneration={aiAssistant.cancelGeneration}
 			/>
 
 			{/* Preview mode overlay */}
@@ -646,6 +740,37 @@ function EditorScreen() {
 				invitation={invitation}
 				onClose={() => setShareModalOpen(false)}
 			/>
+
+			{/* Unsaved changes navigation blocker */}
+			{blockerStatus === "blocked" && (
+				<div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
+					<div className="mx-4 max-w-sm rounded-2xl border border-dm-border bg-dm-bg p-6 text-center shadow-xl">
+						<h2 className="text-lg font-semibold text-dm-ink">
+							Unsaved Changes
+						</h2>
+						<p className="mt-2 text-sm text-dm-muted">
+							You have unsaved changes. Are you sure you want to leave? Your
+							latest changes are being saved automatically.
+						</p>
+						<div className="mt-5 flex justify-center gap-3">
+							<button
+								type="button"
+								onClick={reset}
+								className="rounded-full border border-dm-border px-5 py-2 text-xs uppercase tracking-[0.2em] text-dm-ink"
+							>
+								Stay
+							</button>
+							<button
+								type="button"
+								onClick={proceed}
+								className="rounded-full bg-dm-accent-strong px-5 py-2 text-xs uppercase tracking-[0.2em] text-dm-on-accent"
+							>
+								Leave
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
 		</>
 	);
 }

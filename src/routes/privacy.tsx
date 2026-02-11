@@ -2,10 +2,32 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/privacy")({ component: PrivacyPolicy });
 
+const tocItems = [
+	{ id: "introduction", label: "1. Introduction" },
+	{ id: "information-we-collect", label: "2. Information We Collect" },
+	{ id: "how-we-use-information", label: "3. How We Use Your Information" },
+	{ id: "data-sharing", label: "4. Data Sharing and Disclosure" },
+	{ id: "data-retention", label: "5. Data Retention" },
+	{ id: "your-rights", label: "6. Your Rights" },
+	{ id: "data-security", label: "7. Data Security" },
+	{ id: "cookies", label: "8. Cookies and Tracking" },
+	{ id: "childrens-privacy", label: "9. Children's Privacy" },
+	{ id: "international-transfers", label: "10. International Data Transfers" },
+	{ id: "changes-to-policy", label: "11. Changes to This Policy" },
+	{ id: "contact-us", label: "12. Contact Us" },
+	{ id: "regulatory-information", label: "13. Regulatory Information" },
+];
+
 function PrivacyPolicy() {
 	return (
 		<div className="min-h-screen bg-dm-bg">
 			<div className="mx-auto max-w-3xl px-6 py-16 sm:py-24">
+				<Link
+					to="/"
+					className="inline-flex items-center gap-1 text-sm text-dm-muted transition-colors hover:text-dm-ink mb-8"
+				>
+					&larr; Back to Home
+				</Link>
 				<header className="mb-12">
 					<p className="font-accent text-2xl text-dm-peach">
 						Legal Information
@@ -16,10 +38,35 @@ function PrivacyPolicy() {
 					<p className="mt-4 text-dm-muted">Last updated: February 2026</p>
 				</header>
 
+				{/* Table of Contents */}
+				<nav
+					aria-label="Table of contents"
+					className="mb-12 rounded-2xl border border-dm-border bg-dm-surface p-6"
+				>
+					<p className="text-xs uppercase tracking-[0.3em] text-dm-accent-strong mb-4">
+						Table of Contents
+					</p>
+					<ol className="columns-1 gap-x-8 space-y-2 text-sm sm:columns-2">
+						{tocItems.map((item) => (
+							<li key={item.id}>
+								<a
+									href={`#${item.id}`}
+									className="text-dm-muted transition-colors hover:text-dm-ink"
+								>
+									{item.label}
+								</a>
+							</li>
+						))}
+					</ol>
+				</nav>
+
 				<article className="prose prose-dm max-w-none space-y-10 text-dm-ink">
 					{/* Introduction */}
 					<section>
-						<h2 className="font-heading text-2xl mb-4">1. Introduction</h2>
+						{/* biome-ignore lint/correctness/useUniqueElementIds: TOC anchor target */}
+						<h2 id="introduction" className="font-heading text-2xl mb-4">
+							1. Introduction
+						</h2>
 						<p className="text-dm-muted leading-relaxed">
 							DreamMoments ("we", "our", or "us") is committed to protecting
 							your personal data. This Privacy Policy explains how we collect,
@@ -35,7 +82,11 @@ function PrivacyPolicy() {
 
 					{/* Data We Collect */}
 					<section>
-						<h2 className="font-heading text-2xl mb-4">
+						{/* biome-ignore lint/correctness/useUniqueElementIds: TOC anchor target */}
+						<h2
+							id="information-we-collect"
+							className="font-heading text-2xl mb-4"
+						>
 							2. Information We Collect
 						</h2>
 						<p className="text-dm-muted leading-relaxed mb-4">
@@ -87,7 +138,11 @@ function PrivacyPolicy() {
 
 					{/* How We Use Data */}
 					<section>
-						<h2 className="font-heading text-2xl mb-4">
+						{/* biome-ignore lint/correctness/useUniqueElementIds: TOC anchor target */}
+						<h2
+							id="how-we-use-information"
+							className="font-heading text-2xl mb-4"
+						>
 							3. How We Use Your Information
 						</h2>
 						<p className="text-dm-muted leading-relaxed mb-4">
@@ -123,7 +178,8 @@ function PrivacyPolicy() {
 
 					{/* Data Sharing */}
 					<section>
-						<h2 className="font-heading text-2xl mb-4">
+						{/* biome-ignore lint/correctness/useUniqueElementIds: TOC anchor target */}
+						<h2 id="data-sharing" className="font-heading text-2xl mb-4">
 							4. Data Sharing and Disclosure
 						</h2>
 						<p className="text-dm-muted leading-relaxed mb-4">
@@ -153,7 +209,10 @@ function PrivacyPolicy() {
 
 					{/* Data Retention */}
 					<section>
-						<h2 className="font-heading text-2xl mb-4">5. Data Retention</h2>
+						{/* biome-ignore lint/correctness/useUniqueElementIds: TOC anchor target */}
+						<h2 id="data-retention" className="font-heading text-2xl mb-4">
+							5. Data Retention
+						</h2>
 						<p className="text-dm-muted leading-relaxed">
 							We retain your personal data for as long as necessary to provide
 							our services:
@@ -184,7 +243,10 @@ function PrivacyPolicy() {
 
 					{/* Your Rights */}
 					<section>
-						<h2 className="font-heading text-2xl mb-4">6. Your Rights</h2>
+						{/* biome-ignore lint/correctness/useUniqueElementIds: TOC anchor target */}
+						<h2 id="your-rights" className="font-heading text-2xl mb-4">
+							6. Your Rights
+						</h2>
 						<p className="text-dm-muted leading-relaxed mb-4">
 							Under the PDPA (Malaysia and Singapore), you have the following
 							rights:
@@ -219,7 +281,10 @@ function PrivacyPolicy() {
 
 					{/* Data Security */}
 					<section>
-						<h2 className="font-heading text-2xl mb-4">7. Data Security</h2>
+						{/* biome-ignore lint/correctness/useUniqueElementIds: TOC anchor target */}
+						<h2 id="data-security" className="font-heading text-2xl mb-4">
+							7. Data Security
+						</h2>
 						<p className="text-dm-muted leading-relaxed">
 							We implement appropriate technical and organizational measures to
 							protect your personal data, including:
@@ -235,7 +300,8 @@ function PrivacyPolicy() {
 
 					{/* Cookies */}
 					<section>
-						<h2 className="font-heading text-2xl mb-4">
+						{/* biome-ignore lint/correctness/useUniqueElementIds: TOC anchor target */}
+						<h2 id="cookies" className="font-heading text-2xl mb-4">
 							8. Cookies and Tracking
 						</h2>
 						<p className="text-dm-muted leading-relaxed">
@@ -247,7 +313,8 @@ function PrivacyPolicy() {
 
 					{/* Children's Privacy */}
 					<section>
-						<h2 className="font-heading text-2xl mb-4">
+						{/* biome-ignore lint/correctness/useUniqueElementIds: TOC anchor target */}
+						<h2 id="childrens-privacy" className="font-heading text-2xl mb-4">
 							9. Children's Privacy
 						</h2>
 						<p className="text-dm-muted leading-relaxed">
@@ -260,7 +327,11 @@ function PrivacyPolicy() {
 
 					{/* International Transfers */}
 					<section>
-						<h2 className="font-heading text-2xl mb-4">
+						{/* biome-ignore lint/correctness/useUniqueElementIds: TOC anchor target */}
+						<h2
+							id="international-transfers"
+							className="font-heading text-2xl mb-4"
+						>
 							10. International Data Transfers
 						</h2>
 						<p className="text-dm-muted leading-relaxed">
@@ -273,7 +344,8 @@ function PrivacyPolicy() {
 
 					{/* Updates */}
 					<section>
-						<h2 className="font-heading text-2xl mb-4">
+						{/* biome-ignore lint/correctness/useUniqueElementIds: TOC anchor target */}
+						<h2 id="changes-to-policy" className="font-heading text-2xl mb-4">
 							11. Changes to This Policy
 						</h2>
 						<p className="text-dm-muted leading-relaxed">
@@ -286,7 +358,10 @@ function PrivacyPolicy() {
 
 					{/* Contact */}
 					<section>
-						<h2 className="font-heading text-2xl mb-4">12. Contact Us</h2>
+						{/* biome-ignore lint/correctness/useUniqueElementIds: TOC anchor target */}
+						<h2 id="contact-us" className="font-heading text-2xl mb-4">
+							12. Contact Us
+						</h2>
 						<p className="text-dm-muted leading-relaxed">
 							If you have questions about this Privacy Policy or wish to
 							exercise your data protection rights, please contact our Data
@@ -307,7 +382,11 @@ function PrivacyPolicy() {
 
 					{/* Regulatory Information */}
 					<section>
-						<h2 className="font-heading text-2xl mb-4">
+						{/* biome-ignore lint/correctness/useUniqueElementIds: TOC anchor target */}
+						<h2
+							id="regulatory-information"
+							className="font-heading text-2xl mb-4"
+						>
 							13. Regulatory Information
 						</h2>
 						<div className="grid gap-4 sm:grid-cols-2">

@@ -42,6 +42,8 @@ export default function EternalEleganceInvitation({
 	const consentDescriptionId = useId();
 	const data = content;
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [submitError, setSubmitError] = useState("");
+	const [errors, setErrors] = useState<Record<string, string>>({});
 	const [rsvpData, setRsvpData] = useState<Omit<
 		RsvpConfirmationProps,
 		"onEdit" | "className"
@@ -130,7 +132,10 @@ export default function EternalEleganceInvitation({
 				onAiClick={onAiClick}
 				className="eternal-section"
 			>
-				<CountdownWidget targetDate={data.hero.date} />
+				<CountdownWidget
+					targetDate={data.hero.date}
+					eventTime={data.schedule.events[0]?.time}
+				/>
 			</SectionShell>
 
 			<SectionShell
@@ -231,13 +236,15 @@ export default function EternalEleganceInvitation({
 							<div
 								key={`${photo.url ?? "photo"}-${photo.caption ?? "Portrait"}`}
 								className="eternal-photo"
+								style={{ backgroundColor: "#f5ede4" }}
 							>
 								<img
 									src={photo.url || "/placeholders/photo-light.svg"}
 									alt={photo.caption || "Wedding photo"}
 									loading="lazy"
+									decoding="async"
 									width={360}
-									height={140}
+									height={240}
 									className="absolute inset-0 h-full w-full rounded-[inherit] object-cover"
 								/>
 								<span>{photo.caption ?? "Portrait"}</span>
@@ -307,7 +314,13 @@ export default function EternalEleganceInvitation({
 					<p className="eternal-kicker" style={bodyFont}>
 						RSVP
 					</p>
-					{rsvpData ? (
+					{!onRsvpSubmit && rsvpStatus ? (
+						<div className="mt-4 text-center">
+							<output className="eternal-body" aria-live="polite">
+								{rsvpStatus}
+							</output>
+						</div>
+					) : rsvpData ? (
 						<RsvpConfirmation
 							{...rsvpData}
 							onEdit={() => setRsvpData(null)}
@@ -321,7 +334,19 @@ export default function EternalEleganceInvitation({
 								if (!onRsvpSubmit || isSubmitting) return;
 								const formData = new FormData(event.currentTarget);
 								const name = String(formData.get("name") ?? "").trim();
-								if (!name) return;
+								const email = String(formData.get("email") ?? "").trim();
+								const newErrors: Record<string, string> = {};
+								if (!name) {
+									newErrors.name = "Please enter your name";
+								}
+								if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+									newErrors.email = "Please enter a valid email address";
+								}
+								if (Object.keys(newErrors).length > 0) {
+									setErrors(newErrors);
+									return;
+								}
+								setErrors({});
 								const maxGuests = data.rsvp.allowPlusOnes
 									? Math.max(1, data.rsvp.maxPlusOnes + 1)
 									: 1;
@@ -341,8 +366,9 @@ export default function EternalEleganceInvitation({
 										guestCount,
 										dietaryRequirements,
 										message: String(formData.get("message") ?? ""),
-										email: String(formData.get("email") ?? ""),
+										email,
 									});
+									setSubmitError("");
 									setRsvpData({
 										name,
 										attendance,
@@ -350,14 +376,14 @@ export default function EternalEleganceInvitation({
 										dietaryRequirements,
 									});
 								} catch {
-									// Submission failed; form remains open for retry
+									setSubmitError("Something went wrong. Please try again.");
 								} finally {
 									setIsSubmitting(false);
 								}
 							}}
 						>
 							<label
-								className="grid gap-1.5 text-xs uppercase tracking-[0.15em]"
+								className="grid gap-1.5 text-[0.7rem] sm:text-xs uppercase tracking-[0.15em]"
 								style={{ color: "var(--eternal-muted)" }}
 							>
 								Name
@@ -367,11 +393,66 @@ export default function EternalEleganceInvitation({
 									autoComplete="off"
 									required
 									aria-required="true"
+									aria-invalid={!!errors.name}
 									className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-lavender)]/30"
+									onBlur={(e) => {
+										if (!e.target.value.trim()) {
+											setErrors((prev) => ({
+												...prev,
+												name: "Please enter your name",
+											}));
+										}
+									}}
+									onChange={() =>
+										setErrors((prev) => {
+											const { name: _, ...rest } = prev;
+											return rest;
+										})
+									}
 								/>
+								{errors.name && (
+									<p className="text-red-500 text-xs mt-1" role="alert">
+										{errors.name}
+									</p>
+								)}
 							</label>
 							<label
-								className="grid gap-1.5 text-xs uppercase tracking-[0.15em]"
+								className="grid gap-1.5 text-[0.7rem] sm:text-xs uppercase tracking-[0.15em]"
+								style={{ color: "var(--eternal-muted)" }}
+							>
+								Email
+								<input
+									name="email"
+									placeholder="james@example.com…"
+									type="email"
+									autoComplete="off"
+									spellCheck={false}
+									aria-invalid={!!errors.email}
+									className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-lavender)]/30"
+									onBlur={(e) => {
+										const v = e.target.value.trim();
+										if (v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
+											setErrors((prev) => ({
+												...prev,
+												email: "Please enter a valid email address",
+											}));
+										}
+									}}
+									onChange={() =>
+										setErrors((prev) => {
+											const { email: _, ...rest } = prev;
+											return rest;
+										})
+									}
+								/>
+								{errors.email && (
+									<p className="text-red-500 text-xs mt-1" role="alert">
+										{errors.email}
+									</p>
+								)}
+							</label>
+							<label
+								className="grid gap-1.5 text-[0.7rem] sm:text-xs uppercase tracking-[0.15em]"
 								style={{ color: "var(--eternal-muted)" }}
 							>
 								Attendance
@@ -385,24 +466,23 @@ export default function EternalEleganceInvitation({
 								</select>
 							</label>
 							<label
-								className="grid gap-1.5 text-xs uppercase tracking-[0.15em]"
+								className="grid gap-1.5 text-[0.7rem] sm:text-xs uppercase tracking-[0.15em]"
 								style={{ color: "var(--eternal-muted)" }}
 							>
-								Email
-								<input
-									name="email"
-									placeholder="james@example.com…"
-									type="email"
-									autoComplete="off"
-									spellCheck={false}
-									className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-lavender)]/30"
-								/>
-							</label>
-							<label
-								className="grid gap-1.5 text-xs uppercase tracking-[0.15em]"
-								style={{ color: "var(--eternal-muted)" }}
-							>
-								Guest count
+								Guest count{" "}
+								<span
+									className="normal-case tracking-normal"
+									style={{ color: "var(--eternal-muted)" }}
+								>
+									(Max:{" "}
+									{data.rsvp.allowPlusOnes
+										? Math.max(1, data.rsvp.maxPlusOnes + 1)
+										: 1}{" "}
+									{data.rsvp.allowPlusOnes && data.rsvp.maxPlusOnes + 1 > 1
+										? "guests"
+										: "guest"}
+									)
+								</span>
 								<input
 									name="guestCount"
 									placeholder="2…"
@@ -419,19 +499,19 @@ export default function EternalEleganceInvitation({
 								/>
 							</label>
 							<label
-								className="grid gap-1.5 text-xs uppercase tracking-[0.15em]"
+								className="grid gap-1.5 text-[0.7rem] sm:text-xs uppercase tracking-[0.15em]"
 								style={{ color: "var(--eternal-muted)" }}
 							>
 								Dietary requirements
 								<input
 									name="dietary"
-									placeholder="No seafood…"
+									placeholder="e.g., Vegetarian, no pork, gluten-free"
 									autoComplete="off"
 									className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-lavender)]/30"
 								/>
 							</label>
 							<label
-								className="grid gap-1.5 text-xs uppercase tracking-[0.15em]"
+								className="grid gap-1.5 text-[0.7rem] sm:text-xs uppercase tracking-[0.15em]"
 								style={{ color: "var(--eternal-muted)" }}
 							>
 								Message
@@ -475,6 +555,14 @@ export default function EternalEleganceInvitation({
 								{isSubmitting && <LoadingSpinner size="sm" />}
 								{isSubmitting ? "Submitting..." : "Submit RSVP"}
 							</button>
+							{submitError && (
+								<p
+									className="mt-3 text-center text-sm text-[#b91c1c]"
+									role="alert"
+								>
+									{submitError}
+								</p>
+							)}
 						</form>
 					)}
 				</div>

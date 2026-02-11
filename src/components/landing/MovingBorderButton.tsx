@@ -5,7 +5,6 @@ interface MovingBorderButtonProps {
 	children: React.ReactNode;
 	className?: string;
 	variant?: "crimson" | "gold";
-	as?: "button" | "a";
 	href?: string;
 	onClick?: () => void;
 }
@@ -24,7 +23,6 @@ export function MovingBorderButton({
 	children,
 	className,
 	variant = "crimson",
-	as = "button",
 	href,
 	onClick,
 }: MovingBorderButtonProps) {
@@ -49,8 +47,12 @@ export function MovingBorderButton({
 		background: gradients[variant],
 	};
 
-	const innerClasses =
-		"relative z-10 inline-flex items-center justify-center gap-2 rounded-full bg-[var(--dm-bg)] px-8 py-3 text-sm font-medium tracking-wide text-[var(--dm-ink)] transition-colors duration-200 group-hover:bg-[var(--dm-surface-muted)] min-h-[52px]";
+	const innerClasses = cn(
+		"relative z-10 inline-flex items-center justify-center gap-2 rounded-full px-6 sm:px-8 py-3 text-sm font-medium tracking-wide transition-colors duration-200 min-h-[52px]",
+		variant === "crimson"
+			? "bg-[var(--dm-crimson)] text-white hover:bg-[var(--dm-crimson-bold)]"
+			: "bg-[var(--dm-bg)] text-[var(--dm-ink)] hover:bg-[var(--dm-surface-muted)]",
+	);
 
 	const content = (
 		<>
@@ -72,7 +74,7 @@ export function MovingBorderButton({
 	);
 
 	// Render as TanStack Router Link for internal navigation
-	if (as === "a" && href) {
+	if (href) {
 		return (
 			<Link to={href} className={outerClasses} onClick={onClick}>
 				{content}

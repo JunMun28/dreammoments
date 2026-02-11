@@ -7,6 +7,7 @@ import {
 import { Eye } from "lucide-react";
 import { useCallback, useState } from "react";
 import InvitationRenderer from "../../components/templates/InvitationRenderer";
+import { RouteLoadingSpinner } from "../../components/ui/RouteLoadingSpinner";
 import { buildSampleContent } from "../../data/sample-invitation";
 import { useAuth } from "../../lib/auth";
 import { createInvitation } from "../../lib/data";
@@ -15,6 +16,7 @@ import type { TemplateConfig } from "../../templates/types";
 
 export const Route = createFileRoute("/editor/new")({
 	component: TemplateSelectionPage,
+	pendingComponent: RouteLoadingSpinner,
 });
 
 /** Map template category to a human-readable label */
@@ -80,7 +82,7 @@ function TemplateCard({
 				<button
 					type="button"
 					onClick={() => onPreview(template.id)}
-					className="absolute right-3 top-3 flex h-9 items-center gap-1.5 rounded-full border border-white/30 bg-white/80 px-3 text-[10px] uppercase tracking-[0.15em] text-[color:var(--dm-ink)] opacity-0 backdrop-blur-sm transition-opacity group-hover:opacity-100"
+					className="absolute right-3 top-3 flex h-9 items-center gap-1.5 rounded-full border border-white/30 bg-white/80 px-3 text-[10px] uppercase tracking-[0.15em] text-[color:var(--dm-ink)] opacity-100 backdrop-blur-sm transition-opacity md:opacity-0 md:group-hover:opacity-100"
 					aria-label={`Preview ${template.name} template`}
 				>
 					<Eye size={14} aria-hidden="true" />
@@ -192,7 +194,7 @@ function TemplatePreviewModal({
 				<InvitationRenderer
 					templateId={templateId}
 					content={content}
-					sectionVisibility={sectionVisibility}
+					hiddenSections={sectionVisibility}
 				/>
 			</div>
 		</div>

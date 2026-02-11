@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft, Eye, Redo2, Send, Undo2 } from "lucide-react";
+import { ArrowLeft, Eye, HelpCircle, Redo2, Send, Undo2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "../../lib/utils";
 import { SaveStatusBadge } from "./SaveStatusBadge";
@@ -15,7 +15,16 @@ type EditorToolbarProps = {
 	saveStatus: "saved" | "saving" | "unsaved" | "error";
 	autosaveAt: string;
 	isMobile: boolean;
+	onRetrySave?: () => void;
+	onRevertSave?: () => void;
+	retriesExhausted?: boolean;
+	onShowShortcuts?: () => void;
 };
+
+const isMac =
+	typeof navigator !== "undefined" &&
+	/Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
+const modKey = isMac ? "\u2318" : "Ctrl+";
 
 export function EditorToolbar({
 	title,
@@ -28,6 +37,10 @@ export function EditorToolbar({
 	saveStatus,
 	autosaveAt,
 	isMobile,
+	onRetrySave,
+	onRevertSave,
+	retriesExhausted,
+	onShowShortcuts,
 }: EditorToolbarProps) {
 	const [overflowOpen, setOverflowOpen] = useState(false);
 	const [focusedIndex, setFocusedIndex] = useState(-1);
@@ -71,7 +84,6 @@ export function EditorToolbar({
 		triggerRef.current?.focus();
 	}, []);
 
-	// Focus the first menu item when menu opens
 	useEffect(() => {
 		if (overflowOpen) {
 			setFocusedIndex(0);
@@ -111,11 +123,7 @@ export function EditorToolbar({
 					menuItemRefs.current[last]?.focus();
 					break;
 				}
-				case "Escape": {
-					e.preventDefault();
-					closeMenu();
-					break;
-				}
+				case "Escape":
 				case "Tab": {
 					e.preventDefault();
 					closeMenu();
@@ -138,20 +146,17 @@ export function EditorToolbar({
 					Back
 				</Link>
 
-				<div className="flex items-center gap-1.5">
-					<output
-						className={cn(
-							"block h-1.5 w-1.5 shrink-0 rounded-full",
-							saveStatus === "saved" && "bg-[#22c55e]",
-							saveStatus === "saving" && "bg-[#eab308]",
-							saveStatus === "unsaved" && "bg-[color:var(--dm-muted)]",
-							saveStatus === "error" && "bg-[#ef4444]",
-						)}
-						aria-label={`Save status: ${saveStatus}`}
-					/>
-					<h1 className="max-w-[40vw] truncate text-sm font-semibold text-[color:var(--dm-ink)]">
+				<div className="flex items-center gap-2">
+					<h1 className="max-w-[30vw] truncate text-sm font-semibold text-[color:var(--dm-ink)]">
 						{title}
 					</h1>
+					<SaveStatusBadge
+						status={saveStatus}
+						autosaveAt={autosaveAt}
+						onRetry={onRetrySave}
+						onRevert={onRevertSave}
+						retriesExhausted={retriesExhausted}
+					/>
 				</div>
 
 				<div className="relative">
@@ -227,13 +232,6 @@ export function EditorToolbar({
 										</div>
 									);
 								})}
-								<hr className="mt-1 border-t border-[color:var(--dm-border)]" />
-								<div className="px-3 pt-2">
-									<SaveStatusBadge
-										status={saveStatus}
-										autosaveAt={autosaveAt}
-									/>
-								</div>
 							</div>
 						</>
 					)}
@@ -263,6 +261,7 @@ export function EditorToolbar({
 					disabled={!canUndo}
 					onClick={onUndo}
 					aria-label="Undo"
+					title={`Undo (${modKey}Z)`}
 					aria-disabled={!canUndo}
 					className={cn(
 						"inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-[color:var(--dm-border)] text-[color:var(--dm-ink)]",
@@ -276,6 +275,7 @@ export function EditorToolbar({
 					disabled={!canRedo}
 					onClick={onRedo}
 					aria-label="Redo"
+					title={`Redo (${modKey}Shift+Z)`}
 					aria-disabled={!canRedo}
 					className={cn(
 						"inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-[color:var(--dm-border)] text-[color:var(--dm-ink)]",
@@ -285,17 +285,35 @@ export function EditorToolbar({
 					<Redo2 className="h-4 w-4" aria-hidden="true" />
 				</button>
 
-				<SaveStatusBadge status={saveStatus} autosaveAt={autosaveAt} />
+				<SaveStatusBadge
+					status={saveStatus}
+					autosaveAt={autosaveAt}
+					onRetry={onRetrySave}
+					onRevert={onRevertSave}
+					retriesExhausted={retriesExhausted}
+				/>
 
 				<button
 					type="button"
 					onClick={onPreview}
 					aria-label="Switch to preview mode"
+					title={`Preview (${modKey}Shift+P)`}
 					className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[color:var(--dm-border)] px-4 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-ink)]"
 				>
 					<Eye className="h-4 w-4" aria-hidden="true" />
 					Preview
 				</button>
+				{onShowShortcuts && (
+					<button
+						type="button"
+						onClick={onShowShortcuts}
+						aria-label="Keyboard shortcuts"
+						title="Keyboard shortcuts (?)"
+						className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-[color:var(--dm-border)] text-[color:var(--dm-muted)] hover:text-[color:var(--dm-ink)]"
+					>
+						<HelpCircle className="h-4 w-4" aria-hidden="true" />
+					</button>
+				)}
 				<button
 					type="button"
 					onClick={onPublish}

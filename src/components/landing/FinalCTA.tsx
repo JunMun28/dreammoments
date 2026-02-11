@@ -1,13 +1,10 @@
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { MeshGradientBackground } from "./MeshGradientBackground";
 import { MovingBorderButton } from "./MovingBorderButton";
 import { CalligraphyReveal } from "./motifs/CalligraphyReveal";
 import { GoldRule } from "./motifs/GoldRule";
+import { RisingLanterns } from "./motifs/RisingLanterns";
 import { NeonXi } from "./NeonXi";
-
-gsap.registerPlugin(ScrollTrigger);
 
 export function FinalCTA({ reducedMotion }: { reducedMotion: boolean }) {
 	const sectionRef = useRef<HTMLElement>(null);
@@ -15,91 +12,182 @@ export function FinalCTA({ reducedMotion }: { reducedMotion: boolean }) {
 	const headlineRef = useRef<HTMLDivElement>(null);
 	const topRuleRef = useRef<HTMLDivElement>(null);
 	const bottomRuleRef = useRef<HTMLDivElement>(null);
+	const confettiContainerRef = useRef<HTMLDivElement>(null);
+
+	const confettiElementsRef = useRef<HTMLDivElement[]>([]);
+
+	const handleCtaClick = useCallback(
+		async (e: React.MouseEvent) => {
+			if (reducedMotion) return;
+			const container = confettiContainerRef.current;
+			if (!container) return;
+
+			const gsap = (await import("gsap")).default;
+
+			const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+			const originX = rect.left + rect.width / 2;
+			const originY = rect.top;
+
+			const colors = ["#C84040", "#D4B87A", "#A83232", "#F0D090", "#FFFFFF"];
+
+			for (let i = 0; i < 25; i++) {
+				const el = document.createElement("div");
+				el.style.cssText = `position:absolute;left:${originX}px;top:${originY}px;width:${4 + Math.random() * 4}px;height:${6 + Math.random() * 6}px;background:${colors[Math.floor(Math.random() * colors.length)]};border-radius:1px;`;
+				container.appendChild(el);
+				confettiElementsRef.current.push(el);
+
+				const dx = (Math.random() - 0.5) * 300;
+				const dy = -(Math.random() * 200 + 100);
+				const rot = Math.random() * 720;
+
+				gsap.fromTo(
+					el,
+					{ x: 0, y: 0, rotation: 0, opacity: 1 },
+					{
+						x: dx,
+						y: dy + 400,
+						rotation: rot,
+						opacity: 0,
+						duration: 1.0 + Math.random() * 0.5,
+						ease: "power2.in",
+						onComplete: () => {
+							el.remove();
+							confettiElementsRef.current = confettiElementsRef.current.filter(
+								(e) => e !== el,
+							);
+						},
+					},
+				);
+			}
+		},
+		[reducedMotion],
+	);
+
+	useEffect(() => {
+		return () => {
+			for (const el of confettiElementsRef.current) {
+				el.remove();
+			}
+			confettiElementsRef.current = [];
+		};
+	}, []);
 
 	useEffect(() => {
 		if (reducedMotion || !sectionRef.current) return;
 
-		const ctx = gsap.context(() => {
-			// Xi entrance: scale + rotation settle
-			if (xiRef.current) {
-				gsap.fromTo(
-					xiRef.current,
-					{ scale: 0.85, rotation: -5, opacity: 0 },
-					{
-						scale: 1,
-						rotation: 0,
-						opacity: 1,
-						duration: 1.5,
-						ease: "power2.out",
-						scrollTrigger: {
-							trigger: sectionRef.current,
-							start: "top 70%",
-							toggleActions: "play none none none",
-						},
-					},
-				);
-			}
+		let ctx: gsap.Context | undefined;
 
-			// Headline entrance
-			if (headlineRef.current) {
-				gsap.fromTo(
-					headlineRef.current,
-					{ scale: 0.9, y: 30, opacity: 0 },
-					{
-						scale: 1,
-						y: 0,
-						opacity: 1,
-						duration: 1.0,
-						ease: "power3.out",
-						scrollTrigger: {
-							trigger: sectionRef.current,
-							start: "top 60%",
-							toggleActions: "play none none none",
-						},
-					},
-				);
-			}
+		async function initGSAP() {
+			const gsap = (await import("gsap")).default;
+			const { ScrollTrigger } = await import("gsap/ScrollTrigger");
+			gsap.registerPlugin(ScrollTrigger);
 
-			// Gold rules: scaleX draw
-			const rules = [topRuleRef.current, bottomRuleRef.current].filter(Boolean);
-			for (const rule of rules) {
-				gsap.fromTo(
-					rule,
-					{ scaleX: 0 },
-					{
-						scaleX: 1,
-						duration: 0.8,
-						ease: "power2.out",
-						scrollTrigger: {
-							trigger: rule,
-							start: "top 90%",
-							toggleActions: "play none none none",
-						},
-					},
-				);
-			}
-		}, sectionRef);
+			if (!sectionRef.current) return;
 
-		return () => ctx.revert();
+			ctx = gsap.context(() => {
+				if (xiRef.current) {
+					gsap.fromTo(
+						xiRef.current,
+						{ scale: 0.85, rotation: -5, opacity: 0 },
+						{
+							scale: 1,
+							rotation: 0,
+							opacity: 1,
+							duration: 1.5,
+							ease: "power2.out",
+							scrollTrigger: {
+								trigger: sectionRef.current,
+								start: "top 70%",
+								toggleActions: "play none none none",
+							},
+						},
+					);
+				}
+
+				if (headlineRef.current) {
+					gsap.fromTo(
+						headlineRef.current,
+						{ scale: 0.9, y: 30, opacity: 0 },
+						{
+							scale: 1,
+							y: 0,
+							opacity: 1,
+							duration: 1.0,
+							ease: "power3.out",
+							scrollTrigger: {
+								trigger: sectionRef.current,
+								start: "top 60%",
+								toggleActions: "play none none none",
+							},
+						},
+					);
+				}
+
+				const rules = [topRuleRef.current, bottomRuleRef.current].filter(
+					Boolean,
+				);
+				for (const rule of rules) {
+					gsap.fromTo(
+						rule,
+						{ scaleX: 0 },
+						{
+							scaleX: 1,
+							duration: 0.8,
+							ease: "power2.out",
+							scrollTrigger: {
+								trigger: rule,
+								start: "top 90%",
+								toggleActions: "play none none none",
+							},
+						},
+					);
+				}
+			}, sectionRef);
+		}
+
+		initGSAP();
+		return () => ctx?.revert();
 	}, [reducedMotion]);
 
 	return (
 		<section
 			ref={sectionRef}
 			className="relative overflow-hidden"
-			style={{ background: "var(--dm-crimson)" }}
+			style={{ background: "var(--dm-terracotta-deep)" }}
 		>
 			{/* Mesh gradient overlay */}
 			<div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-				<MeshGradientBackground variant="intense" className="h-full" reducedMotion={reducedMotion}>
+				<MeshGradientBackground
+					variant="intense"
+					className="h-full"
+					reducedMotion={reducedMotion}
+				>
 					<div />
 				</MeshGradientBackground>
 			</div>
+
+			{/* Rising lanterns */}
+			<RisingLanterns reducedMotion={reducedMotion} />
 
 			{/* Gold rule top */}
 			<div ref={topRuleRef} className="origin-center">
 				<GoldRule className="absolute top-0 left-0 right-0" />
 			</div>
+
+			{/* Gold Double Happiness watermark */}
+			<span
+				className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 select-none"
+				style={{
+					fontFamily: '"Noto Serif SC", serif',
+					fontSize: "30vh",
+					color: "var(--dm-gold-electric)",
+					opacity: 0.04,
+					lineHeight: 1,
+				}}
+				aria-hidden="true"
+			>
+				囍
+			</span>
 
 			{/* Giant neon-glow xi behind content */}
 			<div
@@ -115,12 +203,19 @@ export function FinalCTA({ reducedMotion }: { reducedMotion: boolean }) {
 				/>
 			</div>
 
+			{/* Confetti container (populated via DOM manipulation) */}
+			<div
+				ref={confettiContainerRef}
+				className="pointer-events-none fixed inset-0 z-50"
+				aria-hidden="true"
+			/>
+
 			{/* Content */}
 			<div className="relative z-10 mx-auto max-w-4xl px-6 py-[clamp(6rem,14vw,12rem)] text-center">
 				{/* Calligraphy reveal */}
 				<div className="mb-6">
 					<CalligraphyReveal
-						color="var(--dm-gold-electric, #FFD700)"
+						color="var(--dm-gold-electric, #D4B87A)"
 						reducedMotion={reducedMotion}
 					/>
 				</div>
@@ -164,7 +259,9 @@ export function FinalCTA({ reducedMotion }: { reducedMotion: boolean }) {
 				</p>
 
 				{/* CTA */}
-				<div className="mt-8">
+				{/* biome-ignore lint/a11y/useKeyWithClickEvents: confetti is decorative only */}
+				{/* biome-ignore lint/a11y/noStaticElementInteractions: confetti is decorative only */}
+				<div className="mt-8" onClick={handleCtaClick}>
 					<MovingBorderButton href="/auth/signup" variant="gold">
 						Create Your Invitation
 						<span aria-hidden="true" className="ml-2">

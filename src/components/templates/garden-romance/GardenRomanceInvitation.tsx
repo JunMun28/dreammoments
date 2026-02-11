@@ -8,6 +8,7 @@ import {
 } from "motion/react";
 import { useId, useMemo, useState } from "react";
 import { AddToCalendarButton } from "../../ui/AddToCalendarButton";
+import { LoadingSpinner } from "../../ui/LoadingSpinner";
 import AngpowQRCode from "../AngpowQRCode";
 import { CountdownWidget } from "../CountdownWidget";
 import { makeEditableProps, parseAttendance } from "../helpers";
@@ -142,14 +143,16 @@ function AnimatedText({
 			viewport={{ once: true }}
 			variants={{
 				hidden: {},
-				visible: { transition: { staggerChildren: 0.045 } },
+				visible: { transition: { staggerChildren: 0.025 } },
 			}}
 		>
 			{indexedChars.map(({ char, key }) => (
 				<motion.span
 					key={key}
 					className="inline-block"
-					style={char === " " ? { width: "0.25em" } : undefined}
+					style={
+						char === " " ? { width: "0.25em" } : { willChange: "transform" }
+					}
 					variants={{
 						hidden: { opacity: 0, y: 30 },
 						visible: {
@@ -169,13 +172,25 @@ function AnimatedText({
 /* ─── Scroll Progress Line for Story ─── */
 
 function StoryProgressLine() {
+	const prefersReduced = useReducedMotion();
 	const { scrollYProgress } = useScroll();
 	const scaleY = useTransform(scrollYProgress, [0, 1], [0, 1]);
+	if (prefersReduced) {
+		return (
+			<div
+				className="pointer-events-none absolute left-1 top-0 h-full w-px sm:left-3"
+				style={{
+					background: `linear-gradient(180deg, ${COLORS.gold}, ${COLORS.crimson})`,
+				}}
+			/>
+		);
+	}
 	return (
 		<motion.div
 			className="pointer-events-none absolute left-1 top-0 h-full w-px origin-top sm:left-3"
 			style={{
 				scaleY,
+				willChange: "transform",
 				background: `linear-gradient(180deg, ${COLORS.gold}, ${COLORS.crimson})`,
 			}}
 		/>
@@ -220,6 +235,9 @@ export default function GardenRomanceInvitation({
 	);
 
 	const editableProps = makeEditableProps(mode, onInlineEdit);
+	const [errors, setErrors] = useState<Record<string, string>>({});
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [submitError, setSubmitError] = useState("");
 	const [rsvpData, setRsvpData] = useState<Omit<
 		RsvpConfirmationProps,
 		"onEdit" | "className"
@@ -449,7 +467,10 @@ export default function GardenRomanceInvitation({
 				className="relative px-6 py-16 sm:px-10 lg:px-16"
 				style={{ background: COLORS.cream }}
 			>
-				<CountdownWidget targetDate={data.hero.date} />
+				<CountdownWidget
+					targetDate={data.hero.date}
+					eventTime={data.schedule.events[0]?.time}
+				/>
 			</SectionShell>
 
 			{/* ════════════════════════════════════════════
@@ -681,9 +702,11 @@ export default function GardenRomanceInvitation({
 													}
 													alt={milestone.title}
 													loading="lazy"
+													decoding="async"
 													width={600}
 													height={400}
 													className="h-56 w-full object-cover sm:h-64"
+													style={{ backgroundColor: "#f5ede4" }}
 												/>
 											</div>
 										</div>
@@ -741,9 +764,11 @@ export default function GardenRomanceInvitation({
 									src={photo.url || SAMPLE_PHOTOS.hero}
 									alt={photo.caption || "Couple memory"}
 									loading="lazy"
+									decoding="async"
 									width={900}
 									height={900}
 									className="h-full w-full object-cover"
+									style={{ backgroundColor: "#f5ede4" }}
 									whileHover={skip ? undefined : { scale: 1.03 }}
 									transition={{ type: "spring", stiffness: 300, damping: 20 }}
 								/>
@@ -961,9 +986,11 @@ export default function GardenRomanceInvitation({
 							src={SAMPLE_PHOTOS.venue}
 							alt={`${data.venue.name} wedding venue`}
 							loading="lazy"
+							decoding="async"
 							width={1200}
 							height={760}
 							className="h-full w-full object-cover"
+							style={{ backgroundColor: "#f5ede4" }}
 						/>
 						<div className="absolute inset-0 bg-gradient-to-l from-transparent to-[rgba(255,245,243,0.3)]" />
 					</motion.figure>
@@ -1076,10 +1103,22 @@ export default function GardenRomanceInvitation({
 							}}
 							onSubmit={async (event) => {
 								event.preventDefault();
-								if (!onRsvpSubmit) return;
+								if (!onRsvpSubmit || isSubmitting) return;
 								const formData = new FormData(event.currentTarget);
 								const name = String(formData.get("name") ?? "").trim();
-								if (!name) return;
+								const email = String(formData.get("email") ?? "").trim();
+								const newErrors: Record<string, string> = {};
+								if (!name) {
+									newErrors.name = "Please enter your name";
+								}
+								if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+									newErrors.email = "Please enter a valid email address";
+								}
+								if (Object.keys(newErrors).length > 0) {
+									setErrors(newErrors);
+									return;
+								}
+								setErrors({});
 								const rawGuestCount = Number(formData.get("guestCount") ?? 1);
 								const guestCount = Number.isFinite(rawGuestCount)
 									? Math.min(Math.max(rawGuestCount, 1), maxGuests)
@@ -1088,6 +1127,7 @@ export default function GardenRomanceInvitation({
 								const dietaryRequirements = String(
 									formData.get("dietary") ?? "",
 								);
+								setIsSubmitting(true);
 								try {
 									await onRsvpSubmit({
 										name,
@@ -1095,8 +1135,9 @@ export default function GardenRomanceInvitation({
 										guestCount,
 										dietaryRequirements,
 										message: String(formData.get("message") ?? ""),
-										email: String(formData.get("email") ?? ""),
+										email,
 									});
+									setSubmitError("");
 									setRsvpData({
 										name,
 										attendance,
@@ -1104,13 +1145,15 @@ export default function GardenRomanceInvitation({
 										dietaryRequirements,
 									});
 								} catch {
-									// Submission failed; form remains open for retry
+									setSubmitError("Something went wrong. Please try again.");
+								} finally {
+									setIsSubmitting(false);
 								}
 							}}
 						>
 							<div className="grid gap-4 sm:grid-cols-2">
 								<label
-									className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em] sm:col-span-2"
+									className="flex flex-col gap-2 text-[0.7rem] sm:text-[0.6rem] uppercase tracking-[0.28em] sm:col-span-2"
 									style={{ color: COLORS.goldDark }}
 								>
 									Name
@@ -1120,15 +1163,74 @@ export default function GardenRomanceInvitation({
 										autoComplete="name"
 										required
 										aria-required="true"
+										aria-invalid={!!errors.name}
 										className="rounded-xl border bg-white px-4 py-3 text-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C41E3A]/30"
 										style={{
 											borderColor: "rgba(212,175,55,0.3)",
 											color: COLORS.textPrimary,
 										}}
+										onBlur={(e) => {
+											if (!e.target.value.trim()) {
+												setErrors((prev) => ({
+													...prev,
+													name: "Please enter your name",
+												}));
+											}
+										}}
+										onChange={() =>
+											setErrors((prev) => {
+												const { name: _, ...rest } = prev;
+												return rest;
+											})
+										}
 									/>
+									{errors.name && (
+										<p className="text-red-500 text-xs mt-1" role="alert">
+											{errors.name}
+										</p>
+									)}
 								</label>
 								<label
-									className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
+									className="flex flex-col gap-2 text-[0.7rem] sm:text-[0.6rem] uppercase tracking-[0.28em] sm:col-span-2"
+									style={{ color: COLORS.goldDark }}
+								>
+									Email
+									<input
+										name="email"
+										type="email"
+										placeholder="rachel@example.com"
+										autoComplete="email"
+										spellCheck={false}
+										aria-invalid={!!errors.email}
+										className="rounded-xl border bg-white px-4 py-3 text-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C41E3A]/30"
+										style={{
+											borderColor: "rgba(212,175,55,0.3)",
+											color: COLORS.textPrimary,
+										}}
+										onBlur={(e) => {
+											const v = e.target.value.trim();
+											if (v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
+												setErrors((prev) => ({
+													...prev,
+													email: "Please enter a valid email address",
+												}));
+											}
+										}}
+										onChange={() =>
+											setErrors((prev) => {
+												const { email: _, ...rest } = prev;
+												return rest;
+											})
+										}
+									/>
+									{errors.email && (
+										<p className="text-red-500 text-xs mt-1" role="alert">
+											{errors.email}
+										</p>
+									)}
+								</label>
+								<label
+									className="flex flex-col gap-2 text-[0.7rem] sm:text-[0.6rem] uppercase tracking-[0.28em]"
 									style={{ color: COLORS.goldDark }}
 								>
 									Attendance
@@ -1147,10 +1249,16 @@ export default function GardenRomanceInvitation({
 									</select>
 								</label>
 								<label
-									className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
+									className="flex flex-col gap-2 text-[0.7rem] sm:text-[0.6rem] uppercase tracking-[0.28em]"
 									style={{ color: COLORS.goldDark }}
 								>
-									Guest Count
+									Guest Count{" "}
+									<span
+										className="normal-case tracking-normal"
+										style={{ color: COLORS.textMuted }}
+									>
+										(Max: {maxGuests} {maxGuests > 1 ? "guests" : "guest"})
+									</span>
 									<input
 										name="guestCount"
 										type="number"
@@ -1166,31 +1274,13 @@ export default function GardenRomanceInvitation({
 									/>
 								</label>
 								<label
-									className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em] sm:col-span-2"
-									style={{ color: COLORS.goldDark }}
-								>
-									Email
-									<input
-										name="email"
-										type="email"
-										placeholder="rachel@example.com"
-										autoComplete="email"
-										spellCheck={false}
-										className="rounded-xl border bg-white px-4 py-3 text-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C41E3A]/30"
-										style={{
-											borderColor: "rgba(212,175,55,0.3)",
-											color: COLORS.textPrimary,
-										}}
-									/>
-								</label>
-								<label
-									className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em] sm:col-span-2"
+									className="flex flex-col gap-2 text-[0.7rem] sm:text-[0.6rem] uppercase tracking-[0.28em] sm:col-span-2"
 									style={{ color: COLORS.goldDark }}
 								>
 									Dietary Requirements
 									<input
 										name="dietary"
-										placeholder="Vegetarian, halal, no pork..."
+										placeholder="e.g., Vegetarian, no pork, gluten-free"
 										autoComplete="off"
 										className="rounded-xl border bg-white px-4 py-3 text-sm placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C41E3A]/30"
 										style={{
@@ -1200,7 +1290,7 @@ export default function GardenRomanceInvitation({
 									/>
 								</label>
 								<label
-									className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em] sm:col-span-2"
+									className="flex flex-col gap-2 text-[0.7rem] sm:text-[0.6rem] uppercase tracking-[0.28em] sm:col-span-2"
 									style={{ color: COLORS.goldDark }}
 								>
 									Message
@@ -1254,13 +1344,24 @@ export default function GardenRomanceInvitation({
 							) : null}
 							<motion.button
 								type="submit"
-								className="mt-6 w-full rounded-full px-5 py-3.5 text-xs font-semibold uppercase tracking-[0.3em] text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C41E3A]/50"
+								disabled={isSubmitting}
+								className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-3.5 text-xs font-semibold uppercase tracking-[0.3em] text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C41E3A]/50 disabled:opacity-70 disabled:cursor-not-allowed"
 								style={{ background: COLORS.crimson }}
 								whileHover={skip ? undefined : { scale: 1.02 }}
 								whileTap={skip ? undefined : { scale: 0.98 }}
 							>
-								Send RSVP
+								{isSubmitting && <LoadingSpinner size="sm" />}
+								{isSubmitting ? "Sending..." : "Send RSVP"}
 							</motion.button>
+							{submitError && (
+								<p
+									className="mt-3 text-center text-sm"
+									style={{ color: COLORS.crimson }}
+									role="alert"
+								>
+									{submitError}
+								</p>
+							)}
 						</motion.form>
 					)}
 				</div>

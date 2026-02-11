@@ -273,11 +273,12 @@ describe("useEditorState", () => {
 			useEditorState({ initialContent, initialVisibility, initialSection }),
 		);
 
+		// Use different field paths so each push is immediate (not debounced)
 		act(() => {
 			result.current.handleFieldChange("hero.tagline", "V1");
 		});
 		act(() => {
-			result.current.handleFieldChange("hero.tagline", "V2");
+			result.current.handleFieldChange("hero.date", "2025-12-01");
 		});
 		act(() => {
 			result.current.handleFieldChange("hero.tagline", "V3");
@@ -286,11 +287,12 @@ describe("useEditorState", () => {
 		expect(result.current.draft.hero.tagline).toBe("V3");
 		expect(result.current.version).toBe(3);
 
-		// Undo twice to get back to V1
+		// Undo back through each distinct field change
 		act(() => {
 			result.current.handleUndo();
 		});
-		expect(result.current.draft.hero.tagline).toBe("V2");
+		expect(result.current.draft.hero.date).toBe("2025-12-01");
+		expect(result.current.draft.hero.tagline).toBe("V1");
 
 		act(() => {
 			result.current.handleUndo();

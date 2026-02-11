@@ -1,124 +1,40 @@
 import { Link } from "@tanstack/react-router";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useEffect, useRef } from "react";
 import { GradientText } from "./GradientText";
+import { use3DTilt } from "./hooks/use3DTilt";
 import { MeshGradientBackground } from "./MeshGradientBackground";
 import { MovingBorderButton } from "./MovingBorderButton";
-import { NeonXi } from "./NeonXi";
-import { SparkleEffect } from "./SparkleEffect";
-import { SpotlightCursor } from "./SpotlightCursor";
-import { use3DTilt } from "./hooks/use3DTilt";
+import { FloatingHearts } from "./motifs/FloatingHearts";
 import { LatticeOverlay } from "./motifs/LatticeOverlay";
+import { NeonXi } from "./NeonXi";
+import { SpotlightCursor } from "./SpotlightCursor";
+import { TextScramble, type TextScrambleHandle } from "./TextScramble";
 
-gsap.registerPlugin(ScrollTrigger);
+/**
+ * CSS keyframe animation classes for the hero entrance.
+ * Using CSS animations instead of GSAP for the hero entrance
+ * ensures animations work reliably regardless of SSR hydration timing.
+ */
+const HERO_ANIM_BASE =
+	"opacity-0 [.hero-ready_&]:animate-[heroFadeUp_0.7s_cubic-bezier(0.16,1,0.3,1)_forwards]";
 
 export function Hero({ reducedMotion }: { reducedMotion: boolean }) {
 	const tiltRef = use3DTilt({ maxRotation: 6, reducedMotion });
 	const sectionRef = useRef<HTMLElement>(null);
-	const kickerCnRef = useRef<HTMLSpanElement>(null);
-	const kickerEnRef = useRef<HTMLDivElement>(null);
-	const headlineRef = useRef<HTMLHeadingElement>(null);
-	const accentRef = useRef<HTMLSpanElement>(null);
-	const bodyRef = useRef<HTMLParagraphElement>(null);
-	const ctaRef = useRef<HTMLDivElement>(null);
-	const trustRef = useRef<HTMLDivElement>(null);
-	const cardRef = useRef<HTMLDivElement>(null);
+	const scrambleRef = useRef<TextScrambleHandle>(null);
 
+	// Add "hero-ready" class after mount to trigger CSS animations
 	useEffect(() => {
 		if (reducedMotion || !sectionRef.current) return;
-
-		const ctx = gsap.context(() => {
-			const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-
-			// Set initial states
-			gsap.set(kickerCnRef.current, {
-				clipPath: "inset(0 100% 0 0)",
-			});
-			gsap.set(kickerEnRef.current, { opacity: 0, x: -12 });
-			gsap.set(headlineRef.current, { opacity: 0, y: 40 });
-			gsap.set(accentRef.current, { opacity: 0, scale: 0.92 });
-			gsap.set([bodyRef.current, ctaRef.current, trustRef.current], {
-				opacity: 0,
-				y: 20,
-			});
-			gsap.set(cardRef.current, { opacity: 0, y: 60, rotateX: 12 });
-
-			// t=0.0: Chinese kicker clip-path reveal
-			tl.to(
-				kickerCnRef.current,
-				{
-					clipPath: "inset(0 0% 0 0)",
-					duration: 0.6,
-					ease: "power3.out",
-				},
-				0,
-			);
-
-			// t=0.4: English kicker fade
-			tl.to(
-				kickerEnRef.current,
-				{
-					opacity: 1,
-					x: 0,
-					duration: 0.4,
-					ease: "power3.out",
-				},
-				0.4,
-			);
-
-			// t=0.5: Headline reveal
-			tl.to(
-				headlineRef.current,
-				{
-					opacity: 1,
-					y: 0,
-					duration: 0.7,
-					ease: "power3.out",
-				},
-				0.5,
-			);
-
-			// t=0.9: Accent word scale
-			tl.to(
-				accentRef.current,
-				{
-					opacity: 1,
-					scale: 1,
-					duration: 0.8,
-					ease: "back.out(1.2)",
-				},
-				0.9,
-			);
-
-			// t=1.1: Body + CTAs fade
-			tl.to(
-				[bodyRef.current, ctaRef.current, trustRef.current],
-				{
-					opacity: 1,
-					y: 0,
-					duration: 0.5,
-					stagger: 0.1,
-					ease: "power2.out",
-				},
-				1.1,
-			);
-
-			// t=1.2: Card rise
-			tl.to(
-				cardRef.current,
-				{
-					opacity: 1,
-					y: 0,
-					rotateX: 0,
-					duration: 1.0,
-					ease: "power4.out",
-				},
-				1.2,
-			);
-		}, sectionRef);
-
-		return () => ctx.revert();
+		// Small delay to let hydration settle
+		const timer = setTimeout(() => {
+			sectionRef.current?.classList.add("hero-ready");
+			// Trigger text scramble after kicker reveals
+			setTimeout(() => {
+				scrambleRef.current?.trigger();
+			}, 600);
+		}, 50);
+		return () => clearTimeout(timer);
 	}, [reducedMotion]);
 
 	return (
@@ -129,27 +45,30 @@ export function Hero({ reducedMotion }: { reducedMotion: boolean }) {
 		>
 			{/* Mesh gradient background */}
 			<div className="absolute inset-0">
-				<MeshGradientBackground variant="warm" className="h-full" reducedMotion={reducedMotion}>
+				<MeshGradientBackground
+					variant="warm"
+					className="h-full"
+					reducedMotion={reducedMotion}
+				>
 					<div />
 				</MeshGradientBackground>
 			</div>
 
+			{/* Floating hearts */}
+			<FloatingHearts reducedMotion={reducedMotion} />
+
 			{/* Spotlight cursor */}
-			<SpotlightCursor />
+			<SpotlightCursor containerRef={sectionRef} />
 
 			{/* Lattice overlay */}
-			<LatticeOverlay color="var(--dm-gold)" opacity={0.1} />
-
-			{/* Sparkle effect near headline */}
-			<SparkleEffect count={8} className="z-[2]" />
+			<LatticeOverlay color="var(--dm-gold)" opacity={0.06} />
 
 			{/* Content */}
 			<div className="relative z-10 mx-auto max-w-5xl px-6 pt-28 pb-16 lg:pt-32">
 				<div className="text-center">
 					{/* Chinese kicker */}
 					<span
-						ref={kickerCnRef}
-						className="inline-block"
+						className={`inline-block ${reducedMotion ? "" : `${HERO_ANIM_BASE} [animation-delay:0s]`}`}
 						style={{
 							fontFamily: '"Noto Serif SC", serif',
 							fontWeight: 700,
@@ -159,13 +78,17 @@ export function Hero({ reducedMotion }: { reducedMotion: boolean }) {
 							marginBottom: "0.75rem",
 						}}
 					>
-						喜事来了
+						<TextScramble
+							ref={scrambleRef}
+							text="喜事来了"
+							duration={0.6}
+							reducedMotion={reducedMotion}
+						/>
 					</span>
 
 					{/* English kicker pill */}
 					<div
-						ref={kickerEnRef}
-						className="mb-6 flex items-center justify-center gap-2"
+						className={`mb-6 flex items-center justify-center gap-2 ${reducedMotion ? "" : `${HERO_ANIM_BASE} [animation-delay:0.4s]`}`}
 					>
 						<span
 							role="img"
@@ -194,8 +117,7 @@ export function Hero({ reducedMotion }: { reducedMotion: boolean }) {
 
 					{/* Headline */}
 					<h1
-						ref={headlineRef}
-						className="font-display font-extrabold"
+						className={`font-display font-extrabold ${reducedMotion ? "" : `${HERO_ANIM_BASE} [animation-delay:0.5s]`}`}
 						style={{
 							fontSize: "var(--text-hero)",
 							lineHeight: 0.95,
@@ -205,8 +127,7 @@ export function Hero({ reducedMotion }: { reducedMotion: boolean }) {
 					>
 						Beautiful invitations your guests will{" "}
 						<span
-							ref={accentRef}
-							className="inline-block italic"
+							className={`inline-block italic ${reducedMotion ? "" : `${HERO_ANIM_BASE} [animation-delay:0.9s]`}`}
 							style={{ fontSize: "var(--text-hero-accent)" }}
 						>
 							<GradientText gradient="linear-gradient(135deg, var(--dm-crimson-bold), var(--dm-gold-bold))">
@@ -217,8 +138,7 @@ export function Hero({ reducedMotion }: { reducedMotion: boolean }) {
 
 					{/* Subtitle */}
 					<p
-						ref={bodyRef}
-						className="mx-auto mt-6"
+						className={`mx-auto mt-6 ${reducedMotion ? "" : `${HERO_ANIM_BASE} [animation-delay:1.1s]`}`}
 						style={{
 							fontFamily: '"Inter", system-ui, sans-serif',
 							fontWeight: 400,
@@ -234,8 +154,7 @@ export function Hero({ reducedMotion }: { reducedMotion: boolean }) {
 
 					{/* CTA group */}
 					<div
-						ref={ctaRef}
-						className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row"
+						className={`mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row ${reducedMotion ? "" : `${HERO_ANIM_BASE} [animation-delay:1.2s]`}`}
 					>
 						<MovingBorderButton href="/auth/signup" variant="crimson">
 							Create Your Invitation
@@ -259,8 +178,7 @@ export function Hero({ reducedMotion }: { reducedMotion: boolean }) {
 
 					{/* Trust line */}
 					<div
-						ref={trustRef}
-						className="mt-5 flex flex-wrap items-center justify-center gap-x-2 gap-y-1"
+						className={`mt-5 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 ${reducedMotion ? "" : `${HERO_ANIM_BASE} [animation-delay:1.3s]`}`}
 						style={{
 							fontSize: "var(--text-sm)",
 							color: "var(--dm-muted)",
@@ -274,9 +192,9 @@ export function Hero({ reducedMotion }: { reducedMotion: boolean }) {
 					</div>
 				</div>
 
-				{/* Template card */}
-				<div className="relative mx-auto mt-12 max-w-sm lg:mt-16">
-					{/* Neon xi behind card */}
+				{/* Photo wall */}
+				<div className="relative mx-auto mt-12 max-w-md px-4 sm:max-w-lg lg:mt-16 lg:max-w-xl lg:px-0">
+					{/* Neon xi behind */}
 					<div className="absolute inset-0 flex items-center justify-center pointer-events-none">
 						<NeonXi
 							size="8rem"
@@ -292,42 +210,143 @@ export function Hero({ reducedMotion }: { reducedMotion: boolean }) {
 						className="absolute inset-0 -z-1 mx-auto"
 						style={{
 							background:
-								"radial-gradient(ellipse, rgba(212,32,64,0.12) 0%, transparent 70%)",
+								"radial-gradient(ellipse, rgba(200,64,64,0.12) 0%, transparent 70%)",
 							filter: "blur(40px)",
 						}}
 						aria-hidden="true"
 					/>
 
 					<div
-						ref={(node) => {
-							// Merge tiltRef and cardRef
-							if (node) {
-								(
-									tiltRef as React.MutableRefObject<HTMLDivElement | null>
-								).current = node;
-								(
-									cardRef as React.MutableRefObject<HTMLDivElement | null>
-								).current = node;
-							}
-						}}
-						className="relative"
+						ref={tiltRef as React.MutableRefObject<HTMLDivElement | null>}
+						className={`relative ${reducedMotion ? "" : `${HERO_ANIM_BASE} [animation-delay:1.4s]`}`}
 						style={{ transformStyle: "preserve-3d" }}
 					>
-						<div
-							className="overflow-hidden bg-[var(--dm-surface)]"
-							style={{
-								borderRadius: "1.5rem",
-								boxShadow: "0 20px 60px -12px rgba(0,0,0,0.12)",
-							}}
-						>
-							<div className="aspect-[3/4] w-full">
-								<img
-									src="/photos/golden-hour.jpg"
-									alt="Garden Romance template preview showing a Chinese wedding invitation"
-									className="h-full w-full object-cover"
-									loading="eager"
-									fetchPriority="high"
-								/>
+						<div className="relative mx-auto aspect-[4/5] w-full max-w-[420px]">
+							{/* Photo wall grid — gallery layout with center hero */}
+							<div className="absolute inset-0 grid grid-cols-4 grid-rows-4">
+								{/* Top-left: rings */}
+								<div
+									className="col-start-1 row-start-1 col-span-2 row-span-2 flex items-start justify-end pr-2 pt-2 sm:pr-3 sm:pt-3"
+									style={{
+										transform: reducedMotion ? undefined : "rotate(-4deg)",
+									}}
+								>
+									<div
+										className="overflow-hidden rounded-xl bg-[var(--dm-surface)] shadow-[0_12px_32px_-8px_rgba(0,0,0,0.18)] ring-1 ring-black/[0.06] sm:rounded-2xl"
+										style={{ aspectRatio: "3/4", minWidth: 0 }}
+									>
+										<img
+											src="/photos/rings.jpg"
+											alt="Wedding rings"
+											className="h-full w-full object-cover"
+											width={200}
+											height={267}
+											loading="eager"
+											fetchPriority="high"
+											decoding="async"
+										/>
+									</div>
+								</div>
+
+								{/* Top-right: romantic portrait */}
+								<div
+									className="col-start-3 row-start-1 col-span-2 row-span-2 flex items-start justify-start pl-2 pt-2 sm:pl-3 sm:pt-3"
+									style={{
+										transform: reducedMotion ? undefined : "rotate(3deg)",
+									}}
+								>
+									<div
+										className="overflow-hidden rounded-xl bg-[var(--dm-surface)] shadow-[0_12px_32px_-8px_rgba(0,0,0,0.18)] ring-1 ring-black/[0.06] sm:rounded-2xl"
+										style={{
+											aspectRatio: "3/4",
+											minWidth: 0,
+											backgroundColor: "#f5ede4",
+										}}
+									>
+										<img
+											src="/photos/romantic-portrait.jpg"
+											alt="Romantic couple portrait"
+											className="h-full w-full object-cover"
+											width={200}
+											height={267}
+											loading="lazy"
+											decoding="async"
+										/>
+									</div>
+								</div>
+
+								{/* Center: golden hour — hero image (stacked on top) */}
+								<div className="col-start-2 row-start-2 col-span-2 row-span-2 z-10 flex items-center justify-center">
+									<div
+										className="overflow-hidden rounded-xl bg-[var(--dm-surface)] shadow-[0_24px_64px_-12px_rgba(0,0,0,0.25)] ring-1 ring-black/[0.08] sm:rounded-2xl"
+										style={{ aspectRatio: "3/4", minWidth: 0 }}
+									>
+										<img
+											src="/photos/golden-hour.jpg"
+											alt="Garden Romance template preview showing a Chinese wedding invitation"
+											className="h-full w-full object-cover"
+											width={280}
+											height={373}
+											loading="eager"
+											fetchPriority="high"
+											decoding="async"
+										/>
+									</div>
+								</div>
+
+								{/* Bottom-left: couple walking */}
+								<div
+									className="col-start-1 row-start-3 col-span-2 row-span-2 flex items-end justify-end pr-2 pb-2 sm:pr-3 sm:pb-3"
+									style={{
+										transform: reducedMotion ? undefined : "rotate(3deg)",
+									}}
+								>
+									<div
+										className="overflow-hidden rounded-xl bg-[var(--dm-surface)] shadow-[0_12px_32px_-8px_rgba(0,0,0,0.18)] ring-1 ring-black/[0.06] sm:rounded-2xl"
+										style={{
+											aspectRatio: "3/4",
+											minWidth: 0,
+											backgroundColor: "#f5ede4",
+										}}
+									>
+										<img
+											src="/photos/couple-walking.jpg"
+											alt="Couple walking together"
+											className="h-full w-full object-cover"
+											width={200}
+											height={267}
+											loading="lazy"
+											decoding="async"
+										/>
+									</div>
+								</div>
+
+								{/* Bottom-right: floral detail */}
+								<div
+									className="col-start-3 row-start-3 col-span-2 row-span-2 flex items-end justify-start pl-2 pb-2 sm:pl-3 sm:pb-3"
+									style={{
+										transform: reducedMotion ? undefined : "rotate(-3deg)",
+									}}
+								>
+									<div
+										className="overflow-hidden rounded-xl bg-[var(--dm-surface)] shadow-[0_12px_32px_-8px_rgba(0,0,0,0.18)] ring-1 ring-black/[0.06] sm:rounded-2xl"
+										style={{
+											aspectRatio: "3/4",
+											minWidth: 0,
+											backgroundColor: "#f5ede4",
+										}}
+									>
+										<img
+											src="/photos/floral-detail.jpg"
+											alt="Floral wedding detail"
+											className="h-full w-full object-cover"
+											width={200}
+											height={267}
+											loading="lazy"
+											decoding="async"
+										/>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>

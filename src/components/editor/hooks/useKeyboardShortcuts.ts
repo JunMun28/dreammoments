@@ -30,9 +30,24 @@ export function useKeyboardShortcuts(
 		}
 
 		function handler(e: KeyboardEvent) {
-			if (isTextInput(e.target)) return;
-
 			const mod = e.metaKey || e.ctrlKey;
+			const inTextInput = isTextInput(e.target);
+
+			// Cmd/Ctrl+S - Force save (works even in text inputs)
+			if (mod && !e.shiftKey && e.key === "s") {
+				e.preventDefault();
+				actions.onSave();
+				return;
+			}
+
+			// Cmd/Ctrl+Shift+P - Toggle preview
+			if (mod && e.shiftKey && e.key === "p") {
+				e.preventDefault();
+				actions.onTogglePreview();
+				return;
+			}
+
+			if (inTextInput) return;
 
 			// Cmd/Ctrl+Z - Undo
 			if (mod && !e.shiftKey && e.key === "z") {
@@ -48,28 +63,16 @@ export function useKeyboardShortcuts(
 				return;
 			}
 
-			// Cmd/Ctrl+S - Force save
-			if (mod && e.key === "s") {
+			// Cmd/Ctrl+[ - Collapse panel
+			if (e.key === "[" && mod) {
 				e.preventDefault();
-				actions.onSave();
-				return;
-			}
-
-			// Cmd/Ctrl+P - Toggle preview
-			if (mod && e.key === "p") {
-				e.preventDefault();
-				actions.onTogglePreview();
-				return;
-			}
-
-			// [ - Collapse panel
-			if (e.key === "[" && !mod) {
 				actions.onCollapsePanel();
 				return;
 			}
 
-			// ] - Expand panel
-			if (e.key === "]" && !mod) {
+			// Cmd/Ctrl+] - Expand panel
+			if (e.key === "]" && mod) {
+				e.preventDefault();
 				actions.onExpandPanel();
 				return;
 			}

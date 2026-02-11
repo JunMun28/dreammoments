@@ -3,6 +3,7 @@ import {
 	useCallback,
 	useContext,
 	useEffect,
+	useRef,
 	useState,
 } from "react";
 import {
@@ -16,6 +17,9 @@ import { sanitizeRedirect } from "./auth-redirect";
 import { createUser, setCurrentUserId } from "./data";
 import { getStore, updateStore } from "./store";
 import type { User } from "./types";
+
+/** Refresh the access token 10 minutes before the 1-hour expiry */
+const TOKEN_REFRESH_INTERVAL_MS = 50 * 60 * 1000;
 
 // ---------------------------------------------------------------------------
 // Token storage helpers (client-side only)
@@ -59,6 +63,7 @@ function setStoredRefreshToken(token: string | null) {
 const AuthContext = createContext<{
 	user?: User;
 	loading: boolean;
+	sessionExpired: boolean;
 	signInWithGoogle: (redirectTo?: string) => void;
 	signUpWithEmail: (payload: {
 		email: string;
@@ -70,6 +75,7 @@ const AuthContext = createContext<{
 		password: string;
 	}) => Promise<string | undefined>;
 	resetPassword: (payload: { email: string }) => Promise<string | undefined>;
+	refreshUser: () => Promise<void>;
 	signOut: () => void;
 } | null>(null);
 
@@ -84,6 +90,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	const [serverUser, setServerUser] = useState<User | undefined>(undefined);
 	const [loading, setLoading] = useState(true);
 	const [useServerAuth, setUseServerAuth] = useState(false);
+	const [sessionExpired, setSessionExpired] = useState(false);
+	const refreshTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
 	// Legacy localStorage-based user (fallback when server auth is not available)
 	const legacyUserId =
@@ -98,7 +106,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	// The active user is the server-backed user if available, else the legacy one
 	const user = useServerAuth ? serverUser : (serverUser ?? legacyUser);
 
-	// On mount, try to restore session from stored JWT
 	useEffect(() => {
 		let cancelled = false;
 
@@ -119,29 +126,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				if (result.user) {
 					setServerUser(result.user as User);
 					setUseServerAuth(true);
-
-					// If the server gave us refreshed tokens, store them
-					if (result.newToken) {
-						setStoredToken(result.newToken);
-					}
-					if (result.newRefreshToken) {
-						setStoredRefreshToken(result.newRefreshToken);
-					}
-
-					// Also sync to localStorage store so legacy code works
+					if (result.newToken) setStoredToken(result.newToken);
+					if (result.newRefreshToken) setStoredRefreshToken(result.newRefreshToken);
 					syncUserToLocalStore(result.user as User);
 				} else {
-					// Token invalid, clear it
 					setStoredToken(null);
 					setStoredRefreshToken(null);
+					setSessionExpired(true);
 				}
 			} catch {
-				// Server function unavailable, fall back to localStorage
+				// Server unavailable, fall back to localStorage
 			}
 
-			if (!cancelled) {
-				setLoading(false);
-			}
+			if (!cancelled) setLoading(false);
 		}
 
 		restoreSession();
@@ -149,6 +146,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			cancelled = true;
 		};
 	}, []);
+
+	// Proactive token refresh: refresh every 50 minutes to stay ahead of 1hr expiry
+	useEffect(() => {
+		if (!serverUser) {
+			if (refreshTimerRef.current) {
+				clearInterval(refreshTimerRef.current);
+				refreshTimerRef.current = null;
+			}
+			return;
+		}
+
+		refreshTimerRef.current = setInterval(async () => {
+			const token = getStoredToken();
+			if (!token) return;
+			try {
+				const refreshToken = getStoredRefreshToken();
+				const result = await getSessionFn({
+					data: { token, refreshToken: refreshToken ?? undefined },
+				});
+				if (result.user) {
+					setServerUser(result.user as User);
+					if (result.newToken) setStoredToken(result.newToken);
+					if (result.newRefreshToken)
+						setStoredRefreshToken(result.newRefreshToken);
+					syncUserToLocalStore(result.user as User);
+				} else {
+					setStoredToken(null);
+					setStoredRefreshToken(null);
+					setServerUser(undefined);
+					setSessionExpired(true);
+				}
+			} catch {
+				// Silently fail - will retry on next interval
+			}
+		}, TOKEN_REFRESH_INTERVAL_MS);
+
+		return () => {
+			if (refreshTimerRef.current) {
+				clearInterval(refreshTimerRef.current);
+				refreshTimerRef.current = null;
+			}
+		};
+	}, [serverUser]);
 
 	const signInWithGoogle = useCallback((redirectTo?: string) => {
 		if (googleClientId && googleRedirectUri) {
@@ -173,6 +213,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		});
 	}, []);
 
+	function handleAuthSuccess(result: {
+		user: User;
+		token: string;
+		refreshToken: string;
+	}) {
+		setStoredToken(result.token);
+		setStoredRefreshToken(result.refreshToken);
+		setServerUser(result.user);
+		setUseServerAuth(true);
+		setSessionExpired(false);
+		syncUserToLocalStore(result.user);
+	}
+
 	const signUpWithEmail = useCallback(
 		async ({
 			email,
@@ -185,20 +238,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		}): Promise<string | undefined> => {
 			try {
 				const result = await signupFn({ data: { email, password, name } });
-
-				if ("error" in result) {
-					return result.error;
-				}
-
-				// Store the JWT token and refresh token
-				setStoredToken(result.token);
-				setStoredRefreshToken(result.refreshToken);
-				setServerUser(result.user as User);
-				setUseServerAuth(true);
-
-				// Sync to localStorage store for legacy compatibility
-				syncUserToLocalStore(result.user as User);
-
+				if ("error" in result) return result.error;
+				handleAuthSuccess(result as { user: User; token: string; refreshToken: string });
 				return undefined;
 			} catch {
 				return "Something went wrong. Please try again.";
@@ -217,20 +258,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		}): Promise<string | undefined> => {
 			try {
 				const result = await loginFn({ data: { email, password } });
-
-				if ("error" in result) {
-					return result.error;
-				}
-
-				// Store the JWT token and refresh token
-				setStoredToken(result.token);
-				setStoredRefreshToken(result.refreshToken);
-				setServerUser(result.user as User);
-				setUseServerAuth(true);
-
-				// Sync to localStorage store for legacy compatibility
-				syncUserToLocalStore(result.user as User);
-
+				if ("error" in result) return result.error;
+				handleAuthSuccess(result as { user: User; token: string; refreshToken: string });
 				return undefined;
 			} catch {
 				return "Something went wrong. Please try again.";
@@ -243,11 +272,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		async ({ email }: { email: string }): Promise<string | undefined> => {
 			try {
 				const result = await requestPasswordResetFn({ data: { email } });
-
-				if ("error" in result) {
-					return result.error;
-				}
-
+				if ("error" in result) return result.error;
 				return undefined;
 			} catch {
 				return "Something went wrong. Please try again.";
@@ -256,20 +281,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		[],
 	);
 
+	const refreshUser = useCallback(async () => {
+		const token = getStoredToken();
+		if (!token) return;
+		try {
+			const refreshToken = getStoredRefreshToken();
+			const result = await getSessionFn({
+				data: { token, refreshToken: refreshToken ?? undefined },
+			});
+			if (result.user) {
+				setServerUser(result.user as User);
+				setUseServerAuth(true);
+				if (result.newToken) setStoredToken(result.newToken);
+				if (result.newRefreshToken)
+					setStoredRefreshToken(result.newRefreshToken);
+				syncUserToLocalStore(result.user as User);
+			}
+		} catch {
+			// Silently fail - session will remain as-is
+		}
+	}, []);
+
 	const signOut = useCallback(() => {
-		// Clear JWT token and refresh token
+		const token = getStoredToken();
+
 		setStoredToken(null);
 		setStoredRefreshToken(null);
 		setServerUser(undefined);
 		setUseServerAuth(false);
-
-		// Also clear legacy localStorage session
+		setSessionExpired(false);
 		setCurrentUserId(null);
 
-		// Fire-and-forget server logout
-		logoutFn().catch(() => {
-			// Ignore errors on logout
-		});
+		if (token) {
+			logoutFn({ data: { token } }).catch(() => {});
+		}
 	}, []);
 
 	return (
@@ -277,13 +322,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			value={{
 				user,
 				loading,
+				sessionExpired,
 				signInWithGoogle,
 				signUpWithEmail,
 				signInWithEmail,
 				resetPassword,
+				refreshUser,
 				signOut,
 			}}
 		>
+			{sessionExpired && !user && (
+				<div
+					role="alert"
+					className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40"
+				>
+					<div className="mx-4 w-full max-w-sm rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-6 text-center shadow-lg">
+						<p className="text-sm font-medium text-[color:var(--dm-ink)]">
+							Your session has expired. Please log in again.
+						</p>
+						<div className="mt-4 flex gap-3 justify-center">
+							<button
+								type="button"
+								onClick={() => setSessionExpired(false)}
+								className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]"
+							>
+								Dismiss
+							</button>
+							<a
+								href="/auth/login"
+								className="rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)]"
+							>
+								Log In
+							</a>
+						</div>
+					</div>
+				</div>
+			)}
 			{children}
 		</AuthContext.Provider>
 	);

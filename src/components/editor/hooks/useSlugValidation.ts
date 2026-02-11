@@ -22,6 +22,9 @@ const RESERVED_SLUGS = new Set([
 	"terms",
 ]);
 
+export const SLUG_RULES =
+	"Use lowercase letters, numbers, and hyphens. 3\u201360 characters. Must start and end with a letter or number.";
+
 export type SlugAvailability = "idle" | "checking" | "available" | "taken";
 
 export function validateSlug(slug: string): string {
@@ -36,6 +39,41 @@ export function validateSlug(slug: string): string {
 	return "";
 }
 
+/** Suggest alternative slugs when a reserved word is entered */
+export function suggestAlternatives(
+	slug: string,
+	coupleNames?: string,
+): string[] {
+	const suggestions: string[] = [];
+	const year = new Date().getFullYear();
+	if (coupleNames) {
+		const nameSlug = coupleNames
+			.toLowerCase()
+			.replace(/[^a-z0-9]+/g, "-")
+			.replace(/^-|-$/g, "");
+		if (nameSlug.length >= SLUG_MIN) {
+			suggestions.push(`${nameSlug}-wedding`);
+		}
+	}
+	suggestions.push(`${slug}-${year}`);
+	suggestions.push(`${slug}-wedding`);
+	return suggestions;
+}
+
+/** Generate a slug automatically from couple names in the invitation content */
+export function generateSlugFromNames(
+	groomName?: string,
+	brideName?: string,
+): string {
+	const parts = [groomName, brideName].filter(Boolean);
+	if (parts.length === 0) return "";
+	return parts
+		.join("-and-")
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, "-")
+		.replace(/^-|-$/g, "");
+}
+
 interface UseSlugValidationOptions {
 	invitationId: string;
 }
@@ -43,6 +81,7 @@ interface UseSlugValidationOptions {
 export function useSlugValidation({ invitationId }: UseSlugValidationOptions) {
 	const [slugValue, setSlugValueState] = useState("");
 	const [slugError, setSlugError] = useState("");
+	const [slugSuggestions, setSlugSuggestions] = useState<string[]>([]);
 	const [slugAvailability, setSlugAvailability] =
 		useState<SlugAvailability>("idle");
 	const slugCheckTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -55,7 +94,7 @@ export function useSlugValidation({ invitationId }: UseSlugValidationOptions) {
 	}, []);
 
 	const setSlugValue = useCallback(
-		(value: string) => {
+		(value: string, coupleNames?: string) => {
 			const normalized = value.toLowerCase().replace(/\s+/g, "-");
 			setSlugValueState(normalized);
 
@@ -63,6 +102,13 @@ export function useSlugValidation({ invitationId }: UseSlugValidationOptions) {
 
 			const error = validateSlug(normalized);
 			setSlugError(error);
+
+			// Generate suggestions for reserved words
+			if (RESERVED_SLUGS.has(normalized)) {
+				setSlugSuggestions(suggestAlternatives(normalized, coupleNames));
+			} else {
+				setSlugSuggestions([]);
+			}
 
 			if (error || !normalized) {
 				setSlugAvailability("idle");
@@ -87,7 +133,7 @@ export function useSlugValidation({ invitationId }: UseSlugValidationOptions) {
 						if (currentVersion !== slugCheckVersion.current) return;
 						setSlugAvailability("idle");
 					});
-			}, 400);
+			}, 200);
 		},
 		[invitationId],
 	);
@@ -95,16 +141,19 @@ export function useSlugValidation({ invitationId }: UseSlugValidationOptions) {
 	const reset = useCallback((initialSlug: string) => {
 		setSlugValueState(initialSlug);
 		setSlugError("");
+		setSlugSuggestions([]);
 		setSlugAvailability("idle");
 	}, []);
 
 	const slugIsValid =
 		!slugError &&
+		slugValue.trim() !== "" &&
 		(slugAvailability === "available" || slugAvailability === "idle");
 
 	return {
 		slugValue,
 		slugError,
+		slugSuggestions,
 		slugAvailability,
 		slugIsValid,
 		setSlugValue,

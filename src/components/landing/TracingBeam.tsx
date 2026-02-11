@@ -1,9 +1,5 @@
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
-
-gsap.registerPlugin(ScrollTrigger);
 
 interface TracingBeamProps {
 	className?: string;
@@ -16,7 +12,6 @@ export function TracingBeam({
 	reducedMotion = false,
 	triggerRef,
 }: TracingBeamProps) {
-	const svgRef = useRef<SVGSVGElement>(null);
 	const progressRef = useRef<SVGLineElement>(null);
 	const dotRef = useRef<SVGCircleElement>(null);
 	const containerRef = useRef<HTMLDivElement>(null);
@@ -27,41 +22,50 @@ export function TracingBeam({
 		const trigger = triggerRef?.current ?? containerRef.current;
 		if (!trigger || !progressRef.current || !dotRef.current) return;
 
-		const ctx = gsap.context(() => {
-			// Animate the progress line scaleY from 0 to 1
-			gsap.fromTo(
-				progressRef.current,
-				{ attr: { y2: "0%" } },
-				{
-					attr: { y2: "100%" },
-					ease: "none",
-					scrollTrigger: {
-						trigger,
-						start: "top 80%",
-						end: "bottom 50%",
-						scrub: 0.5,
-					},
-				},
-			);
+		let ctx: gsap.Context | undefined;
 
-			// Animate the dot traveling down
-			gsap.fromTo(
-				dotRef.current,
-				{ attr: { cy: "0%" } },
-				{
-					attr: { cy: "100%" },
-					ease: "none",
-					scrollTrigger: {
-						trigger,
-						start: "top 80%",
-						end: "bottom 50%",
-						scrub: 0.5,
-					},
-				},
-			);
-		}, containerRef);
+		async function initGSAP() {
+			const gsap = (await import("gsap")).default;
+			const { ScrollTrigger } = await import("gsap/ScrollTrigger");
+			gsap.registerPlugin(ScrollTrigger);
 
-		return () => ctx.revert();
+			if (!containerRef.current) return;
+
+			ctx = gsap.context(() => {
+				gsap.fromTo(
+					progressRef.current,
+					{ attr: { y2: "0%" } },
+					{
+						attr: { y2: "100%" },
+						ease: "none",
+						scrollTrigger: {
+							trigger,
+							start: "top 80%",
+							end: "bottom 50%",
+							scrub: 0.5,
+						},
+					},
+				);
+
+				gsap.fromTo(
+					dotRef.current,
+					{ attr: { cy: "0%" } },
+					{
+						attr: { cy: "100%" },
+						ease: "none",
+						scrollTrigger: {
+							trigger,
+							start: "top 80%",
+							end: "bottom 50%",
+							scrub: 0.5,
+						},
+					},
+				);
+			}, containerRef);
+		}
+
+		initGSAP();
+		return () => ctx?.revert();
 	}, [reducedMotion, triggerRef]);
 
 	return (
@@ -71,7 +75,6 @@ export function TracingBeam({
 			aria-hidden="true"
 		>
 			<svg
-				ref={svgRef}
 				className="absolute inset-0 h-full w-full overflow-visible"
 				preserveAspectRatio="none"
 				role="presentation"
@@ -105,7 +108,7 @@ export function TracingBeam({
 					r="5"
 					fill="var(--dm-gold-electric)"
 					style={{
-						filter: "drop-shadow(0 0 6px rgba(255,215,0,0.8))",
+						filter: "drop-shadow(0 0 6px rgba(212,184,122,0.8))",
 					}}
 				/>
 			</svg>

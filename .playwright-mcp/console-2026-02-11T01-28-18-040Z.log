@@ -1,0 +1,46 @@
+[     824ms] [WARNING] [tanstack-router] These exports from "/Users/wongjunmun/Developer/tanstack_projects/dreammoments/src/routes/dashboard/$invitationId/index.tsx" will not be code-split and will increase your bundle size:
+- InvitationDashboard
+For the best optimization, these items should either have their export statements removed, or be imported from another location that is not a route file. @ http://localhost:3000/src/routes/dashboard/$invitationId/index.tsx?t=1770771695633:2
+[    1085ms] Error: Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <Suspense fallback={<InviteLoadingState>}>
+      <CatchBoundary getResetKey={function getResetKey} errorComponent={function Lazy} onCatch={function onCatch}>
+        <CatchBoundaryImpl getResetKey={function getResetKey} onCatch={function onCatch}>
+          <SafeFragment fallback={function fallback}>
+            <MatchInnerImpl matchId="/invite/$s...">
+              <Lazy>
+                <InviteScreen>
+                  <EnvelopeAnimation slug="garden-rom..." onComplete={function} coupleNames={"Sarah & ..."} ...>
+                    <div>
+                    <AnimatePresence data-tsd-source="/src/compo...">
+                      <PresenceChild isPresent={true} initial={undefined} custom={undefined} presenceAffectsLayout={true} ...>
+                        <motion.div className="dm-envelop..." initial={{opacity:1}} exit={{opacity:0}} ...>
++                         <div
++                           className="dm-envelope-overlay"
++                           onClick={undefined}
++                           data-tsd-source="/src/components/templates/EnvelopeAnimation.tsx:85:6"
++                           style={{opacity:1}}
++                           ref={function}
++                         >
+
+    at throwOnHydrationMismatch (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=129d1a15:3920:13)
+    at beginWork (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=129d1a15:8694:196)
+    at runWithFiberInDEV (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=129d1a15:997:72)
+    at performUnitOfWork (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=129d1a15:12561:98)
+    at workLoopSync (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=129d1a15:12424:43)
+    at renderRootSync (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=129d1a15:12408:13)
+    at performWorkOnRoot (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=129d1a15:11766:189)
+    at performSyncWorkOnRoot (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=129d1a15:13517:9)
+    at flushSyncWorkAcrossRoots_impl (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=129d1a15:13414:122)
+    at flushPassiveEffects (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=129d1a15:13187:11)

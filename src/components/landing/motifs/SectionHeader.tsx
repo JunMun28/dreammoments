@@ -1,16 +1,12 @@
-import { motion } from "motion/react";
-import { ANIMATION, sectionReveal } from "../animation";
-
 interface SectionHeaderProps {
 	kickerEn: string;
 	kickerCn: string;
 	title: string;
 	subtitle?: string;
 	kickerColor?: string;
-	/** Color for the English kicker. Defaults to --dm-muted on dark theme, rgba white on light */
 	kickerEnColor?: string;
 	light?: boolean;
-	reducedMotion: boolean;
+	reducedMotion?: boolean;
 }
 
 /**
@@ -25,19 +21,15 @@ export function SectionHeader({
 	kickerColor = "var(--dm-gold)",
 	kickerEnColor,
 	light = false,
-	reducedMotion,
 }: SectionHeaderProps) {
 	const resolvedEnColor =
 		kickerEnColor ?? (light ? "rgba(255,255,255,0.7)" : "var(--dm-muted)");
 
 	return (
-		<div className="mx-auto max-w-2xl text-center mb-16">
+		<div data-scroll-reveal className="mx-auto max-w-2xl text-center mb-16">
 			{/* Chinese kicker -- primary, above */}
-			<motion.p
-				initial={reducedMotion ? false : "hidden"}
-				whileInView="visible"
-				viewport={ANIMATION.viewport}
-				variants={sectionReveal}
+			<p
+				className="dm-reveal"
 				style={{
 					fontFamily: '"Noto Serif SC", serif',
 					fontWeight: 700,
@@ -48,14 +40,11 @@ export function SectionHeader({
 				}}
 			>
 				{kickerCn}
-			</motion.p>
+			</p>
 
 			{/* English kicker -- secondary, below */}
-			<motion.p
-				initial={reducedMotion ? false : "hidden"}
-				whileInView="visible"
-				viewport={ANIMATION.viewport}
-				variants={sectionReveal}
+			<p
+				className="dm-reveal dm-reveal-d1"
 				style={{
 					fontFamily: '"Inter", system-ui, sans-serif',
 					fontWeight: 500,
@@ -66,16 +55,12 @@ export function SectionHeader({
 				}}
 			>
 				{kickerEn}
-			</motion.p>
+			</p>
 
 			{/* Section title */}
 			{title && (
-				<motion.h2
-					initial={reducedMotion ? false : "hidden"}
-					whileInView="visible"
-					viewport={ANIMATION.viewport}
-					variants={sectionReveal}
-					className="mt-4 font-display font-bold"
+				<h2
+					className="dm-reveal dm-reveal-d2 mt-4 font-display font-bold"
 					style={{
 						fontSize: "var(--text-section)",
 						letterSpacing: "-0.03em",
@@ -84,23 +69,19 @@ export function SectionHeader({
 					}}
 				>
 					{title}
-				</motion.h2>
+				</h2>
 			)}
 
 			{/* Subtitle */}
 			{subtitle && (
-				<motion.p
-					initial={reducedMotion ? false : "hidden"}
-					whileInView="visible"
-					viewport={ANIMATION.viewport}
-					variants={sectionReveal}
-					className="mt-4 text-lg leading-relaxed"
+				<p
+					className="dm-reveal dm-reveal-d3 mt-4 text-lg leading-relaxed"
 					style={{
 						color: light ? "rgba(255,255,255,0.8)" : "var(--dm-muted)",
 					}}
 				>
 					{subtitle}
-				</motion.p>
+				</p>
 			)}
 		</div>
 	);

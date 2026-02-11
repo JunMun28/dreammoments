@@ -1,0 +1,235 @@
+- generic [active] [ref=e1]:
+  - link "Skip to main content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=e3]:
+    - generic [ref=e5]:
+      - link "DreamMoments" [ref=e6] [cursor=pointer]:
+        - /url: /
+      - navigation "Main navigation" [ref=e7]:
+        - link "Templates" [ref=e8] [cursor=pointer]:
+          - /url: /#templates
+        - link "How it works" [ref=e9] [cursor=pointer]:
+          - /url: /#process
+        - link "Pricing" [ref=e10] [cursor=pointer]:
+          - /url: /#pricing
+      - generic [ref=e12]:
+        - link "Sign in" [ref=e13] [cursor=pointer]:
+          - /url: /auth/login
+        - link "Start Free Trial" [ref=e14] [cursor=pointer]:
+          - /url: /editor/new?template=love-at-dusk
+  - main [ref=e15]:
+    - generic [ref=e16]:
+      - generic [ref=e18]:
+        - paragraph [ref=e19]: Garden Romance Sample Invitation
+        - link "Create your own" [ref=e20] [cursor=pointer]:
+          - /url: /editor/new?template=garden-romance
+      - generic [ref=e37]:
+        - generic [ref=e38]:
+          - generic: 囍
+          - generic: 囍
+          - generic [ref=e43]:
+            - paragraph [ref=e44]: 恭 请 光 临
+            - heading "S a r a h 囍 M i c h a e l" [level=1] [ref=e45]:
+              - generic [ref=e46]:
+                - generic [ref=e47]: S
+                - generic [ref=e48]: a
+                - generic [ref=e49]: r
+                - generic [ref=e50]: a
+                - generic [ref=e51]: h
+              - text: 囍
+              - generic [ref=e52]:
+                - generic [ref=e53]: M
+                - generic [ref=e54]: i
+                - generic [ref=e55]: c
+                - generic [ref=e56]: h
+                - generic [ref=e57]: a
+                - generic [ref=e58]: e
+                - generic [ref=e59]: l
+            - paragraph [ref=e60]: 良缘天定 · 佳期如梦
+            - generic [ref=e61]:
+              - generic [ref=e62]:
+                - paragraph [ref=e63]: Wedding Date
+                - paragraph [ref=e64]: Sunday, June 15, 2025
+                - paragraph [ref=e65]: 2025年6月15日星期日
+              - generic [ref=e66]:
+                - paragraph [ref=e67]: Venue
+                - paragraph [ref=e68]: Grand Hyatt Singapore
+                - paragraph [ref=e69]: Grand Hyatt Singapore · Ballroom Level 2
+            - 'button "Add to Calendar: Sarah & Michael''s Wedding" [ref=e74] [cursor=pointer]':
+              - img [ref=e76]
+              - generic [ref=e78]: Add to Calendar
+            - generic [ref=e80]:
+              - link "RSVP Now" [ref=e81] [cursor=pointer]:
+                - /url: "#rsvp-scene-_r_1_"
+              - generic [ref=e82]: Ceremony at 3:30 PM · Dinner at 6:00 PM
+            - img [ref=e84]
+        - status "Wedding countdown" [ref=e87]:
+          - paragraph [ref=e88]: Celebration Complete
+        - generic [ref=e90]:
+          - img [ref=e93]
+          - paragraph [ref=e98]: 敬 邀 光 临
+          - heading "We Joyfully Invite You" [level=2] [ref=e99]
+          - paragraph [ref=e100]: Together with our beloved families, we request the honour of your presence at the celebration of our marriage.
+          - paragraph [ref=e101]: 谨定于良辰吉日，诚邀阁下拨冗光临，共证我们的幸福时刻。
+        - generic [ref=e104]:
+          - generic [ref=e105]:
+            - paragraph [ref=e106]: 爱 情 故 事
+            - heading "Our Story" [level=2] [ref=e107]
+          - generic [ref=e109]:
+            - article [ref=e110]:
+              - generic: "1"
+              - generic [ref=e113]:
+                - generic [ref=e114]:
+                  - paragraph [ref=e115]: 序章
+                  - heading "How we met" [level=3] [ref=e116]
+                  - paragraph [ref=e117]: "2018"
+                  - paragraph [ref=e118]: A rainy campus afternoon turned into forever.
+                - img "How we met" [ref=e120]
+            - article [ref=e121]:
+              - generic: "2"
+              - generic [ref=e124]:
+                - generic [ref=e125]:
+                  - paragraph [ref=e126]: 第一幕
+                  - heading "Falling in love" [level=3] [ref=e127]
+                  - paragraph [ref=e128]: "2020"
+                  - paragraph [ref=e129]: We traveled, cooked, and built a home together.
+                - img "Falling in love" [ref=e131]
+            - article [ref=e132]:
+              - generic: "3"
+              - generic [ref=e135]:
+                - generic [ref=e136]:
+                  - paragraph [ref=e137]: 第二幕
+                  - heading "The proposal" [level=3] [ref=e138]
+                  - paragraph [ref=e139]: "2024"
+                  - paragraph [ref=e140]: Under the stars, we said yes to forever.
+                - img "The proposal" [ref=e142]
+        - generic [ref=e144]:
+          - generic [ref=e145]:
+            - paragraph [ref=e146]: 影 像 集 锦
+            - heading "Gallery" [level=2] [ref=e147]
+          - generic [ref=e148]:
+            - figure "Sunset vows" [ref=e149]:
+              - img "Sunset vows" [ref=e150]
+              - generic [ref=e152]: Sunset vows
+            - figure "Garden strolls" [ref=e153]:
+              - img "Garden strolls" [ref=e154]
+              - generic [ref=e156]: Garden strolls
+            - figure "Together always" [ref=e157]:
+              - img "Together always" [ref=e158]
+              - generic [ref=e160]: Together always
+        - generic [ref=e162]:
+          - generic [ref=e163]:
+            - paragraph [ref=e164]: 婚 礼 流 程
+            - heading "Wedding Day" [level=2] [ref=e165]
+          - generic [ref=e168]:
+            - article [ref=e169]:
+              - generic [ref=e172]:
+                - paragraph [ref=e173]: 3:00 PM
+                - heading "Guest Arrival" [level=3] [ref=e174]
+                - paragraph [ref=e175]: Welcome drinks
+            - article [ref=e176]:
+              - generic [ref=e179]:
+                - paragraph [ref=e180]: 3:30 PM
+                - heading "Ceremony" [level=3] [ref=e181]
+                - paragraph [ref=e182]: Exchange of vows
+            - article [ref=e183]:
+              - generic [ref=e186]:
+                - paragraph [ref=e187]: 4:30 PM
+                - heading "Photo Session" [level=3] [ref=e188]
+                - paragraph [ref=e189]: Group photos
+            - article [ref=e190]:
+              - generic [ref=e193]:
+                - paragraph [ref=e194]: 6:00 PM
+                - heading "Dinner Reception" [level=3] [ref=e195]
+                - paragraph [ref=e196]: Dinner and celebrations
+            - article [ref=e197]:
+              - generic [ref=e200]:
+                - paragraph [ref=e201]: 9:00 PM
+                - heading "After Party" [level=3] [ref=e202]
+                - paragraph [ref=e203]: Dancing and festivities
+        - generic [ref=e205]:
+          - generic [ref=e206]:
+            - paragraph [ref=e207]: 婚礼地点
+            - heading "Grand Hyatt Singapore" [level=3] [ref=e208]
+            - paragraph [ref=e209]: 10 Scotts Road, Singapore 228211
+            - paragraph [ref=e210]: Enter via the main lobby, Level 1.
+            - paragraph [ref=e211]: Complimentary valet parking available.
+            - generic [ref=e212]: 1.3055, 103.8318
+            - generic [ref=e213]:
+              - link "Google Maps" [ref=e214] [cursor=pointer]:
+                - /url: https://www.google.com/maps/search/?api=1&query=1.3055,103.8318
+              - link "Waze" [ref=e215] [cursor=pointer]:
+                - /url: https://www.waze.com/ul?ll=1.3055,103.8318&navigate=yes
+          - figure [ref=e216]:
+            - img "Grand Hyatt Singapore wedding venue" [ref=e217]
+        - generic [ref=e220]:
+          - generic [ref=e221]:
+            - paragraph [ref=e222]: 敬 请 回 复
+            - heading "Reserve Your Seat" [level=3] [ref=e223]:
+              - text: Reserve
+              - text: Your Seat
+            - paragraph [ref=e224]: Please reply by 20 May 2025.
+            - generic [ref=e225]:
+              - paragraph [ref=e226]: RSVP Deadline
+              - paragraph [ref=e227]: Tuesday, May 20, 2025
+              - paragraph [ref=e228]: 2025年5月20日星期二
+              - paragraph [ref=e229]: Up to 3 guests on this invite
+            - generic [ref=e230]:
+              - generic [ref=e231]: No restrictions
+              - generic [ref=e232]: Vegetarian
+              - generic [ref=e233]: Halal
+              - generic [ref=e234]: No pork
+          - generic [ref=e235]:
+            - generic [ref=e236]:
+              - generic [ref=e237]:
+                - text: Name
+                - textbox "Name" [ref=e238]:
+                  - /placeholder: Rachel Lim
+              - generic [ref=e239]:
+                - text: Attendance
+                - combobox "Attendance" [ref=e240]:
+                  - option "Attending" [selected]
+                  - option "Not Attending"
+                  - option "Undecided"
+              - generic [ref=e241]:
+                - text: Guest Count
+                - spinbutton "Guest Count" [ref=e242]: "1"
+              - generic [ref=e243]:
+                - text: Email
+                - textbox "Email" [ref=e244]:
+                  - /placeholder: rachel@example.com
+              - generic [ref=e245]:
+                - text: Dietary Requirements
+                - textbox "Dietary Requirements" [ref=e246]:
+                  - /placeholder: Vegetarian, halal, no pork...
+              - generic [ref=e247]:
+                - text: Message
+                - textbox "Message" [ref=e248]:
+                  - /placeholder: Can't wait to celebrate your wedding
+              - generic [ref=e249] [cursor=pointer]:
+                - checkbox "I consent to the collection of my personal data as described in the Privacy Policy" [ref=e250]
+                - generic [ref=e251]:
+                  - text: I consent to the collection of my personal data as described in the
+                  - link "Privacy Policy" [ref=e252]:
+                    - /url: /privacy
+            - button "Send RSVP" [ref=e253]
+        - generic [ref=e255]:
+          - generic [ref=e256]:
+            - paragraph [ref=e257]: 常 见 问 题
+            - heading "Questions" [level=2] [ref=e258]
+          - generic [ref=e259]:
+            - article [ref=e260]:
+              - paragraph [ref=e261]: What should I wear?
+              - paragraph [ref=e262]: Smart casual. Please avoid white.
+            - article [ref=e263]:
+              - paragraph [ref=e264]: Can I bring a plus one?
+              - paragraph [ref=e265]: Please RSVP for your allocated seats only.
+            - article [ref=e266]:
+              - paragraph [ref=e267]: Is there parking?
+              - paragraph [ref=e268]: Complimentary valet parking is available.
+        - generic [ref=e270]:
+          - paragraph [ref=e272]: 良 辰 吉 日 · 敬 候 君 临
+          - paragraph [ref=e273]: 百年好合 · 永结同心
+          - paragraph [ref=e274]: "#SarahMichael"
+  - button "Open TanStack Devtools" [ref=e35] [cursor=pointer]:
+    - img "TanStack Devtools" [ref=e36]

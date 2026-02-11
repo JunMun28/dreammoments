@@ -80,6 +80,7 @@ vi.mock("@/db/index", () => ({
 
 vi.mock("@/lib/rate-limit", () => ({
 	authRateLimit: vi.fn(() => ({ allowed: true, remaining: 4, resetAt: 0 })),
+	formatRateLimitMessage: vi.fn(() => "Too many attempts. Try again in 15 minutes."),
 }));
 
 vi.mock("@/lib/session", () => ({

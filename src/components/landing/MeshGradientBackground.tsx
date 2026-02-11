@@ -1,5 +1,4 @@
-import gsap from "gsap";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 type MeshVariant = "warm" | "crimson" | "gold" | "intense";
@@ -22,28 +21,28 @@ const ORBS: Record<MeshVariant, OrbConfig[]> = {
 	warm: [
 		{
 			gradient:
-				"radial-gradient(circle, rgba(232,24,64,0.25) 0%, transparent 70%)",
+				"radial-gradient(circle, rgba(200,64,64,0.14) 0%, transparent 70%)",
 			size: "50%",
 			position: { top: "10%", left: "15%" },
 			opacity: 1,
 		},
 		{
 			gradient:
-				"radial-gradient(circle, rgba(255,184,0,0.20) 0%, transparent 70%)",
+				"radial-gradient(circle, rgba(168,176,138,0.15) 0%, transparent 70%)",
 			size: "45%",
 			position: { top: "60%", left: "70%" },
 			opacity: 1,
 		},
 		{
 			gradient:
-				"radial-gradient(circle, rgba(255,107,107,0.18) 0%, transparent 70%)",
+				"radial-gradient(circle, rgba(212,184,122,0.14) 0%, transparent 70%)",
 			size: "40%",
 			position: { top: "70%", left: "20%" },
 			opacity: 1,
 		},
 		{
 			gradient:
-				"radial-gradient(circle, rgba(212,175,55,0.15) 0%, transparent 70%)",
+				"radial-gradient(circle, rgba(200,64,64,0.08) 0%, transparent 70%)",
 			size: "35%",
 			position: { top: "20%", left: "75%" },
 			opacity: 1,
@@ -52,28 +51,28 @@ const ORBS: Record<MeshVariant, OrbConfig[]> = {
 	crimson: [
 		{
 			gradient:
-				"radial-gradient(circle, rgba(232,24,64,0.22) 0%, transparent 70%)",
+				"radial-gradient(circle, rgba(200,64,64,0.12) 0%, transparent 70%)",
 			size: "55%",
 			position: { top: "5%", left: "10%" },
 			opacity: 1,
 		},
 		{
 			gradient:
-				"radial-gradient(circle, rgba(212,32,64,0.20) 0%, transparent 70%)",
+				"radial-gradient(circle, rgba(200,64,64,0.10) 0%, transparent 70%)",
 			size: "50%",
 			position: { top: "50%", left: "65%" },
 			opacity: 1,
 		},
 		{
 			gradient:
-				"radial-gradient(circle, rgba(255,184,0,0.15) 0%, transparent 70%)",
+				"radial-gradient(circle, rgba(168,176,138,0.12) 0%, transparent 70%)",
 			size: "40%",
 			position: { top: "30%", left: "80%" },
 			opacity: 1,
 		},
 		{
 			gradient:
-				"radial-gradient(circle, rgba(255,107,107,0.12) 0%, transparent 70%)",
+				"radial-gradient(circle, rgba(212,184,122,0.10) 0%, transparent 70%)",
 			size: "35%",
 			position: { top: "75%", left: "30%" },
 			opacity: 1,
@@ -82,28 +81,28 @@ const ORBS: Record<MeshVariant, OrbConfig[]> = {
 	gold: [
 		{
 			gradient:
-				"radial-gradient(circle, rgba(255,184,0,0.25) 0%, transparent 70%)",
+				"radial-gradient(circle, rgba(212,184,122,0.18) 0%, transparent 70%)",
 			size: "50%",
 			position: { top: "15%", left: "20%" },
 			opacity: 1,
 		},
 		{
 			gradient:
-				"radial-gradient(circle, rgba(212,175,55,0.22) 0%, transparent 70%)",
+				"radial-gradient(circle, rgba(212,184,122,0.16) 0%, transparent 70%)",
 			size: "45%",
 			position: { top: "55%", left: "70%" },
 			opacity: 1,
 		},
 		{
 			gradient:
-				"radial-gradient(circle, rgba(232,24,64,0.12) 0%, transparent 70%)",
+				"radial-gradient(circle, rgba(200,64,64,0.08) 0%, transparent 70%)",
 			size: "40%",
 			position: { top: "70%", left: "15%" },
 			opacity: 1,
 		},
 		{
 			gradient:
-				"radial-gradient(circle, rgba(255,127,80,0.15) 0%, transparent 70%)",
+				"radial-gradient(circle, rgba(196,162,101,0.14) 0%, transparent 70%)",
 			size: "35%",
 			position: { top: "10%", left: "80%" },
 			opacity: 1,
@@ -112,35 +111,35 @@ const ORBS: Record<MeshVariant, OrbConfig[]> = {
 	intense: [
 		{
 			gradient:
-				"radial-gradient(circle, rgba(255,184,0,0.30) 0%, transparent 70%)",
+				"radial-gradient(circle, rgba(212,184,122,0.22) 0%, transparent 70%)",
 			size: "55%",
 			position: { top: "10%", left: "70%" },
 			opacity: 1,
 		},
 		{
 			gradient:
-				"radial-gradient(circle, rgba(255,107,107,0.25) 0%, transparent 70%)",
+				"radial-gradient(circle, rgba(212,184,122,0.14) 0%, transparent 70%)",
 			size: "50%",
 			position: { top: "60%", left: "20%" },
 			opacity: 1,
 		},
 		{
 			gradient:
-				"radial-gradient(circle, rgba(212,175,55,0.22) 0%, transparent 70%)",
+				"radial-gradient(circle, rgba(212,184,122,0.12) 0%, transparent 70%)",
 			size: "45%",
 			position: { top: "30%", left: "50%" },
 			opacity: 1,
 		},
 		{
 			gradient:
-				"radial-gradient(circle, rgba(255,127,80,0.20) 0%, transparent 70%)",
+				"radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%)",
 			size: "40%",
 			position: { top: "80%", left: "75%" },
 			opacity: 1,
 		},
 		{
 			gradient:
-				"radial-gradient(circle, rgba(232,24,64,0.18) 0%, transparent 70%)",
+				"radial-gradient(circle, rgba(212,184,122,0.10) 0%, transparent 70%)",
 			size: "35%",
 			position: { top: "5%", left: "30%" },
 			opacity: 1,
@@ -158,40 +157,79 @@ export function MeshGradientBackground({
 }: MeshGradientBackgroundProps) {
 	const orbRefs = useRef<(HTMLDivElement | null)[]>([]);
 	const containerRef = useRef<HTMLDivElement>(null);
+	const [isMobile, setIsMobile] = useState(false);
+
+	useEffect(() => {
+		if (typeof window === "undefined") return;
+		setIsMobile(window.innerWidth < 768);
+	}, []);
 
 	useEffect(() => {
 		if (reducedMotion || typeof window === "undefined") return;
 
-		// Skip ambient animation on mobile
-		const isMobile = window.innerWidth < 768;
 		if (isMobile) return;
 
-		const ctx = gsap.context(() => {
-			for (const orb of orbRefs.current) {
-				if (!orb) continue;
-				gsap.to(orb, {
-					x: `random(-${DRIFT_RANGE}, ${DRIFT_RANGE})`,
-					y: `random(-${DRIFT_RANGE}, ${DRIFT_RANGE})`,
-					duration: `random(18, 25)`,
-					ease: "sine.inOut",
-					repeat: -1,
-					yoyo: true,
-				});
-			}
-		}, containerRef);
+		const container = containerRef.current;
+		if (!container) return;
 
-		return () => ctx.revert();
-	}, [reducedMotion]);
+		let ctx: gsap.Context | undefined;
+		let tweens: gsap.core.Tween[] = [];
+		let observer: IntersectionObserver | undefined;
+
+		async function initGSAP() {
+			const gsap = (await import("gsap")).default;
+
+			if (!container) return;
+
+			ctx = gsap.context(() => {
+				for (const orb of orbRefs.current) {
+					if (!orb) continue;
+					tweens.push(
+						gsap.to(orb, {
+							x: `random(-${DRIFT_RANGE}, ${DRIFT_RANGE})`,
+							y: `random(-${DRIFT_RANGE}, ${DRIFT_RANGE})`,
+							duration: `random(18, 25)`,
+							ease: "sine.inOut",
+							repeat: -1,
+							yoyo: true,
+						}),
+					);
+				}
+			}, container);
+
+			observer = new IntersectionObserver(
+				([entry]) => {
+					for (const tween of tweens) {
+						if (entry.isIntersecting) {
+							tween.resume();
+						} else {
+							tween.pause();
+						}
+					}
+				},
+				{ threshold: 0 },
+			);
+			observer.observe(container);
+		}
+
+		initGSAP();
+
+		return () => {
+			observer?.disconnect();
+			tweens = [];
+			ctx?.revert();
+		};
+	}, [reducedMotion, isMobile, variant]);
 
 	const orbs = ORBS[variant];
 
 	return (
-		<div ref={containerRef} className={cn("relative", className)}>
+		<div
+			ref={containerRef}
+			className={cn("pointer-events-none relative", className)}
+		>
 			{/* Mesh gradient orbs */}
-			<div
-				className="pointer-events-none absolute inset-0 overflow-hidden"
-				aria-hidden="true"
-			>
+			<div className="absolute inset-0 overflow-hidden" aria-hidden="true">
 				{orbs.map((orb, i) => (
 					<div
 						key={`${variant}-orb-${i}`}
@@ -206,7 +244,7 @@ export function MeshGradientBackground({
 							top: orb.position.top,
 							left: orb.position.left,
 							opacity: orb.opacity,
-							willChange: reducedMotion ? "auto" : "transform",
+							willChange: reducedMotion || isMobile ? "auto" : "transform",
 						}}
 					/>
 				))}

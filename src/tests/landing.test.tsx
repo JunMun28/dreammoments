@@ -17,7 +17,7 @@ describe("landing page", () => {
 		expect(markup).toContain("remember.");
 		expect(markup).toContain("Create Your Invitation");
 		expect(markup).toContain("Browse Templates");
-		expect(markup).toContain("Made for Chinese Weddings");
+		expect(markup).toContain("AI-POWERED INVITATIONS");
 		expect(markup).toContain("囍");
 		expect(markup).toContain("AI-Powered");
 	});
@@ -28,20 +28,20 @@ describe("landing page", () => {
 		expect(markup).toContain("Love at Dusk");
 		expect(markup).toContain("Blush Romance");
 		expect(markup).toContain("Eternal Elegance");
-		expect(markup).toContain("The Collection");
+		expect(markup).toContain("THE COLLECTION");
 	});
 
 	test("renders social proof section", () => {
 		const markup = renderToString(<Landing />);
-		expect(markup).toContain("500+");
-		expect(markup).toContain("4.9/5");
-		expect(markup).toContain("&lt; 3 min");
+		expect(markup).toContain("Couples &amp; counting");
+		expect(markup).toContain("Average rating");
+		expect(markup).toContain("Minutes to set up");
 		expect(markup).toContain("tea ceremony");
 	});
 
 	test("renders timeline steps", () => {
 		const markup = renderToString(<Landing />);
-		expect(markup).toContain("From sign up to RSVPs in 5 steps");
+		expect(markup).toContain("Five steps to your perfect invitation.");
 		expect(markup).toContain("Sign up in seconds");
 		expect(markup).toContain("Pick your template");
 		expect(markup).toContain("Let AI write your story");
@@ -52,16 +52,16 @@ describe("landing page", () => {
 	test("renders features section", () => {
 		const markup = renderToString(<Landing />);
 		expect(markup).toContain("AI-Powered Content");
-		expect(markup).toContain("Built for Chinese Weddings");
+		expect(markup).toContain("Chinese Wedding Customs");
 		expect(markup).toContain("One-Tap RSVP");
 		expect(markup).toContain("Real-Time Dashboard");
-		expect(markup).toContain("Beautiful on Every Screen");
-		expect(markup).toContain("Why DreamMoments");
+		expect(markup).toContain("WhatsApp Share");
+		expect(markup).toContain("WHY DREAMMOMENTS");
 	});
 
 	test("renders pricing section", () => {
 		const markup = renderToString(<Landing />);
-		expect(markup).toContain("Simple Pricing");
+		expect(markup).toContain("SIMPLE PRICING");
 		expect(markup).toContain("RM0");
 		expect(markup).toContain("RM49");
 		expect(markup).toContain("Most Popular");
@@ -70,6 +70,7 @@ describe("landing page", () => {
 	test("renders final CTA section", () => {
 		const markup = renderToString(<Landing />);
 		expect(markup).toContain("Your love story awaits");
-		expect(markup).toContain("Create an invitation your guests will treasure.");
+		expect(markup).toContain("Create an invitation your guests will");
+		expect(markup).toContain("treasure.");
 	});
 });

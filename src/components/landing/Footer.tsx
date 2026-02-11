@@ -2,15 +2,19 @@ import { Link } from "@tanstack/react-router";
 import { MeshGradientBackground } from "./MeshGradientBackground";
 import { GoldRule } from "./motifs/GoldRule";
 
-export function Footer() {
+export function Footer({ reducedMotion = false }: { reducedMotion?: boolean }) {
 	return (
 		<footer
-			className="relative px-6 py-12 text-center"
+			className="relative px-6 py-16 text-center"
 			style={{ background: "var(--dm-bg)" }}
 		>
 			{/* Subtle mesh gradient strip */}
 			<div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-				<MeshGradientBackground variant="warm" className="h-full">
+				<MeshGradientBackground
+					variant="warm"
+					className="h-full"
+					reducedMotion={reducedMotion}
+				>
 					<div />
 				</MeshGradientBackground>
 			</div>
@@ -28,15 +32,18 @@ export function Footer() {
 							fontSize: "1rem",
 							color: "var(--dm-gold-electric)",
 							opacity: 0.6,
-							textShadow: "0 0 8px rgba(255,215,0,0.4)",
+							textShadow: "0 0 8px rgba(212,184,122,0.4)",
 						}}
 						aria-hidden="true"
 					>
 						囍
 					</span>
 					<p
-						className="font-display text-xl font-semibold"
-						style={{ color: "var(--dm-ink)" }}
+						className="font-display text-2xl font-semibold"
+						style={{
+							color: "var(--dm-ink)",
+							letterSpacing: "-0.02em",
+						}}
 					>
 						DreamMoments
 					</p>
@@ -47,7 +54,7 @@ export function Footer() {
 							fontSize: "1rem",
 							color: "var(--dm-gold-electric)",
 							opacity: 0.6,
-							textShadow: "0 0 8px rgba(255,215,0,0.4)",
+							textShadow: "0 0 8px rgba(212,184,122,0.4)",
 						}}
 						aria-hidden="true"
 					>
@@ -61,24 +68,78 @@ export function Footer() {
 					Singapore.
 				</p>
 
+				{/* EST line */}
+				<p
+					className="mt-4"
+					style={{
+						fontFamily: '"Inter", system-ui, sans-serif',
+						fontSize: "0.6875rem",
+						fontWeight: 500,
+						textTransform: "uppercase",
+						letterSpacing: "0.2em",
+						color: "var(--dm-muted)",
+						opacity: 0.5,
+					}}
+				>
+					EST. 2025
+				</p>
+
+				{/* Contact */}
+				<div
+					className="mt-6 flex flex-wrap items-center justify-center gap-4 text-sm"
+					style={{ color: "var(--dm-muted)" }}
+				>
+					<a
+						href="mailto:hello@dreammoments.app"
+						className="rounded transition-colors duration-300 hover:text-[var(--dm-ink)] focus-visible:ring-2 focus-visible:ring-[var(--dm-crimson)] focus-visible:ring-offset-2 focus-visible:outline-none"
+					>
+						hello@dreammoments.app
+					</a>
+					<span style={{ opacity: 0.4 }} aria-hidden="true">
+						{"\u00B7"}
+					</span>
+					<a
+						href="https://wa.me/60123456789"
+						target="_blank"
+						rel="noopener noreferrer"
+						className="rounded transition-colors duration-300 hover:text-[var(--dm-ink)] focus-visible:ring-2 focus-visible:ring-[var(--dm-crimson)] focus-visible:ring-offset-2 focus-visible:outline-none"
+					>
+						WhatsApp
+					</a>
+					<span style={{ opacity: 0.4 }} aria-hidden="true">
+						{"\u00B7"}
+					</span>
+					<a
+						href="https://instagram.com/dreammoments.app"
+						target="_blank"
+						rel="noopener noreferrer"
+						className="rounded transition-colors duration-300 hover:text-[var(--dm-ink)] focus-visible:ring-2 focus-visible:ring-[var(--dm-crimson)] focus-visible:ring-offset-2 focus-visible:outline-none"
+					>
+						Instagram
+					</a>
+				</div>
+
 				{/* Links */}
 				<nav
 					aria-label="Footer"
-					className="mt-8 flex justify-center gap-6 text-sm"
+					className="mt-4 flex justify-center gap-4 text-sm"
 				>
 					<Link
 						to="/privacy"
-						className="transition-colors duration-300 hover:text-[var(--dm-ink)]"
+						className="rounded transition-colors duration-300 hover:text-[var(--dm-ink)] focus-visible:ring-2 focus-visible:ring-[var(--dm-crimson)] focus-visible:ring-offset-2 focus-visible:outline-none"
 						style={{ color: "var(--dm-muted)" }}
 					>
 						Privacy Policy
 					</Link>
-					<span style={{ color: "var(--dm-border)" }} aria-hidden="true">
-						|
+					<span
+						style={{ color: "var(--dm-muted)", opacity: 0.4 }}
+						aria-hidden="true"
+					>
+						{"\u00B7"}
 					</span>
 					<Link
 						to="/terms"
-						className="transition-colors duration-300 hover:text-[var(--dm-ink)]"
+						className="rounded transition-colors duration-300 hover:text-[var(--dm-ink)] focus-visible:ring-2 focus-visible:ring-[var(--dm-crimson)] focus-visible:ring-offset-2 focus-visible:outline-none"
 						style={{ color: "var(--dm-muted)" }}
 					>
 						Terms of Service

@@ -1,12 +1,5 @@
 import { Link } from "@tanstack/react-router";
 import { Check } from "lucide-react";
-import { motion } from "motion/react";
-import {
-	ANIMATION,
-	childReveal,
-	containerReveal,
-	sectionReveal,
-} from "./animation";
 import { GradientText } from "./GradientText";
 import { HongbaoBadge } from "./HongbaoBadge";
 import { useCountUp } from "./hooks/useCountUp";
@@ -14,7 +7,7 @@ import { MovingBorderButton } from "./MovingBorderButton";
 import { SectionHeader } from "./motifs/SectionHeader";
 
 const FREE_FEATURES = [
-	"3 AI content generations",
+	"3 AI text regenerations per invitation",
 	"All 4 premium templates",
 	"Standard invitation link",
 	"RSVP management",
@@ -22,7 +15,7 @@ const FREE_FEATURES = [
 ];
 
 const PREMIUM_FEATURES = [
-	"100 AI content generations",
+	"100 AI text regenerations per invitation",
 	"Custom slug (your-name.dreammoments.app)",
 	"Angpao QR code",
 	"CSV guest import / export",
@@ -36,7 +29,6 @@ export function Pricing({ reducedMotion }: { reducedMotion: boolean }) {
 		duration: 1.8,
 		reducedMotion,
 	});
-
 	return (
 		// biome-ignore lint/correctness/useUniqueElementIds: intentional anchor for in-page navigation
 		<section
@@ -55,43 +47,36 @@ export function Pricing({ reducedMotion }: { reducedMotion: boolean }) {
 				/>
 
 				{/* Currency context pill */}
-				<motion.div
-					initial={reducedMotion ? false : "hidden"}
-					whileInView="visible"
-					viewport={ANIMATION.viewport}
-					variants={sectionReveal}
-					className="-mt-10 mb-14 text-center"
-				>
+				<div data-scroll-reveal className="-mt-10 mb-14 text-center">
 					<span
-						className="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm"
+						className="dm-reveal inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm"
 						style={{
 							borderColor: "var(--dm-border)",
 							background: "var(--dm-surface)",
 							color: "var(--dm-muted)",
 						}}
 					>
-						<span>Prices shown in</span>
+						<span>Prices in</span>
 						<span className="font-semibold" style={{ color: "var(--dm-ink)" }}>
-							MYR (Malaysia)
+							MYR
 						</span>
-						<span className="text-xs">/ SGD (Singapore)</span>
+						<span style={{ opacity: 0.5 }}>/</span>
+						<span className="font-semibold" style={{ color: "var(--dm-ink)" }}>
+							SGD
+						</span>
 					</span>
-				</motion.div>
+				</div>
 
 				{/* Cards */}
-				<motion.div
-					initial={reducedMotion ? false : "hidden"}
-					whileInView="visible"
-					viewport={ANIMATION.viewport}
-					variants={containerReveal}
+				<div
+					data-scroll-reveal
 					className="mx-auto grid max-w-4xl gap-8 md:grid-cols-2"
 				>
 					{/* Free Card */}
-					<motion.div
-						variants={childReveal}
-						className="flex flex-col rounded-2xl p-8 sm:p-10 order-2 md:order-1"
+					<div
+						className="dm-reveal-child flex flex-col rounded-2xl p-8 sm:p-10 order-1"
 						style={{
-							border: "1px dashed var(--dm-border)",
+							border: "1px solid var(--dm-border)",
 							background: "var(--dm-surface)",
 						}}
 					>
@@ -130,36 +115,32 @@ export function Pricing({ reducedMotion }: { reducedMotion: boolean }) {
 						>
 							Get Started Free
 						</Link>
-					</motion.div>
+					</div>
 
 					{/* Premium Card */}
-					<motion.div
-						variants={childReveal}
-						className="relative order-1 md:order-2 md:-translate-y-3"
-					>
+					<div className="dm-reveal-child relative order-2 translate-y-0 md:-translate-y-3">
 						{/* Animated gradient border wrapper */}
-						<div
-							className="dm-pricing-glow relative overflow-hidden rounded-2xl p-[3px]"
-						>
+						<div className="dm-pricing-glow relative overflow-hidden rounded-2xl p-[3px]">
 							<span
 								className="dm-pricing-glow-spin pointer-events-none absolute inset-[-200%]"
 								style={{
-									background: "conic-gradient(from 0deg, transparent 0deg 200deg, var(--dm-gold-bold) 240deg, var(--dm-crimson-bold) 280deg, transparent 320deg 360deg)",
+									background:
+										"conic-gradient(from 0deg, transparent 0deg 200deg, var(--dm-hongbao-gold) 240deg, var(--dm-hongbao-red-deep) 280deg, transparent 320deg 360deg)",
 								}}
 								aria-hidden="true"
 							/>
 							<div
 								className="relative z-10 flex flex-col rounded-[calc(1rem-3px)] p-8 sm:p-10"
 								style={{
-									background: "var(--dm-gold-soft)",
-									boxShadow: "0 12px 48px -12px rgba(212, 175, 55, 0.15)",
+									background: "var(--dm-hongbao-red)",
+									boxShadow: "0 12px 48px -12px rgba(200, 64, 64, 0.25)",
 								}}
 							>
 								<HongbaoBadge label="Most Popular" />
 
 								<span
 									className="mt-2 text-sm font-medium uppercase tracking-[0.12em]"
-									style={{ color: "var(--dm-muted)" }}
+									style={{ color: "rgba(255,255,255,0.7)" }}
 								>
 									Premium
 								</span>
@@ -168,18 +149,21 @@ export function Pricing({ reducedMotion }: { reducedMotion: boolean }) {
 										className="font-display font-semibold"
 										style={{ fontSize: "3.5rem" }}
 									>
-										<GradientText gradient="linear-gradient(135deg, var(--dm-gold-warm), var(--dm-crimson-bold))">
-											RM<span ref={priceRef as React.RefObject<HTMLSpanElement>}>49</span>
+										<GradientText gradient="linear-gradient(135deg, #D4B87A, #F0D090)">
+											RM
+											<span ref={priceRef as React.RefObject<HTMLSpanElement>}>
+												49
+											</span>
 										</GradientText>
 									</span>
 									<span
-										className="ml-2 text-sm"
-										style={{ color: "var(--dm-muted)" }}
+										className="ml-2 text-lg font-semibold"
+										style={{ color: "rgba(255,255,255,0.85)" }}
 									>
-										/ SGD19
+										/ S$19
 									</span>
 								</div>
-								<p className="mt-2" style={{ color: "var(--dm-muted)" }}>
+								<p className="mt-2" style={{ color: "rgba(255,255,255,0.7)" }}>
 									One-time per invitation. Not a subscription.
 								</p>
 
@@ -189,9 +173,11 @@ export function Pricing({ reducedMotion }: { reducedMotion: boolean }) {
 											<Check
 												aria-hidden="true"
 												className="mt-0.5 h-5 w-5 flex-shrink-0"
-												style={{ color: "var(--dm-gold-warm)" }}
+												style={{ color: "var(--dm-hongbao-gold)" }}
 											/>
-											<span style={{ color: "var(--dm-ink)" }}>{f}</span>
+											<span style={{ color: "rgba(255,255,255,0.9)" }}>
+												{f}
+											</span>
 										</li>
 									))}
 								</ul>
@@ -202,39 +188,23 @@ export function Pricing({ reducedMotion }: { reducedMotion: boolean }) {
 										variant="gold"
 										className="w-full justify-center"
 									>
-										Upgrade for RM49
+										Upgrade for RM49 / S$19
 									</MovingBorderButton>
 								</div>
 							</div>
 						</div>
-						<style>{`
-							.dm-pricing-glow-spin {
-								animation: dm-pricing-spin 8s linear infinite;
-							}
-							@keyframes dm-pricing-spin {
-								from { transform: rotate(0deg); }
-								to { transform: rotate(360deg); }
-							}
-							@media (prefers-reduced-motion: reduce) {
-								.dm-pricing-glow-spin { animation: none; display: none; }
-								.dm-pricing-glow { border: 3px solid var(--dm-gold); border-radius: 1rem; padding: 0; }
-								.dm-pricing-glow > div:last-of-type { border-radius: 1rem; }
-							}
-						`}</style>
-					</motion.div>
-				</motion.div>
+					</div>
+				</div>
 
 				{/* Angpao tagline */}
-				<motion.p
-					initial={reducedMotion ? false : "hidden"}
-					whileInView="visible"
-					viewport={ANIMATION.viewport}
-					variants={sectionReveal}
-					className="mt-10 text-center font-accent text-lg italic"
-					style={{ color: "var(--dm-muted)" }}
-				>
-					One-time payment. Like an angpao — give once, celebrate forever.
-				</motion.p>
+				<div data-scroll-reveal>
+					<p
+						className="dm-reveal mt-10 text-center font-accent text-lg italic"
+						style={{ color: "var(--dm-muted)" }}
+					>
+						One-time payment. Like an angpao — give once, celebrate forever.
+					</p>
+				</div>
 			</div>
 		</section>
 	);

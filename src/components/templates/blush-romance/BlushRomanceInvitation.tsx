@@ -42,6 +42,8 @@ export default function BlushRomanceInvitation({
 	const consentDescriptionId = useId();
 	const data = content;
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [submitError, setSubmitError] = useState("");
+	const [errors, setErrors] = useState<Record<string, string>>({});
 	const [rsvpData, setRsvpData] = useState<Omit<
 		RsvpConfirmationProps,
 		"onEdit" | "className"
@@ -132,7 +134,10 @@ export default function BlushRomanceInvitation({
 				onAiClick={onAiClick}
 				className="blush-section"
 			>
-				<CountdownWidget targetDate={data.hero.date} />
+				<CountdownWidget
+					targetDate={data.hero.date}
+					eventTime={data.schedule.events[0]?.time}
+				/>
 			</SectionShell>
 
 			<div className="blush-floral-divider" aria-hidden="true">
@@ -253,9 +258,11 @@ export default function BlushRomanceInvitation({
 										src={photo.url || "/placeholders/photo-light.svg"}
 										alt={photo.caption || "Wedding photo"}
 										loading="lazy"
+										decoding="async"
 										width={360}
-										height={140}
+										height={240}
 										className="blush-photo-frame w-full object-cover"
+										style={{ aspectRatio: "3 / 2", backgroundColor: "#f5ede4" }}
 									/>
 									<p className="blush-meta">{photo.caption ?? "Moment"}</p>
 								</div>
@@ -366,11 +373,12 @@ export default function BlushRomanceInvitation({
 							</div>
 						) : null}
 					</div>
-					<div className="blush-map">
+					<div className="blush-map" style={{ backgroundColor: "#f5ede4" }}>
 						<img
 							src="/placeholders/photo-light.svg"
 							alt={`Map showing location of ${data.venue.name}`}
 							loading="lazy"
+							decoding="async"
 							width={800}
 							height={450}
 						/>
@@ -419,7 +427,19 @@ export default function BlushRomanceInvitation({
 								if (!onRsvpSubmit || isSubmitting) return;
 								const formData = new FormData(event.currentTarget);
 								const name = String(formData.get("name") ?? "").trim();
-								if (!name) return;
+								const email = String(formData.get("email") ?? "").trim();
+								const newErrors: Record<string, string> = {};
+								if (!name) {
+									newErrors.name = "Please enter your name";
+								}
+								if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+									newErrors.email = "Please enter a valid email address";
+								}
+								if (Object.keys(newErrors).length > 0) {
+									setErrors(newErrors);
+									return;
+								}
+								setErrors({});
 								const maxGuests = data.rsvp.allowPlusOnes
 									? Math.max(1, data.rsvp.maxPlusOnes + 1)
 									: 1;
@@ -439,8 +459,9 @@ export default function BlushRomanceInvitation({
 										guestCount,
 										dietaryRequirements,
 										message: String(formData.get("message") ?? ""),
-										email: String(formData.get("email") ?? ""),
+										email,
 									});
+									setSubmitError("");
 									setRsvpData({
 										name,
 										attendance,
@@ -448,13 +469,13 @@ export default function BlushRomanceInvitation({
 										dietaryRequirements,
 									});
 								} catch {
-									// Submission failed; form remains open for retry
+									setSubmitError("Something went wrong. Please try again.");
 								} finally {
 									setIsSubmitting(false);
 								}
 							}}
 						>
-							<label className="grid gap-1.5 text-xs uppercase tracking-[0.15em] text-[color:var(--dm-muted)]">
+							<label className="grid gap-1.5 text-[0.7rem] sm:text-xs uppercase tracking-[0.15em] text-[color:var(--dm-muted)]">
 								Name
 								<input
 									name="name"
@@ -462,10 +483,62 @@ export default function BlushRomanceInvitation({
 									autoComplete="off"
 									required
 									aria-required="true"
+									aria-invalid={!!errors.name}
 									className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30"
+									onBlur={(e) => {
+										if (!e.target.value.trim()) {
+											setErrors((prev) => ({
+												...prev,
+												name: "Please enter your name",
+											}));
+										}
+									}}
+									onChange={() =>
+										setErrors((prev) => {
+											const { name: _, ...rest } = prev;
+											return rest;
+										})
+									}
 								/>
+								{errors.name && (
+									<p className="text-red-500 text-xs mt-1" role="alert">
+										{errors.name}
+									</p>
+								)}
 							</label>
-							<label className="grid gap-1.5 text-xs uppercase tracking-[0.15em] text-[color:var(--dm-muted)]">
+							<label className="grid gap-1.5 text-[0.7rem] sm:text-xs uppercase tracking-[0.15em] text-[color:var(--dm-muted)]">
+								Email
+								<input
+									name="email"
+									placeholder="rachel@example.com…"
+									type="email"
+									autoComplete="off"
+									spellCheck={false}
+									aria-invalid={!!errors.email}
+									className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30"
+									onBlur={(e) => {
+										const v = e.target.value.trim();
+										if (v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
+											setErrors((prev) => ({
+												...prev,
+												email: "Please enter a valid email address",
+											}));
+										}
+									}}
+									onChange={() =>
+										setErrors((prev) => {
+											const { email: _, ...rest } = prev;
+											return rest;
+										})
+									}
+								/>
+								{errors.email && (
+									<p className="text-red-500 text-xs mt-1" role="alert">
+										{errors.email}
+									</p>
+								)}
+							</label>
+							<label className="grid gap-1.5 text-[0.7rem] sm:text-xs uppercase tracking-[0.15em] text-[color:var(--dm-muted)]">
 								Attendance
 								<select
 									name="attendance"
@@ -476,19 +549,18 @@ export default function BlushRomanceInvitation({
 									<option value="undecided">Undecided</option>
 								</select>
 							</label>
-							<label className="grid gap-1.5 text-xs uppercase tracking-[0.15em] text-[color:var(--dm-muted)]">
-								Email
-								<input
-									name="email"
-									placeholder="rachel@example.com…"
-									type="email"
-									autoComplete="off"
-									spellCheck={false}
-									className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30"
-								/>
-							</label>
-							<label className="grid gap-1.5 text-xs uppercase tracking-[0.15em] text-[color:var(--dm-muted)]">
-								Guest count
+							<label className="grid gap-1.5 text-[0.7rem] sm:text-xs uppercase tracking-[0.15em] text-[color:var(--dm-muted)]">
+								Guest count{" "}
+								<span className="normal-case tracking-normal text-[color:var(--dm-muted)]">
+									(Max:{" "}
+									{data.rsvp.allowPlusOnes
+										? Math.max(1, data.rsvp.maxPlusOnes + 1)
+										: 1}{" "}
+									{data.rsvp.allowPlusOnes && data.rsvp.maxPlusOnes + 1 > 1
+										? "guests"
+										: "guest"}
+									)
+								</span>
 								<input
 									name="guestCount"
 									placeholder="2…"
@@ -504,16 +576,16 @@ export default function BlushRomanceInvitation({
 									className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30"
 								/>
 							</label>
-							<label className="grid gap-1.5 text-xs uppercase tracking-[0.15em] text-[color:var(--dm-muted)]">
+							<label className="grid gap-1.5 text-[0.7rem] sm:text-xs uppercase tracking-[0.15em] text-[color:var(--dm-muted)]">
 								Dietary requirements
 								<input
 									name="dietary"
-									placeholder="Vegetarian, no pork…"
+									placeholder="e.g., Vegetarian, no pork, gluten-free"
 									autoComplete="off"
 									className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--dm-peach)]/30"
 								/>
 							</label>
-							<label className="grid gap-1.5 text-xs uppercase tracking-[0.15em] text-[color:var(--dm-muted)]">
+							<label className="grid gap-1.5 text-[0.7rem] sm:text-xs uppercase tracking-[0.15em] text-[color:var(--dm-muted)]">
 								Message
 								<textarea
 									name="message"
@@ -555,6 +627,14 @@ export default function BlushRomanceInvitation({
 								{isSubmitting && <LoadingSpinner size="sm" />}
 								{isSubmitting ? "Sending..." : "Send RSVP"}
 							</button>
+							{submitError && (
+								<p
+									className="mt-3 text-center text-sm text-[#b91c1c]"
+									role="alert"
+								>
+									{submitError}
+								</p>
+							)}
 						</form>
 					)}
 				</div>

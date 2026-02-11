@@ -11,6 +11,7 @@ vi.mock("@tanstack/react-router", () => ({
 	}: AnchorHTMLAttributes<HTMLAnchorElement> & { children?: ReactNode }) => (
 		<a {...props}>{children}</a>
 	),
+	useNavigate: () => vi.fn(),
 }));
 
 describe("header", () => {

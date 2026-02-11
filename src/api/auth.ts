@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import { and, eq, gt, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { getDbOrNull, isProduction, schema } from "@/db/index";
-import { authRateLimit } from "@/lib/rate-limit";
+import { authRateLimit, formatRateLimitMessage } from "@/lib/rate-limit";
 import {
 	createRefreshToken,
 	createSession,
@@ -122,7 +122,7 @@ export const signupFn = createServerFn({ method: "POST" })
 		// Rate limit by email
 		const limit = authRateLimit(email);
 		if (!limit.allowed) {
-			return { error: ApiError.rateLimit().message };
+			return { error: formatRateLimitMessage(limit.resetAt) };
 		}
 
 		const passwordHash = await bcrypt.hash(password, BCRYPT_COST);
@@ -175,8 +175,9 @@ export const signupFn = createServerFn({ method: "POST" })
 		for (const u of fallbackUsers.values()) {
 			if (u.email === email) {
 				return {
-				error: "Unable to create account. If you already have an account, try logging in.",
-			};
+					error:
+						"Unable to create account. If you already have an account, try logging in.",
+				};
 			}
 		}
 
@@ -220,7 +221,7 @@ export const loginFn = createServerFn({ method: "POST" })
 		// Rate limit by email
 		const limit = authRateLimit(email);
 		if (!limit.allowed) {
-			return { error: "Too many attempts. Please try again later." };
+			return { error: formatRateLimitMessage(limit.resetAt) };
 		}
 
 		const db = getDbOrNull();
@@ -443,7 +444,12 @@ export const googleCallbackFn = createServerFn({ method: "POST" })
 		async ({
 			data,
 		}): Promise<
-			| { user: AuthSuccess["user"]; token: string; redirectTo: string }
+			| {
+					user: AuthSuccess["user"];
+					token: string;
+					refreshToken: string;
+					redirectTo: string;
+			  }
 			| AuthError
 		> => {
 			const { code, redirectTo } = data;
@@ -451,7 +457,7 @@ export const googleCallbackFn = createServerFn({ method: "POST" })
 			// Rate limit by code prefix (prevents replay/brute-force)
 			const limit = authRateLimit(`google:${code.slice(0, 16)}`);
 			if (!limit.allowed) {
-				return { error: "Too many attempts. Please try again later." };
+				return { error: formatRateLimitMessage(limit.resetAt) };
 			}
 
 			const clientId = process.env.VITE_GOOGLE_CLIENT_ID;
@@ -552,10 +558,12 @@ export const googleCallbackFn = createServerFn({ method: "POST" })
 						.returning();
 
 					const token = await createSession(updated.id);
+					const refreshToken = await createRefreshToken(updated.id);
 
 					return {
 						user: sanitizeUser(updated),
 						token,
+						refreshToken,
 						redirectTo: safeRedirectTo,
 					};
 				}
@@ -573,10 +581,12 @@ export const googleCallbackFn = createServerFn({ method: "POST" })
 					.returning();
 
 				const token = await createSession(created.id);
+				const refreshToken = await createRefreshToken(created.id);
 
 				return {
 					user: sanitizeUser(created),
 					token,
+					refreshToken,
 					redirectTo: safeRedirectTo,
 				};
 			}
@@ -607,10 +617,12 @@ export const googleCallbackFn = createServerFn({ method: "POST" })
 				fallbackUsers.set(foundUser.id, foundUser);
 
 				const token = await createSession(foundUser.id);
+				const refreshToken = await createRefreshToken(foundUser.id);
 
 				return {
 					user: sanitizeFallbackUser(foundUser),
 					token,
+					refreshToken,
 					redirectTo: safeRedirectTo,
 				};
 			}
@@ -629,10 +641,12 @@ export const googleCallbackFn = createServerFn({ method: "POST" })
 			fallbackUsers.set(id, newUser);
 
 			const token = await createSession(id);
+			const refreshToken = await createRefreshToken(id);
 
 			return {
 				user: sanitizeFallbackUser(newUser),
 				token,
+				refreshToken,
 				redirectTo: safeRedirectTo,
 			};
 		},
@@ -664,7 +678,7 @@ export const requestPasswordResetFn = createServerFn({ method: "POST" })
 		// Rate limit by email
 		const limit = authRateLimit(`reset:${email}`);
 		if (!limit.allowed) {
-			return { error: "Too many attempts. Please try again later." };
+			return { error: formatRateLimitMessage(limit.resetAt) };
 		}
 
 		const db = getDbOrNull();
@@ -720,7 +734,7 @@ export const confirmPasswordResetFn = createServerFn({ method: "POST" })
 		// Rate limit by token prefix
 		const limit = authRateLimit(`confirm-reset:${token.slice(0, 8)}`);
 		if (!limit.allowed) {
-			return { error: "Too many attempts. Please try again later." };
+			return { error: formatRateLimitMessage(limit.resetAt) };
 		}
 
 		const db = getDbOrNull();

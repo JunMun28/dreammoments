@@ -7,7 +7,7 @@ import {
 import { ContextPanelHeader } from "./ContextPanelHeader";
 import { FieldRenderer } from "./FieldRenderer";
 import { getValueByPath } from "./hooks/useEditorState";
-import { listFieldMap } from "./listFieldMap";
+import { getListItems, getListItemsChangeHandler } from "./listFieldHelpers";
 
 type MobileAllSectionsPanelProps = {
 	sections: SectionConfig[];
@@ -23,26 +23,6 @@ type MobileAllSectionsPanelProps = {
 	onAiClick: (sectionId: string, aiType?: FieldAiTaskType) => void;
 	scrollContainerRef: React.RefObject<HTMLDivElement | null>;
 };
-
-function getListItems(
-	draft: InvitationContent,
-	sectionId: string,
-): Array<Record<string, unknown>> | undefined {
-	const listConfig = listFieldMap[sectionId];
-	if (!listConfig) return undefined;
-
-	const sectionData = draft[sectionId as keyof InvitationContent] as
-		| Record<string, unknown>
-		| undefined;
-	if (!sectionData) return undefined;
-
-	const arrayKey = Object.keys(sectionData).find((k) =>
-		Array.isArray(sectionData[k]),
-	);
-	if (!arrayKey) return undefined;
-
-	return (sectionData[arrayKey] as Array<Record<string, unknown>>) ?? [];
-}
 
 export function MobileAllSectionsPanel({
 	sections,
@@ -76,6 +56,9 @@ export function MobileAllSectionsPanel({
 							}
 							onAiClick={() => onAiClick(section.id)}
 							completion={completion}
+							hasErrors={Object.entries(errors).some(
+								([key, val]) => key.startsWith(`${section.id}.`) && !!val,
+							)}
 						/>
 
 						<div className="px-5 py-4">
@@ -83,10 +66,6 @@ export function MobileAllSectionsPanel({
 								{section.fields.map((field) => {
 									const fieldPath = `${section.id}.${field.id}`;
 									const value = getValueByPath(draft, fieldPath);
-									const listItems =
-										field.type === "list"
-											? getListItems(draft, section.id)
-											: undefined;
 
 									return (
 										<FieldRenderer
@@ -99,24 +78,18 @@ export function MobileAllSectionsPanel({
 											error={errors[fieldPath]}
 											uploadingField={uploadingField}
 											onImageUpload={onImageUpload}
-											listItems={listItems}
+											listItems={
+												field.type === "list"
+													? getListItems(draft, section.id)
+													: undefined
+											}
 											onListItemsChange={
 												field.type === "list"
-													? (items) => {
-															const sectionData = draft[
-																section.id as keyof InvitationContent
-															] as Record<string, unknown> | undefined;
-															if (!sectionData) return;
-															const arrayKey = Object.keys(sectionData).find(
-																(k) => Array.isArray(sectionData[k]),
-															);
-															if (arrayKey) {
-																onFieldChange(
-																	`${section.id}.${arrayKey}`,
-																	JSON.stringify(items),
-																);
-															}
-														}
+													? getListItemsChangeHandler(
+															draft,
+															section.id,
+															onFieldChange,
+														)
 													: undefined
 											}
 											onAiClick={

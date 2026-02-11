@@ -2,7 +2,14 @@ import { useEffect, useRef } from "react";
 import { cn } from "../../lib/utils";
 
 type SectionPillBarProps = {
-	sections: Array<{ id: string; label: string; completion: number }>;
+	sections: Array<{
+		id: string;
+		label: string;
+		completion: number;
+		hasErrors?: boolean;
+		errorCount?: number;
+		severity?: "error" | "warning";
+	}>;
 	activeSection: string;
 	onSectionChange: (sectionId: string) => void;
 };
@@ -122,7 +129,22 @@ export function SectionPillBar({
 						onClick={() => onSectionChange(section.id)}
 					>
 						{section.label}
-						<CompletionIcon completion={section.completion} />
+						{section.hasErrors ? (
+							<span
+								role="status"
+								className={cn(
+									"inline-flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full text-[9px] font-bold text-white",
+									section.severity === "warning"
+										? "bg-orange-500"
+										: "bg-red-500",
+								)}
+								aria-label={`${section.errorCount ?? 1} ${section.severity === "warning" ? "warning" : "error"}${(section.errorCount ?? 1) > 1 ? "s" : ""}`}
+							>
+								{(section.errorCount ?? 1) > 1 ? section.errorCount : ""}
+							</span>
+						) : (
+							<CompletionIcon completion={section.completion} />
+						)}
 					</button>
 				);
 			})}

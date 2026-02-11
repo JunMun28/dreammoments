@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { InvitationContent } from "../../../lib/types";
 import type { FieldConfig } from "../../../templates/types";
 
@@ -69,22 +69,33 @@ export function useEditorState({
 	const [history, setHistory] = useState<InvitationContent[]>([]);
 	const [future, setFuture] = useState<InvitationContent[]>([]);
 	const [version, setVersion] = useState(0);
+	const historyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const lastFieldRef = useRef<string>("");
 
 	const canUndo = history.length > 0;
 	const canRedo = future.length > 0;
 
-	const updateDraft = (next: InvitationContent) => {
-		setHistory((prev) => [...prev.slice(-19), draft]);
+	const pushHistory = (snapshot: InvitationContent) => {
+		setHistory((prev) => [...prev.slice(-49), snapshot]);
 		setFuture([]);
+	};
+
+	const updateDraft = (next: InvitationContent) => {
+		pushHistory(draft);
 		setDraft(next);
 		setVersion((v) => v + 1);
 	};
 
 	const handleUndo = () => {
 		if (!canUndo) return;
+		// Flush any pending debounced history push
+		if (historyTimeoutRef.current) {
+			clearTimeout(historyTimeoutRef.current);
+			historyTimeoutRef.current = null;
+		}
 		const previous = history[history.length - 1];
 		setHistory((prev) => prev.slice(0, -1));
-		setFuture((prev) => [draft, ...prev].slice(0, 20));
+		setFuture((prev) => [draft, ...prev].slice(0, 50));
 		setDraft(previous);
 		setVersion((v) => v + 1);
 	};
@@ -93,7 +104,7 @@ export function useEditorState({
 		if (!canRedo) return;
 		const next = future[0];
 		setFuture((prev) => prev.slice(1));
-		setHistory((prev) => [...prev.slice(-19), draft]);
+		setHistory((prev) => [...prev.slice(-49), draft]);
 		setDraft(next);
 		setVersion((v) => v + 1);
 	};
@@ -104,7 +115,24 @@ export function useEditorState({
 				? Number(value || 0)
 				: value;
 		const next = setValueByPath(draft, fieldPath, normalized);
-		updateDraft(next);
+
+		if (historyTimeoutRef.current) clearTimeout(historyTimeoutRef.current);
+		if (fieldPath !== lastFieldRef.current) {
+			pushHistory(draft);
+			lastFieldRef.current = fieldPath;
+		} else {
+			const snapshotForTimeout = draft;
+			const fieldForTimeout = fieldPath;
+			historyTimeoutRef.current = setTimeout(() => {
+				if (lastFieldRef.current === fieldForTimeout) {
+					pushHistory(snapshotForTimeout);
+				}
+			}, 500);
+		}
+
+		setFuture([]);
+		setDraft(next);
+		setVersion((v) => v + 1);
 	};
 
 	const hiddenSections = useMemo(() => {

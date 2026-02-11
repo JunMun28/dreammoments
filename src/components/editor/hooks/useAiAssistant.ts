@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { generateAiContent } from "../../../lib/ai";
 import {
 	incrementAiUsage,
@@ -49,6 +49,7 @@ export type UseAiAssistantReturn = {
 	setAiType: (type: AiTaskType) => void;
 	generate: () => Promise<void>;
 	applyResult: () => void;
+	cancelGeneration: () => void;
 };
 
 const defaultAiPanel: AiPanelState = {
@@ -78,6 +79,7 @@ export function useAiAssistant({
 }: UseAiAssistantParams): UseAiAssistantReturn {
 	const [aiPanel, setAiPanel] = useState<AiPanelState>(defaultAiPanel);
 	const [aiGenerating, setAiGenerating] = useState(false);
+	const abortRef = useRef<AbortController | null>(null);
 
 	const remainingAi = Math.max(0, planLimit - aiGenerationsUsed);
 
@@ -102,6 +104,14 @@ export function useAiAssistant({
 		setAiPanel((prev) => ({ ...prev, type }));
 	}, []);
 
+	const cancelGeneration = useCallback(() => {
+		if (abortRef.current) {
+			abortRef.current.abort();
+			abortRef.current = null;
+		}
+		setAiGenerating(false);
+	}, []);
+
 	const generate = useCallback(async () => {
 		if (remainingAi <= 0) {
 			setAiPanel((prev) => ({
@@ -110,6 +120,9 @@ export function useAiAssistant({
 			}));
 			return;
 		}
+		abortRef.current?.abort();
+		const controller = new AbortController();
+		abortRef.current = controller;
 		setAiPanel((prev) => ({ ...prev, error: undefined }));
 		setAiGenerating(true);
 		try {
@@ -119,6 +132,7 @@ export function useAiAssistant({
 				prompt: aiPanel.prompt,
 				context: draft,
 			})) as Record<string, unknown>;
+			if (controller.signal.aborted) return;
 			const generation = recordAiGeneration(
 				invitationId,
 				aiPanel.sectionId,
@@ -133,6 +147,7 @@ export function useAiAssistant({
 			}));
 			onGenerateSuccess?.();
 		} catch {
+			if (controller.signal.aborted) return;
 			const errorMessage = "Generation failed. Please try again.";
 			setAiPanel((prev) => ({
 				...prev,
@@ -140,7 +155,12 @@ export function useAiAssistant({
 			}));
 			onGenerateError?.(errorMessage);
 		} finally {
-			setAiGenerating(false);
+			if (!controller.signal.aborted) {
+				setAiGenerating(false);
+			}
+			if (abortRef.current === controller) {
+				abortRef.current = null;
+			}
 		}
 	}, [
 		remainingAi,
@@ -212,5 +232,6 @@ export function useAiAssistant({
 		setAiType,
 		generate,
 		applyResult,
+		cancelGeneration,
 	};
 }
