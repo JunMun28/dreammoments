@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import type { InvitationContent } from "../lib/types";
@@ -133,6 +134,48 @@ describe("setValueByPath", () => {
 			(updated as unknown as Record<string, Record<string, unknown>>).gift
 				.paymentUrl,
 		).toBe("https://pay.me");
+	});
+
+	test("keeps untouched top-level branches by reference", () => {
+		const content = makeContent();
+		const updated = setValueByPath(content, "hero.tagline", "Changed");
+
+		expect(updated.hero).not.toBe(content.hero);
+		expect(updated.couple).toBe(content.couple);
+		expect(updated.story).toBe(content.story);
+	});
+
+	test("clones only changed deep branch", () => {
+		const content = makeContent();
+		const updated = setValueByPath(
+			content,
+			"couple.partnerOne.fullName",
+			"Carol Wong",
+		);
+
+		expect(updated.couple).not.toBe(content.couple);
+		expect(updated.couple.partnerOne).not.toBe(content.couple.partnerOne);
+		expect(updated.couple.partnerTwo).toBe(content.couple.partnerTwo);
+		expect(updated.hero).toBe(content.hero);
+	});
+
+	test("supports array index paths without mutating original array", () => {
+		const content = makeContent({
+			story: {
+				milestones: [
+					{ date: "2025-01-01", title: "Met", description: "At a cafe" },
+				],
+			},
+		});
+		const updated = setValueByPath(
+			content,
+			"story.milestones.0.title",
+			"First Date",
+		);
+
+		expect(updated.story.milestones[0]?.title).toBe("First Date");
+		expect(content.story.milestones[0]?.title).toBe("Met");
+		expect(updated.story.milestones).not.toBe(content.story.milestones);
 	});
 });
 
