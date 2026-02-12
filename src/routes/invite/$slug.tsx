@@ -79,7 +79,10 @@ function parseCoupleNames(slug: string): string {
 		const mid = nameparts.indexOf("and");
 		if (mid > 0 && mid < nameparts.length - 1) {
 			const first = nameparts.slice(0, mid).map(capitalize).join(" ");
-			const second = nameparts.slice(mid + 1).map(capitalize).join(" ");
+			const second = nameparts
+				.slice(mid + 1)
+				.map(capitalize)
+				.join(" ");
 			return `${first} & ${second}`;
 		}
 	}
@@ -148,9 +151,6 @@ const lightTemplates = new Set([
 	"blush-romance",
 ]);
 
-function noop() {}
-
-
 function resolveSampleTemplate(slug: string) {
 	if (slug.includes("blush-romance")) return "blush-romance";
 	if (slug.includes("garden-romance")) return "garden-romance";
@@ -213,12 +213,17 @@ function InviteScreen() {
 	useEffect(() => {
 		if (typeof window === "undefined") return;
 		if (!invitation) return;
+		const visitorKey =
+			localStorage.getItem("dm-visitor") ??
+			`${Date.now()}-${Math.random().toString(36).slice(2)}`;
+		localStorage.setItem("dm-visitor", visitorKey);
 		// Track view via server mutation, fall back to local store
 		trackViewMutation.mutate(
 			{
 				invitationId: invitation.id,
 				userAgent: navigator.userAgent,
 				referrer: document.referrer,
+				visitorKey,
 			},
 			{
 				onError: () => {

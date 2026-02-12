@@ -1,210 +1,131 @@
 import { Link } from "@tanstack/react-router";
 import { Check } from "lucide-react";
-import { GradientText } from "./GradientText";
-import { HongbaoBadge } from "./HongbaoBadge";
-import { useCountUp } from "./hooks/useCountUp";
-import { MovingBorderButton } from "./MovingBorderButton";
-import { SectionHeader } from "./motifs/SectionHeader";
+import { useRef } from "react";
+import { useScrollReveal } from "./hooks/useScrollReveal";
 
 const FREE_FEATURES = [
-	"3 AI text regenerations per invitation",
-	"All 4 premium templates",
-	"Standard invitation link",
+	"3 AI text regenerations",
+	"All premium templates",
+	"Standard link",
 	"RSVP management",
-	"Basic view analytics",
+	"Basic analytics",
 ];
 
 const PREMIUM_FEATURES = [
-	"100 AI text regenerations per invitation",
-	"Custom slug (your-name.dreammoments.app)",
-	"Angpao QR code",
-	"CSV guest import / export",
-	"Detailed analytics dashboard",
+	"Unlimited AI regenerations",
+	"Custom URL (your-name.dreammoments.app)",
+	"Digital Ang Bao QR",
+	"Guest list export",
+	"Advanced analytics",
 	"Priority support",
-	'Remove "Made with DreamMoments" branding',
+	"Remove branding",
 ];
 
 export function Pricing({ reducedMotion }: { reducedMotion: boolean }) {
-	const priceRef = useCountUp(49, {
-		duration: 1.8,
-		reducedMotion,
-	});
-	return (
-		// biome-ignore lint/correctness/useUniqueElementIds: intentional anchor for in-page navigation
-		<section
-			id="pricing"
-			className="relative px-6 py-[clamp(5rem,10vw,10rem)]"
-			style={{ background: "var(--dm-bg)" }}
-		>
-			<div className="mx-auto max-w-5xl">
-				<SectionHeader
-					kickerEn="SIMPLE PRICING"
-					kickerCn="简单定价"
-					title="One price. No subscriptions."
-					subtitle="Start free, upgrade when you're ready. One-time payment per invitation."
-					kickerColor="var(--dm-gold)"
-					reducedMotion={reducedMotion}
-				/>
+	const sectionRef = useRef<HTMLElement>(null);
+	useScrollReveal(reducedMotion, sectionRef);
 
-				{/* Currency context pill */}
-				<div data-scroll-reveal className="-mt-10 mb-14 text-center">
-					<span
-						className="dm-reveal inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm"
-						style={{
-							borderColor: "var(--dm-border)",
-							background: "var(--dm-surface)",
-							color: "var(--dm-muted)",
-						}}
-					>
-						<span>Prices in</span>
-						<span className="font-semibold" style={{ color: "var(--dm-ink)" }}>
-							MYR
-						</span>
-						<span style={{ opacity: 0.5 }}>/</span>
-						<span className="font-semibold" style={{ color: "var(--dm-ink)" }}>
-							SGD
-						</span>
+	return (
+		// biome-ignore lint/correctness/useUniqueElementIds: stable hash target for in-page navigation links
+		<section
+			ref={sectionRef}
+			className="py-24 lg:py-32 bg-dm-surface-muted"
+			id="pricing"
+		>
+			<div className="dm-container dm-reveal">
+				<div className="text-center max-w-2xl mx-auto mb-16">
+					<span className="text-dm-primary font-semibold tracking-wider text-sm uppercase mb-4 block">
+						Pricing
 					</span>
+					<h2 className="text-heading mb-6">Simple, transparent pricing.</h2>
+					<p className="text-body-lg mb-8">
+						Start for free, upgrade only when you're ready to publish. One-time
+						payment per invitation, no subscriptions.
+					</p>
+
+					<div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full border border-dm-border text-sm text-dm-ink-muted">
+						<span>Prices in</span>
+						<span className="font-semibold text-dm-ink">MYR</span>
+						<span className="text-gray-300">/</span>
+						<span className="font-semibold text-dm-ink">SGD</span>
+					</div>
 				</div>
 
-				{/* Cards */}
-				<div
-					data-scroll-reveal
-					className="mx-auto grid max-w-4xl gap-8 md:grid-cols-2"
-				>
-					{/* Free Card */}
-					<div
-						className="dm-reveal-child flex flex-col rounded-2xl p-8 sm:p-10 order-1"
-						style={{
-							border: "1px solid var(--dm-border)",
-							background: "var(--dm-surface)",
-						}}
-					>
-						<span
-							className="text-sm font-medium uppercase tracking-[0.12em]"
-							style={{ color: "var(--dm-muted)" }}
-						>
-							Free
-						</span>
-						<div
-							className="mt-3 font-display text-5xl font-semibold"
-							style={{ color: "var(--dm-ink)" }}
-						>
-							RM0
+				<div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+					{/* Free Plan */}
+					<div className="bg-white rounded-3xl p-8 border border-dm-border shadow-sm flex flex-col">
+						<div className="mb-6">
+							<h3 className="text-lg font-medium text-dm-ink">Basic</h3>
+							<div className="mt-4 flex items-baseline gap-1">
+								<span className="text-4xl font-display font-bold text-dm-ink">
+									RM0
+								</span>
+							</div>
+							<p className="mt-2 text-sm text-dm-ink-muted">
+								Perfect for trying it out.
+							</p>
 						</div>
-						<p className="mt-2" style={{ color: "var(--dm-muted)" }}>
-							Everything to get started.
-						</p>
-
-						<ul className="mt-8 flex-1 space-y-4">
-							{FREE_FEATURES.map((f) => (
-								<li key={f} className="flex items-start gap-3">
-									<Check
-										aria-hidden="true"
-										className="mt-0.5 h-5 w-5 flex-shrink-0"
-										style={{ color: "var(--dm-sage)" }}
-									/>
-									<span style={{ color: "var(--dm-ink)" }}>{f}</span>
+						<ul className="space-y-4 mb-8 flex-1">
+							{FREE_FEATURES.map((feature) => (
+								<li
+									key={feature}
+									className="flex items-start gap-3 text-sm text-dm-ink-muted"
+								>
+									<Check className="w-5 h-5 text-dm-primary flex-shrink-0" />
+									{feature}
 								</li>
 							))}
 						</ul>
-
 						<Link
 							to="/auth/signup"
-							className="dm-cta-secondary mt-10 w-full text-center text-sm uppercase tracking-[0.12em]"
+							className="w-full block text-center py-3 bg-white border border-dm-border rounded-full text-dm-ink font-medium hover:bg-gray-50 transition-colors"
 						>
 							Get Started Free
 						</Link>
 					</div>
 
-					{/* Premium Card */}
-					<div className="dm-reveal-child relative order-2 translate-y-0 md:-translate-y-3">
-						{/* Animated gradient border wrapper */}
-						<div className="dm-pricing-glow relative overflow-hidden rounded-2xl p-[3px]">
-							<span
-								className="dm-pricing-glow-spin pointer-events-none absolute inset-[-200%]"
-								style={{
-									background:
-										"conic-gradient(from 0deg, transparent 0deg 200deg, var(--dm-hongbao-gold) 240deg, var(--dm-hongbao-red-deep) 280deg, transparent 320deg 360deg)",
-								}}
-								aria-hidden="true"
-							/>
-							<div
-								className="relative z-10 flex flex-col rounded-[calc(1rem-3px)] p-8 sm:p-10"
-								style={{
-									background: "var(--dm-hongbao-red)",
-									boxShadow: "0 12px 48px -12px rgba(200, 64, 64, 0.25)",
-								}}
-							>
-								<HongbaoBadge label="Most Popular" />
-
-								<span
-									className="mt-2 text-sm font-medium uppercase tracking-[0.12em]"
-									style={{ color: "rgba(255,255,255,0.7)" }}
-								>
-									Premium
-								</span>
-								<div className="mt-3">
-									<span
-										className="font-display font-semibold"
-										style={{ fontSize: "3.5rem" }}
-									>
-										<GradientText gradient="linear-gradient(135deg, #D4B87A, #F0D090)">
-											RM
-											<span ref={priceRef as React.RefObject<HTMLSpanElement>}>
-												49
-											</span>
-										</GradientText>
-									</span>
-									<span
-										className="ml-2 text-lg font-semibold"
-										style={{ color: "rgba(255,255,255,0.85)" }}
-									>
-										/ S$19
-									</span>
-								</div>
-								<p className="mt-2" style={{ color: "rgba(255,255,255,0.7)" }}>
-									One-time per invitation. Not a subscription.
-								</p>
-
-								<ul className="mt-8 flex-1 space-y-4">
-									{PREMIUM_FEATURES.map((f) => (
-										<li key={f} className="flex items-start gap-3">
-											<Check
-												aria-hidden="true"
-												className="mt-0.5 h-5 w-5 flex-shrink-0"
-												style={{ color: "var(--dm-hongbao-gold)" }}
-											/>
-											<span style={{ color: "rgba(255,255,255,0.9)" }}>
-												{f}
-											</span>
-										</li>
-									))}
-								</ul>
-
-								<div className="mt-10 w-full">
-									<MovingBorderButton
-										href="/auth/signup"
-										variant="gold"
-										className="w-full justify-center"
-									>
-										Upgrade for RM49 / S$19
-									</MovingBorderButton>
-								</div>
-							</div>
+					{/* Premium Plan */}
+					<div className="bg-white rounded-3xl p-8 border-2 border-dm-primary shadow-xl flex flex-col relative overflow-hidden">
+						<div className="absolute top-0 right-0 bg-dm-primary text-white text-xs font-bold px-3 py-1 rounded-bl-xl uppercase tracking-wider">
+							Popular
 						</div>
+						<div className="mb-6">
+							<h3 className="text-lg font-medium text-dm-ink">Premium</h3>
+							<div className="mt-4 flex items-baseline gap-1">
+								<span className="text-4xl font-display font-bold text-dm-ink">
+									RM49
+								</span>
+								<span className="text-lg text-dm-ink-muted font-medium">
+									/ S$19
+								</span>
+							</div>
+							<p className="mt-2 text-sm text-dm-ink-muted">
+								Everything you need for the big day.
+							</p>
+						</div>
+						<ul className="space-y-4 mb-8 flex-1">
+							{PREMIUM_FEATURES.map((feature) => (
+								<li
+									key={feature}
+									className="flex items-start gap-3 text-sm text-dm-ink"
+								>
+									<Check className="w-5 h-5 text-dm-primary flex-shrink-0" />
+									{feature}
+								</li>
+							))}
+						</ul>
+						<Link
+							to="/auth/signup"
+							className="w-full block text-center py-3 bg-dm-primary text-white rounded-full font-medium hover:bg-dm-primary-hover shadow-lg shadow-dm-primary/25 transition-all"
+						>
+							Create Premium Invite
+						</Link>
 					</div>
 				</div>
 
-				{/* Angpao tagline */}
-				<div data-scroll-reveal>
-					<p
-						className="dm-reveal mt-10 text-center font-accent text-lg italic"
-						style={{ color: "var(--dm-muted)" }}
-					>
-						One-time payment. Like an angpao — give once, celebrate forever.
-					</p>
-				</div>
+				<p className="text-center text-sm text-dm-ink-muted mt-10 italic">
+					"Like an angpao — give once, celebrate forever."
+				</p>
 			</div>
 		</section>
 	);

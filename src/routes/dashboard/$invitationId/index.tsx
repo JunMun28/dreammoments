@@ -207,7 +207,7 @@ function ConfirmPublishDialog({
 	);
 }
 
-export function InvitationDashboard() {
+function InvitationDashboard() {
 	const { invitationId } = Route.useParams();
 	const { user, loading } = useAuth();
 	const { addToast } = useToast();

@@ -1,158 +1,136 @@
 import { Link } from "@tanstack/react-router";
-import { MeshGradientBackground } from "./MeshGradientBackground";
-import { GoldRule } from "./motifs/GoldRule";
 
-export function Footer({ reducedMotion = false }: { reducedMotion?: boolean }) {
+export function Footer({
+	reducedMotion: _reducedMotion = false,
+}: {
+	reducedMotion?: boolean;
+}) {
 	return (
-		<footer
-			className="relative px-6 py-16 text-center"
-			style={{ background: "var(--dm-bg)" }}
-		>
-			{/* Subtle mesh gradient strip */}
-			<div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-				<MeshGradientBackground
-					variant="warm"
-					className="h-full"
-					reducedMotion={reducedMotion}
-				>
-					<div />
-				</MeshGradientBackground>
-			</div>
+		<footer className="py-12 bg-white border-t border-dm-border">
+			<div className="dm-container">
+				<div className="grid md:grid-cols-4 gap-8 mb-12">
+					<div className="md:col-span-1">
+						<Link
+							to="/"
+							className="text-xl font-display font-bold text-dm-ink flex items-center gap-2"
+						>
+							DreamMoments
+						</Link>
+						<p className="mt-4 text-sm text-dm-ink-muted leading-relaxed">
+							The modern platform for wedding invitations. Thinking of every
+							detail so you don&apos;t have to.
+						</p>
+					</div>
 
-			{/* Gold hairline at top */}
-			<GoldRule className="absolute top-0 left-0 right-0" />
+					<div>
+						<h4 className="font-semibold text-dm-ink mb-4">Product</h4>
+						<ul className="space-y-2 text-sm text-dm-ink-muted">
+							<li>
+								<Link
+									to="/"
+									hash="features"
+									className="hover:text-dm-primary transition-colors"
+								>
+									Features
+								</Link>
+							</li>
+							<li>
+								<Link
+									to="/"
+									hash="templates"
+									className="hover:text-dm-primary transition-colors"
+								>
+									Templates
+								</Link>
+							</li>
+							<li>
+								<Link
+									to="/"
+									hash="pricing"
+									className="hover:text-dm-primary transition-colors"
+								>
+									Pricing
+								</Link>
+							</li>
+						</ul>
+					</div>
 
-			<div className="mx-auto max-w-4xl">
-				{/* Brand */}
-				<div className="flex items-center justify-center gap-3">
-					<span
-						className="select-none"
-						style={{
-							fontFamily: '"Noto Serif SC", serif',
-							fontSize: "1rem",
-							color: "var(--dm-gold-electric)",
-							opacity: 0.6,
-							textShadow: "0 0 8px rgba(212,184,122,0.4)",
-						}}
-						aria-hidden="true"
-					>
-						囍
-					</span>
-					<p
-						className="font-display text-2xl font-semibold"
-						style={{
-							color: "var(--dm-ink)",
-							letterSpacing: "-0.02em",
-						}}
-					>
-						DreamMoments
+					<div>
+						<h4 className="font-semibold text-dm-ink mb-4">Resources</h4>
+						<ul className="space-y-2 text-sm text-dm-ink-muted">
+							<li>
+								<a
+									href="/blog"
+									className="hover:text-dm-primary transition-colors"
+								>
+									Blog
+								</a>
+							</li>
+							<li>
+								<a
+									href="/help"
+									className="hover:text-dm-primary transition-colors"
+								>
+									Help Center
+								</a>
+							</li>
+							<li>
+								<a
+									href="/guides"
+									className="hover:text-dm-primary transition-colors"
+								>
+									Wedding Guides
+								</a>
+							</li>
+						</ul>
+					</div>
+
+					<div>
+						<h4 className="font-semibold text-dm-ink mb-4">Legal</h4>
+						<ul className="space-y-2 text-sm text-dm-ink-muted">
+							<li>
+								<Link
+									to="/privacy"
+									className="hover:text-dm-primary transition-colors"
+								>
+									Privacy Policy
+								</Link>
+							</li>
+							<li>
+								<Link
+									to="/terms"
+									className="hover:text-dm-primary transition-colors"
+								>
+									Terms of Service
+								</Link>
+							</li>
+						</ul>
+					</div>
+				</div>
+
+				<div className="pt-8 border-t border-dm-border flex flex-col md:flex-row justify-between items-center gap-4">
+					<p className="text-sm text-dm-ink-muted">
+						© {new Date().getFullYear()} DreamMoments. All rights reserved.
 					</p>
-					<span
-						className="select-none"
-						style={{
-							fontFamily: '"Noto Serif SC", serif',
-							fontSize: "1rem",
-							color: "var(--dm-gold-electric)",
-							opacity: 0.6,
-							textShadow: "0 0 8px rgba(212,184,122,0.4)",
-						}}
-						aria-hidden="true"
-					>
-						囍
-					</span>
+					<div className="flex gap-6">
+						<a
+							href="https://instagram.com"
+							target="_blank"
+							rel="noopener noreferrer"
+							className="text-dm-ink-muted hover:text-dm-primary transition-colors"
+						>
+							Instagram
+						</a>
+						<a
+							href="https://twitter.com"
+							target="_blank"
+							rel="noopener noreferrer"
+							className="text-dm-ink-muted hover:text-dm-primary transition-colors"
+						>
+							Twitter
+						</a>
+					</div>
 				</div>
-
-				{/* Tagline */}
-				<p className="mt-2 text-sm" style={{ color: "var(--dm-muted)" }}>
-					AI-powered wedding invitations for Chinese couples in Malaysia &
-					Singapore.
-				</p>
-
-				{/* EST line */}
-				<p
-					className="mt-4"
-					style={{
-						fontFamily: '"Inter", system-ui, sans-serif',
-						fontSize: "0.6875rem",
-						fontWeight: 500,
-						textTransform: "uppercase",
-						letterSpacing: "0.2em",
-						color: "var(--dm-muted)",
-						opacity: 0.5,
-					}}
-				>
-					EST. 2025
-				</p>
-
-				{/* Contact */}
-				<div
-					className="mt-6 flex flex-wrap items-center justify-center gap-4 text-sm"
-					style={{ color: "var(--dm-muted)" }}
-				>
-					<a
-						href="mailto:hello@dreammoments.app"
-						className="rounded transition-colors duration-300 hover:text-[var(--dm-ink)] focus-visible:ring-2 focus-visible:ring-[var(--dm-crimson)] focus-visible:ring-offset-2 focus-visible:outline-none"
-					>
-						hello@dreammoments.app
-					</a>
-					<span style={{ opacity: 0.4 }} aria-hidden="true">
-						{"\u00B7"}
-					</span>
-					<a
-						href="https://wa.me/60123456789"
-						target="_blank"
-						rel="noopener noreferrer"
-						className="rounded transition-colors duration-300 hover:text-[var(--dm-ink)] focus-visible:ring-2 focus-visible:ring-[var(--dm-crimson)] focus-visible:ring-offset-2 focus-visible:outline-none"
-					>
-						WhatsApp
-					</a>
-					<span style={{ opacity: 0.4 }} aria-hidden="true">
-						{"\u00B7"}
-					</span>
-					<a
-						href="https://instagram.com/dreammoments.app"
-						target="_blank"
-						rel="noopener noreferrer"
-						className="rounded transition-colors duration-300 hover:text-[var(--dm-ink)] focus-visible:ring-2 focus-visible:ring-[var(--dm-crimson)] focus-visible:ring-offset-2 focus-visible:outline-none"
-					>
-						Instagram
-					</a>
-				</div>
-
-				{/* Links */}
-				<nav
-					aria-label="Footer"
-					className="mt-4 flex justify-center gap-4 text-sm"
-				>
-					<Link
-						to="/privacy"
-						className="rounded transition-colors duration-300 hover:text-[var(--dm-ink)] focus-visible:ring-2 focus-visible:ring-[var(--dm-crimson)] focus-visible:ring-offset-2 focus-visible:outline-none"
-						style={{ color: "var(--dm-muted)" }}
-					>
-						Privacy Policy
-					</Link>
-					<span
-						style={{ color: "var(--dm-muted)", opacity: 0.4 }}
-						aria-hidden="true"
-					>
-						{"\u00B7"}
-					</span>
-					<Link
-						to="/terms"
-						className="rounded transition-colors duration-300 hover:text-[var(--dm-ink)] focus-visible:ring-2 focus-visible:ring-[var(--dm-crimson)] focus-visible:ring-offset-2 focus-visible:outline-none"
-						style={{ color: "var(--dm-muted)" }}
-					>
-						Terms of Service
-					</Link>
-				</nav>
-
-				{/* PDPA line */}
-				<p
-					className="mt-6 text-xs"
-					style={{ color: "var(--dm-muted)", opacity: 0.6 }}
-				>
-					PDPA compliant for Malaysia and Singapore
-				</p>
 			</div>
 		</footer>
 	);

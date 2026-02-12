@@ -1,13 +1,28 @@
 import { createServerFn } from "@tanstack/react-start";
+import {
+	deleteCookie,
+	getCookie,
+	setCookie,
+} from "@tanstack/react-start/server";
 import bcrypt from "bcryptjs";
 import { and, eq, gt, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { getDbOrNull, isProduction, schema } from "@/db/index";
+import {
+	AUTH_ACCESS_COOKIE,
+	AUTH_REFRESH_COOKIE,
+	getAccessCookieOptions,
+	getClearedCookieOptions,
+	getRefreshCookieOptions,
+} from "@/lib/auth-cookies";
+import { sanitizeRedirect } from "@/lib/auth-redirect";
 import { authRateLimit, formatRateLimitMessage } from "@/lib/rate-limit";
 import {
+	createOAuthStateToken,
 	createRefreshToken,
 	createSession,
 	refreshSession,
+	verifyOAuthStateToken,
 	verifySession,
 } from "@/lib/session";
 import { ApiError } from "./errors";
@@ -101,6 +116,45 @@ function generateId(): string {
 	);
 }
 
+function getCookieSafe(name: string): string | undefined {
+	try {
+		return getCookie(name);
+	} catch {
+		return undefined;
+	}
+}
+
+function setCookieSafe(
+	name: string,
+	value: string,
+	options: Record<string, unknown>,
+) {
+	try {
+		setCookie(name, value, options);
+	} catch {
+		// no request context (tests/direct calls)
+	}
+}
+
+function deleteCookieSafe(name: string, options: Record<string, unknown>) {
+	try {
+		deleteCookie(name, options);
+	} catch {
+		// no request context (tests/direct calls)
+	}
+}
+
+function persistAuthCookies(token: string, refreshToken: string) {
+	setCookieSafe(AUTH_ACCESS_COOKIE, token, getAccessCookieOptions());
+	setCookieSafe(AUTH_REFRESH_COOKIE, refreshToken, getRefreshCookieOptions());
+}
+
+function clearAuthCookies() {
+	const options = getClearedCookieOptions();
+	deleteCookieSafe(AUTH_ACCESS_COOKIE, options);
+	deleteCookieSafe(AUTH_REFRESH_COOKIE, options);
+}
+
 // ---------------------------------------------------------------------------
 // Server Functions
 // ---------------------------------------------------------------------------
@@ -157,6 +211,7 @@ export const signupFn = createServerFn({ method: "POST" })
 
 			const token = await createSession(created.id);
 			const refreshToken = await createRefreshToken(created.id);
+			persistAuthCookies(token, refreshToken);
 
 			return {
 				user: sanitizeUser(created),
@@ -197,6 +252,7 @@ export const signupFn = createServerFn({ method: "POST" })
 
 		const token = await createSession(id);
 		const refreshToken = await createRefreshToken(id);
+		persistAuthCookies(token, refreshToken);
 
 		return {
 			user: sanitizeFallbackUser(user),
@@ -248,6 +304,7 @@ export const loginFn = createServerFn({ method: "POST" })
 
 			const token = await createSession(row.id);
 			const refreshToken = await createRefreshToken(row.id);
+			persistAuthCookies(token, refreshToken);
 			return { user: sanitizeUser(row), token, refreshToken };
 		}
 
@@ -281,6 +338,7 @@ export const loginFn = createServerFn({ method: "POST" })
 
 		const token = await createSession(foundUser.id);
 		const refreshToken = await createRefreshToken(foundUser.id);
+		persistAuthCookies(token, refreshToken);
 
 		return {
 			user: sanitizeFallbackUser(foundUser),
@@ -290,47 +348,38 @@ export const loginFn = createServerFn({ method: "POST" })
 	});
 
 const logoutSchema = z.object({
-	token: z.string().min(1, "Token is required"),
+	token: z.string().min(1, "Token is required").optional(),
+	refreshToken: z.string().min(1).optional(),
 });
 
 export const logoutFn = createServerFn({ method: "POST" })
-	.inputValidator((data: { token: string }) => parseInput(logoutSchema, data))
+	.inputValidator((data: { token?: string; refreshToken?: string }) =>
+		parseInput(logoutSchema, data),
+	)
 	.handler(async ({ data }): Promise<{ success: boolean }> => {
-		const db = getDbOrNull();
+		const token = data.token ?? getCookieSafe(AUTH_ACCESS_COOKIE);
+		const refreshToken =
+			data.refreshToken ?? getCookieSafe(AUTH_REFRESH_COOKIE);
 
-		if (db) {
-			const tokenHash = await hashToken(data.token);
-
-			// Decode JWT to get expiry (best-effort; if invalid, use 1h default)
-			let expiresAt = new Date(Date.now() + 60 * 60 * 1000);
-			try {
-				const parts = data.token.split(".");
-				if (parts[1]) {
-					const payload = JSON.parse(atob(parts[1]));
-					if (typeof payload.exp === "number") {
-						expiresAt = new Date(payload.exp * 1000);
-					}
-				}
-			} catch {
-				// Use default expiry
-			}
-
-			await db.insert(schema.tokenBlocklist).values({
-				tokenHash,
-				expiresAt,
-			});
+		if (token) {
+			await blockToken(token, 60 * 60 * 1000);
 		}
+		if (refreshToken) {
+			await blockToken(refreshToken, 7 * 24 * 60 * 60 * 1000);
+		}
+
+		clearAuthCookies();
 
 		return { success: true };
 	});
 
 const getSessionSchema = z.object({
-	token: z.string().min(1, "Token is required"),
+	token: z.string().min(1, "Token is required").optional(),
 	refreshToken: z.string().optional(),
 });
 
 export const getSessionFn = createServerFn({ method: "POST" })
-	.inputValidator((data: { token: string; refreshToken?: string }) =>
+	.inputValidator((data: { token?: string; refreshToken?: string }) =>
 		parseInput(getSessionSchema, data),
 	)
 	.handler(
@@ -341,19 +390,36 @@ export const getSessionFn = createServerFn({ method: "POST" })
 			newToken?: string;
 			newRefreshToken?: string;
 		}> => {
-			const { token } = data;
+			const token = data.token ?? getCookieSafe(AUTH_ACCESS_COOKIE);
+			const refreshToken =
+				data.refreshToken ?? getCookieSafe(AUTH_REFRESH_COOKIE);
 
-			if (!token) {
+			if (!token && !refreshToken) {
+				clearAuthCookies();
 				return { user: null };
 			}
 
-			// First try to verify the access token
-			const session = await verifySession(token, "access");
+			if (token && (await isTokenBlocked(token))) {
+				clearAuthCookies();
+				return { user: null };
+			}
+
+			// First try to verify the access token, if present.
+			const session = token ? await verifySession(token, "access") : null;
 
 			// If access token is expired but we have a refresh token, try refreshing
-			if (!session && data.refreshToken) {
-				const refreshed = await refreshSession(data.refreshToken);
+			if (!session && refreshToken) {
+				if (await isTokenBlocked(refreshToken)) {
+					clearAuthCookies();
+					return { user: null };
+				}
+
+				const refreshed = await refreshSession(refreshToken);
 				if (refreshed) {
+					// Rotation: immediately revoke old refresh token.
+					await blockToken(refreshToken, 7 * 24 * 60 * 60 * 1000);
+					persistAuthCookies(refreshed.token, refreshed.refreshToken);
+
 					const refreshedSession = await verifySession(
 						refreshed.token,
 						"access",
@@ -368,6 +434,7 @@ export const getSessionFn = createServerFn({ method: "POST" })
 								.where(eq(schema.users.id, refreshedSession.userId));
 
 							if (!row) {
+								clearAuthCookies();
 								return { user: null };
 							}
 
@@ -379,11 +446,13 @@ export const getSessionFn = createServerFn({ method: "POST" })
 						}
 
 						if (isProduction()) {
+							clearAuthCookies();
 							return { user: null };
 						}
 
 						const fallbackUser = fallbackUsers.get(refreshedSession.userId);
 						if (!fallbackUser) {
+							clearAuthCookies();
 							return { user: null };
 						}
 
@@ -394,10 +463,12 @@ export const getSessionFn = createServerFn({ method: "POST" })
 						};
 					}
 				}
+				clearAuthCookies();
 				return { user: null };
 			}
 
 			if (!session) {
+				clearAuthCookies();
 				return { user: null };
 			}
 
@@ -410,6 +481,7 @@ export const getSessionFn = createServerFn({ method: "POST" })
 					.where(eq(schema.users.id, session.userId));
 
 				if (!row) {
+					clearAuthCookies();
 					return { user: null };
 				}
 
@@ -418,12 +490,14 @@ export const getSessionFn = createServerFn({ method: "POST" })
 
 			// In production, DB is required
 			if (isProduction()) {
+				clearAuthCookies();
 				return { user: null };
 			}
 
 			// Dev-only fallback: in-memory store
 			const fallbackUser = fallbackUsers.get(session.userId);
 			if (!fallbackUser) {
+				clearAuthCookies();
 				return { user: null };
 			}
 
@@ -431,13 +505,26 @@ export const getSessionFn = createServerFn({ method: "POST" })
 		},
 	);
 
-const googleCallbackSchema = z.object({
-	code: z.string().min(1, "Authorization code is required"),
+const googleStateSchema = z.object({
 	redirectTo: z.string().max(500).optional(),
 });
 
+export const createGoogleAuthStateFn = createServerFn({ method: "POST" })
+	.inputValidator((data: { redirectTo?: string }) =>
+		parseInput(googleStateSchema, data),
+	)
+	.handler(async ({ data }): Promise<{ stateToken: string }> => {
+		const safeRedirect = sanitizeRedirect(data.redirectTo);
+		return { stateToken: await createOAuthStateToken(safeRedirect) };
+	});
+
+const googleCallbackSchema = z.object({
+	code: z.string().min(1, "Authorization code is required"),
+	stateToken: z.string().min(1, "State token is required"),
+});
+
 export const googleCallbackFn = createServerFn({ method: "POST" })
-	.inputValidator((data: { code: string; redirectTo?: string }) =>
+	.inputValidator((data: { code: string; stateToken: string }) =>
 		parseInput(googleCallbackSchema, data),
 	)
 	.handler(
@@ -452,7 +539,12 @@ export const googleCallbackFn = createServerFn({ method: "POST" })
 			  }
 			| AuthError
 		> => {
-			const { code, redirectTo } = data;
+			const { code, stateToken } = data;
+
+			const verifiedState = await verifyOAuthStateToken(stateToken);
+			if (!verifiedState) {
+				return { error: "Invalid or expired OAuth state. Please try again." };
+			}
 
 			// Rate limit by code prefix (prevents replay/brute-force)
 			const limit = authRateLimit(`google:${code.slice(0, 16)}`);
@@ -532,11 +624,7 @@ export const googleCallbackFn = createServerFn({ method: "POST" })
 			const avatarUrl = googleUser.picture || undefined;
 
 			const db = getDbOrNull();
-			// Validate redirectTo is a safe relative URL (prevent open redirect)
-			const safeRedirectTo =
-				redirectTo?.startsWith("/") && !redirectTo.startsWith("//")
-					? redirectTo
-					: "/dashboard";
+			const safeRedirectTo = sanitizeRedirect(verifiedState.redirectTo);
 
 			if (db) {
 				// Check if user exists
@@ -559,6 +647,7 @@ export const googleCallbackFn = createServerFn({ method: "POST" })
 
 					const token = await createSession(updated.id);
 					const refreshToken = await createRefreshToken(updated.id);
+					persistAuthCookies(token, refreshToken);
 
 					return {
 						user: sanitizeUser(updated),
@@ -582,6 +671,7 @@ export const googleCallbackFn = createServerFn({ method: "POST" })
 
 				const token = await createSession(created.id);
 				const refreshToken = await createRefreshToken(created.id);
+				persistAuthCookies(token, refreshToken);
 
 				return {
 					user: sanitizeUser(created),
@@ -618,6 +708,7 @@ export const googleCallbackFn = createServerFn({ method: "POST" })
 
 				const token = await createSession(foundUser.id);
 				const refreshToken = await createRefreshToken(foundUser.id);
+				persistAuthCookies(token, refreshToken);
 
 				return {
 					user: sanitizeFallbackUser(foundUser),
@@ -642,6 +733,7 @@ export const googleCallbackFn = createServerFn({ method: "POST" })
 
 			const token = await createSession(id);
 			const refreshToken = await createRefreshToken(id);
+			persistAuthCookies(token, refreshToken);
 
 			return {
 				user: sanitizeFallbackUser(newUser),
@@ -660,6 +752,42 @@ async function hashToken(token: string): Promise<string> {
 	return Array.from(new Uint8Array(hashBuffer))
 		.map((b) => b.toString(16).padStart(2, "0"))
 		.join("");
+}
+
+function decodeTokenExpiry(token: string, defaultMs: number): Date {
+	let expiresAt = new Date(Date.now() + defaultMs);
+	try {
+		const parts = token.split(".");
+		if (parts[1]) {
+			const payload = JSON.parse(atob(parts[1]));
+			if (typeof payload.exp === "number") {
+				expiresAt = new Date(payload.exp * 1000);
+			}
+		}
+	} catch {
+		// keep default
+	}
+	return expiresAt;
+}
+
+async function isTokenBlocked(token: string): Promise<boolean> {
+	const db = getDbOrNull();
+	if (!db) return false;
+	const tokenHash = await hashToken(token);
+	const [entry] = await db
+		.select()
+		.from(schema.tokenBlocklist)
+		.where(eq(schema.tokenBlocklist.tokenHash, tokenHash));
+	return !!entry;
+}
+
+async function blockToken(token: string, defaultTtlMs: number) {
+	const db = getDbOrNull();
+	if (!db) return;
+	await db.insert(schema.tokenBlocklist).values({
+		tokenHash: await hashToken(token),
+		expiresAt: decodeTokenExpiry(token, defaultTtlMs),
+	});
 }
 
 // ── Request password reset ──────────────────────────────────────

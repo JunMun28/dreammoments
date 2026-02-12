@@ -1,308 +1,104 @@
-import { Fragment, useEffect, useRef } from "react";
-import { MeshGradientBackground } from "./MeshGradientBackground";
-import { GoldRule } from "./motifs/GoldRule";
-import { PetalShower } from "./motifs/PetalShower";
-import { SplitWords } from "./SplitWords";
-
-interface StatConfig {
-	value: number;
-	suffix: string;
-	prefix: string;
-	label: string;
-	isDecimal: boolean;
-	displaySuffix?: string;
-}
-
-const STATS: StatConfig[] = [
-	{
-		value: 100,
-		suffix: "s",
-		prefix: "",
-		label: "Couples & counting",
-		isDecimal: false,
-	},
-	{
-		value: 4.9,
-		suffix: "",
-		prefix: "",
-		label: "Average rating",
-		isDecimal: true,
-	},
-	{
-		value: 3,
-		suffix: "",
-		prefix: "< ",
-		label: "Minutes to set up",
-		isDecimal: false,
-		displaySuffix: " min",
-	},
-];
+import { useRef } from "react";
+import { useScrollReveal } from "./hooks/useScrollReveal";
 
 const TESTIMONIALS = [
 	{
 		quote:
-			"Our guests kept saying the invitation was the most beautiful they'd ever received. The tea ceremony section was perfect.",
-		author: "Wei Lin & Jun Hao",
-		location: "Kuala Lumpur",
-	},
-	{
-		quote:
-			"We created our invitation in one evening. The AI wrote our love story better than we could ourselves!",
-		author: "Hui Wen & Zhi Yang",
+			"It felt less like sending an invite and more like sharing a piece of our story. Our guests were in tears.",
+		author: "Sarah & Michael",
 		location: "Singapore",
+		img: "https://images.unsplash.com/photo-1623091410901-00e2d5b6a0ff?q=80&w=200&auto=format&fit=crop",
 	},
 	{
 		quote:
-			"The bilingual feature saved us so much time. Our parents loved that everything was in both English and Chinese.",
-		author: "Shu Qi & Wei Jie",
+			"We wanted something that honored our traditions but felt modern. DreamMoments was the perfect bridge between generations.",
+		author: "Wei Ling & Jun Hao",
+		location: "Kuala Lumpur",
+		img: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?q=80&w=200&auto=format&fit=crop",
+	},
+	{
+		quote:
+			"Simple, beautiful, and deeply personal. I'll cherish this digital keepsake forever.",
+		author: "Elena & David",
 		location: "Penang",
+		img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop",
 	},
 ];
 
 export function SocialProof({ reducedMotion }: { reducedMotion: boolean }) {
 	const sectionRef = useRef<HTMLElement>(null);
-	const statsRef = useRef<HTMLDivElement>(null);
-	const testimonialRef = useRef<HTMLDivElement>(null);
-
-	useEffect(() => {
-		if (reducedMotion || !sectionRef.current) return;
-
-		let ctx: gsap.Context | undefined;
-
-		async function initGSAP() {
-			const gsap = (await import("gsap")).default;
-			const { ScrollTrigger } = await import("gsap/ScrollTrigger");
-			gsap.registerPlugin(ScrollTrigger);
-
-			if (!sectionRef.current) return;
-
-			ctx = gsap.context(() => {
-				const statValues =
-					statsRef.current?.querySelectorAll("[data-stat-value]");
-				const statItems =
-					statsRef.current?.querySelectorAll("[data-stat-item]");
-
-				if (statItems) {
-					gsap.set(statItems, { y: 30, opacity: 0 });
-
-					gsap.to(statItems, {
-						y: 0,
-						opacity: 1,
-						duration: 0.6,
-						stagger: 0.15,
-						ease: "power2.out",
-						scrollTrigger: {
-							trigger: statsRef.current,
-							start: "top 80%",
-							toggleActions: "play none none none",
-						},
-					});
-				}
-
-				if (statValues) {
-					for (const el of statValues) {
-						const target = Number.parseFloat(
-							(el as HTMLElement).dataset.statTarget ?? "0",
-						);
-						const isDecimal =
-							(el as HTMLElement).dataset.statDecimal === "true";
-						const prefix = (el as HTMLElement).dataset.statPrefix ?? "";
-						const displaySuffix =
-							(el as HTMLElement).dataset.statDisplaySuffix ?? "";
-						const suffix = (el as HTMLElement).dataset.statSuffix ?? "";
-
-						const obj = { val: 0 };
-						gsap.to(obj, {
-							val: target,
-							duration: 2.0,
-							ease: "power2.out",
-							snap: isDecimal ? { val: 0.1 } : { val: 1 },
-							scrollTrigger: {
-								trigger: statsRef.current,
-								start: "top 80%",
-								toggleActions: "play none none none",
-							},
-							onUpdate: () => {
-								(el as HTMLElement).textContent = `${prefix}${
-									isDecimal ? obj.val.toFixed(1) : Math.round(obj.val)
-								}${suffix}${displaySuffix}`;
-							},
-						});
-					}
-				}
-
-				const words = testimonialRef.current?.querySelectorAll("[data-word]");
-				if (words && words.length > 0) {
-					gsap.set(words, { opacity: 0.15 });
-
-					gsap.to(words, {
-						opacity: 1.0,
-						duration: 0.3,
-						stagger: 0.05,
-						ease: "power2.out",
-						scrollTrigger: {
-							trigger: testimonialRef.current,
-							start: "top 75%",
-							end: "top 40%",
-							scrub: 0.5,
-						},
-					});
-				}
-			}, sectionRef);
-		}
-
-		initGSAP();
-		return () => ctx?.revert();
-	}, [reducedMotion]);
+	useScrollReveal(reducedMotion, sectionRef);
 
 	return (
 		<section
 			ref={sectionRef}
-			className="relative"
-			style={{ background: "var(--dm-crimson-soft)" }}
+			className="py-32 bg-white overflow-hidden relative"
 		>
-			{/* Mesh gradient overlay */}
-			<div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-				<MeshGradientBackground
-					variant="crimson"
-					className="h-full"
-					reducedMotion={reducedMotion}
-				>
-					<div />
-				</MeshGradientBackground>
-			</div>
-
-			{/* Petal shower */}
-			<PetalShower reducedMotion={reducedMotion} />
-
-			<GoldRule className="absolute top-0 left-0 right-0 z-10" />
-
+			{/* Background Texture */}
 			<div
-				className="mx-auto max-w-4xl px-6 text-center"
-				style={{ padding: "clamp(4rem, 8vw, 7rem) 1.5rem" }}
-			>
-				{/* Stats row */}
-				<div
-					ref={statsRef}
-					className="flex flex-col items-center justify-center gap-8 md:flex-row md:gap-12 lg:gap-20"
-				>
-					{STATS.map((stat, i) => (
-						<Fragment key={stat.label}>
-							{/* Gold divider between items */}
-							{i > 0 && (
-								<div
-									className="mx-auto my-2 md:my-0"
-									style={{
-										width: "4rem",
-										height: "1px",
-										background: "var(--dm-gold)",
-										opacity: 0.3,
-									}}
-									aria-hidden="true"
-								/>
-							)}
-							<div data-stat-item className="text-center">
-								<p
-									data-stat-value
-									data-stat-target={stat.value}
-									data-stat-decimal={stat.isDecimal ? "true" : "false"}
-									data-stat-prefix={stat.prefix}
-									data-stat-suffix={stat.suffix}
-									data-stat-display-suffix={
-										stat.displaySuffix ?? ""
-									}
-									className="font-display font-extrabold"
-									style={{
-										fontFamily:
-											'"Playfair Display", "Noto Serif SC", Georgia, serif',
-										fontWeight: 800,
-										fontSize: "clamp(2.5rem, 6vw, 4rem)",
-										color: "var(--dm-ink)",
-										lineHeight: 1.1,
-									}}
-								>
-									{stat.prefix}
-									{stat.isDecimal ? stat.value.toFixed(1) : stat.value}
-									{stat.suffix}
-									{stat.displaySuffix ?? ""}
-								</p>
-								<p
-									className="mt-1"
-									style={{
-										fontFamily: '"Inter", system-ui, sans-serif',
-										fontWeight: 400,
-										fontSize: "var(--text-sm)",
-										color: "var(--dm-muted)",
-									}}
-								>
-									{stat.label}
-								</p>
+				className="absolute inset-0 opacity-[0.03]"
+				style={{
+					backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+				}}
+			/>
+
+			<div className="dm-container relative z-10">
+				<div className="text-center mb-20 animate-fade-up">
+					<span className="text-dm-primary font-medium tracking-widest uppercase text-sm mb-4 block">
+						Real Stories
+					</span>
+					<h2 className="text-display text-4xl md:text-5xl text-dm-ink">
+						Loved by Couples, <br /> Adored by Guests.
+					</h2>
+				</div>
+
+				<div className="grid md:grid-cols-3 gap-8 lg:gap-12">
+					{TESTIMONIALS.map((t, i) => (
+						<div
+							key={t.author}
+							className={`relative p-8 rounded-none border-l-2 border-dm-primary/20 bg-white hover:border-dm-primary transition-colors duration-500 animate-fade-up`}
+							style={{ animationDelay: `${i * 150}ms` }}
+						>
+							{/* Quote Icon */}
+							<div className="absolute -top-4 -left-3 bg-white px-2 text-4xl text-dm-primary font-display">
+								"
 							</div>
-						</Fragment>
+
+							<p className="text-xl md:text-2xl font-display text-dm-ink/90 mb-8 leading-relaxed italic">
+								{t.quote}
+							</p>
+
+							<div className="flex items-center gap-4">
+								<div className="w-12 h-12 rounded-full overflow-hidden border border-dm-border">
+									<img
+										src={t.img}
+										alt={t.author}
+										className="w-full h-full object-cover"
+									/>
+								</div>
+								<div>
+									<h4 className="font-semibold text-dm-ink">{t.author}</h4>
+									<p className="text-sm text-dm-ink-muted uppercase tracking-wider">
+										{t.location}
+									</p>
+								</div>
+							</div>
+						</div>
 					))}
 				</div>
 
-				{/* Testimonials */}
-				<div
-					ref={testimonialRef}
-					className="mx-auto mt-10 grid max-w-4xl gap-8 md:grid-cols-3"
-				>
-					{TESTIMONIALS.map((t) => (
-						<blockquote
-							key={t.author}
-							className="relative text-left"
-							style={{
-								borderLeft: "3px solid var(--dm-gold-electric)",
-								paddingLeft: "1.5rem",
-							}}
+				{/* Trust Indicators */}
+				<div className="mt-24 pt-12 border-t border-dm-border flex flex-wrap justify-center gap-12 md:gap-24 opacity-60 grayscale hover:grayscale-0 transition-all duration-500 animate-fade-in delay-300">
+					{["Vogue", "Brides", "Tatler", "The Knot"].map((brand) => (
+						<span
+							key={brand}
+							className="text-2xl font-display font-bold text-dm-ink-muted"
 						>
-							<span
-								className="pointer-events-none absolute select-none"
-								style={{
-									fontFamily: '"Playfair Display", serif',
-									fontSize: "3rem",
-									color: "var(--dm-crimson)",
-									opacity: 0.2,
-									lineHeight: 1,
-									top: "-0.5em",
-									left: "-0.5rem",
-								}}
-								aria-hidden="true"
-							>
-								{"\u201C"}
-							</span>
-							<p
-								style={{
-									fontFamily:
-										'"Playfair Display", "Noto Serif SC", Georgia, serif',
-									fontWeight: 400,
-									fontStyle: "italic",
-									fontSize: "clamp(1rem, 1.5vw, 1.125rem)",
-									color: "var(--dm-ink)",
-									lineHeight: 1.7,
-								}}
-							>
-								<SplitWords>{t.quote}</SplitWords>
-							</p>
-							<footer
-								className="mt-4"
-								style={{
-									fontFamily: '"Inter", system-ui, sans-serif',
-									fontWeight: 500,
-									fontVariant: "small-caps",
-									fontSize: "var(--text-sm)",
-									letterSpacing: "0.05em",
-									color: "var(--dm-muted)",
-								}}
-							>
-								{t.author}, {t.location}
-							</footer>
-						</blockquote>
+							{brand}
+						</span>
 					))}
 				</div>
 			</div>
-
-			<GoldRule className="absolute bottom-0 left-0 right-0 z-10" />
 		</section>
 	);
 }

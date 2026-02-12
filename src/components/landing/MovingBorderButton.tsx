@@ -25,7 +25,8 @@ export function MovingBorderButton({
 	variant = "crimson",
 	href,
 	onClick,
-}: MovingBorderButtonProps) {
+	onMouseEnter,
+}: MovingBorderButtonProps & { onMouseEnter?: React.MouseEventHandler }) {
 	const gradients: Record<string, string> = {
 		crimson:
 			"conic-gradient(from 0deg, transparent 0deg 240deg, var(--dm-crimson) 260deg 300deg, transparent 320deg 360deg)",
@@ -76,14 +77,24 @@ export function MovingBorderButton({
 	// Render as TanStack Router Link for internal navigation
 	if (href) {
 		return (
-			<Link to={href} className={outerClasses} onClick={onClick}>
+			<Link
+				to={href}
+				className={outerClasses}
+				onClick={onClick}
+				onMouseEnter={onMouseEnter}
+			>
 				{content}
 			</Link>
 		);
 	}
 
 	return (
-		<button type="button" className={outerClasses} onClick={onClick}>
+		<button
+			type="button"
+			className={outerClasses}
+			onClick={onClick}
+			onMouseEnter={onMouseEnter}
+		>
 			{content}
 		</button>
 	);

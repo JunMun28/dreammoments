@@ -125,11 +125,9 @@ function LoginScreen() {
 					onClick={() => {
 						setGoogleLoading(true);
 						setGoogleTimedOut(false);
-						try {
-							signInWithGoogle(redirectTarget);
-						} catch {
+						void signInWithGoogle(redirectTarget).catch(() => {
 							setGoogleLoading(false);
-						}
+						});
 					}}
 				>
 					{googleLoading ? (

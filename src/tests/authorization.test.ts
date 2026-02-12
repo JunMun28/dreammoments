@@ -100,6 +100,9 @@ vi.mock("@/lib/server-auth", () => ({
 vi.mock("@/lib/rate-limit", () => ({
 	authRateLimit: vi.fn(() => ({ allowed: true, remaining: 4, resetAt: 0 })),
 	rsvpRateLimit: vi.fn(() => ({ allowed: true, remaining: 9, resetAt: 0 })),
+	createDbRateLimiter: vi.fn(() =>
+		vi.fn(async () => ({ allowed: true, remaining: 9, resetAt: 0 })),
+	),
 }));
 
 vi.mock("@/lib/session", () => ({

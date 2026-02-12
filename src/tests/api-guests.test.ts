@@ -30,6 +30,14 @@ vi.mock("@tanstack/react-start", () => ({
 	},
 }));
 
+const { mockRsvpLimiter } = vi.hoisted(() => ({
+	mockRsvpLimiter: vi.fn(async () => ({
+		allowed: true,
+		remaining: 9,
+		resetAt: 0,
+	})),
+}));
+
 const mockDb = {
 	select: vi.fn(),
 	insert: vi.fn(),
@@ -75,7 +83,7 @@ vi.mock("@/lib/server-auth", () => ({
 }));
 
 vi.mock("@/lib/rate-limit", () => ({
-	rsvpRateLimit: vi.fn(() => ({ allowed: true, remaining: 9, resetAt: 0 })),
+	createDbRateLimiter: vi.fn(() => mockRsvpLimiter),
 }));
 
 vi.mock("@/lib/data", () => ({
@@ -112,12 +120,12 @@ import {
 	getInvitationById as localGetInvitationById,
 	listGuests as localListGuests,
 } from "@/lib/data";
-import { rsvpRateLimit } from "@/lib/rate-limit";
+import { createDbRateLimiter } from "@/lib/rate-limit";
 import { requireAuth } from "@/lib/server-auth";
 
 const mockedGetDbOrNull = vi.mocked(getDbOrNull);
 const mockedRequireAuth = vi.mocked(requireAuth);
-const mockedRsvpRateLimit = vi.mocked(rsvpRateLimit);
+const mockedCreateDbRateLimiter = vi.mocked(createDbRateLimiter);
 const mockedLocalGetById = vi.mocked(localGetInvitationById);
 const mockedLocalListGuests = vi.mocked(localListGuests);
 
@@ -125,7 +133,8 @@ beforeEach(() => {
 	vi.clearAllMocks();
 	mockedGetDbOrNull.mockReturnValue(null);
 	mockedRequireAuth.mockResolvedValue({ userId: "user-a" });
-	mockedRsvpRateLimit.mockReturnValue({
+	mockedCreateDbRateLimiter.mockReturnValue(mockRsvpLimiter);
+	mockRsvpLimiter.mockResolvedValue({
 		allowed: true,
 		remaining: 9,
 		resetAt: 0,
@@ -150,7 +159,7 @@ describe("submitRsvpFn", () => {
 	});
 
 	test("rate limiting returns error", async () => {
-		mockedRsvpRateLimit.mockReturnValue({
+		mockRsvpLimiter.mockResolvedValue({
 			allowed: false,
 			remaining: 0,
 			resetAt: Date.now() + 60000,

@@ -349,7 +349,11 @@ function EditorScreen() {
 		}
 		setUploadingField(fieldPath);
 		try {
-			const uploaded = await uploadImage(file);
+			const token =
+				typeof window !== "undefined"
+					? (window.localStorage.getItem("dm-auth-token") ?? undefined)
+					: undefined;
+			const uploaded = await uploadImage(file, token);
 			editor.handleFieldChange(fieldPath, uploaded.url);
 		} catch {
 			addToast({

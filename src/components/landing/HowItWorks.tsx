@@ -1,9 +1,7 @@
-import { useEffect, useRef } from "react";
-import { CurvedConnectorPath } from "./CurvedConnectorPath";
-import { PaperCutEdge } from "./motifs/PaperCutEdge";
-import { SectionHeader } from "./motifs/SectionHeader";
+import { useRef } from "react";
+import { useScrollReveal } from "./hooks/useScrollReveal";
 
-const TIMELINE_STEPS = [
+const STEPS = [
 	{
 		id: "01",
 		title: "Sign up in seconds",
@@ -14,183 +12,84 @@ const TIMELINE_STEPS = [
 		id: "02",
 		title: "Pick your template",
 		description:
-			"Choose from 4 designs crafted for Chinese weddings. Tea ceremony, banquet, and bilingual sections included.",
+			"Choose from our collection of modern designs. Each one supports English, Chinese, or both.",
 	},
 	{
 		id: "03",
 		title: "Let AI write your story",
 		description:
-			"Our AI generates your couple story, schedule, and details in English and Chinese. You just fill in the basics.",
+			"Answer a few questions and our AI will generate your love story and wedding details instantly.",
 	},
 	{
 		id: "04",
-		title: "Make it yours",
+		title: "Customize & Personalize",
 		description:
-			"Edit every section. Change photos, colors, and wording until it feels like you.",
+			"Upload your photos, tweak the colors, and make it truly yours.",
 	},
 	{
 		id: "05",
-		title: "Share & track RSVPs",
+		title: "Share with one tap",
 		description:
-			"Publish your unique link. Share via WhatsApp in one tap. Track who's viewed, who's replied, and dietary preferences.",
+			"Send via WhatsApp to all your guests. Track RSVPs in real-time.",
 	},
 ];
 
 export function HowItWorks({ reducedMotion }: { reducedMotion: boolean }) {
 	const sectionRef = useRef<HTMLElement>(null);
-	const stepsRef = useRef<HTMLDivElement[]>([]);
-
-	useEffect(() => {
-		if (reducedMotion || stepsRef.current.length === 0) return;
-
-		let ctx: gsap.Context | undefined;
-
-		async function initGSAP() {
-			const gsap = (await import("gsap")).default;
-			const { ScrollTrigger } = await import("gsap/ScrollTrigger");
-			gsap.registerPlugin(ScrollTrigger);
-
-			if (!sectionRef.current) return;
-
-			ctx = gsap.context(() => {
-				for (let i = 0; i < stepsRef.current.length; i++) {
-					const step = stepsRef.current[i];
-					if (!step) continue;
-					const isOdd = i % 2 === 0;
-					gsap.fromTo(
-						step,
-						{ opacity: 0, x: isOdd ? -40 : 40 },
-						{
-							opacity: 1,
-							x: 0,
-							duration: 0.6,
-							ease: "power2.out",
-							scrollTrigger: {
-								trigger: step,
-								start: "top 85%",
-								toggleActions: "play none none none",
-							},
-						},
-					);
-				}
-			}, sectionRef);
-		}
-
-		initGSAP();
-		return () => ctx?.revert();
-	}, [reducedMotion]);
+	useScrollReveal(reducedMotion, sectionRef);
 
 	return (
+		// biome-ignore lint/correctness/useUniqueElementIds: stable hash target for in-page navigation links
 		<section
 			ref={sectionRef}
-			className="relative py-[clamp(5rem,10vw,10rem)] px-6 overflow-hidden"
-			style={{
-				background:
-					"linear-gradient(180deg, var(--dm-surface-rose) 0%, var(--dm-gold-soft) 100%)",
-			}}
+			className="py-24 lg:py-32 bg-white"
+			id="how-it-works"
 		>
-			{/* biome-ignore lint/correctness/useUniqueElementIds: intentional anchor for in-page navigation */}
-			<div id="process" />
+			<div className="dm-container">
+				<div className="max-w-3xl mx-auto text-center mb-20 dm-reveal">
+					<span className="text-dm-primary font-semibold tracking-wider text-sm uppercase mb-4 block">
+						Process
+					</span>
+					<h2 className="text-heading mb-6">
+						From idea to invitation in minutes.
+					</h2>
+					<p className="text-body-lg">
+						We&apos;ve simplified the traditional wedding card process into five
+						easy steps.
+					</p>
+				</div>
 
-			<div className="relative z-10 max-w-5xl mx-auto">
-				<SectionHeader
-					kickerEn="THE PROCESS"
-					kickerCn="五步成礼"
-					title="Five steps to your perfect invitation."
-					subtitle="From sign-up to RSVPs in minutes."
-					kickerColor="var(--dm-crimson)"
-					reducedMotion={reducedMotion}
-				/>
+				<div className="relative max-w-4xl mx-auto">
+					{/* Vertical line connecting steps */}
+					<div className="absolute left-[28px] md:left-1/2 top-4 bottom-4 w-px bg-dm-border -translate-x-1/2 hidden md:block" />
+					<div className="absolute left-[28px] top-4 bottom-4 w-px bg-dm-border -translate-x-1/2 md:hidden" />
 
-				{/* Alternating left-right layout */}
-				<div className="mx-auto max-w-4xl">
-					{TIMELINE_STEPS.map((step, i) => {
-						const isOdd = i % 2 === 0; // 0-indexed: steps 1,3,5 go left
-						return (
-							<div key={step.id}>
-								{/* Curved connector between steps (hidden on mobile) */}
-								{i > 0 && (
-									<div className="hidden md:block">
-										<CurvedConnectorPath
-											direction={isOdd ? "right-to-left" : "left-to-right"}
-										/>
-									</div>
-								)}
-
-								{/* Step row: alternating alignment */}
-								<div
-									ref={(el) => {
-										if (el) stepsRef.current[i] = el;
-									}}
-									className={`flex ${isOdd ? "md:justify-start" : "md:justify-end"}`}
-								>
-									<div className="w-full md:w-[60%] relative">
-										{/* Step number circle */}
-										<div className="flex items-center gap-4 mb-3">
-											<span
-												className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full font-display text-base font-semibold tracking-[0.18em]"
-												style={{
-													border: "3px solid var(--dm-gold-electric)",
-													background: "var(--dm-surface)",
-													color: "var(--dm-gold-electric)",
-												}}
-											>
-												{step.id}
-											</span>
-											<h3
-												className="font-heading font-semibold"
-												style={{
-													fontSize: "var(--text-card-title)",
-													color: "var(--dm-ink)",
-												}}
-											>
-												{step.title}
-											</h3>
-										</div>
-
-										{/* Card */}
-										<div
-											className="rounded-[1.5rem] border bg-[var(--dm-surface)] p-6 sm:p-7 relative overflow-hidden"
-											style={{
-												borderColor: "var(--dm-border)",
-												boxShadow: "0 4px 20px -2px rgba(0,0,0,0.05)",
-											}}
-										>
-											{/* Step number watermark */}
-											<span
-												className="absolute top-2 right-4 font-display font-extrabold pointer-events-none select-none"
-												style={{
-													fontSize: "clamp(3rem, 5vw, 5rem)",
-													color: "var(--dm-gold-electric)",
-													opacity: 0.08,
-													lineHeight: 1,
-												}}
-												aria-hidden="true"
-											>
-												{step.id}
-											</span>
-
-											<p
-												className="text-base leading-relaxed relative z-[1]"
-												style={{ color: "var(--dm-muted)" }}
-											>
-												{step.description}
-											</p>
-										</div>
-									</div>
-								</div>
+					{STEPS.map((step, i) => (
+						<div
+							key={step.id}
+							className="relative mb-12 last:mb-0 md:flex md:justify-between items-center group dm-reveal-child"
+						>
+							{/* Step Number Bubble */}
+							<div className="absolute left-0 md:left-1/2 -translate-x-1/2 w-14 h-14 rounded-full bg-white border-4 border-dm-water text-dm-primary font-display font-bold text-xl flex items-center justify-center z-10 shadow-sm group-hover:scale-110 transition-transform duration-300">
+								{step.id}
 							</div>
-						);
-					})}
+
+							{/* Content - Left or Right based on index */}
+							<div
+								className={`ml-20 md:ml-0 md:w-[42%] ${i % 2 === 0 ? "md:mr-auto md:text-right" : "md:ml-auto md:text-left"}`}
+							>
+								<h3 className="text-xl font-display font-semibold text-dm-ink mb-2">
+									{step.title}
+								</h3>
+								<p className="text-body text-sm">{step.description}</p>
+							</div>
+
+							{/* Empty spacer for the other side */}
+							<div className="hidden md:block md:w-[42%]" />
+						</div>
+					))}
 				</div>
 			</div>
-
-			{/* Paper-cut edge at bottom transitioning to Features */}
-			<PaperCutEdge
-				position="bottom"
-				color="var(--dm-surface-muted)"
-				scallops={20}
-			/>
 		</section>
 	);
 }

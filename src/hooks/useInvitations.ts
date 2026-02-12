@@ -213,6 +213,7 @@ export function useTrackView() {
 			invitationId: string;
 			userAgent?: string;
 			referrer?: string;
+			visitorKey?: string;
 		}) => {
 			const result = await trackViewFn({ data: payload });
 			if (result && "error" in result)

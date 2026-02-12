@@ -1,6 +1,16 @@
+import { getCookie } from "@tanstack/react-start/server";
 import { eq } from "drizzle-orm";
 import { getDbOrNull, schema } from "@/db/index";
+import { AUTH_ACCESS_COOKIE } from "./auth-cookies";
 import { verifySession } from "./session";
+
+function getAuthCookieSafely() {
+	try {
+		return getCookie(AUTH_ACCESS_COOKIE);
+	} catch {
+		return undefined;
+	}
+}
 
 /**
  * Hash a token using SHA-256 for blocklist lookups.
@@ -37,17 +47,18 @@ async function isTokenBlocked(token: string): Promise<boolean> {
 export async function requireAuth(
 	token: string | undefined,
 ): Promise<{ userId: string }> {
-	if (!token) {
+	const tokenToVerify = token ?? getAuthCookieSafely();
+	if (!tokenToVerify) {
 		throw new Error("Authentication required");
 	}
 
-	const session = await verifySession(token);
+	const session = await verifySession(tokenToVerify, "access");
 	if (!session) {
 		throw new Error("Invalid or expired session");
 	}
 
 	// Check if the token has been revoked
-	const blocked = await isTokenBlocked(token);
+	const blocked = await isTokenBlocked(tokenToVerify);
 	if (blocked) {
 		throw new Error("Token has been revoked");
 	}

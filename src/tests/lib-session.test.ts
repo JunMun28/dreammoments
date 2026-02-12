@@ -1,9 +1,11 @@
 import { describe, expect, test } from "vitest";
 import {
+	createOAuthStateToken,
 	createRefreshToken,
 	createSession,
 	getJwtSecret,
 	refreshSession,
+	verifyOAuthStateToken,
 	verifySession,
 } from "../lib/session";
 
@@ -144,5 +146,24 @@ describe("refreshSession", () => {
 		expect(result).toBeNull();
 
 		process.env.JWT_SECRET = originalSecret;
+	});
+});
+
+describe("OAuth state token", () => {
+	test("creates and verifies OAuth state token", async () => {
+		const originalSecret = process.env.JWT_SECRET;
+		process.env.JWT_SECRET = "my-super-secret-key-that-is-32-chars-long!!";
+		process.env.NODE_ENV = "development";
+
+		const token = await createOAuthStateToken("/editor/new");
+		const state = await verifyOAuthStateToken(token);
+
+		expect(state).toEqual({ redirectTo: "/editor/new" });
+		process.env.JWT_SECRET = originalSecret;
+	});
+
+	test("returns null for invalid OAuth state token", async () => {
+		const state = await verifyOAuthStateToken("invalid-token");
+		expect(state).toBeNull();
 	});
 });

@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { googleCallbackFn } from "@/api/auth";
 import {
 	DEFAULT_AUTH_REDIRECT,
-	readRedirectFromStateSearch,
 	sanitizeRedirect,
 } from "../../lib/auth-redirect";
 import { setCurrentUserId } from "../../lib/data";
@@ -54,7 +53,7 @@ function CallbackScreen() {
 		async function handleCallback() {
 			const params = new URLSearchParams(window.location.search);
 			const code = params.get("code");
-			const stateRedirect = readRedirectFromStateSearch(window.location.search);
+			const stateToken = params.get("state");
 
 			if (!code) {
 				const googleError = params.get("error");
@@ -62,7 +61,12 @@ function CallbackScreen() {
 					if (!cancelled) setError(mapGoogleError(googleError));
 					return;
 				}
-				if (!cancelled) setRedirectTarget(stateRedirect);
+				if (!cancelled) setRedirectTarget(DEFAULT_AUTH_REDIRECT);
+				return;
+			}
+
+			if (!stateToken) {
+				setError("Missing OAuth state. Please try signing in again.");
 				return;
 			}
 
@@ -70,7 +74,7 @@ function CallbackScreen() {
 				const result = await googleCallbackFn({
 					data: {
 						code,
-						redirectTo: stateRedirect,
+						stateToken,
 					},
 				});
 
@@ -82,10 +86,6 @@ function CallbackScreen() {
 				}
 
 				window.localStorage.setItem("dm-auth-token", result.token);
-
-				if ("refreshToken" in result && result.refreshToken) {
-					window.localStorage.setItem("dm-refresh-token", result.refreshToken);
-				}
 
 				syncCallbackUser(result.user);
 

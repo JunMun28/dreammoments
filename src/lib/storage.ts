@@ -1,7 +1,4 @@
-const uploadUrl = import.meta.env.VITE_R2_UPLOAD_URL as string | undefined;
-const publicBaseUrl = import.meta.env.VITE_R2_PUBLIC_BASE_URL as
-	| string
-	| undefined;
+import { confirmUploadFn, getUploadUrlFn } from "@/api/storage";
 
 // biome-ignore lint/suspicious/noControlCharactersInRegex: intentional stripping of control characters for security
 const CONTROL_CHARS = /[\x00-\x1f]/g;
@@ -11,18 +8,46 @@ function sanitizeFilename(name: string): string {
 	return basename.replace(CONTROL_CHARS, "").replace(/\.\./g, "") || "upload";
 }
 
-export async function uploadImage(file: File) {
-	if (uploadUrl && publicBaseUrl) {
-		const key = `${Date.now()}-${sanitizeFilename(file.name)}`;
-		await fetch(`${uploadUrl}/${key}`, {
-			method: "PUT",
-			body: file,
-			headers: { "Content-Type": file.type },
+export async function uploadImage(file: File, token?: string) {
+	if (
+		file.type === "image/jpeg" ||
+		file.type === "image/png" ||
+		file.type === "image/webp"
+	) {
+		const signed = await getUploadUrlFn({
+			data: {
+				token,
+				filename: sanitizeFilename(file.name),
+				contentType: file.type,
+			},
 		});
-		return {
-			url: `${publicBaseUrl}/${key}`,
-			storage: "r2" as const,
-		};
+
+		if (signed.available) {
+			const response = await fetch(signed.uploadEndpoint, {
+				method: "PUT",
+				body: file,
+				headers: { "Content-Type": file.type },
+			});
+			if (!response.ok) {
+				throw new Error(`Upload failed with status ${response.status}`);
+			}
+
+			const confirmed = await confirmUploadFn({
+				data: {
+					token,
+					key: signed.key,
+				},
+			});
+
+			if ("error" in confirmed) {
+				throw new Error(confirmed.error);
+			}
+
+			return {
+				url: confirmed.url,
+				storage: "r2" as const,
+			};
+		}
 	}
 
 	const dataUrl = await readFileAsDataUrl(file);

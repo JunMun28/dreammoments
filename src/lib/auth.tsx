@@ -7,6 +7,7 @@ import {
 	useState,
 } from "react";
 import {
+	createGoogleAuthStateFn,
 	getSessionFn,
 	loginFn,
 	logoutFn,
@@ -26,7 +27,6 @@ const TOKEN_REFRESH_INTERVAL_MS = 50 * 60 * 1000;
 // ---------------------------------------------------------------------------
 
 const TOKEN_KEY = "dm-auth-token";
-const REFRESH_TOKEN_KEY = "dm-refresh-token";
 
 function getStoredToken(): string | null {
 	if (typeof window === "undefined") return null;
@@ -42,20 +42,6 @@ function setStoredToken(token: string | null) {
 	}
 }
 
-function getStoredRefreshToken(): string | null {
-	if (typeof window === "undefined") return null;
-	return window.localStorage.getItem(REFRESH_TOKEN_KEY);
-}
-
-function setStoredRefreshToken(token: string | null) {
-	if (typeof window === "undefined") return;
-	if (token) {
-		window.localStorage.setItem(REFRESH_TOKEN_KEY, token);
-	} else {
-		window.localStorage.removeItem(REFRESH_TOKEN_KEY);
-	}
-}
-
 // ---------------------------------------------------------------------------
 // Context
 // ---------------------------------------------------------------------------
@@ -64,7 +50,7 @@ const AuthContext = createContext<{
 	user?: User;
 	loading: boolean;
 	sessionExpired: boolean;
-	signInWithGoogle: (redirectTo?: string) => void;
+	signInWithGoogle: (redirectTo?: string) => Promise<void>;
 	signUpWithEmail: (payload: {
 		email: string;
 		password: string;
@@ -111,15 +97,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 		async function restoreSession() {
 			const token = getStoredToken();
-			if (!token) {
-				setLoading(false);
-				return;
-			}
 
 			try {
-				const refreshToken = getStoredRefreshToken();
 				const result = await getSessionFn({
-					data: { token, refreshToken: refreshToken ?? undefined },
+					data: { token: token ?? undefined },
 				});
 				if (cancelled) return;
 
@@ -127,11 +108,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 					setServerUser(result.user as User);
 					setUseServerAuth(true);
 					if (result.newToken) setStoredToken(result.newToken);
-					if (result.newRefreshToken) setStoredRefreshToken(result.newRefreshToken);
 					syncUserToLocalStore(result.user as User);
 				} else {
 					setStoredToken(null);
-					setStoredRefreshToken(null);
 					setSessionExpired(true);
 				}
 			} catch {
@@ -159,21 +138,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 		refreshTimerRef.current = setInterval(async () => {
 			const token = getStoredToken();
-			if (!token) return;
 			try {
-				const refreshToken = getStoredRefreshToken();
 				const result = await getSessionFn({
-					data: { token, refreshToken: refreshToken ?? undefined },
+					data: { token: token ?? undefined },
 				});
 				if (result.user) {
 					setServerUser(result.user as User);
 					if (result.newToken) setStoredToken(result.newToken);
-					if (result.newRefreshToken)
-						setStoredRefreshToken(result.newRefreshToken);
 					syncUserToLocalStore(result.user as User);
 				} else {
 					setStoredToken(null);
-					setStoredRefreshToken(null);
 					setServerUser(undefined);
 					setSessionExpired(true);
 				}
@@ -190,18 +164,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		};
 	}, [serverUser]);
 
-	const signInWithGoogle = useCallback((redirectTo?: string) => {
+	const signInWithGoogle = useCallback(async (redirectTo?: string) => {
 		if (googleClientId && googleRedirectUri) {
+			const { stateToken } = await createGoogleAuthStateFn({
+				data: { redirectTo: sanitizeRedirect(redirectTo) },
+			});
 			const params = new URLSearchParams({
 				client_id: googleClientId,
 				redirect_uri: googleRedirectUri,
 				response_type: "code",
 				scope: "openid email profile",
 				prompt: "select_account",
+				state: stateToken,
 			});
-			if (redirectTo) {
-				params.set("state", sanitizeRedirect(redirectTo));
-			}
 			window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
 			return;
 		}
@@ -213,18 +188,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		});
 	}, []);
 
-	function handleAuthSuccess(result: {
-		user: User;
-		token: string;
-		refreshToken: string;
-	}) {
-		setStoredToken(result.token);
-		setStoredRefreshToken(result.refreshToken);
-		setServerUser(result.user);
-		setUseServerAuth(true);
-		setSessionExpired(false);
-		syncUserToLocalStore(result.user);
-	}
+	const handleAuthSuccess = useCallback(
+		(result: { user: User; token: string; refreshToken?: string }) => {
+			setStoredToken(result.token);
+			setServerUser(result.user);
+			setUseServerAuth(true);
+			setSessionExpired(false);
+			syncUserToLocalStore(result.user);
+		},
+		[],
+	);
 
 	const signUpWithEmail = useCallback(
 		async ({
@@ -239,13 +212,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			try {
 				const result = await signupFn({ data: { email, password, name } });
 				if ("error" in result) return result.error;
-				handleAuthSuccess(result as { user: User; token: string; refreshToken: string });
+				handleAuthSuccess(
+					result as { user: User; token: string; refreshToken: string },
+				);
 				return undefined;
 			} catch {
 				return "Something went wrong. Please try again.";
 			}
 		},
-		[],
+		[handleAuthSuccess],
 	);
 
 	const signInWithEmail = useCallback(
@@ -259,13 +234,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			try {
 				const result = await loginFn({ data: { email, password } });
 				if ("error" in result) return result.error;
-				handleAuthSuccess(result as { user: User; token: string; refreshToken: string });
+				handleAuthSuccess(
+					result as { user: User; token: string; refreshToken: string },
+				);
 				return undefined;
 			} catch {
 				return "Something went wrong. Please try again.";
 			}
 		},
-		[],
+		[handleAuthSuccess],
 	);
 
 	const resetPassword = useCallback(
@@ -283,18 +260,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 	const refreshUser = useCallback(async () => {
 		const token = getStoredToken();
-		if (!token) return;
 		try {
-			const refreshToken = getStoredRefreshToken();
 			const result = await getSessionFn({
-				data: { token, refreshToken: refreshToken ?? undefined },
+				data: { token: token ?? undefined },
 			});
 			if (result.user) {
 				setServerUser(result.user as User);
 				setUseServerAuth(true);
 				if (result.newToken) setStoredToken(result.newToken);
-				if (result.newRefreshToken)
-					setStoredRefreshToken(result.newRefreshToken);
 				syncUserToLocalStore(result.user as User);
 			}
 		} catch {
@@ -306,15 +279,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		const token = getStoredToken();
 
 		setStoredToken(null);
-		setStoredRefreshToken(null);
 		setServerUser(undefined);
 		setUseServerAuth(false);
 		setSessionExpired(false);
 		setCurrentUserId(null);
 
-		if (token) {
-			logoutFn({ data: { token } }).catch(() => {});
-		}
+		logoutFn({ data: { token: token ?? undefined } }).catch(() => {});
 	}, []);
 
 	return (

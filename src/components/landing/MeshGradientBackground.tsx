@@ -219,7 +219,7 @@ export function MeshGradientBackground({
 			tweens = [];
 			ctx?.revert();
 		};
-	}, [reducedMotion, isMobile, variant]);
+	}, [reducedMotion, isMobile]);
 
 	const orbs = ORBS[variant];
 

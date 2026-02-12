@@ -59,8 +59,12 @@ export const trackViewFn = createServerFn({
 	method: "POST",
 })
 	.inputValidator(
-		(data: { invitationId: string; userAgent?: string; referrer?: string }) =>
-			parseInput(trackViewSchema, data),
+		(data: {
+			invitationId: string;
+			userAgent?: string;
+			referrer?: string;
+			visitorKey?: string;
+		}) => parseInput(trackViewSchema, data),
 	)
 	.handler(async ({ data }) => {
 		const db = getDbOrNull();
@@ -77,12 +81,21 @@ export const trackViewFn = createServerFn({
 				return { error: "Invitation not found" };
 			}
 
-			// Generate visitor hash
-			const hashInput = `${ua}-${Date.now().toString(36)}`;
-			const visitorHash =
-				typeof btoa !== "undefined"
-					? btoa(hashInput).slice(0, 12)
-					: Buffer.from(hashInput).toString("base64").slice(0, 12);
+			// Stable visitor hash used for unique-visitor analytics.
+			const stableSource = [
+				data.invitationId,
+				data.visitorKey ?? "",
+				ua,
+				data.referrer ?? "",
+			].join("|");
+			const digestBuffer = await crypto.subtle.digest(
+				"SHA-256",
+				new TextEncoder().encode(stableSource),
+			);
+			const visitorHash = Array.from(new Uint8Array(digestBuffer))
+				.map((byte) => byte.toString(16).padStart(2, "0"))
+				.join("")
+				.slice(0, 16);
 
 			const deviceType = detectDeviceType(ua);
 

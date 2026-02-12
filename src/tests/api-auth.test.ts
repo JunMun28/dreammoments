@@ -80,12 +80,16 @@ vi.mock("@/db/index", () => ({
 
 vi.mock("@/lib/rate-limit", () => ({
 	authRateLimit: vi.fn(() => ({ allowed: true, remaining: 4, resetAt: 0 })),
-	formatRateLimitMessage: vi.fn(() => "Too many attempts. Try again in 15 minutes."),
+	formatRateLimitMessage: vi.fn(
+		() => "Too many attempts. Try again in 15 minutes.",
+	),
 }));
 
 vi.mock("@/lib/session", () => ({
 	createSession: vi.fn(async () => "mock-access-token"),
 	createRefreshToken: vi.fn(async () => "mock-refresh-token"),
+	createOAuthStateToken: vi.fn(async () => "mock-oauth-state-token"),
+	verifyOAuthStateToken: vi.fn(async () => ({ redirectTo: "/dashboard" })),
 	verifySession: vi.fn(async () => null),
 	refreshSession: vi.fn(async () => null),
 }));
@@ -101,6 +105,7 @@ vi.mock("@/lib/email", () => ({
 // We need to import the auth module *after* mocks are set up
 import {
 	confirmPasswordResetFn,
+	createGoogleAuthStateFn,
 	getSessionFn,
 	googleCallbackFn,
 	loginFn,
@@ -111,9 +116,11 @@ import {
 import { getDbOrNull, isProduction } from "@/db/index";
 import { authRateLimit } from "@/lib/rate-limit";
 import {
+	createOAuthStateToken,
 	createRefreshToken,
 	createSession,
 	refreshSession,
+	verifyOAuthStateToken,
 	verifySession,
 } from "@/lib/session";
 
@@ -126,6 +133,8 @@ const mockedIsProduction = vi.mocked(isProduction);
 const mockedAuthRateLimit = vi.mocked(authRateLimit);
 const mockedCreateSession = vi.mocked(createSession);
 const mockedCreateRefreshToken = vi.mocked(createRefreshToken);
+const mockedCreateOAuthStateToken = vi.mocked(createOAuthStateToken);
+const mockedVerifyOAuthStateToken = vi.mocked(verifyOAuthStateToken);
 const mockedVerifySession = vi.mocked(verifySession);
 const mockedRefreshSession = vi.mocked(refreshSession);
 
@@ -140,6 +149,8 @@ beforeEach(() => {
 	});
 	mockedCreateSession.mockResolvedValue("mock-access-token");
 	mockedCreateRefreshToken.mockResolvedValue("mock-refresh-token");
+	mockedCreateOAuthStateToken.mockResolvedValue("mock-oauth-state-token");
+	mockedVerifyOAuthStateToken.mockResolvedValue({ redirectTo: "/dashboard" });
 });
 
 // ---------------------------------------------------------------------------
@@ -370,10 +381,11 @@ describe("logoutFn", () => {
 		expect(result.success).toBe(true);
 	});
 
-	test("rejects empty token", async () => {
-		await expect(
-			(logoutFn as CallableFunction)({ token: "" }),
-		).rejects.toThrow();
+	test("allows empty payload and still succeeds", async () => {
+		const result = (await (logoutFn as CallableFunction)({})) as {
+			success: boolean;
+		};
+		expect(result.success).toBe(true);
 	});
 });
 
@@ -467,8 +479,11 @@ describe("getSessionFn", () => {
 
 		mockedVerifySession.mockResolvedValue({ userId: "db-user-id" });
 
-		const selectChain = chainable([dbUser]);
-		mockDb.select.mockReturnValue(selectChain);
+		const blocklistLookupChain = chainable([]);
+		const userLookupChain = chainable([dbUser]);
+		mockDb.select
+			.mockReturnValueOnce(blocklistLookupChain)
+			.mockReturnValueOnce(userLookupChain);
 		mockedGetDbOrNull.mockReturnValue(
 			mockDb as unknown as ReturnType<typeof getDbOrNull>,
 		);
@@ -483,6 +498,14 @@ describe("getSessionFn", () => {
 });
 
 describe("googleCallbackFn", () => {
+	test("creates signed OAuth state token", async () => {
+		const result = (await (createGoogleAuthStateFn as CallableFunction)({
+			redirectTo: "/editor/new",
+		})) as { stateToken: string };
+
+		expect(result.stateToken).toBe("mock-oauth-state-token");
+	});
+
 	test("returns error when OAuth is not configured", async () => {
 		// Ensure env vars are not set
 		const origClientId = process.env.VITE_GOOGLE_CLIENT_ID;
@@ -495,6 +518,7 @@ describe("googleCallbackFn", () => {
 
 		const result = (await (googleCallbackFn as CallableFunction)({
 			code: "test-auth-code-12345",
+			stateToken: "state-token",
 		})) as { error: string };
 
 		expect(result.error).toContain("Google OAuth is not configured");
@@ -514,9 +538,21 @@ describe("googleCallbackFn", () => {
 
 		const result = (await (googleCallbackFn as CallableFunction)({
 			code: "test-auth-code-12345",
+			stateToken: "state-token",
 		})) as { error: string };
 
 		expect(result.error).toContain("Too many attempts");
+	});
+
+	test("invalid OAuth state is rejected", async () => {
+		mockedVerifyOAuthStateToken.mockResolvedValueOnce(null);
+
+		const result = (await (googleCallbackFn as CallableFunction)({
+			code: "test-auth-code-12345",
+			stateToken: "bad-state-token",
+		})) as { error: string };
+
+		expect(result.error).toContain("Invalid or expired OAuth state");
 	});
 });
 

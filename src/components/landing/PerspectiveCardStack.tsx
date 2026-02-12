@@ -119,7 +119,13 @@ export function PerspectiveCardStack({
 	);
 }
 
-function CardContent({ template, shadowClass }: { template: TemplateData; shadowClass: string }) {
+function CardContent({
+	template,
+	shadowClass,
+}: {
+	template: TemplateData;
+	shadowClass: string;
+}) {
 	return (
 		<>
 			<div

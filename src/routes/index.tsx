@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { EnvelopeReveal } from "../components/landing/EnvelopeReveal";
 import { Features } from "../components/landing/Features";
 import { FinalCTA } from "../components/landing/FinalCTA";
 import { Footer } from "../components/landing/Footer";
@@ -64,6 +65,7 @@ export function Landing() {
 			className="min-h-screen bg-dm-bg selection:bg-dm-crimson/20 selection:text-dm-ink"
 		>
 			<Hero reducedMotion={reducedMotion} />
+			<EnvelopeReveal reducedMotion={reducedMotion} />
 			<Showcase reducedMotion={reducedMotion} />
 			<SocialProof reducedMotion={reducedMotion} />
 			<HowItWorks reducedMotion={reducedMotion} />

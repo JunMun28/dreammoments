@@ -16,7 +16,10 @@ function VolumeIcon({ muted, volume }: { muted: boolean; volume: number }) {
 function PlayIcon({
 	buffering,
 	playing,
-}: { buffering: boolean; playing: boolean }) {
+}: {
+	buffering: boolean;
+	playing: boolean;
+}) {
 	if (buffering) return <Loader2 size={20} className="animate-spin" />;
 	if (playing) return <Pause size={20} />;
 	return <Play size={20} />;

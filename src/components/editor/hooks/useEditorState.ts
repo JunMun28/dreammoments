@@ -31,18 +31,42 @@ export function setValueByPath(
 	path: string,
 	value: unknown,
 ): InvitationContent {
-	const next = structuredClone(content);
-	const parts = path.split(".");
-	let current = next as unknown as Record<string, unknown>;
-	parts.slice(0, -1).forEach((part) => {
-		const existing = current[part];
-		if (existing == null || typeof existing !== "object") {
-			current[part] = {};
-		}
-		current = current[part] as Record<string, unknown>;
-	});
-	current[parts.at(-1) as string] = value;
-	return next;
+	const parts = path.split(".").filter(Boolean);
+	if (parts.length === 0) return content;
+
+	const isObjectLike = (input: unknown): input is Record<string, unknown> =>
+		typeof input === "object" && input !== null;
+	const isArrayIndex = (part: string) => /^\d+$/.test(part);
+	const cloneContainer = (
+		input: unknown,
+		nextPart?: string,
+	): Record<string, unknown> | unknown[] => {
+		if (Array.isArray(input)) return [...input];
+		if (isObjectLike(input)) return { ...input };
+		return isArrayIndex(nextPart ?? "") ? [] : {};
+	};
+
+	const sourceRoot = content as unknown as Record<string, unknown>;
+	const nextRoot = cloneContainer(sourceRoot) as Record<string, unknown>;
+
+	let sourceCursor: unknown = sourceRoot;
+	let nextCursor = nextRoot;
+
+	for (let i = 0; i < parts.length - 1; i++) {
+		const part = parts[i] as string;
+		const nextPart = parts[i + 1] as string;
+		const sourceChild = isObjectLike(sourceCursor)
+			? (sourceCursor as Record<string, unknown>)[part]
+			: undefined;
+		const nextChild = cloneContainer(sourceChild, nextPart);
+		nextCursor[part] = nextChild;
+		sourceCursor = sourceChild;
+		nextCursor = nextChild as Record<string, unknown>;
+	}
+
+	const lastPart = parts.at(-1) as string;
+	nextCursor[lastPart] = value;
+	return nextRoot as InvitationContent;
 }
 
 export function validateField(field: FieldConfig, value: string): string {

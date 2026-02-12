@@ -61,6 +61,45 @@ export async function createRefreshToken(userId: string): Promise<string> {
 }
 
 /**
+ * Create a short-lived signed OAuth state token.
+ * Contains only sanitized internal redirect path + nonce.
+ */
+export async function createOAuthStateToken(
+	redirectTo: string,
+): Promise<string> {
+	return new SignJWT({
+		type: "oauth_state",
+		redirectTo,
+		nonce: crypto.randomUUID(),
+	})
+		.setProtectedHeader({ alg: "HS256" })
+		.setExpirationTime("10m")
+		.setIssuedAt()
+		.sign(getJwtSecret());
+}
+
+/**
+ * Verify OAuth state token and extract redirect path.
+ */
+export async function verifyOAuthStateToken(
+	stateToken: string,
+): Promise<{ redirectTo: string } | null> {
+	try {
+		const secret = getJwtSecret();
+		const { payload } = await jwtVerify(stateToken, secret);
+		if (payload.type !== "oauth_state") {
+			return null;
+		}
+		if (typeof payload.redirectTo !== "string") {
+			return null;
+		}
+		return { redirectTo: payload.redirectTo };
+	} catch {
+		return null;
+	}
+}
+
+/**
  * Verify a JWT session token and return the payload.
  * Returns null if the token is invalid or expired.
  * Optionally checks the token type claim.

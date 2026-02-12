@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequestHeader } from "@tanstack/react-start/server";
 import { and, eq } from "drizzle-orm";
 
 import { getDbOrNull, schema } from "@/db/index";
@@ -10,7 +11,7 @@ import {
 	submitRsvp as localSubmitRsvp,
 	updateGuest as localUpdateGuest,
 } from "@/lib/data";
-import { rsvpRateLimit } from "@/lib/rate-limit";
+import { createDbRateLimiter } from "@/lib/rate-limit";
 import { requireAuth } from "@/lib/server-auth";
 import type { AttendanceStatus } from "@/lib/types";
 import {
@@ -21,6 +22,27 @@ import {
 	updateGuestSchema,
 } from "@/lib/validation";
 import { parseInput } from "./validate";
+
+const rsvpRateLimit = createDbRateLimiter("rsvp", {
+	maxAttempts: 10,
+	windowMs: 60 * 60 * 1000,
+});
+
+function getRequestHeaderSafe(name: string): string | undefined {
+	try {
+		return getRequestHeader(name);
+	} catch {
+		return undefined;
+	}
+}
+
+function getRateLimitKey(invitationId: string, visitorKey: string): string {
+	const forwarded = getRequestHeaderSafe("x-forwarded-for");
+	const realIp = getRequestHeaderSafe("x-real-ip");
+	const firstForwarded = forwarded?.split(",")[0]?.trim();
+	const ip = firstForwarded || realIp || "unknown";
+	return `${invitationId}:${visitorKey}:${ip}`;
+}
 
 // ── List guests for an invitation ───────────────────────────────────
 
@@ -122,8 +144,10 @@ export const submitRsvpFn = createServerFn({
 		}) => parseInput(submitRsvpSchema, data),
 	)
 	.handler(async ({ data }) => {
-		// Rate limit by visitorKey (10 per hour)
-		const limit = rsvpRateLimit(data.visitorKey);
+		// Rate limit by invitation + visitor + client IP (multi-instance safe).
+		const limit = await rsvpRateLimit(
+			getRateLimitKey(data.invitationId, data.visitorKey),
+		);
 		if (!limit.allowed) {
 			return { error: "Too many submissions. Please try again later." };
 		}

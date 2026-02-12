@@ -13,7 +13,7 @@ import {
 	updateInvitation as localUpdateInvitation,
 } from "@/lib/data";
 import { requireAuth } from "@/lib/server-auth";
-import { generateSlug, slugify } from "@/lib/slug";
+import { slugify } from "@/lib/slug";
 import type { Invitation } from "@/lib/types";
 import {
 	createInvitationSchema,
@@ -23,6 +23,35 @@ import {
 	updateInvitationSchema,
 } from "@/lib/validation";
 import { parseInput } from "./validate";
+
+async function slugExists(
+	db: NonNullable<ReturnType<typeof getDbOrNull>>,
+	slug: string,
+	excludeInvitationId?: string,
+) {
+	const rows = await db
+		.select({ id: schema.invitations.id })
+		.from(schema.invitations)
+		.where(eq(schema.invitations.slug, slug));
+	if (!excludeInvitationId) return rows.length > 0;
+	return rows.some((row) => row.id !== excludeInvitationId);
+}
+
+async function generateUniqueDbSlug(
+	db: NonNullable<ReturnType<typeof getDbOrNull>>,
+	baseInput: string,
+	excludeInvitationId?: string,
+) {
+	const base = slugify(baseInput) || "dreammoments";
+	let candidate = base;
+	for (let attempt = 0; attempt < 20; attempt++) {
+		if (!(await slugExists(db, candidate, excludeInvitationId))) {
+			return candidate;
+		}
+		candidate = `${base}-${Math.random().toString(36).slice(2, 6)}`;
+	}
+	return `${base}-${Date.now().toString(36).slice(-4)}`;
+}
 
 // ── Check slug availability ─────────────────────────────────────────
 
@@ -162,12 +191,7 @@ export const createInvitationFn = createServerFn({
 			const content = buildSampleContent(template.id);
 			const baseSlug = `${content.hero.partnerOneName}-${content.hero.partnerTwoName}`;
 
-			// Get existing slugs to avoid collisions
-			const existingRows = await db
-				.select({ slug: schema.invitations.slug })
-				.from(schema.invitations);
-			const existingSlugs = new Set(existingRows.map((r) => r.slug));
-			const slug = generateSlug(baseSlug, existingSlugs);
+			const slug = await generateUniqueDbSlug(db, baseSlug);
 
 			const title = `${content.hero.partnerOneName} & ${content.hero.partnerTwoName}`;
 			const sectionVisibility = Object.fromEntries(
@@ -385,28 +409,18 @@ export const publishInvitationFn = createServerFn({
 			const template =
 				templates.find((t) => t.id === invitation.templateId) ?? templates[0];
 
-			// Generate unique slug
-			const existingRows = await db
-				.select({ slug: schema.invitations.slug })
-				.from(schema.invitations);
-			const existingSlugs = new Set(
-				existingRows
-					.filter((r) => r.slug !== invitation.slug)
-					.map((r) => r.slug),
-			);
-
 			const content = invitation.content as Record<string, unknown>;
 			const hero = content.hero as {
 				partnerOneName: string;
 				partnerTwoName: string;
 			};
-			const baseSlug = data.slug
+			const requestedBaseSlug = data.slug
 				? slugify(data.slug)
 				: `${hero.partnerOneName}-${hero.partnerTwoName}`;
-			const seed = data.randomize
-				? `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`
-				: baseSlug;
-			const slug = generateSlug(seed, existingSlugs);
+			const baseSlug = data.randomize
+				? `${requestedBaseSlug}-${Math.random().toString(36).slice(2, 6)}`
+				: requestedBaseSlug;
+			const slug = await generateUniqueDbSlug(db, baseSlug, invitation.id);
 
 			const updated = await db
 				.update(schema.invitations)

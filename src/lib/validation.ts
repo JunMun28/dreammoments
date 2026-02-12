@@ -125,6 +125,7 @@ export const trackViewSchema = z.object({
 	invitationId: z.string().min(1, "invitationId is required"),
 	userAgent: z.string().default(""),
 	referrer: z.string().optional(),
+	visitorKey: z.string().min(1).optional(),
 });
 
 export type TrackViewInput = z.infer<typeof trackViewSchema>;

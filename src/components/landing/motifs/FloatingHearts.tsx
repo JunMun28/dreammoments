@@ -1,9 +1,5 @@
 import { useEffect, useState } from "react";
 
-interface FloatingHeartsProps {
-	reducedMotion: boolean;
-}
-
 function seededRandom(seed: number) {
 	const x = Math.sin(seed + 1) * 10000;
 	return x - Math.floor(x);
@@ -23,45 +19,46 @@ function generateHearts(count: number) {
 	}));
 }
 
-const HEARTS = generateHearts(7);
+const HEARTS = generateHearts(12);
 
-export function FloatingHearts({ reducedMotion }: FloatingHeartsProps) {
-	const [isMobile, setIsMobile] = useState(false);
+export function FloatingHearts({
+	reducedMotion,
+	count = 12,
+}: {
+	reducedMotion: boolean;
+	count?: number;
+}) {
+	const [mounted, setMounted] = useState(false);
 
 	useEffect(() => {
-		if (typeof window === "undefined") return;
-		setIsMobile(window.innerWidth < 768);
+		setMounted(true);
 	}, []);
 
-	if (reducedMotion || isMobile) return null;
+	if (reducedMotion || !mounted) return null;
+	const hearts = HEARTS.slice(0, count);
 
 	return (
 		<div
 			className="pointer-events-none absolute inset-0 overflow-hidden"
 			aria-hidden="true"
 		>
-			{HEARTS.map((h) => (
+			{hearts.map((h, i) => (
 				<svg
 					key={h.id}
 					className="absolute"
 					width={h.size}
 					height={h.size}
 					viewBox="0 0 24 24"
-					fill="var(--dm-crimson)"
+					fill={i % 3 === 0 ? "var(--dm-gold)" : "var(--dm-crimson)"}
 					role="presentation"
 					style={{
 						left: `${h.left}%`,
-						bottom: "-5%",
+						bottom: "-10%",
 						opacity: h.opacity,
-						animationName: "dm-heart-float",
-						animationDuration: `${h.duration}s`,
-						animationDelay: `${h.delay}s`,
-						animationTimingFunction: "ease-in-out",
-						animationIterationCount: "infinite",
+						animation: `dm-heart-float ${h.duration}s ease-in-out ${h.delay}s infinite`,
 						["--heart-sway" as string]: `${h.swayAmount}px`,
 					}}
 				>
-					<title>Decorative heart</title>
 					<path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
 				</svg>
 			))}

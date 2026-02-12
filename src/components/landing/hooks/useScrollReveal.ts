@@ -106,3 +106,38 @@ export function useScrollRevealInit(
 		};
 	}, [reducedMotion, containerRef]);
 }
+
+/**
+ * Hook to trigger animations on a specific element when it enters viewport.
+ * Adds 'dm-revealed' class to the ref element.
+ */
+export function useScrollReveal(
+	reducedMotion: boolean,
+	ref: RefObject<HTMLElement | null>,
+	threshold = 0.2,
+) {
+	useEffect(() => {
+		if (reducedMotion) {
+			ref.current?.classList.add("dm-revealed");
+			return;
+		}
+
+		const el = ref.current;
+		if (!el) return;
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				for (const entry of entries) {
+					if (entry.isIntersecting) {
+						entry.target.classList.add("dm-revealed");
+						observer.unobserve(entry.target);
+					}
+				}
+			},
+			{ threshold },
+		);
+
+		observer.observe(el);
+		return () => observer.disconnect();
+	}, [reducedMotion, ref, threshold]);
+}

@@ -28,10 +28,13 @@ export function ContextPanelHeader({
 						{sectionLabel}
 					</h2>
 					{hasErrors && (
-						<span
-							className="inline-block h-2 w-2 shrink-0 rounded-full bg-red-500"
-							aria-label="Section has validation errors"
-						/>
+						<>
+							<span
+								className="inline-block h-2 w-2 shrink-0 rounded-full bg-red-500"
+								aria-hidden="true"
+							/>
+							<span className="sr-only">Section has validation errors</span>
+						</>
 					)}
 
 					<button

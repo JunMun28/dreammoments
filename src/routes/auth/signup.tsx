@@ -17,7 +17,11 @@ function getPasswordChecks(password: string) {
 	};
 }
 
-function getStrengthStyle(score: number): { bar: string; text: string; label: string } {
+function getStrengthStyle(score: number): {
+	bar: string;
+	text: string;
+	label: string;
+} {
 	if (score <= 1)
 		return { bar: "bg-dm-error", text: "text-dm-error", label: "Weak" };
 	if (score <= 2)
@@ -49,13 +53,9 @@ export function PasswordStrengthBar({ password }: { password: string }) {
 			</p>
 			<ul className="space-y-0.5 text-[10px] text-[color:var(--dm-muted)]">
 				<li>{checks.hasLength ? "\u2713" : "\u2717"} At least 8 characters</li>
-				<li>
-					{checks.hasUppercase ? "\u2713" : "\u2717"} Uppercase letter
-				</li>
+				<li>{checks.hasUppercase ? "\u2713" : "\u2717"} Uppercase letter</li>
 				<li>{checks.hasNumber ? "\u2713" : "\u2717"} Number</li>
-				<li>
-					{checks.hasSpecial ? "\u2713" : "\u2717"} Special character
-				</li>
+				<li>{checks.hasSpecial ? "\u2713" : "\u2717"} Special character</li>
 			</ul>
 		</div>
 	);
@@ -183,11 +183,9 @@ function SignupScreen() {
 					onClick={() => {
 						setGoogleLoading(true);
 						setGoogleTimedOut(false);
-						try {
-							signInWithGoogle(redirectTarget);
-						} catch {
+						void signInWithGoogle(redirectTarget).catch(() => {
 							setGoogleLoading(false);
-						}
+						});
 					}}
 				>
 					{googleLoading ? (
