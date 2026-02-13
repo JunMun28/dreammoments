@@ -32,44 +32,44 @@ html {
   outline-offset: 2px;
 }
 
-/* ─── Modern Light Theme (Slate/Zinc + Soft Rose) ─── */
+/* ─── Modern Light Theme (Pastel Dream - Pink/Lilac/Cream) ─── */
 :root {
   /* Core Surfaces */
-  --dm-bg:             #FAFAFA; /* Zinc-50 - Clean off-white */
+  --dm-bg:             #FFF9F9; /* Pale Cream/Pink - Warm and soft base */
   --dm-surface:        #FFFFFF; /* White */
-  --dm-surface-muted:  #F4F4F5; /* Zinc-100 */
+  --dm-surface-muted:  #F9F5F9; /* Very pale lilac/grey */
   --dm-paper:          #FFFFFF;
   
   /* Text / Ink */
-  --dm-ink:            #18181B; /* Zinc-950 - Deep charcoal, softer than black */
-  --dm-ink-muted:      #52525B; /* Zinc-600 */
-  --dm-ink-soft:       #A1A1AA; /* Zinc-400 */
+  --dm-ink:            #4A4E55; /* Warm Grey - Softer contrast */
+  --dm-ink-muted:      #767A85; /* Medium Grey */
+  --dm-ink-soft:       #A1A5B0; /* Light Grey */
   
   /* Borders */
-  --dm-border:         #E4E4E7; /* Zinc-200 */
-  --dm-border-soft:    #F4F4F5; /* Zinc-100 */
+  --dm-border:         #E0BBE4; /* Lilac - Soft borders */
+  --dm-border-soft:    #F2D9F2; /* Pale Lilac */
 
-  /* Accents - Soft Rose & Modern Red */
-  --dm-primary:        #E11D48; /* Rose-600 - Modern, vibrant but not harsh */
-  --dm-primary-hover:  #BE123C; /* Rose-700 */
-  --dm-primary-soft:   #FFE4E6; /* Rose-100 */
-  --dm-primary-text:   #FFFFFF;
+  /* Accents - Pastel Dream */
+  --dm-primary:        #FFB7B2; /* Soft Pink - Playful highlights */
+  --dm-primary-hover:  #FF9E99; /* Deeper Pink */
+  --dm-primary-soft:   #FFE4E1; /* Misty Rose */
+  --dm-primary-text:   #4A4E55; /* Warm Grey on Pink */
   
   /* Secondary Accents */
-  --dm-accent:         #18181B; /* Zinc-950 - Strong contrast accent */
-  --dm-gold:           #CA8A04; /* Yellow-600 - Subtle gold touches */
+  --dm-accent:         #B5EAD7; /* Mint Green - Fresh contrast */
+  --dm-gold:           #E0BBE4; /* Replacing Gold with Lilac for this theme */
   
   /* Semantic */
-  --dm-success:        #10B981;
-  --dm-error:          #EF4444;
-  --dm-warning:        #F59E0B;
+  --dm-success:        #B5EAD7; /* Mint */
+  --dm-error:          #FFB7B2; /* Soft Red/Pink */
+  --dm-warning:        #FFDAC1; /* Peach */
 
-  /* Shadows (Soft & Diffused) */
-  --dm-shadow-sm:      0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --dm-shadow-md:      0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
-  --dm-shadow-lg:      0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
-  --dm-shadow-xl:      0 20px 25px -5px rgb(0 0 0 / 0.05), 0 8px 10px -6px rgb(0 0 0 / 0.05);
-  --dm-shadow-glow:    0 0 20px rgba(225, 29, 72, 0.3); /* Rose glow */
+  /* Shadows (Soft Pastel Glow) */
+  --dm-shadow-sm:      0 1px 2px 0 rgb(74 78 85 / 0.05);
+  --dm-shadow-md:      0 4px 6px -1px rgb(74 78 85 / 0.05), 0 2px 4px -2px rgb(74 78 85 / 0.05);
+  --dm-shadow-lg:      0 10px 15px -3px rgb(74 78 85 / 0.05), 0 4px 6px -4px rgb(74 78 85 / 0.05);
+  --dm-shadow-xl:      0 20px 25px -5px rgb(74 78 85 / 0.05), 0 8px 10px -6px rgb(74 78 85 / 0.05);
+  --dm-shadow-glow:    0 0 20px rgba(255, 183, 178, 0.4); /* Pink glow */
   
   /* Radii */
   --radius-sm:         0.5rem;

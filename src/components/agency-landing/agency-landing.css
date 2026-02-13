@@ -10,12 +10,12 @@
 }
 
 .agency-landing {
-	--agency-background: #ffffff;
-	--agency-foreground: #0a0a0a;
-	--agency-muted: #f5f5f5;
-	--agency-muted-foreground: #737373;
-	--agency-border: #e5e5e5;
-	--agency-ring: #0066ff;
+	--agency-background: #FFF9F9; /* Pale Cream/Pink */
+	--agency-foreground: #4A4E55; /* Warm Grey */
+	--agency-muted: #F9F5F9; /* Pale Lilac/Grey */
+	--agency-muted-foreground: #767A85; /* Medium Grey */
+	--agency-border: #E0BBE4; /* Lilac */
+	--agency-ring: #FFB7B2; /* Soft Pink */
 
 	background-color: var(--agency-background);
 	color: var(--agency-foreground);
@@ -24,12 +24,12 @@
 }
 
 .agency-landing.dark {
-	--agency-background: #0a0a0a;
-	--agency-foreground: #fafafa;
-	--agency-muted: #171717;
-	--agency-muted-foreground: #a3a3a3;
-	--agency-border: #262626;
-	--agency-ring: #3b82f6;
+	--agency-background: #4A4E55; /* Warm Grey */
+	--agency-foreground: #FFF9F9; /* Pale Cream/Pink */
+	--agency-muted: #60646C; /* Lighter Grey */
+	--agency-muted-foreground: #D1D5DB; /* Soft Light Grey */
+	--agency-border: #A1A5B0; /* Light Grey */
+	--agency-ring: #E0BBE4; /* Lilac */
 }
 
 /* Tailwind token utilities from @theme can be unreliable in this app shell.

@@ -164,7 +164,7 @@ export function Header() {
 											<Link
 												to="/editor/new"
 												search={{ template: "love-at-dusk" }}
-												className="mt-4 inline-flex w-full items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-semibold text-neutral-900 transition-opacity hover:opacity-90"
+												className="mt-4 inline-flex w-full items-center justify-center rounded-full bg-[color:var(--dm-primary)] px-4 py-2 text-sm font-semibold text-[color:var(--dm-primary-text)] transition-opacity hover:opacity-90"
 												onClick={() => setIsMenuOpen(false)}
 											>
 												Start creating
