@@ -9,13 +9,15 @@ import {
 	Eye,
 	Heart,
 	Mail,
-	MoreHorizontal,
+	Monitor,
 	Send,
 	Share2,
+	Smartphone,
 	Sparkles,
 	Trash2,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import InvitationRenderer from "../../components/templates/InvitationRenderer";
 import ShareModal from "../../components/share/ShareModal";
 import { RouteErrorFallback } from "../../components/ui/RouteErrorFallback";
 import { RouteLoadingSpinner } from "../../components/ui/RouteLoadingSpinner";
@@ -33,6 +35,7 @@ import {
 } from "../../lib/data";
 import { useStore } from "../../lib/store";
 import type { Invitation, InvitationStatus } from "../../lib/types";
+import { cn } from "../../lib/utils";
 import { templates } from "../../templates";
 
 export const Route = createFileRoute("/dashboard/")({
@@ -46,6 +49,15 @@ const statusLabels: Record<InvitationStatus, string> = {
 	published: "Published",
 	archived: "Archived",
 };
+
+type PreviewViewport = "phone" | "desktop";
+
+function getStatusClass(status: InvitationStatus) {
+	if (status === "published") return "bg-dm-success/10 text-dm-success";
+	if (status === "archived")
+		return "bg-[color:var(--dm-border)] text-[color:var(--dm-muted)]";
+	return "bg-[color:var(--dm-peach)]/10 text-[color:var(--dm-peach)]";
+}
 
 function ConfirmDeleteDialog({
 	title,
@@ -134,9 +146,11 @@ function DashboardScreen() {
 	>("all");
 	const [page, setPage] = useState(1);
 	const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
-	const [openOverflowId, setOpenOverflowId] = useState<string | null>(null);
-	const overflowRef = useRef<HTMLDivElement>(null);
-	const perPage = 9;
+	const [previewInvitationId, setPreviewInvitationId] = useState<string | null>(
+		null,
+	);
+	const [previewViewport, setPreviewViewport] = useState<PreviewViewport>("phone");
+	const perPage = 6;
 
 	const handleDeleteConfirm = useCallback(async () => {
 		if (!deleteTarget) return;
@@ -182,21 +196,6 @@ function DashboardScreen() {
 		[addToast, navigate],
 	);
 
-	// Close overflow menu when clicking outside
-	useEffect(() => {
-		if (!openOverflowId) return;
-		const handleClick = (e: MouseEvent) => {
-			if (
-				overflowRef.current &&
-				!overflowRef.current.contains(e.target as Node)
-			) {
-				setOpenOverflowId(null);
-			}
-		};
-		document.addEventListener("pointerdown", handleClick);
-		return () => document.removeEventListener("pointerdown", handleClick);
-	}, [openOverflowId]);
-
 	const filteredInvitations = useMemo(() => {
 		return invitations.filter((inv) => {
 			const matchesSearch = inv.title
@@ -216,7 +215,7 @@ function DashboardScreen() {
 		[filteredInvitations],
 	);
 
-	const totalPages = Math.ceil(sortedInvitations.length / perPage);
+	const totalPages = Math.max(1, Math.ceil(sortedInvitations.length / perPage));
 	const paginatedInvitations = sortedInvitations.slice(
 		(page - 1) * perPage,
 		page * perPage,
@@ -228,28 +227,74 @@ function DashboardScreen() {
 		setPage(1);
 	}, [search, statusFilter]);
 
+	useEffect(() => {
+		setPage((current) => Math.min(current, totalPages));
+	}, [totalPages]);
+
+	useEffect(() => {
+		if (sortedInvitations.length === 0) {
+			setPreviewInvitationId(null);
+			return;
+		}
+		const exists = sortedInvitations.some(
+			(invitation) => invitation.id === previewInvitationId,
+		);
+		if (!exists) {
+			setPreviewInvitationId(sortedInvitations[0].id);
+		}
+	}, [sortedInvitations, previewInvitationId]);
+
+	useEffect(() => {
+		if (paginatedInvitations.length === 0) return;
+		const existsOnPage = paginatedInvitations.some(
+			(invitation) => invitation.id === previewInvitationId,
+		);
+		if (!existsOnPage) {
+			setPreviewInvitationId(paginatedInvitations[0].id);
+		}
+	}, [paginatedInvitations, previewInvitationId]);
+
+	const activeInvitation = useMemo(() => {
+		if (!previewInvitationId) return null;
+		return (
+			sortedInvitations.find(
+				(invitation) => invitation.id === previewInvitationId,
+			) ?? null
+		);
+	}, [sortedInvitations, previewInvitationId]);
+
 	if (!user && !loading) return <Navigate to="/auth/login" />;
 
 	if (loading) {
 		return (
 			<div className="min-h-screen bg-[color:var(--dm-bg)] px-6 py-10">
-				<div className="mx-auto max-w-6xl space-y-8">
+				<div className="mx-auto max-w-[1220px] space-y-8">
 					<div>
 						<div className="mb-2 h-4 w-20 animate-pulse rounded bg-[color:var(--dm-border)]" />
 						<div className="mb-2 h-8 w-48 animate-pulse rounded bg-[color:var(--dm-border)]" />
 						<div className="h-4 w-64 animate-pulse rounded bg-[color:var(--dm-border)]" />
 					</div>
-					<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-						{[1, 2, 3].map((i) => (
+					<div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
+						<div className="space-y-4">
+							{[1, 2, 3].map((i) => (
+								<div
+									key={i}
+									className="animate-pulse rounded-3xl border border-[color:var(--dm-border)] p-6"
+								>
+									<div className="mb-3 h-4 w-24 rounded bg-[color:var(--dm-border)]" />
+									<div className="mb-3 h-8 w-2/3 rounded bg-[color:var(--dm-border)]" />
+									<div className="h-24 rounded-2xl bg-[color:var(--dm-border)]" />
+								</div>
+							))}
+						</div>
+						<div
+							className="animate-pulse rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-6"
+						>
+							<div className="mb-4 h-5 w-28 rounded bg-[color:var(--dm-border)]" />
 							<div
-								key={i}
-								className="animate-pulse rounded-2xl border border-[color:var(--dm-border)] p-6"
-							>
-								<div className="mb-4 h-40 rounded-lg bg-[color:var(--dm-border)]" />
-								<div className="mb-2 h-5 w-2/3 rounded bg-[color:var(--dm-border)]" />
-								<div className="h-4 w-1/3 rounded bg-[color:var(--dm-border)]" />
-							</div>
-						))}
+								className="h-[520px] rounded-3xl bg-[color:var(--dm-border)]"
+							/>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -303,8 +348,8 @@ function DashboardScreen() {
 	}
 
 	return (
-		<div className="min-h-screen bg-[color:var(--dm-bg)] px-6 py-10">
-			<div className="mx-auto max-w-6xl space-y-8">
+		<div className="min-h-screen bg-[radial-gradient(circle_at_0%_0%,rgba(255,240,245,0.85),transparent_45%),radial-gradient(circle_at_100%_0%,rgba(240,249,255,0.8),transparent_35%),var(--dm-bg)] px-4 py-8 sm:px-6 sm:py-10">
+			<div className="mx-auto max-w-[1220px] space-y-6">
 				<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 					<div className="min-w-0">
 						<p className="text-xs uppercase tracking-[0.4em] text-[color:var(--dm-accent-strong)]">
@@ -314,36 +359,44 @@ function DashboardScreen() {
 							My Invitations
 						</h1>
 						<p className="mt-2 text-sm text-[color:var(--dm-muted)]">
-							Manage drafts, RSVPs, and sharing.
+							Manage drafts, track RSVPs, and preview your card before sharing.
 						</p>
 					</div>
 					<Link
 						to="/editor/new"
-						className="rounded-full bg-[color:var(--dm-accent-strong)] px-5 py-3 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)]"
+						className="inline-flex min-h-11 items-center justify-center rounded-full bg-[color:var(--dm-accent-strong)] px-5 py-3 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)]"
 					>
 						New Invitation
 					</Link>
 				</div>
 
-				{/* Search and filter controls */}
-				<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+				<div className="flex flex-wrap items-center gap-2">
+					<div className="rounded-full border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] px-3 py-1 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
+						{sortedInvitations.length} invitations
+					</div>
+					<div className="rounded-full border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] px-3 py-1 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
+						Page {page} / {totalPages}
+					</div>
+				</div>
+
+				<div className="flex flex-col gap-3 rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-4 sm:flex-row sm:items-center">
 					<input
 						placeholder="Search invitations..."
 						aria-label="Search invitations"
 						value={search}
 						onChange={(e) => setSearch(e.target.value)}
-						className="h-10 flex-1 rounded-full border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] px-4 text-sm text-[color:var(--dm-ink)]"
+						className="h-11 min-w-0 flex-1 rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] px-4 text-sm text-[color:var(--dm-ink)]"
 						autoComplete="off"
 						type="search"
 					/>
-					<div className="flex gap-2 text-xs uppercase tracking-[0.2em]">
+					<div className="flex flex-wrap gap-2 text-xs uppercase tracking-[0.2em]">
 						{(["all", "draft", "published", "archived"] as const).map(
 							(status) => (
 								<button
 									key={status}
 									type="button"
 									onClick={() => setStatusFilter(status)}
-									className={`rounded-full px-3 py-2 transition-colors ${
+									className={`min-h-11 rounded-full px-3 py-2 ${
 										statusFilter === status
 											? "bg-[color:var(--dm-accent-strong)] text-[color:var(--dm-on-accent)]"
 											: "border border-[color:var(--dm-border)] text-[color:var(--dm-ink)]"
@@ -356,243 +409,297 @@ function DashboardScreen() {
 					</div>
 				</div>
 
-				<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-					{paginatedInvitations.length === 0 &&
-						(search || statusFilter !== "all") && (
-							<div className="col-span-full flex flex-col items-center justify-center rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] px-6 py-16 text-center">
-								<p className="text-sm text-[color:var(--dm-muted)]">
-									No invitations match your search or filter.
-								</p>
-								<button
-									type="button"
-									className="mt-4 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-accent-strong)] hover:underline"
-									onClick={() => {
-										setSearch("");
-										setStatusFilter("all");
-									}}
-								>
-									Clear Filters
-								</button>
-							</div>
-						)}
-					{paginatedInvitations.map((invitation) => {
-						const templateName =
-							templates.find(
-								(template) => template.id === invitation.templateId,
-							)?.name ?? invitation.templateId;
-						const guests = listGuests(invitation.id);
-						const analytics = getAnalytics(invitation.id);
+				<div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
+					<div className="space-y-4">
+						{paginatedInvitations.length === 0 &&
+							(search || statusFilter !== "all") && (
+								<div className="flex flex-col items-center justify-center rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] px-6 py-16 text-center">
+									<p className="text-sm text-[color:var(--dm-muted)]">
+										No invitations match your search or filter.
+									</p>
+									<button
+										type="button"
+										className="mt-4 min-h-11 rounded-full border border-[color:var(--dm-border)] px-5 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-ink)]"
+										onClick={() => {
+											setSearch("");
+											setStatusFilter("all");
+										}}
+									>
+										Clear Filters
+									</button>
+								</div>
+							)}
+						{paginatedInvitations.map((invitation) => {
+							const templateName =
+								templates.find(
+									(template) => template.id === invitation.templateId,
+								)?.name ?? invitation.templateId;
+							const guests = listGuests(invitation.id);
+							const analytics = getAnalytics(invitation.id);
+							const isActive = invitation.id === activeInvitation?.id;
 
-						return (
-							<div
-								key={invitation.id}
-								className="rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-6"
-							>
-								<div className="flex flex-wrap items-start justify-between gap-4">
-									<div>
-										<p className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">
-											{templateName}
-										</p>
-										<h2 className="mt-2 text-xl font-semibold text-[color:var(--dm-ink)] break-words">
-											{invitation.title}
-										</h2>
-										<span
-											className={`mt-2 inline-block rounded-full px-2.5 py-0.5 text-xs uppercase tracking-[0.2em] ${
-												invitation.status === "published"
-													? "bg-dm-success/10 text-dm-success"
-													: invitation.status === "archived"
-														? "bg-[color:var(--dm-border)] text-[color:var(--dm-muted)]"
-														: "bg-[color:var(--dm-peach)]/10 text-[color:var(--dm-peach)]"
-											}`}
+							return (
+								<article
+									key={invitation.id}
+									className={cn(
+										"rounded-3xl border bg-[color:var(--dm-surface)] p-5 shadow-sm",
+										isActive
+											? "border-[color:var(--dm-accent-strong)] ring-2 ring-[color:var(--dm-accent-strong)]/10"
+											: "border-[color:var(--dm-border)]",
+									)}
+								>
+									<div className="flex flex-wrap items-start justify-between gap-4">
+										<div className="min-w-0 flex-1">
+											<p className="text-xs uppercase tracking-[0.3em] text-[color:var(--dm-accent-strong)]">
+												{templateName}
+											</p>
+											<h2 className="mt-2 break-words text-xl font-semibold text-[color:var(--dm-ink)]">
+												{invitation.title}
+											</h2>
+											<span
+												className={cn(
+													"mt-2 inline-block rounded-full px-2.5 py-0.5 text-xs uppercase tracking-[0.2em]",
+													getStatusClass(invitation.status),
+												)}
+											>
+												{statusLabels[invitation.status]}
+											</span>
+										</div>
+										<button
+											type="button"
+											className={cn(
+												"inline-flex min-h-11 items-center gap-1.5 rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em]",
+												isActive
+													? "border-[color:var(--dm-accent-strong)] text-[color:var(--dm-accent-strong)]"
+													: "border-[color:var(--dm-border)] text-[color:var(--dm-ink)]",
+											)}
+											onClick={() => setPreviewInvitationId(invitation.id)}
 										>
-											{statusLabels[invitation.status]}
-										</span>
+											<Eye className="h-3.5 w-3.5" aria-hidden="true" />
+											Preview
+										</button>
 									</div>
-									<div className="flex flex-wrap gap-2 text-xs uppercase tracking-[0.2em]">
-										{/* Edit - always visible, links directly to editor */}
+
+									<div className="mt-4 rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] p-4">
+										<p className="text-sm font-medium text-[color:var(--dm-ink)]">
+											{invitation.content.hero.partnerOneName} ×{" "}
+											{invitation.content.hero.partnerTwoName}
+										</p>
+										<p className="mt-1 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
+											{invitation.content.hero.date}
+										</p>
+										<p className="mt-2 max-h-8 overflow-hidden text-xs text-[color:var(--dm-muted)]">
+											{invitation.content.hero.tagline}
+										</p>
+									</div>
+
+									<div className="mt-4 grid gap-2 sm:grid-cols-2">
 										<Link
 											to="/editor/$invitationId"
 											params={{ invitationId: invitation.id }}
-											className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)]"
+											className="inline-flex min-h-11 items-center justify-center rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-ink)]"
 										>
 											Edit
 										</Link>
-										{/* Share - always visible */}
 										<button
 											type="button"
-											className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)]"
+											className="inline-flex min-h-11 items-center justify-center rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-ink)]"
 											onClick={() => {
 												setSelected(invitation);
 												setShareOpen(true);
 											}}
 										>
-											<Share2
-												className="h-3 w-3 sm:hidden"
-												aria-hidden="true"
-											/>
+											<Share2 className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
 											Share
 										</button>
-										{/* Desktop-only buttons: Preview, Duplicate, Delete */}
 										<Link
 											to="/invite/$slug"
 											params={{ slug: invitation.slug }}
-											className="hidden rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)] sm:inline-flex"
+											className="inline-flex min-h-11 items-center justify-center rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-ink)]"
 										>
-											Preview
+											Open Live
 										</Link>
 										<button
 											type="button"
-											className="hidden items-center gap-1.5 rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)] sm:inline-flex"
+											className="inline-flex min-h-11 items-center justify-center rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-ink)]"
 											onClick={() => handleDuplicate(invitation)}
 											disabled={duplicatingId === invitation.id}
 										>
-											<Copy className="h-3 w-3" aria-hidden="true" />
+											<Copy className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
 											{duplicatingId === invitation.id
 												? "Duplicating..."
 												: "Duplicate"}
 										</button>
-										<button
-											type="button"
-											className="hidden rounded-full border border-dm-error/30 px-4 py-2 text-dm-error hover:bg-dm-error/5 sm:inline-flex"
-											onClick={() => setDeleteTarget(invitation)}
-											disabled={deleteMutation.isPending}
-										>
-											{deleteMutation.isPending &&
-											deleteTarget?.id === invitation.id
-												? "Deleting..."
-												: "Delete"}
-										</button>
-										{/* Mobile overflow menu */}
-										<div
-											className="relative sm:hidden"
-											ref={
-												openOverflowId === invitation.id
-													? overflowRef
-													: undefined
-											}
-										>
-											<button
-												type="button"
-												className="inline-flex items-center justify-center rounded-full border border-[color:var(--dm-border)] px-2.5 py-2 text-[color:var(--dm-ink)]"
-												onClick={() =>
-													setOpenOverflowId(
-														openOverflowId === invitation.id
-															? null
-															: invitation.id,
-													)
-												}
-												aria-label="More actions"
-											>
-												<MoreHorizontal
-													className="h-4 w-4"
-													aria-hidden="true"
-												/>
-											</button>
-											{openOverflowId === invitation.id && (
-												<div className="absolute right-0 top-full z-10 mt-1 w-40 rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] py-1 shadow-lg">
-													<Link
-														to="/invite/$slug"
-														params={{ slug: invitation.slug }}
-														className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-xs uppercase tracking-[0.15em] text-[color:var(--dm-ink)]"
-														onClick={() => setOpenOverflowId(null)}
-													>
-														<Eye className="h-3.5 w-3.5" aria-hidden="true" />
-														Preview
-													</Link>
-													<button
-														type="button"
-														className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-xs uppercase tracking-[0.15em] text-[color:var(--dm-ink)]"
-														onClick={() => {
-															setOpenOverflowId(null);
-															handleDuplicate(invitation);
-														}}
-														disabled={duplicatingId === invitation.id}
-													>
-														<Copy className="h-3.5 w-3.5" aria-hidden="true" />
-														{duplicatingId === invitation.id
-															? "Duplicating..."
-															: "Duplicate"}
-													</button>
-													<button
-														type="button"
-														className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-xs uppercase tracking-[0.15em] text-dm-error"
-														onClick={() => {
-															setOpenOverflowId(null);
-															setDeleteTarget(invitation);
-														}}
-														disabled={deleteMutation.isPending}
-													>
-														<Trash2
-															className="h-3.5 w-3.5"
-															aria-hidden="true"
-														/>
-														{deleteMutation.isPending &&
-														deleteTarget?.id === invitation.id
-															? "Deleting..."
-															: "Delete"}
-													</button>
-												</div>
-											)}
-										</div>
 									</div>
-								</div>
-								<div className="mt-4 grid gap-3 sm:grid-cols-3">
-									<div className="rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-4">
-										<p className="text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
-											Views
-										</p>
-										{analytics.totalViews > 0 ? (
+
+									<div className="mt-4 grid gap-3 sm:grid-cols-3">
+										<div className="rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-4">
+											<p className="text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
+												Views
+											</p>
 											<p className="mt-2 text-lg font-semibold tabular-nums text-[color:var(--dm-ink)]">
 												{analytics.totalViews}
 											</p>
-										) : (
-											<p className="mt-2 text-xs leading-relaxed text-[color:var(--dm-muted)]">
-												Your invitation hasn't been viewed yet
+										</div>
+										<div className="rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-4">
+											<p className="text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
+												RSVPs
 											</p>
-										)}
-									</div>
-									<div className="rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-4">
-										<p className="text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
-											RSVPs
-										</p>
-										{guests.length > 0 ? (
-											<p className="mt-2 text-lg font-semibold tabular-nums text-[color:var(--dm-ink)]">
-												{guests.length}
-											</p>
-										) : (
-											<div className="mt-2 flex items-center gap-1.5">
-												<Send
-													className="h-3 w-3 text-[color:var(--dm-muted)]"
-													aria-hidden="true"
-												/>
-												<p className="text-xs leading-relaxed text-[color:var(--dm-muted)]">
-													Share to collect RSVPs
+											{guests.length > 0 ? (
+												<p className="mt-2 text-lg font-semibold tabular-nums text-[color:var(--dm-ink)]">
+													{guests.length}
 												</p>
+											) : (
+												<div className="mt-2 flex items-center gap-1.5">
+													<Send
+														className="h-3 w-3 text-[color:var(--dm-muted)]"
+														aria-hidden="true"
+													/>
+													<p className="text-xs text-[color:var(--dm-muted)]">
+														No RSVPs yet
+													</p>
+												</div>
+											)}
+										</div>
+										<div className="rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-4">
+											<p className="text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
+												Updated
+											</p>
+											<p className="mt-2 text-xs text-[color:var(--dm-muted)]">
+												{new Date(invitation.updatedAt).toLocaleDateString()}
+											</p>
+										</div>
+									</div>
+
+									<button
+										type="button"
+										className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full border border-dm-error/30 px-4 py-2 text-xs uppercase tracking-[0.2em] text-dm-error hover:bg-dm-error/5"
+										onClick={() => setDeleteTarget(invitation)}
+										disabled={deleteMutation.isPending}
+									>
+										<Trash2 className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
+										{deleteMutation.isPending &&
+										deleteTarget?.id === invitation.id
+											? "Deleting..."
+											: "Delete"}
+									</button>
+								</article>
+							);
+						})}
+					</div>
+
+					<aside className="xl:sticky xl:top-6 xl:h-fit">
+						<div className="overflow-hidden rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] shadow-[0_20px_70px_-35px_rgba(0,0,0,0.45)]">
+							{activeInvitation ? (
+								<>
+									<div className="border-b border-[color:var(--dm-border)] p-5">
+										<p className="text-xs uppercase tracking-[0.35em] text-[color:var(--dm-accent-strong)]">
+											Live Preview
+										</p>
+										<h3 className="mt-2 break-words text-xl font-semibold text-[color:var(--dm-ink)]">
+											{activeInvitation.title}
+										</h3>
+										<div className="mt-3 flex flex-wrap items-center gap-2">
+											<span
+												className={cn(
+													"rounded-full px-2.5 py-0.5 text-xs uppercase tracking-[0.2em]",
+													getStatusClass(activeInvitation.status),
+												)}
+											>
+												{statusLabels[activeInvitation.status]}
+											</span>
+											<span className="rounded-full border border-[color:var(--dm-border)] px-2.5 py-0.5 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
+												{
+													templates.find(
+														(template) =>
+															template.id === activeInvitation.templateId,
+													)?.name
+												}
+											</span>
+										</div>
+										<div className="mt-4 grid grid-cols-2 gap-2">
+											<button
+												type="button"
+												className={cn(
+													"inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full border px-3 text-xs uppercase tracking-[0.2em]",
+													previewViewport === "phone"
+														? "border-[color:var(--dm-accent-strong)] text-[color:var(--dm-accent-strong)]"
+														: "border-[color:var(--dm-border)] text-[color:var(--dm-ink)]",
+												)}
+												onClick={() => setPreviewViewport("phone")}
+												aria-pressed={previewViewport === "phone"}
+											>
+												<Smartphone className="h-3.5 w-3.5" aria-hidden="true" />
+												Phone
+											</button>
+											<button
+												type="button"
+												className={cn(
+													"inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full border px-3 text-xs uppercase tracking-[0.2em]",
+													previewViewport === "desktop"
+														? "border-[color:var(--dm-accent-strong)] text-[color:var(--dm-accent-strong)]"
+														: "border-[color:var(--dm-border)] text-[color:var(--dm-ink)]",
+												)}
+												onClick={() => setPreviewViewport("desktop")}
+												aria-pressed={previewViewport === "desktop"}
+											>
+												<Monitor className="h-3.5 w-3.5" aria-hidden="true" />
+												Desktop
+											</button>
+										</div>
+									</div>
+									<div className="bg-[linear-gradient(135deg,rgba(255,241,246,0.6),rgba(241,245,249,0.7))] p-4 sm:p-5">
+										<div
+											className={cn(
+												"mx-auto overflow-hidden rounded-[26px] border border-white/80 bg-[color:var(--dm-surface)] shadow-2xl",
+												previewViewport === "phone"
+													? "max-w-[340px]"
+													: "max-w-full",
+											)}
+											style={
+												(activeInvitation.designOverrides ??
+													{}) as Record<string, string>
+											}
+										>
+											<div
+												className={cn(
+													"pointer-events-none overflow-hidden",
+													previewViewport === "phone"
+														? "h-[560px]"
+														: "h-[520px]",
+												)}
+											>
+												<InvitationRenderer
+													templateId={activeInvitation.templateId}
+													content={activeInvitation.content}
+													hiddenSections={activeInvitation.sectionVisibility}
+													mode="preview"
+												/>
 											</div>
-										)}
+										</div>
 									</div>
-									<div className="rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-4">
-										<p className="text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
-											Updated
-										</p>
-										<p className="mt-2 text-xs text-[color:var(--dm-muted)]">
-											{new Date(invitation.updatedAt).toLocaleDateString()}
-										</p>
-									</div>
+								</>
+							) : (
+								<div className="flex min-h-[620px] flex-col items-center justify-center px-6 text-center">
+									<p className="text-sm text-[color:var(--dm-muted)]">
+										No invitation to preview.
+									</p>
+									<p className="mt-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
+										Clear filters or create a new invitation.
+									</p>
 								</div>
-							</div>
-						);
-					})}
+							)}
+						</div>
+					</aside>
 				</div>
 
-				{/* Pagination */}
 				{totalPages > 1 && (
-					<div className="mt-8 flex items-center justify-center gap-2">
+					<div className="mt-2 flex items-center justify-center gap-2">
 						<button
 							type="button"
 							onClick={() => setPage((p) => Math.max(1, p - 1))}
 							disabled={page === 1}
-							className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-ink)] disabled:opacity-40"
+							className="min-h-11 rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-ink)] disabled:opacity-40"
 						>
 							Previous
 						</button>
@@ -603,27 +710,27 @@ function DashboardScreen() {
 							type="button"
 							onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
 							disabled={page === totalPages}
-							className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-ink)] disabled:opacity-40"
+							className="min-h-11 rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-ink)] disabled:opacity-40"
 						>
 							Next
 						</button>
 					</div>
 				)}
-			</div>
 
-			<ShareModal
-				open={shareOpen}
-				invitation={selected}
-				onClose={() => setShareOpen(false)}
-			/>
-
-			{deleteTarget && (
-				<ConfirmDeleteDialog
-					title={deleteTarget.title}
-					onConfirm={handleDeleteConfirm}
-					onCancel={() => setDeleteTarget(null)}
+				<ShareModal
+					open={shareOpen}
+					invitation={selected}
+					onClose={() => setShareOpen(false)}
 				/>
-			)}
+
+				{deleteTarget && (
+					<ConfirmDeleteDialog
+						title={deleteTarget.title}
+						onConfirm={handleDeleteConfirm}
+						onCancel={() => setDeleteTarget(null)}
+					/>
+				)}
+			</div>
 		</div>
 	);
 }

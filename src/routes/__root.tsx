@@ -176,6 +176,14 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 						]}
 					/>
 				)}
+				{import.meta.env.DEV && (
+					<script
+						// biome-ignore lint/security/noDangerouslySetInnerHtml: dev-only cleanup to prevent stale SW issues across localhost projects
+						dangerouslySetInnerHTML={{
+							__html: `if("serviceWorker"in navigator){navigator.serviceWorker.getRegistrations().then(function(registrations){for(const registration of registrations){registration.unregister()}})}`,
+						}}
+					/>
+				)}
 				<Scripts />
 				{!import.meta.env.DEV && (
 					<script

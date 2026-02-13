@@ -186,6 +186,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			name: "Google User",
 			authProvider: "google",
 		});
+		setSessionExpired(false);
+		window.location.href = sanitizeRedirect(redirectTo);
 	}, []);
 
 	const handleAuthSuccess = useCallback(
@@ -301,33 +303,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				signOut,
 			}}
 		>
-			{sessionExpired && !user && (
-				<div
-					role="alert"
-					className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40"
-				>
-					<div className="mx-4 w-full max-w-sm rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-6 text-center shadow-lg">
-						<p className="text-sm font-medium text-[color:var(--dm-ink)]">
-							Your session has expired. Please log in again.
-						</p>
-						<div className="mt-4 flex gap-3 justify-center">
-							<button
-								type="button"
-								onClick={() => setSessionExpired(false)}
-								className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]"
-							>
-								Dismiss
-							</button>
-							<a
-								href="/auth/login"
-								className="rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)]"
-							>
-								Log In
-							</a>
-						</div>
-					</div>
-				</div>
-			)}
 			{children}
 		</AuthContext.Provider>
 	);
