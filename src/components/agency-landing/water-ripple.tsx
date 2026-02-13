@@ -1,19 +1,9 @@
 "use client";
 
-import { useTexture } from "@react-three/drei";
+import { useRef, useEffect, useMemo, useSyncExternalStore } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import {
-	Component,
-	type ErrorInfo,
-	type ReactNode,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-	useSyncExternalStore,
-} from "react";
+import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
-import { useWebglSupport } from "./webgl-support";
 
 const MAX_RIPPLES = 30;
 const BRUSH_SIZE = 100;
@@ -94,10 +84,7 @@ function createBrushTexture(): THREE.Texture {
 		width: 128,
 		height: 128,
 	});
-	const ctx = canvas.getContext("2d");
-	if (!ctx) {
-		throw new Error("Canvas 2D context unavailable");
-	}
+	const ctx = canvas.getContext("2d")!;
 	const g = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
 	g.addColorStop(0, "rgba(255,255,255,1)");
 	g.addColorStop(0.3, "rgba(255,255,255,0.5)");
@@ -172,20 +159,18 @@ function WaterRippleScene({
 			const mesh = new THREE.Mesh(geo, mat);
 			mesh.visible = false;
 			mesh.rotation.z = RANDOM_ROTATIONS[i] ?? 0;
-			brushSceneRef.current?.add(mesh);
+			brushSceneRef.current!.add(mesh);
 			return { mesh, material: mat };
 		});
 
 		return () => {
 			fboRef.current?.dispose();
 			geo.dispose();
-			ripplesRef.current.forEach((r) => {
-				r.material.dispose();
-			});
+			ripplesRef.current.forEach((r) => r.material.dispose());
 			initializedRef.current = false;
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [brushTexture, size.width, size.height]);
+	}, [brushTexture]);
 
 	useEffect(() => {
 		const w = Math.floor(size.width * FBO_SCALE),
@@ -250,7 +235,7 @@ function WaterRippleScene({
 			uTime: { value: 0 },
 		}),
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[imageTexture, size.width, size.height],
+		[],
 	);
 
 	useFrame((_, delta) => {
@@ -265,7 +250,7 @@ function WaterRippleScene({
 		ripplesRef.current.forEach(({ mesh, material }) => {
 			if (mesh.visible) {
 				mesh.rotation.z += 0.02 * ts;
-				material.opacity *= 0.96 ** ts;
+				material.opacity *= Math.pow(0.96, ts);
 				mesh.scale.x = mesh.scale.x * 0.982 + 0.108;
 				mesh.scale.y = mesh.scale.y * 0.982 + 0.108;
 				if (material.opacity < 0.002) mesh.visible = false;
@@ -315,26 +300,6 @@ function WaterRippleScene({
 
 const emptySubscribe = () => () => {};
 
-class CanvasErrorBoundary extends Component<
-	{ fallback: ReactNode; children: ReactNode },
-	{ hasError: boolean }
-> {
-	state = { hasError: false };
-
-	static getDerivedStateFromError(): { hasError: boolean } {
-		return { hasError: true };
-	}
-
-	componentDidCatch(_error: Error, _errorInfo: ErrorInfo): void {}
-
-	render() {
-		if (this.state.hasError) {
-			return this.props.fallback;
-		}
-		return this.props.children;
-	}
-}
-
 export function WaterRipple({
 	src,
 	maskRadius,
@@ -347,8 +312,6 @@ export function WaterRipple({
 		() => true,
 		() => false,
 	);
-	const hasWebgl = useWebglSupport();
-	const [isCanvasLost, setIsCanvasLost] = useState(false);
 
 	return (
 		<div
@@ -357,51 +320,24 @@ export function WaterRipple({
 				willChange: "transform",
 				transformStyle: "preserve-3d",
 				backfaceVisibility: "hidden",
+				backgroundColor: "var(--agency-background)",
 			}}
 		>
-			{isMounted && hasWebgl && !isCanvasLost ? (
-				<CanvasErrorBoundary
-					fallback={
-						<img
-							src={src}
-							alt=""
-							className="h-full w-full object-cover"
-							loading="lazy"
-						/>
-					}
+			{isMounted && (
+				<Canvas
+					dpr={1}
+					gl={{
+						antialias: false,
+						alpha: true,
+						powerPreference: "high-performance",
+						stencil: false,
+						depth: false,
+					}}
+					style={{ width: "100%", height: "100%" }}
+					frameloop="always"
 				>
-					<Canvas
-						dpr={1}
-						gl={{
-							antialias: false,
-							alpha: true,
-							powerPreference: "high-performance",
-							stencil: false,
-							depth: false,
-						}}
-						style={{ width: "100%", height: "100%" }}
-						frameloop="always"
-						onCreated={({ gl }) => {
-							gl.domElement.addEventListener(
-								"webglcontextlost",
-								(event) => {
-									event.preventDefault();
-									setIsCanvasLost(true);
-								},
-								{ once: true },
-							);
-						}}
-					>
-						<WaterRippleScene src={src} maskRadius={maskRadius} />
-					</Canvas>
-				</CanvasErrorBoundary>
-			) : (
-				<img
-					src={src}
-					alt=""
-					className="h-full w-full object-cover"
-					loading="lazy"
-				/>
+					<WaterRippleScene src={src} maskRadius={maskRadius} />
+				</Canvas>
 			)}
 		</div>
 	);

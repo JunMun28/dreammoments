@@ -1,5 +1,6 @@
 "use client";
 
+import { useTexture } from "@react-three/drei";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
@@ -198,6 +199,12 @@ const projects: Project[] = [
 	},
 ];
 
+if (typeof window !== "undefined") {
+	for (const project of projects) {
+		useTexture.preload(project.image);
+	}
+}
+
 function ProjectOverlay({
 	project,
 	onClose,
@@ -314,7 +321,6 @@ function ProjectItem({
 	const titleRef = useRef<HTMLHeadingElement>(null);
 	const descRef = useRef<HTMLParagraphElement>(null);
 	const [maskRadius, setMaskRadius] = useState(0);
-	const [isInView, setIsInView] = useState(false);
 	const isEven = index % 2 === 0;
 
 	const xTo = useRef<gsap.QuickToFunc | null>(null);
@@ -356,21 +362,6 @@ function ProjectItem({
 		yTo.current?.(0);
 		scaleTo.current?.(1.15);
 	};
-
-	useEffect(() => {
-		const target = containerRef.current;
-		if (!target) return;
-
-		const observer = new IntersectionObserver(
-			([entry]) => {
-				setIsInView(entry?.isIntersecting ?? false);
-			},
-			{ root: null, rootMargin: "30% 0px 30% 0px", threshold: 0.01 },
-		);
-
-		observer.observe(target);
-		return () => observer.disconnect();
-	}, []);
 
 	useEffect(() => {
 		if (!containerRef.current) return;
@@ -420,14 +411,6 @@ function ProjectItem({
 			onClick={onClick}
 			onMouseEnter={() => onHover(true)}
 			onMouseLeave={() => onHover(false)}
-			onKeyDown={(e) => {
-				if (e.key === "Enter" || e.key === " ") {
-					e.preventDefault();
-					onClick();
-				}
-			}}
-			role="button"
-			tabIndex={0}
 		>
 			<div className="mx-auto max-w-[90rem] px-6 sm:px-12 lg:px-24 2xl:max-w-[112.5rem] min-[120rem]:max-w-[137.5rem]">
 				<div
@@ -451,16 +434,7 @@ function ProjectItem({
 								transform: "scale(1.15)",
 							}}
 						>
-							{isInView ? (
-								<WaterRipple src={project.image} maskRadius={maskRadius} />
-							) : (
-								<img
-									src={project.image}
-									alt={`${project.titleUp} ${project.titleDown}`}
-									className="h-full w-full object-cover"
-									loading="lazy"
-								/>
-							)}
+							<WaterRipple src={project.image} maskRadius={maskRadius} />
 						</div>
 					</div>
 					<div

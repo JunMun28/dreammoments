@@ -2,15 +2,7 @@
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { motion } from "motion/react";
-import {
-	Component,
-	type ErrorInfo,
-	type ReactNode,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-} from "react";
+import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { useLandingTheme } from "./theme-context";
 
@@ -138,7 +130,7 @@ interface ShaderPlaneProps {
 
 function ShaderPlane({ isDark, startColors, endColors }: ShaderPlaneProps) {
 	const meshRef = useRef<THREE.Mesh>(null);
-	const { gl } = useThree();
+	const { size, gl } = useThree();
 	const defaultStart = {
 		color1: "#FF66B2",
 		color2: "#994DE6",
@@ -192,14 +184,8 @@ function ShaderPlane({ isDark, startColors, endColors }: ShaderPlaneProps) {
 				),
 			},
 		}),
-		[
-			startColors?.color1,
-			startColors?.color2,
-			startColors?.color3,
-			endColors?.color1,
-			endColors?.color2,
-			endColors?.color3,
-		],
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[],
 	);
 
 	useEffect(() => {
@@ -290,7 +276,7 @@ function ShaderPlane({ isDark, startColors, endColors }: ShaderPlaneProps) {
 				);
 			}
 		}
-	}, [gl]);
+	}, [size, gl]);
 
 	useFrame((state) => {
 		if (meshRef.current) {
@@ -331,30 +317,9 @@ const defaultEndColors = {
 	color3: "#FF66B2",
 };
 
-class CanvasErrorBoundary extends Component<
-	{ fallback: ReactNode; children: ReactNode },
-	{ hasError: boolean }
-> {
-	state = { hasError: false };
-
-	static getDerivedStateFromError(): { hasError: boolean } {
-		return { hasError: true };
-	}
-
-	componentDidCatch(_error: Error, _errorInfo: ErrorInfo): void {}
-
-	render() {
-		if (this.state.hasError) {
-			return this.props.fallback;
-		}
-		return this.props.children;
-	}
-}
-
 export function Hero({ startColors, endColors }: HeroProps = {}) {
 	const { resolvedTheme } = useLandingTheme();
 	const isDark = resolvedTheme === "dark";
-	const [isCanvasLost, setIsCanvasLost] = useState(false);
 
 	const mergedStartColors = {
 		color1: startColors?.color1 ?? defaultStartColors.color1,
@@ -375,53 +340,23 @@ export function Hero({ startColors, endColors }: HeroProps = {}) {
 			className="hero relative h-screen w-full bg-background overflow-hidden"
 		>
 			<div className="absolute inset-0 z-0">
-				{isCanvasLost ? (
-					<div
-						className="h-full w-full opacity-50 md:opacity-85"
-						style={{
-							background:
-								"radial-gradient(120% 120% at 70% 20%, rgba(255, 102, 178, 0.28) 0%, rgba(77, 128, 255, 0.24) 45%, transparent 75%)",
-						}}
+				<Canvas
+					className="h-full w-full opacity-50 saturate-125 md:opacity-85"
+					style={{ pointerEvents: "none" }}
+					dpr={[1, 1.5]}
+					camera={{ position: [0, 0, 1] }}
+					onCreated={({ gl, size }) => {
+						gl.setSize(size.width, size.height);
+					}}
+					resize={{ scroll: false }}
+					gl={{ antialias: false, powerPreference: "high-performance" }}
+				>
+					<ShaderPlane
+						isDark={isDark}
+						startColors={mergedStartColors}
+						endColors={mergedEndColors}
 					/>
-				) : (
-					<CanvasErrorBoundary
-						fallback={
-							<div
-								className="h-full w-full opacity-50 md:opacity-85"
-								style={{
-									background:
-										"radial-gradient(120% 120% at 70% 20%, rgba(255, 102, 178, 0.28) 0%, rgba(77, 128, 255, 0.24) 45%, transparent 75%)",
-								}}
-							/>
-						}
-					>
-						<Canvas
-							className="h-full w-full opacity-50 saturate-125 md:opacity-85"
-							style={{ pointerEvents: "none" }}
-							dpr={[1, 1.5]}
-							camera={{ position: [0, 0, 1] }}
-							onCreated={({ gl, size }) => {
-								gl.setSize(size.width, size.height);
-								gl.domElement.addEventListener(
-									"webglcontextlost",
-									(event) => {
-										event.preventDefault();
-										setIsCanvasLost(true);
-									},
-									{ once: true },
-								);
-							}}
-							resize={{ scroll: false }}
-							gl={{ antialias: false, powerPreference: "high-performance" }}
-						>
-							<ShaderPlane
-								isDark={isDark}
-								startColors={mergedStartColors}
-								endColors={mergedEndColors}
-							/>
-						</Canvas>
-					</CanvasErrorBoundary>
-				)}
+				</Canvas>
 			</div>
 
 			<div
