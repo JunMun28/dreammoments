@@ -28,6 +28,7 @@ export function Header() {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const [isMobile, setIsMobile] = useState(false);
 	const { isOverlayOpen } = useOverlay();
+	const isOnHero = activeSection === "Home";
 
 	useEffect(() => {
 		const checkMobile = () => setIsMobile(window.innerWidth < 640);
@@ -77,7 +78,7 @@ export function Header() {
 					<div className="mx-auto flex max-w-[90rem] items-center justify-between gap-4 2xl:max-w-[112.5rem] min-[120rem]:max-w-[137.5rem]">
 						<motion.a
 							href="/"
-							className="flex h-12 shrink-0 items-center justify-center rounded-xl bg-white/10 px-4 text-base font-medium tracking-tight text-foreground/90 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] backdrop-blur-xl border border-white/20 sm:h-16 sm:rounded-2xl sm:px-5 sm:text-xl transition-all duration-300 hover:bg-white/20 hover:scale-[1.02]"
+							className={`flex h-12 shrink-0 items-center justify-center rounded-xl bg-white/10 px-4 text-base font-medium tracking-tight shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] backdrop-blur-xl border border-white/20 sm:h-16 sm:rounded-2xl sm:px-5 sm:text-xl transition-all duration-300 hover:bg-white/20 hover:scale-[1.02] ${isOnHero ? "text-white" : "text-foreground/90"}`}
 							initial={{ opacity: 0, x: -20 }}
 							animate={{ opacity: 1, x: 0 }}
 							transition={{
@@ -108,7 +109,7 @@ export function Header() {
 							>
 								<button
 									onClick={() => setIsMenuOpen(!isMenuOpen)}
-									className="flex h-12 w-full items-center justify-between gap-4 px-4 text-foreground/90 sm:h-16 sm:px-5 hover:bg-white/5 transition-colors"
+									className={`flex h-12 w-full items-center justify-between gap-4 px-4 sm:h-16 sm:px-5 hover:bg-white/5 transition-colors ${isOnHero ? "text-white" : "text-foreground/90"}`}
 									type="button"
 									aria-label="Toggle menu"
 									aria-expanded={isMenuOpen}
