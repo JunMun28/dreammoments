@@ -134,6 +134,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 	const router = useRouter();
 	const isFullScreen =
 		pathname.startsWith("/editor/") || pathname.startsWith("/invite/");
+	const isHome = pathname === "/";
 
 	useEffect(() => {
 		const unsubscribe = router.subscribe("onResolved", () => {
@@ -153,12 +154,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 						<a href="#main-content" className="dm-skip-link">
 							Skip to main content
 						</a>
-						{!isFullScreen && <Header />}
+						{!isFullScreen && !isHome && <Header />}
 						{/* biome-ignore lint/correctness/useUniqueElementIds: Root layout renders once; skip link requires stable ID */}
 						<main
 							id="main-content"
 							tabIndex={-1}
-							className={isFullScreen ? "" : "pt-20"}
+							className={isFullScreen || isHome ? "" : "pt-20"}
 						>
 							{children}
 						</main>

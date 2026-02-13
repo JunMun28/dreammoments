@@ -16,7 +16,7 @@ const setup = async (page: any, currentUserId?: string) => {
 test("routing smoke unauth", async ({ page }) => {
 	await setup(page)
 	await page.goto("/")
-	await expect(page.locator("#main")).toBeVisible()
+	await expect(page.locator("#main-content")).toBeVisible()
 
 	await page.goto("/auth/login")
 	await expect(page.getByRole("heading", { name: "Welcome Back" })).toBeVisible()

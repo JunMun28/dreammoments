@@ -12,6 +12,26 @@ html {
   color-scheme: light;
 }
 
+.dm-skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 1rem;
+  z-index: 9999;
+  padding: 0.75rem 1rem;
+  background: var(--dm-bg);
+  border: 2px solid var(--dm-primary);
+  border-radius: 0.375rem;
+  color: var(--dm-ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.dm-skip-link:focus {
+  left: 1rem;
+  outline: 2px solid var(--dm-primary);
+  outline-offset: 2px;
+}
+
 /* ─── Modern Light Theme (Slate/Zinc + Soft Rose) ─── */
 :root {
   /* Core Surfaces */

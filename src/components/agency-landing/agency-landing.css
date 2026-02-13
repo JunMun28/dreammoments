@@ -1,0 +1,82 @@
+/* biome-ignore lint/suspicious/noUnknownAtRules: Tailwind CSS v4 custom at-rule */
+@theme inline {
+	--color-background: var(--agency-background);
+	--color-foreground: var(--agency-foreground);
+	--color-muted: var(--agency-muted);
+	--color-muted-foreground: var(--agency-muted-foreground);
+	--color-border: var(--agency-border);
+	--color-ring: var(--agency-ring);
+	--breakpoint-3xl: 120rem;
+}
+
+.agency-landing {
+	--agency-background: #ffffff;
+	--agency-foreground: #0a0a0a;
+	--agency-muted: #f5f5f5;
+	--agency-muted-foreground: #737373;
+	--agency-border: #e5e5e5;
+	--agency-ring: #0066ff;
+
+	background-color: var(--agency-background);
+	color: var(--agency-foreground);
+	isolation: isolate;
+	min-height: 100vh;
+}
+
+.agency-landing.dark {
+	--agency-background: #0a0a0a;
+	--agency-foreground: #fafafa;
+	--agency-muted: #171717;
+	--agency-muted-foreground: #a3a3a3;
+	--agency-border: #262626;
+	--agency-ring: #3b82f6;
+}
+
+/* Tailwind token utilities from @theme can be unreliable in this app shell.
+   Provide landing-scoped fallbacks so section layering/colors stay correct. */
+.agency-landing .bg-background {
+	background-color: var(--agency-background);
+}
+
+.agency-landing .text-background {
+	color: var(--agency-background);
+}
+
+.agency-landing .bg-foreground {
+	background-color: var(--agency-foreground);
+}
+
+.agency-landing .text-foreground {
+	color: var(--agency-foreground);
+}
+
+.agency-landing .bg-muted {
+	background-color: var(--agency-muted);
+}
+
+.agency-landing .text-muted-foreground {
+	color: var(--agency-muted-foreground);
+}
+
+.agency-landing .border-border {
+	border-color: var(--agency-border);
+}
+
+.agency-landing > main {
+	background-color: var(--agency-background);
+}
+
+.agency-landing .focus-ring:focus-visible {
+	outline: 2px solid var(--agency-ring);
+	outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.agency-landing *,
+	.agency-landing *::before,
+	.agency-landing *::after {
+		animation-duration: 0.01ms;
+		animation-iteration-count: 1;
+		transition-duration: 0.01ms;
+	}
+}
