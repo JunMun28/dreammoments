@@ -71,17 +71,20 @@ export function Header() {
 					initial={{ opacity: 0, y: -20 }}
 					animate={{ opacity: 1, y: 0 }}
 					exit={{ opacity: 0, y: -20 }}
-					transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+					transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
 					className="fixed left-0 right-0 top-0 z-50 px-4 py-6 sm:px-12 sm:py-12 lg:px-24"
 				>
 					<div className="mx-auto flex max-w-[90rem] items-center justify-between gap-4 2xl:max-w-[112.5rem] min-[120rem]:max-w-[137.5rem]">
 						<motion.a
 							href="/"
-							className="flex h-12 shrink-0 items-center justify-center rounded-xl bg-neutral-900/70 px-4 text-base font-medium tracking-tight text-white shadow-lg backdrop-blur-lg sm:h-16 sm:rounded-2xl sm:px-5 sm:text-xl"
-							initial={{ opacity: 0, y: -20 }}
-							animate={{ opacity: 1, y: 0 }}
-							transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-							whileHover={{ scale: 1.05 }}
+							className="flex h-12 shrink-0 items-center justify-center rounded-xl bg-white/10 px-4 text-base font-medium tracking-tight text-foreground/90 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] backdrop-blur-xl border border-white/20 sm:h-16 sm:rounded-2xl sm:px-5 sm:text-xl transition-all duration-300 hover:bg-white/20 hover:scale-[1.02]"
+							initial={{ opacity: 0, x: -20 }}
+							animate={{ opacity: 1, x: 0 }}
+							transition={{
+								duration: 0.6,
+								ease: [0.22, 1, 0.36, 1],
+								delay: 0.1,
+							}}
 							whileTap={{ scale: 0.95 }}
 						>
 							DreamMoments
@@ -89,22 +92,23 @@ export function Header() {
 
 						<div className="relative h-12 sm:h-16">
 							<motion.div
-								className="absolute right-0 top-0 w-52 overflow-hidden rounded-xl bg-neutral-900/70 shadow-lg backdrop-blur-lg sm:h-auto sm:w-64 sm:rounded-2xl"
-								initial={{ opacity: 0, y: -20 }}
+								className="absolute right-0 top-0 w-52 overflow-hidden rounded-xl bg-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] backdrop-blur-xl border border-white/20 sm:h-auto sm:w-64 sm:rounded-2xl"
+								initial={{ opacity: 0, x: 20 }}
 								animate={{
 									opacity: 1,
-									y: 0,
+									x: 0,
 									height: isMenuOpen ? "auto" : isMobile ? 48 : 64,
 								}}
 								transition={{
 									duration: 0.4,
 									ease: [0.22, 1, 0.36, 1],
 									height: { duration: 0.4, ease: [0.22, 1, 0.36, 1] },
+									delay: 0.2,
 								}}
 							>
 								<button
 									onClick={() => setIsMenuOpen(!isMenuOpen)}
-									className="flex h-12 w-full items-center justify-between gap-4 px-4 text-white sm:h-16 sm:px-5"
+									className="flex h-12 w-full items-center justify-between gap-4 px-4 text-foreground/90 sm:h-16 sm:px-5 hover:bg-white/5 transition-colors"
 									type="button"
 									aria-label="Toggle menu"
 									aria-expanded={isMenuOpen}
@@ -150,10 +154,10 @@ export function Header() {
 																setIsMenuOpen(false);
 																setActiveSection(item.label);
 															}}
-															className={`block py-1.5 text-lg font-medium transition-colors hover:text-white ${
+															className={`block py-1.5 text-lg font-medium transition-all hover:translate-x-1 ${
 																activeSection === item.label
-																	? "text-white underline underline-offset-4"
-																	: "text-white/60"
+																	? "text-foreground font-semibold"
+																	: "text-foreground/60 hover:text-foreground"
 															}`}
 														>
 															{item.label}
@@ -164,7 +168,7 @@ export function Header() {
 											<Link
 												to="/editor/new"
 												search={{ template: "love-at-dusk" }}
-												className="mt-4 inline-flex w-full items-center justify-center rounded-full bg-[color:var(--dm-primary)] px-4 py-2 text-sm font-semibold text-[color:var(--dm-primary-text)] transition-opacity hover:opacity-90"
+												className="mt-4 inline-flex w-full items-center justify-center rounded-full bg-[color:var(--dm-primary)] px-4 py-2 text-sm font-semibold text-[color:var(--dm-primary-text)] transition-all hover:opacity-90 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
 												onClick={() => setIsMenuOpen(false)}
 											>
 												Start creating

@@ -216,25 +216,39 @@ html {
   }
 }
 
-/* Cinematic Utilities */
-.text-shadow-hero {
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-}
+  /* Cinematic Utilities */
+  .text-shadow-hero {
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  }
+  
+  .text-shadow-sm {
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  }
+  
+  .bg-cinematic-overlay {
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.3) 0%,
+      rgba(0, 0, 0, 0.1) 40%,
+      rgba(0, 0, 0, 0.4) 100%
+    );
+  }
 
-.text-shadow-sm {
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-}
+  /* Shimmer Animation */
+  @keyframes shimmer {
+    0% {
+      background-position: 200% center;
+    }
+    100% {
+      background-position: -200% center;
+    }
+  }
 
-.bg-cinematic-overlay {
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0.3) 0%,
-    rgba(0, 0, 0, 0.1) 40%,
-    rgba(0, 0, 0, 0.4) 100%
-  );
-}
-
-/* Delay modifiers */
+  .animate-shimmer {
+    animation: shimmer 8s ease-in-out infinite;
+  }
+  
+  /* Delay modifiers */
 .delay-100 { animation-delay: 100ms; }
 .delay-200 { animation-delay: 200ms; }
 .delay-300 { animation-delay: 300ms; }

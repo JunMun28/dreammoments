@@ -490,7 +490,7 @@ export function Projects() {
 					baseVelocity={80}
 					className="text-[clamp(4rem,12vw,14rem)] font-medium italic tracking-tight text-foreground uppercase px-8"
 				>
-					Signature <span className="font-serif font-thin">Stories</span>&nbsp;
+					Our <span className="font-serif font-thin">Templates</span>&nbsp;
 				</VelocityText>
 			</div>
 			<div className="flex flex-col">

@@ -20,7 +20,7 @@ interface LandingThemeContextValue {
 }
 
 const STORAGE_KEY = "dm-landing-theme";
-const DEFAULT_THEME: LandingTheme = "dark";
+const DEFAULT_THEME: LandingTheme = "light";
 
 const LandingThemeContext = createContext<LandingThemeContextValue | null>(
 	null,

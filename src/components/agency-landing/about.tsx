@@ -1,113 +1,94 @@
 "use client";
 
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useEffect, useRef } from "react";
-
-if (typeof window !== "undefined") {
-	gsap.registerPlugin(ScrollTrigger);
-}
+import { ArrowRight } from "lucide-react";
+import { motion } from "motion/react";
 
 export function About() {
-	const sectionRef = useRef<HTMLElement>(null);
-	const imageRef = useRef<HTMLDivElement>(null);
-	const headingRef = useRef<HTMLHeadingElement>(null);
-	const ctaRef = useRef<HTMLAnchorElement>(null);
-
-	useEffect(() => {
-		if (!sectionRef.current) return;
-
-		const ctx = gsap.context(() => {
-			gsap.fromTo(
-				imageRef.current,
-				{ scale: 0.9, opacity: 0 },
-				{
-					scale: 1,
-					opacity: 1,
-					duration: 1,
-					ease: "power2.out",
-					scrollTrigger: {
-						trigger: sectionRef.current,
-						start: "top 80%",
-						end: "top 30%",
-						scrub: 1,
-					},
-				},
-			);
-
-			gsap.fromTo(
-				headingRef.current,
-				{ y: 60, opacity: 0 },
-				{
-					y: 0,
-					opacity: 1,
-					duration: 1,
-					ease: "power3.out",
-					scrollTrigger: {
-						trigger: headingRef.current,
-						start: "top 85%",
-						end: "top 60%",
-						scrub: 1,
-					},
-				},
-			);
-
-			gsap.fromTo(
-				ctaRef.current,
-				{ y: 40, opacity: 0 },
-				{
-					y: 0,
-					opacity: 1,
-					duration: 1,
-					ease: "power3.out",
-					scrollTrigger: {
-						trigger: ctaRef.current,
-						start: "top 90%",
-						end: "top 70%",
-						scrub: 1,
-					},
-				},
-			);
-		}, sectionRef);
-
-		return () => ctx.revert();
-	}, []);
-
 	return (
-		// biome-ignore lint/correctness/useUniqueElementIds: stable hash target for in-page navigation
 		<section
-			ref={sectionRef}
 			id="about"
-			className="bg-background pb-24 lg:pb-32"
+			className="w-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-dm-bg pb-24 lg:pb-32"
 		>
-			<div className="px-6 sm:px-12 lg:px-24 flex flex-col items-center max-w-[90rem] 2xl:max-w-[112.5rem] min-[120rem]:max-w-[137.5rem] mx-auto">
-				<div
-					ref={imageRef}
-					className="relative aspect-[21/9] w-full overflow-hidden rounded-full mb-16 lg:aspect-[3/1]"
-				>
-					<img
-						src="/img/mock-project2.webp"
-						alt="DreamMoments invitation showcase"
-						className="h-full w-full object-cover"
-						loading="lazy"
-					/>
+			<div className="max-w-[1400px] mx-auto w-full">
+				<div className="flex flex-col items-center space-y-8">
+					{/* Video with SVG Frame Overlay */}
+					<motion.div
+						initial={{ opacity: 0, scale: 0.95 }}
+						whileInView={{ opacity: 1, scale: 1 }}
+						viewport={{ once: true }}
+						transition={{ duration: 0.8 }}
+						className="relative w-full max-w-3xl"
+						style={{ aspectRatio: "1204 / 845" }}
+					>
+						{/* Video layer */}
+						<video
+							autoPlay
+							loop
+							muted
+							playsInline
+							className="absolute inset-0 w-full h-full object-cover"
+						>
+							<source src="/video/about-intro.mp4" type="video/mp4" />
+						</video>
+
+						{/* SVG Frame overlay - covers areas outside the shape */}
+						<svg
+							viewBox="0 0 1204 845"
+							fill="none"
+							xmlns="http://www.w3.org/2000/svg"
+							className="absolute inset-0 w-full h-full pointer-events-none"
+							preserveAspectRatio="xMidYMid slice"
+							aria-hidden="true"
+						>
+							{/* This path is the INVERSE - it fills everything EXCEPT the vehicle shape */}
+							<path
+								fillRule="evenodd"
+								clipRule="evenodd"
+								d="M0 0H1204V845H0V0ZM75 0C33.5786 0 0 33.5786 0 75V570C0 611.421 33.5786 645 75 645H237C310.541 645.02 334.965 663.267 335 743V769C335 810.421 368.579 844 410 844H794C835.421 844 869 810.421 869 769V743C869.035 663.267 893.459 645.02 967 645H1129C1170.42 645 1204 611.421 1204 570V75C1204 33.5786 1170.42 0 1129 0H75Z"
+								className="fill-dm-bg"
+							/>
+						</svg>
+					</motion.div>
+
+					{/* Small Text */}
+					<motion.p
+						initial={{ opacity: 0, y: 20 }}
+						whileInView={{ opacity: 1, y: 0 }}
+						viewport={{ once: true }}
+						transition={{ duration: 0.6, delay: 0.2 }}
+						className="text-xs sm:text-sm uppercase tracking-wider text-dm-ink-muted font-medium"
+					>
+						WEDDING INVITATIONS REIMAGINED
+					</motion.p>
+
+					{/* Main Description */}
+					<motion.h2
+						initial={{ opacity: 0, y: 20 }}
+						whileInView={{ opacity: 1, y: 0 }}
+						viewport={{ once: true }}
+						transition={{ duration: 0.6, delay: 0.3 }}
+						className="text-xl sm:text-3xl font-normal text-dm-ink text-center leading-tight max-w-xl"
+					>
+						DreamMoments turns your timeline, photos, and traditions into a
+						living wedding page your guests actually enjoy using.
+					</motion.h2>
+
+					{/* CTA Button */}
+					<motion.div
+						initial={{ opacity: 0, y: 20 }}
+						whileInView={{ opacity: 1, y: 0 }}
+						viewport={{ once: true }}
+						transition={{ duration: 0.6, delay: 0.4 }}
+					>
+						<a
+							href="#services-menu"
+							className="group cursor-pointer px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-pink-300 hover:bg-pink-400 text-neutral-900 font-medium text-sm sm:text-base transition-colors duration-200 flex items-center gap-2"
+						>
+							<span>How it works</span>
+							<ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 group-hover:translate-x-1" />
+						</a>
+					</motion.div>
 				</div>
-
-				<h2
-					ref={headingRef}
-					className="text-[clamp(1.75rem,4vw,3rem)] font-medium leading-[1.2] tracking-tight text-center mx-auto text-foreground max-w-4xl"
-				>
-					DreamMoments turns your timeline, photos, and traditions into a living
-					wedding page your guests actually enjoy using.
-				</h2>
-
-				<a
-					ref={ctaRef}
-					href="#services-menu"
-					className="inline-flex items-center justify-center mt-8 px-6 py-3 rounded-full bg-foreground text-background text-lg tracking-tight font-medium transition-opacity hover:opacity-80"
-				>
-					How it works
-				</a>
 			</div>
 		</section>
 	);
