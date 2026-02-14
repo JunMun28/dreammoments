@@ -38,29 +38,6 @@ export function Footer() {
 			id="contact"
 			className="bg-foreground text-background lg:sticky lg:bottom-0 lg:z-0"
 		>
-			<div className="mx-auto max-w-[90rem] px-6 pb-16 pt-24 text-center sm:text-left lg:px-24 lg:pb-24 lg:pt-32 2xl:max-w-[112.5rem] min-[120rem]:max-w-[137.5rem]">
-				<a
-					href="mailto:hello@dreammoments.app"
-					className="break-all text-2xl font-medium tracking-tight transition-opacity hover:opacity-80 sm:break-normal sm:text-5xl lg:text-7xl"
-				>
-					hello@dreammoments.app
-				</a>
-
-				<div className="mt-10">
-					<Link
-						to="/editor/new"
-						search={{ template: "love-at-dusk" }}
-						className="inline-flex w-full items-center justify-center rounded-full bg-dm-primary px-8 py-4 text-lg font-medium text-dm-primary-text transition-colors hover:bg-dm-primary-hover sm:w-auto"
-					>
-						Start Creating
-					</Link>
-				</div>
-			</div>
-
-			<div className="mx-auto max-w-[90rem] px-6 lg:px-24 2xl:max-w-[112.5rem] min-[120rem]:max-w-[137.5rem]">
-				<div className="border-t border-background/10" />
-			</div>
-
 			<div className="mx-auto max-w-[90rem] px-6 py-16 lg:px-24 lg:py-24 2xl:max-w-[112.5rem] min-[120rem]:max-w-[137.5rem]">
 				<div className="flex flex-col justify-between gap-12 lg:flex-row lg:gap-8">
 					<div>
@@ -70,6 +47,15 @@ export function Footer() {
 						<p className="mt-4 text-4xl text-background/60">
 							Designed for modern wedding storytelling.
 						</p>
+						<div className="mt-8">
+							<Link
+								to="/editor/new"
+								search={{ template: "love-at-dusk" }}
+								className="inline-flex items-center justify-center rounded-full bg-dm-primary px-8 py-4 text-lg font-medium text-dm-primary-text transition-colors hover:bg-dm-primary-hover"
+							>
+								Start Creating
+							</Link>
+						</div>
 					</div>
 
 					<div className="flex flex-col gap-16 sm:flex-row lg:gap-24">

@@ -3,7 +3,7 @@
 import { About } from "./about";
 import "./landing.css";
 import { Faq } from "./faq";
-import { Footer } from "./footer";
+import { Footer } from "./Footer";
 import { Header } from "./header";
 import { Hero } from "./hero";
 import { OverlayProvider } from "./overlay-context";
