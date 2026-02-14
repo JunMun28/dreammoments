@@ -10,7 +10,6 @@ const sections = [
 	{ id: "projects", label: "Templates" },
 	{ id: "services", label: "Features" },
 	{ id: "about", label: "About us" },
-	{ id: "social-proof", label: "Testimonials" },
 	{ id: "faq", label: "FAQ" },
 ];
 
@@ -19,7 +18,6 @@ const menuItems = [
 	{ label: "Templates", href: "#projects" },
 	{ label: "Features", href: "#services-menu" },
 	{ label: "About us", href: "#about" },
-	{ label: "Testimonials", href: "#social-proof" },
 	{ label: "FAQ", href: "#faq" },
 ];
 
@@ -78,7 +76,11 @@ export function Header() {
 					<div className="mx-auto flex max-w-[90rem] items-center justify-between gap-4 2xl:max-w-[112.5rem] min-[120rem]:max-w-[137.5rem]">
 						<motion.a
 							href="/"
-							className={`flex h-12 shrink-0 items-center justify-center rounded-xl bg-white/10 px-4 text-base font-medium tracking-tight shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] backdrop-blur-xl border border-white/20 sm:h-16 sm:rounded-2xl sm:px-5 sm:text-xl transition-all duration-300 hover:bg-white/20 hover:scale-[1.02] ${isOnHero ? "text-white" : "text-foreground/90"}`}
+							className={`flex h-12 shrink-0 items-center justify-center rounded-xl px-4 text-base font-medium tracking-tight shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] backdrop-blur-xl sm:h-16 sm:rounded-2xl sm:px-5 sm:text-xl transition-all duration-300 hover:scale-[1.02] ${
+								isOnHero
+									? "bg-white/10 border border-white/20 text-white hover:bg-white/20"
+									: "bg-white/80 border border-border text-foreground hover:bg-white/90 dark:bg-white/10 dark:border-white/20 dark:text-foreground dark:hover:bg-white/20"
+							}`}
 							initial={{ opacity: 0, x: -20 }}
 							animate={{ opacity: 1, x: 0 }}
 							transition={{
@@ -93,7 +95,11 @@ export function Header() {
 
 						<div className="relative h-12 sm:h-16">
 							<motion.div
-								className="absolute right-0 top-0 w-52 overflow-hidden rounded-xl bg-white/10 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] backdrop-blur-xl border border-white/20 sm:h-auto sm:w-64 sm:rounded-2xl"
+								className={`absolute right-0 top-0 w-52 overflow-hidden rounded-xl shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] backdrop-blur-xl sm:h-auto sm:w-64 sm:rounded-2xl ${
+									isOnHero
+										? "bg-white/10 border border-white/20"
+										: "bg-white/80 border border-border dark:bg-white/10 dark:border-white/20"
+								}`}
 								initial={{ opacity: 0, x: 20 }}
 								animate={{
 									opacity: 1,
@@ -109,7 +115,11 @@ export function Header() {
 							>
 								<button
 									onClick={() => setIsMenuOpen(!isMenuOpen)}
-									className={`flex h-12 w-full items-center justify-between gap-4 px-4 sm:h-16 sm:px-5 hover:bg-white/5 transition-colors ${isOnHero ? "text-white" : "text-foreground/90"}`}
+									className={`flex h-12 w-full items-center justify-between gap-4 px-4 sm:h-16 sm:px-5 transition-colors ${
+										isOnHero
+											? "text-white hover:bg-white/5"
+											: "text-foreground hover:bg-foreground/5 dark:hover:bg-white/5"
+									}`}
 									type="button"
 									aria-label="Toggle menu"
 									aria-expanded={isMenuOpen}

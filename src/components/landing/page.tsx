@@ -1,7 +1,7 @@
 "use client";
 
 import { About } from "./about";
-import "./agency-landing.css";
+import "./landing.css";
 import { Faq } from "./faq";
 import { Footer } from "./footer";
 import { Header } from "./header";
@@ -10,18 +10,17 @@ import { OverlayProvider } from "./overlay-context";
 import { Projects } from "./projects";
 import { Services } from "./services";
 import { SmoothScroll } from "./smooth-scroll";
-import { SocialProof } from "./social-proof";
 import { LandingThemeProvider, useLandingTheme } from "./theme-context";
 import { ThemeSwitch } from "./theme-switch";
 
-function AgencyLandingContent() {
+function LandingContent() {
 	const { resolvedTheme } = useLandingTheme();
 
 	return (
 		<OverlayProvider>
 			<SmoothScroll>
 				<div
-					className={`agency-landing ${resolvedTheme === "dark" ? "dark" : ""}`}
+					className={`landing ${resolvedTheme === "dark" ? "dark" : ""}`}
 				>
 					<Header />
 					<ThemeSwitch />
@@ -30,7 +29,6 @@ function AgencyLandingContent() {
 						<Projects />
 						<Services />
 						<About />
-						<SocialProof />
 						<Faq />
 					</main>
 					<Footer />
@@ -40,10 +38,10 @@ function AgencyLandingContent() {
 	);
 }
 
-export function AgencyLandingPage() {
+export function LandingPage() {
 	return (
 		<LandingThemeProvider>
-			<AgencyLandingContent />
+			<LandingContent />
 		</LandingThemeProvider>
 	);
 }

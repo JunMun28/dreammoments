@@ -49,11 +49,11 @@ html {
   --dm-border:         #E0BBE4; /* Lilac - Soft borders */
   --dm-border-soft:    #F2D9F2; /* Pale Lilac */
 
-  /* Accents - Pastel Dream */
-  --dm-primary:        #FFB7B2; /* Soft Pink - Playful highlights */
-  --dm-primary-hover:  #FF9E99; /* Deeper Pink */
+  /* Accents - Pastel Dream (Primary: pink-300/400) */
+  --dm-primary:        #fda4af; /* Pink 300 - Primary CTA */
+  --dm-primary-hover:  #fb7185; /* Pink 400 - Hover state */
   --dm-primary-soft:   #FFE4E1; /* Misty Rose */
-  --dm-primary-text:   #4A4E55; /* Warm Grey on Pink */
+  --dm-primary-text:   #1c1917; /* Neutral 900 - Dark text on pink */
   
   /* Secondary Accents */
   --dm-accent:         #B5EAD7; /* Mint Green - Fresh contrast */
@@ -131,7 +131,7 @@ html {
 }
 
 .dm-button-primary {
-  @apply inline-flex items-center justify-center px-6 py-3 rounded-full bg-dm-primary text-white font-medium transition-all duration-300 hover:bg-dm-primary-hover hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0;
+  @apply inline-flex items-center justify-center px-6 py-3 rounded-full bg-dm-primary text-dm-primary-text font-medium transition-all duration-300 hover:bg-dm-primary-hover hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0;
 }
 
 .dm-button-secondary {

@@ -9,13 +9,13 @@
 	--breakpoint-3xl: 120rem;
 }
 
-.agency-landing {
+.landing {
 	--agency-background: #FFF9F9; /* Pale Cream/Pink */
 	--agency-foreground: #4A4E55; /* Warm Grey */
 	--agency-muted: #F9F5F9; /* Pale Lilac/Grey */
 	--agency-muted-foreground: #767A85; /* Medium Grey */
 	--agency-border: #E0BBE4; /* Lilac */
-	--agency-ring: #FFB7B2; /* Soft Pink */
+	--agency-ring: #fda4af; /* Primary Pink - matches dm-primary */
 
 	background-color: var(--agency-background);
 	color: var(--agency-foreground);
@@ -23,7 +23,7 @@
 	min-height: 100vh;
 }
 
-.agency-landing.dark {
+.landing.dark {
 	--agency-background: #4A4E55; /* Warm Grey */
 	--agency-foreground: #FFF9F9; /* Pale Cream/Pink */
 	--agency-muted: #60646C; /* Lighter Grey */
@@ -34,47 +34,47 @@
 
 /* Tailwind token utilities from @theme can be unreliable in this app shell.
    Provide landing-scoped fallbacks so section layering/colors stay correct. */
-.agency-landing .bg-background {
+.landing .bg-background {
 	background-color: var(--agency-background);
 }
 
-.agency-landing .text-background {
+.landing .text-background {
 	color: var(--agency-background);
 }
 
-.agency-landing .bg-foreground {
+.landing .bg-foreground {
 	background-color: var(--agency-foreground);
 }
 
-.agency-landing .text-foreground {
+.landing .text-foreground {
 	color: var(--agency-foreground);
 }
 
-.agency-landing .bg-muted {
+.landing .bg-muted {
 	background-color: var(--agency-muted);
 }
 
-.agency-landing .text-muted-foreground {
+.landing .text-muted-foreground {
 	color: var(--agency-muted-foreground);
 }
 
-.agency-landing .border-border {
+.landing .border-border {
 	border-color: var(--agency-border);
 }
 
-.agency-landing > main {
+.landing > main {
 	background-color: var(--agency-background);
 }
 
-.agency-landing .focus-ring:focus-visible {
+.landing .focus-ring:focus-visible {
 	outline: 2px solid var(--agency-ring);
 	outline-offset: 2px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.agency-landing *,
-	.agency-landing *::before,
-	.agency-landing *::after {
+	.landing *,
+	.landing *::before,
+	.landing *::after {
 		animation-duration: 0.01ms;
 		animation-iteration-count: 1;
 		transition-duration: 0.01ms;

@@ -54,7 +54,7 @@ test("floating theme toggle updates landing wrapper class", async ({ page }) => 
 	await setup(page);
 	await page.goto("/");
 
-	const landingWrapper = page.locator(".agency-landing");
+	const landingWrapper = page.locator(".landing");
 	await expect(landingWrapper).toHaveClass(/dark/);
 
 	await forceDomClick(
@@ -96,15 +96,6 @@ test("header anchors navigate to expected sections", async ({ page }) => {
 	);
 	await expect(page).toHaveURL(/#about/);
 	await expect(page.locator("#about")).toBeVisible();
-
-	await forceDomClick(
-		(await openHeaderMenu(page)).getByRole("link", {
-			name: "Testimonials",
-			exact: true,
-		}),
-	);
-	await expect(page).toHaveURL(/#social-proof/);
-	await expect(page.locator("#social-proof")).toBeVisible();
 
 	await forceDomClick(
 		(await openHeaderMenu(page)).getByRole("link", { name: "FAQ", exact: true }),

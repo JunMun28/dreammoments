@@ -173,26 +173,12 @@ function ServiceItem({ title }: { title: string }) {
 			>
 				<div
 					ref={overlayInnerRef}
-					className="flex items-center justify-between h-full px-6 sm:px-12 lg:px-24"
+					className="flex items-center h-full px-6 sm:px-12 lg:px-24"
 					style={{ transform: "translateY(-101%)" }}
 				>
 					<span className="text-[clamp(1.5rem,4vw,4rem)] font-light tracking-tight text-background">
 						{chars}
 					</span>
-					<svg
-						className="w-8 h-8 md:w-12 md:h-12 text-background"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-						aria-hidden="true"
-					>
-						<path
-							strokeLinecap="round"
-							strokeLinejoin="round"
-							strokeWidth={1.5}
-							d="M7 17L17 7M17 7H7M17 7V17"
-						/>
-					</svg>
 				</div>
 			</div>
 		</div>

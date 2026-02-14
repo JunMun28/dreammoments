@@ -82,7 +82,7 @@ export function About() {
 					>
 						<a
 							href="#services-menu"
-							className="group cursor-pointer px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-pink-300 hover:bg-pink-400 text-neutral-900 font-medium text-sm sm:text-base transition-colors duration-200 flex items-center gap-2"
+							className="group cursor-pointer px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-dm-primary hover:bg-dm-primary-hover text-dm-primary-text font-medium text-sm sm:text-base transition-colors duration-200 flex items-center gap-2"
 						>
 							<span>How it works</span>
 							<ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 group-hover:translate-x-1" />

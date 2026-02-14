@@ -75,11 +75,11 @@ function BlobCursor({ isVisible }: { isVisible: boolean }) {
 		>
 			<motion.div style={{ rotate }}>
 				<motion.div
-					className="flex h-20 w-20 items-center justify-center rounded-full bg-foreground"
+					className="flex h-20 w-20 items-center justify-center rounded-full bg-dm-primary"
 					style={{ scaleX: scaleAlongMotion, scaleY: scalePerp }}
 				>
 					<motion.span
-						className="text-sm font-medium uppercase tracking-wide text-background"
+						className="text-sm font-medium uppercase tracking-wide text-dm-primary-text"
 						style={{
 							rotate: useTransform(rotate, (r) => -r),
 							scaleX: useTransform(scaleAlongMotion, (s) => 1 / s),
@@ -170,6 +170,7 @@ interface Project {
 	titleDown: string;
 	image: string;
 	description: string;
+	price: number;
 }
 
 const projects: Project[] = [
@@ -180,6 +181,7 @@ const projects: Project[] = [
 		image: "/img/mock-project1.webp",
 		description:
 			"A graceful invitation style inspired by heritage rituals and family-first moments.",
+		price: 38,
 	},
 	{
 		id: "2",
@@ -188,6 +190,7 @@ const projects: Project[] = [
 		image: "/img/mock-project2.webp",
 		description:
 			"Soft floral visuals for intimate outdoor celebrations and warm guest experiences.",
+		price: 38,
 	},
 	{
 		id: "3",
@@ -196,6 +199,7 @@ const projects: Project[] = [
 		image: "/img/mock-project3.webp",
 		description:
 			"Modern editorial styling for couples who want sleek, cinematic wedding pages.",
+		price: 38,
 	},
 ];
 
@@ -457,6 +461,21 @@ function ProjectItem({
 						>
 							{project.description}
 						</p>
+						<p
+							className={`mt-4 text-lg font-semibold text-foreground ${isEven ? "" : "md:ml-auto"}`}
+						>
+							SGD {project.price}
+						</p>
+						<button
+							type="button"
+							onClick={(e) => {
+								e.stopPropagation();
+								onClick();
+							}}
+							className={`mt-6 w-fit rounded-full bg-dm-primary px-6 py-3 text-sm font-medium text-dm-primary-text transition-colors hover:bg-dm-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--dm-focus)] md:hidden ${isEven ? "" : "md:ml-auto"}`}
+						>
+							View template
+						</button>
 					</div>
 				</div>
 			</div>

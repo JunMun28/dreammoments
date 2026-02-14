@@ -112,7 +112,7 @@ export function SocialProof() {
 					<Link
 						to="/editor/new"
 						search={{ template: "love-at-dusk" }}
-						className="hidden sm:inline-flex items-center justify-center px-6 py-3 rounded-full bg-foreground text-background text-sm font-medium transition-opacity hover:opacity-80"
+						className="hidden sm:inline-flex items-center justify-center px-6 py-3 rounded-full bg-dm-primary text-dm-primary-text text-sm font-medium transition-colors hover:bg-dm-primary-hover"
 					>
 						Start your invite
 					</Link>
@@ -161,7 +161,7 @@ export function SocialProof() {
 							</span>
 							<a
 								href="#projects"
-								className="w-10 h-10 rounded-full bg-foreground/10 flex items-center justify-center hover:bg-foreground hover:text-background transition-colors"
+								className="w-10 h-10 rounded-full bg-dm-primary/20 flex items-center justify-center hover:bg-dm-primary hover:text-dm-primary-text transition-colors text-foreground"
 							>
 								<ArrowIcon className="w-4 h-4" />
 							</a>
@@ -181,7 +181,7 @@ export function SocialProof() {
 							</span>
 							<a
 								href="#services-menu"
-								className="w-10 h-10 rounded-full bg-foreground/10 flex items-center justify-center hover:bg-foreground hover:text-background transition-colors"
+								className="w-10 h-10 rounded-full bg-dm-primary/20 flex items-center justify-center hover:bg-dm-primary hover:text-dm-primary-text transition-colors text-foreground"
 							>
 								<ArrowIcon className="w-4 h-4" />
 							</a>
@@ -201,7 +201,7 @@ export function SocialProof() {
 							</span>
 							<a
 								href="#faq"
-								className="w-10 h-10 rounded-full bg-foreground/10 flex items-center justify-center hover:bg-foreground hover:text-background transition-colors"
+								className="w-10 h-10 rounded-full bg-dm-primary/20 flex items-center justify-center hover:bg-dm-primary hover:text-dm-primary-text transition-colors text-foreground"
 							>
 								<ArrowIcon className="w-4 h-4" />
 							</a>
@@ -235,7 +235,7 @@ export function SocialProof() {
 							</span>
 							<a
 								href="#hero"
-								className="w-10 h-10 rounded-full bg-foreground/10 flex items-center justify-center hover:bg-foreground hover:text-background transition-colors"
+								className="w-10 h-10 rounded-full bg-dm-primary/20 flex items-center justify-center hover:bg-dm-primary hover:text-dm-primary-text transition-colors text-foreground"
 							>
 								<ArrowIcon className="w-4 h-4" />
 							</a>
