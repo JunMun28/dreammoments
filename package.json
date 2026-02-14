@@ -11,7 +11,7 @@
     "predev": "node scripts/check-node.mjs",
     "dev": "NODE_OPTIONS=--dns-result-order=ipv4first CHOKIDAR_USEPOLLING=1 CHOKIDAR_INTERVAL=200 vite dev --host --port 3000",
     "prebuild": "node scripts/check-node.mjs",
-    "build": "vite build",
+    "build": "NODE_OPTIONS='--max-old-space-size=4096' vite build",
     "prepreview": "node scripts/check-node.mjs",
     "preview": "vite preview",
     "test": "vitest run",
