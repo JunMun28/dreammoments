@@ -166,9 +166,13 @@ export function Header() {
 																setActiveSection(item.label);
 															}}
 															className={`block py-1.5 text-lg font-medium transition-all hover:translate-x-1 ${
-																activeSection === item.label
-																	? "text-foreground font-semibold"
-																	: "text-foreground/60 hover:text-foreground"
+																isOnHero
+																	? activeSection === item.label
+																		? "text-white font-semibold"
+																		: "text-white/80 hover:text-white"
+																	: activeSection === item.label
+																		? "text-foreground font-semibold"
+																		: "text-foreground/60 hover:text-foreground"
 															}`}
 														>
 															{item.label}

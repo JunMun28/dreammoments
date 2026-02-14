@@ -19,9 +19,7 @@ function LandingContent() {
 	return (
 		<OverlayProvider>
 			<SmoothScroll>
-				<div
-					className={`landing ${resolvedTheme === "dark" ? "dark" : ""}`}
-				>
+				<div className={`landing ${resolvedTheme === "dark" ? "dark" : ""}`}>
 					<Header />
 					<ThemeSwitch />
 					<main className="relative z-10 flex-1 bg-background">

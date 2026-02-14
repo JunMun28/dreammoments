@@ -116,7 +116,7 @@ function VelocityText({
 	baseVelocity?: number;
 	className?: string;
 }) {
-	const baseX = useMotionValue(0);
+	const baseX = useMotionValue(600);
 	const { scrollY } = useScroll();
 	const scrollVelocity = useVelocity(scrollY);
 	const smoothVelocity = useSpring(scrollVelocity, {
