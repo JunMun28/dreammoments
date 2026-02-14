@@ -2,8 +2,8 @@
 
 import { About } from "./about";
 import "./landing.css";
-import { Faq } from "./faq";
 import { Footer } from "./Footer";
+import { Faq } from "./faq";
 import { Header } from "./header";
 import { Hero } from "./hero";
 import { OverlayProvider } from "./overlay-context";
