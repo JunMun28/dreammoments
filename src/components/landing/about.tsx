@@ -7,7 +7,7 @@ export function About() {
 	return (
 		<section
 			id="about"
-			className="w-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-dm-bg pb-24 lg:pb-32"
+			className="w-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-background pb-24 lg:pb-32"
 		>
 			<div className="max-w-[1400px] mx-auto w-full">
 				<div className="flex flex-col items-center space-y-8">
@@ -45,7 +45,7 @@ export function About() {
 								fillRule="evenodd"
 								clipRule="evenodd"
 								d="M0 0H1204V845H0V0ZM75 0C33.5786 0 0 33.5786 0 75V570C0 611.421 33.5786 645 75 645H237C310.541 645.02 334.965 663.267 335 743V769C335 810.421 368.579 844 410 844H794C835.421 844 869 810.421 869 769V743C869.035 663.267 893.459 645.02 967 645H1129C1170.42 645 1204 611.421 1204 570V75C1204 33.5786 1170.42 0 1129 0H75Z"
-								className="fill-dm-bg"
+								className="fill-background"
 							/>
 						</svg>
 					</motion.div>
@@ -56,7 +56,7 @@ export function About() {
 						whileInView={{ opacity: 1, y: 0 }}
 						viewport={{ once: true }}
 						transition={{ duration: 0.6, delay: 0.2 }}
-						className="text-xs sm:text-sm uppercase tracking-wider text-dm-ink-muted font-medium"
+						className="text-xs sm:text-sm uppercase tracking-wider text-muted-foreground font-medium"
 					>
 						WEDDING INVITATIONS REIMAGINED
 					</motion.p>
@@ -67,7 +67,7 @@ export function About() {
 						whileInView={{ opacity: 1, y: 0 }}
 						viewport={{ once: true }}
 						transition={{ duration: 0.6, delay: 0.3 }}
-						className="text-xl sm:text-3xl font-normal text-dm-ink text-center leading-tight max-w-xl"
+						className="text-xl sm:text-3xl font-normal text-foreground text-center leading-tight max-w-xl"
 					>
 						DreamMoments turns your timeline, photos, and traditions into a
 						living wedding page your guests actually enjoy using.

@@ -10,11 +10,11 @@
 }
 
 .landing {
-	--agency-background: #FFF9F9; /* Pale Cream/Pink */
-	--agency-foreground: #4A4E55; /* Warm Grey */
-	--agency-muted: #F9F5F9; /* Pale Lilac/Grey */
-	--agency-muted-foreground: #767A85; /* Medium Grey */
-	--agency-border: #E0BBE4; /* Lilac */
+	--agency-background: #fff9f9; /* Pale Cream/Pink */
+	--agency-foreground: #4a4e55; /* Warm Grey */
+	--agency-muted: #f9f5f9; /* Pale Lilac/Grey */
+	--agency-muted-foreground: #767a85; /* Medium Grey */
+	--agency-border: #e0bbe4; /* Lilac */
 	--agency-ring: #fda4af; /* Primary Pink - matches dm-primary */
 
 	background-color: var(--agency-background);
@@ -24,12 +24,12 @@
 }
 
 .landing.dark {
-	--agency-background: #4A4E55; /* Warm Grey */
-	--agency-foreground: #FFF9F9; /* Pale Cream/Pink */
-	--agency-muted: #60646C; /* Lighter Grey */
-	--agency-muted-foreground: #D1D5DB; /* Soft Light Grey */
-	--agency-border: #A1A5B0; /* Light Grey */
-	--agency-ring: #E0BBE4; /* Lilac */
+	--agency-background: #4a4e55; /* Warm Grey */
+	--agency-foreground: #fff9f9; /* Pale Cream/Pink */
+	--agency-muted: #60646c; /* Lighter Grey */
+	--agency-muted-foreground: #d1d5db; /* Soft Light Grey */
+	--agency-border: #a1a5b0; /* Light Grey */
+	--agency-ring: #e0bbe4; /* Lilac */
 }
 
 /* Tailwind token utilities from @theme can be unreliable in this app shell.
@@ -60,6 +60,10 @@
 
 .landing .border-border {
 	border-color: var(--agency-border);
+}
+
+.landing .fill-background {
+	fill: var(--agency-background);
 }
 
 .landing > main {
