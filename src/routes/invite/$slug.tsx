@@ -3,7 +3,7 @@ import {
 	type ErrorComponentProps,
 	Link,
 } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { getPublicInvitation } from "../../api/public";
 import EnvelopeAnimation from "../../components/templates/EnvelopeAnimation";
 import InvitationRenderer from "../../components/templates/InvitationRenderer";

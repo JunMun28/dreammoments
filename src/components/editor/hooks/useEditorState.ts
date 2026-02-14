@@ -66,7 +66,7 @@ export function setValueByPath(
 
 	const lastPart = parts.at(-1) as string;
 	nextCursor[lastPart] = value;
-	return nextRoot as InvitationContent;
+	return nextRoot as unknown as InvitationContent;
 }
 
 export function validateField(field: FieldConfig, value: string): string {
