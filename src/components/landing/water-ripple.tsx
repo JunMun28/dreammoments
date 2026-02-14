@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef, useEffect, useMemo, useSyncExternalStore } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { useEffect, useMemo, useRef, useSyncExternalStore } from "react";
 import * as THREE from "three";
 
 const MAX_RIPPLES = 30;
@@ -84,7 +84,12 @@ function createBrushTexture(): THREE.Texture {
 		width: 128,
 		height: 128,
 	});
-	const ctx = canvas.getContext("2d")!;
+	const tex = new THREE.CanvasTexture(canvas);
+	const ctx = canvas.getContext("2d");
+	if (!ctx) {
+		tex.needsUpdate = true;
+		return tex;
+	}
 	const g = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
 	g.addColorStop(0, "rgba(255,255,255,1)");
 	g.addColorStop(0.3, "rgba(255,255,255,0.5)");
@@ -92,7 +97,6 @@ function createBrushTexture(): THREE.Texture {
 	g.addColorStop(1, "rgba(255,255,255,0)");
 	ctx.fillStyle = g;
 	ctx.fillRect(0, 0, 128, 128);
-	const tex = new THREE.CanvasTexture(canvas);
 	tex.needsUpdate = true;
 	return tex;
 }
@@ -127,16 +131,19 @@ function WaterRippleScene({
 		if (initializedRef.current) return;
 		initializedRef.current = true;
 
-		const w = Math.max(1, Math.floor((size.width || 1) * FBO_SCALE));
-		const h = Math.max(1, Math.floor((size.height || 1) * FBO_SCALE));
+		const w = Math.max(1, Math.floor((sizeRef.current.width || 1) * FBO_SCALE));
+		const h = Math.max(
+			1,
+			Math.floor((sizeRef.current.height || 1) * FBO_SCALE),
+		);
 		fboRef.current = new THREE.WebGLRenderTarget(w, h, {
 			minFilter: THREE.LinearFilter,
 			magFilter: THREE.LinearFilter,
 			format: THREE.RGBAFormat,
 		});
 		brushSceneRef.current = new THREE.Scene();
-		const hw = (size.width || 1) / 2,
-			hh = (size.height || 1) / 2;
+		const hw = (sizeRef.current.width || 1) / 2,
+			hh = (sizeRef.current.height || 1) / 2;
 		brushCameraRef.current = new THREE.OrthographicCamera(
 			-hw,
 			hw,
@@ -159,17 +166,18 @@ function WaterRippleScene({
 			const mesh = new THREE.Mesh(geo, mat);
 			mesh.visible = false;
 			mesh.rotation.z = RANDOM_ROTATIONS[i] ?? 0;
-			brushSceneRef.current!.add(mesh);
+			brushSceneRef.current?.add(mesh);
 			return { mesh, material: mat };
 		});
 
 		return () => {
 			fboRef.current?.dispose();
 			geo.dispose();
-			ripplesRef.current.forEach((r) => r.material.dispose());
+			ripplesRef.current.forEach((r) => {
+				r.material.dispose();
+			});
 			initializedRef.current = false;
 		};
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [brushTexture]);
 
 	useEffect(() => {
@@ -226,15 +234,16 @@ function WaterRippleScene({
 
 	const uniforms = useMemo(
 		() => ({
-			uTexture: { value: imageTexture },
+			uTexture: { value: imageTextureRef.current },
 			uDisplacement: { value: null as THREE.Texture | null },
-			uResolution: { value: new THREE.Vector2(size.width, size.height) },
+			uResolution: {
+				value: new THREE.Vector2(sizeRef.current.width, sizeRef.current.height),
+			},
 			uTextureSize: { value: new THREE.Vector2(1, 1) },
 			uMaskRadius: { value: 0 },
 			uMaskCenter: { value: new THREE.Vector2(0.5, 0.5) },
 			uTime: { value: 0 },
 		}),
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[],
 	);
 
@@ -250,7 +259,7 @@ function WaterRippleScene({
 		ripplesRef.current.forEach(({ mesh, material }) => {
 			if (mesh.visible) {
 				mesh.rotation.z += 0.02 * ts;
-				material.opacity *= Math.pow(0.96, ts);
+				material.opacity *= 0.96 ** ts;
 				mesh.scale.x = mesh.scale.x * 0.982 + 0.108;
 				mesh.scale.y = mesh.scale.y * 0.982 + 0.108;
 				if (material.opacity < 0.002) mesh.visible = false;

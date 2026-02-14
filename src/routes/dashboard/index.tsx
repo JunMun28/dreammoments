@@ -17,8 +17,8 @@ import {
 	Trash2,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import InvitationRenderer from "../../components/templates/InvitationRenderer";
 import ShareModal from "../../components/share/ShareModal";
+import InvitationRenderer from "../../components/templates/InvitationRenderer";
 import { RouteErrorFallback } from "../../components/ui/RouteErrorFallback";
 import { RouteLoadingSpinner } from "../../components/ui/RouteLoadingSpinner";
 import { useToast } from "../../components/ui/Toast";
@@ -149,7 +149,8 @@ function DashboardScreen() {
 	const [previewInvitationId, setPreviewInvitationId] = useState<string | null>(
 		null,
 	);
-	const [previewViewport, setPreviewViewport] = useState<PreviewViewport>("phone");
+	const [previewViewport, setPreviewViewport] =
+		useState<PreviewViewport>("phone");
 	const perPage = 6;
 
 	const handleDeleteConfirm = useCallback(async () => {
@@ -287,13 +288,9 @@ function DashboardScreen() {
 								</div>
 							))}
 						</div>
-						<div
-							className="animate-pulse rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-6"
-						>
+						<div className="animate-pulse rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-6">
 							<div className="mb-4 h-5 w-28 rounded bg-[color:var(--dm-border)]" />
-							<div
-								className="h-[520px] rounded-3xl bg-[color:var(--dm-border)]"
-							/>
+							<div className="h-[520px] rounded-3xl bg-[color:var(--dm-border)]" />
 						</div>
 					</div>
 				</div>
@@ -629,7 +626,10 @@ function DashboardScreen() {
 												onClick={() => setPreviewViewport("phone")}
 												aria-pressed={previewViewport === "phone"}
 											>
-												<Smartphone className="h-3.5 w-3.5" aria-hidden="true" />
+												<Smartphone
+													className="h-3.5 w-3.5"
+													aria-hidden="true"
+												/>
 												Phone
 											</button>
 											<button
@@ -657,8 +657,10 @@ function DashboardScreen() {
 													: "max-w-full",
 											)}
 											style={
-												(activeInvitation.designOverrides ??
-													{}) as Record<string, string>
+												(activeInvitation.designOverrides ?? {}) as Record<
+													string,
+													string
+												>
 											}
 										>
 											<div

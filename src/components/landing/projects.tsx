@@ -413,8 +413,16 @@ function ProjectItem({
 			ref={containerRef}
 			className="group cursor-pointer py-16 md:py-24"
 			onClick={onClick}
+			onKeyDown={(e) => {
+				if (e.key === "Enter" || e.key === " ") {
+					e.preventDefault();
+					onClick();
+				}
+			}}
 			onMouseEnter={() => onHover(true)}
 			onMouseLeave={() => onHover(false)}
+			role="button"
+			tabIndex={0}
 		>
 			<div className="mx-auto max-w-[90rem] px-6 sm:px-12 lg:px-24 2xl:max-w-[112.5rem] min-[120rem]:max-w-[137.5rem]">
 				<div

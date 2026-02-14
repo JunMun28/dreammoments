@@ -5,6 +5,7 @@ import { motion } from "motion/react";
 
 export function About() {
 	return (
+		// biome-ignore lint/correctness/useUniqueElementIds: stable hash target for in-page navigation
 		<section
 			id="about"
 			className="w-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-background pb-24 lg:pb-32"
