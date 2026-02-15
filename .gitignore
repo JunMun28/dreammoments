@@ -15,3 +15,4 @@ post-log.json
 pre-log.json
 playwright-report
 test-results
+.playwright-mcp
