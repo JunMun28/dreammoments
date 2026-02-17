@@ -8,7 +8,15 @@ function toText(value: unknown): string {
 export function ImageBlock({ block }: { block: Block }) {
 	const src = toText(block.content.src);
 	const alt = toText(block.content.alt) || "Invitation image";
-	const objectFit = toText(block.content.objectFit) || "cover";
+	const objectFitRaw = toText(block.content.objectFit);
+	const objectFit: CSSProperties["objectFit"] =
+		objectFitRaw === "contain" ||
+		objectFitRaw === "cover" ||
+		objectFitRaw === "fill" ||
+		objectFitRaw === "none" ||
+		objectFitRaw === "scale-down"
+			? objectFitRaw
+			: "cover";
 	const imageStyle: CSSProperties = { objectFit };
 
 	if (!src) {
