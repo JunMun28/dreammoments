@@ -3,6 +3,7 @@ import { getRequestHeader } from "@tanstack/react-start/server";
 import { and, eq } from "drizzle-orm";
 
 import { getDbOrNull, schema } from "@/db/index";
+import { isCanvasDocument } from "@/lib/canvas/document";
 import {
 	exportGuestsCsv as localExportGuestsCsv,
 	getInvitationById as localGetInvitationById,
@@ -172,15 +173,34 @@ export const submitRsvpFn = createServerFn({
 
 			// Check guest count limits
 			const content = invitation.content as Record<string, unknown>;
-			const rsvp = content.rsvp as {
-				allowPlusOnes: boolean;
-				maxPlusOnes: number;
-			};
-			if (rsvp) {
-				const maxAllowed = rsvp.allowPlusOnes ? 1 + rsvp.maxPlusOnes : 1;
-				if ((data.guestCount ?? 1) > maxAllowed) {
-					return { error: "Guest count exceeds limit" };
+			let allowPlusOnes = false;
+			let maxPlusOnes = 0;
+			if (isCanvasDocument(content)) {
+				const formBlock = content.blockOrder
+					.map((id) => content.blocksById[id])
+					.find(
+						(block) =>
+							block?.type === "form" || block?.semantic === "rsvp-form",
+					);
+				if (typeof formBlock?.content.allowPlusOnes === "boolean") {
+					allowPlusOnes = formBlock.content.allowPlusOnes;
 				}
+				if (typeof formBlock?.content.maxPlusOnes === "number") {
+					maxPlusOnes = formBlock.content.maxPlusOnes;
+				}
+			} else {
+				const rsvp = content.rsvp as
+					| {
+							allowPlusOnes?: boolean;
+							maxPlusOnes?: number;
+					  }
+					| undefined;
+				allowPlusOnes = !!rsvp?.allowPlusOnes;
+				maxPlusOnes = rsvp?.maxPlusOnes ?? 0;
+			}
+			const maxAllowed = allowPlusOnes ? 1 + maxPlusOnes : 1;
+			if ((data.guestCount ?? 1) > maxAllowed) {
+				return { error: "Guest count exceeds limit" };
 			}
 
 			const rows = await db

@@ -221,7 +221,7 @@ function TemplateSelectionPage() {
 		try {
 			const invitation = createInvitation(user.id, templateId);
 			navigate({
-				to: "/editor/$invitationId",
+				to: "/editor/canvas/$invitationId",
 				params: { invitationId: invitation.id },
 			});
 		} catch {

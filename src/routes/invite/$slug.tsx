@@ -5,11 +5,13 @@ import {
 } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { getPublicInvitation } from "../../api/public";
+import { CanvasEngine } from "../../components/canvas/CanvasEngine";
 import EnvelopeAnimation from "../../components/templates/EnvelopeAnimation";
-import InvitationRenderer from "../../components/templates/InvitationRenderer";
 import { buildSampleContent } from "../../data/sample-invitation";
 import { useSubmitRsvp, useTrackView } from "../../hooks/useInvitations";
 import { useAuth } from "../../lib/auth";
+import { summarizeInvitationContent } from "../../lib/canvas/document";
+import { migrateInvitationContentToCanvas } from "../../lib/canvas/migrate";
 import { submitRsvp, trackInvitationView } from "../../lib/data";
 import { useStore } from "../../lib/store";
 
@@ -158,6 +160,83 @@ function resolveSampleTemplate(slug: string) {
 	return "love-at-dusk";
 }
 
+function CanvasRsvpCard({
+	onSubmit,
+	disabled,
+	statusMessage,
+}: {
+	onSubmit: (payload: {
+		name: string;
+		attendance: "attending" | "not_attending" | "undecided";
+		guestCount: number;
+	}) => void;
+	disabled?: boolean;
+	statusMessage: string;
+}) {
+	const [name, setName] = useState("");
+	const [attendance, setAttendance] = useState<
+		"attending" | "not_attending" | "undecided"
+	>("attending");
+	const [guestCount, setGuestCount] = useState(1);
+
+	return (
+		<div className="mx-auto mt-6 w-full max-w-[390px] rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-4">
+			<p className="text-xs uppercase tracking-[0.18em] text-[color:var(--dm-muted)]">
+				RSVP
+			</p>
+			<div className="mt-3 grid gap-2">
+				<input
+					value={name}
+					onChange={(event) => setName(event.target.value)}
+					placeholder="Your name"
+					className="rounded-lg border border-[color:var(--dm-border)] px-3 py-2 text-sm"
+					disabled={disabled}
+				/>
+				<select
+					value={attendance}
+					onChange={(event) =>
+						setAttendance(
+							event.target.value as "attending" | "not_attending" | "undecided",
+						)
+					}
+					className="rounded-lg border border-[color:var(--dm-border)] px-3 py-2 text-sm"
+					disabled={disabled}
+				>
+					<option value="attending">Attending</option>
+					<option value="not_attending">Not attending</option>
+					<option value="undecided">Undecided</option>
+				</select>
+				<input
+					type="number"
+					min={1}
+					value={guestCount}
+					onChange={(event) =>
+						setGuestCount(Math.max(1, Number(event.target.value)))
+					}
+					className="rounded-lg border border-[color:var(--dm-border)] px-3 py-2 text-sm"
+					disabled={disabled}
+				/>
+				<button
+					type="button"
+					className="rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-xs uppercase tracking-[0.16em] text-[color:var(--dm-on-accent)] disabled:opacity-60"
+					onClick={() => {
+						if (!name.trim() || disabled) return;
+						onSubmit({ name: name.trim(), attendance, guestCount });
+					}}
+					disabled={disabled}
+				>
+					Submit RSVP
+				</button>
+			</div>
+			{statusMessage ? (
+				<p className="mt-2 text-xs text-[color:var(--dm-muted)]">
+					{statusMessage}
+				</p>
+			) : null}
+		</div>
+	);
+}
+
 function InviteScreen() {
 	const { slug } = Route.useParams();
 	const { user } = useAuth();
@@ -186,7 +265,12 @@ function InviteScreen() {
 		(invitation?.templateSnapshot as { id?: string } | undefined)?.id ??
 		invitation?.templateId ??
 		resolveSampleTemplate(slug);
-	const content = invitation?.content ?? buildSampleContent(templateId);
+	const sourceContent = invitation?.content ?? buildSampleContent(templateId);
+	const canvasDocument = migrateInvitationContentToCanvas(
+		sourceContent,
+		templateId,
+	);
+	const summary = summarizeInvitationContent(canvasDocument);
 
 	// Fix 1: RSVP duplicate submission prevention
 	const storageKey = invitation ? `rsvp_${invitation.id}` : "";
@@ -198,16 +282,6 @@ function InviteScreen() {
 			return false;
 		}
 	});
-
-	const hiddenSections = useMemo(() => {
-		if (!invitation?.sectionVisibility) return undefined;
-		return Object.fromEntries(
-			Object.entries(invitation.sectionVisibility).map(([key, value]) => [
-				key,
-				!value,
-			]),
-		);
-	}, [invitation?.sectionVisibility]);
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: trackViewMutation intentionally excluded – fire once when invitation loads
 	useEffect(() => {
@@ -238,19 +312,13 @@ function InviteScreen() {
 	}, [invitation]);
 
 	const headerLabel = useMemo(() => {
-		if (!isSample)
-			return `${content.hero.partnerOneName} & ${content.hero.partnerTwoName}`;
+		if (!isSample) return summary.title;
 		const label = templateId
 			.split("-")
 			.map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
 			.join(" ");
 		return `${label} Sample Invitation`;
-	}, [
-		content.hero.partnerOneName,
-		content.hero.partnerTwoName,
-		isSample,
-		templateId,
-	]);
+	}, [summary.title, isSample, templateId]);
 
 	const shellClass = lightTemplates.has(templateId)
 		? "dm-shell-light"
@@ -349,7 +417,7 @@ function InviteScreen() {
 		<EnvelopeAnimation
 			slug={slug}
 			onComplete={handleEnvelopeComplete}
-			coupleNames={`${content.hero.partnerOneName} & ${content.hero.partnerTwoName}`}
+			coupleNames={summary.title}
 		>
 			<div className={`min-h-screen ${shellClass}`}>
 				{/* Fix 11: Only show header for sample invitations */}
@@ -367,17 +435,20 @@ function InviteScreen() {
 						</div>
 					</header>
 				)}
-				<InvitationRenderer
-					templateId={templateId}
-					content={content}
-					hiddenSections={hiddenSections}
-					onRsvpSubmit={alreadySubmitted ? undefined : handleRsvpSubmit}
-					rsvpStatus={
-						alreadySubmitted
-							? "You have already submitted your RSVP. Thank you!"
-							: rsvpStatus
-					}
-				/>
+				<div className="mx-auto max-w-[430px] p-4">
+					<CanvasEngine document={canvasDocument} />
+					{invitation?.status === "published" ? (
+						<CanvasRsvpCard
+							disabled={alreadySubmitted}
+							statusMessage={
+								alreadySubmitted
+									? "You have already submitted your RSVP. Thank you!"
+									: rsvpStatus
+							}
+							onSubmit={(payload) => handleRsvpSubmit(payload)}
+						/>
+					) : null}
+				</div>
 			</div>
 		</EnvelopeAnimation>
 	);

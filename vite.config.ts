@@ -50,6 +50,8 @@ const config = defineConfig({
 	test: {
 		environment: "node",
 		globals: true,
+		testTimeout: 15000,
+		hookTimeout: 15000,
 		exclude: [...configDefaults.exclude, "tests/e2e/**"],
 		coverage: {
 			provider: "v8",

@@ -6,6 +6,7 @@ import {
 	useRef,
 	useState,
 } from "react";
+import { summarizeInvitationContent } from "../../lib/canvas/document";
 import { PUBLIC_BASE_URL } from "../../lib/data";
 import { generateQrDataUrl } from "../../lib/qr";
 import type { Invitation } from "../../lib/types";
@@ -86,15 +87,11 @@ export default function ShareModal({
 
 	if (!open || !invitation) return null;
 
-	const partnerOne = invitation.content.hero.partnerOneName;
-	const partnerTwo = invitation.content.hero.partnerTwoName;
-	const hasNames = partnerOne && partnerTwo;
-	const coupleNames = hasNames
-		? `${partnerOne} & ${partnerTwo}`
-		: "Our Wedding";
-	const shareText = hasNames
-		? `You're invited to ${coupleNames}'s wedding on ${invitation.content.hero.date}.`
-		: `You're invited to our wedding on ${invitation.content.hero.date}.`;
+	const summary = summarizeInvitationContent(invitation.content);
+	const coupleNames = summary.title || "Our Wedding";
+	const shareText = summary.date
+		? `You're invited to ${coupleNames}'s wedding on ${summary.date}.`
+		: `You're invited to ${coupleNames}.`;
 
 	const btnClass =
 		"rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-accent-strong)] transition-colors hover:bg-[color:var(--dm-surface-muted)] hover:border-[color:var(--dm-accent-strong)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--dm-accent-strong)] focus-visible:ring-offset-2 active:scale-[0.98]";

@@ -3,6 +3,8 @@ import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { getDbOrNull, schema } from "@/db/index";
+import { summarizeInvitationContent } from "@/lib/canvas/document";
+import { convertTemplateToCanvasDocument } from "@/lib/canvas/template-converter";
 import {
 	createInvitation as localCreateInvitation,
 	deleteInvitation as localDeleteInvitation,
@@ -182,18 +184,22 @@ export const createInvitationFn = createServerFn({
 		const db = getDbOrNull();
 
 		if (db) {
-			// Build sample content for the template
 			const { buildSampleContent } = await import("@/data/sample-invitation");
 			const { templates } = await import("@/templates/index");
 
 			const template =
 				templates.find((t) => t.id === data.templateId) ?? templates[0];
-			const content = buildSampleContent(template.id);
-			const baseSlug = `${content.hero.partnerOneName}-${content.hero.partnerTwoName}`;
+			const legacyContent = buildSampleContent(template.id);
+			const canvasContent = convertTemplateToCanvasDocument(
+				template.id,
+				legacyContent,
+			);
+			const summary = summarizeInvitationContent(canvasContent);
+			const baseSlug = summary.slugBase;
 
 			const slug = await generateUniqueDbSlug(db, baseSlug);
 
-			const title = `${content.hero.partnerOneName} & ${content.hero.partnerTwoName}`;
+			const title = summary.title;
 			const sectionVisibility = Object.fromEntries(
 				template.sections.map((section) => [
 					section.id,
@@ -209,7 +215,7 @@ export const createInvitationFn = createServerFn({
 					title,
 					templateId: template.id,
 					templateVersion: template.version,
-					content: content as unknown as Record<string, unknown>,
+					content: canvasContent as unknown as Record<string, unknown>,
 					sectionVisibility,
 					designOverrides: {},
 					status: "draft",
@@ -410,13 +416,10 @@ export const publishInvitationFn = createServerFn({
 				templates.find((t) => t.id === invitation.templateId) ?? templates[0];
 
 			const content = invitation.content as Record<string, unknown>;
-			const hero = content.hero as {
-				partnerOneName: string;
-				partnerTwoName: string;
-			};
+			const summary = summarizeInvitationContent(content);
 			const requestedBaseSlug = data.slug
 				? slugify(data.slug)
-				: `${hero.partnerOneName}-${hero.partnerTwoName}`;
+				: summary.slugBase;
 			const baseSlug = data.randomize
 				? `${requestedBaseSlug}-${Math.random().toString(36).slice(2, 6)}`
 				: requestedBaseSlug;

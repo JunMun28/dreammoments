@@ -27,6 +27,7 @@ import {
 	useInvitations,
 } from "../../hooks/useInvitations";
 import { useAuth } from "../../lib/auth";
+import { summarizeInvitationContent } from "../../lib/canvas/document";
 import {
 	createInvitation,
 	getAnalytics,
@@ -187,7 +188,7 @@ function DashboardScreen() {
 					message: "Invitation duplicated — opening editor",
 				});
 				await navigate({
-					to: "/editor/$invitationId",
+					to: "/editor/canvas/$invitationId",
 					params: { invitationId: newInv.id },
 				});
 			} finally {
@@ -427,6 +428,7 @@ function DashboardScreen() {
 								</div>
 							)}
 						{paginatedInvitations.map((invitation) => {
+							const summary = summarizeInvitationContent(invitation.content);
 							const templateName =
 								templates.find(
 									(template) => template.id === invitation.templateId,
@@ -479,20 +481,19 @@ function DashboardScreen() {
 
 									<div className="mt-4 rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] p-4">
 										<p className="text-sm font-medium text-[color:var(--dm-ink)]">
-											{invitation.content.hero.partnerOneName} ×{" "}
-											{invitation.content.hero.partnerTwoName}
+											{summary.title}
 										</p>
 										<p className="mt-1 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
-											{invitation.content.hero.date}
+											{summary.date || "Date not set"}
 										</p>
 										<p className="mt-2 max-h-8 overflow-hidden text-xs text-[color:var(--dm-muted)]">
-											{invitation.content.hero.tagline}
+											{summary.tagline || "No tagline"}
 										</p>
 									</div>
 
 									<div className="mt-4 grid gap-2 sm:grid-cols-2">
 										<Link
-											to="/editor/$invitationId"
+											to="/editor/canvas/$invitationId"
 											params={{ invitationId: invitation.id }}
 											className="inline-flex min-h-11 items-center justify-center rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-ink)]"
 										>
