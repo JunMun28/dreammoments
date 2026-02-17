@@ -5,6 +5,7 @@ import { AddToCalendarButton } from "../../ui/AddToCalendarButton";
 import { LoadingSpinner } from "../../ui/LoadingSpinner";
 import AngpowQRCode from "../AngpowQRCode";
 import { ParticleField } from "../animations";
+import "./love-at-dusk.css";
 import { CountdownWidget } from "../CountdownWidget";
 import { makeEditableProps, parseAttendance } from "../helpers";
 import {
@@ -331,7 +332,7 @@ export default function LoveAtDuskInvitation({
 						<div className="love-timeline-track" aria-hidden="true" />
 						{data.story.milestones.map((milestone, index) => (
 							<div
-								key={`${milestone.title}-${milestone.date}`}
+								key={`${milestone.title}-${index}`}
 								data-reveal
 								style={{ transitionDelay: `${index * 80}ms` }}
 								className={`dm-reveal love-timeline-item ${
@@ -382,7 +383,7 @@ export default function LoveAtDuskInvitation({
 					<div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
 						{data.gallery.photos.map((item, index) => (
 							<div
-								key={`${item.url ?? "photo"}-${item.caption ?? "Photo"}`}
+								key={`${item.url}-${index}`}
 								data-reveal
 								style={{ transitionDelay: `${index * 60}ms` }}
 								className="dm-reveal love-gallery-card"
@@ -424,7 +425,7 @@ export default function LoveAtDuskInvitation({
 					<div className="mt-6 grid gap-4">
 						{data.schedule.events.map((event, index) => (
 							<div
-								key={`${event.time}-${event.title}`}
+								key={`${event.time}-${index}`}
 								data-reveal
 								style={{ transitionDelay: `${index * 70}ms` }}
 								className="dm-reveal love-schedule-item"
@@ -558,7 +559,7 @@ export default function LoveAtDuskInvitation({
 					<div className="mt-6 grid gap-5 sm:grid-cols-3">
 						{data.entourage.members.map((person, index) => (
 							<div
-								key={`${person.role}-${person.name}`}
+								key={`${person.role}-${index}`}
 								data-reveal
 								style={{ transitionDelay: `${index * 80}ms` }}
 								className="dm-reveal love-entourage-card"

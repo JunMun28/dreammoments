@@ -1,0 +1,365 @@
+/* ─── Blush Romance Template ─── */
+
+.blush-romance {
+	--blush-bg: #fff5f3;
+	--blush-bg-alt: #fdf0ed;
+	--blush-bg-sage: #f3f7f2;
+	--blush-ink: #4a3f3a;
+	--blush-muted: #8a7a6a;
+	--blush-peach: #e8a098;
+	--blush-sage: #8ba888;
+	--blush-border: rgba(232, 160, 152, 0.2);
+
+	background: var(--blush-bg);
+	color: var(--blush-ink);
+	overflow: hidden;
+	position: relative;
+}
+
+/* ─── Sections ─── */
+
+.blush-section {
+	position: relative;
+	padding: 4rem 1.5rem;
+	text-align: center;
+}
+@media (min-width: 640px) {
+	.blush-section {
+		padding: 5rem 2.5rem;
+	}
+}
+
+/* ─── Hero ─── */
+
+.blush-hero {
+	min-height: 100svh;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	background: linear-gradient(180deg, #fff5f3, #fdeae6);
+}
+
+.blush-hero-frame {
+	position: absolute;
+	inset: 1.5rem;
+	border: 1px solid var(--blush-border);
+	border-radius: 1.5rem;
+	pointer-events: none;
+}
+
+.blush-hero-bloom {
+	position: absolute;
+	width: 60%;
+	height: 60%;
+	top: 20%;
+	left: 20%;
+	background: radial-gradient(
+		ellipse,
+		rgba(232, 160, 152, 0.15),
+		transparent 70%
+	);
+	pointer-events: none;
+}
+
+.blush-hero-corner {
+	position: absolute;
+	width: 3rem;
+	height: 3rem;
+	pointer-events: none;
+}
+.blush-hero-corner-tl {
+	top: 2.5rem;
+	left: 2.5rem;
+	border-top: 1px solid var(--blush-peach);
+	border-left: 1px solid var(--blush-peach);
+	opacity: 0.4;
+}
+.blush-hero-corner-tr {
+	top: 2.5rem;
+	right: 2.5rem;
+	border-top: 1px solid var(--blush-peach);
+	border-right: 1px solid var(--blush-peach);
+	opacity: 0.4;
+}
+.blush-hero-corner-bl {
+	bottom: 2.5rem;
+	left: 2.5rem;
+	border-bottom: 1px solid var(--blush-peach);
+	border-left: 1px solid var(--blush-peach);
+	opacity: 0.4;
+}
+.blush-hero-corner-br {
+	bottom: 2.5rem;
+	right: 2.5rem;
+	border-bottom: 1px solid var(--blush-peach);
+	border-right: 1px solid var(--blush-peach);
+	opacity: 0.4;
+}
+
+/* ─── Typography ─── */
+
+.blush-kicker {
+	text-transform: uppercase;
+	letter-spacing: 0.35em;
+	font-size: 0.65rem;
+	color: var(--blush-peach);
+	margin-bottom: 0.75rem;
+}
+.blush-kicker-sage {
+	color: var(--blush-sage);
+}
+
+.blush-title {
+	font-size: 3rem;
+	color: var(--blush-ink);
+	line-height: 1;
+	margin-top: 1rem;
+}
+@media (min-width: 640px) {
+	.blush-title {
+		font-size: 4rem;
+	}
+}
+
+.blush-tagline {
+	font-size: 1.5rem;
+	color: var(--blush-peach);
+	margin-top: 1rem;
+}
+@media (min-width: 640px) {
+	.blush-tagline {
+		font-size: 2rem;
+	}
+}
+
+.blush-heading {
+	font-size: 1.5rem;
+	color: var(--blush-ink);
+	margin-bottom: 0.5rem;
+}
+
+.blush-body {
+	font-size: 0.9375rem;
+	line-height: 1.7;
+	color: var(--blush-muted);
+}
+
+.blush-subtext {
+	font-size: 0.8125rem;
+	color: var(--blush-muted);
+	margin-top: 0.75rem;
+}
+
+.blush-meta {
+	font-size: 0.6875rem;
+	text-transform: uppercase;
+	letter-spacing: 0.2em;
+	color: var(--blush-muted);
+}
+
+.blush-ampersand {
+	display: inline-block;
+	color: var(--blush-peach);
+	font-size: 0.75em;
+	vertical-align: middle;
+	margin: 0 0.25em;
+	font-style: italic;
+}
+
+/* ─── Pill Row (date & venue separator) ─── */
+
+.blush-pill-row {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.75rem;
+	margin-top: 1.5rem;
+	font-size: 0.8125rem;
+	color: var(--blush-muted);
+}
+
+.blush-pill-dot {
+	width: 5px;
+	height: 5px;
+	border-radius: 50%;
+	background: var(--blush-peach);
+	flex-shrink: 0;
+	display: inline-block;
+}
+
+/* ─── Floral Dividers ─── */
+
+.blush-floral-divider {
+	padding: 1rem 0;
+	text-align: center;
+	color: var(--blush-peach);
+	overflow: hidden;
+}
+
+.blush-floral-svg {
+	width: 200px;
+	max-width: 50%;
+	height: auto;
+	margin: 0 auto;
+	display: block;
+}
+
+/* ─── Panels ─── */
+
+.blush-panel {
+	background: var(--blush-bg-alt);
+}
+
+.blush-panel-sage {
+	background: var(--blush-bg-sage);
+}
+
+/* ─── Cards ─── */
+
+.blush-card {
+	padding: 1.5rem;
+	border-radius: 1rem;
+	background: white;
+	border: 1px solid var(--blush-border);
+	text-align: left;
+}
+
+.blush-card-accent {
+	border-left: 3px solid var(--blush-peach);
+}
+
+/* ─── Photos ─── */
+
+.blush-photo {
+	text-align: center;
+}
+
+.blush-photo-frame {
+	border-radius: 0.75rem;
+	border: 1px solid var(--blush-border);
+}
+
+/* ─── Timeline (Schedule) ─── */
+
+.blush-timeline {
+	padding: 1.25rem 1.5rem;
+	border-radius: 0.75rem;
+	background: white;
+	border: 1px solid var(--blush-border);
+	border-left: 3px solid var(--blush-sage);
+	text-align: left;
+}
+
+/* ─── Venue ─── */
+
+.blush-venue {
+	display: grid;
+	gap: 2rem;
+	text-align: center;
+}
+@media (min-width: 768px) {
+	.blush-venue {
+		grid-template-columns: 1fr 1fr;
+		text-align: left;
+	}
+}
+
+.blush-map {
+	border-radius: 1rem;
+	overflow: hidden;
+	border: 1px solid var(--blush-border);
+}
+.blush-map img {
+	width: 100%;
+	height: auto;
+	display: block;
+}
+
+/* ─── RSVP Form ─── */
+
+.blush-form {
+	display: grid;
+	gap: 1rem;
+}
+.blush-form input,
+.blush-form select,
+.blush-form textarea {
+	width: 100%;
+	padding: 0.75rem 1rem;
+	border-radius: 0.5rem;
+	border: 1px solid var(--blush-border);
+	background: white;
+	font-size: 0.875rem;
+	color: var(--blush-ink);
+	transition: border-color 0.2s;
+}
+.blush-form input:focus,
+.blush-form select:focus,
+.blush-form textarea:focus {
+	border-color: var(--blush-peach);
+	outline: none;
+	box-shadow: 0 0 0 3px rgba(232, 160, 152, 0.15);
+}
+.blush-form textarea {
+	min-height: 5rem;
+	resize: vertical;
+}
+.blush-form button[type="submit"] {
+	padding: 0.75rem 2rem;
+	border-radius: 9999px;
+	border: none;
+	background: var(--blush-peach);
+	color: white;
+	font-size: 0.75rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.2em;
+	cursor: pointer;
+	transition:
+		background 0.2s,
+		transform 0.1s;
+}
+.blush-form button[type="submit"]:hover {
+	background: #d4908a;
+}
+.blush-form button[type="submit"]:active {
+	transform: scale(0.98);
+}
+
+/* ─── Consent ─── */
+
+.blush-consent {
+	display: flex;
+	gap: 0.75rem;
+	align-items: flex-start;
+	font-size: 0.75rem;
+	color: var(--blush-muted);
+	cursor: pointer;
+}
+
+.blush-consent-link {
+	color: var(--blush-peach);
+	text-decoration: underline;
+}
+.blush-consent-link:hover {
+	text-decoration: none;
+}
+
+/* ─── FAQ ─── */
+
+.blush-faq {
+	padding: 1.25rem;
+	border-radius: 0.75rem;
+	background: white;
+	border: 1px solid var(--blush-border);
+	text-align: left;
+}
+
+/* ─── Footer ─── */
+
+.blush-footer {
+	text-align: center;
+	background: var(--blush-bg-alt);
+	padding-bottom: 3rem;
+}

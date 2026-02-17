@@ -36,11 +36,10 @@ import { KeyboardShortcutsHelp } from "../../components/editor/KeyboardShortcuts
 import type { PreviewLayout } from "../../components/editor/LayoutToggle";
 import { MobileAllSectionsPanel } from "../../components/editor/MobileAllSectionsPanel";
 import MobileBottomSheet from "../../components/editor/MobileBottomSheet";
-import MobileSectionNav from "../../components/editor/MobileSectionNav";
 import { OnboardingTour } from "../../components/editor/OnboardingTour";
 import { PreviewDialog } from "../../components/editor/PreviewDialog";
 import { PublishDialog } from "../../components/editor/PublishDialog";
-import { SectionPillBar } from "../../components/editor/SectionPillBar";
+
 import { SectionRail } from "../../components/editor/SectionRail";
 import { SlugEditor } from "../../components/editor/SlugEditor";
 import { UpgradePrompt } from "../../components/editor/UpgradePrompt";
@@ -461,12 +460,6 @@ function EditorScreen() {
 		scrollToSection(sectionId);
 	};
 
-	const handleMobileSectionChange = (sectionId: string) => {
-		editor.setActiveSection(sectionId);
-		scrollToFormSection(sectionId);
-		scrollToSection(sectionId);
-	};
-
 	const handleSectionSelectFromPreview = (sectionId: string) => {
 		editor.setActiveSection(sectionId);
 		if (isMobile || isTablet) {
@@ -516,37 +509,11 @@ function EditorScreen() {
 					onInlineEdit={handleInlineEdit}
 					previewRef={previewRef}
 					previewLayout={previewLayout}
+					showBuilderChrome={!isMobile && !isTablet}
 				/>
 			</div>
 		</div>
 	);
-
-	// Build the pill bar (SectionPillBar for desktop/tablet, MobileSectionNav for mobile)
-	const externalPillBar = (
-		<MobileSectionNav
-			sections={pillSections}
-			activeSection={editor.activeSection}
-			onSectionChange={handleSectionChange}
-		/>
-	);
-	const sheetPillBar = (
-		<MobileSectionNav
-			sections={pillSections}
-			activeSection={editor.activeSection}
-			onSectionChange={handleMobileSectionChange}
-			embedded
-		/>
-	);
-	const pillBar =
-		isMobile || isTablet ? (
-			externalPillBar
-		) : (
-			<SectionPillBar
-				sections={pillSections}
-				activeSection={editor.activeSection}
-				onSectionChange={handleSectionChange}
-			/>
-		);
 
 	// Build the context panel
 	const contextPanelInner = (
@@ -588,7 +555,6 @@ function EditorScreen() {
 			<MobileBottomSheet
 				open={mobileEditorOpen}
 				onClose={() => setMobileEditorOpen(false)}
-				headerContent={sheetPillBar}
 				snapPoints={[30, 60, 95]}
 				initialSnap={2}
 				activeSnapIndex={mobileSnapIndex}
@@ -639,7 +605,6 @@ function EditorScreen() {
 			<EditorLayout
 				toolbar={toolbar}
 				preview={preview}
-				pillBar={pillBar}
 				contextPanel={contextPanel}
 				sectionRail={
 					!isMobile && !isTablet ? (

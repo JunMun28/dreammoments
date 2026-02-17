@@ -5,6 +5,7 @@ import { AddToCalendarButton } from "../../ui/AddToCalendarButton";
 import { LoadingSpinner } from "../../ui/LoadingSpinner";
 import AngpowQRCode from "../AngpowQRCode";
 import { Parallax, ParticleField } from "../animations";
+import "./blush-romance.css";
 import { CountdownWidget } from "../CountdownWidget";
 import { makeEditableProps, parseAttendance } from "../helpers";
 import {
@@ -217,7 +218,7 @@ export default function BlushRomanceInvitation({
 					<div className="mt-6 grid gap-5">
 						{data.story.milestones.map((milestone, index) => (
 							<div
-								key={`${milestone.date}-${milestone.title}`}
+								key={`${milestone.date}-${index}`}
 								data-reveal
 								style={{ transitionDelay: `${index * 90}ms` }}
 								className="dm-reveal blush-card blush-card-accent"
@@ -249,7 +250,7 @@ export default function BlushRomanceInvitation({
 						<div className="mt-6 grid gap-4 md:grid-cols-3">
 							{data.gallery.photos.map((photo, index) => (
 								<div
-									key={`${photo.url ?? "photo"}-${photo.caption ?? "Moment"}`}
+									key={`${photo.url}-${index}`}
 									data-reveal
 									style={{ transitionDelay: `${index * 70}ms` }}
 									className="dm-reveal blush-photo"
@@ -302,7 +303,7 @@ export default function BlushRomanceInvitation({
 					<div className="mt-6 grid gap-4">
 						{data.schedule.events.map((event, index) => (
 							<div
-								key={`${event.time}-${event.title}`}
+								key={`${event.time}-${index}`}
 								data-reveal
 								style={{ transitionDelay: `${index * 60}ms` }}
 								className="dm-reveal blush-timeline"
@@ -655,7 +656,7 @@ export default function BlushRomanceInvitation({
 					<div className="mt-6 grid gap-4">
 						{data.faq.items.map((item, index) => (
 							<div
-								key={item.question}
+								key={`${item.question}-${index}`}
 								data-reveal
 								style={{ transitionDelay: `${index * 70}ms` }}
 								className="dm-reveal blush-faq"

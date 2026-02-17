@@ -48,42 +48,6 @@ test.describe("mobile editor", () => {
 		}
 	})
 
-	test("mobile section nav renders scrollable tab strip", async ({ page }) => {
-		await setupMobileEditor(page)
-		await page.goto(`/editor/${seedInvitations.love.id}`)
-		await waitForStoreHydration(page)
-
-		// MobileSectionNav should have tablist role on the pill container
-		const tablist = page.getByRole("tablist", { name: "Invitation sections" })
-		await expect(tablist).toBeVisible()
-
-		// Should have tab pills with labels (not just dots)
-		const tabs = tablist.getByRole("tab")
-		const tabCount = await tabs.count()
-		expect(tabCount).toBeGreaterThan(0)
-
-		// Active tab should have aria-selected=true
-		const activeTab = tablist.getByRole("tab", { selected: true })
-		await expect(activeTab).toBeVisible()
-
-		// Should have navigation buttons outside the tablist
-		await expect(page.getByRole("button", { name: "Previous section" })).toBeVisible()
-		await expect(page.getByRole("button", { name: "Next section" })).toBeVisible()
-	})
-
-	test("section navigation via next/previous buttons", async ({ page }) => {
-		await setupMobileEditor(page)
-		await page.goto(`/editor/${seedInvitations.love.id}`)
-		await waitForStoreHydration(page)
-
-		const nextBtn = page.getByRole("button", { name: "Next section" })
-		await nextBtn.click()
-
-		// The active section label should have changed
-		const tablist = page.getByRole("tablist", { name: "Invitation sections" })
-		await expect(tablist).toBeVisible()
-	})
-
 	test("AI assistant opens as bottom sheet on mobile", async ({ page }) => {
 		await setupMobileEditor(page)
 		await page.goto(`/editor/${seedInvitations.love.id}`)
