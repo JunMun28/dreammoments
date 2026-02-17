@@ -39,9 +39,9 @@ function TemplateColorPreview({
 	];
 	return (
 		<div className="flex gap-1.5" aria-hidden="true">
-			{colors.map((color) => (
+			{colors.map((color, index) => (
 				<div
-					key={color}
+					key={`${color}-${index}`}
 					className="h-5 w-5 rounded-full border border-[color:var(--dm-border)]"
 					style={{ background: color }}
 				/>
@@ -202,7 +202,7 @@ function TemplatePreviewModal({
 }
 
 function TemplateSelectionPage() {
-	const { user } = useAuth();
+	const { user, loading } = useAuth();
 	const navigate = useNavigate();
 	const [creatingId, setCreatingId] = useState<string | null>(null);
 	const [previewId, setPreviewId] = useState<string | null>(null);
@@ -211,6 +211,7 @@ function TemplateSelectionPage() {
 		setPreviewId(templateId);
 	}, []);
 
+	if (loading) return <RouteLoadingSpinner />;
 	if (!user) return <Navigate to="/auth/login" />;
 
 	const handleSelect = (templateId: string) => {
@@ -220,7 +221,7 @@ function TemplateSelectionPage() {
 		try {
 			const invitation = createInvitation(user.id, templateId);
 			navigate({
-				to: "/editor/$invitationId",
+				to: "/editor/canvas/$invitationId",
 				params: { invitationId: invitation.id },
 			});
 		} catch {

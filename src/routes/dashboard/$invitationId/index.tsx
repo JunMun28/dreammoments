@@ -466,7 +466,7 @@ function InvitationDashboard() {
 					</div>
 					<div className="flex flex-wrap gap-3 text-xs uppercase tracking-[0.2em]">
 						<Link
-							to="/editor/$invitationId"
+							to="/editor/canvas/$invitationId"
 							params={{ invitationId }}
 							className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)]"
 						>

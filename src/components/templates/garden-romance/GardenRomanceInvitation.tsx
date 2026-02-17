@@ -10,6 +10,7 @@ import { useId, useMemo, useState } from "react";
 import { AddToCalendarButton } from "../../ui/AddToCalendarButton";
 import { LoadingSpinner } from "../../ui/LoadingSpinner";
 import AngpowQRCode from "../AngpowQRCode";
+import "./garden-romance.css";
 import { CountdownWidget } from "../CountdownWidget";
 import { makeEditableProps, parseAttendance } from "../helpers";
 import {
@@ -627,7 +628,7 @@ export default function GardenRomanceInvitation({
 
 								return (
 									<motion.article
-										key={`${milestone.date}-${milestone.title}`}
+										key={`${milestone.date}-${index}`}
 										{...reveal(variant, index * 0.1)}
 										className="relative"
 									>
@@ -754,7 +755,7 @@ export default function GardenRomanceInvitation({
 					>
 						{data.gallery.photos.map((photo, index) => (
 							<motion.figure
-								key={`${photo.url ?? "photo"}-${photo.caption ?? "memory"}`}
+								key={`${photo.url}-${index}`}
 								variants={scaleIn}
 								transition={{ duration: 0.6, ease: motionEase }}
 								className={`group relative overflow-hidden rounded-2xl border shadow-md ${galleryLayoutClasses[index % galleryLayoutClasses.length]}`}
@@ -832,9 +833,9 @@ export default function GardenRomanceInvitation({
 							{...reveal(staggerContainer, 0.2)}
 							className="space-y-6"
 						>
-							{data.schedule.events.map((event) => (
+							{data.schedule.events.map((event, index) => (
 								<motion.article
-									key={`${event.time}-${event.title}`}
+									key={`${event.time}-${index}`}
 									variants={slideFromRight}
 									transition={{ duration: 0.7, ease: motionEase }}
 									className="relative flex gap-6 pl-14"
@@ -1401,9 +1402,9 @@ export default function GardenRomanceInvitation({
 						{...reveal(staggerContainer, 0.2)}
 						className="mt-12 grid gap-4"
 					>
-						{data.faq.items.map((item) => (
+						{data.faq.items.map((item, index) => (
 							<motion.article
-								key={item.question}
+								key={`${item.question}-${index}`}
 								variants={fadeUp}
 								transition={{ duration: 0.6, ease: motionEase }}
 								className="rounded-2xl border p-6"

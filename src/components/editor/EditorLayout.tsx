@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 type EditorLayoutProps = {
 	toolbar: ReactNode;
 	preview: ReactNode;
-	pillBar: ReactNode;
 	contextPanel: ReactNode;
 	sectionRail?: ReactNode;
 	isMobile: boolean;
@@ -16,7 +15,6 @@ type EditorLayoutProps = {
 export function EditorLayout({
 	toolbar,
 	preview,
-	pillBar,
 	contextPanel,
 	sectionRail,
 	isMobile,
@@ -25,7 +23,7 @@ export function EditorLayout({
 	bottomSheetOpen,
 	onOpenBottomSheet,
 }: EditorLayoutProps) {
-	// Non-desktop layout: toolbar (sticky top) + preview (flex-1) + pillBar (sticky bottom) + bottom sheet
+	// Non-desktop layout: toolbar (sticky top) + preview (flex-1) + bottom sheet
 	if (isMobile || isTablet) {
 		return (
 			<div className="flex h-[100dvh] flex-col bg-[color:var(--dm-bg)]">
@@ -39,13 +37,6 @@ export function EditorLayout({
 
 				{/* Scrollable preview area */}
 				<div className="min-h-0 flex-1">{preview}</div>
-
-				{/* Sticky pill bar at bottom (hidden when bottom sheet is open) */}
-				{!bottomSheetOpen && (
-					<div className="shrink-0 border-t border-[color:var(--dm-border)] bg-[color:var(--dm-bg)]">
-						{pillBar}
-					</div>
-				)}
 
 				{/* Floating edit FAB - visible only when bottom sheet is closed */}
 				{!bottomSheetOpen && onOpenBottomSheet && (
@@ -97,11 +88,6 @@ export function EditorLayout({
 				)}
 				<div className="min-w-0 overflow-y-auto">{preview}</div>
 				<div className="flex flex-col overflow-hidden border-l border-[color:var(--dm-border)] bg-[color:var(--dm-surface)]">
-					{!panelCollapsed && (
-						<div className="shrink-0 border-b border-[color:var(--dm-border)]">
-							{pillBar}
-						</div>
-					)}
 					<div className="min-h-0 flex-1">{contextPanel}</div>
 				</div>
 			</div>

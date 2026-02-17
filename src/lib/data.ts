@@ -1,5 +1,10 @@
 import { buildSampleContent } from "../data/sample-invitation";
 import { templates } from "../templates";
+import {
+	isCanvasDocument,
+	summarizeInvitationContent,
+} from "./canvas/document";
+import { convertTemplateToCanvasDocument } from "./canvas/template-converter";
 import { generateSlug, slugify } from "./slug";
 import { getStore, updateStore } from "./store";
 import type {
@@ -22,6 +27,38 @@ const createId = () =>
 
 const getTemplate = (templateId: string) =>
 	templates.find((template) => template.id === templateId) ?? templates[0];
+
+function resolveRsvpLimits(content: unknown): {
+	allowPlusOnes: boolean;
+	maxPlusOnes: number;
+} {
+	if (!content || typeof content !== "object") {
+		return { allowPlusOnes: false, maxPlusOnes: 0 };
+	}
+
+	if (!isCanvasDocument(content)) {
+		const legacy = content as Partial<InvitationContent>;
+		return {
+			allowPlusOnes: !!legacy.rsvp?.allowPlusOnes,
+			maxPlusOnes: legacy.rsvp?.maxPlusOnes ?? 0,
+		};
+	}
+
+	const formBlock = content.blockOrder
+		.map((id) => content.blocksById[id])
+		.find((block) => block?.type === "form" || block?.semantic === "rsvp-form");
+
+	const allowPlusOnes =
+		typeof formBlock?.content.allowPlusOnes === "boolean"
+			? formBlock.content.allowPlusOnes
+			: false;
+	const maxPlusOnes =
+		typeof formBlock?.content.maxPlusOnes === "number"
+			? formBlock.content.maxPlusOnes
+			: 0;
+
+	return { allowPlusOnes, maxPlusOnes };
+}
 
 export const PUBLIC_BASE_URL = "https://dreammoments.app";
 
@@ -91,17 +128,22 @@ export function updateUserPlan(userId: string, plan: PlanTier) {
 
 export function createInvitation(userId: string, templateId: string) {
 	const template = getTemplate(templateId);
-	const content = buildSampleContent(template.id);
-	const baseSlug = `${content.hero.partnerOneName}-${content.hero.partnerTwoName}`;
+	const legacyContent = buildSampleContent(template.id);
+	const canvasContent = convertTemplateToCanvasDocument(
+		template.id,
+		legacyContent,
+	);
+	const summary = summarizeInvitationContent(canvasContent);
+	const baseSlug = summary.slugBase;
 	const existing = new Set(getStore().invitations.map((inv) => inv.slug));
 	const invitation: Invitation = {
 		id: createId(),
 		userId,
 		slug: generateSlug(baseSlug, existing),
-		title: `${content.hero.partnerOneName} & ${content.hero.partnerTwoName}`,
+		title: summary.title,
 		templateId: template.id,
 		templateVersion: template.version,
-		content,
+		content: canvasContent as unknown as InvitationContent,
 		sectionVisibility: Object.fromEntries(
 			template.sections.map((section) => [section.id, section.defaultVisible]),
 		),
@@ -170,9 +212,8 @@ export function publishInvitation(
 			.invitations.filter((inv) => inv.id !== invitationId)
 			.map((inv) => inv.slug),
 	);
-	const baseSlug = options?.slug
-		? slugify(options.slug)
-		: `${invitation.content.hero.partnerOneName}-${invitation.content.hero.partnerTwoName}`;
+	const summary = summarizeInvitationContent(invitation.content);
+	const baseSlug = options?.slug ? slugify(options.slug) : summary.slugBase;
 	const seed = options?.randomize
 		? `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`
 		: baseSlug;
@@ -251,9 +292,8 @@ export function submitRsvp(
 ) {
 	const invitation = getInvitationById(invitationId);
 	if (!invitation) throw new Error("Invitation not found");
-	const maxAllowed = invitation.content.rsvp.allowPlusOnes
-		? 1 + invitation.content.rsvp.maxPlusOnes
-		: 1;
+	const { allowPlusOnes, maxPlusOnes } = resolveRsvpLimits(invitation.content);
+	const maxAllowed = allowPlusOnes ? 1 + maxPlusOnes : 1;
 	if ((payload.guestCount ?? 1) > maxAllowed) {
 		throw new Error("Guest count exceeds limit");
 	}

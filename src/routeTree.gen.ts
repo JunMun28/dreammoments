@@ -24,6 +24,7 @@ import { Route as AuthResetRouteImport } from './routes/auth/reset'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as DashboardInvitationIdIndexRouteImport } from './routes/dashboard/$invitationId/index'
+import { Route as EditorCanvasInvitationIdRouteImport } from './routes/editor/canvas/$invitationId'
 
 const UpgradeRoute = UpgradeRouteImport.update({
   id: '/upgrade',
@@ -101,6 +102,12 @@ const DashboardInvitationIdIndexRoute =
     path: '/dashboard/$invitationId/',
     getParentRoute: () => rootRouteImport,
   } as any)
+const EditorCanvasInvitationIdRoute =
+  EditorCanvasInvitationIdRouteImport.update({
+    id: '/editor/canvas/$invitationId',
+    path: '/editor/canvas/$invitationId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -117,6 +124,7 @@ export interface FileRoutesByFullPath {
   '/upgrade/success': typeof UpgradeSuccessRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/upgrade/': typeof UpgradeIndexRoute
+  '/editor/canvas/$invitationId': typeof EditorCanvasInvitationIdRoute
   '/dashboard/$invitationId/': typeof DashboardInvitationIdIndexRoute
 }
 export interface FileRoutesByTo {
@@ -133,6 +141,7 @@ export interface FileRoutesByTo {
   '/upgrade/success': typeof UpgradeSuccessRoute
   '/dashboard': typeof DashboardIndexRoute
   '/upgrade': typeof UpgradeIndexRoute
+  '/editor/canvas/$invitationId': typeof EditorCanvasInvitationIdRoute
   '/dashboard/$invitationId': typeof DashboardInvitationIdIndexRoute
 }
 export interface FileRoutesById {
@@ -151,6 +160,7 @@ export interface FileRoutesById {
   '/upgrade/success': typeof UpgradeSuccessRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/upgrade/': typeof UpgradeIndexRoute
+  '/editor/canvas/$invitationId': typeof EditorCanvasInvitationIdRoute
   '/dashboard/$invitationId/': typeof DashboardInvitationIdIndexRoute
 }
 export interface FileRouteTypes {
@@ -170,6 +180,7 @@ export interface FileRouteTypes {
     | '/upgrade/success'
     | '/dashboard/'
     | '/upgrade/'
+    | '/editor/canvas/$invitationId'
     | '/dashboard/$invitationId/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -186,6 +197,7 @@ export interface FileRouteTypes {
     | '/upgrade/success'
     | '/dashboard'
     | '/upgrade'
+    | '/editor/canvas/$invitationId'
     | '/dashboard/$invitationId'
   id:
     | '__root__'
@@ -203,6 +215,7 @@ export interface FileRouteTypes {
     | '/upgrade/success'
     | '/dashboard/'
     | '/upgrade/'
+    | '/editor/canvas/$invitationId'
     | '/dashboard/$invitationId/'
   fileRoutesById: FileRoutesById
 }
@@ -219,6 +232,7 @@ export interface RootRouteChildren {
   EditorNewRoute: typeof EditorNewRoute
   InviteSlugRoute: typeof InviteSlugRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
+  EditorCanvasInvitationIdRoute: typeof EditorCanvasInvitationIdRoute
   DashboardInvitationIdIndexRoute: typeof DashboardInvitationIdIndexRoute
 }
 
@@ -329,6 +343,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardInvitationIdIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/editor/canvas/$invitationId': {
+      id: '/editor/canvas/$invitationId'
+      path: '/editor/canvas/$invitationId'
+      fullPath: '/editor/canvas/$invitationId'
+      preLoaderRoute: typeof EditorCanvasInvitationIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -358,6 +379,7 @@ const rootRouteChildren: RootRouteChildren = {
   EditorNewRoute: EditorNewRoute,
   InviteSlugRoute: InviteSlugRoute,
   DashboardIndexRoute: DashboardIndexRoute,
+  EditorCanvasInvitationIdRoute: EditorCanvasInvitationIdRoute,
   DashboardInvitationIdIndexRoute: DashboardInvitationIdIndexRoute,
 }
 export const routeTree = rootRouteImport

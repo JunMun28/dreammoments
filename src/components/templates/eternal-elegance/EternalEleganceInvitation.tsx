@@ -5,6 +5,7 @@ import { AddToCalendarButton } from "../../ui/AddToCalendarButton";
 import { LoadingSpinner } from "../../ui/LoadingSpinner";
 import AngpowQRCode from "../AngpowQRCode";
 import { DrawPath, Shimmer } from "../animations";
+import "./eternal-elegance.css";
 import { CountdownWidget } from "../CountdownWidget";
 import { makeEditableProps, parseAttendance } from "../helpers";
 import {
@@ -190,9 +191,9 @@ export default function EternalEleganceInvitation({
 							name: data.couple.partnerTwo.fullName,
 							bio: data.couple.partnerTwo.bio,
 						},
-					].map((person) => (
+					].map((person, index) => (
 						<div
-							key={person.name}
+							key={`${person.name}-${index}`}
 							data-reveal
 							className="dm-reveal eternal-card"
 						>
@@ -232,9 +233,9 @@ export default function EternalEleganceInvitation({
 						Gallery
 					</p>
 					<div className="mt-6 grid gap-4 md:grid-cols-3">
-						{data.gallery.photos.map((photo) => (
+						{data.gallery.photos.map((photo, index) => (
 							<div
-								key={`${photo.url ?? "photo"}-${photo.caption ?? "Portrait"}`}
+								key={`${photo.url}-${index}`}
 								className="eternal-photo"
 								style={{ backgroundColor: "#f5ede4" }}
 							>

@@ -1,0 +1,241 @@
+/* ─── Love at Dusk Template ─── */
+
+.love-at-dusk {
+	--love-bg: #0d0a08;
+	--love-bg-section: #1a1410;
+	--love-bg-panel: #140d0b;
+	--love-ink: #0d0a08;
+	--love-cream: #f5e6d3;
+	--love-muted: rgba(245, 230, 211, 0.55);
+	--love-accent: #d4af37;
+	--love-primary: #8b2252;
+	--love-secondary: #c9a962;
+
+	background: var(--love-bg);
+	color: var(--love-cream);
+	overflow: hidden;
+	position: relative;
+}
+
+/* ─── Starfield ─── */
+
+@keyframes love-star-twinkle {
+	0%,
+	100% {
+		opacity: 0;
+		transform: scale(0.5);
+	}
+	50% {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+.love-starfield {
+	position: fixed;
+	inset: 0;
+	pointer-events: none;
+	z-index: 0;
+}
+
+.love-star {
+	position: absolute;
+	width: 2px;
+	height: 2px;
+	background: var(--love-accent);
+	border-radius: 50%;
+	animation: love-star-twinkle 3s ease-in-out infinite;
+}
+
+/* ─── Sections ─── */
+
+.love-section {
+	position: relative;
+	padding: 4rem 1.5rem;
+}
+@media (min-width: 640px) {
+	.love-section {
+		padding: 5rem 2.5rem;
+	}
+}
+
+.love-section-wide {
+	padding: 5rem 1.5rem;
+}
+@media (min-width: 640px) {
+	.love-section-wide {
+		padding: 6rem 2.5rem;
+	}
+}
+
+.love-panel {
+	background: var(--love-bg-panel);
+}
+
+/* ─── Hero ─── */
+
+.love-hero {
+	min-height: 100svh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.love-hero-bg {
+	position: absolute;
+	inset: 0;
+	background: radial-gradient(
+		ellipse at 50% 30%,
+		rgba(139, 34, 82, 0.2),
+		transparent 70%
+	);
+	z-index: 0;
+}
+
+.love-hero-glow {
+	position: absolute;
+	width: 40%;
+	height: 40%;
+	top: 30%;
+	left: 30%;
+	background: radial-gradient(circle, rgba(212, 175, 55, 0.08), transparent);
+	z-index: 0;
+	pointer-events: none;
+}
+
+/* ─── Pills ─── */
+
+.love-pill {
+	padding: 0.5rem 1.25rem;
+	border-radius: 9999px;
+	border: 1px solid rgba(212, 175, 55, 0.3);
+	background: rgba(212, 175, 55, 0.08);
+	font-size: 0.8125rem;
+}
+
+/* ─── Gradient Dividers ─── */
+
+.love-gradient-divider {
+	height: 6rem;
+	position: relative;
+}
+
+.love-gradient-hero-to-section {
+	background: linear-gradient(
+		180deg,
+		var(--love-bg) 0%,
+		var(--love-bg-section) 100%
+	);
+}
+
+.love-gradient-section-to-panel {
+	background: linear-gradient(
+		180deg,
+		var(--love-bg-section) 0%,
+		var(--love-bg-panel) 100%
+	);
+}
+
+/* ─── Couple Cards ─── */
+
+.love-couple-card {
+	padding: 1.5rem;
+	border-radius: 1.5rem;
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	background: rgba(255, 255, 255, 0.03);
+	overflow: hidden;
+}
+
+/* ─── Story Timeline ─── */
+
+.love-story-timeline {
+	position: relative;
+	padding-left: 2rem;
+}
+
+.love-timeline-track {
+	position: absolute;
+	left: 0.4375rem;
+	top: 0;
+	bottom: 0;
+	width: 1px;
+	background: linear-gradient(
+		180deg,
+		var(--love-accent),
+		rgba(139, 34, 82, 0.5)
+	);
+}
+
+.love-timeline-item {
+	position: relative;
+	padding-left: 1.5rem;
+	margin-bottom: 2.5rem;
+}
+
+.love-timeline-left,
+.love-timeline-right {
+	/* Alternating alignment is visual via the existing layout */
+}
+
+.love-timeline-dot {
+	position: absolute;
+	left: -1.625rem;
+	top: 0.375rem;
+	width: 0.75rem;
+	height: 0.75rem;
+	border-radius: 50%;
+	border: 2px solid var(--love-accent);
+	background: var(--love-bg-section);
+}
+
+.love-timeline-content {
+	display: block;
+}
+
+/* ─── Gallery ─── */
+
+.love-gallery-card {
+	text-align: center;
+}
+
+/* ─── Schedule ─── */
+
+.love-schedule-item {
+	display: flex;
+	gap: 1.5rem;
+	padding: 1.25rem;
+	border-radius: 1rem;
+	border: 1px solid rgba(255, 255, 255, 0.06);
+	background: rgba(255, 255, 255, 0.02);
+}
+
+.love-schedule-time {
+	flex-shrink: 0;
+	min-width: 4rem;
+}
+
+.love-schedule-details {
+	flex: 1;
+}
+
+/* ─── Venue ─── */
+
+.love-venue-map {
+	text-align: center;
+}
+
+/* ─── Entourage ─── */
+
+.love-entourage-card {
+	padding: 1.5rem;
+	border-radius: 1rem;
+	border: 1px solid rgba(255, 255, 255, 0.06);
+	background: rgba(255, 255, 255, 0.02);
+	text-align: center;
+}
+
+/* ─── Typography ─── */
+
+.love-heading {
+	color: var(--love-cream);
+}
