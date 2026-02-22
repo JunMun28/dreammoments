@@ -1,3 +1,4 @@
+import { useCallback, useState } from "react";
 import type { InvitationContent } from "../../lib/types";
 import {
 	type FieldAiTaskType,
@@ -22,6 +23,8 @@ type MobileAllSectionsPanelProps = {
 	onVisibilityChange: (sectionId: string, visible: boolean) => void;
 	onAiClick: (sectionId: string, aiType?: FieldAiTaskType) => void;
 	scrollContainerRef: React.RefObject<HTMLDivElement | null>;
+	/** Currently active section (driven by scroll spy) */
+	activeSectionId?: string;
 };
 
 export function MobileAllSectionsPanel({
@@ -37,9 +40,40 @@ export function MobileAllSectionsPanel({
 	onVisibilityChange,
 	onAiClick,
 	scrollContainerRef,
+	activeSectionId,
 }: MobileAllSectionsPanelProps) {
+	const [scrolled, setScrolled] = useState(false);
+
+	const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+		setScrolled(e.currentTarget.scrollTop > 0);
+	}, []);
+
+	const activeSection = activeSectionId
+		? sections.find((s) => s.id === activeSectionId)
+		: undefined;
+	const fieldCount = activeSection?.fields.length ?? 0;
+	const completion = activeSectionId
+		? (sectionProgress[activeSectionId] ?? 0)
+		: 0;
+	const filledCount = Math.round((completion / 100) * fieldCount);
+	const activeSectionLabel = activeSection
+		? getSectionLabel(activeSection.id)
+		: "";
+
 	return (
-		<div ref={scrollContainerRef} className="dm-scroll-thin flex-1">
+		<div
+			ref={scrollContainerRef}
+			className="dm-scroll-thin flex-1"
+			onScroll={handleScroll}
+		>
+			{/* Sticky sub-header — only after user has scrolled past first section */}
+			{scrolled && activeSectionLabel && (
+				<div className="sticky top-0 z-10 flex h-7 items-center justify-center border-b border-[color:var(--dm-ink)]/10 bg-white/95 backdrop-blur-sm">
+					<span className="text-xs text-[color:var(--dm-ink)]/60">
+						{activeSectionLabel} · {filledCount} of {fieldCount} fields
+					</span>
+				</div>
+			)}
 			{sections.map((section) => {
 				const sectionLabel = getSectionLabel(section.id);
 				const isVisible = sectionVisibility[section.id] ?? true;

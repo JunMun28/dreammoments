@@ -7,6 +7,7 @@ import {
 	useState,
 } from "react";
 import { cn } from "../../lib/utils";
+import { SectionStepIndicator } from "./SectionStepIndicator";
 
 export type MobileBottomSheetProps = {
 	open: boolean;
@@ -27,6 +28,14 @@ export type MobileBottomSheetProps = {
 	onSnapChange?: (snapIndex: number) => void;
 	/** Whether the form has unsaved changes -- increases dismiss thresholds */
 	isDirty?: boolean;
+	/** Section list for step progress indicator */
+	sections?: { id: string; label: string }[];
+	/** Currently active section ID */
+	activeSectionId?: string;
+	/** Per-section completion percentages (0–100) */
+	sectionProgress?: Record<string, number>;
+	/** Called when user taps a dot in the progress indicator */
+	onSectionClick?: (sectionId: string) => void;
 };
 
 const SWIPE_THRESHOLD = 80;
@@ -46,6 +55,10 @@ export default function MobileBottomSheet({
 	activeSnapIndex,
 	onSnapChange,
 	isDirty = false,
+	sections,
+	activeSectionId,
+	sectionProgress,
+	onSectionClick,
 }: MobileBottomSheetProps) {
 	const titleId = useId();
 	const sheetRef = useRef<HTMLDivElement>(null);
@@ -404,6 +417,19 @@ export default function MobileBottomSheet({
 						Drag
 					</span>
 				</button>
+
+				{/* Section step indicator */}
+				{sections &&
+					sections.length > 0 &&
+					activeSectionId &&
+					onSectionClick && (
+						<SectionStepIndicator
+							sections={sections}
+							activeSectionId={activeSectionId}
+							sectionProgress={sectionProgress ?? {}}
+							onSectionClick={onSectionClick}
+						/>
+					)}
 
 				{/* Header */}
 				{headerContent ? (

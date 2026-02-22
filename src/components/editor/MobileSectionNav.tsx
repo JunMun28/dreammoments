@@ -1,5 +1,11 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { type KeyboardEvent, useCallback, useEffect, useRef } from "react";
+import {
+	type KeyboardEvent,
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 import { cn } from "../../lib/utils";
 
 export type MobileSectionNavProps = {
@@ -8,6 +14,8 @@ export type MobileSectionNavProps = {
 	onSectionChange: (sectionId: string) => void;
 	/** When true, removes border-t, background, and safe-area padding (for use inside bottom sheet header) */
 	embedded?: boolean;
+	/** When provided, the nav handles scroll + highlight on pill tap */
+	scrollContainerRef?: React.RefObject<HTMLDivElement | null>;
 };
 
 function CompletionIcon({ completion }: { completion: number | undefined }) {
@@ -83,9 +91,21 @@ export default function MobileSectionNav({
 	activeSection,
 	onSectionChange,
 	embedded = false,
+	scrollContainerRef,
 }: MobileSectionNavProps) {
 	const activeRef = useRef<HTMLButtonElement>(null);
 	const tabRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
+	const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+	useEffect(() => {
+		if (typeof window === "undefined") return;
+		const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+		setPrefersReducedMotion(mq.matches);
+		const handler = (e: MediaQueryListEvent) =>
+			setPrefersReducedMotion(e.matches);
+		mq.addEventListener("change", handler);
+		return () => mq.removeEventListener("change", handler);
+	}, []);
 
 	const currentIndex = sections.findIndex((s) => s.id === activeSection);
 
@@ -209,7 +229,27 @@ export default function MobileSectionNav({
 									? "bg-[color:var(--dm-accent-strong)] text-[color:var(--dm-on-accent)]"
 									: "border border-[color:var(--dm-border)] text-[color:var(--dm-muted)]",
 							)}
-							onClick={() => onSectionChange(section.id)}
+							onClick={() => {
+								onSectionChange(section.id);
+								if (scrollContainerRef?.current) {
+									const target =
+										scrollContainerRef.current.querySelector<HTMLElement>(
+											`[data-section-form="${section.id}"]`,
+										);
+									if (target) {
+										target.scrollIntoView({
+											behavior: prefersReducedMotion ? "instant" : "smooth",
+											block: "start",
+										});
+										if (!prefersReducedMotion) {
+											target.classList.add("section-highlight");
+											setTimeout(() => {
+												target.classList.remove("section-highlight");
+											}, 700);
+										}
+									}
+								}
+							}}
 							onKeyDown={handleTabKeyDown}
 						>
 							{section.label || section.id}
