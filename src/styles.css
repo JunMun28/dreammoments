@@ -417,3 +417,25 @@ html {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-8px); }
 }
+
+/* ─── Mobile Editor Section Highlight ─── */
+@keyframes section-highlight {
+  from {
+    opacity: 0.5;
+    background-color: color-mix(in srgb, var(--dm-peach, #e8a87c) 10%, transparent);
+  }
+  to {
+    opacity: 1;
+    background-color: transparent;
+  }
+}
+
+.section-highlight {
+  animation: section-highlight 700ms ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .section-highlight {
+    animation: none;
+  }
+}
