@@ -92,8 +92,14 @@ vi.mock("@/lib/data", () => ({
 		name: "Guest One",
 		attendance: "attending",
 	})),
+	deleteGuest: vi.fn(),
+	deleteGuestInInvitation: vi.fn(() => true),
 	listGuests: vi.fn(() => []),
 	updateGuest: vi.fn(),
+	updateGuestInInvitation: vi.fn(() => ({
+		id: "g-1",
+		name: "Updated Name",
+	})),
 	importGuests: vi.fn(() => [
 		{ id: "g-1", name: "Imported One" },
 		{ id: "g-2", name: "Imported Two" },
@@ -109,6 +115,8 @@ vi.mock("@/lib/data", () => ({
 // ---------------------------------------------------------------------------
 
 import {
+	bulkUpdateGuestsFn,
+	deleteGuestFn,
 	exportGuestsCsvFn,
 	importGuestsFn,
 	listGuestsFn,
@@ -117,8 +125,10 @@ import {
 } from "@/api/guests";
 import { getDbOrNull } from "@/db/index";
 import {
+	deleteGuestInInvitation as localDeleteGuestInInvitation,
 	getInvitationById as localGetInvitationById,
 	listGuests as localListGuests,
+	updateGuestInInvitation as localUpdateGuestInInvitation,
 } from "@/lib/data";
 import { createDbRateLimiter } from "@/lib/rate-limit";
 import { requireAuth } from "@/lib/server-auth";
@@ -128,12 +138,23 @@ const mockedRequireAuth = vi.mocked(requireAuth);
 const mockedCreateDbRateLimiter = vi.mocked(createDbRateLimiter);
 const mockedLocalGetById = vi.mocked(localGetInvitationById);
 const mockedLocalListGuests = vi.mocked(localListGuests);
+const mockedLocalDeleteGuestInInvitation = vi.mocked(
+	localDeleteGuestInInvitation,
+);
+const mockedLocalUpdateGuestInInvitation = vi.mocked(
+	localUpdateGuestInInvitation,
+);
 
 beforeEach(() => {
 	vi.clearAllMocks();
 	mockedGetDbOrNull.mockReturnValue(null);
 	mockedRequireAuth.mockResolvedValue({ userId: "user-a" });
 	mockedCreateDbRateLimiter.mockReturnValue(mockRsvpLimiter);
+	mockedLocalDeleteGuestInInvitation.mockReturnValue(true);
+	mockedLocalUpdateGuestInInvitation.mockReturnValue({
+		id: "g-1",
+		name: "Updated Name",
+	} as ReturnType<typeof localUpdateGuestInInvitation>);
 	mockRsvpLimiter.mockResolvedValue({
 		allowed: true,
 		remaining: 9,
@@ -358,6 +379,56 @@ describe("listGuestsFn", () => {
 		expect(result).toEqual([]);
 		expect(mockedLocalListGuests).toHaveBeenCalledWith("inv-1", "attending");
 	});
+
+	test("filters by search term (fallback)", async () => {
+		const inv = { id: "inv-1", userId: "user-a" };
+		mockedLocalGetById.mockReturnValue(
+			inv as ReturnType<typeof localGetInvitationById>,
+		);
+		mockedLocalListGuests.mockReturnValue([
+			{
+				id: "g-1",
+				name: "Alice Wong",
+				email: "alice@example.com",
+				relationship: "friend",
+			},
+			{
+				id: "g-2",
+				name: "Bob Tan",
+				email: "bob@example.com",
+				relationship: "family",
+			},
+		] as ReturnType<typeof localListGuests>);
+
+		const result = await (listGuestsFn as CallableFunction)({
+			invitationId: "inv-1",
+			token: "valid-token",
+			search: "alice",
+		});
+
+		expect(result).toHaveLength(1);
+		expect(result[0]?.name).toBe("Alice Wong");
+	});
+
+	test("filters by relationship (fallback)", async () => {
+		const inv = { id: "inv-1", userId: "user-a" };
+		mockedLocalGetById.mockReturnValue(
+			inv as ReturnType<typeof localGetInvitationById>,
+		);
+		mockedLocalListGuests.mockReturnValue([
+			{ id: "g-1", name: "Alice", relationship: "friend" },
+			{ id: "g-2", name: "Bob", relationship: "family" },
+		] as ReturnType<typeof localListGuests>);
+
+		const result = await (listGuestsFn as CallableFunction)({
+			invitationId: "inv-1",
+			token: "valid-token",
+			relationship: "family",
+		});
+
+		expect(result).toHaveLength(1);
+		expect(result[0]?.name).toBe("Bob");
+	});
 });
 
 describe("updateGuestFn", () => {
@@ -372,9 +443,27 @@ describe("updateGuestFn", () => {
 			token: "valid-token",
 			invitationId: "inv-1",
 			name: "Updated Name",
-		})) as { success: boolean };
+		})) as { id: string; name: string };
 
-		expect(result.success).toBe(true);
+		expect(result.id).toBe("g-1");
+		expect(result.name).toBe("Updated Name");
+	});
+
+	test("returns guest not found when guest is outside invitation (fallback)", async () => {
+		const inv = { id: "inv-1", userId: "user-a" };
+		mockedLocalGetById.mockReturnValue(
+			inv as ReturnType<typeof localGetInvitationById>,
+		);
+		mockedLocalUpdateGuestInInvitation.mockReturnValue(undefined);
+
+		const result = (await (updateGuestFn as CallableFunction)({
+			guestId: "g-other",
+			token: "valid-token",
+			invitationId: "inv-1",
+			name: "Updated Name",
+		})) as { error: string };
+
+		expect(result.error).toBe("Guest not found");
 	});
 
 	test("denies update for wrong user (fallback)", async () => {
@@ -435,6 +524,136 @@ describe("updateGuestFn", () => {
 		});
 
 		expect(result.name).toBe("Updated");
+	});
+});
+
+describe("deleteGuestFn", () => {
+	test("deletes guest (fallback path)", async () => {
+		const inv = { id: "inv-1", userId: "user-a" };
+		mockedLocalGetById.mockReturnValue(
+			inv as ReturnType<typeof localGetInvitationById>,
+		);
+
+		const result = (await (deleteGuestFn as CallableFunction)({
+			guestId: "g-1",
+			token: "valid-token",
+			invitationId: "inv-1",
+		})) as { success: boolean };
+
+		expect(result.success).toBe(true);
+	});
+
+	test("returns guest not found for non-member guest (fallback)", async () => {
+		const inv = { id: "inv-1", userId: "user-a" };
+		mockedLocalGetById.mockReturnValue(
+			inv as ReturnType<typeof localGetInvitationById>,
+		);
+		mockedLocalDeleteGuestInInvitation.mockReturnValue(false);
+
+		const result = (await (deleteGuestFn as CallableFunction)({
+			guestId: "g-other",
+			token: "valid-token",
+			invitationId: "inv-1",
+		})) as { error: string };
+
+		expect(result.error).toBe("Guest not found");
+	});
+
+	test("denies delete for wrong user (fallback)", async () => {
+		const inv = { id: "inv-1", userId: "user-b" };
+		mockedLocalGetById.mockReturnValue(
+			inv as ReturnType<typeof localGetInvitationById>,
+		);
+
+		const result = (await (deleteGuestFn as CallableFunction)({
+			guestId: "g-1",
+			token: "valid-token",
+			invitationId: "inv-1",
+		})) as { error: string };
+
+		expect(result.error).toBe("Access denied");
+	});
+
+	test("deletes guest (DB path)", async () => {
+		const invitation = { userId: "user-a" };
+		const selectChain = chainable([invitation]);
+		const deleteChain = chainable([]);
+		mockDb.select.mockReturnValue(selectChain);
+		mockDb.delete.mockReturnValue(deleteChain);
+		mockedGetDbOrNull.mockReturnValue(
+			mockDb as unknown as ReturnType<typeof getDbOrNull>,
+		);
+
+		const result = (await (deleteGuestFn as CallableFunction)({
+			guestId: "g-1",
+			token: "valid-token",
+			invitationId: "inv-1",
+		})) as { success: boolean };
+
+		expect(result.success).toBe(true);
+	});
+});
+
+describe("bulkUpdateGuestsFn", () => {
+	test("bulk updates guest attendance (fallback)", async () => {
+		const inv = { id: "inv-1", userId: "user-a" };
+		mockedLocalGetById.mockReturnValue(
+			inv as ReturnType<typeof localGetInvitationById>,
+		);
+
+		const result = (await (bulkUpdateGuestsFn as CallableFunction)({
+			invitationId: "inv-1",
+			token: "valid-token",
+			updates: [
+				{ guestId: "g-1", attendance: "attending" },
+				{ guestId: "g-2", attendance: "not_attending" },
+			],
+		})) as { updated: number };
+
+		expect(result.updated).toBe(2);
+	});
+
+	test("only counts guests in invitation (fallback)", async () => {
+		const inv = { id: "inv-1", userId: "user-a" };
+		mockedLocalGetById.mockReturnValue(
+			inv as ReturnType<typeof localGetInvitationById>,
+		);
+		mockedLocalUpdateGuestInInvitation
+			.mockReturnValueOnce({
+				id: "g-1",
+				name: "Updated Name",
+			} as ReturnType<typeof localUpdateGuestInInvitation>)
+			.mockReturnValueOnce(undefined);
+
+		const result = (await (bulkUpdateGuestsFn as CallableFunction)({
+			invitationId: "inv-1",
+			token: "valid-token",
+			updates: [
+				{ guestId: "g-1", attendance: "attending" },
+				{ guestId: "g-other", attendance: "not_attending" },
+			],
+		})) as { updated: number };
+
+		expect(result.updated).toBe(1);
+	});
+
+	test("bulk updates guest attendance (DB)", async () => {
+		const invitation = { userId: "user-a" };
+		const selectChain = chainable([invitation]);
+		const updateChain = chainable([{ id: "g-1" }]);
+		mockDb.select.mockReturnValue(selectChain);
+		mockDb.update.mockReturnValue(updateChain);
+		mockedGetDbOrNull.mockReturnValue(
+			mockDb as unknown as ReturnType<typeof getDbOrNull>,
+		);
+
+		const result = (await (bulkUpdateGuestsFn as CallableFunction)({
+			invitationId: "inv-1",
+			token: "valid-token",
+			updates: [{ guestId: "g-1", attendance: "attending" }],
+		})) as { updated: number };
+
+		expect(result.updated).toBe(1);
 	});
 });
 

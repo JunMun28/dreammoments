@@ -193,3 +193,20 @@ export const payments = pgTable(
 		statusIdx: index("idx_payments_status").on(table.status),
 	}),
 );
+
+export const invitationSnapshots = pgTable(
+	"invitation_snapshots",
+	{
+		id: uuid("id").defaultRandom().primaryKey(),
+		invitationId: uuid("invitation_id")
+			.notNull()
+			.references(() => invitations.id, { onDelete: "cascade" }),
+		content: jsonb("content").$type<Record<string, unknown>>().notNull(),
+		designOverrides: jsonb("design_overrides").$type<Record<string, unknown>>(),
+		reason: varchar("reason", { length: 100 }),
+		createdAt: timestamp("created_at").defaultNow().notNull(),
+	},
+	(table) => ({
+		invitationIdx: index("idx_snapshots_invitation").on(table.invitationId),
+	}),
+);

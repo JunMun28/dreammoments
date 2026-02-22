@@ -14,6 +14,7 @@ import type {
 	Guest,
 	Invitation,
 	InvitationContent,
+	InvitationSnapshot,
 	InvitationView,
 	Payment,
 	PlanTier,
@@ -243,6 +244,9 @@ export function deleteInvitation(invitationId: string) {
 		aiGenerations: store.aiGenerations.filter(
 			(gen) => gen.invitationId !== invitationId,
 		),
+		invitationSnapshots: (store.invitationSnapshots ?? []).filter(
+			(snapshot) => snapshot.invitationId !== invitationId,
+		),
 	}));
 }
 
@@ -335,6 +339,48 @@ export function updateGuest(guestId: string, patch: Partial<Guest>) {
 			guest.id === guestId ? { ...guest, ...patch, updatedAt: now() } : guest,
 		),
 	}));
+}
+
+export function deleteGuest(guestId: string) {
+	updateStore((store) => ({
+		...store,
+		guests: store.guests.filter((guest) => guest.id !== guestId),
+	}));
+}
+
+export function updateGuestInInvitation(
+	invitationId: string,
+	guestId: string,
+	patch: Partial<Guest>,
+) {
+	let updated: Guest | undefined;
+	updateStore((store) => ({
+		...store,
+		guests: store.guests.map((guest) => {
+			if (guest.id !== guestId || guest.invitationId !== invitationId) {
+				return guest;
+			}
+			updated = { ...guest, ...patch, updatedAt: now() };
+			return updated;
+		}),
+	}));
+	return updated;
+}
+
+export function deleteGuestInInvitation(invitationId: string, guestId: string) {
+	let deleted = false;
+	updateStore((store) => ({
+		...store,
+		guests: store.guests.filter((guest) => {
+			const shouldDelete =
+				guest.id === guestId && guest.invitationId === invitationId;
+			if (shouldDelete) {
+				deleted = true;
+			}
+			return !shouldDelete;
+		}),
+	}));
+	return deleted;
 }
 
 export function listGuests(
@@ -494,11 +540,17 @@ export function recordAiGeneration(
 	return generation;
 }
 
-export function markAiGenerationAccepted(generationId: string) {
+export function markAiGenerationAccepted(
+	generationId: string,
+	invitationId?: string,
+) {
 	updateStore((store) => ({
 		...store,
 		aiGenerations: store.aiGenerations.map((gen) =>
-			gen.id === generationId ? { ...gen, accepted: true } : gen,
+			gen.id === generationId &&
+			(invitationId === undefined || gen.invitationId === invitationId)
+				? { ...gen, accepted: true }
+				: gen,
 		),
 	}));
 }
@@ -509,6 +561,42 @@ export function incrementAiUsage(invitationId: string) {
 	return updateInvitation(invitationId, {
 		aiGenerationsUsed: invitation.aiGenerationsUsed + 1,
 	});
+}
+
+export function listAiGenerations(invitationId: string) {
+	return getStore().aiGenerations.filter(
+		(generation) => generation.invitationId === invitationId,
+	);
+}
+
+export function createInvitationSnapshot(
+	invitationId: string,
+	reason?: string,
+) {
+	const invitation = getInvitationById(invitationId);
+	if (!invitation) return;
+
+	const snapshot: InvitationSnapshot = {
+		id: createId(),
+		invitationId,
+		content: invitation.content as unknown as Record<string, unknown>,
+		designOverrides: invitation.designOverrides,
+		reason,
+		createdAt: now(),
+	};
+
+	updateStore((store) => ({
+		...store,
+		invitationSnapshots: [...(store.invitationSnapshots ?? []), snapshot],
+	}));
+
+	return snapshot;
+}
+
+export function listInvitationSnapshots(invitationId: string) {
+	return (getStore().invitationSnapshots ?? []).filter(
+		(snapshot) => snapshot.invitationId === invitationId,
+	);
 }
 
 export function aiUsageLimit(plan: PlanTier) {

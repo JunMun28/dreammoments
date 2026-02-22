@@ -7,6 +7,7 @@ import { summarizeInvitationContent } from "@/lib/canvas/document";
 import { convertTemplateToCanvasDocument } from "@/lib/canvas/template-converter";
 import {
 	createInvitation as localCreateInvitation,
+	createInvitationSnapshot as localCreateInvitationSnapshot,
 	deleteInvitation as localDeleteInvitation,
 	getInvitationById as localGetInvitationById,
 	listInvitationsByUser as localListInvitationsByUser,
@@ -272,6 +273,21 @@ export const updateInvitationFn = createServerFn({
 				return { error: "Access denied" };
 			}
 
+			if (data.content !== undefined) {
+				const current = await db
+					.select({ content: schema.invitations.content })
+					.from(schema.invitations)
+					.where(eq(schema.invitations.id, data.invitationId));
+
+				if (current[0]) {
+					await db.insert(schema.invitationSnapshots).values({
+						invitationId: data.invitationId,
+						content: current[0].content as Record<string, unknown>,
+						reason: "auto-save",
+					});
+				}
+			}
+
 			// Build update fields
 			const updateFields: Record<string, unknown> = {
 				updatedAt: new Date(),
@@ -300,6 +316,10 @@ export const updateInvitationFn = createServerFn({
 		}
 		if (invitation.userId !== userId) {
 			return { error: "Access denied" };
+		}
+
+		if (data.content !== undefined) {
+			localCreateInvitationSnapshot(data.invitationId, "auto-save");
 		}
 
 		const patch: Partial<Invitation> = {};
@@ -514,3 +534,138 @@ export const unpublishInvitationFn = createServerFn({
 		const unpublished = localUnpublishInvitation(data.invitationId);
 		return unpublished ?? { error: "Unpublish failed" };
 	});
+
+// ── Patch invitation content (partial update) ────────────────────────
+
+const patchContentSchema = z.object({
+	invitationId: z.string().min(1, "invitationId is required"),
+	token: z.string().min(1, "Token is required"),
+	path: z
+		.string()
+		.min(1, "path is required")
+		.refine((path) => isSafePath(path), "Invalid path"),
+	value: z.unknown(),
+});
+
+export const patchInvitationContentFn = createServerFn({
+	method: "POST",
+})
+	.inputValidator(
+		(data: {
+			invitationId: string;
+			token: string;
+			path: string;
+			value: unknown;
+		}) => parseInput(patchContentSchema, data),
+	)
+	// @ts-expect-error ServerFn inference expects stricter JSON type than Record<string, unknown>
+	.handler(async ({ data }) => {
+		const { userId } = await requireAuth(data.token);
+
+		const db = getDbOrNull();
+
+		if (db) {
+			const rows = await db
+				.select()
+				.from(schema.invitations)
+				.where(eq(schema.invitations.id, data.invitationId));
+
+			if (rows.length === 0) {
+				return { error: "Invitation not found" };
+			}
+			if (rows[0].userId !== userId) {
+				return { error: "Access denied" };
+			}
+
+			await db.insert(schema.invitationSnapshots).values({
+				invitationId: data.invitationId,
+				content: rows[0].content as Record<string, unknown>,
+				reason: "patch-content",
+			});
+
+			const content = structuredClone(
+				rows[0].content as Record<string, unknown>,
+			);
+			setNestedValue(content, getPathSegments(data.path), data.value);
+
+			const updated = await db
+				.update(schema.invitations)
+				.set({ content, updatedAt: new Date() })
+				.where(eq(schema.invitations.id, data.invitationId))
+				.returning();
+
+			return updated[0];
+		}
+
+		const invitation = localGetInvitationById(data.invitationId);
+		if (!invitation) {
+			return { error: "Invitation not found" };
+		}
+		if (invitation.userId !== userId) {
+			return { error: "Access denied" };
+		}
+
+		localCreateInvitationSnapshot(data.invitationId, "patch-content");
+
+		const content = structuredClone(
+			invitation.content as unknown as Record<string, unknown>,
+		);
+		setNestedValue(content, getPathSegments(data.path), data.value);
+
+		const updated = localUpdateInvitation(data.invitationId, {
+			content: content as unknown as Invitation["content"],
+		});
+
+		return updated ?? { error: "Patch failed" };
+	});
+
+function setNestedValue(
+	obj: Record<string, unknown>,
+	keys: string[],
+	value: unknown,
+) {
+	let current: Record<string, unknown> = obj;
+
+	if (keys.length === 0) {
+		throw new Error("Invalid path");
+	}
+
+	if (keys.some((key) => FORBIDDEN_PATH_SEGMENTS.has(key))) {
+		throw new Error("Invalid path");
+	}
+
+	for (let i = 0; i < keys.length - 1; i++) {
+		const key = keys[i];
+		const existing = Object.hasOwn(current, key) ? current[key] : undefined;
+		if (!isRecord(existing)) {
+			current[key] = {};
+		}
+		current = current[key] as Record<string, unknown>;
+	}
+
+	current[keys[keys.length - 1]] = value;
+}
+
+const FORBIDDEN_PATH_SEGMENTS = new Set([
+	"__proto__",
+	"prototype",
+	"constructor",
+]);
+
+function getPathSegments(path: string) {
+	return path
+		.split(".")
+		.map((segment) => segment.trim())
+		.filter((segment) => segment.length > 0);
+}
+
+function isSafePath(path: string) {
+	const keys = getPathSegments(path);
+	return (
+		keys.length > 0 && keys.every((key) => !FORBIDDEN_PATH_SEGMENTS.has(key))
+	);
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return !!value && typeof value === "object" && !Array.isArray(value);
+}

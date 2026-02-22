@@ -10,6 +10,7 @@ const defaultStore: Store = {
 	guests: [],
 	views: [],
 	aiGenerations: [],
+	invitationSnapshots: [],
 	payments: [],
 	sessions: {},
 	passwords: {},

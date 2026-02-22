@@ -5,17 +5,20 @@ import { and, eq } from "drizzle-orm";
 import { getDbOrNull, schema } from "@/db/index";
 import { isCanvasDocument } from "@/lib/canvas/document";
 import {
+	deleteGuestInInvitation as localDeleteGuestInInvitation,
 	exportGuestsCsv as localExportGuestsCsv,
 	getInvitationById as localGetInvitationById,
 	importGuests as localImportGuests,
 	listGuests as localListGuests,
 	submitRsvp as localSubmitRsvp,
-	updateGuest as localUpdateGuest,
+	updateGuestInInvitation as localUpdateGuestInInvitation,
 } from "@/lib/data";
 import { createDbRateLimiter } from "@/lib/rate-limit";
 import { requireAuth } from "@/lib/server-auth";
 import type { AttendanceStatus } from "@/lib/types";
 import {
+	bulkUpdateGuestsSchema,
+	deleteGuestSchema,
 	exportGuestsSchema,
 	guestImportSchema,
 	listGuestsSchema,
@@ -45,6 +48,45 @@ function getRateLimitKey(invitationId: string, visitorKey: string): string {
 	return `${invitationId}:${visitorKey}:${ip}`;
 }
 
+type GuestFilterable = {
+	name?: string | null;
+	email?: string | null;
+	relationship?: string | null;
+	attendance?: string | null;
+};
+
+function applyGuestFilters<T extends GuestFilterable>(
+	guests: T[],
+	options: {
+		filter?: "attending" | "not_attending" | "undecided" | "pending";
+		search?: string;
+		relationship?: string;
+	},
+) {
+	let filtered = guests;
+
+	if (options.filter === "pending") {
+		filtered = filtered.filter((guest) => !guest.attendance);
+	}
+
+	if (options.search) {
+		const term = options.search.toLowerCase();
+		filtered = filtered.filter(
+			(guest) =>
+				guest.name?.toLowerCase().includes(term) ||
+				guest.email?.toLowerCase().includes(term),
+		);
+	}
+
+	if (options.relationship) {
+		filtered = filtered.filter(
+			(guest) => guest.relationship === options.relationship,
+		);
+	}
+
+	return filtered;
+}
+
 // ── List guests for an invitation ───────────────────────────────────
 
 export const listGuestsFn = createServerFn({
@@ -55,11 +97,15 @@ export const listGuestsFn = createServerFn({
 			invitationId: string;
 			token: string;
 			filter?: "attending" | "not_attending" | "undecided" | "pending";
+			search?: string;
+			relationship?: string;
 		}) => {
 			parseInput(listGuestsSchema, {
 				invitationId: data.invitationId,
 				userId: "placeholder",
 				filter: data.filter,
+				search: data.search,
+				relationship: data.relationship,
 			});
 			return data;
 		},
@@ -102,12 +148,11 @@ export const listGuestsFn = createServerFn({
 
 			const rows = await query;
 
-			// For "pending" filter, get guests without attendance set
-			if (data.filter === "pending") {
-				return rows.filter((g) => !g.attendance);
-			}
-
-			return rows;
+			return applyGuestFilters(rows, {
+				filter: data.filter,
+				search: data.search,
+				relationship: data.relationship,
+			});
 		}
 
 		// localStorage fallback - verify ownership
@@ -119,10 +164,15 @@ export const listGuestsFn = createServerFn({
 			return { error: "Access denied" };
 		}
 
-		return localListGuests(
+		const rows = localListGuests(
 			data.invitationId,
 			data.filter as AttendanceStatus | "pending" | undefined,
 		);
+
+		return applyGuestFilters(rows, {
+			search: data.search,
+			relationship: data.relationship,
+		});
 	});
 
 // ── Submit RSVP (public, no auth required) ──────────────────────────
@@ -333,8 +383,12 @@ export const updateGuestFn = createServerFn({
 		}
 
 		const { guestId, token: _, invitationId: __, ...patch } = data;
-		localUpdateGuest(guestId, patch);
-		return { success: true };
+		const updated = localUpdateGuestInInvitation(
+			data.invitationId,
+			guestId,
+			patch,
+		);
+		return updated ?? { error: "Guest not found" };
 	});
 
 // ── Import guests (bulk) ────────────────────────────────────────────
@@ -478,4 +532,166 @@ export const exportGuestsCsvFn = createServerFn({
 		}
 
 		return { csv: localExportGuestsCsv(data.invitationId) };
+	});
+
+// ── Delete guest ─────────────────────────────────────────────────────
+
+export const deleteGuestFn = createServerFn({
+	method: "POST",
+})
+	.inputValidator(
+		(data: { guestId: string; token: string; invitationId: string }) => {
+			parseInput(deleteGuestSchema, {
+				...data,
+				userId: "placeholder",
+			});
+			return data;
+		},
+	)
+	.handler(async ({ data }) => {
+		const { userId } = await requireAuth(data.token);
+
+		const db = getDbOrNull();
+
+		if (db) {
+			const invitation = await db
+				.select({ userId: schema.invitations.userId })
+				.from(schema.invitations)
+				.where(eq(schema.invitations.id, data.invitationId));
+
+			if (invitation.length === 0) {
+				return { error: "Invitation not found" };
+			}
+			if (invitation[0].userId !== userId) {
+				return { error: "Access denied" };
+			}
+
+			await db
+				.delete(schema.guests)
+				.where(
+					and(
+						eq(schema.guests.id, data.guestId),
+						eq(schema.guests.invitationId, data.invitationId),
+					),
+				);
+
+			return { success: true };
+		}
+
+		const invitation = localGetInvitationById(data.invitationId);
+		if (!invitation) {
+			return { error: "Invitation not found" };
+		}
+		if (invitation.userId !== userId) {
+			return { error: "Access denied" };
+		}
+
+		const deleted = localDeleteGuestInInvitation(
+			data.invitationId,
+			data.guestId,
+		);
+		if (!deleted) {
+			return { error: "Guest not found" };
+		}
+		return { success: true };
+	});
+
+// ── Bulk update guests ──────────────────────────────────────────────
+
+export const bulkUpdateGuestsFn = createServerFn({
+	method: "POST",
+})
+	.inputValidator(
+		(data: {
+			invitationId: string;
+			token: string;
+			updates: Array<{
+				guestId: string;
+				name?: string;
+				attendance?: "attending" | "not_attending" | "undecided";
+				guestCount?: number;
+				dietaryRequirements?: string;
+			}>;
+		}) => {
+			parseInput(bulkUpdateGuestsSchema, {
+				...data,
+				userId: "placeholder",
+			});
+			return data;
+		},
+	)
+	.handler(async ({ data }) => {
+		const { userId } = await requireAuth(data.token);
+
+		const db = getDbOrNull();
+
+		if (db) {
+			const invitation = await db
+				.select({ userId: schema.invitations.userId })
+				.from(schema.invitations)
+				.where(eq(schema.invitations.id, data.invitationId));
+
+			if (invitation.length === 0) {
+				return { error: "Invitation not found" };
+			}
+			if (invitation[0].userId !== userId) {
+				return { error: "Access denied" };
+			}
+
+			let updated = 0;
+
+			for (const update of data.updates) {
+				const { guestId, ...fields } = update;
+				const updateFields: Record<string, unknown> = {
+					updatedAt: new Date(),
+				};
+
+				for (const [key, value] of Object.entries(fields)) {
+					if (value !== undefined) {
+						updateFields[key] = value;
+					}
+				}
+
+				const rows = await db
+					.update(schema.guests)
+					.set(updateFields)
+					.where(
+						and(
+							eq(schema.guests.id, guestId),
+							eq(schema.guests.invitationId, data.invitationId),
+						),
+					)
+					.returning();
+
+				if (rows.length > 0) {
+					updated++;
+				}
+			}
+
+			return { updated };
+		}
+
+		const invitation = localGetInvitationById(data.invitationId);
+		if (!invitation) {
+			return { error: "Invitation not found" };
+		}
+		if (invitation.userId !== userId) {
+			return { error: "Access denied" };
+		}
+
+		let updated = 0;
+
+		for (const update of data.updates) {
+			const { guestId, ...fields } = update;
+			const row = localUpdateGuestInInvitation(
+				data.invitationId,
+				guestId,
+				fields,
+			);
+			if (row) {
+				updated++;
+			}
+		}
+
+		return { updated };
 	});

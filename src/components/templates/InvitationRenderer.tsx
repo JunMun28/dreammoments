@@ -39,7 +39,7 @@ export default function InvitationRenderer({
 	...props
 }: TemplateInvitationProps & { templateId: string }) {
 	const Template = templateComponents[templateId] ?? FallbackTemplate;
-	const musicUrl = props.content.musicUrl;
+	const musicUrl = props.content?.musicUrl;
 
 	useEffect(() => {
 		preloadTemplate(templateId);

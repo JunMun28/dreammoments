@@ -8,6 +8,13 @@
       "when": 1770605351523,
       "tag": "0000_military_reavers",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1771475707945,
+      "tag": "0001_freezing_captain_britain",
+      "breakpoints": true
     }
   ]
 }

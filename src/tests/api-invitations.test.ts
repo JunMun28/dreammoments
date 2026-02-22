@@ -71,6 +71,7 @@ vi.mock("@/lib/server-auth", () => ({
 }));
 
 vi.mock("@/lib/data", () => ({
+	createInvitationSnapshot: vi.fn(),
 	createInvitation: vi.fn(() => ({
 		id: "local-inv-1",
 		userId: "user-a",
@@ -130,6 +131,7 @@ import {
 	deleteInvitationFn,
 	getInvitation,
 	getInvitations,
+	patchInvitationContentFn,
 	publishInvitationFn,
 	updateInvitationFn,
 } from "@/api/invitations";
@@ -202,7 +204,7 @@ describe("getInvitation", () => {
 			title: "My Wedding",
 		};
 		mockedLocalGetById.mockReturnValue(
-			inv as ReturnType<typeof localGetInvitationById>,
+			inv as unknown as ReturnType<typeof localGetInvitationById>,
 		);
 
 		const result = await (getInvitation as CallableFunction)({
@@ -220,7 +222,7 @@ describe("getInvitation", () => {
 			title: "Not My Wedding",
 		};
 		mockedLocalGetById.mockReturnValue(
-			inv as ReturnType<typeof localGetInvitationById>,
+			inv as unknown as ReturnType<typeof localGetInvitationById>,
 		);
 
 		const result = (await (getInvitation as CallableFunction)({
@@ -327,7 +329,7 @@ describe("updateInvitationFn", () => {
 			title: "Old Title",
 		};
 		mockedLocalGetById.mockReturnValue(
-			inv as ReturnType<typeof localGetInvitationById>,
+			inv as unknown as ReturnType<typeof localGetInvitationById>,
 		);
 
 		const result = await (updateInvitationFn as CallableFunction)({
@@ -346,7 +348,7 @@ describe("updateInvitationFn", () => {
 			title: "Not Mine",
 		};
 		mockedLocalGetById.mockReturnValue(
-			inv as ReturnType<typeof localGetInvitationById>,
+			inv as unknown as ReturnType<typeof localGetInvitationById>,
 		);
 
 		const result = (await (updateInvitationFn as CallableFunction)({
@@ -420,7 +422,7 @@ describe("deleteInvitationFn", () => {
 			userId: "user-a",
 		};
 		mockedLocalGetById.mockReturnValue(
-			inv as ReturnType<typeof localGetInvitationById>,
+			inv as unknown as ReturnType<typeof localGetInvitationById>,
 		);
 
 		const result = (await (deleteInvitationFn as CallableFunction)({
@@ -437,7 +439,7 @@ describe("deleteInvitationFn", () => {
 			userId: "user-b",
 		};
 		mockedLocalGetById.mockReturnValue(
-			inv as ReturnType<typeof localGetInvitationById>,
+			inv as unknown as ReturnType<typeof localGetInvitationById>,
 		);
 
 		const result = (await (deleteInvitationFn as CallableFunction)({
@@ -491,7 +493,7 @@ describe("publishInvitationFn", () => {
 			content: { hero: { partnerOneName: "Alice", partnerTwoName: "Bob" } },
 		};
 		mockedLocalGetById.mockReturnValue(
-			inv as ReturnType<typeof localGetInvitationById>,
+			inv as unknown as ReturnType<typeof localGetInvitationById>,
 		);
 
 		const result = await (publishInvitationFn as CallableFunction)({
@@ -509,7 +511,7 @@ describe("publishInvitationFn", () => {
 			userId: "user-b",
 		};
 		mockedLocalGetById.mockReturnValue(
-			inv as ReturnType<typeof localGetInvitationById>,
+			inv as unknown as ReturnType<typeof localGetInvitationById>,
 		);
 
 		const result = (await (publishInvitationFn as CallableFunction)({
@@ -575,5 +577,71 @@ describe("checkSlugAvailabilityFn", () => {
 		})) as { available: boolean };
 
 		expect(result.available).toBe(true);
+	});
+});
+
+describe("patchInvitationContentFn", () => {
+	test("patches specific content field (fallback path)", async () => {
+		const inv = {
+			id: "inv-1",
+			userId: "user-a",
+			content: {
+				hero: {
+					partnerOneName: "Alice",
+					partnerTwoName: "Bob",
+					tagline: "old",
+					date: "2026-06-01",
+				},
+				schedule: { events: [] },
+			},
+		};
+		mockedLocalGetById.mockReturnValue(
+			inv as unknown as ReturnType<typeof localGetInvitationById>,
+		);
+
+		const result = await (patchInvitationContentFn as CallableFunction)({
+			invitationId: "inv-1",
+			token: "valid-token",
+			path: "hero.tagline",
+			value: "Forever Yours",
+		});
+
+		expect(result.error).toBeUndefined();
+	});
+
+	test("denies patch for wrong user (fallback)", async () => {
+		const inv = { id: "inv-1", userId: "user-b", content: {} };
+		mockedLocalGetById.mockReturnValue(
+			inv as unknown as ReturnType<typeof localGetInvitationById>,
+		);
+
+		const result = (await (patchInvitationContentFn as CallableFunction)({
+			invitationId: "inv-1",
+			token: "valid-token",
+			path: "hero.tagline",
+			value: "Hacked",
+		})) as { error: string };
+
+		expect(result.error).toBe("Access denied");
+	});
+
+	test("rejects unsafe patch path", async () => {
+		const inv = {
+			id: "inv-1",
+			userId: "user-a",
+			content: {},
+		};
+		mockedLocalGetById.mockReturnValue(
+			inv as unknown as ReturnType<typeof localGetInvitationById>,
+		);
+
+		await expect(
+			(patchInvitationContentFn as CallableFunction)({
+				invitationId: "inv-1",
+				token: "valid-token",
+				path: "__proto__.polluted",
+				value: "x",
+			}),
+		).rejects.toThrow("Invalid path");
 	});
 });

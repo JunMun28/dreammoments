@@ -17,6 +17,7 @@ import {
 	Trash2,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { CanvasEngine } from "../../components/canvas/CanvasEngine";
 import ShareModal from "../../components/share/ShareModal";
 import InvitationRenderer from "../../components/templates/InvitationRenderer";
 import { RouteErrorFallback } from "../../components/ui/RouteErrorFallback";
@@ -27,7 +28,11 @@ import {
 	useInvitations,
 } from "../../hooks/useInvitations";
 import { useAuth } from "../../lib/auth";
-import { summarizeInvitationContent } from "../../lib/canvas/document";
+import {
+	asCanvasDocument,
+	isCanvasDocument,
+	summarizeInvitationContent,
+} from "../../lib/canvas/document";
 import {
 	createInvitation,
 	getAnalytics,
@@ -672,12 +677,28 @@ function DashboardScreen() {
 														: "h-[520px]",
 												)}
 											>
-												<InvitationRenderer
-													templateId={activeInvitation.templateId}
-													content={activeInvitation.content}
-													hiddenSections={activeInvitation.sectionVisibility}
-													mode="preview"
-												/>
+												{(() => {
+													const canvasDocument = isCanvasDocument(
+														activeInvitation.content,
+													)
+														? asCanvasDocument(activeInvitation.content)
+														: null;
+
+													if (canvasDocument) {
+														return <CanvasEngine document={canvasDocument} />;
+													}
+
+													return (
+														<InvitationRenderer
+															templateId={activeInvitation.templateId}
+															content={activeInvitation.content}
+															hiddenSections={
+																activeInvitation.sectionVisibility
+															}
+															mode="preview"
+														/>
+													);
+												})()}
 											</div>
 										</div>
 									</div>

@@ -6,6 +6,7 @@ import {
 	getPublicInvitationSchema,
 	guestImportItemSchema,
 	guestImportSchema,
+	invitationContentSchema,
 	listGuestsSchema,
 	publishInvitationSchema,
 	submitRsvpSchema,
@@ -365,6 +366,16 @@ describe("listGuestsSchema", () => {
 		}
 	});
 
+	test("accepts optional search and relationship filters", () => {
+		const result = listGuestsSchema.safeParse({
+			invitationId: "inv-123",
+			userId: "user-456",
+			search: "alice",
+			relationship: "friend",
+		});
+		expect(result.success).toBe(true);
+	});
+
 	test("rejects invalid filter", () => {
 		const result = listGuestsSchema.safeParse({
 			invitationId: "inv-123",
@@ -425,5 +436,54 @@ describe("trackViewSchema", () => {
 		if (result.success) {
 			expect(result.data.userAgent).toBe("");
 		}
+	});
+});
+
+describe("invitationContentSchema", () => {
+	test("validates correct content", () => {
+		const content = {
+			hero: {
+				partnerOneName: "A",
+				partnerTwoName: "B",
+				tagline: "Love",
+				date: "2026-06-01",
+			},
+			announcement: { title: "T", message: "M", formalText: "F" },
+			couple: {
+				partnerOne: { fullName: "Alice", bio: "bio" },
+				partnerTwo: { fullName: "Bob", bio: "bio" },
+			},
+			story: { milestones: [] },
+			gallery: { photos: [] },
+			schedule: { events: [] },
+			venue: {
+				name: "V",
+				address: "A",
+				coordinates: { lat: 0, lng: 0 },
+				directions: "D",
+			},
+			entourage: { members: [] },
+			registry: { title: "T", note: "N" },
+			rsvp: {
+				deadline: "2026-05-01",
+				allowPlusOnes: false,
+				maxPlusOnes: 0,
+				dietaryOptions: [],
+				customMessage: "",
+			},
+			faq: { items: [] },
+			footer: { message: "M" },
+			details: { scheduleSummary: "", venueSummary: "" },
+			calendar: { dateLabel: "", message: "" },
+			countdown: { targetDate: "" },
+		};
+
+		const result = invitationContentSchema.safeParse(content);
+		expect(result.success).toBe(true);
+	});
+
+	test("rejects content missing required fields", () => {
+		const result = invitationContentSchema.safeParse({});
+		expect(result.success).toBe(false);
 	});
 });

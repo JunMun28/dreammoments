@@ -175,6 +175,15 @@ export interface AiGeneration {
 	createdAt: string;
 }
 
+export interface InvitationSnapshot {
+	id: string;
+	invitationId: string;
+	content: Record<string, unknown>;
+	designOverrides?: Record<string, unknown>;
+	reason?: string;
+	createdAt: string;
+}
+
 export interface Payment {
 	id: string;
 	userId: string;
@@ -193,6 +202,7 @@ export interface Store {
 	guests: Guest[];
 	views: InvitationView[];
 	aiGenerations: AiGeneration[];
+	invitationSnapshots: InvitationSnapshot[];
 	payments: Payment[];
 	sessions: Record<string, string>;
 	passwords: Record<string, string>;
