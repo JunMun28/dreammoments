@@ -6,8 +6,10 @@ import { publishInvitation, updateInvitation } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import { AiContextPopover } from "./AiContextPopover";
 import { AlignmentGuides } from "./AlignmentGuides";
+import { BlockInspectorSidebar } from "./BlockInspectorSidebar";
 import { BlockRenderer } from "./BlockRenderer";
 import { BlockToolbar } from "./BlockToolbar";
+import { buildCanvasSections, CanvasSectionRail } from "./CanvasSectionRail";
 import { CanvasToolbar } from "./CanvasToolbar";
 import { useCanvasAutoSave } from "./hooks/useCanvasAutoSave";
 import { useCanvasKeyboard } from "./hooks/useCanvasKeyboard";
@@ -197,8 +199,6 @@ function CanvasBlockNode({
 	editing,
 	onInlineCommit,
 	onInlineCancel,
-	onUpdateContent,
-	onRestyle,
 	animationsEnabled,
 }: {
 	block: Block;
@@ -232,8 +232,6 @@ function CanvasBlockNode({
 	editing: boolean;
 	onInlineCommit: (text: string) => void;
 	onInlineCancel: () => void;
-	onUpdateContent: (contentPatch: Record<string, unknown>) => void;
-	onRestyle: (stylePatch: Record<string, string>) => void;
 	animationsEnabled: boolean;
 }) {
 	const position = previewPosition ?? block.position;
@@ -328,7 +326,7 @@ function CanvasBlockNode({
 						onResizePointerCancel={resize.onPointerCancel}
 					/>
 					<BlockToolbar
-						block={block}
+						locked={Boolean(block.locked)}
 						onDelete={onDelete}
 						onDuplicate={onDuplicate}
 						onLockToggle={onLockToggle}
@@ -337,8 +335,6 @@ function CanvasBlockNode({
 						onBringToFront={onBringToFront}
 						onSendToBack={onSendToBack}
 						onAiClick={onAiClick}
-						onUpdateContent={onUpdateContent}
-						onRestyle={onRestyle}
 					/>
 					{showAi ? (
 						<AiContextPopover
@@ -384,6 +380,7 @@ export function CanvasEditor({
 	const [showListView, setShowListView] = useState(false);
 	const [aiBlockId, setAiBlockId] = useState<string | null>(null);
 	const [animationsEnabled, setAnimationsEnabled] = useState(true);
+	const [activeSectionId, setActiveSectionId] = useState<string>("");
 	const initialRenderRef = useRef(true);
 	const save = useCanvasAutoSave({ invitationId, document });
 	const documentUpdatedAt = document.metadata.updatedAt;
@@ -393,6 +390,14 @@ export function CanvasEditor({
 			document.blockOrder.map((id) => document.blocksById[id]).filter(Boolean),
 		[document],
 	);
+	const selectedBlocks = useMemo(
+		() =>
+			selectedBlockIds
+				.map((blockId) => document.blocksById[blockId])
+				.filter(Boolean),
+		[selectedBlockIds, document],
+	);
+	const sections = useMemo(() => buildCanvasSections(document), [document]);
 
 	useEffect(() => {
 		void documentUpdatedAt;
@@ -402,6 +407,29 @@ export function CanvasEditor({
 		}
 		save.markDirty();
 	}, [documentUpdatedAt, save]);
+
+	useEffect(() => {
+		if (sections.length === 0) {
+			if (activeSectionId !== "") setActiveSectionId("");
+			return;
+		}
+		if (sections.some((section) => section.id === activeSectionId)) return;
+		setActiveSectionId(sections[0]?.id ?? "");
+	}, [sections, activeSectionId]);
+
+	useEffect(() => {
+		const firstSelected = selectedBlocks[0];
+		if (!firstSelected) return;
+		const section = sections.find(
+			(item) =>
+				item.blockId === firstSelected.id ||
+				item.id === firstSelected.sectionId ||
+				firstSelected.semantic?.startsWith(`${item.id}-`),
+		);
+		if (!section) return;
+		if (section.id === activeSectionId) return;
+		setActiveSectionId(section.id);
+	}, [selectedBlocks, sections, activeSectionId]);
 
 	const getPosition = (blockId: string): Position | null =>
 		store.getState().document.blocksById[blockId]?.position ?? null;
@@ -468,10 +496,26 @@ export function CanvasEditor({
 
 	const handlePublish = () => {
 		void (async () => {
-			const token =
-				typeof window === "undefined"
-					? null
-					: window.localStorage.getItem(TOKEN_KEY);
+			const token = (() => {
+				if (typeof window === "undefined") return null;
+				const storage = window.localStorage as
+					| {
+							getItem?: (key: string) => string | null;
+					  }
+					| Record<string, unknown>;
+				if (
+					storage &&
+					typeof (storage as { getItem?: unknown }).getItem === "function"
+				) {
+					return (
+						(storage as { getItem: (key: string) => string | null }).getItem(
+							TOKEN_KEY,
+						) ?? null
+					);
+				}
+				const fallback = (storage as Record<string, unknown>)[TOKEN_KEY];
+				return typeof fallback === "string" ? fallback : null;
+			})();
 			if (!token) {
 				publishInvitation(invitationId);
 				return;
@@ -534,6 +578,52 @@ export function CanvasEditor({
 		store.getState().stopEditing();
 	};
 
+	const duplicateBlock = (blockId: string) => {
+		const block = store.getState().document.blocksById[blockId];
+		if (!block) return;
+		const clone = copyBlock(block, makeCloneId(block.id));
+		store.getState().addBlock(clone.type, clone.position, clone.content, {
+			id: clone.id,
+			size: clone.size,
+			style: clone.style,
+			semantic: clone.semantic,
+			sectionId: clone.sectionId,
+			parentId: clone.parentId,
+			locked: clone.locked,
+		});
+	};
+
+	const updateBlockContentPatch = (
+		blockId: string,
+		contentPatch: Record<string, unknown>,
+	) => {
+		const current = store.getState().document.blocksById[blockId];
+		if (!current) return;
+		store.getState().updateContent(blockId, {
+			...current.content,
+			...contentPatch,
+		});
+	};
+
+	const toggleBlockLock = (blockId: string) => {
+		const block = store.getState().document.blocksById[blockId];
+		if (!block) return;
+		store.getState().updateBlock(block.id, { locked: !block.locked });
+	};
+
+	const handleSectionSelect = (section: { id: string; blockId: string }) => {
+		setActiveSectionId(section.id);
+		store.getState().selectBlock(section.blockId);
+		setAiBlockId(null);
+		const canvas = canvasRef.current;
+		if (!canvas) return;
+		const target = canvas.querySelector<HTMLElement>(
+			`[data-canvas-block-id="${section.blockId}"]`,
+		);
+		if (!target) return;
+		target.scrollIntoView({ block: "center", behavior: "smooth" });
+	};
+
 	return (
 		<div className="min-h-screen bg-[color:var(--dm-bg)]">
 			<CanvasToolbar
@@ -577,169 +667,190 @@ export function CanvasEditor({
 				onPublish={handlePublish}
 			/>
 
-			<div className="mx-auto max-w-[480px] p-4 pb-24">
-				{showListView ? (
-					<ListView
-						document={document}
+			<div className="mx-auto w-full max-w-[1440px] p-4 pb-24 lg:grid lg:grid-cols-[190px_minmax(0,1fr)_360px] lg:gap-4 lg:pb-6">
+				<aside className="hidden rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] lg:block">
+					<div className="border-b border-[color:var(--dm-border)] px-3 py-2">
+						<p className="text-[10px] uppercase tracking-[0.14em] text-[color:var(--dm-muted)]">
+							Sections
+						</p>
+					</div>
+					<CanvasSectionRail
+						sections={sections}
+						activeSectionId={activeSectionId}
+						onSectionSelect={handleSectionSelect}
+					/>
+				</aside>
+
+				<div className="min-w-0">
+					{showListView ? (
+						<ListView
+							document={document}
+							onMove={moveBlock}
+							onResize={resizeBlock}
+							onDelete={(blockId) => store.getState().removeBlock(blockId)}
+						/>
+					) : (
+						<div className="flex justify-center">
+							<div
+								ref={canvasRef}
+								className="relative h-[calc(100svh-180px)] max-h-[820px] overflow-auto rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] shadow-sm"
+								role="region"
+								aria-label="Invitation canvas"
+								style={{
+									width: document.canvas.width,
+									backgroundColor:
+										document.designTokens.colors.background || "var(--dm-surface)",
+								}}
+								onClick={(event) => {
+									if (event.target === event.currentTarget) {
+										store.getState().clearSelection();
+										setAiBlockId(null);
+										store.getState().stopEditing();
+									}
+								}}
+								onKeyDown={(event) => {
+									if (event.key === "Escape") {
+										store.getState().clearSelection();
+										setAiBlockId(null);
+										store.getState().stopEditing();
+									}
+								}}
+							>
+								{blocks.map((block) => (
+									<CanvasBlockNode
+										key={block.id}
+										block={block}
+										canvasRef={canvasRef}
+										selected={selectedBlockIds.includes(block.id)}
+										previewPosition={previewPositions[block.id]}
+										previewSize={previewSizes[block.id]}
+										onSelect={(additive) =>
+											store.getState().selectBlock(block.id, additive)
+										}
+										onDoubleClick={() => {
+											if (block.type === "text" || block.type === "heading") {
+												store.getState().startEditing(block.id);
+											}
+										}}
+										onDelete={() => store.getState().removeBlock(block.id)}
+										onDuplicate={() => duplicateBlock(block.id)}
+										onLockToggle={() => toggleBlockLock(block.id)}
+										onBringForward={() => {
+											const order = [...store.getState().document.blockOrder];
+											const index = order.indexOf(block.id);
+											if (index < 0 || index === order.length - 1) return;
+											[order[index], order[index + 1]] = [
+												order[index + 1],
+												order[index],
+											];
+											store.getState().reorderBlocks(order);
+										}}
+										onSendBackward={() => {
+											const order = [...store.getState().document.blockOrder];
+											const index = order.indexOf(block.id);
+											if (index <= 0) return;
+											[order[index], order[index - 1]] = [
+												order[index - 1],
+												order[index],
+											];
+											store.getState().reorderBlocks(order);
+										}}
+										onBringToFront={() => {
+											const order = [...store.getState().document.blockOrder];
+											const index = order.indexOf(block.id);
+											if (index < 0 || index === order.length - 1) return;
+											order.splice(index, 1);
+											order.push(block.id);
+											store.getState().reorderBlocks(order);
+										}}
+										onSendToBack={() => {
+											const order = [...store.getState().document.blockOrder];
+											const index = order.indexOf(block.id);
+											if (index <= 0) return;
+											order.splice(index, 1);
+											order.unshift(block.id);
+											store.getState().reorderBlocks(order);
+										}}
+										onAiClick={() =>
+											setAiBlockId((current) =>
+												current === block.id ? null : block.id,
+											)
+										}
+										onMoveCommit={(position) => moveBlock(block.id, position)}
+										onResizeCommit={(size) => resizeBlock(block.id, size)}
+										onPreviewMove={(position, nextGuides) => {
+											setPreviewPositions((prev) => ({
+												...prev,
+												[block.id]: position,
+											}));
+											setGuides(nextGuides);
+										}}
+										onPreviewResize={(size) =>
+											setPreviewSizes((prev) => ({ ...prev, [block.id]: size }))
+										}
+										onClearGuides={() => setGuides([])}
+										snapPosition={({ position, size, disableSnap }) =>
+											calculateSnap({
+												position,
+												size,
+												activeBlockId: block.id,
+												blocks,
+												disableSnap,
+											})
+										}
+										showAi={aiBlockId === block.id}
+										onAiApply={(patch) => applyAiPatch(block.id, patch)}
+										onAiClose={() => setAiBlockId(null)}
+										editing={editingBlockId === block.id}
+										onInlineCommit={(text) => updateTextContent(block.id, text)}
+										onInlineCancel={() => store.getState().stopEditing()}
+										animationsEnabled={animationsEnabled}
+									/>
+								))}
+								<AlignmentGuides
+									guides={guides}
+									canvasWidth={document.canvas.width}
+									canvasHeight={document.canvas.height}
+								/>
+							</div>
+						</div>
+					)}
+				</div>
+
+				<aside className="hidden overflow-hidden rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] lg:block">
+					<div className="border-b border-[color:var(--dm-border)] px-4 py-3">
+						<p className="text-[10px] uppercase tracking-[0.14em] text-[color:var(--dm-muted)]">
+							Element inspector
+						</p>
+					</div>
+					<BlockInspectorSidebar
+						selectedBlocks={selectedBlocks}
+						onUpdateContent={updateBlockContentPatch}
+						onRestyle={(blockId, stylePatch) =>
+							store.getState().restyleBlock(blockId, stylePatch)
+						}
 						onMove={moveBlock}
 						onResize={resizeBlock}
 						onDelete={(blockId) => store.getState().removeBlock(blockId)}
+						onDuplicate={duplicateBlock}
+						onToggleLock={toggleBlockLock}
+						onBulkDelete={(blockIds) => {
+							for (const blockId of blockIds) {
+								store.getState().removeBlock(blockId);
+							}
+						}}
+						onBulkLock={(blockIds, locked) => {
+							for (const blockId of blockIds) {
+								store.getState().updateBlock(blockId, { locked });
+							}
+						}}
+						onBulkRestyle={(blockIds, stylePatch) => {
+							for (const blockId of blockIds) {
+								store.getState().restyleBlock(blockId, stylePatch);
+							}
+						}}
 					/>
-				) : (
-					<div
-						ref={canvasRef}
-						className="relative overflow-auto rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] shadow-sm"
-						role="region"
-						aria-label="Invitation canvas"
-						style={{
-							width: document.canvas.width,
-							height: "calc(100svh - 180px)",
-							maxHeight: "820px",
-							backgroundColor:
-								document.designTokens.colors.background || "var(--dm-surface)",
-						}}
-						onClick={(event) => {
-							if (event.target === event.currentTarget) {
-								store.getState().clearSelection();
-								setAiBlockId(null);
-								store.getState().stopEditing();
-							}
-						}}
-						onKeyDown={(event) => {
-							if (event.key === "Escape") {
-								store.getState().clearSelection();
-								setAiBlockId(null);
-								store.getState().stopEditing();
-							}
-						}}
-					>
-						{blocks.map((block) => (
-							<CanvasBlockNode
-								key={block.id}
-								block={block}
-								canvasRef={canvasRef}
-								selected={selectedBlockIds.includes(block.id)}
-								previewPosition={previewPositions[block.id]}
-								previewSize={previewSizes[block.id]}
-								onSelect={(additive) =>
-									store.getState().selectBlock(block.id, additive)
-								}
-								onDoubleClick={() => {
-									if (block.type === "text" || block.type === "heading") {
-										store.getState().startEditing(block.id);
-									}
-								}}
-								onDelete={() => store.getState().removeBlock(block.id)}
-								onDuplicate={() => {
-									const clone = copyBlock(block, makeCloneId(block.id));
-									store
-										.getState()
-										.addBlock(clone.type, clone.position, clone.content, {
-											id: clone.id,
-											size: clone.size,
-											style: clone.style,
-											semantic: clone.semantic,
-											sectionId: clone.sectionId,
-											parentId: clone.parentId,
-											locked: clone.locked,
-										});
-								}}
-								onLockToggle={() =>
-									store
-										.getState()
-										.updateBlock(block.id, { locked: !block.locked })
-								}
-								onBringForward={() => {
-									const order = [...store.getState().document.blockOrder];
-									const index = order.indexOf(block.id);
-									if (index < 0 || index === order.length - 1) return;
-									[order[index], order[index + 1]] = [
-										order[index + 1],
-										order[index],
-									];
-									store.getState().reorderBlocks(order);
-								}}
-								onSendBackward={() => {
-									const order = [...store.getState().document.blockOrder];
-									const index = order.indexOf(block.id);
-									if (index <= 0) return;
-									[order[index], order[index - 1]] = [
-										order[index - 1],
-										order[index],
-									];
-									store.getState().reorderBlocks(order);
-								}}
-								onBringToFront={() => {
-									const order = [...store.getState().document.blockOrder];
-									const index = order.indexOf(block.id);
-									if (index < 0 || index === order.length - 1) return;
-									order.splice(index, 1);
-									order.push(block.id);
-									store.getState().reorderBlocks(order);
-								}}
-								onSendToBack={() => {
-									const order = [...store.getState().document.blockOrder];
-									const index = order.indexOf(block.id);
-									if (index <= 0) return;
-									order.splice(index, 1);
-									order.unshift(block.id);
-									store.getState().reorderBlocks(order);
-								}}
-								onAiClick={() =>
-									setAiBlockId((current) =>
-										current === block.id ? null : block.id,
-									)
-								}
-								onMoveCommit={(position) => moveBlock(block.id, position)}
-								onResizeCommit={(size) => resizeBlock(block.id, size)}
-								onPreviewMove={(position, nextGuides) => {
-									setPreviewPositions((prev) => ({
-										...prev,
-										[block.id]: position,
-									}));
-									setGuides(nextGuides);
-								}}
-								onPreviewResize={(size) =>
-									setPreviewSizes((prev) => ({ ...prev, [block.id]: size }))
-								}
-								onClearGuides={() => setGuides([])}
-								snapPosition={({ position, size, disableSnap }) =>
-									calculateSnap({
-										position,
-										size,
-										activeBlockId: block.id,
-										blocks,
-										disableSnap,
-									})
-								}
-								showAi={aiBlockId === block.id}
-								onAiApply={(patch) => applyAiPatch(block.id, patch)}
-								onAiClose={() => setAiBlockId(null)}
-								editing={editingBlockId === block.id}
-								onInlineCommit={(text) => updateTextContent(block.id, text)}
-								onInlineCancel={() => store.getState().stopEditing()}
-								onUpdateContent={(contentPatch) => {
-									const current =
-										store.getState().document.blocksById[block.id];
-									if (!current) return;
-									store.getState().updateContent(block.id, {
-										...current.content,
-										...contentPatch,
-									});
-								}}
-								onRestyle={(stylePatch) =>
-									store.getState().restyleBlock(block.id, stylePatch)
-								}
-								animationsEnabled={animationsEnabled}
-							/>
-						))}
-						<AlignmentGuides
-							guides={guides}
-							canvasWidth={document.canvas.width}
-							canvasHeight={document.canvas.height}
-						/>
-					</div>
-				)}
+				</aside>
 			</div>
 
 			<div className="fixed inset-x-0 bottom-0 z-40 border-t border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] px-4 py-2 sm:hidden">

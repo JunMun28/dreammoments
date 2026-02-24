@@ -30,7 +30,23 @@ const INTERVAL_MS = 30000;
 
 function getStoredToken(): string | null {
 	if (typeof window === "undefined") return null;
-	return window.localStorage.getItem(TOKEN_KEY);
+	const storage = window.localStorage as
+		| {
+				getItem?: (key: string) => string | null;
+		  }
+		| Record<string, unknown>;
+	if (
+		storage &&
+		typeof (storage as { getItem?: unknown }).getItem === "function"
+	) {
+		return (
+			(storage as { getItem: (key: string) => string | null }).getItem(
+				TOKEN_KEY,
+			) ?? null
+		);
+	}
+	const fallback = (storage as Record<string, unknown>)[TOKEN_KEY];
+	return typeof fallback === "string" ? fallback : null;
 }
 
 export function useAutoSave({

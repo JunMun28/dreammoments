@@ -1,0 +1,98 @@
+import type { Block, CanvasDocument } from "@/lib/canvas/types";
+import { getSectionLabel } from "@/templates/types";
+
+export type CanvasSection = {
+	id: string;
+	label: string;
+	blockId: string;
+	count: number;
+};
+
+function formatFallbackSectionLabel(sectionId: string): string {
+	if (sectionId === "general") return "General";
+	return sectionId.replace(/^\w/, (char) => char.toUpperCase());
+}
+
+export function resolveBlockSectionId(block: Block): string {
+	if (block.sectionId && block.sectionId.trim().length > 0) {
+		return block.sectionId;
+	}
+	if (block.semantic?.includes("-")) {
+		return block.semantic.split("-")[0] || "general";
+	}
+	return "general";
+}
+
+export function buildCanvasSections(document: CanvasDocument): CanvasSection[] {
+	const byId = new Map<string, CanvasSection>();
+	for (const blockId of document.blockOrder) {
+		const block = document.blocksById[blockId];
+		if (!block) continue;
+		const sectionId = resolveBlockSectionId(block);
+		const existing = byId.get(sectionId);
+		if (existing) {
+			existing.count += 1;
+			continue;
+		}
+		const resolvedLabel = getSectionLabel(sectionId);
+		byId.set(sectionId, {
+			id: sectionId,
+			label:
+				resolvedLabel === sectionId
+					? formatFallbackSectionLabel(sectionId)
+					: resolvedLabel,
+			blockId,
+			count: 1,
+		});
+	}
+	return Array.from(byId.values());
+}
+
+export function CanvasSectionRail({
+	sections,
+	activeSectionId,
+	onSectionSelect,
+}: {
+	sections: CanvasSection[];
+	activeSectionId: string;
+	onSectionSelect: (section: CanvasSection) => void;
+}) {
+	if (sections.length === 0) {
+		return (
+			<div className="p-3 text-[11px] text-[color:var(--dm-muted)]">
+				No sections
+			</div>
+		);
+	}
+
+	return (
+		<nav
+			className="flex h-full flex-col gap-2 p-2"
+			aria-label="Canvas sections"
+		>
+			{sections.map((section) => {
+				const active = section.id === activeSectionId;
+				return (
+					<button
+						key={section.id}
+						type="button"
+						onClick={() => onSectionSelect(section)}
+						aria-pressed={active}
+						className={`rounded-xl border px-2 py-2 text-left transition-colors ${
+							active
+								? "border-[color:var(--dm-accent)] bg-[color:var(--dm-accent-soft)] text-[color:var(--dm-accent-strong)]"
+								: "border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] text-[color:var(--dm-ink)] hover:bg-[color:var(--dm-surface-muted)]"
+						}`}
+					>
+						<p className="truncate text-[11px] font-semibold uppercase tracking-[0.1em]">
+							{section.label}
+						</p>
+						<p className="text-[10px] text-[color:var(--dm-muted)]">
+							{section.count} block{section.count > 1 ? "s" : ""}
+						</p>
+					</button>
+				);
+			})}
+		</nav>
+	);
+}
