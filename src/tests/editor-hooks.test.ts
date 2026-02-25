@@ -409,10 +409,34 @@ describe("useEditorState", () => {
 // ─── useAutoSave ────────────────────────────────────────────────────────────
 
 describe("useAutoSave", () => {
+	function clearStorageFallback(storage: unknown) {
+		const target = storage as {
+			clear?: () => void;
+			removeItem?: (key: string) => void;
+			key?: (index: number) => string | null;
+			length?: number;
+		};
+		if (typeof target.clear === "function") {
+			target.clear();
+			return;
+		}
+		if (
+			typeof target.removeItem === "function" &&
+			typeof target.key === "function" &&
+			typeof target.length === "number"
+		) {
+			for (let index = target.length - 1; index >= 0; index -= 1) {
+				const key = target.key(index);
+				if (!key) continue;
+				target.removeItem(key);
+			}
+		}
+	}
+
 	beforeEach(() => {
 		vi.useFakeTimers();
 		vi.clearAllMocks();
-		localStorage.clear();
+		clearStorageFallback(localStorage);
 	});
 
 	function makeAutoSaveParams(version = 0) {

@@ -8,6 +8,30 @@ import { createEmptyCanvasDocument } from "@/lib/canvas/types";
 import { publishInvitation, updateInvitation } from "@/lib/data";
 import { CanvasEditor } from "./CanvasEditor";
 
+function clearStorageFallback(storage: unknown) {
+	const target = storage as {
+		clear?: () => void;
+		removeItem?: (key: string) => void;
+		key?: (index: number) => string | null;
+		length?: number;
+	};
+	if (typeof target.clear === "function") {
+		target.clear();
+		return;
+	}
+	if (
+		typeof target.removeItem === "function" &&
+		typeof target.key === "function" &&
+		typeof target.length === "number"
+	) {
+		for (let index = target.length - 1; index >= 0; index -= 1) {
+			const key = target.key(index);
+			if (!key) continue;
+			target.removeItem(key);
+		}
+	}
+}
+
 vi.mock("@/api/invitations", async () => {
 	const actual =
 		await vi.importActual<typeof import("@/api/invitations")>(
@@ -54,15 +78,29 @@ function buildDocument(): CanvasDocument {
 			style: { fontSize: "34px", color: "#111111" },
 			semantic: "partner-name",
 		},
+		"image-1": {
+			id: "image-1",
+			type: "image",
+			position: { x: 20, y: 184 },
+			size: { width: 220, height: 120 },
+			zIndex: 2,
+			content: {
+				src: "https://images.example/photo.jpg",
+				alt: "Couple portrait",
+			},
+			style: {},
+			semantic: "gallery-image",
+			sectionId: "gallery",
+		},
 	};
-	document.blockOrder = ["text-1", "heading-1"];
+	document.blockOrder = ["text-1", "heading-1", "image-1"];
 	return document;
 }
 
 describe("CanvasEditor", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		window.localStorage.clear();
+		clearStorageFallback(window.localStorage);
 		Object.defineProperty(HTMLElement.prototype, "setPointerCapture", {
 			configurable: true,
 			value: vi.fn(),
@@ -179,6 +217,66 @@ describe("CanvasEditor", () => {
 		expect(blockNode.style.fontSize).toBe("28px");
 	});
 
+	test("shows image controls in inspector when image selected", () => {
+		render(
+			<CanvasEditor
+				invitationId="inv-image-1"
+				title="Editor Test"
+				initialDocument={buildDocument()}
+				previewSlug="test-slug"
+			/>,
+		);
+
+		const blocks = screen.getAllByRole("button", {
+			name: /Canvas block/i,
+		});
+		fireEvent.click(blocks[2]);
+
+		expect(screen.getByLabelText("Image URL")).toBeTruthy();
+		expect(screen.getByLabelText("Image alt text")).toBeTruthy();
+	});
+
+	test("shows empty inspector state when no selection", () => {
+		render(
+			<CanvasEditor
+				invitationId="inv-empty-1"
+				title="Editor Test"
+				initialDocument={buildDocument()}
+				previewSlug="test-slug"
+			/>,
+		);
+
+		const firstBlock = screen.getAllByRole("button", {
+			name: /Canvas block/i,
+		})[0];
+		fireEvent.click(firstBlock);
+		expect(screen.getByLabelText("Block text content")).toBeTruthy();
+
+		fireEvent.click(screen.getByRole("region", { name: "Invitation canvas" }));
+		expect(screen.getByText("Select an element")).toBeTruthy();
+	});
+
+	test("multi-select shows shared controls only", () => {
+		render(
+			<CanvasEditor
+				invitationId="inv-bulk-1"
+				title="Editor Test"
+				initialDocument={buildDocument()}
+				previewSlug="test-slug"
+			/>,
+		);
+
+		const blocks = screen.getAllByRole("button", {
+			name: /Canvas block/i,
+		});
+		fireEvent.click(blocks[0]);
+		fireEvent.click(blocks[1], { shiftKey: true });
+
+		expect(screen.getByText("Shared controls only")).toBeTruthy();
+		expect(screen.queryByLabelText("Block text content")).toBeNull();
+		expect(screen.getByRole("button", { name: /Delete all/i })).toBeTruthy();
+	});
+
 	test("updates grid spacing from toolbar control", () => {
 		render(
 			<CanvasEditor
@@ -244,32 +342,49 @@ describe("CanvasEditor", () => {
 			publishedAt: "2026-02-17T08:00:00.000Z",
 			templateVersion: "v2",
 		} as Awaited<ReturnType<typeof publishInvitationFn>>);
-		window.localStorage.setItem("dm-auth-token", "token-123");
+		const originalLocalStorage = window.localStorage;
+		Object.defineProperty(window, "localStorage", {
+			configurable: true,
+			value: {
+				...originalLocalStorage,
+				getItem: (key: string) =>
+					key === "dm-auth-token" ? "token-123" : null,
+			},
+		});
 
-		render(
-			<CanvasEditor
-				invitationId="inv-7"
-				title="Editor Test"
-				initialDocument={buildDocument()}
-				previewSlug="test-slug"
-			/>,
-		);
+		try {
+			render(
+				<CanvasEditor
+					invitationId="inv-7"
+					title="Editor Test"
+					initialDocument={buildDocument()}
+					previewSlug="test-slug"
+				/>,
+			);
 
-		fireEvent.click(screen.getByRole("button", { name: "Publish invitation" }));
+			fireEvent.click(
+				screen.getByRole("button", { name: "Publish invitation" }),
+			);
 
-		await waitFor(() =>
-			expect(vi.mocked(publishInvitationFn)).toHaveBeenCalledWith({
-				data: { invitationId: "inv-7", token: "token-123" },
-			}),
-		);
-		expect(vi.mocked(publishInvitation)).not.toHaveBeenCalled();
-		expect(vi.mocked(updateInvitation)).toHaveBeenCalledWith(
-			"inv-7",
-			expect.objectContaining({
-				status: "published",
-				slug: "server-slug",
-			}),
-		);
+			await waitFor(() =>
+				expect(vi.mocked(publishInvitationFn)).toHaveBeenCalledWith({
+					data: { invitationId: "inv-7", token: "token-123" },
+				}),
+			);
+			expect(vi.mocked(publishInvitation)).not.toHaveBeenCalled();
+			expect(vi.mocked(updateInvitation)).toHaveBeenCalledWith(
+				"inv-7",
+				expect.objectContaining({
+					status: "published",
+					slug: "server-slug",
+				}),
+			);
+		} finally {
+			Object.defineProperty(window, "localStorage", {
+				configurable: true,
+				value: originalLocalStorage,
+			});
+		}
 	});
 
 	test("keeps local edits when initialDocument prop refreshes for same invitation", () => {
