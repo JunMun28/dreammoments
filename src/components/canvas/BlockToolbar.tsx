@@ -23,7 +23,7 @@ function IconButton({
 		<button
 			type="button"
 			onClick={onClick}
-			className={`flex h-7 w-7 items-center justify-center rounded-lg transition-colors ${
+			className={`flex h-7 w-7 items-center justify-center rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-[color:var(--dm-focus)] focus-visible:outline-none ${
 				danger
 					? "text-red-500 hover:bg-red-50"
 					: "text-[color:var(--dm-ink)] hover:bg-[color:var(--dm-surface-muted)]"
@@ -39,7 +39,7 @@ function Separator() {
 	return (
 		<div
 			className="mx-0.5 h-4 w-px bg-[color:var(--dm-border)]"
-			role="separator"
+			aria-hidden="true"
 		/>
 	);
 }

@@ -17,7 +17,7 @@ export function InspectorSection({
 			<button
 				type="button"
 				onClick={() => setOpen((prev) => !prev)}
-				className="flex w-full items-center justify-between px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-[color:var(--dm-ink-muted)] hover:bg-[color:var(--dm-surface-muted)]"
+				className="flex w-full items-center justify-between px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-[color:var(--dm-ink-muted)] hover:bg-[color:var(--dm-surface-muted)] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[color:var(--dm-focus)] focus-visible:outline-none"
 			>
 				{title}
 				<ChevronDown
@@ -71,7 +71,7 @@ export function NumberInput({
 				value={value}
 				onChange={(event) => onChange(event.target.value)}
 				aria-label={ariaLabel}
-				className="w-full rounded-lg border border-[color:var(--dm-border)] px-2 py-1.5 pr-6 text-xs text-[color:var(--dm-ink)]"
+				className="w-full rounded-lg border border-[color:var(--dm-border)] px-2 py-1.5 pr-6 text-xs text-[color:var(--dm-ink)] focus-visible:ring-2 focus-visible:ring-[color:var(--dm-focus)] focus-visible:outline-none"
 			/>
 			{suffix && (
 				<span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-[color:var(--dm-ink-soft)]">

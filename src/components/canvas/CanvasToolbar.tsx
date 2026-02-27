@@ -26,7 +26,7 @@ function ToolbarButton({
 			type="button"
 			onClick={onClick}
 			disabled={disabled}
-			className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-medium text-[color:var(--dm-ink)] transition-colors hover:bg-[color:var(--dm-surface-muted)] disabled:opacity-40"
+			className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-medium text-[color:var(--dm-ink)] transition-colors hover:bg-[color:var(--dm-surface-muted)] disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-[color:var(--dm-focus)] focus-visible:outline-none"
 			aria-label={label}
 		>
 			{children}
@@ -38,7 +38,7 @@ function Separator() {
 	return (
 		<div
 			className="mx-1 h-5 w-px bg-[color:var(--dm-border)]"
-			role="separator"
+			aria-hidden="true"
 		/>
 	);
 }
@@ -53,7 +53,11 @@ function SaveBadge({ status }: { status: string }) {
 					? "Error"
 					: "Unsaved";
 	return (
-		<span className="rounded-full bg-[color:var(--dm-surface-muted)] px-2 py-0.5 text-[10px] uppercase tracking-wider text-[color:var(--dm-ink-muted)]">
+		<span
+			className="rounded-full bg-[color:var(--dm-surface-muted)] px-2 py-0.5 text-[10px] uppercase tracking-wider text-[color:var(--dm-ink-muted)]"
+			role="status"
+			aria-live="polite"
+		>
 			{label}
 		</span>
 	);
