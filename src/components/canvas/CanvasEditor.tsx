@@ -798,6 +798,30 @@ export function CanvasEditor({
 								store.getState().restyleBlock(blockId, stylePatch);
 							}
 						}}
+						designTokens={document.designTokens}
+						onDesignTokenChange={(section, key, value) => {
+							store.getState().updateDesignToken(section, key, value);
+							if (section === "fonts") {
+								const latest = store.getState().document;
+								for (const blockId of latest.blockOrder) {
+									const block = latest.blocksById[blockId];
+									if (!block) continue;
+									if (key === "heading" && block.type === "heading") {
+										store.getState().restyleBlock(block.id, { fontFamily: value });
+									}
+									if (
+										key === "body" &&
+										(block.type === "text" ||
+											block.type === "timeline" ||
+											block.type === "map" ||
+											block.type === "form")
+									) {
+										store.getState().restyleBlock(block.id, { fontFamily: value });
+									}
+								}
+							}
+						}}
+						onSpacingChange={(spacing) => store.getState().setGridSpacing(spacing)}
 					/>
 				</aside>
 			</div>

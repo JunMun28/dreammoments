@@ -180,9 +180,9 @@ describe("CanvasEditor", () => {
 		const rewriteButton = screen.getByRole("button", { name: /Rewrite/i });
 		fireEvent.click(rewriteButton);
 
-		expect(screen.getByText("Welcome to our day")).toBeTruthy();
+		expect(screen.getAllByText("Welcome to our day").length).toBeGreaterThan(0);
 		fireEvent.click(screen.getByRole("button", { name: "Apply" }));
-		expect(screen.getByText("Welcome to our day ✨")).toBeTruthy();
+		expect(screen.getAllByText("Welcome to our day ✨").length).toBeGreaterThan(0);
 	});
 
 	test("property editor can change text and font size", () => {
@@ -210,7 +210,7 @@ describe("CanvasEditor", () => {
 			target: { value: "28" },
 		});
 
-		expect(screen.getByText("Fresh copy")).toBeTruthy();
+		expect(screen.getAllByText("Fresh copy").length).toBeGreaterThan(0);
 		const blockNode = container.querySelector(
 			'[data-canvas-block-id="text-1"]',
 		) as HTMLElement;
@@ -253,7 +253,7 @@ describe("CanvasEditor", () => {
 		expect(screen.getByLabelText("Block text content")).toBeTruthy();
 
 		fireEvent.click(screen.getByRole("region", { name: "Invitation canvas" }));
-		expect(screen.getByText("Select an element")).toBeTruthy();
+		expect(screen.getByText("Document")).toBeTruthy();
 	});
 
 	test("multi-select shows shared controls only", () => {
@@ -386,7 +386,7 @@ describe("CanvasEditor", () => {
 		fireEvent.change(screen.getByLabelText("Block text content"), {
 			target: { value: "Persisted text change" },
 		});
-		expect(screen.getByText("Persisted text change")).toBeTruthy();
+		expect(screen.getAllByText("Persisted text change").length).toBeGreaterThan(0);
 
 		rerender(
 			<CanvasEditor
@@ -397,6 +397,6 @@ describe("CanvasEditor", () => {
 			/>,
 		);
 
-		expect(screen.getByText("Persisted text change")).toBeTruthy();
+		expect(screen.getAllByText("Persisted text change").length).toBeGreaterThan(0);
 	});
 });
