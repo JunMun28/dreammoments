@@ -1,7 +1,16 @@
-import { History, Plus, Save } from "lucide-react";
-import type { BlockType, DesignTokens } from "@/lib/canvas/types";
+import {
+	Eye,
+	List,
+	MonitorPlay,
+	PanelLeft,
+	Plus,
+	Redo2,
+	Send,
+	Undo2,
+} from "lucide-react";
+import type { BlockType } from "@/lib/canvas/types";
 
-function Button({
+function ToolbarButton({
 	label,
 	onClick,
 	children,
@@ -17,11 +26,36 @@ function Button({
 			type="button"
 			onClick={onClick}
 			disabled={disabled}
-			className="inline-flex items-center gap-1 rounded-full border border-[color:var(--dm-border)] px-3 py-1.5 text-[10px] uppercase tracking-[0.14em] text-[color:var(--dm-ink)] transition-colors hover:bg-[color:var(--dm-surface-muted)] disabled:opacity-50"
+			className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-medium text-[color:var(--dm-ink)] transition-colors hover:bg-[color:var(--dm-surface-muted)] disabled:opacity-40"
 			aria-label={label}
 		>
 			{children}
 		</button>
+	);
+}
+
+function Separator() {
+	return (
+		<div
+			className="mx-1 h-5 w-px bg-[color:var(--dm-border)]"
+			role="separator"
+		/>
+	);
+}
+
+function SaveBadge({ status }: { status: string }) {
+	const label =
+		status === "saved"
+			? "Saved"
+			: status === "saving"
+				? "Saving..."
+				: status === "error"
+					? "Error"
+					: "Unsaved";
+	return (
+		<span className="rounded-full bg-[color:var(--dm-surface-muted)] px-2 py-0.5 text-[10px] uppercase tracking-wider text-[color:var(--dm-ink-muted)]">
+			{label}
+		</span>
 	);
 }
 
@@ -31,7 +65,6 @@ export function CanvasToolbar({
 	canRedo,
 	onUndo,
 	onRedo,
-	onSave,
 	saveStatus,
 	onAddBlock,
 	onToggleListView,
@@ -40,16 +73,12 @@ export function CanvasToolbar({
 	onPublish,
 	animationsEnabled,
 	onToggleAnimations,
-	designTokens,
-	onDesignTokenChange,
-	onSpacingChange,
 }: {
 	title: string;
 	canUndo: boolean;
 	canRedo: boolean;
 	onUndo: () => void;
 	onRedo: () => void;
-	onSave: () => void;
 	saveStatus: "saved" | "saving" | "unsaved" | "error";
 	onAddBlock: (type: BlockType) => void;
 	onToggleListView: () => void;
@@ -58,123 +87,77 @@ export function CanvasToolbar({
 	onPublish: () => void;
 	animationsEnabled: boolean;
 	onToggleAnimations: () => void;
-	designTokens: DesignTokens;
-	onDesignTokenChange: (
-		section: "colors" | "fonts",
-		key: string,
-		value: string,
-	) => void;
-	onSpacingChange: (spacing: number) => void;
 }) {
 	return (
-		<div className="sticky top-0 z-50 border-b border-[color:var(--dm-border)] bg-[color:var(--dm-bg)]/95 px-4 py-3 backdrop-blur">
-			<div className="flex flex-wrap items-center gap-2">
-				<p className="mr-2 text-sm font-semibold text-[color:var(--dm-ink)]">
+		<div className="sticky top-0 z-50 border-b border-[color:var(--dm-border)] bg-[color:var(--dm-bg)]/95 px-4 py-2 backdrop-blur">
+			<div className="flex items-center gap-1">
+				<p className="mr-2 shrink-0 text-sm font-semibold text-[color:var(--dm-ink)]">
 					{title}
 				</p>
-				<Button label="Undo" onClick={onUndo} disabled={!canUndo}>
-					<History className="h-3.5 w-3.5" aria-hidden="true" />
-					Undo
-				</Button>
-				<Button label="Redo" onClick={onRedo} disabled={!canRedo}>
-					<History className="h-3.5 w-3.5 rotate-180" aria-hidden="true" />
-					Redo
-				</Button>
-				<Button label="Add text block" onClick={() => onAddBlock("text")}>
+
+				<Separator />
+
+				<ToolbarButton label="Undo" onClick={onUndo} disabled={!canUndo}>
+					<Undo2 className="h-3.5 w-3.5" aria-hidden="true" />
+				</ToolbarButton>
+				<ToolbarButton label="Redo" onClick={onRedo} disabled={!canRedo}>
+					<Redo2 className="h-3.5 w-3.5" aria-hidden="true" />
+				</ToolbarButton>
+
+				<Separator />
+
+				<ToolbarButton
+					label="Add text block"
+					onClick={() => onAddBlock("text")}
+				>
 					<Plus className="h-3.5 w-3.5" aria-hidden="true" />
 					Text
-				</Button>
-				<Button label="Add image block" onClick={() => onAddBlock("image")}>
+				</ToolbarButton>
+				<ToolbarButton
+					label="Add image block"
+					onClick={() => onAddBlock("image")}
+				>
 					<Plus className="h-3.5 w-3.5" aria-hidden="true" />
 					Image
-				</Button>
-				<Button
+				</ToolbarButton>
+				<ToolbarButton
 					label="Add decorative block"
 					onClick={() => onAddBlock("decorative")}
 				>
 					<Plus className="h-3.5 w-3.5" aria-hidden="true" />
 					Decor
-				</Button>
-				<Button label="Toggle list view" onClick={onToggleListView}>
-					{listView ? "Canvas View" : "List View"}
-				</Button>
-				<Button label="Toggle animation preview" onClick={onToggleAnimations}>
+				</ToolbarButton>
+
+				<Separator />
+
+				<ToolbarButton label="Toggle list view" onClick={onToggleListView}>
+					{listView ? (
+						<PanelLeft className="h-3.5 w-3.5" aria-hidden="true" />
+					) : (
+						<List className="h-3.5 w-3.5" aria-hidden="true" />
+					)}
+					{listView ? "Canvas" : "List"}
+				</ToolbarButton>
+				<ToolbarButton
+					label="Toggle animation preview"
+					onClick={onToggleAnimations}
+				>
+					<MonitorPlay className="h-3.5 w-3.5" aria-hidden="true" />
 					{animationsEnabled ? "Anim On" : "Anim Off"}
-				</Button>
-				<Button label="Save now" onClick={onSave}>
-					<Save className="h-3.5 w-3.5" aria-hidden="true" />
-					{saveStatus}
-				</Button>
-				<Button label="Preview invitation" onClick={onPreview}>
-					Preview
-				</Button>
-				<Button label="Publish invitation" onClick={onPublish}>
-					Publish
-				</Button>
-			</div>
-			<div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-[color:var(--dm-muted)]">
-				<label className="inline-flex items-center gap-1">
-					BG
-					<input
-						type="color"
-						value={designTokens.colors.background || "#ffffff"}
-						onChange={(event) =>
-							onDesignTokenChange("colors", "background", event.target.value)
-						}
-						className="h-7 w-9 rounded border border-[color:var(--dm-border)] p-1"
-						aria-label="Canvas background color"
-					/>
-				</label>
-				<label className="inline-flex items-center gap-1">
-					Text
-					<input
-						type="color"
-						value={designTokens.colors.text || "#111111"}
-						onChange={(event) =>
-							onDesignTokenChange("colors", "text", event.target.value)
-						}
-						className="h-7 w-9 rounded border border-[color:var(--dm-border)] p-1"
-						aria-label="Canvas text color"
-					/>
-				</label>
-				<label className="inline-flex items-center gap-1">
-					Grid
-					<input
-						type="number"
-						min={1}
-						max={24}
-						value={designTokens.spacing}
-						onChange={(event) =>
-							onSpacingChange(Math.max(1, Number(event.target.value) || 8))
-						}
-						className="w-14 rounded border border-[color:var(--dm-border)] px-1.5 py-1 text-[11px] normal-case tracking-normal text-[color:var(--dm-ink)]"
-						aria-label="Snap grid size"
-					/>
-				</label>
-				<label className="inline-flex items-center gap-1">
-					Heading font
-					<input
-						type="text"
-						value={designTokens.fonts.heading || ""}
-						onChange={(event) =>
-							onDesignTokenChange("fonts", "heading", event.target.value)
-						}
-						className="w-28 rounded border border-[color:var(--dm-border)] px-1.5 py-1 text-[11px] normal-case tracking-normal text-[color:var(--dm-ink)]"
-						aria-label="Heading font family"
-					/>
-				</label>
-				<label className="inline-flex items-center gap-1">
-					Body font
-					<input
-						type="text"
-						value={designTokens.fonts.body || ""}
-						onChange={(event) =>
-							onDesignTokenChange("fonts", "body", event.target.value)
-						}
-						className="w-28 rounded border border-[color:var(--dm-border)] px-1.5 py-1 text-[11px] normal-case tracking-normal text-[color:var(--dm-ink)]"
-						aria-label="Body font family"
-					/>
-				</label>
+				</ToolbarButton>
+
+				<div className="ml-auto flex items-center gap-1">
+					<SaveBadge status={saveStatus} />
+
+					<ToolbarButton label="Preview invitation" onClick={onPreview}>
+						<Eye className="h-3.5 w-3.5" aria-hidden="true" />
+						Preview
+					</ToolbarButton>
+					<ToolbarButton label="Publish invitation" onClick={onPublish}>
+						<Send className="h-3.5 w-3.5" aria-hidden="true" />
+						Publish
+					</ToolbarButton>
+				</div>
 			</div>
 		</div>
 	);

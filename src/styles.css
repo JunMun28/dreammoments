@@ -64,6 +64,10 @@ html {
   --dm-error:          #FFB7B2; /* Soft Red/Pink */
   --dm-warning:        #FFDAC1; /* Peach */
 
+  /* Canvas editor */
+  --dm-accent-strong:  #8BB5A2; /* Sage green for focus/selection rings */
+  --dm-focus:          rgba(253, 164, 175, 0.4); /* Pink focus ring */
+
   /* Shadows (Soft Pastel Glow) */
   --dm-shadow-sm:      0 1px 2px 0 rgb(74 78 85 / 0.05);
   --dm-shadow-md:      0 4px 6px -1px rgb(74 78 85 / 0.05), 0 2px 4px -2px rgb(74 78 85 / 0.05);

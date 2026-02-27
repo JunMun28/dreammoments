@@ -277,24 +277,6 @@ describe("CanvasEditor", () => {
 		expect(screen.getByRole("button", { name: /Delete all/i })).toBeTruthy();
 	});
 
-	test("updates grid spacing from toolbar control", () => {
-		render(
-			<CanvasEditor
-				invitationId="inv-5"
-				title="Editor Test"
-				initialDocument={buildDocument()}
-				previewSlug="test-slug"
-			/>,
-		);
-
-		const spacingInput = screen.getByLabelText(
-			"Snap grid size",
-		) as HTMLInputElement;
-		fireEvent.change(spacingInput, { target: { value: "12" } });
-
-		expect(spacingInput.value).toBe("12");
-	});
-
 	test("resizes block through resize handle pointer events", () => {
 		const { container } = render(
 			<CanvasEditor

@@ -626,37 +626,12 @@ export function CanvasEditor({
 				canRedo={canRedo}
 				onUndo={() => store.temporal.getState().undo()}
 				onRedo={() => store.temporal.getState().redo()}
-				onSave={() => void save.saveNow()}
 				saveStatus={save.status}
 				onAddBlock={handleAddBlock}
 				onToggleListView={() => setShowListView((prev) => !prev)}
 				listView={showListView}
 				animationsEnabled={animationsEnabled}
 				onToggleAnimations={() => setAnimationsEnabled((prev) => !prev)}
-				designTokens={document.designTokens}
-				onDesignTokenChange={(section, key, value) => {
-					store.getState().updateDesignToken(section, key, value);
-					if (section === "fonts") {
-						const latest = store.getState().document;
-						for (const blockId of latest.blockOrder) {
-							const block = latest.blocksById[blockId];
-							if (!block) continue;
-							if (key === "heading" && block.type === "heading") {
-								store.getState().restyleBlock(block.id, { fontFamily: value });
-							}
-							if (
-								key === "body" &&
-								(block.type === "text" ||
-									block.type === "timeline" ||
-									block.type === "map" ||
-									block.type === "form")
-							) {
-								store.getState().restyleBlock(block.id, { fontFamily: value });
-							}
-						}
-					}
-				}}
-				onSpacingChange={(spacing) => store.getState().setGridSpacing(spacing)}
 				onPreview={() => window.open(`/invite/${previewSlug}`, "_blank")}
 				onPublish={handlePublish}
 			/>
