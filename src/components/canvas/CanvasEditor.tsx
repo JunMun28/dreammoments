@@ -182,8 +182,6 @@ function CanvasBlockNode({
 	onDelete,
 	onDuplicate,
 	onLockToggle,
-	onBringForward,
-	onSendBackward,
 	onBringToFront,
 	onSendToBack,
 	onAiClick,
@@ -211,8 +209,6 @@ function CanvasBlockNode({
 	onDelete: () => void;
 	onDuplicate: () => void;
 	onLockToggle: () => void;
-	onBringForward: () => void;
-	onSendBackward: () => void;
 	onBringToFront: () => void;
 	onSendToBack: () => void;
 	onAiClick: () => void;
@@ -330,8 +326,6 @@ function CanvasBlockNode({
 						onDelete={onDelete}
 						onDuplicate={onDuplicate}
 						onLockToggle={onLockToggle}
-						onBringForward={onBringForward}
-						onSendBackward={onSendBackward}
 						onBringToFront={onBringToFront}
 						onSendToBack={onSendToBack}
 						onAiClick={onAiClick}
@@ -735,26 +729,6 @@ export function CanvasEditor({
 										onDelete={() => store.getState().removeBlock(block.id)}
 										onDuplicate={() => duplicateBlock(block.id)}
 										onLockToggle={() => toggleBlockLock(block.id)}
-										onBringForward={() => {
-											const order = [...store.getState().document.blockOrder];
-											const index = order.indexOf(block.id);
-											if (index < 0 || index === order.length - 1) return;
-											[order[index], order[index + 1]] = [
-												order[index + 1],
-												order[index],
-											];
-											store.getState().reorderBlocks(order);
-										}}
-										onSendBackward={() => {
-											const order = [...store.getState().document.blockOrder];
-											const index = order.indexOf(block.id);
-											if (index <= 0) return;
-											[order[index], order[index - 1]] = [
-												order[index - 1],
-												order[index],
-											];
-											store.getState().reorderBlocks(order);
-										}}
 										onBringToFront={() => {
 											const order = [...store.getState().document.blockOrder];
 											const index = order.indexOf(block.id);

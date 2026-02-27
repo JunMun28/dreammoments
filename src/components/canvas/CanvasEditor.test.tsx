@@ -127,7 +127,7 @@ describe("CanvasEditor", () => {
 		fireEvent.click(buttons[0]);
 		fireEvent.click(buttons[1], { shiftKey: true });
 
-		expect(screen.getAllByRole("button", { name: "AI actions" }).length).toBe(
+		expect(screen.getAllByRole("button", { name: "AI" }).length).toBe(
 			2,
 		);
 	});
@@ -174,7 +174,7 @@ describe("CanvasEditor", () => {
 			name: /Canvas block/i,
 		})[0];
 		fireEvent.click(firstBlock);
-		fireEvent.click(screen.getByRole("button", { name: "AI actions" }));
+		fireEvent.click(screen.getByRole("button", { name: "AI" }));
 
 		expect(screen.getByText("AI suggestions")).toBeTruthy();
 		const rewriteButton = screen.getByRole("button", { name: /Rewrite/i });

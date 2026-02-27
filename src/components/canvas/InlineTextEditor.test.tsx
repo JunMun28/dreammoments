@@ -14,6 +14,7 @@ function makeBlock(text: string) {
 		zIndex: 0,
 		locked: false,
 		sectionId: "s1",
+		style: {},
 	};
 }
 
