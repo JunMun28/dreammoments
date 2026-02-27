@@ -26,6 +26,8 @@ export interface UseDragBlockParams {
 
 const MOBILE_LONG_PRESS_MS = 300;
 const MOVE_CANCEL_THRESHOLD = 8;
+/** Movement threshold before acquiring pointer capture (allows dblclick synthesis) */
+const DRAG_START_THRESHOLD = 3;
 
 export function useDragBlock({
 	canvasRef,
@@ -46,6 +48,10 @@ export function useDragBlock({
 	const disableSnapRef = useRef(false);
 	const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const touchPendingRef = useRef(false);
+	/** Element to capture on after drag threshold (deferred from pointerdown) */
+	const captureTargetRef = useRef<HTMLElement | null>(null);
+	/** Whether we have acquired pointer capture */
+	const capturedRef = useRef(false);
 
 	const clearRaf = useCallback(() => {
 		if (rafRef.current != null) {
@@ -72,8 +78,8 @@ export function useDragBlock({
 			if (disabled) return;
 			if (event.button !== 0) return;
 
-			const target = event.currentTarget;
-			target.setPointerCapture(event.pointerId);
+			captureTargetRef.current = event.currentTarget;
+			capturedRef.current = false;
 			activePointerIdRef.current = event.pointerId;
 			startPointerRef.current = {
 				x: event.clientX,
@@ -83,14 +89,18 @@ export function useDragBlock({
 			disableSnapRef.current = event.shiftKey;
 
 			if (event.pointerType === "touch") {
+				// Touch: capture immediately, use long-press to activate drag
+				event.currentTarget.setPointerCapture(event.pointerId);
+				capturedRef.current = true;
 				touchPendingRef.current = true;
 				longPressTimerRef.current = setTimeout(() => {
 					setDraggingActive();
 					touchPendingRef.current = false;
 				}, MOBILE_LONG_PRESS_MS);
-			} else {
-				setDraggingActive();
 			}
+			// Mouse/pen: defer capture until DRAG_START_THRESHOLD movement.
+			// This allows the browser to synthesize dblclick events for
+			// quick click-click sequences (needed for inline text editing).
 		},
 		[disabled, getOrigin, setDraggingActive],
 	);
@@ -105,6 +115,7 @@ export function useDragBlock({
 			const deltaX = event.clientX - startPointer.x;
 			const deltaY = event.clientY - startPointer.y;
 
+			// Touch: cancel long-press if moved too far
 			if (touchPendingRef.current) {
 				if (
 					Math.abs(deltaX) > MOVE_CANCEL_THRESHOLD ||
@@ -113,6 +124,20 @@ export function useDragBlock({
 					clearLongPress();
 				}
 				return;
+			}
+
+			// Mouse/pen: acquire capture after movement threshold
+			if (!capturedRef.current && captureTargetRef.current) {
+				if (
+					Math.abs(deltaX) >= DRAG_START_THRESHOLD ||
+					Math.abs(deltaY) >= DRAG_START_THRESHOLD
+				) {
+					captureTargetRef.current.setPointerCapture(event.pointerId);
+					capturedRef.current = true;
+					setDraggingActive();
+				} else {
+					return; // Below threshold, don't start drag yet
+				}
 			}
 
 			if (!activeRef.current) return;
@@ -154,6 +179,7 @@ export function useDragBlock({
 			disabled,
 			getSize,
 			onPreview,
+			setDraggingActive,
 			snapPosition,
 		],
 	);
@@ -180,6 +206,8 @@ export function useDragBlock({
 		startPointerRef.current = null;
 		startOriginRef.current = null;
 		disableSnapRef.current = false;
+		captureTargetRef.current = null;
+		capturedRef.current = false;
 	}, [
 		clearLongPress,
 		clearRaf,

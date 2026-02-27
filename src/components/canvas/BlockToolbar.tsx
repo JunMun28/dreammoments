@@ -50,10 +50,12 @@ export function BlockToolbar({
 }) {
 	return (
 		<div
-			className="pointer-events-auto absolute -top-12 left-0 z-50 rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-2 shadow-sm"
-			onPointerDown={(event) => event.stopPropagation()}
+			className="pointer-events-none absolute -top-12 left-0 z-50"
 		>
-			<div className="mb-2 flex flex-wrap items-center gap-1">
+			<div
+				className="pointer-events-auto flex flex-wrap items-center gap-1 rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-2 shadow-sm"
+				onPointerDown={(event) => event.stopPropagation()}
+			>
 				<ToolbarButton label="AI actions" onClick={onAiClick}>
 					<span className="inline-flex items-center gap-1">
 						<Sparkles className="h-3 w-3" aria-hidden="true" />
