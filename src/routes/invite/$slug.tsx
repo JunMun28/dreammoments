@@ -5,7 +5,7 @@ import {
 } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { getPublicInvitation } from "../../api/public";
-import { CanvasEngine } from "../../components/canvas/CanvasEngine";
+import { ScenePageEngine } from "@/components/canvas/ScenePageEngine";
 import EnvelopeAnimation from "../../components/templates/EnvelopeAnimation";
 import { buildSampleContent } from "../../data/sample-invitation";
 import { useSubmitRsvp, useTrackView } from "../../hooks/useInvitations";
@@ -419,10 +419,10 @@ function InviteScreen() {
 			onComplete={handleEnvelopeComplete}
 			coupleNames={summary.title}
 		>
-			<div className={`min-h-screen ${shellClass}`}>
+			<div className={shellClass}>
 				{/* Fix 11: Only show header for sample invitations */}
 				{isSample && (
-					<header className="border-b border-[color:var(--dm-border)] px-6 py-6 text-xs uppercase tracking-[0.4em] text-[color:var(--dm-accent-strong)]">
+					<header className="fixed top-0 left-0 right-0 z-50 border-b border-[color:var(--dm-border)] bg-[color:var(--dm-bg)]/80 backdrop-blur-sm px-6 py-3 text-xs uppercase tracking-[0.4em] text-[color:var(--dm-accent-strong)]">
 						<div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
 							<p className="text-center">{headerLabel}</p>
 							<Link
@@ -435,20 +435,18 @@ function InviteScreen() {
 						</div>
 					</header>
 				)}
-				<div className="mx-auto max-w-[430px] p-4">
-					<CanvasEngine document={canvasDocument} />
-					{invitation?.status === "published" ? (
-						<CanvasRsvpCard
-							disabled={alreadySubmitted}
-							statusMessage={
-								alreadySubmitted
-									? "You have already submitted your RSVP. Thank you!"
-									: rsvpStatus
-							}
-							onSubmit={(payload) => handleRsvpSubmit(payload)}
-						/>
-					) : null}
-				</div>
+				<ScenePageEngine document={canvasDocument} />
+				{invitation?.status === "published" ? (
+					<CanvasRsvpCard
+						disabled={alreadySubmitted}
+						statusMessage={
+							alreadySubmitted
+								? "You have already submitted your RSVP. Thank you!"
+								: rsvpStatus
+						}
+						onSubmit={(payload) => handleRsvpSubmit(payload)}
+					/>
+				) : null}
 			</div>
 		</EnvelopeAnimation>
 	);
