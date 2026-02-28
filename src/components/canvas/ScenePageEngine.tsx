@@ -15,6 +15,8 @@ import {
 } from "react";
 import type { Block, CanvasDocument } from "@/lib/canvas/types";
 import { cn } from "@/lib/utils";
+import { ParticleField } from "@/components/templates/animations";
+import type { ParticlePreset } from "@/components/templates/animations";
 import { BlockRenderer } from "./BlockRenderer";
 
 /* ── Types ───────────────────────────────────────────────────────── */
@@ -75,6 +77,27 @@ function toCssProperties(style: Record<string, string>): CSSProperties {
 	return next;
 }
 
+/** Map template IDs to particle and overlay presets */
+function getTemplateEffects(templateId: string): {
+	particle: ParticlePreset | null;
+	overlay: string | null;
+} {
+	switch (templateId) {
+		case "blush-romance":
+			return { particle: "petalRain", overlay: "dm-overlay-romantic" };
+		case "eternal-elegance":
+			return { particle: "goldDust", overlay: "dm-overlay-cinematic" };
+		case "garden-romance":
+			return { particle: "petalRain", overlay: "dm-overlay-romantic" };
+		case "love-at-dusk":
+			return { particle: "starlight", overlay: "dm-overlay-dramatic" };
+		case "double-happiness":
+			return { particle: "lanterns", overlay: "dm-overlay-golden" };
+		default:
+			return { particle: "goldDust", overlay: "dm-overlay-cinematic" };
+	}
+}
+
 /* ── Scene Section ─────────────────────────────────────────────── */
 
 function SceneSection({
@@ -83,15 +106,20 @@ function SceneSection({
 	canvasWidth,
 	backgroundColor,
 	isHero,
+	particlePreset,
+	overlayClass,
 }: {
 	section: Section;
 	index: number;
 	canvasWidth: number;
 	backgroundColor: string;
 	isHero: boolean;
+	particlePreset: ParticlePreset | null;
+	overlayClass: string | null;
 }) {
 	const ref = useRef<HTMLDivElement>(null);
 	const [isVisible, setIsVisible] = useState(false);
+	const hasImages = section.blocks.some((b) => b.type === "image");
 
 	useEffect(() => {
 		const el = ref.current;
@@ -134,7 +162,10 @@ function SceneSection({
 	return (
 		<div
 			ref={ref}
-			className="dm-scene-page"
+			className={cn(
+				"dm-scene-page",
+				!isHero && hasImages && overlayClass,
+			)}
 			data-scene-section={section.id}
 			data-scene-index={index}
 			style={{ backgroundColor }}
@@ -164,6 +195,13 @@ function SceneSection({
 					}}
 					aria-hidden="true"
 				/>
+			)}
+
+			{/* Ambient particles for hero section */}
+			{isHero && particlePreset && (
+				<div className="absolute inset-0 z-[1]" aria-hidden="true">
+					<ParticleField preset={particlePreset} className="h-full" />
+				</div>
 			)}
 
 			{/* Block content — positioned relative within the section */}
@@ -280,6 +318,7 @@ export function ScenePageEngine({
 	const canvasWidth = doc.canvas.width;
 	const backgroundColor = doc.designTokens.colors.background ?? "#ffffff";
 	const accentColor = doc.designTokens.colors.primary ?? "#C4727F";
+	const effects = useMemo(() => getTemplateEffects(doc.templateId), [doc.templateId]);
 
 	// Track active section via IntersectionObserver
 	// biome-ignore lint/correctness/useExhaustiveDependencies: re-observe when sections change
@@ -331,6 +370,8 @@ export function ScenePageEngine({
 					canvasWidth={canvasWidth}
 					backgroundColor={backgroundColor}
 					isHero={index === 0 || isHeroSection(section)}
+					particlePreset={effects.particle}
+					overlayClass={effects.overlay}
 				/>
 			))}
 
