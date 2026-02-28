@@ -94,7 +94,9 @@ function TemplatePreviewModal({
 	const content = buildSampleContent(templateId);
 	const template = templates.find((t) => t.id === templateId);
 	const sectionVisibility = template
-		? Object.fromEntries(template.sections.map((s) => [s.id, s.defaultVisible]))
+		? Object.fromEntries(
+				template.sections.map((s) => [s.id, !s.defaultVisible]),
+			)
 		: {};
 
 	return (
