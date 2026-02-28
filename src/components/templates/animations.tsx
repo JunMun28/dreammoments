@@ -128,11 +128,25 @@ export function Stagger({
 
 // ── Floating particle system ─────────────────────────────────────────
 
+type ParticlePreset = "petalRain" | "goldDust" | "starlight" | "snowfall" | "lanterns";
+
+const PARTICLE_PRESETS: Record<
+	ParticlePreset,
+	{ count: number; color: string; shape: "circle" | "petal" | "sparkle"; drift: "down" | "up" | "float" }
+> = {
+	petalRain: { count: 18, color: "rgba(196, 114, 127, 0.5)", shape: "petal", drift: "down" },
+	goldDust: { count: 24, color: "rgba(212, 175, 55, 0.6)", shape: "sparkle", drift: "up" },
+	starlight: { count: 16, color: "rgba(255, 255, 255, 0.7)", shape: "sparkle", drift: "float" },
+	snowfall: { count: 20, color: "rgba(255, 255, 255, 0.5)", shape: "circle", drift: "down" },
+	lanterns: { count: 8, color: "rgba(255, 160, 50, 0.6)", shape: "circle", drift: "up" },
+};
+
 interface ParticleFieldProps {
 	count?: number;
 	color?: string;
-	/** Particle shape: "circle" | "petal" | "sparkle" */
 	shape?: "circle" | "petal" | "sparkle";
+	/** Named preset that auto-configures count, color, shape, and drift */
+	preset?: ParticlePreset;
 	className?: string;
 }
 
@@ -151,12 +165,18 @@ interface Particle {
  * Petals for Blush Romance, sparkles for Love at Dusk, circles as default.
  */
 export function ParticleField({
-	count = 12,
-	color = "currentColor",
-	shape = "circle",
+	count: countProp,
+	color: colorProp,
+	shape: shapeProp,
+	preset,
 	className = "",
 }: ParticleFieldProps) {
 	const prefersReduced = usePrefersReducedMotion();
+	const config = preset ? PARTICLE_PRESETS[preset] : null;
+	const count = countProp ?? config?.count ?? 12;
+	const color = colorProp ?? config?.color ?? "currentColor";
+	const shape = shapeProp ?? config?.shape ?? "circle";
+	const drift = config?.drift ?? "float";
 	const particles = useMemo(
 		() =>
 			Array.from({ length: count }, (_, i) => ({
@@ -179,7 +199,7 @@ export function ParticleField({
 			aria-hidden="true"
 		>
 			{particles.map((p) => (
-				<ParticleElement key={p.id} particle={p} color={color} shape={shape} />
+				<ParticleElement key={p.id} particle={p} color={color} shape={shape} drift={drift} />
 			))}
 		</div>
 	);
@@ -189,10 +209,12 @@ function ParticleElement({
 	particle: p,
 	color,
 	shape,
+	drift,
 }: {
 	particle: Particle;
 	color: string;
 	shape: "circle" | "petal" | "sparkle";
+	drift: "down" | "up" | "float";
 }) {
 	const shapeStyle =
 		shape === "petal"
@@ -224,7 +246,7 @@ function ParticleElement({
 				height: p.size,
 				...shapeStyle,
 				transform: `rotate(${p.rotate}deg)`,
-				animation: `dm-particle-float ${p.duration}s ease-in-out ${p.delay}s infinite`,
+				animation: `${drift === "down" ? "dm-particle-drift-down" : drift === "up" ? "dm-particle-drift-up" : "dm-particle-float"} ${p.duration}s ${drift === "float" ? "ease-in-out" : "linear"} ${p.delay}s infinite`,
 			}}
 		/>
 	);
@@ -403,6 +425,8 @@ export function Shimmer({
 		</div>
 	);
 }
+
+export type { ParticlePreset };
 
 // ── Hook: prefers-reduced-motion ─────────────────────────────────────
 
