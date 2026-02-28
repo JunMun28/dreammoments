@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { ScenePageEngine } from "@/components/canvas/ScenePageEngine";
 import { getPublicInvitation } from "../../api/public";
 import EnvelopeAnimation from "../../components/templates/EnvelopeAnimation";
+import { RsvpConfirmation } from "../../components/templates/RsvpConfirmation";
 import { buildSampleContent } from "../../data/sample-invitation";
 import { useSubmitRsvp, useTrackView } from "../../hooks/useInvitations";
 import { useAuth } from "../../lib/auth";
@@ -253,7 +254,12 @@ function InviteScreen() {
 		storeInvitation ??
 		(loaderData?.invitation as typeof storeInvitation) ??
 		null;
-	const [rsvpStatus, setRsvpStatus] = useState("");
+	const [rsvpResult, setRsvpResult] = useState<{
+		name: string;
+		attendance: "attending" | "not_attending" | "undecided";
+		guestCount: number;
+	} | null>(null);
+	const [rsvpError, setRsvpError] = useState("");
 	const handleEnvelopeComplete = useCallback(() => {}, []);
 	const trackViewMutation = useTrackView();
 	const submitRsvpMutation = useSubmitRsvp();
@@ -351,7 +357,11 @@ function InviteScreen() {
 				},
 				{
 					onSuccess: () => {
-						setRsvpStatus("RSVP received. Thank you!");
+						setRsvpResult({
+							name: payload.name,
+							attendance: payload.attendance,
+							guestCount: payload.guestCount,
+						});
 						try {
 							localStorage.setItem(
 								storageKey,
@@ -368,7 +378,11 @@ function InviteScreen() {
 						// Fall back to local store
 						try {
 							submitRsvp(invitation.id, payload, visitorKey);
-							setRsvpStatus("RSVP received. Thank you!");
+							setRsvpResult({
+								name: payload.name,
+								attendance: payload.attendance,
+								guestCount: payload.guestCount,
+							});
 							try {
 								localStorage.setItem(
 									storageKey,
@@ -381,7 +395,7 @@ function InviteScreen() {
 							} catch {}
 							setAlreadySubmitted(true);
 						} catch {
-							setRsvpStatus("RSVP limit reached. Please try again later.");
+							setRsvpError("RSVP limit reached. Please try again later.");
 						}
 					},
 				},
@@ -437,15 +451,26 @@ function InviteScreen() {
 				)}
 				<ScenePageEngine document={canvasDocument} />
 				{invitation?.status === "published" ? (
-					<CanvasRsvpCard
-						disabled={alreadySubmitted}
-						statusMessage={
-							alreadySubmitted
-								? "You have already submitted your RSVP. Thank you!"
-								: rsvpStatus
-						}
-						onSubmit={(payload) => handleRsvpSubmit(payload)}
-					/>
+					rsvpResult || alreadySubmitted ? (
+						<RsvpConfirmation
+							name={rsvpResult?.name ?? "Guest"}
+							attendance={rsvpResult?.attendance ?? "attending"}
+							guestCount={rsvpResult?.guestCount}
+							onEdit={() => {
+								setRsvpResult(null);
+								setAlreadySubmitted(false);
+								try {
+									localStorage.removeItem(storageKey);
+								} catch {}
+							}}
+						/>
+					) : (
+						<CanvasRsvpCard
+							disabled={submitRsvpMutation.isPending}
+							statusMessage={rsvpError}
+							onSubmit={(payload) => handleRsvpSubmit(payload)}
+						/>
+					)
 				) : null}
 			</div>
 		</EnvelopeAnimation>
