@@ -10,8 +10,10 @@ import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 
 interface RevealProps {
 	children: ReactNode;
-	direction?: "up" | "left" | "right" | "none";
+	direction?: "up" | "left" | "right" | "none" | "blur" | "scale";
 	delay?: number;
+	/** Duration in seconds (default 0.8) */
+	duration?: number;
 	className?: string;
 }
 
@@ -23,6 +25,7 @@ export function Reveal({
 	children,
 	direction = "up",
 	delay = 0,
+	duration = 0.8,
 	className = "",
 }: RevealProps) {
 	const ref = useRef<HTMLDivElement>(null);
@@ -51,14 +54,18 @@ export function Reveal({
 	}, [prefersReduced]);
 
 	const transform = isVisible
-		? "translate3d(0, 0, 0)"
+		? "translate3d(0, 0, 0) scale(1)"
 		: direction === "up"
 			? "translate3d(0, 30px, 0)"
 			: direction === "left"
 				? "translate3d(-30px, 0, 0)"
 				: direction === "right"
 					? "translate3d(30px, 0, 0)"
-					: "translate3d(0, 0, 0)";
+					: direction === "scale"
+						? "scale(0.95)"
+						: "translate3d(0, 0, 0)";
+
+	const filter = direction === "blur" && !isVisible ? "blur(8px)" : "blur(0)";
 
 	return (
 		<div
@@ -67,12 +74,54 @@ export function Reveal({
 			style={{
 				opacity: isVisible ? 1 : 0,
 				transform,
+				filter: direction === "blur" ? filter : undefined,
 				transition: prefersReduced
 					? "none"
-					: `opacity 0.8s cubic-bezier(0.25, 0.1, 0.25, 1) ${delay}s, transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1) ${delay}s`,
+					: `opacity ${duration}s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s, transform ${duration}s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s, filter ${duration}s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s`,
 			}}
 		>
 			{children}
+		</div>
+	);
+}
+
+// ── Staggered reveal for child elements ──────────────────────────────
+
+interface StaggerProps {
+	children: ReactNode;
+	/** Delay between each child in seconds */
+	interval?: number;
+	/** Base delay before first child in seconds */
+	baseDelay?: number;
+	direction?: RevealProps["direction"];
+	className?: string;
+}
+
+/**
+ * Wraps each child in a Reveal with staggered delay.
+ * Children animate in sequentially with configurable interval.
+ */
+export function Stagger({
+	children,
+	interval = 0.1,
+	baseDelay = 0,
+	direction = "up",
+	className = "",
+}: StaggerProps) {
+	const childArray = Array.isArray(children) ? children : [children];
+
+	return (
+		<div className={className}>
+			{childArray.map((child, index) => (
+				<Reveal
+					key={index}
+					direction={direction}
+					delay={baseDelay + index * interval}
+					duration={0.8}
+				>
+					{child}
+				</Reveal>
+			))}
 		</div>
 	);
 }
