@@ -167,5 +167,17 @@ export function buildSampleContent(templateId: string): InvitationContent {
 		base.announcement.title = "Eternal Elegance";
 		base.footer.message = "With love and gratitude.";
 	}
+	if (templateId === "double-happiness") {
+		base.hero.tagline = "囍临门 · 永结同心";
+		base.hero.partnerOneName = "王小明";
+		base.hero.partnerTwoName = "李小红";
+		base.announcement.title = "我们结婚啦";
+		base.announcement.message =
+			"亲爱的家人朋友们，我们诚挚地邀请您来参加我们的婚礼。";
+		base.announcement.formalText =
+			"Dear Family & Friends, we cordially invite you to celebrate our union.";
+		base.footer.message =
+			"感谢您的祝福，期待与您在婚礼相见。\nThank you for your blessings. We look forward to celebrating with you.";
+	}
 	return base;
 }

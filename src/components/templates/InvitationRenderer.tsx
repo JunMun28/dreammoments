@@ -11,6 +11,8 @@ const templateImports: Record<
 		import("./eternal-elegance/EternalEleganceInvitation"),
 	"garden-romance": () => import("./garden-romance/GardenRomanceInvitation"),
 	"love-at-dusk": () => import("./love-at-dusk/LoveAtDuskInvitation"),
+	"double-happiness": () =>
+		import("./double-happiness/DoubleHappinessInvitation"),
 };
 
 const templateComponents: Record<

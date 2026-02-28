@@ -4,7 +4,7 @@ import {
 	Navigate,
 	useNavigate,
 } from "@tanstack/react-router";
-import { Eye } from "lucide-react";
+import { X } from "lucide-react";
 import { useCallback, useState } from "react";
 import InvitationRenderer from "../../components/templates/InvitationRenderer";
 import { RouteLoadingSpinner } from "../../components/ui/RouteLoadingSpinner";
@@ -26,137 +26,70 @@ const categoryLabels: Record<string, string> = {
 	western: "Western",
 };
 
-function TemplateColorPreview({
-	tokens,
-}: {
-	tokens: TemplateConfig["tokens"];
-}) {
-	const colors = [
-		tokens.colors.primary,
-		tokens.colors.secondary,
-		tokens.colors.accent,
-		tokens.colors.background,
-	];
-	return (
-		<div className="flex gap-1.5" aria-hidden="true">
-			{colors.map((color, index) => (
-				<div
-					key={`${color}-${index}`}
-					className="h-5 w-5 rounded-full border border-[color:var(--dm-border)]"
-					style={{ background: color }}
-				/>
-			))}
-		</div>
-	);
-}
+/** Map template id to preview image path */
+const templatePreviewImages: Record<string, string> = {
+	"blush-romance": "/img/template-blush-romance.png",
+	"love-at-dusk": "/img/template-love-at-dusk.png",
+	"garden-romance": "/img/template-garden-romance.png",
+	"eternal-elegance": "/img/template-eternal-elegance.png",
+	"double-happiness": "/img/template-double-happiness.png",
+};
 
 function TemplateCard({
 	template,
-	onSelect,
-	onPreview,
-	isCreating,
+	onClick,
 }: {
 	template: TemplateConfig;
-	onSelect: (templateId: string) => void;
-	onPreview: (templateId: string) => void;
-	isCreating: boolean;
+	onClick: () => void;
 }) {
 	return (
-		<div className="group rounded-3xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-6 transition-shadow duration-300 hover:shadow-[0_8px_28px_-4px_rgba(0,0,0,0.07)]">
-			{/* Color preview strip */}
-			<div
-				className="relative mb-5 flex h-32 items-end rounded-2xl p-4"
-				style={{
-					background: `linear-gradient(135deg, ${template.tokens.colors.background} 0%, ${template.tokens.colors.primary} 100%)`,
-				}}
-			>
-				<div
-					className="rounded-xl px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.15em]"
-					style={{
-						background: template.tokens.colors.accent,
-						color: template.tokens.colors.text,
-					}}
-				>
-					{template.nameZh}
-				</div>
-				<button
-					type="button"
-					onClick={() => onPreview(template.id)}
-					className="absolute right-3 top-3 flex h-9 items-center gap-1.5 rounded-full border border-white/30 bg-white/80 px-3 text-[10px] uppercase tracking-[0.15em] text-[color:var(--dm-ink)] opacity-100 backdrop-blur-sm transition-opacity md:opacity-0 md:group-hover:opacity-100"
-					aria-label={`Preview ${template.name} template`}
-				>
-					<Eye size={14} aria-hidden="true" />
-					Preview
-				</button>
-			</div>
-
-			{/* Template info */}
-			<div className="mb-4 flex items-start justify-between gap-3">
-				<div>
-					<h2 className="font-heading text-xl font-semibold text-[color:var(--dm-ink)]">
-						{template.name}
-					</h2>
-					<p className="mt-0.5 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
-						{categoryLabels[template.category] ?? template.category}
-					</p>
-				</div>
-				<TemplateColorPreview tokens={template.tokens} />
-			</div>
-
-			<p className="mb-5 text-sm leading-relaxed text-[color:var(--dm-muted)]">
-				{template.description}
-			</p>
-
-			{/* Section count + tone */}
-			<div className="mb-5 flex flex-wrap gap-2">
-				<span className="inline-flex items-center rounded-full border border-[color:var(--dm-border)] px-3 py-1 text-[10px] uppercase tracking-[0.15em] text-[color:var(--dm-muted)]">
-					{template.sections.length} sections
-				</span>
-				<span className="inline-flex items-center rounded-full border border-[color:var(--dm-border)] px-3 py-1 text-[10px] uppercase tracking-[0.15em] text-[color:var(--dm-muted)]">
-					{template.aiConfig.defaultTone} tone
-				</span>
-			</div>
-
-			<button
-				type="button"
-				disabled={isCreating}
-				onClick={() => onSelect(template.id)}
-				className="w-full rounded-full bg-[color:var(--dm-accent-strong)] px-5 py-3 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)] transition-opacity disabled:opacity-50"
-			>
-				{isCreating ? (
-					<span className="inline-flex items-center gap-2">
-						<svg
-							className="h-4 w-4 animate-spin"
-							viewBox="0 0 24 24"
-							fill="none"
-							aria-hidden="true"
-						>
-							<circle
-								cx="12"
-								cy="12"
-								r="10"
-								stroke="currentColor"
-								strokeWidth="3"
-								strokeDasharray="31.4 31.4"
-								strokeLinecap="round"
-							/>
-						</svg>
-						Creating...
-					</span>
+		<button
+			type="button"
+			onClick={onClick}
+			className="group cursor-pointer text-left transition-transform duration-200 hover:scale-[1.02] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--dm-primary)]"
+			aria-label={`Preview ${template.name} template`}
+		>
+			{/* Preview image */}
+			<div className="relative aspect-[3/4] overflow-hidden rounded-2xl border border-[color:var(--dm-border)]">
+				{templatePreviewImages[template.id] ? (
+					<img
+						src={templatePreviewImages[template.id]}
+						alt={`${template.name} template preview`}
+						className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+					/>
 				) : (
-					"Use This Template"
+					<div
+						className="h-full w-full"
+						style={{
+							background: `linear-gradient(135deg, ${template.tokens.colors.background} 0%, ${template.tokens.colors.primary} 100%)`,
+						}}
+					/>
 				)}
-			</button>
-		</div>
+			</div>
+
+			{/* Template name + category */}
+			<div className="mt-3 px-0.5">
+				<h2 className="text-sm font-semibold text-[color:var(--dm-ink)]">
+					{template.name}
+				</h2>
+				<p className="mt-0.5 text-xs text-[color:var(--dm-muted)]">
+					{categoryLabels[template.category] ?? template.category}
+				</p>
+			</div>
+		</button>
 	);
 }
 
 function TemplatePreviewModal({
 	templateId,
 	onClose,
+	onSelect,
+	isCreating,
 }: {
 	templateId: string;
 	onClose: () => void;
+	onSelect: (templateId: string) => void;
+	isCreating: boolean;
 }) {
 	const content = buildSampleContent(templateId);
 	const template = templates.find((t) => t.id === templateId);
@@ -177,13 +110,27 @@ function TemplatePreviewModal({
 				<span className="text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
 					Preview &mdash; {template?.name}
 				</span>
-				<button
-					type="button"
-					onClick={onClose}
-					className="rounded-full px-4 py-2 text-xs uppercase tracking-[0.15em] text-[color:var(--dm-muted)] transition-colors hover:text-[color:var(--dm-ink)]"
-				>
-					Close
-				</button>
+				<div className="flex items-center gap-3">
+					<button
+						type="button"
+						disabled={isCreating}
+						onClick={(e) => {
+							e.stopPropagation();
+							onSelect(templateId);
+						}}
+						className="rounded-full bg-[color:var(--dm-accent-strong)] px-5 py-2 text-xs uppercase tracking-[0.15em] text-[color:var(--dm-on-accent)] transition-opacity disabled:opacity-50"
+					>
+						{isCreating ? "Creating..." : "Use This Template"}
+					</button>
+					<button
+						type="button"
+						onClick={onClose}
+						className="flex h-8 w-8 items-center justify-center rounded-full text-[color:var(--dm-muted)] transition-colors hover:bg-[color:var(--dm-border)] hover:text-[color:var(--dm-ink)]"
+						aria-label="Close preview"
+					>
+						<X size={16} />
+					</button>
+				</div>
 			</div>
 			{/* biome-ignore lint/a11y/noStaticElementInteractions: stop propagation for modal content */}
 			<div
@@ -231,7 +178,7 @@ function TemplateSelectionPage() {
 
 	return (
 		<div className="min-h-screen bg-[color:var(--dm-bg)] px-6 py-10">
-			<div className="mx-auto max-w-5xl space-y-8">
+			<div className="mx-auto max-w-6xl space-y-8">
 				{/* Header */}
 				<div className="text-center">
 					<Link
@@ -263,15 +210,13 @@ function TemplateSelectionPage() {
 					</p>
 				</div>
 
-				{/* Template grid: 2 columns on desktop, 1 on mobile */}
-				<div className="grid gap-6 sm:grid-cols-2">
+				{/* Template grid: 4 columns on desktop, 2 on mobile */}
+				<div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
 					{templates.map((template) => (
 						<TemplateCard
 							key={template.id}
 							template={template}
-							onSelect={handleSelect}
-							onPreview={handlePreview}
-							isCreating={creatingId === template.id}
+							onClick={() => handlePreview(template.id)}
 						/>
 					))}
 				</div>
@@ -281,6 +226,8 @@ function TemplateSelectionPage() {
 				<TemplatePreviewModal
 					templateId={previewId}
 					onClose={() => setPreviewId(null)}
+					onSelect={handleSelect}
+					isCreating={creatingId === previewId}
 				/>
 			)}
 		</div>

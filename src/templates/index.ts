@@ -1,4 +1,5 @@
 import { blushRomanceTemplate } from "./blush-romance";
+import { doubleHappinessTemplate } from "./double-happiness";
 import { eternalEleganceTemplate } from "./eternal-elegance";
 import { gardenRomanceTemplate } from "./garden-romance";
 import { loveAtDuskTemplate } from "./love-at-dusk";
@@ -8,6 +9,7 @@ export const templates = [
 	loveAtDuskTemplate,
 	gardenRomanceTemplate,
 	eternalEleganceTemplate,
+	doubleHappinessTemplate,
 ];
 
 export {
@@ -15,4 +17,5 @@ export {
 	loveAtDuskTemplate,
 	gardenRomanceTemplate,
 	eternalEleganceTemplate,
+	doubleHappinessTemplate,
 };

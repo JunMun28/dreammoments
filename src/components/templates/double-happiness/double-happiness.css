@@ -1,0 +1,92 @@
+/* ─── Double Happiness Template (囍临门) ─── */
+
+/* Root wrapper scopes all template styles */
+.double-happiness {
+	--dh-red: #c8102e;
+	--dh-gold: #d4a843;
+	--dh-cream: #fff8f0;
+	--dh-dark: #2b1216;
+	--dh-deep-red: #8b1a1a;
+	--dh-gold-light: #f5e6c8;
+	--dh-muted: #8b7355;
+}
+
+/* ── Section alternation ── */
+.dh-section-cream {
+	background-color: var(--dh-cream);
+}
+.dh-section-dark {
+	background-color: var(--dh-deep-red);
+	color: #fff8f0;
+}
+.dh-section-white {
+	background-color: #ffffff;
+}
+
+/* ── Gold decorative divider (non-text, 3:1 contrast is sufficient) ── */
+.dh-gold-divider {
+	height: 1px;
+	background: linear-gradient(
+		90deg,
+		transparent,
+		rgba(212, 168, 67, 0.5),
+		transparent
+	);
+}
+
+/* ── Blockquote accent (announcement section) ── */
+.dh-blockquote {
+	border-left: 3px solid var(--dh-gold);
+	padding-left: 1.5rem;
+}
+
+/* ── Timeline vertical line ── */
+.dh-timeline-line {
+	width: 2px;
+	background: linear-gradient(
+		180deg,
+		var(--dh-gold),
+		var(--dh-red),
+		var(--dh-gold)
+	);
+}
+
+/* ── Timeline dot ── */
+.dh-timeline-dot {
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	background-color: var(--dh-red);
+	border: 2px solid var(--dh-gold);
+}
+
+/* ── Photo frame ── */
+.dh-photo-frame {
+	border: 1px solid rgba(212, 168, 67, 0.3);
+	box-shadow: 0 2px 8px rgba(43, 18, 22, 0.08);
+}
+
+/* ── RSVP form focus indicators on festive backgrounds ── */
+.double-happiness input:focus-visible,
+.double-happiness select:focus-visible,
+.double-happiness textarea:focus-visible {
+	outline: 2px solid #ffffff;
+	outline-offset: 2px;
+	box-shadow: 0 0 0 4px rgba(200, 16, 46, 0.5);
+}
+
+/* ── 囍 watermark ── */
+.dh-xi-watermark {
+	font-size: 12rem;
+	color: rgba(212, 168, 67, 0.08);
+	pointer-events: none;
+	user-select: none;
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+	.double-happiness * {
+		animation-duration: 0.01ms !important;
+		transition-duration: 0.01ms !important;
+	}
+}

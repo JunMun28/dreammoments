@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 import {
 	blushRomanceTemplate,
+	doubleHappinessTemplate,
 	eternalEleganceTemplate,
 	gardenRomanceTemplate,
 	loveAtDuskTemplate,
@@ -8,12 +9,13 @@ import {
 } from "../templates";
 
 describe("templates array", () => {
-	test("contains all four templates", () => {
-		expect(templates).toHaveLength(4);
+	test("contains all five templates", () => {
+		expect(templates).toHaveLength(5);
 		expect(templates.map((t) => t.id)).toContain("blush-romance");
 		expect(templates.map((t) => t.id)).toContain("love-at-dusk");
 		expect(templates.map((t) => t.id)).toContain("garden-romance");
 		expect(templates.map((t) => t.id)).toContain("eternal-elegance");
+		expect(templates.map((t) => t.id)).toContain("double-happiness");
 	});
 
 	test("all templates have required fields", () => {
@@ -168,6 +170,38 @@ describe("individual templates", () => {
 
 		test("has correct category", () => {
 			expect(eternalEleganceTemplate.category).toBe("western");
+		});
+	});
+
+	describe("doubleHappinessTemplate", () => {
+		test("has correct ID", () => {
+			expect(doubleHappinessTemplate.id).toBe("double-happiness");
+		});
+
+		test("has correct category", () => {
+			expect(doubleHappinessTemplate.category).toBe("chinese");
+		});
+
+		test("has expected sections", () => {
+			const sectionIds = doubleHappinessTemplate.sections.map((s) => s.id);
+			expect(sectionIds).toContain("hero");
+			expect(sectionIds).toContain("announcement");
+			expect(sectionIds).toContain("couple");
+			expect(sectionIds).toContain("story");
+			expect(sectionIds).toContain("gallery");
+			expect(sectionIds).toContain("countdown");
+			expect(sectionIds).toContain("schedule");
+			expect(sectionIds).toContain("venue");
+			expect(sectionIds).toContain("rsvp");
+			expect(sectionIds).toContain("gift");
+			expect(sectionIds).toContain("footer");
+		});
+
+		test("gift section is hidden by default", () => {
+			const giftSection = doubleHappinessTemplate.sections.find(
+				(s) => s.id === "gift",
+			);
+			expect(giftSection?.defaultVisible).toBe(false);
 		});
 	});
 });
