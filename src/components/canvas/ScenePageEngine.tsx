@@ -13,10 +13,12 @@ import {
 	useRef,
 	useState,
 } from "react";
+import {
+	ParticleField,
+	type ParticlePreset,
+} from "@/components/templates/animations";
 import type { Block, CanvasDocument } from "@/lib/canvas/types";
 import { cn } from "@/lib/utils";
-import { ParticleField } from "@/components/templates/animations";
-import type { ParticlePreset } from "@/components/templates/animations";
 import { BlockRenderer } from "./BlockRenderer";
 
 /* ── Types ───────────────────────────────────────────────────────── */
@@ -45,7 +47,7 @@ function groupBlocksBySection(doc: CanvasDocument): Section[] {
 			sectionMap.set(sectionId, []);
 			sectionOrder.push(sectionId);
 		}
-		sectionMap.get(sectionId)!.push(block);
+		sectionMap.get(sectionId)?.push(block);
 	}
 
 	return sectionOrder.map((id) => ({
@@ -162,10 +164,7 @@ function SceneSection({
 	return (
 		<div
 			ref={ref}
-			className={cn(
-				"dm-scene-page",
-				!isHero && hasImages && overlayClass,
-			)}
+			className={cn("dm-scene-page", !isHero && hasImages && overlayClass)}
 			data-scene-section={section.id}
 			data-scene-index={index}
 			style={{ backgroundColor }}
@@ -305,6 +304,41 @@ function SceneProgressDots({
 	);
 }
 
+/* ── Swipe Hint ──────────────────────────────────────────────── */
+
+function SwipeHint({
+	containerRef,
+}: {
+	containerRef: React.RefObject<HTMLDivElement | null>;
+}) {
+	const [hidden, setHidden] = useState(false);
+
+	useEffect(() => {
+		const container = containerRef.current;
+		if (!container) return;
+
+		const handleScroll = () => {
+			if (container.scrollTop > 20) {
+				setHidden(true);
+			}
+		};
+		container.addEventListener("scroll", handleScroll, { passive: true });
+		return () => container.removeEventListener("scroll", handleScroll);
+	}, [containerRef]);
+
+	return (
+		<div className="dm-swipe-hint" data-hidden={hidden} aria-hidden="true">
+			<span className="dm-swipe-hint-text">Scroll</span>
+			<span className="dm-swipe-hint-chevron">
+				<svg viewBox="0 0 24 24" role="img" aria-label="Scroll down">
+					<title>Scroll down</title>
+					<path d="M6 9l6 6 6-6" />
+				</svg>
+			</span>
+		</div>
+	);
+}
+
 /* ── Main Component ───────────────────────────────────────────── */
 
 export function ScenePageEngine({
@@ -318,7 +352,10 @@ export function ScenePageEngine({
 	const canvasWidth = doc.canvas.width;
 	const backgroundColor = doc.designTokens.colors.background ?? "#ffffff";
 	const accentColor = doc.designTokens.colors.primary ?? "#C4727F";
-	const effects = useMemo(() => getTemplateEffects(doc.templateId), [doc.templateId]);
+	const effects = useMemo(
+		() => getTemplateEffects(doc.templateId),
+		[doc.templateId],
+	);
 
 	// Track active section via IntersectionObserver
 	// biome-ignore lint/correctness/useExhaustiveDependencies: re-observe when sections change
@@ -374,6 +411,8 @@ export function ScenePageEngine({
 					overlayClass={effects.overlay}
 				/>
 			))}
+
+			<SwipeHint containerRef={containerRef} />
 
 			<SceneProgressDots
 				count={sections.length}

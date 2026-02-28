@@ -953,3 +953,55 @@ html {
     animation: none;
   }
 }
+
+/* ─── Swipe Hint ─── */
+.dm-swipe-hint {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  opacity: 1;
+  transition: opacity 0.5s ease-out;
+  pointer-events: none;
+}
+
+.dm-swipe-hint[data-hidden="true"] {
+  opacity: 0;
+}
+
+.dm-swipe-hint-text {
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.dm-swipe-hint-chevron {
+  width: 1.5rem;
+  height: 1.5rem;
+  animation: dm-swipe-bounce 1.8s ease-in-out infinite;
+}
+
+.dm-swipe-hint-chevron svg {
+  width: 100%;
+  height: 100%;
+  stroke: rgba(255, 255, 255, 0.6);
+  stroke-width: 2;
+  fill: none;
+}
+
+@keyframes dm-swipe-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dm-swipe-hint-chevron {
+    animation: none;
+  }
+}
