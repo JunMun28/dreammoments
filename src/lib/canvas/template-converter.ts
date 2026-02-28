@@ -20,6 +20,20 @@ const DEFAULT_COLORS = {
 	muted: "#6B7280",
 };
 
+/** Perceived luminance (0–1) of a hex color. */
+function luminance(hex: string): number {
+	const h = hex.replace("#", "");
+	const r = Number.parseInt(h.slice(0, 2), 16) / 255;
+	const g = Number.parseInt(h.slice(2, 4), 16) / 255;
+	const b = Number.parseInt(h.slice(4, 6), 16) / 255;
+	return 0.299 * r + 0.587 * g + 0.114 * b;
+}
+
+/** Text color safe for a white card — dark if template text is too light. */
+function cardTextColor(templateText: string): string {
+	return luminance(templateText) > 0.6 ? "#1A1A1A" : templateText;
+}
+
 const DEFAULT_TYPOGRAPHY = {
 	headingFont: '"Playfair Display", serif',
 	bodyFont: '"Inter", sans-serif',
@@ -265,7 +279,7 @@ function buildBlocks(
 				fontFamily: tokens.typography.bodyFont,
 				fontSize: "14px",
 				lineHeight: "1.64",
-				color: tokens.colors.text,
+				color: cardTextColor(tokens.colors.text),
 				backgroundColor: "#ffffff",
 				borderRadius: "16px",
 				padding: "14px",
@@ -327,6 +341,7 @@ function buildBlocks(
 				borderRadius: "14px",
 				padding: "14px",
 				border: `1px solid ${tokens.colors.accent}`,
+				color: cardTextColor(tokens.colors.text),
 			},
 			sectionId: "venue",
 			semantic: "venue-map",
@@ -348,7 +363,7 @@ function buildBlocks(
 				borderRadius: "14px",
 				padding: "14px",
 				border: `1px solid ${tokens.colors.accent}`,
-				color: tokens.colors.text,
+				color: cardTextColor(tokens.colors.text),
 			},
 			sectionId: "rsvp",
 			semantic: "rsvp-form",

@@ -8,6 +8,7 @@
 
 import {
 	type CSSProperties,
+	useCallback,
 	useEffect,
 	useMemo,
 	useRef,
@@ -100,6 +101,33 @@ function getTemplateEffects(templateId: string): {
 	}
 }
 
+/* ── Content Scale Hook ──────────────────────────────────────── */
+
+/** Scale factor to enlarge content blocks for full-viewport scenes. */
+function useContentScale(canvasWidth: number): number {
+	const [scale, setScale] = useState(1);
+
+	const update = useCallback(() => {
+		const vw = window.innerWidth;
+		// On mobile (viewport ≤ canvas + 40px padding), no scaling
+		if (vw <= canvasWidth + 40) {
+			setScale(1);
+			return;
+		}
+		// Scale to fill ~60% of viewport width, capped at 2.2x
+		const s = Math.min((vw * 0.6) / canvasWidth, 2.2);
+		setScale(Math.max(1, s));
+	}, [canvasWidth]);
+
+	useEffect(() => {
+		update();
+		window.addEventListener("resize", update);
+		return () => window.removeEventListener("resize", update);
+	}, [update]);
+
+	return scale;
+}
+
 /* ── Scene Section ─────────────────────────────────────────────── */
 
 function SceneSection({
@@ -110,6 +138,7 @@ function SceneSection({
 	isHero,
 	particlePreset,
 	overlayClass,
+	contentScale,
 }: {
 	section: Section;
 	index: number;
@@ -118,6 +147,7 @@ function SceneSection({
 	isHero: boolean;
 	particlePreset: ParticlePreset | null;
 	overlayClass: string | null;
+	contentScale: number;
 }) {
 	const ref = useRef<HTMLDivElement>(null);
 	const [isVisible, setIsVisible] = useState(false);
@@ -189,7 +219,7 @@ function SceneSection({
 					className="absolute inset-0"
 					style={{
 						background:
-							"linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.05) 40%, rgba(0,0,0,0.4) 100%)",
+							"linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.25) 40%, rgba(0,0,0,0.55) 100%)",
 						zIndex: 1,
 					}}
 					aria-hidden="true"
@@ -204,54 +234,83 @@ function SceneSection({
 			)}
 
 			{/* Block content — positioned relative within the section */}
-			<div
-				className="relative w-full"
-				style={{
-					maxWidth: canvasWidth,
-					minHeight: sectionBounds.maxY - sectionBounds.minY,
-					zIndex: 2,
-				}}
-			>
-				{section.blocks.map((block, blockIndex) => {
-					// Skip the hero image block since we render it as Ken Burns background
-					if (
-						isHero &&
-						heroImgSrc &&
-						block.type === "image" &&
-						block.content.src === heroImgSrc
-					) {
-						return null;
-					}
+			{(() => {
+				const effectiveScale = isHero ? 1 : contentScale;
+				const contentHeight = sectionBounds.maxY - sectionBounds.minY;
 
-					const blockStyle: CSSProperties = {
-						position: "absolute",
-						width: block.size.width,
-						height: block.size.height,
-						// Offset Y relative to section start
-						transform: `translate3d(${block.position.x}px, ${block.position.y - sectionBounds.minY}px, 0)`,
-						zIndex: block.zIndex,
-						// Entrance animation
-						opacity: isVisible ? 1 : 0,
-						transition: `opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) ${blockIndex * 0.1}s, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) ${blockIndex * 0.1}s`,
-						...toCssProperties(block.style),
-					};
-
-					// Apply gold foil to heading blocks in hero
-					const isGoldFoil = block.type === "heading" && isHero;
-
-					return (
+				return (
+					<div
+						className="relative"
+						style={{
+							width: canvasWidth * effectiveScale,
+							height: contentHeight * effectiveScale,
+							zIndex: 2,
+						}}
+					>
 						<div
-							key={block.id}
-							style={blockStyle}
-							data-canvas-block-id={block.id}
-							data-canvas-block-type={block.type}
-							className={isGoldFoil ? "dm-gold-foil" : undefined}
+							style={{
+								position: "absolute",
+								top: 0,
+								left: 0,
+								width: canvasWidth,
+								height: contentHeight,
+								transform: `scale(${effectiveScale})`,
+								transformOrigin: "top left",
+							}}
 						>
-							<BlockRenderer block={block} />
+							{section.blocks.map((block, blockIndex) => {
+								// Skip the hero image block since we render it as Ken Burns background
+								if (
+									isHero &&
+									heroImgSrc &&
+									block.type === "image" &&
+									block.content.src === heroImgSrc
+								) {
+									return null;
+								}
+
+								const isTextBlock =
+									block.type === "text" || block.type === "heading";
+
+								const blockStyle: CSSProperties = {
+									position: "absolute",
+									width: block.size.width,
+									height: block.size.height,
+									// Offset Y relative to section start
+									transform: `translate3d(${block.position.x}px, ${block.position.y - sectionBounds.minY}px, 0)`,
+									zIndex: block.zIndex,
+									// Entrance animation
+									opacity: isVisible ? 1 : 0,
+									transition: `opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) ${blockIndex * 0.1}s, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) ${blockIndex * 0.1}s`,
+									// Add text-shadow for hero readability
+									...(isHero && isTextBlock
+										? {
+												textShadow:
+													"0 2px 12px rgba(0,0,0,0.6), 0 1px 4px rgba(0,0,0,0.4)",
+											}
+										: {}),
+									...toCssProperties(block.style),
+								};
+
+								// Apply gold foil to heading blocks in hero
+								const isGoldFoil = block.type === "heading" && isHero;
+
+								return (
+									<div
+										key={block.id}
+										style={blockStyle}
+										data-canvas-block-id={block.id}
+										data-canvas-block-type={block.type}
+										className={isGoldFoil ? "dm-gold-foil" : undefined}
+									>
+										<BlockRenderer block={block} />
+									</div>
+								);
+							})}
 						</div>
-					);
-				})}
-			</div>
+					</div>
+				);
+			})()}
 		</div>
 	);
 }
@@ -412,6 +471,7 @@ export function ScenePageEngine({
 		() => getTemplateEffects(doc.templateId),
 		[doc.templateId],
 	);
+	const contentScale = useContentScale(canvasWidth);
 
 	// Track active section via IntersectionObserver
 	// biome-ignore lint/correctness/useExhaustiveDependencies: re-observe when sections change
@@ -465,6 +525,7 @@ export function ScenePageEngine({
 					isHero={index === 0 || isHeroSection(section)}
 					particlePreset={effects.particle}
 					overlayClass={effects.overlay}
+					contentScale={contentScale}
 				/>
 			))}
 
