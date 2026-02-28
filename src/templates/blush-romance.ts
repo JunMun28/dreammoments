@@ -21,8 +21,8 @@ export const blushRomanceTemplate: TemplateConfig = {
 			muted: "#6F5561",
 		},
 		typography: {
-			headingFont: "'Cormorant Garamond', serif",
-			bodyFont: "'Lato', 'Manrope', sans-serif",
+			headingFont: "'Cormorant Garamond', 'Georgia', serif",
+			bodyFont: "'Lato', 'Inter', sans-serif",
 			accentFont: "'Sacramento', 'Cormorant Garamond', serif",
 		},
 		animations: {

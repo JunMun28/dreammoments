@@ -22,8 +22,8 @@ export const doubleHappinessTemplate: TemplateConfig = {
 			muted: "#8B7355",
 		},
 		typography: {
-			headingFont: "'Noto Serif SC', 'Songti SC', Georgia, serif",
-			bodyFont: "Inter, 'Noto Sans SC', system-ui, sans-serif",
+			headingFont: "'Ma Shan Zheng', 'Noto Serif SC', 'Songti SC', serif",
+			bodyFont: "'Noto Sans SC', 'Inter', sans-serif",
 			accentFont: "'Noto Serif SC', 'Songti SC', serif",
 		},
 		animations: {

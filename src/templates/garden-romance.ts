@@ -21,9 +21,9 @@ export const gardenRomanceTemplate: TemplateConfig = {
 			muted: "#A09080",
 		},
 		typography: {
-			headingFont: "'Playfair Display', 'Times New Roman', serif",
+			headingFont: "'Playfair Display', 'Georgia', serif",
 			bodyFont: "'Inter', sans-serif",
-			accentFont: "'Noto Serif SC', 'Songti SC', serif",
+			accentFont: "'Dancing Script', 'Noto Serif SC', serif",
 		},
 		animations: {
 			scrollTriggerOffset: 80,

@@ -21,9 +21,9 @@ export const eternalEleganceTemplate: TemplateConfig = {
 			muted: "#6F6F6F",
 		},
 		typography: {
-			headingFont: "'Didot', 'Bodoni MT', 'Cormorant Garamond', serif",
-			bodyFont: "'Garamond', 'Cormorant Garamond', serif",
-			accentFont: "'Pinyon Script', 'Garamond', serif",
+			headingFont: "'Cormorant Garamond', 'Georgia', serif",
+			bodyFont: "'Inter', sans-serif",
+			accentFont: "'Pinyon Script', 'Great Vibes', serif",
 		},
 		animations: {
 			scrollTriggerOffset: 120,

@@ -21,9 +21,9 @@ export const loveAtDuskTemplate: TemplateConfig = {
 			muted: "#B7A38A",
 		},
 		typography: {
-			headingFont: "'Playfair Display', 'Noto Serif SC', serif",
-			bodyFont: "'Noto Serif SC', 'Manrope', serif",
-			accentFont: "'Noto Serif SC', serif",
+			headingFont: "'Playfair Display', 'Georgia', serif",
+			bodyFont: "'Inter', sans-serif",
+			accentFont: "'Great Vibes', 'Noto Serif SC', serif",
 		},
 		animations: {
 			scrollTriggerOffset: 120,
