@@ -4,8 +4,8 @@ import {
 	Link,
 } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { getPublicInvitation } from "../../api/public";
 import { ScenePageEngine } from "@/components/canvas/ScenePageEngine";
+import { getPublicInvitation } from "../../api/public";
 import EnvelopeAnimation from "../../components/templates/EnvelopeAnimation";
 import { buildSampleContent } from "../../data/sample-invitation";
 import { useSubmitRsvp, useTrackView } from "../../hooks/useInvitations";
