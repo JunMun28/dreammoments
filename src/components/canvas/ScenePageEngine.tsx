@@ -304,6 +304,62 @@ function SceneProgressDots({
 	);
 }
 
+/* ── Music Player ────────────────────────────────────────────── */
+
+const TEMPLATE_MUSIC: Record<string, string | null> = {
+	"blush-romance": null,
+	"eternal-elegance": null,
+	"garden-romance": null,
+	"love-at-dusk": null,
+	"double-happiness": null,
+};
+
+function MusicPlayer({ templateId }: { templateId: string }) {
+	const audioRef = useRef<HTMLAudioElement>(null);
+	const [playing, setPlaying] = useState(false);
+	const trackUrl = TEMPLATE_MUSIC[templateId] ?? null;
+
+	if (!trackUrl) return null;
+
+	const toggle = () => {
+		const audio = audioRef.current;
+		if (!audio) return;
+		if (playing) {
+			audio.pause();
+		} else {
+			audio.play().catch(() => {});
+		}
+		setPlaying(!playing);
+	};
+
+	return (
+		<>
+			{/* biome-ignore lint/a11y/useMediaCaption: background music track, no dialogue */}
+			<audio ref={audioRef} src={trackUrl} loop preload="none" />
+			<button
+				type="button"
+				className="dm-music-btn"
+				data-playing={playing}
+				onClick={toggle}
+				aria-label={playing ? "Pause music" : "Play music"}
+			>
+				{playing ? (
+					<svg viewBox="0 0 24 24" aria-hidden="true">
+						<title>Pause</title>
+						<rect x="6" y="4" width="4" height="16" />
+						<rect x="14" y="4" width="4" height="16" />
+					</svg>
+				) : (
+					<svg viewBox="0 0 24 24" aria-hidden="true">
+						<title>Play</title>
+						<polygon points="5,3 19,12 5,21" />
+					</svg>
+				)}
+			</button>
+		</>
+	);
+}
+
 /* ── Swipe Hint ──────────────────────────────────────────────── */
 
 function SwipeHint({
@@ -411,6 +467,8 @@ export function ScenePageEngine({
 					overlayClass={effects.overlay}
 				/>
 			))}
+
+			<MusicPlayer templateId={doc.templateId} />
 
 			<SwipeHint containerRef={containerRef} />
 
