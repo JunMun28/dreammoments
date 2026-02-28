@@ -635,3 +635,192 @@ html {
     animation: none !important;
   }
 }
+
+/* ─── RSVP Confirmation Animations ─── */
+.rsvp-confirmation {
+	text-align: center;
+	padding: 1.5rem;
+	animation: dm-canvas-fade-in 0.5s ease-out;
+}
+
+.rsvp-confetti {
+	position: relative;
+	height: 0;
+	overflow: visible;
+}
+
+.rsvp-confetti-dot {
+	position: absolute;
+	display: block;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	opacity: 0;
+}
+
+.rsvp-confetti-1 {
+	background: var(--dm-primary, #C4727F);
+	animation: dm-confetti-burst-1 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+}
+.rsvp-confetti-2 {
+	background: #D4AF37;
+	animation: dm-confetti-burst-2 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards;
+}
+.rsvp-confetti-3 {
+	background: var(--dm-primary, #C4727F);
+	animation: dm-confetti-burst-3 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.35s forwards;
+}
+.rsvp-confetti-4 {
+	background: #D4AF37;
+	animation: dm-confetti-burst-4 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.45s forwards;
+}
+.rsvp-confetti-5 {
+	background: var(--dm-primary, #C4727F);
+	animation: dm-confetti-burst-5 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards;
+}
+.rsvp-confetti-6 {
+	background: #D4AF37;
+	animation: dm-confetti-burst-6 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.55s forwards;
+}
+
+@keyframes dm-confetti-burst-1 {
+	0% { opacity: 1; transform: translate(0, 0) scale(1); }
+	100% { opacity: 0; transform: translate(-60px, -80px) scale(0.5); }
+}
+@keyframes dm-confetti-burst-2 {
+	0% { opacity: 1; transform: translate(0, 0) scale(1); }
+	100% { opacity: 0; transform: translate(70px, -90px) scale(0.4); }
+}
+@keyframes dm-confetti-burst-3 {
+	0% { opacity: 1; transform: translate(0, 0) scale(1); }
+	100% { opacity: 0; transform: translate(-40px, -110px) scale(0.6); }
+}
+@keyframes dm-confetti-burst-4 {
+	0% { opacity: 1; transform: translate(0, 0) scale(1); }
+	100% { opacity: 0; transform: translate(50px, -70px) scale(0.5); }
+}
+@keyframes dm-confetti-burst-5 {
+	0% { opacity: 1; transform: translate(0, 0) scale(1); }
+	100% { opacity: 0; transform: translate(-80px, -60px) scale(0.3); }
+}
+@keyframes dm-confetti-burst-6 {
+	0% { opacity: 1; transform: translate(0, 0) scale(1); }
+	100% { opacity: 0; transform: translate(90px, -50px) scale(0.4); }
+}
+
+.rsvp-check-circle {
+	width: 52px;
+	height: 52px;
+	margin: 1rem auto;
+}
+
+.rsvp-check-svg {
+	width: 100%;
+	height: 100%;
+}
+
+.rsvp-check-ring {
+	stroke: var(--dm-primary, #C4727F);
+	stroke-dasharray: 151;
+	stroke-dashoffset: 151;
+	animation: dm-check-ring 0.6s cubic-bezier(0.65, 0, 0.45, 1) 0.1s forwards;
+}
+
+.rsvp-check-mark {
+	stroke: var(--dm-primary, #C4727F);
+	stroke-dasharray: 36;
+	stroke-dashoffset: 36;
+	animation: dm-check-mark 0.4s cubic-bezier(0.65, 0, 0.45, 1) 0.6s forwards;
+}
+
+@keyframes dm-check-ring {
+	to { stroke-dashoffset: 0; }
+}
+
+@keyframes dm-check-mark {
+	to { stroke-dashoffset: 0; }
+}
+
+.rsvp-confirm-heading {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	margin-top: 0.75rem;
+}
+
+.rsvp-confirm-icon {
+	width: 1.25rem;
+	height: 1.25rem;
+	color: var(--dm-primary, #C4727F);
+}
+
+.rsvp-confirm-title {
+	font-size: 0.875rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.16em;
+	color: var(--dm-ink, #1A1A1A);
+}
+
+.rsvp-confirm-message {
+	margin-top: 0.25rem;
+	font-size: 0.8125rem;
+	color: var(--dm-muted, #888);
+}
+
+.rsvp-confirm-summary {
+	margin-top: 1rem;
+	border: 1px solid var(--dm-border, #E0E0E0);
+	border-radius: 0.75rem;
+	padding: 0.75rem;
+	text-align: left;
+}
+
+.rsvp-confirm-row {
+	display: flex;
+	justify-content: space-between;
+	padding: 0.25rem 0;
+	font-size: 0.75rem;
+}
+
+.rsvp-confirm-row dt {
+	color: var(--dm-muted, #888);
+}
+
+.rsvp-confirm-row dd {
+	color: var(--dm-ink, #1A1A1A);
+	font-weight: 500;
+}
+
+.rsvp-confirm-status {
+	text-transform: capitalize;
+}
+
+.rsvp-confirm-edit {
+	margin-top: 0.75rem;
+	font-size: 0.6875rem;
+	text-transform: uppercase;
+	letter-spacing: 0.14em;
+	color: var(--dm-primary, #C4727F);
+	background: none;
+	border: none;
+	cursor: pointer;
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.rsvp-confetti-dot {
+		/* biome-ignore lint/complexity/noImportantStyles: required for a11y override */
+		animation: none !important;
+	}
+	.rsvp-check-ring,
+	.rsvp-check-mark {
+		animation: none;
+		stroke-dashoffset: 0;
+	}
+	.rsvp-confirmation {
+		animation: none;
+	}
+}
