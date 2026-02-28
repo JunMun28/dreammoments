@@ -32,71 +32,86 @@ html {
   outline-offset: 2px;
 }
 
-/* ─── Modern Light Theme (Pastel Dream - Pink/Lilac/Cream) ─── */
+/* ─── Professional Editor Theme (Figma/Linear-inspired) ─── */
 :root {
   /* Core Surfaces */
-  --dm-bg:             #FFF9F9; /* Pale Cream/Pink - Warm and soft base */
-  --dm-surface:        #FFFFFF; /* White */
-  --dm-surface-muted:  #F9F5F9; /* Very pale lilac/grey */
+  --dm-bg:             #F8F8F8;
+  --dm-surface:        #FFFFFF;
+  --dm-surface-muted:  #F2F2F2;
   --dm-paper:          #FFFFFF;
-  
-  /* Text / Ink */
-  --dm-ink:            #4A4E55; /* Warm Grey - Softer contrast */
-  --dm-ink-muted:      #767A85; /* Medium Grey */
-  --dm-ink-soft:       #A1A5B0; /* Light Grey */
-  
-  /* Borders */
-  --dm-border:         #E0BBE4; /* Lilac - Soft borders */
-  --dm-border-soft:    #F2D9F2; /* Pale Lilac */
+  --dm-bg-soft:        #F2F2F2; /* Legacy alias for --dm-surface-muted */
 
-  /* Accents - Pastel Dream (Primary: pink-300/400) */
-  --dm-primary:        #fda4af; /* Pink 300 - Primary CTA */
-  --dm-primary-hover:  #fb7185; /* Pink 400 - Hover state */
-  --dm-primary-soft:   #FFE4E1; /* Misty Rose */
-  --dm-primary-text:   #1c1917; /* Neutral 900 - Dark text on pink */
-  
-  /* Secondary Accents */
-  --dm-accent:         #B5EAD7; /* Mint Green - Fresh contrast */
-  --dm-gold:           #E0BBE4; /* Replacing Gold with Lilac for this theme */
-  
+  /* Text / Ink */
+  --dm-ink:            #1A1A1A;
+  --dm-ink-muted:      #6B6B6B;
+  --dm-ink-soft:       #9B9B9B;
+  --dm-muted:          #9B9B9B; /* Legacy alias for --dm-ink-soft */
+
+  /* Borders */
+  --dm-border:         #E0E0E0;
+  --dm-border-soft:    #EBEBEB;
+
+  /* Accents — warm dusty rose */
+  --dm-primary:        #C4727F;
+  --dm-primary-hover:  #A85B67;
+  --dm-primary-soft:   rgba(196, 114, 127, 0.08);
+  --dm-primary-text:   #FFFFFF;
+
+  /* Legacy aliases — consolidate to --dm-primary in a future pass */
+  --dm-accent:         #C4727F;
+  --dm-gold:           #C4727F;
+  --dm-peach:          #C4727F;
+  --dm-on-accent:      #FFFFFF;
+  --dm-crimson:        #C4727F;
+  --dm-crimson-deep:   #A85B67;
+  --dm-sage:           #34A853;
+  --dm-lavender:       #C4727F;
+
   /* Semantic */
-  --dm-success:        #B5EAD7; /* Mint */
-  --dm-error:          #FFB7B2; /* Soft Red/Pink */
-  --dm-warning:        #FFDAC1; /* Peach */
+  --dm-success:        #34A853;
+  --dm-error:          #DC3545;
+  --dm-warning:        #F59E0B;
 
   /* Canvas editor */
-  --dm-accent-strong:  #8BB5A2; /* Sage green for focus/selection rings */
-  --dm-focus:          rgba(253, 164, 175, 0.4); /* Pink focus ring */
+  --dm-accent-strong:  #C4727F;
+  --dm-focus:          rgba(196, 114, 127, 0.4);
+  --dm-canvas-bg:      #EDEDED;
+  --dm-canvas-dot:     #D5D5D5;
 
-  /* Shadows (Soft Pastel Glow) */
-  --dm-shadow-sm:      0 1px 2px 0 rgb(74 78 85 / 0.05);
-  --dm-shadow-md:      0 4px 6px -1px rgb(74 78 85 / 0.05), 0 2px 4px -2px rgb(74 78 85 / 0.05);
-  --dm-shadow-lg:      0 10px 15px -3px rgb(74 78 85 / 0.05), 0 4px 6px -4px rgb(74 78 85 / 0.05);
-  --dm-shadow-xl:      0 20px 25px -5px rgb(74 78 85 / 0.05), 0 8px 10px -6px rgb(74 78 85 / 0.05);
-  --dm-shadow-glow:    0 0 20px rgba(255, 183, 178, 0.4); /* Pink glow */
-  
-  /* Radii */
-  --radius-sm:         0.5rem;
-  --radius-md:         0.75rem;
-  --radius-lg:         1rem;
-  --radius-xl:         1.5rem;
-  --radius-2xl:        2rem;
-  
-  /* Typography */
-  --font-display:      "Playfair Display", serif;
+  /* Z-index */
+  --dm-z-modal:        50;
+
+  /* Shadows — subtle, neutral */
+  --dm-shadow-sm:      0 1px 2px 0 rgb(0 0 0 / 0.04);
+  --dm-shadow-md:      0 2px 4px -1px rgb(0 0 0 / 0.06);
+  --dm-shadow-lg:      0 4px 8px -2px rgb(0 0 0 / 0.06);
+  --dm-shadow-xl:      0 8px 16px -4px rgb(0 0 0 / 0.08);
+  --dm-shadow-glow:    none;
+
+  /* Radii — tight, tool-like */
+  --radius-sm:         0.25rem;
+  --radius-md:         0.375rem;
+  --radius-lg:         0.5rem;
+  --radius-xl:         0.75rem;
+  --radius-2xl:        1rem;
+
+  /* Typography — Inter only for editor chrome */
+  --font-display:      "Inter", sans-serif;
   --font-body:         "Inter", sans-serif;
-  --font-heading:      "Playfair Display", serif;
+  --font-heading:      "Inter", sans-serif;
 }
 
 @theme inline {
   /* Colors */
   --color-dm-bg: var(--dm-bg);
+  --color-dm-bg-soft: var(--dm-bg-soft);
   --color-dm-surface: var(--dm-surface);
   --color-dm-surface-muted: var(--dm-surface-muted);
   --color-dm-paper: var(--dm-paper);
   --color-dm-ink: var(--dm-ink);
   --color-dm-ink-muted: var(--dm-ink-muted);
   --color-dm-ink-soft: var(--dm-ink-soft);
+  --color-dm-muted: var(--dm-muted);
   --color-dm-border: var(--dm-border);
   --color-dm-border-soft: var(--dm-border-soft);
   --color-dm-primary: var(--dm-primary);
@@ -105,15 +120,22 @@ html {
   --color-dm-primary-text: var(--dm-primary-text);
   --color-dm-accent: var(--dm-accent);
   --color-dm-gold: var(--dm-gold);
+  --color-dm-peach: var(--dm-peach);
+  --color-dm-on-accent: var(--dm-on-accent);
+  --color-dm-crimson: var(--dm-crimson);
+  --color-dm-crimson-deep: var(--dm-crimson-deep);
+  --color-dm-sage: var(--dm-sage);
+  --color-dm-lavender: var(--dm-lavender);
+  --color-dm-accent-strong: var(--dm-accent-strong);
   --color-dm-success: var(--dm-success);
   --color-dm-error: var(--dm-error);
   --color-dm-warning: var(--dm-warning);
-  
+
   /* Fonts */
   --font-display: var(--font-display);
   --font-heading: var(--font-heading);
   --font-body: var(--font-body);
-  
+
   /* Shadows */
   --shadow-glow: var(--dm-shadow-glow);
 }
@@ -129,21 +151,28 @@ html {
   }
 }
 
+/* Canvas dot grid background */
+.dm-canvas-grid {
+  background-color: var(--dm-canvas-bg);
+  background-image: radial-gradient(circle, var(--dm-canvas-dot) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
 /* Utilities */
 .dm-container {
   @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
 }
 
 .dm-button-primary {
-  @apply inline-flex items-center justify-center px-6 py-3 rounded-full bg-dm-primary text-dm-primary-text font-medium transition-all duration-300 hover:bg-dm-primary-hover hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0;
+  @apply inline-flex items-center justify-center px-6 py-3 rounded-lg bg-dm-primary text-dm-primary-text font-medium transition-all duration-200 hover:bg-dm-primary-hover active:translate-y-0;
 }
 
 .dm-button-secondary {
-  @apply inline-flex items-center justify-center px-6 py-3 rounded-full bg-white border border-dm-border text-dm-ink font-medium transition-all duration-300 hover:border-dm-ink-muted hover:shadow-md hover:-translate-y-0.5 active:translate-y-0;
+  @apply inline-flex items-center justify-center px-6 py-3 rounded-lg bg-white border border-dm-border text-dm-ink font-medium transition-all duration-200 hover:border-dm-ink-muted active:translate-y-0;
 }
 
 .dm-card {
-  @apply bg-white rounded-2xl border border-dm-border shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+  @apply bg-white rounded-lg border border-dm-border shadow-sm transition-all duration-200 hover:shadow-md;
 }
 
 /* Typography Utilities */
@@ -161,10 +190,6 @@ html {
 
 .text-body-lg {
   @apply font-body text-lg text-dm-ink-muted leading-relaxed;
-}
-
-.text-body {
-  @apply font-body text-base text-dm-ink-muted leading-relaxed;
 }
 
 .text-body {
@@ -330,15 +355,12 @@ html {
   z-index: 30;
   padding: 0.25rem 0.5rem;
   border-radius: 0.375rem;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid var(--dm-border-soft);
+  background: var(--dm-surface);
+  border: 1px solid var(--dm-border);
   font-size: 0.65rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-weight: 500;
   color: var(--dm-ink-muted);
   cursor: pointer;
-  backdrop-filter: blur(4px);
   opacity: 0;
   transition: opacity 0.2s, background 0.2s;
 }
@@ -347,8 +369,8 @@ html {
   opacity: 1;
 }
 .dm-ai-button:hover {
-  background: var(--dm-primary-soft);
-  color: var(--dm-primary-hover);
+  background: var(--dm-surface-muted);
+  color: var(--dm-ink);
   border-color: var(--dm-primary);
 }
 
@@ -426,7 +448,7 @@ html {
 @keyframes section-highlight {
   from {
     opacity: 0.5;
-    background-color: color-mix(in srgb, var(--dm-peach, #e8a87c) 10%, transparent);
+    background-color: color-mix(in srgb, var(--dm-peach) 10%, transparent);
   }
   to {
     opacity: 1;
@@ -441,5 +463,83 @@ html {
 @media (prefers-reduced-motion: reduce) {
   .section-highlight {
     animation: none;
+  }
+}
+
+/* ─── Premium Template Effects ─── */
+@keyframes dm-ken-burns {
+  0% {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  100% {
+    transform: scale(1.08) translate3d(-1%, -1%, 0);
+  }
+}
+
+.dm-ken-burns {
+  animation: dm-ken-burns 14s ease-in-out alternate infinite;
+  will-change: transform;
+}
+
+.dm-gold-foil {
+  background: linear-gradient(110deg, #D4AF37 0%, #FFE89D 45%, #D4AF37 55%, #B8860B 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: dm-shimmer-sweep 4s ease-in-out infinite;
+}
+
+.dm-rose-gold-foil {
+  background: linear-gradient(110deg, #B76E79 0%, #F0D0C8 45%, #B76E79 55%, #8B5E68 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: dm-shimmer-sweep 4s ease-in-out infinite;
+}
+
+@keyframes dm-blur-in {
+  from {
+    opacity: 0;
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+/* ─── Scene Page Snap Scroll ─── */
+.dm-scene-container {
+  height: 100svh;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.dm-scene-page {
+  scroll-snap-align: start;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dm-ken-burns {
+    animation: none;
+  }
+  .dm-gold-foil,
+  .dm-rose-gold-foil {
+    animation: none;
+  }
+  .dm-scene-container {
+    scroll-snap-type: none;
+    scroll-behavior: auto;
   }
 }
