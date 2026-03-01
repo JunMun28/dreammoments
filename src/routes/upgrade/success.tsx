@@ -27,9 +27,7 @@ function UpgradeSuccessScreen() {
 		}, VERIFICATION_TIMEOUT_MS);
 
 		try {
-			const result = await getPaymentStatusFn({
-				data: {} as Record<string, never>,
-			});
+			const result = await getPaymentStatusFn();
 
 			if ("isPremium" in result && result.isPremium) {
 				setVerified(true);

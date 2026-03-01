@@ -75,14 +75,9 @@ export const checkSlugAvailabilityFn = createServerFn({
 
 // ── List user invitations ───────────────────────────────────────────
 
-const getInvitationsSchema = z.object({});
-
 export const getInvitations = createServerFn({
 	method: "GET",
 })
-	.inputValidator((data: Record<string, never>) =>
-		parseInput(getInvitationsSchema, data),
-	)
 	// @ts-expect-error ServerFn inference expects stricter JSON type than Record<string, unknown>
 	.handler(async () => {
 		const { userId } = await requireAuth();

@@ -206,31 +206,25 @@ export const handleStripeWebhookFn = createServerFn({ method: "POST" })
 
 // ── Payment Status ──────────────────────────────────────────────────
 
-const paymentStatusSchema = z.object({});
+export const getPaymentStatusFn = createServerFn({ method: "GET" }).handler(
+	async (): Promise<
+		{ plan: string; isPremium: boolean } | { error: string }
+	> => {
+		const { userId } = await requireAuth();
 
-export const getPaymentStatusFn = createServerFn({ method: "GET" })
-	.inputValidator((data: Record<string, never>) =>
-		parseInput(paymentStatusSchema, data),
-	)
-	.handler(
-		async (): Promise<
-			{ plan: string; isPremium: boolean } | { error: string }
-		> => {
-			const { userId } = await requireAuth();
+		const db = getDbOrNull();
+		if (!db) throw new Error("Database connection required");
 
-			const db = getDbOrNull();
-			if (!db) throw new Error("Database connection required");
+		const [user] = await db
+			.select({ plan: schema.users.plan })
+			.from(schema.users)
+			.where(eq(schema.users.id, userId));
 
-			const [user] = await db
-				.select({ plan: schema.users.plan })
-				.from(schema.users)
-				.where(eq(schema.users.id, userId));
+		if (!user) {
+			return { error: "User not found." };
+		}
 
-			if (!user) {
-				return { error: "User not found." };
-			}
-
-			const plan = user.plan ?? "free";
-			return { plan, isPremium: plan === "premium" };
-		},
-	);
+		const plan = user.plan ?? "free";
+		return { plan, isPremium: plan === "premium" };
+	},
+);

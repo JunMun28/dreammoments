@@ -3,10 +3,13 @@ import {
 	SignedOut,
 	SignInButton,
 	UserButton,
+	useAuth,
 } from "@clerk/tanstack-react-start";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { getPaymentStatusFn } from "../api/payments";
 import { useFocusTrap } from "./editor/hooks/useFocusTrap";
 
 const navItems = [
@@ -17,6 +20,17 @@ const navItems = [
 
 export default function Header() {
 	const [open, setOpen] = useState(false);
+	const { isSignedIn } = useAuth();
+	const { data: planData } = useQuery({
+		queryKey: ["payment-status"],
+		queryFn: async () => {
+			const result = await getPaymentStatusFn();
+			if ("error" in result) return null;
+			return result;
+		},
+		enabled: !!isSignedIn,
+	});
+	const isFreePlan = isSignedIn && planData && !planData.isPremium;
 	const hamburgerRef = useRef<HTMLButtonElement>(null);
 	const menuRef = useRef<HTMLDivElement>(null);
 
@@ -84,6 +98,14 @@ export default function Header() {
 								</Link>
 							</SignedOut>
 							<SignedIn>
+								{isFreePlan && (
+									<Link
+										to="/upgrade"
+										className="rounded-full inline-flex items-center justify-center border border-dm-peach/40 bg-dm-surface px-4 py-2 text-xs font-semibold leading-none text-dm-ink"
+									>
+										Upgrade
+									</Link>
+								)}
 								<Link
 									to="/dashboard"
 									className="rounded-full inline-flex items-center justify-center bg-dm-ink px-5 py-2.5 text-sm font-semibold leading-none text-white shadow-[0_4px_20px_-2px_rgba(0,0,0,0.12)]"
@@ -143,6 +165,15 @@ export default function Header() {
 								>
 									Open App
 								</Link>
+								{isFreePlan && (
+									<Link
+										to="/upgrade"
+										className="rounded-full inline-flex items-center justify-center border border-dm-peach/40 px-4 py-2 text-center text-xs font-semibold leading-none text-dm-ink"
+										onClick={closeMenu}
+									>
+										Upgrade
+									</Link>
+								)}
 							</SignedIn>
 							<SignedOut>
 								<Link

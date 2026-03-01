@@ -36,7 +36,7 @@ export function useInvitations() {
 	return useQuery({
 		queryKey: invitationKeys.all,
 		queryFn: async () => {
-			const result = await getInvitations({ data: {} });
+			const result = await getInvitations();
 			if (
 				result &&
 				typeof result === "object" &&

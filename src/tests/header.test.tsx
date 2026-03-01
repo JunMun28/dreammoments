@@ -14,11 +14,20 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 
 vi.mock("@clerk/tanstack-react-start", () => ({
+	useAuth: () => ({ isSignedIn: false }),
 	useUser: () => ({ isSignedIn: false }),
 	SignedIn: (_props: { children: ReactNode }) => null,
 	SignedOut: ({ children }: { children: ReactNode }) => <>{children}</>,
 	SignInButton: ({ children }: { children: ReactNode }) => <>{children}</>,
 	UserButton: () => null,
+}));
+
+vi.mock("@tanstack/react-query", () => ({
+	useQuery: () => ({ data: null }),
+}));
+
+vi.mock("../api/payments", () => ({
+	getPaymentStatusFn: vi.fn(),
 }));
 
 describe("header", () => {
