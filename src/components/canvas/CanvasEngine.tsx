@@ -1,4 +1,10 @@
-import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
+import {
+	type CSSProperties,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import type { CanvasDocument } from "@/lib/canvas/types";
 import { toCssProperties } from "@/lib/canvas/types";
 import { cn } from "@/lib/utils";

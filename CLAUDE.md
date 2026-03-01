@@ -45,7 +45,7 @@ src/
   components/
     editor/            # Editor UI (context panel, toolbar, field renderers, inline edit, AI assistant)
       hooks/           # Editor hooks (useAutoSave, useEditorState, useFieldValidation, useInlineEdit, etc.)
-    templates/         # 4 wedding invitation templates (blush-romance, eternal-elegance, garden-romance, love-at-dusk)
+    templates/         # Wedding invitation template (double-happiness)
     landing/           # Landing page sections
     share/             # Share/invite modal
     ui/                # Shared UI primitives (LoadingSpinner, Skeleton)
@@ -77,6 +77,16 @@ tests/
 - Requires `DATABASE_URL` env var for PostgreSQL
 - Google OAuth: `VITE_GOOGLE_CLIENT_ID`, `VITE_GOOGLE_REDIRECT_URI`
 - Local env file: `.env.local`
+
+## Pre-commit Checklist
+
+Before every commit, run these commands and ensure they all pass:
+
+```
+pnpm check            # Biome lint + format (CI runs this — must pass)
+npx tsc --noEmit      # TypeScript type check
+pnpm test --run       # Unit tests
+```
 
 ## Conventions
 
