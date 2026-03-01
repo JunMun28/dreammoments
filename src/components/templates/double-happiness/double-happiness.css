@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&display=swap");
+
 /* ─── Double Happiness Template (囍临门) ─── */
 
 /* Root wrapper scopes all template styles */
@@ -10,6 +12,8 @@
 	--t-muted: #8b7355;
 	--t-bg-alt: #ffffff;
 	--t-accent-light: #f5e6c8;
+	--t-accent-deep: #b8860b;
+	--t-accent-glow: rgba(212, 168, 67, 0.15);
 	max-width: 430px;
 	margin-left: auto;
 	margin-right: auto;
@@ -117,51 +121,66 @@
 	transform: translate3d(0, 30px, 0);
 }
 
-/* ── Countdown styling (design rules §2.2) ── */
+/* ── Countdown styling (enhanced) ── */
 .double-happiness .countdown-widget {
 	text-align: center;
+	padding: 2rem 1.5rem;
+}
+
+.double-happiness .countdown-date {
+	font-size: 0.875rem;
+	letter-spacing: 0.25em;
+	color: var(--t-muted);
+	margin-bottom: 1.5rem;
+}
+
+.double-happiness .countdown-date-zh {
+	font-size: 1rem;
+	letter-spacing: 0.3em;
+	color: var(--t-text);
+	margin-bottom: 0.5rem;
 }
 
 .double-happiness .countdown-units {
 	display: flex;
 	justify-content: center;
-	align-items: center;
-	gap: 0.5rem;
+	align-items: flex-start;
+	gap: 0.25rem;
 }
 
 .double-happiness .countdown-unit-wrapper {
 	display: flex;
-	align-items: center;
-	gap: 0.5rem;
+	align-items: flex-start;
+	gap: 0.25rem;
 }
 
 .double-happiness .countdown-unit {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	min-width: 4rem;
+	min-width: 4.5rem;
 }
 
 .double-happiness .countdown-value {
-	font-size: 2rem;
+	font-size: 2.5rem;
 	font-weight: 700;
-	line-height: 1.2;
+	line-height: 1.1;
 	color: var(--t-text);
+	font-variant-numeric: tabular-nums;
 }
 
 .double-happiness .countdown-label {
-	font-size: 0.625rem;
+	font-size: 0.5625rem;
 	text-transform: uppercase;
 	letter-spacing: 0.3em;
 	color: var(--t-muted);
-	margin-top: 0.25rem;
+	margin-top: 0.5rem;
 }
 
 .double-happiness .countdown-separator {
-	font-size: 1.5rem;
+	font-size: 1.75rem;
 	color: var(--t-accent);
 	font-weight: 300;
-	align-self: flex-start;
 	margin-top: 0.25rem;
 }
 
@@ -172,11 +191,150 @@
 }
 
 .double-happiness .countdown-timezone {
-	font-size: 0.625rem;
+	font-size: 0.5625rem;
 	text-transform: uppercase;
 	letter-spacing: 0.2em;
 	color: var(--t-muted);
-	margin-top: 1rem;
+	margin-top: 1.25rem;
+}
+
+/* ── Gold foil shimmer effect ── */
+.dh-gold-shimmer {
+	background: linear-gradient(
+		110deg,
+		var(--t-accent) 0%,
+		var(--t-accent-light) 45%,
+		#fff 50%,
+		var(--t-accent-light) 55%,
+		var(--t-accent) 100%
+	);
+	background-size: 200% 100%;
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+	color: transparent;
+	animation: dh-gold-shimmer 3s ease-in-out infinite;
+}
+
+@keyframes dh-gold-shimmer {
+	0%,
+	100% {
+		background-position: 200% center;
+	}
+	50% {
+		background-position: 0% center;
+	}
+}
+
+/* ── Ornamental double-border frame ── */
+.dh-ornamental-frame {
+	position: relative;
+	border: 2px solid rgba(212, 168, 67, 0.3);
+	padding: 2rem;
+	border-radius: 4px;
+}
+
+.dh-ornamental-frame::before {
+	content: "";
+	position: absolute;
+	inset: 6px;
+	border: 1px solid rgba(212, 168, 67, 0.15);
+	border-radius: 2px;
+	pointer-events: none;
+}
+
+/* ── Enhanced milestone card ── */
+.dh-milestone-card {
+	background: #ffffff;
+	border: 1px solid rgba(212, 168, 67, 0.15);
+	border-radius: 12px;
+	padding: 1.25rem;
+	box-shadow: 0 2px 8px rgba(43, 18, 22, 0.05);
+}
+
+/* ── Enhanced schedule event card ── */
+.dh-event-card {
+	background: #ffffff;
+	border: 1px solid rgba(212, 168, 67, 0.15);
+	border-radius: 12px;
+	padding: 1.25rem;
+	box-shadow: 0 4px 16px rgba(43, 18, 22, 0.06);
+	display: flex;
+	gap: 1rem;
+}
+
+.dh-event-card-stripe {
+	width: 3px;
+	flex-shrink: 0;
+	border-radius: 9999px;
+	background: linear-gradient(180deg, var(--t-primary), var(--t-accent));
+}
+
+/* ── Enhanced photo frame with gold glow ── */
+.dh-photo-frame-premium {
+	border: 1px solid rgba(212, 168, 67, 0.3);
+	box-shadow:
+		0 2px 8px rgba(43, 18, 22, 0.08),
+		0 4px 16px rgba(212, 168, 67, 0.1);
+	border-radius: 16px;
+	overflow: hidden;
+}
+
+/* ── Double-ring portrait frame ── */
+.dh-portrait-frame {
+	position: relative;
+	border-radius: 50%;
+}
+
+.dh-portrait-frame::before {
+	content: "";
+	position: absolute;
+	inset: -6px;
+	border-radius: 50%;
+	border: 2px solid rgba(212, 168, 67, 0.4);
+	pointer-events: none;
+}
+
+.dh-portrait-frame::after {
+	content: "";
+	position: absolute;
+	inset: -2px;
+	border-radius: 50%;
+	border: 1px solid rgba(212, 168, 67, 0.2);
+	pointer-events: none;
+}
+
+/* ── Enhanced timeline dot ── */
+.dh-timeline-dot-premium {
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+	background-color: var(--t-primary);
+	border: 2px solid var(--t-accent);
+	box-shadow: 0 0 0 3px rgba(212, 168, 67, 0.1);
+}
+
+/* ── Ken Burns hero animation ── */
+.dh-ken-burns {
+	animation: dm-ken-burns 14s ease-in-out infinite alternate;
+}
+
+/* ── Music player vinyl spin ── */
+.dh-music-spin {
+	animation: dh-vinyl-spin 4s linear infinite;
+}
+
+.dh-music-spin.paused {
+	animation-play-state: paused;
+}
+
+@keyframes dh-vinyl-spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
 }
 
 /* ── Reduced motion ── */

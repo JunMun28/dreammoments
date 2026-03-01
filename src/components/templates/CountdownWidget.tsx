@@ -115,6 +115,7 @@ type CountdownWidgetProps = {
 	targetDate: string;
 	timezone?: string;
 	eventTime?: string;
+	displayDate?: string;
 	className?: string;
 };
 
@@ -129,6 +130,7 @@ export function CountdownWidget({
 	targetDate,
 	timezone = DEFAULT_TIMEZONE,
 	eventTime,
+	displayDate,
 	className,
 }: CountdownWidgetProps) {
 	const [state, setState] = useState(() =>
@@ -219,6 +221,7 @@ export function CountdownWidget({
 			<span className="sr-only" aria-live="polite">
 				{timeLeft.days} days, {timeLeft.hours} hours until the wedding
 			</span>
+			{displayDate && <p className="countdown-date-zh">{displayDate}</p>}
 			<div className="countdown-units" aria-hidden="true">
 				{UNITS.map((unit, index) => (
 					<div key={unit.key} className="countdown-unit-wrapper">

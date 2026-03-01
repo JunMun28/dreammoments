@@ -1052,3 +1052,10 @@ html {
     animation: none;
   }
 }
+
+/* Gold dust particle decoration — hidden when reduced motion is preferred */
+@media (prefers-reduced-motion: reduce) {
+  .dm-gold-dust {
+    display: none;
+  }
+}
