@@ -54,7 +54,6 @@ function chainable(result: unknown[] = []) {
 
 vi.mock("@/db/index", () => ({
 	getDbOrNull: vi.fn(() => null),
-	isProduction: vi.fn(() => false),
 	schema: {
 		invitations: {
 			id: "id",
@@ -68,33 +67,6 @@ vi.mock("@/db/index", () => ({
 
 vi.mock("@/lib/server-auth", () => ({
 	requireAuth: vi.fn(async () => ({ userId: "user-a" })),
-}));
-
-vi.mock("@/lib/data", () => ({
-	createInvitationSnapshot: vi.fn(),
-	createInvitation: vi.fn(() => ({
-		id: "local-inv-1",
-		userId: "user-a",
-		templateId: "double-happiness",
-		title: "Sample",
-		status: "draft",
-	})),
-	deleteInvitation: vi.fn(),
-	getInvitationById: vi.fn(() => null),
-	listInvitationsByUser: vi.fn(() => []),
-	publishInvitation: vi.fn(() => ({
-		id: "local-inv-1",
-		status: "published",
-		slug: "alice-bob",
-	})),
-	unpublishInvitation: vi.fn(() => ({
-		id: "local-inv-1",
-		status: "draft",
-	})),
-	updateInvitation: vi.fn(() => ({
-		id: "local-inv-1",
-		title: "Updated",
-	})),
 }));
 
 vi.mock("@/lib/slug", () => ({
@@ -136,20 +108,16 @@ import {
 	updateInvitationFn,
 } from "@/api/invitations";
 import { getDbOrNull } from "@/db/index";
-import {
-	getInvitationById as localGetInvitationById,
-	listInvitationsByUser as localListInvitationsByUser,
-} from "@/lib/data";
 import { requireAuth } from "@/lib/server-auth";
 
 const mockedGetDbOrNull = vi.mocked(getDbOrNull);
 const mockedRequireAuth = vi.mocked(requireAuth);
-const mockedLocalGetById = vi.mocked(localGetInvitationById);
-const mockedLocalListByUser = vi.mocked(localListInvitationsByUser);
 
 beforeEach(() => {
 	vi.clearAllMocks();
-	mockedGetDbOrNull.mockReturnValue(null);
+	mockedGetDbOrNull.mockReturnValue(
+		mockDb as unknown as ReturnType<typeof getDbOrNull>,
+	);
 	mockedRequireAuth.mockResolvedValue({ userId: "user-a" });
 });
 
@@ -158,17 +126,6 @@ beforeEach(() => {
 // ---------------------------------------------------------------------------
 
 describe("getInvitations", () => {
-	test("returns user invitations from localStorage fallback", async () => {
-		mockedLocalListByUser.mockReturnValue([]);
-
-		const result = await (getInvitations as CallableFunction)({
-			token: "valid-token",
-		});
-
-		expect(result).toEqual([]);
-		expect(mockedRequireAuth).toHaveBeenCalledWith("valid-token");
-	});
-
 	test("returns invitations from DB", async () => {
 		const now = new Date();
 		const dbInvitations = [
@@ -197,55 +154,6 @@ describe("getInvitations", () => {
 });
 
 describe("getInvitation", () => {
-	test("returns invitation when user owns it (fallback)", async () => {
-		const inv = {
-			id: "inv-1",
-			userId: "user-a",
-			title: "My Wedding",
-		};
-		mockedLocalGetById.mockReturnValue(
-			inv as unknown as ReturnType<typeof localGetInvitationById>,
-		);
-
-		const result = await (getInvitation as CallableFunction)({
-			invitationId: "inv-1",
-			token: "valid-token",
-		});
-
-		expect(result).toEqual(inv);
-	});
-
-	test("denies access when user does not own invitation (fallback)", async () => {
-		const inv = {
-			id: "inv-1",
-			userId: "user-b",
-			title: "Not My Wedding",
-		};
-		mockedLocalGetById.mockReturnValue(
-			inv as unknown as ReturnType<typeof localGetInvitationById>,
-		);
-
-		const result = (await (getInvitation as CallableFunction)({
-			invitationId: "inv-1",
-			token: "valid-token",
-		})) as { error: string };
-
-		expect(result.error).toBe("Access denied");
-	});
-
-	test("returns error when invitation not found (fallback)", async () => {
-		mockedLocalGetById.mockReturnValue(
-			null as unknown as ReturnType<typeof localGetInvitationById>,
-		);
-
-		const result = (await (getInvitation as CallableFunction)({
-			invitationId: "nonexistent",
-			token: "valid-token",
-		})) as { error: string };
-
-		expect(result.error).toContain("not found");
-	});
-
 	test("returns invitation from DB when user owns it", async () => {
 		const dbInv = {
 			id: "inv-1",
@@ -283,16 +191,6 @@ describe("getInvitation", () => {
 });
 
 describe("createInvitationFn", () => {
-	test("creates invitation (fallback path)", async () => {
-		const result = await (createInvitationFn as CallableFunction)({
-			token: "valid-token",
-			templateId: "double-happiness",
-		});
-
-		expect(result).toBeDefined();
-		expect(result.id).toBe("local-inv-1");
-	});
-
 	test("creates invitation with DB", async () => {
 		const created = {
 			id: "db-inv-1",
@@ -322,44 +220,6 @@ describe("createInvitationFn", () => {
 });
 
 describe("updateInvitationFn", () => {
-	test("updates invitation (fallback path)", async () => {
-		const inv = {
-			id: "inv-1",
-			userId: "user-a",
-			title: "Old Title",
-		};
-		mockedLocalGetById.mockReturnValue(
-			inv as unknown as ReturnType<typeof localGetInvitationById>,
-		);
-
-		const result = await (updateInvitationFn as CallableFunction)({
-			invitationId: "inv-1",
-			token: "valid-token",
-			title: "New Title",
-		});
-
-		expect(result).toBeDefined();
-	});
-
-	test("denies update for wrong user (fallback)", async () => {
-		const inv = {
-			id: "inv-1",
-			userId: "user-b",
-			title: "Not Mine",
-		};
-		mockedLocalGetById.mockReturnValue(
-			inv as unknown as ReturnType<typeof localGetInvitationById>,
-		);
-
-		const result = (await (updateInvitationFn as CallableFunction)({
-			invitationId: "inv-1",
-			token: "valid-token",
-			title: "Hacked",
-		})) as { error: string };
-
-		expect(result.error).toBe("Access denied");
-	});
-
 	test("denies update for wrong user (DB path)", async () => {
 		const existing = { userId: "user-b" };
 		const selectChain = chainable([existing]);
@@ -416,40 +276,6 @@ describe("updateInvitationFn", () => {
 });
 
 describe("deleteInvitationFn", () => {
-	test("deletes invitation (fallback path)", async () => {
-		const inv = {
-			id: "inv-1",
-			userId: "user-a",
-		};
-		mockedLocalGetById.mockReturnValue(
-			inv as unknown as ReturnType<typeof localGetInvitationById>,
-		);
-
-		const result = (await (deleteInvitationFn as CallableFunction)({
-			invitationId: "inv-1",
-			token: "valid-token",
-		})) as { success: boolean };
-
-		expect(result.success).toBe(true);
-	});
-
-	test("denies delete for wrong user (fallback)", async () => {
-		const inv = {
-			id: "inv-1",
-			userId: "user-b",
-		};
-		mockedLocalGetById.mockReturnValue(
-			inv as unknown as ReturnType<typeof localGetInvitationById>,
-		);
-
-		const result = (await (deleteInvitationFn as CallableFunction)({
-			invitationId: "inv-1",
-			token: "valid-token",
-		})) as { error: string };
-
-		expect(result.error).toBe("Access denied");
-	});
-
 	test("denies delete for wrong user (DB path)", async () => {
 		const existing = { userId: "user-b" };
 		const selectChain = chainable([existing]);
@@ -486,15 +312,19 @@ describe("deleteInvitationFn", () => {
 });
 
 describe("publishInvitationFn", () => {
-	test("publishes invitation (fallback path)", async () => {
+	test("publishes invitation (DB path)", async () => {
 		const inv = {
 			id: "inv-1",
 			userId: "user-a",
+			slug: "alice-bob",
+			status: "draft",
 			content: { hero: { partnerOneName: "Alice", partnerTwoName: "Bob" } },
 		};
-		mockedLocalGetById.mockReturnValue(
-			inv as unknown as ReturnType<typeof localGetInvitationById>,
-		);
+		const updated = { ...inv, status: "published", publishedAt: "2026-01-01" };
+		const selectChain = chainable([inv]);
+		const updateChain = chainable([updated]);
+		mockDb.select.mockReturnValue(selectChain);
+		mockDb.update.mockReturnValue(updateChain);
 
 		const result = await (publishInvitationFn as CallableFunction)({
 			invitationId: "inv-1",
@@ -505,14 +335,13 @@ describe("publishInvitationFn", () => {
 		expect(result.status).toBe("published");
 	});
 
-	test("denies publish for wrong user (fallback)", async () => {
+	test("denies publish for wrong user (DB path)", async () => {
 		const inv = {
 			id: "inv-1",
 			userId: "user-b",
 		};
-		mockedLocalGetById.mockReturnValue(
-			inv as unknown as ReturnType<typeof localGetInvitationById>,
-		);
+		const selectChain = chainable([inv]);
+		mockDb.select.mockReturnValue(selectChain);
 
 		const result = (await (publishInvitationFn as CallableFunction)({
 			invitationId: "inv-1",
@@ -524,15 +353,6 @@ describe("publishInvitationFn", () => {
 });
 
 describe("checkSlugAvailabilityFn", () => {
-	test("returns available when no DB", async () => {
-		const result = (await (checkSlugAvailabilityFn as CallableFunction)({
-			token: "valid-token",
-			slug: "alice-bob",
-		})) as { available: boolean };
-
-		expect(result.available).toBe(true);
-	});
-
 	test("returns available when slug not taken (DB)", async () => {
 		const selectChain = chainable([]);
 		mockDb.select.mockReturnValue(selectChain);
@@ -581,7 +401,7 @@ describe("checkSlugAvailabilityFn", () => {
 });
 
 describe("patchInvitationContentFn", () => {
-	test("patches specific content field (fallback path)", async () => {
+	test("patches specific content field (DB path)", async () => {
 		const inv = {
 			id: "inv-1",
 			userId: "user-a",
@@ -595,9 +415,10 @@ describe("patchInvitationContentFn", () => {
 				schedule: { events: [] },
 			},
 		};
-		mockedLocalGetById.mockReturnValue(
-			inv as unknown as ReturnType<typeof localGetInvitationById>,
-		);
+		const selectChain = chainable([inv]);
+		const updateChain = chainable([inv]);
+		mockDb.select.mockReturnValue(selectChain);
+		mockDb.update.mockReturnValue(updateChain);
 
 		const result = await (patchInvitationContentFn as CallableFunction)({
 			invitationId: "inv-1",
@@ -609,11 +430,10 @@ describe("patchInvitationContentFn", () => {
 		expect(result.error).toBeUndefined();
 	});
 
-	test("denies patch for wrong user (fallback)", async () => {
+	test("denies patch for wrong user (DB path)", async () => {
 		const inv = { id: "inv-1", userId: "user-b", content: {} };
-		mockedLocalGetById.mockReturnValue(
-			inv as unknown as ReturnType<typeof localGetInvitationById>,
-		);
+		const selectChain = chainable([inv]);
+		mockDb.select.mockReturnValue(selectChain);
 
 		const result = (await (patchInvitationContentFn as CallableFunction)({
 			invitationId: "inv-1",
@@ -631,9 +451,8 @@ describe("patchInvitationContentFn", () => {
 			userId: "user-a",
 			content: {},
 		};
-		mockedLocalGetById.mockReturnValue(
-			inv as unknown as ReturnType<typeof localGetInvitationById>,
-		);
+		const selectChain = chainable([inv]);
+		mockDb.select.mockReturnValue(selectChain);
 
 		await expect(
 			(patchInvitationContentFn as CallableFunction)({

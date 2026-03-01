@@ -5,7 +5,6 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 import { publishInvitationFn } from "@/api/invitations";
 import type { CanvasDocument } from "@/lib/canvas/types";
 import { createEmptyCanvasDocument } from "@/lib/canvas/types";
-import { publishInvitation, updateInvitation } from "@/lib/data";
 import { CanvasEditor } from "./CanvasEditor";
 
 function clearStorageFallback(storage: unknown) {
@@ -41,16 +40,6 @@ vi.mock("@/api/invitations", async () => {
 		...actual,
 		publishInvitationFn: vi.fn(),
 		updateInvitationFn: vi.fn(async () => ({})),
-	};
-});
-
-vi.mock("@/lib/data", async () => {
-	const actual =
-		await vi.importActual<typeof import("@/lib/data")>("@/lib/data");
-	return {
-		...actual,
-		publishInvitation: vi.fn(),
-		updateInvitation: vi.fn(),
 	};
 });
 
@@ -109,6 +98,21 @@ describe("CanvasEditor", () => {
 			configurable: true,
 			value: vi.fn(),
 		});
+		if (typeof window.matchMedia !== "function") {
+			Object.defineProperty(window, "matchMedia", {
+				configurable: true,
+				value: vi.fn().mockImplementation((query: string) => ({
+					matches: false,
+					media: query,
+					onchange: null,
+					addListener: vi.fn(),
+					removeListener: vi.fn(),
+					addEventListener: vi.fn(),
+					removeEventListener: vi.fn(),
+					dispatchEvent: vi.fn(),
+				})),
+			});
+		}
 	});
 
 	test("supports shift multi-select", () => {
@@ -324,49 +328,24 @@ describe("CanvasEditor", () => {
 			publishedAt: "2026-02-17T08:00:00.000Z",
 			templateVersion: "v2",
 		} as Awaited<ReturnType<typeof publishInvitationFn>>);
-		const originalLocalStorage = window.localStorage;
-		Object.defineProperty(window, "localStorage", {
-			configurable: true,
-			value: {
-				...originalLocalStorage,
-				getItem: (key: string) =>
-					key === "dm-auth-token" ? "token-123" : null,
-			},
-		});
 
-		try {
-			render(
-				<CanvasEditor
-					invitationId="inv-7"
-					title="Editor Test"
-					initialDocument={buildDocument()}
-					previewSlug="test-slug"
-				/>,
-			);
+		render(
+			<CanvasEditor
+				invitationId="inv-7"
+				title="Editor Test"
+				initialDocument={buildDocument()}
+				previewSlug="test-slug"
+				token="token-123"
+			/>,
+		);
 
-			fireEvent.click(
-				screen.getByRole("button", { name: "Publish invitation" }),
-			);
+		fireEvent.click(screen.getByRole("button", { name: "Publish invitation" }));
 
-			await waitFor(() =>
-				expect(vi.mocked(publishInvitationFn)).toHaveBeenCalledWith({
-					data: { invitationId: "inv-7", token: "token-123" },
-				}),
-			);
-			expect(vi.mocked(publishInvitation)).not.toHaveBeenCalled();
-			expect(vi.mocked(updateInvitation)).toHaveBeenCalledWith(
-				"inv-7",
-				expect.objectContaining({
-					status: "published",
-					slug: "server-slug",
-				}),
-			);
-		} finally {
-			Object.defineProperty(window, "localStorage", {
-				configurable: true,
-				value: originalLocalStorage,
-			});
-		}
+		await waitFor(() =>
+			expect(vi.mocked(publishInvitationFn)).toHaveBeenCalledWith({
+				data: { invitationId: "inv-7", token: "token-123" },
+			}),
+		);
 	});
 
 	test("keeps local edits when initialDocument prop refreshes for same invitation", () => {

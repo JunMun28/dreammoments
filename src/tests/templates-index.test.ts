@@ -65,6 +65,7 @@ describe("templates array", () => {
 			"image",
 			"toggle",
 			"list",
+			"living-portrait",
 		];
 		for (const template of templates) {
 			for (const section of template.sections) {

@@ -23,6 +23,9 @@ export interface InvitationContent {
 		tagline: string;
 		date: string;
 		heroImageUrl?: string;
+		avatarImageUrl?: string;
+		avatarStyle?: "pixar" | "ghibli";
+		animatedVideoUrl?: string;
 	};
 	announcement: {
 		title: string;
@@ -172,6 +175,9 @@ export interface AiGeneration {
 	prompt: string;
 	generatedContent: Record<string, unknown>;
 	accepted: boolean;
+	status?: string;
+	externalJobId?: string;
+	resultUrl?: string;
 	createdAt: string;
 }
 
@@ -194,17 +200,4 @@ export interface Payment {
 	currency: "MYR" | "SGD";
 	status: PaymentStatus;
 	createdAt: string;
-}
-
-export interface Store {
-	users: User[];
-	invitations: Invitation[];
-	guests: Guest[];
-	views: InvitationView[];
-	aiGenerations: AiGeneration[];
-	invitationSnapshots: InvitationSnapshot[];
-	payments: Payment[];
-	sessions: Record<string, string>;
-	passwords: Record<string, string>;
-	rateLimits: Record<string, { count: number; lastReset: string }>;
 }

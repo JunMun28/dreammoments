@@ -6,20 +6,15 @@ import { RouteErrorFallback } from "../../../components/ui/RouteErrorFallback";
 import { RouteLoadingSpinner } from "../../../components/ui/RouteLoadingSpinner";
 import { useToast } from "../../../components/ui/Toast";
 import {
+	useAddGuest,
+	useExportGuestsCsv,
+	useGuests,
+	useImportGuests,
 	useInvitation,
 	usePublishInvitation,
-	useGuests as useServerGuests,
 	useUnpublishInvitation,
 } from "../../../hooks/useInvitations";
 import { useAuth } from "../../../lib/auth";
-import {
-	addGuest,
-	exportGuestsCsv,
-	getDietarySummary,
-	importGuests,
-	setInvitationSlug,
-} from "../../../lib/data";
-import { useStore } from "../../../lib/store";
 import type {
 	AttendanceStatus,
 	Invitation,
@@ -212,17 +207,14 @@ function InvitationDashboard() {
 	const { user, loading } = useAuth();
 	const { addToast } = useToast();
 	const { data: serverInvitation } = useInvitation(invitationId);
-	const localInvitation = useStore((store) =>
-		store.invitations.find((item) => item.id === invitationId),
-	);
-	const invitation = serverInvitation ?? localInvitation;
-	const { data: serverGuests } = useServerGuests(invitationId);
-	const localGuests = useStore((store) =>
-		store.guests.filter((guest) => guest.invitationId === invitationId),
-	);
-	const guests = serverGuests ?? localGuests;
+	const invitation = serverInvitation ?? null;
+	const { data: serverGuests } = useGuests(invitationId);
+	const guests = serverGuests ?? [];
 	const publishMutation = usePublishInvitation();
 	const unpublishMutation = useUnpublishInvitation();
+	const addGuestMutation = useAddGuest();
+	const importGuestsMutation = useImportGuests();
+	const exportCsvMutation = useExportGuestsCsv();
 	const [filter, setFilter] = useState<AttendanceStatus | "pending" | "all">(
 		"all",
 	);
@@ -339,7 +331,10 @@ function InvitationDashboard() {
 		setPublishing(true);
 		try {
 			if (publishConfirm === "publish") {
-				await publishMutation.mutateAsync({ invitationId });
+				await publishMutation.mutateAsync({
+					invitationId,
+					slug: slugValue || undefined,
+				});
 				addToast({ type: "success", message: "Invitation published" });
 			} else {
 				await unpublishMutation.mutateAsync(invitationId);
@@ -360,6 +355,7 @@ function InvitationDashboard() {
 		addToast,
 		publishMutation,
 		unpublishMutation,
+		slugValue,
 	]);
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: only fire once when invitation missing
@@ -368,6 +364,28 @@ function InvitationDashboard() {
 			addToast({ type: "error", message: "Invitation not found" });
 		}
 	}, [!invitation, loading]);
+
+	const totalGuests = guests.reduce((sum, guest) => sum + guest.guestCount, 0);
+	const attending = guests.filter(
+		(guest) => guest.attendance === "attending",
+	).length;
+	const pending = guests.filter((guest) => !guest.attendance).length;
+	const dietary = useMemo(() => {
+		const summary: Record<string, number> = {};
+		const notes: string[] = [];
+		for (const guest of guests) {
+			if (!guest.dietaryRequirements) continue;
+			const req = guest.dietaryRequirements.trim();
+			if (!req) continue;
+			const key = req.toLowerCase();
+			if (key.length > 30) {
+				notes.push(`${guest.name}: ${req}`);
+			} else {
+				summary[req] = (summary[req] ?? 0) + 1;
+			}
+		}
+		return { summary, notes };
+	}, [guests]);
 
 	if (!user && !loading) return <Navigate to="/auth/login" />;
 
@@ -416,13 +434,6 @@ function InvitationDashboard() {
 			</div>
 		);
 	}
-
-	const totalGuests = guests.reduce((sum, guest) => sum + guest.guestCount, 0);
-	const attending = guests.filter(
-		(guest) => guest.attendance === "attending",
-	).length;
-	const pending = guests.filter((guest) => !guest.attendance).length;
-	const dietary = getDietarySummary(invitationId);
 
 	return (
 		<div className="min-h-screen bg-[color:var(--dm-bg)] px-6 py-10">
@@ -635,14 +646,23 @@ function InvitationDashboard() {
 							<button
 								type="button"
 								className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)]"
-								onClick={() =>
-									downloadCsv(
-										`guests-${invitation.slug}.csv`,
-										exportGuestsCsv(invitationId),
-									)
-								}
+								disabled={exportCsvMutation.isPending}
+								onClick={async () => {
+									try {
+										const csv =
+											await exportCsvMutation.mutateAsync(invitationId);
+										downloadCsv(`guests-${invitation.slug}.csv`, csv);
+									} catch {
+										addToast({
+											type: "error",
+											message: "Failed to export guests.",
+										});
+									}
+								}}
 							>
-								Export Guests CSV
+								{exportCsvMutation.isPending
+									? "Exporting..."
+									: "Export Guests CSV"}
 							</button>
 							{user.plan === "premium" ? (
 								<label className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)]">
@@ -830,7 +850,7 @@ function InvitationDashboard() {
 												type="button"
 												className="rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)] disabled:opacity-60"
 												disabled={importStep === "importing"}
-												onClick={() => {
+												onClick={async () => {
 													setImportStep("importing");
 													try {
 														const existingNames = new Set(
@@ -853,7 +873,10 @@ function InvitationDashboard() {
 																!existingNames.has(g.name.toLowerCase()),
 														);
 														const duplicates = mapped.length - unique.length;
-														importGuests(invitationId, unique);
+														await importGuestsMutation.mutateAsync({
+															invitationId,
+															guests: unique,
+														});
 														setImportRows([]);
 														setImportStep("idle");
 														setMapping({});
@@ -969,22 +992,32 @@ function InvitationDashboard() {
 								<button
 									type="button"
 									className="rounded-full bg-[color:var(--dm-accent-strong)] px-4 py-2 text-xs uppercase tracking-[0.2em] text-[color:var(--dm-on-accent)]"
-									onClick={() => {
+									onClick={async () => {
 										if (!manualGuest.name.trim()) {
 											setGuestError("Guest name is required");
 											return;
 										}
 										setGuestError("");
-										addGuest(invitationId, manualGuest);
-										addToast({
-											type: "success",
-											message: `${manualGuest.name} added to guest list`,
-										});
-										setManualGuest({
-											name: "",
-											email: "",
-											relationship: "",
-										});
+										try {
+											await addGuestMutation.mutateAsync({
+												invitationId,
+												...manualGuest,
+											});
+											addToast({
+												type: "success",
+												message: `${manualGuest.name} added to guest list`,
+											});
+											setManualGuest({
+												name: "",
+												email: "",
+												relationship: "",
+											});
+										} catch {
+											addToast({
+												type: "error",
+												message: "Failed to add guest.",
+											});
+										}
 									}}
 								>
 									Add Guest
@@ -1018,13 +1051,7 @@ function InvitationDashboard() {
 											validateSlug(val);
 										}}
 										onBlur={() => {
-											if (
-												slugValue &&
-												slugValue !== invitation.slug &&
-												slugAvailable
-											) {
-												setInvitationSlug(invitationId, slugValue);
-											}
+											// Slug will be applied when publishing
 										}}
 										className="h-10 w-full rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] px-3 pr-8 text-base text-[color:var(--dm-ink)]"
 										disabled={user.plan !== "premium"}

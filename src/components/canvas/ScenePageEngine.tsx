@@ -73,6 +73,15 @@ function getHeroImageSrc(blocks: Block[]): string | null {
 	return null;
 }
 
+function getHeroVideoUrl(blocks: Block[]): string | null {
+	for (const block of blocks) {
+		if (block.type === "image" && block.content.animatedVideoUrl) {
+			return block.content.animatedVideoUrl as string;
+		}
+	}
+	return null;
+}
+
 /** Default particle and overlay presets for scene rendering. */
 function getTemplateEffects(): {
 	particle: ParticlePreset | null;
@@ -170,6 +179,29 @@ function SceneSection({
 	}, [section.blocks]);
 
 	const heroImgSrc = isHero ? getHeroImageSrc(section.blocks) : null;
+	const heroVideoUrl = isHero ? getHeroVideoUrl(section.blocks) : null;
+	const videoRef = useRef<HTMLVideoElement>(null);
+	const [videoReady, setVideoReady] = useState(false);
+
+	// Viewport-gated video playback
+	useEffect(() => {
+		const video = videoRef.current;
+		const el = ref.current;
+		if (!video || !el || !heroVideoUrl) return;
+
+		const observer = new IntersectionObserver(
+			([entry]) => {
+				if (entry.isIntersecting) {
+					video.play().catch(() => {});
+				} else {
+					video.pause();
+				}
+			},
+			{ threshold: 0.25 },
+		);
+		observer.observe(el);
+		return () => observer.disconnect();
+	}, [heroVideoUrl]);
 
 	return (
 		<div
@@ -179,17 +211,43 @@ function SceneSection({
 			data-scene-index={index}
 			style={{ backgroundColor }}
 		>
-			{/* Ken Burns background for hero */}
+			{/* Ken Burns background image for hero (poster / fallback) */}
 			{isHero && heroImgSrc && (
 				<div
-					className="absolute inset-0 dm-ken-burns"
+					className={cn(
+						"absolute inset-0",
+						!(heroVideoUrl && videoReady) && "dm-ken-burns",
+					)}
 					style={{
 						backgroundImage: `url(${heroImgSrc})`,
 						backgroundSize: "cover",
 						backgroundPosition: "center",
 						zIndex: 0,
+						transition: "opacity 700ms ease",
+						opacity: heroVideoUrl && videoReady ? 0 : 1,
 					}}
 					aria-hidden="true"
+				/>
+			)}
+
+			{/* Animated video background for hero (cross-fades in when ready) */}
+			{isHero && heroVideoUrl && (
+				<video
+					ref={videoRef}
+					src={heroVideoUrl}
+					poster={heroImgSrc ?? undefined}
+					autoPlay
+					muted
+					loop
+					playsInline
+					preload="metadata"
+					onCanPlayThrough={() => setVideoReady(true)}
+					className="absolute inset-0 h-full w-full object-cover"
+					style={{
+						zIndex: 0,
+						transition: "opacity 700ms ease",
+						opacity: videoReady ? 1 : 0,
+					}}
 				/>
 			)}
 
@@ -343,58 +401,6 @@ function SceneProgressDots({
 	);
 }
 
-/* ── Music Player ────────────────────────────────────────────── */
-
-const TEMPLATE_MUSIC: Record<string, string | null> = {
-	"double-happiness": null,
-};
-
-function MusicPlayer({ templateId }: { templateId: string }) {
-	const audioRef = useRef<HTMLAudioElement>(null);
-	const [playing, setPlaying] = useState(false);
-	const trackUrl = TEMPLATE_MUSIC[templateId] ?? null;
-
-	if (!trackUrl) return null;
-
-	const toggle = () => {
-		const audio = audioRef.current;
-		if (!audio) return;
-		if (playing) {
-			audio.pause();
-		} else {
-			audio.play().catch(() => {});
-		}
-		setPlaying(!playing);
-	};
-
-	return (
-		<>
-			{/* biome-ignore lint/a11y/useMediaCaption: background music track, no dialogue */}
-			<audio ref={audioRef} src={trackUrl} loop preload="none" />
-			<button
-				type="button"
-				className="dm-music-btn"
-				data-playing={playing}
-				onClick={toggle}
-				aria-label={playing ? "Pause music" : "Play music"}
-			>
-				{playing ? (
-					<svg viewBox="0 0 24 24" aria-hidden="true">
-						<title>Pause</title>
-						<rect x="6" y="4" width="4" height="16" />
-						<rect x="14" y="4" width="4" height="16" />
-					</svg>
-				) : (
-					<svg viewBox="0 0 24 24" aria-hidden="true">
-						<title>Play</title>
-						<polygon points="5,3 19,12 5,21" />
-					</svg>
-				)}
-			</button>
-		</>
-	);
-}
-
 /* ── Swipe Hint ──────────────────────────────────────────────── */
 
 function SwipeHint({
@@ -501,8 +507,6 @@ export function ScenePageEngine({
 					contentScale={contentScale}
 				/>
 			))}
-
-			<MusicPlayer templateId={doc.templateId} />
 
 			<SwipeHint containerRef={containerRef} />
 

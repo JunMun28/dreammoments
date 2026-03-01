@@ -3,12 +3,6 @@ import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { getDbOrNull, schema } from "@/db/index";
-import {
-	getInvitationById as localGetInvitationById,
-	listAiGenerations as localListAiGenerations,
-	markAiGenerationAccepted as localMarkAiGenerationAccepted,
-	updateInvitation as localUpdateInvitation,
-} from "@/lib/data";
 import { requireAuth } from "@/lib/server-auth";
 import { listAiGenerationsSchema } from "@/lib/validation";
 import { parseInput } from "./validate";
@@ -424,36 +418,25 @@ export const listAiGenerationsFn = createServerFn({
 		const { userId } = await requireAuth(data.token);
 
 		const db = getDbOrNull();
+		if (!db) throw new Error("Database connection required");
 
-		if (db) {
-			const invitation = await db
-				.select({ userId: schema.invitations.userId })
-				.from(schema.invitations)
-				.where(eq(schema.invitations.id, data.invitationId));
+		const invitation = await db
+			.select({ userId: schema.invitations.userId })
+			.from(schema.invitations)
+			.where(eq(schema.invitations.id, data.invitationId));
 
-			if (invitation.length === 0) {
-				return { error: "Invitation not found" };
-			}
-			if (invitation[0].userId !== userId) {
-				return { error: "Access denied" };
-			}
-
-			return db
-				.select()
-				.from(schema.aiGenerations)
-				.where(eq(schema.aiGenerations.invitationId, data.invitationId))
-				.orderBy(desc(schema.aiGenerations.createdAt));
-		}
-
-		const invitation = localGetInvitationById(data.invitationId);
-		if (!invitation) {
+		if (invitation.length === 0) {
 			return { error: "Invitation not found" };
 		}
-		if (invitation.userId !== userId) {
+		if (invitation[0].userId !== userId) {
 			return { error: "Access denied" };
 		}
 
-		return localListAiGenerations(data.invitationId);
+		return db
+			.select()
+			.from(schema.aiGenerations)
+			.where(eq(schema.aiGenerations.invitationId, data.invitationId))
+			.orderBy(desc(schema.aiGenerations.createdAt));
 	});
 
 // ── Apply AI result to invitation content ────────────────────────────
@@ -493,68 +476,42 @@ export const applyAiResultFn = createServerFn({
 		const { userId } = await requireAuth(data.token);
 
 		const db = getDbOrNull();
+		if (!db) throw new Error("Database connection required");
 
-		if (db) {
-			const rows = await db
-				.select()
-				.from(schema.invitations)
-				.where(eq(schema.invitations.id, data.invitationId));
+		const rows = await db
+			.select()
+			.from(schema.invitations)
+			.where(eq(schema.invitations.id, data.invitationId));
 
-			if (rows.length === 0) {
-				return { error: "Invitation not found" };
-			}
-			if (rows[0].userId !== userId) {
-				return { error: "Access denied" };
-			}
-
-			const content = structuredClone(
-				rows[0].content as Record<string, unknown>,
-			);
-			applyAiToContent(content, data.type, data.sectionId, data.aiResult);
-
-			const updated = await db
-				.update(schema.invitations)
-				.set({ content, updatedAt: new Date() })
-				.where(eq(schema.invitations.id, data.invitationId))
-				.returning();
-
-			if (data.generationId) {
-				await db
-					.update(schema.aiGenerations)
-					.set({ accepted: true })
-					.where(
-						and(
-							eq(schema.aiGenerations.id, data.generationId),
-							eq(schema.aiGenerations.invitationId, data.invitationId),
-						),
-					);
-			}
-
-			return updated[0];
-		}
-
-		const invitation = localGetInvitationById(data.invitationId);
-		if (!invitation) {
+		if (rows.length === 0) {
 			return { error: "Invitation not found" };
 		}
-		if (invitation.userId !== userId) {
+		if (rows[0].userId !== userId) {
 			return { error: "Access denied" };
 		}
 
-		const content = structuredClone(
-			invitation.content as unknown as Record<string, unknown>,
-		);
+		const content = structuredClone(rows[0].content as Record<string, unknown>);
 		applyAiToContent(content, data.type, data.sectionId, data.aiResult);
 
-		localUpdateInvitation(data.invitationId, {
-			content: content as unknown as typeof invitation.content,
-		});
+		const updated = await db
+			.update(schema.invitations)
+			.set({ content, updatedAt: new Date() })
+			.where(eq(schema.invitations.id, data.invitationId))
+			.returning();
 
 		if (data.generationId) {
-			localMarkAiGenerationAccepted(data.generationId, data.invitationId);
+			await db
+				.update(schema.aiGenerations)
+				.set({ accepted: true })
+				.where(
+					and(
+						eq(schema.aiGenerations.id, data.generationId),
+						eq(schema.aiGenerations.invitationId, data.invitationId),
+					),
+				);
 		}
 
-		return localGetInvitationById(data.invitationId) ?? { success: true };
+		return updated[0];
 	});
 
 function applyAiToContent(

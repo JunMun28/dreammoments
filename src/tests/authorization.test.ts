@@ -117,33 +117,6 @@ vi.mock("@/lib/slug", () => ({
 	slugify: vi.fn((s: string) => s.toLowerCase()),
 }));
 
-vi.mock("@/lib/data", () => ({
-	getInvitationById: vi.fn(() => null),
-	listInvitationsByUser: vi.fn(() => []),
-	createInvitation: vi.fn(),
-	updateInvitation: vi.fn(),
-	deleteInvitation: vi.fn(),
-	publishInvitation: vi.fn(),
-	unpublishInvitation: vi.fn(),
-	listGuests: vi.fn(() => []),
-	submitRsvp: vi.fn(),
-	updateGuest: vi.fn(),
-	importGuests: vi.fn(() => []),
-	exportGuestsCsv: vi.fn(() => ""),
-	getAnalytics: vi.fn(() => ({
-		totalViews: 0,
-		uniqueVisitors: 0,
-		viewsByDay: [],
-	})),
-	getDeviceBreakdown: vi.fn(() => ({
-		mobile: 0,
-		desktop: 0,
-		tablet: 0,
-	})),
-	updateUserPlan: vi.fn(),
-	recordPayment: vi.fn(),
-}));
-
 vi.mock("@/lib/stripe", () => ({
 	getStripeConfig: vi.fn(() => null),
 	createCheckoutSession: vi.fn(),
@@ -192,12 +165,10 @@ import {
 	updateInvitationFn,
 } from "@/api/invitations";
 import { getDbOrNull } from "@/db/index";
-import { getInvitationById as localGetInvitationById } from "@/lib/data";
 import { requireAuth } from "@/lib/server-auth";
 
 const mockedGetDbOrNull = vi.mocked(getDbOrNull);
 const mockedRequireAuth = vi.mocked(requireAuth);
-const mockedLocalGetById = vi.mocked(localGetInvitationById);
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -218,106 +189,11 @@ const USER_B_INVITATION = {
 
 beforeEach(() => {
 	vi.clearAllMocks();
-	mockedGetDbOrNull.mockReturnValue(null);
+	mockedGetDbOrNull.mockReturnValue(
+		mockDb as unknown as ReturnType<typeof getDbOrNull>,
+	);
 	// User A is authenticated
 	mockedRequireAuth.mockResolvedValue({ userId: USER_A });
-});
-
-// ---------------------------------------------------------------------------
-// Cross-user authorization tests — localStorage fallback path
-// ---------------------------------------------------------------------------
-
-describe("cross-user authorization (fallback path)", () => {
-	beforeEach(() => {
-		mockedLocalGetById.mockReturnValue(
-			USER_B_INVITATION as ReturnType<typeof localGetInvitationById>,
-		);
-	});
-
-	test("User A cannot read User B's invitation", async () => {
-		const result = (await (getInvitation as CallableFunction)({
-			invitationId: "inv-b-1",
-			token: "token-a",
-		})) as { error: string };
-
-		expect(result.error).toBe("Access denied");
-	});
-
-	test("User A cannot update User B's invitation", async () => {
-		const result = (await (updateInvitationFn as CallableFunction)({
-			invitationId: "inv-b-1",
-			token: "token-a",
-			title: "Hacked",
-		})) as { error: string };
-
-		expect(result.error).toBe("Access denied");
-	});
-
-	test("User A cannot delete User B's invitation", async () => {
-		const result = (await (deleteInvitationFn as CallableFunction)({
-			invitationId: "inv-b-1",
-			token: "token-a",
-		})) as { error: string };
-
-		expect(result.error).toBe("Access denied");
-	});
-
-	test("User A cannot publish User B's invitation", async () => {
-		const result = (await (publishInvitationFn as CallableFunction)({
-			invitationId: "inv-b-1",
-			token: "token-a",
-		})) as { error: string };
-
-		expect(result.error).toBe("Access denied");
-	});
-
-	test("User A cannot view User B's guest list", async () => {
-		const result = (await (listGuestsFn as CallableFunction)({
-			invitationId: "inv-b-1",
-			token: "token-a",
-		})) as { error: string };
-
-		expect(result.error).toBe("Access denied");
-	});
-
-	test("User A cannot export User B's guests CSV", async () => {
-		const result = (await (exportGuestsCsvFn as CallableFunction)({
-			invitationId: "inv-b-1",
-			token: "token-a",
-		})) as { error: string };
-
-		expect(result.error).toBe("Access denied");
-	});
-
-	test("User A cannot import guests to User B's invitation", async () => {
-		const result = (await (importGuestsFn as CallableFunction)({
-			invitationId: "inv-b-1",
-			token: "token-a",
-			guests: [{ name: "Injected Guest" }],
-		})) as { error: string };
-
-		expect(result.error).toBe("Access denied");
-	});
-
-	test("User A cannot update guests of User B's invitation", async () => {
-		const result = (await (updateGuestFn as CallableFunction)({
-			guestId: "guest-1",
-			token: "token-a",
-			invitationId: "inv-b-1",
-			name: "Hacked",
-		})) as { error: string };
-
-		expect(result.error).toBe("Access denied");
-	});
-
-	test("User A cannot view User B's analytics", async () => {
-		const result = (await (getAnalyticsFn as CallableFunction)({
-			token: "token-a",
-			invitationId: "inv-b-1",
-		})) as { error: string };
-
-		expect(result.error).toBe("Access denied");
-	});
 });
 
 // ---------------------------------------------------------------------------

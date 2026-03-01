@@ -13,8 +13,6 @@ import { useSubmitRsvp, useTrackView } from "../../hooks/useInvitations";
 import { useAuth } from "../../lib/auth";
 import { summarizeInvitationContent } from "../../lib/canvas/document";
 import { migrateInvitationContentToCanvas } from "../../lib/canvas/migrate";
-import { submitRsvp, trackInvitationView } from "../../lib/data";
-import { useStore } from "../../lib/store";
 
 function InviteErrorFallback({ reset }: ErrorComponentProps) {
 	return (
@@ -232,13 +230,22 @@ function InviteScreen() {
 				errorReason?: string | null;
 		  }
 		| undefined;
-	const storeInvitation = useStore((store) =>
-		store.invitations.find((item) => item.slug === slug),
-	);
 	const invitation =
-		storeInvitation ??
-		(loaderData?.invitation as typeof storeInvitation) ??
-		null;
+		(loaderData?.invitation as {
+			id: string;
+			slug: string;
+			title: string;
+			status: string;
+			templateId: string;
+			content: Record<string, unknown>;
+			templateSnapshot?: { id?: string };
+			sectionVisibility?: Record<string, boolean>;
+			designOverrides?: Record<string, unknown>;
+			userId: string;
+			invitedCount?: number;
+			updatedAt: string;
+			createdAt: string;
+		}) ?? null;
 	const [rsvpResult, setRsvpResult] = useState<{
 		name: string;
 		attendance: "attending" | "not_attending" | "undecided";
@@ -283,23 +290,12 @@ function InviteScreen() {
 			`${Date.now()}-${Math.random().toString(36).slice(2)}`;
 		localStorage.setItem("dm-visitor", visitorKey);
 		// Track view via server mutation, fall back to local store
-		trackViewMutation.mutate(
-			{
-				invitationId: invitation.id,
-				userAgent: navigator.userAgent,
-				referrer: document.referrer,
-				visitorKey,
-			},
-			{
-				onError: () => {
-					trackInvitationView(
-						invitation.id,
-						navigator.userAgent,
-						document.referrer,
-					);
-				},
-			},
-		);
+		trackViewMutation.mutate({
+			invitationId: invitation.id,
+			userAgent: navigator.userAgent,
+			referrer: document.referrer,
+			visitorKey,
+		});
 	}, [invitation]);
 
 	const headerLabel = useMemo(() => {
@@ -358,28 +354,7 @@ function InviteScreen() {
 						setAlreadySubmitted(true);
 					},
 					onError: () => {
-						// Fall back to local store
-						try {
-							submitRsvp(invitation.id, payload, visitorKey);
-							setRsvpResult({
-								name: payload.name,
-								attendance: payload.attendance,
-								guestCount: payload.guestCount,
-							});
-							try {
-								localStorage.setItem(
-									storageKey,
-									JSON.stringify({
-										name: payload.name,
-										attendance: payload.attendance,
-										submittedAt: Date.now(),
-									}),
-								);
-							} catch {}
-							setAlreadySubmitted(true);
-						} catch {
-							setRsvpError("RSVP limit reached. Please try again later.");
-						}
+						setRsvpError("Failed to submit RSVP. Please try again.");
 					},
 				},
 			);

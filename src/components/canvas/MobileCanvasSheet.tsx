@@ -58,6 +58,8 @@ export function MobileCanvasSheet({
 	onBulkDelete,
 	onBulkLock,
 	onBulkRestyle,
+	invitationId,
+	token,
 	designTokens,
 	onDesignTokenChange,
 	onSpacingChange,
@@ -80,6 +82,8 @@ export function MobileCanvasSheet({
 		blockIds: string[],
 		stylePatch: Record<string, string>,
 	) => void;
+	invitationId?: string;
+	token?: string;
 	designTokens: CanvasDocument["designTokens"];
 	onDesignTokenChange: (
 		section: "colors" | "fonts",
@@ -173,6 +177,8 @@ export function MobileCanvasSheet({
 							onBulkDelete={onBulkDelete}
 							onBulkLock={onBulkLock}
 							onBulkRestyle={onBulkRestyle}
+							invitationId={invitationId}
+							token={token}
 							designTokens={designTokens}
 							onDesignTokenChange={onDesignTokenChange}
 							onSpacingChange={onSpacingChange}

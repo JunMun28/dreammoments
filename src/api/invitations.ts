@@ -5,19 +5,8 @@ import { z } from "zod";
 import { getDbOrNull, schema } from "@/db/index";
 import { summarizeInvitationContent } from "@/lib/canvas/document";
 import { convertTemplateToCanvasDocument } from "@/lib/canvas/template-converter";
-import {
-	createInvitation as localCreateInvitation,
-	createInvitationSnapshot as localCreateInvitationSnapshot,
-	deleteInvitation as localDeleteInvitation,
-	getInvitationById as localGetInvitationById,
-	listInvitationsByUser as localListInvitationsByUser,
-	publishInvitation as localPublishInvitation,
-	unpublishInvitation as localUnpublishInvitation,
-	updateInvitation as localUpdateInvitation,
-} from "@/lib/data";
 import { requireAuth } from "@/lib/server-auth";
 import { slugify } from "@/lib/slug";
-import type { Invitation } from "@/lib/types";
 import {
 	createInvitationSchema,
 	deleteInvitationSchema,
@@ -75,18 +64,15 @@ export const checkSlugAvailabilityFn = createServerFn({
 		await requireAuth(data.token);
 
 		const db = getDbOrNull();
+		if (!db) throw new Error("Database connection required");
 
-		if (db) {
-			const rows = await db
-				.select({ id: schema.invitations.id })
-				.from(schema.invitations)
-				.where(eq(schema.invitations.slug, data.slug));
+		const rows = await db
+			.select({ id: schema.invitations.id })
+			.from(schema.invitations)
+			.where(eq(schema.invitations.slug, data.slug));
 
-			const taken = rows.some((r) => r.id !== data.invitationId);
-			return { available: !taken };
-		}
-
-		return { available: true };
+		const taken = rows.some((r) => r.id !== data.invitationId);
+		return { available: !taken };
 	});
 
 // ── List user invitations ───────────────────────────────────────────
@@ -106,17 +92,14 @@ export const getInvitations = createServerFn({
 		const { userId } = await requireAuth(data.token);
 
 		const db = getDbOrNull();
+		if (!db) throw new Error("Database connection required");
 
-		if (db) {
-			const rows = await db
-				.select()
-				.from(schema.invitations)
-				.where(eq(schema.invitations.userId, userId))
-				.orderBy(desc(schema.invitations.updatedAt));
-			return rows;
-		}
-
-		return localListInvitationsByUser(userId);
+		const rows = await db
+			.select()
+			.from(schema.invitations)
+			.where(eq(schema.invitations.userId, userId))
+			.orderBy(desc(schema.invitations.updatedAt));
+		return rows;
 	});
 
 // ── Get single invitation ──────────────────────────────────────────
@@ -137,33 +120,23 @@ export const getInvitation = createServerFn({
 		const { userId } = await requireAuth(data.token);
 
 		const db = getDbOrNull();
+		if (!db) throw new Error("Database connection required");
 
-		if (db) {
-			const rows = await db
-				.select()
-				.from(schema.invitations)
-				.where(
-					and(
-						eq(schema.invitations.id, data.invitationId),
-						eq(schema.invitations.userId, userId),
-					),
-				);
+		const rows = await db
+			.select()
+			.from(schema.invitations)
+			.where(
+				and(
+					eq(schema.invitations.id, data.invitationId),
+					eq(schema.invitations.userId, userId),
+				),
+			);
 
-			if (rows.length === 0) {
-				return { error: "Invitation not found or access denied" };
-			}
-
-			return rows[0];
+		if (rows.length === 0) {
+			return { error: "Invitation not found or access denied" };
 		}
 
-		const invitation = localGetInvitationById(data.invitationId);
-		if (!invitation) {
-			return { error: "Invitation not found" };
-		}
-		if (invitation.userId !== userId) {
-			return { error: "Access denied" };
-		}
-		return invitation;
+		return rows[0];
 	});
 
 // ── Create invitation ──────────────────────────────────────────────
@@ -183,52 +156,46 @@ export const createInvitationFn = createServerFn({
 		const { userId } = await requireAuth(data.token);
 
 		const db = getDbOrNull();
+		if (!db) throw new Error("Database connection required");
 
-		if (db) {
-			const { buildSampleContent } = await import("@/data/sample-invitation");
-			const { templates } = await import("@/templates/index");
+		const { buildSampleContent } = await import("@/data/sample-invitation");
+		const { templates } = await import("@/templates/index");
 
-			const template =
-				templates.find((t) => t.id === data.templateId) ?? templates[0];
-			const legacyContent = buildSampleContent(template.id);
-			const canvasContent = convertTemplateToCanvasDocument(
-				template.id,
-				legacyContent,
-			);
-			const summary = summarizeInvitationContent(canvasContent);
-			const baseSlug = summary.slugBase;
+		const template =
+			templates.find((t) => t.id === data.templateId) ?? templates[0];
+		const legacyContent = buildSampleContent(template.id);
+		const canvasContent = convertTemplateToCanvasDocument(
+			template.id,
+			legacyContent,
+		);
+		const summary = summarizeInvitationContent(canvasContent);
+		const baseSlug = summary.slugBase;
 
-			const slug = await generateUniqueDbSlug(db, baseSlug);
+		const slug = await generateUniqueDbSlug(db, baseSlug);
 
-			const title = summary.title;
-			const sectionVisibility = Object.fromEntries(
-				template.sections.map((section) => [
-					section.id,
-					section.defaultVisible,
-				]),
-			);
+		const title = summary.title;
+		const sectionVisibility = Object.fromEntries(
+			template.sections.map((section) => [section.id, section.defaultVisible]),
+		);
 
-			const rows = await db
-				.insert(schema.invitations)
-				.values({
-					userId,
-					slug,
-					title,
-					templateId: template.id,
-					templateVersion: template.version,
-					content: canvasContent as unknown as Record<string, unknown>,
-					sectionVisibility,
-					designOverrides: {},
-					status: "draft",
-					aiGenerationsUsed: 0,
-					invitedCount: 0,
-				})
-				.returning();
+		const rows = await db
+			.insert(schema.invitations)
+			.values({
+				userId,
+				slug,
+				title,
+				templateId: template.id,
+				templateVersion: template.version,
+				content: canvasContent as unknown as Record<string, unknown>,
+				sectionVisibility,
+				designOverrides: {},
+				status: "draft",
+				aiGenerationsUsed: 0,
+				invitedCount: 0,
+			})
+			.returning();
 
-			return rows[0];
-		}
-
-		return localCreateInvitation(userId, data.templateId);
+		return rows[0];
 	});
 
 // ── Update invitation ──────────────────────────────────────────────
@@ -258,82 +225,55 @@ export const updateInvitationFn = createServerFn({
 		const { userId } = await requireAuth(data.token);
 
 		const db = getDbOrNull();
+		if (!db) throw new Error("Database connection required");
 
-		if (db) {
-			// Verify ownership
-			const existing = await db
-				.select({ userId: schema.invitations.userId })
-				.from(schema.invitations)
-				.where(eq(schema.invitations.id, data.invitationId));
+		// Verify ownership
+		const existing = await db
+			.select({ userId: schema.invitations.userId })
+			.from(schema.invitations)
+			.where(eq(schema.invitations.id, data.invitationId));
 
-			if (existing.length === 0) {
-				return { error: "Invitation not found" };
-			}
-			if (existing[0].userId !== userId) {
-				return { error: "Access denied" };
-			}
-
-			if (data.content !== undefined) {
-				const current = await db
-					.select({ content: schema.invitations.content })
-					.from(schema.invitations)
-					.where(eq(schema.invitations.id, data.invitationId));
-
-				if (current[0]) {
-					await db.insert(schema.invitationSnapshots).values({
-						invitationId: data.invitationId,
-						content: current[0].content as Record<string, unknown>,
-						reason: "auto-save",
-					});
-				}
-			}
-
-			// Build update fields
-			const updateFields: Record<string, unknown> = {
-				updatedAt: new Date(),
-			};
-			if (data.title !== undefined) updateFields.title = data.title;
-			if (data.content !== undefined) updateFields.content = data.content;
-			if (data.sectionVisibility !== undefined)
-				updateFields.sectionVisibility = data.sectionVisibility;
-			if (data.designOverrides !== undefined)
-				updateFields.designOverrides = data.designOverrides;
-			if (data.status !== undefined) updateFields.status = data.status;
-
-			const rows = await db
-				.update(schema.invitations)
-				.set(updateFields)
-				.where(eq(schema.invitations.id, data.invitationId))
-				.returning();
-
-			return rows[0];
-		}
-
-		// localStorage fallback
-		const invitation = localGetInvitationById(data.invitationId);
-		if (!invitation) {
+		if (existing.length === 0) {
 			return { error: "Invitation not found" };
 		}
-		if (invitation.userId !== userId) {
+		if (existing[0].userId !== userId) {
 			return { error: "Access denied" };
 		}
 
 		if (data.content !== undefined) {
-			localCreateInvitationSnapshot(data.invitationId, "auto-save");
+			const current = await db
+				.select({ content: schema.invitations.content })
+				.from(schema.invitations)
+				.where(eq(schema.invitations.id, data.invitationId));
+
+			if (current[0]) {
+				await db.insert(schema.invitationSnapshots).values({
+					invitationId: data.invitationId,
+					content: current[0].content as Record<string, unknown>,
+					reason: "auto-save",
+				});
+			}
 		}
 
-		const patch: Partial<Invitation> = {};
-		if (data.title !== undefined) patch.title = data.title;
-		if (data.content !== undefined)
-			patch.content = data.content as unknown as Invitation["content"];
+		// Build update fields
+		const updateFields: Record<string, unknown> = {
+			updatedAt: new Date(),
+		};
+		if (data.title !== undefined) updateFields.title = data.title;
+		if (data.content !== undefined) updateFields.content = data.content;
 		if (data.sectionVisibility !== undefined)
-			patch.sectionVisibility = data.sectionVisibility;
+			updateFields.sectionVisibility = data.sectionVisibility;
 		if (data.designOverrides !== undefined)
-			patch.designOverrides = data.designOverrides;
-		if (data.status !== undefined) patch.status = data.status;
+			updateFields.designOverrides = data.designOverrides;
+		if (data.status !== undefined) updateFields.status = data.status;
 
-		const updated = localUpdateInvitation(data.invitationId, patch);
-		return updated ?? { error: "Update failed" };
+		const rows = await db
+			.update(schema.invitations)
+			.set(updateFields)
+			.where(eq(schema.invitations.id, data.invitationId))
+			.returning();
+
+		return rows[0];
 	});
 
 // ── Delete invitation ──────────────────────────────────────────────
@@ -352,38 +292,25 @@ export const deleteInvitationFn = createServerFn({
 		const { userId } = await requireAuth(data.token);
 
 		const db = getDbOrNull();
+		if (!db) throw new Error("Database connection required");
 
-		if (db) {
-			// Verify ownership
-			const existing = await db
-				.select({ userId: schema.invitations.userId })
-				.from(schema.invitations)
-				.where(eq(schema.invitations.id, data.invitationId));
+		// Verify ownership
+		const existing = await db
+			.select({ userId: schema.invitations.userId })
+			.from(schema.invitations)
+			.where(eq(schema.invitations.id, data.invitationId));
 
-			if (existing.length === 0) {
-				return { error: "Invitation not found" };
-			}
-			if (existing[0].userId !== userId) {
-				return { error: "Access denied" };
-			}
-
-			await db
-				.delete(schema.invitations)
-				.where(eq(schema.invitations.id, data.invitationId));
-
-			return { success: true };
-		}
-
-		// localStorage fallback
-		const invitation = localGetInvitationById(data.invitationId);
-		if (!invitation) {
+		if (existing.length === 0) {
 			return { error: "Invitation not found" };
 		}
-		if (invitation.userId !== userId) {
+		if (existing[0].userId !== userId) {
 			return { error: "Access denied" };
 		}
 
-		localDeleteInvitation(data.invitationId);
+		await db
+			.delete(schema.invitations)
+			.where(eq(schema.invitations.id, data.invitationId));
+
 		return { success: true };
 	});
 
@@ -413,68 +340,50 @@ export const publishInvitationFn = createServerFn({
 		const { userId } = await requireAuth(data.token);
 
 		const db = getDbOrNull();
+		if (!db) throw new Error("Database connection required");
 
-		if (db) {
-			// Get invitation and verify ownership
-			const rows = await db
-				.select()
-				.from(schema.invitations)
-				.where(eq(schema.invitations.id, data.invitationId));
+		// Get invitation and verify ownership
+		const rows = await db
+			.select()
+			.from(schema.invitations)
+			.where(eq(schema.invitations.id, data.invitationId));
 
-			if (rows.length === 0) {
-				return { error: "Invitation not found" };
-			}
-
-			const invitation = rows[0];
-			if (invitation.userId !== userId) {
-				return { error: "Access denied" };
-			}
-
-			// Get template snapshot
-			const { templates } = await import("@/templates/index");
-			const template =
-				templates.find((t) => t.id === invitation.templateId) ?? templates[0];
-
-			const content = invitation.content as Record<string, unknown>;
-			const summary = summarizeInvitationContent(content);
-			const requestedBaseSlug = data.slug
-				? slugify(data.slug)
-				: summary.slugBase;
-			const baseSlug = data.randomize
-				? `${requestedBaseSlug}-${Math.random().toString(36).slice(2, 6)}`
-				: requestedBaseSlug;
-			const slug = await generateUniqueDbSlug(db, baseSlug, invitation.id);
-
-			const updated = await db
-				.update(schema.invitations)
-				.set({
-					slug,
-					status: "published",
-					publishedAt: new Date(),
-					templateVersion: template.version,
-					templateSnapshot: template as unknown as Record<string, unknown>,
-					updatedAt: new Date(),
-				})
-				.where(eq(schema.invitations.id, data.invitationId))
-				.returning();
-
-			return updated[0];
-		}
-
-		// localStorage fallback
-		const invitation = localGetInvitationById(data.invitationId);
-		if (!invitation) {
+		if (rows.length === 0) {
 			return { error: "Invitation not found" };
 		}
+
+		const invitation = rows[0];
 		if (invitation.userId !== userId) {
 			return { error: "Access denied" };
 		}
 
-		const published = localPublishInvitation(data.invitationId, {
-			slug: data.slug,
-			randomize: data.randomize,
-		});
-		return published ?? { error: "Publish failed" };
+		// Get template snapshot
+		const { templates } = await import("@/templates/index");
+		const template =
+			templates.find((t) => t.id === invitation.templateId) ?? templates[0];
+
+		const content = invitation.content as Record<string, unknown>;
+		const summary = summarizeInvitationContent(content);
+		const requestedBaseSlug = data.slug ? slugify(data.slug) : summary.slugBase;
+		const baseSlug = data.randomize
+			? `${requestedBaseSlug}-${Math.random().toString(36).slice(2, 6)}`
+			: requestedBaseSlug;
+		const slug = await generateUniqueDbSlug(db, baseSlug, invitation.id);
+
+		const updated = await db
+			.update(schema.invitations)
+			.set({
+				slug,
+				status: "published",
+				publishedAt: new Date(),
+				templateVersion: template.version,
+				templateSnapshot: template as unknown as Record<string, unknown>,
+				updatedAt: new Date(),
+			})
+			.where(eq(schema.invitations.id, data.invitationId))
+			.returning();
+
+		return updated[0];
 	});
 
 // ── Unpublish invitation ───────────────────────────────────────────
@@ -494,45 +403,32 @@ export const unpublishInvitationFn = createServerFn({
 		const { userId } = await requireAuth(data.token);
 
 		const db = getDbOrNull();
+		if (!db) throw new Error("Database connection required");
 
-		if (db) {
-			// Verify ownership
-			const existing = await db
-				.select({ userId: schema.invitations.userId })
-				.from(schema.invitations)
-				.where(eq(schema.invitations.id, data.invitationId));
+		// Verify ownership
+		const existing = await db
+			.select({ userId: schema.invitations.userId })
+			.from(schema.invitations)
+			.where(eq(schema.invitations.id, data.invitationId));
 
-			if (existing.length === 0) {
-				return { error: "Invitation not found" };
-			}
-			if (existing[0].userId !== userId) {
-				return { error: "Access denied" };
-			}
-
-			const rows = await db
-				.update(schema.invitations)
-				.set({
-					status: "draft",
-					publishedAt: null,
-					updatedAt: new Date(),
-				})
-				.where(eq(schema.invitations.id, data.invitationId))
-				.returning();
-
-			return rows[0];
-		}
-
-		// localStorage fallback
-		const invitation = localGetInvitationById(data.invitationId);
-		if (!invitation) {
+		if (existing.length === 0) {
 			return { error: "Invitation not found" };
 		}
-		if (invitation.userId !== userId) {
+		if (existing[0].userId !== userId) {
 			return { error: "Access denied" };
 		}
 
-		const unpublished = localUnpublishInvitation(data.invitationId);
-		return unpublished ?? { error: "Unpublish failed" };
+		const rows = await db
+			.update(schema.invitations)
+			.set({
+				status: "draft",
+				publishedAt: null,
+				updatedAt: new Date(),
+			})
+			.where(eq(schema.invitations.id, data.invitationId))
+			.returning();
+
+		return rows[0];
 	});
 
 // ── Patch invitation content (partial update) ────────────────────────
@@ -563,60 +459,36 @@ export const patchInvitationContentFn = createServerFn({
 		const { userId } = await requireAuth(data.token);
 
 		const db = getDbOrNull();
+		if (!db) throw new Error("Database connection required");
 
-		if (db) {
-			const rows = await db
-				.select()
-				.from(schema.invitations)
-				.where(eq(schema.invitations.id, data.invitationId));
+		const rows = await db
+			.select()
+			.from(schema.invitations)
+			.where(eq(schema.invitations.id, data.invitationId));
 
-			if (rows.length === 0) {
-				return { error: "Invitation not found" };
-			}
-			if (rows[0].userId !== userId) {
-				return { error: "Access denied" };
-			}
-
-			await db.insert(schema.invitationSnapshots).values({
-				invitationId: data.invitationId,
-				content: rows[0].content as Record<string, unknown>,
-				reason: "patch-content",
-			});
-
-			const content = structuredClone(
-				rows[0].content as Record<string, unknown>,
-			);
-			setNestedValue(content, getPathSegments(data.path), data.value);
-
-			const updated = await db
-				.update(schema.invitations)
-				.set({ content, updatedAt: new Date() })
-				.where(eq(schema.invitations.id, data.invitationId))
-				.returning();
-
-			return updated[0];
-		}
-
-		const invitation = localGetInvitationById(data.invitationId);
-		if (!invitation) {
+		if (rows.length === 0) {
 			return { error: "Invitation not found" };
 		}
-		if (invitation.userId !== userId) {
+		if (rows[0].userId !== userId) {
 			return { error: "Access denied" };
 		}
 
-		localCreateInvitationSnapshot(data.invitationId, "patch-content");
-
-		const content = structuredClone(
-			invitation.content as unknown as Record<string, unknown>,
-		);
-		setNestedValue(content, getPathSegments(data.path), data.value);
-
-		const updated = localUpdateInvitation(data.invitationId, {
-			content: content as unknown as Invitation["content"],
+		await db.insert(schema.invitationSnapshots).values({
+			invitationId: data.invitationId,
+			content: rows[0].content as Record<string, unknown>,
+			reason: "patch-content",
 		});
 
-		return updated ?? { error: "Patch failed" };
+		const content = structuredClone(rows[0].content as Record<string, unknown>);
+		setNestedValue(content, getPathSegments(data.path), data.value);
+
+		const updated = await db
+			.update(schema.invitations)
+			.set({ content, updatedAt: new Date() })
+			.where(eq(schema.invitations.id, data.invitationId))
+			.returning();
+
+		return updated[0];
 	});
 
 function setNestedValue(

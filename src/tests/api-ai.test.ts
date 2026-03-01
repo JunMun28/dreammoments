@@ -62,82 +62,26 @@ vi.mock("@/lib/server-auth", () => ({
 	requireAuth: vi.fn(async () => ({ userId: "user-a" })),
 }));
 
-vi.mock("@/lib/data", () => ({
-	getInvitationById: vi.fn(() => null),
-	listAiGenerations: vi.fn(() => []),
-	markAiGenerationAccepted: vi.fn(),
-	updateInvitation: vi.fn(() => ({})),
-}));
-
 import {
-	applyAiResultFn,
 	generateAiContentBatchFn,
 	generateAiContentFn,
 	listAiGenerationsFn,
 } from "@/api/ai";
 import { getDbOrNull } from "@/db/index";
-import {
-	getInvitationById as localGetInvitationById,
-	listAiGenerations as localListAiGenerations,
-	markAiGenerationAccepted as localMarkAiGenerationAccepted,
-} from "@/lib/data";
 import { requireAuth } from "@/lib/server-auth";
 
 const mockedGetDbOrNull = vi.mocked(getDbOrNull);
 const mockedRequireAuth = vi.mocked(requireAuth);
-const mockedLocalGetById = vi.mocked(localGetInvitationById);
-const mockedLocalListAiGens = vi.mocked(localListAiGenerations);
-const mockedLocalMarkAiGenerationAccepted = vi.mocked(
-	localMarkAiGenerationAccepted,
-);
 
 beforeEach(() => {
 	vi.clearAllMocks();
-	mockedGetDbOrNull.mockReturnValue(null);
+	mockedGetDbOrNull.mockReturnValue(
+		mockDb as unknown as ReturnType<typeof getDbOrNull>,
+	);
 	mockedRequireAuth.mockResolvedValue({ userId: "user-a" });
 });
 
 describe("listAiGenerationsFn", () => {
-	test("lists AI generations (fallback path)", async () => {
-		const invitation = { id: "inv-1", userId: "user-a" };
-		const generations = [
-			{
-				id: "gen-1",
-				invitationId: "inv-1",
-				sectionId: "schedule",
-				prompt: "test",
-				accepted: false,
-			},
-		];
-		mockedLocalGetById.mockReturnValue(
-			invitation as ReturnType<typeof localGetInvitationById>,
-		);
-		mockedLocalListAiGens.mockReturnValue(
-			generations as ReturnType<typeof localListAiGenerations>,
-		);
-
-		const result = await (listAiGenerationsFn as CallableFunction)({
-			invitationId: "inv-1",
-			token: "valid-token",
-		});
-
-		expect(result).toEqual(generations);
-	});
-
-	test("denies access for wrong user (fallback)", async () => {
-		const invitation = { id: "inv-1", userId: "user-b" };
-		mockedLocalGetById.mockReturnValue(
-			invitation as ReturnType<typeof localGetInvitationById>,
-		);
-
-		const result = (await (listAiGenerationsFn as CallableFunction)({
-			invitationId: "inv-1",
-			token: "valid-token",
-		})) as { error: string };
-
-		expect(result.error).toBe("Access denied");
-	});
-
 	test("lists AI generations (DB path)", async () => {
 		const invitation = { userId: "user-a" };
 		const generations = [{ id: "gen-1", invitationId: "inv-1" }];
@@ -156,107 +100,6 @@ describe("listAiGenerationsFn", () => {
 		});
 
 		expect(result).toEqual(generations);
-	});
-});
-
-describe("applyAiResultFn", () => {
-	test("applies schedule result to invitation (fallback)", async () => {
-		const invitation = {
-			id: "inv-1",
-			userId: "user-a",
-			content: { schedule: { events: [] } },
-		};
-		mockedLocalGetById.mockReturnValue(
-			invitation as unknown as ReturnType<typeof localGetInvitationById>,
-		);
-
-		const result = await (applyAiResultFn as CallableFunction)({
-			invitationId: "inv-1",
-			token: "valid-token",
-			type: "schedule",
-			sectionId: "schedule",
-			aiResult: {
-				events: [
-					{
-						time: "10:00 AM",
-						title: "Ceremony",
-						description: "Main event",
-					},
-				],
-			},
-		});
-
-		expect(result.error).toBeUndefined();
-	});
-
-	test("applies tagline result to invitation (fallback)", async () => {
-		const invitation = {
-			id: "inv-1",
-			userId: "user-a",
-			content: {
-				hero: {
-					partnerOneName: "A",
-					partnerTwoName: "B",
-					tagline: "old",
-					date: "",
-				},
-			},
-		};
-		mockedLocalGetById.mockReturnValue(
-			invitation as ReturnType<typeof localGetInvitationById>,
-		);
-
-		const result = await (applyAiResultFn as CallableFunction)({
-			invitationId: "inv-1",
-			token: "valid-token",
-			type: "tagline",
-			sectionId: "hero",
-			aiResult: { tagline: "Forever & Always" },
-		});
-
-		expect(result.error).toBeUndefined();
-	});
-
-	test("scopes accepted generation update by invitation (fallback)", async () => {
-		const invitation = {
-			id: "inv-1",
-			userId: "user-a",
-			content: { schedule: { events: [] } },
-		};
-		mockedLocalGetById.mockReturnValue(
-			invitation as unknown as ReturnType<typeof localGetInvitationById>,
-		);
-
-		await (applyAiResultFn as CallableFunction)({
-			invitationId: "inv-1",
-			token: "valid-token",
-			type: "schedule",
-			sectionId: "schedule",
-			aiResult: { events: [] },
-			generationId: "gen-1",
-		});
-
-		expect(mockedLocalMarkAiGenerationAccepted).toHaveBeenCalledWith(
-			"gen-1",
-			"inv-1",
-		);
-	});
-
-	test("denies apply for wrong user", async () => {
-		const invitation = { id: "inv-1", userId: "user-b", content: {} };
-		mockedLocalGetById.mockReturnValue(
-			invitation as ReturnType<typeof localGetInvitationById>,
-		);
-
-		const result = (await (applyAiResultFn as CallableFunction)({
-			invitationId: "inv-1",
-			token: "valid-token",
-			type: "schedule",
-			sectionId: "schedule",
-			aiResult: { events: [] },
-		})) as { error: string };
-
-		expect(result.error).toBe("Access denied");
 	});
 });
 

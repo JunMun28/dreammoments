@@ -1,10 +1,10 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { CanvasEditor } from "@/components/canvas/CanvasEditor";
+import { useInvitation } from "@/hooks/useInvitations";
+import { useAuth } from "@/lib/auth";
 import { asCanvasDocument } from "@/lib/canvas/document";
 import { migrateInvitationContentToCanvas } from "@/lib/canvas/migrate";
-import { getCurrentUser, updateInvitation } from "@/lib/data";
-import { useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/editor/canvas/$invitationId")({
 	component: CanvasEditorRoute,
@@ -12,32 +12,29 @@ export const Route = createFileRoute("/editor/canvas/$invitationId")({
 
 function CanvasEditorRoute() {
 	const { invitationId } = Route.useParams();
-	const user = getCurrentUser();
-	const invitation = useStore((store) =>
-		store.invitations.find((item) => item.id === invitationId),
-	);
-	const existingCanvas = useMemo(
-		() => (invitation ? asCanvasDocument(invitation.content) : null),
-		[invitation],
-	);
+	const { user, token, loading: authLoading } = useAuth();
+	const { data: invitation, isLoading } = useInvitation(invitationId);
 
 	const canvasDocument = useMemo(() => {
 		if (!invitation) return null;
 		return (
-			existingCanvas ??
+			asCanvasDocument(invitation.content) ??
 			migrateInvitationContentToCanvas(
 				invitation.content,
 				invitation.templateId,
 			)
 		);
-	}, [existingCanvas, invitation]);
+	}, [invitation]);
 
-	useEffect(() => {
-		if (!invitation || !canvasDocument || existingCanvas) return;
-		updateInvitation(invitation.id, {
-			content: canvasDocument as unknown as never,
-		});
-	}, [invitation, canvasDocument, existingCanvas]);
+	if (authLoading || isLoading) {
+		return (
+			<div className="flex min-h-screen items-center justify-center bg-[color:var(--dm-bg)]">
+				<p className="text-xs uppercase tracking-[0.18em] text-[color:var(--dm-muted)]">
+					Loading canvas...
+				</p>
+			</div>
+		);
+	}
 
 	if (!user) return <Navigate to="/auth/login" />;
 	if (!invitation || invitation.userId !== user.id) {
@@ -71,6 +68,7 @@ function CanvasEditorRoute() {
 			title={invitation.title || "Canvas invitation"}
 			initialDocument={canvasDocument}
 			previewSlug={invitation.slug}
+			token={token ?? undefined}
 		/>
 	);
 }

@@ -10,13 +10,7 @@ import {
 } from "drizzle-orm";
 import { z } from "zod";
 
-import { getDbOrNull, isProduction, schema } from "@/db/index";
-import {
-	getAnalytics as localGetAnalytics,
-	getDeviceBreakdown as localGetDeviceBreakdown,
-	getInvitationById as localGetInvitationById,
-	listGuests as localListGuests,
-} from "@/lib/data";
+import { getDbOrNull, schema } from "@/db/index";
 import { requireAuth } from "@/lib/server-auth";
 import { parseInput } from "./validate";
 
@@ -61,196 +55,150 @@ export const getAnalyticsFn = createServerFn({
 		const { userId } = await requireAuth(data.token);
 
 		const db = getDbOrNull();
+		if (!db) throw new Error("Database connection required");
 
-		if (db) {
-			// Verify ownership
-			const invRows = await db
-				.select({ userId: schema.invitations.userId })
-				.from(schema.invitations)
-				.where(eq(schema.invitations.id, data.invitationId));
+		// Verify ownership
+		const invRows = await db
+			.select({ userId: schema.invitations.userId })
+			.from(schema.invitations)
+			.where(eq(schema.invitations.id, data.invitationId));
 
-			if (invRows.length === 0) {
-				return { error: "Invitation not found" };
-			}
-			if (invRows[0].userId !== userId) {
-				return { error: "Access denied" };
-			}
-
-			// Calculate period filter date
-			const periodStart = getPeriodStart(data.period);
-
-			// Build shared WHERE conditions for view queries
-			const viewConditions = [
-				eq(schema.invitationViews.invitationId, data.invitationId),
-			];
-			if (periodStart) {
-				viewConditions.push(gte(schema.invitationViews.viewedAt, periodStart));
-			}
-			const viewWhere = and(...viewConditions);
-
-			// Run all aggregation queries in parallel
-			const [
-				totalViewsResult,
-				uniqueViewsResult,
-				viewsByDayResult,
-				deviceResult,
-				referrerResult,
-				rsvpResult,
-			] = await Promise.all([
-				// Total views
-				db
-					.select({ value: count() })
-					.from(schema.invitationViews)
-					.where(viewWhere),
-
-				// Unique views (distinct visitor hashes)
-				db
-					.select({
-						value: countDistinct(schema.invitationViews.visitorHash),
-					})
-					.from(schema.invitationViews)
-					.where(viewWhere),
-
-				// Views by day
-				db
-					.select({
-						date: sql<string>`date_trunc('day', ${schema.invitationViews.viewedAt})::date::text`,
-						count: count(),
-					})
-					.from(schema.invitationViews)
-					.where(viewWhere)
-					.groupBy(sql`date_trunc('day', ${schema.invitationViews.viewedAt})`)
-					.orderBy(sql`date_trunc('day', ${schema.invitationViews.viewedAt})`),
-
-				// Device breakdown
-				db
-					.select({
-						deviceType: schema.invitationViews.deviceType,
-						count: count(),
-					})
-					.from(schema.invitationViews)
-					.where(viewWhere)
-					.groupBy(schema.invitationViews.deviceType),
-
-				// Top referrers
-				db
-					.select({
-						referrer: schema.invitationViews.referrer,
-						count: count(),
-					})
-					.from(schema.invitationViews)
-					.where(
-						and(...viewConditions, isNotNull(schema.invitationViews.referrer)),
-					)
-					.groupBy(schema.invitationViews.referrer)
-					.orderBy(sql`count(*) desc`)
-					.limit(10),
-
-				// RSVP summary from guests table
-				db
-					.select({
-						attendance: schema.guests.attendance,
-						count: count(),
-					})
-					.from(schema.guests)
-					.where(eq(schema.guests.invitationId, data.invitationId))
-					.groupBy(schema.guests.attendance),
-			]);
-
-			const totalViews = totalViewsResult[0]?.value ?? 0;
-			const uniqueViews = uniqueViewsResult[0]?.value ?? 0;
-
-			const viewsByDay = viewsByDayResult.map((row) => ({
-				date: row.date,
-				count: row.count,
-			}));
-
-			const deviceBreakdown = { mobile: 0, desktop: 0, tablet: 0 };
-			for (const row of deviceResult) {
-				const device = (row.deviceType ??
-					"desktop") as keyof typeof deviceBreakdown;
-				if (device in deviceBreakdown) {
-					deviceBreakdown[device] = row.count;
-				}
-			}
-
-			const topReferrers = referrerResult
-				.filter(
-					(row): row is { referrer: string; count: number } =>
-						row.referrer !== null,
-				)
-				.map((row) => ({
-					referrer: row.referrer,
-					count: row.count,
-				}));
-
-			const rsvpSummary = {
-				attending: 0,
-				notAttending: 0,
-				pending: 0,
-				total: 0,
-			};
-			for (const row of rsvpResult) {
-				rsvpSummary.total += row.count;
-				if (row.attendance === "attending") rsvpSummary.attending = row.count;
-				else if (row.attendance === "not_attending")
-					rsvpSummary.notAttending = row.count;
-				else rsvpSummary.pending += row.count;
-			}
-
-			return {
-				totalViews,
-				uniqueViews,
-				rsvpSummary,
-				viewsByDay,
-				deviceBreakdown,
-				topReferrers,
-			};
-		}
-
-		if (isProduction()) {
-			throw new Error("Database required in production");
-		}
-
-		// Dev-only localStorage fallback
-		console.warn(
-			"[Analytics] getAnalytics: using localStorage fallback (no DATABASE_URL)",
-		);
-
-		const invitation = localGetInvitationById(data.invitationId);
-		if (!invitation) {
+		if (invRows.length === 0) {
 			return { error: "Invitation not found" };
 		}
-		if (invitation.userId !== userId) {
+		if (invRows[0].userId !== userId) {
 			return { error: "Access denied" };
 		}
 
-		const localAnalytics = localGetAnalytics(data.invitationId);
-		const localDevices = localGetDeviceBreakdown(data.invitationId);
-		const localGuests = localListGuests(data.invitationId);
+		// Calculate period filter date
+		const periodStart = getPeriodStart(data.period);
+
+		// Build shared WHERE conditions for view queries
+		const viewConditions = [
+			eq(schema.invitationViews.invitationId, data.invitationId),
+		];
+		if (periodStart) {
+			viewConditions.push(gte(schema.invitationViews.viewedAt, periodStart));
+		}
+		const viewWhere = and(...viewConditions);
+
+		// Run all aggregation queries in parallel
+		const [
+			totalViewsResult,
+			uniqueViewsResult,
+			viewsByDayResult,
+			deviceResult,
+			referrerResult,
+			rsvpResult,
+		] = await Promise.all([
+			// Total views
+			db
+				.select({ value: count() })
+				.from(schema.invitationViews)
+				.where(viewWhere),
+
+			// Unique views (distinct visitor hashes)
+			db
+				.select({
+					value: countDistinct(schema.invitationViews.visitorHash),
+				})
+				.from(schema.invitationViews)
+				.where(viewWhere),
+
+			// Views by day
+			db
+				.select({
+					date: sql<string>`date_trunc('day', ${schema.invitationViews.viewedAt})::date::text`,
+					count: count(),
+				})
+				.from(schema.invitationViews)
+				.where(viewWhere)
+				.groupBy(sql`date_trunc('day', ${schema.invitationViews.viewedAt})`)
+				.orderBy(sql`date_trunc('day', ${schema.invitationViews.viewedAt})`),
+
+			// Device breakdown
+			db
+				.select({
+					deviceType: schema.invitationViews.deviceType,
+					count: count(),
+				})
+				.from(schema.invitationViews)
+				.where(viewWhere)
+				.groupBy(schema.invitationViews.deviceType),
+
+			// Top referrers
+			db
+				.select({
+					referrer: schema.invitationViews.referrer,
+					count: count(),
+				})
+				.from(schema.invitationViews)
+				.where(
+					and(...viewConditions, isNotNull(schema.invitationViews.referrer)),
+				)
+				.groupBy(schema.invitationViews.referrer)
+				.orderBy(sql`count(*) desc`)
+				.limit(10),
+
+			// RSVP summary from guests table
+			db
+				.select({
+					attendance: schema.guests.attendance,
+					count: count(),
+				})
+				.from(schema.guests)
+				.where(eq(schema.guests.invitationId, data.invitationId))
+				.groupBy(schema.guests.attendance),
+		]);
+
+		const totalViews = totalViewsResult[0]?.value ?? 0;
+		const uniqueViews = uniqueViewsResult[0]?.value ?? 0;
+
+		const viewsByDay = viewsByDayResult.map((row) => ({
+			date: row.date,
+			count: row.count,
+		}));
+
+		const deviceBreakdown = { mobile: 0, desktop: 0, tablet: 0 };
+		for (const row of deviceResult) {
+			const device = (row.deviceType ??
+				"desktop") as keyof typeof deviceBreakdown;
+			if (device in deviceBreakdown) {
+				deviceBreakdown[device] = row.count;
+			}
+		}
+
+		const topReferrers = referrerResult
+			.filter(
+				(row): row is { referrer: string; count: number } =>
+					row.referrer !== null,
+			)
+			.map((row) => ({
+				referrer: row.referrer,
+				count: row.count,
+			}));
 
 		const rsvpSummary = {
-			attending: localGuests.filter((g) => g.attendance === "attending").length,
-			notAttending: localGuests.filter((g) => g.attendance === "not_attending")
-				.length,
-			pending: localGuests.filter((g) => !g.attendance).length,
-			total: localGuests.length,
+			attending: 0,
+			notAttending: 0,
+			pending: 0,
+			total: 0,
 		};
+		for (const row of rsvpResult) {
+			rsvpSummary.total += row.count;
+			if (row.attendance === "attending") rsvpSummary.attending = row.count;
+			else if (row.attendance === "not_attending")
+				rsvpSummary.notAttending = row.count;
+			else rsvpSummary.pending += row.count;
+		}
 
 		return {
-			totalViews: localAnalytics.totalViews,
-			uniqueViews: localAnalytics.uniqueVisitors,
+			totalViews,
+			uniqueViews,
 			rsvpSummary,
-			viewsByDay: localAnalytics.viewsByDay.map((d) => ({
-				date: d.date,
-				count: d.views,
-			})),
-			deviceBreakdown: {
-				mobile: localDevices.mobile ?? 0,
-				desktop: localDevices.desktop ?? 0,
-				tablet: localDevices.tablet ?? 0,
-			},
-			topReferrers: [],
+			viewsByDay,
+			deviceBreakdown,
+			topReferrers,
 		};
 	});
 

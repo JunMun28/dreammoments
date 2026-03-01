@@ -4,18 +4,8 @@ import { and, eq } from "drizzle-orm";
 
 import { getDbOrNull, schema } from "@/db/index";
 import { isCanvasDocument } from "@/lib/canvas/document";
-import {
-	deleteGuestInInvitation as localDeleteGuestInInvitation,
-	exportGuestsCsv as localExportGuestsCsv,
-	getInvitationById as localGetInvitationById,
-	importGuests as localImportGuests,
-	listGuests as localListGuests,
-	submitRsvp as localSubmitRsvp,
-	updateGuestInInvitation as localUpdateGuestInInvitation,
-} from "@/lib/data";
 import { createDbRateLimiter } from "@/lib/rate-limit";
 import { requireAuth } from "@/lib/server-auth";
-import type { AttendanceStatus } from "@/lib/types";
 import {
 	bulkUpdateGuestsSchema,
 	deleteGuestSchema,
@@ -114,62 +104,42 @@ export const listGuestsFn = createServerFn({
 		const { userId } = await requireAuth(data.token);
 
 		const db = getDbOrNull();
+		if (!db) throw new Error("Database connection required");
 
-		if (db) {
-			// Verify invitation ownership
-			const invitation = await db
-				.select({ userId: schema.invitations.userId })
-				.from(schema.invitations)
-				.where(eq(schema.invitations.id, data.invitationId));
+		// Verify invitation ownership
+		const invitation = await db
+			.select({ userId: schema.invitations.userId })
+			.from(schema.invitations)
+			.where(eq(schema.invitations.id, data.invitationId));
 
-			if (invitation.length === 0) {
-				return { error: "Invitation not found" };
-			}
-			if (invitation[0].userId !== userId) {
-				return { error: "Access denied" };
-			}
-
-			let query = db
-				.select()
-				.from(schema.guests)
-				.where(eq(schema.guests.invitationId, data.invitationId));
-
-			if (data.filter && data.filter !== "pending") {
-				query = db
-					.select()
-					.from(schema.guests)
-					.where(
-						and(
-							eq(schema.guests.invitationId, data.invitationId),
-							eq(schema.guests.attendance, data.filter),
-						),
-					);
-			}
-
-			const rows = await query;
-
-			return applyGuestFilters(rows, {
-				filter: data.filter,
-				search: data.search,
-				relationship: data.relationship,
-			});
-		}
-
-		// localStorage fallback - verify ownership
-		const invitation = localGetInvitationById(data.invitationId);
-		if (!invitation) {
+		if (invitation.length === 0) {
 			return { error: "Invitation not found" };
 		}
-		if (invitation.userId !== userId) {
+		if (invitation[0].userId !== userId) {
 			return { error: "Access denied" };
 		}
 
-		const rows = localListGuests(
-			data.invitationId,
-			data.filter as AttendanceStatus | "pending" | undefined,
-		);
+		let query = db
+			.select()
+			.from(schema.guests)
+			.where(eq(schema.guests.invitationId, data.invitationId));
+
+		if (data.filter && data.filter !== "pending") {
+			query = db
+				.select()
+				.from(schema.guests)
+				.where(
+					and(
+						eq(schema.guests.invitationId, data.invitationId),
+						eq(schema.guests.attendance, data.filter),
+					),
+				);
+		}
+
+		const rows = await query;
 
 		return applyGuestFilters(rows, {
+			filter: data.filter,
 			search: data.search,
 			relationship: data.relationship,
 		});
@@ -204,96 +174,71 @@ export const submitRsvpFn = createServerFn({
 		}
 
 		const db = getDbOrNull();
+		if (!db) throw new Error("Database connection required");
 
-		if (db) {
-			// Verify invitation exists and is published
-			const invRows = await db
-				.select()
-				.from(schema.invitations)
-				.where(eq(schema.invitations.id, data.invitationId));
+		// Verify invitation exists and is published
+		const invRows = await db
+			.select()
+			.from(schema.invitations)
+			.where(eq(schema.invitations.id, data.invitationId));
 
-			if (invRows.length === 0) {
-				return { error: "Invitation not found" };
-			}
-
-			const invitation = invRows[0];
-			if (invitation.status !== "published") {
-				return { error: "Invitation is not published" };
-			}
-
-			// Check guest count limits
-			const content = invitation.content as Record<string, unknown>;
-			let allowPlusOnes = false;
-			let maxPlusOnes = 0;
-			if (isCanvasDocument(content)) {
-				const formBlock = content.blockOrder
-					.map((id) => content.blocksById[id])
-					.find(
-						(block) =>
-							block?.type === "form" || block?.semantic === "rsvp-form",
-					);
-				if (typeof formBlock?.content.allowPlusOnes === "boolean") {
-					allowPlusOnes = formBlock.content.allowPlusOnes;
-				}
-				if (typeof formBlock?.content.maxPlusOnes === "number") {
-					maxPlusOnes = formBlock.content.maxPlusOnes;
-				}
-			} else {
-				const rsvp = content.rsvp as
-					| {
-							allowPlusOnes?: boolean;
-							maxPlusOnes?: number;
-					  }
-					| undefined;
-				allowPlusOnes = !!rsvp?.allowPlusOnes;
-				maxPlusOnes = rsvp?.maxPlusOnes ?? 0;
-			}
-			const maxAllowed = allowPlusOnes ? 1 + maxPlusOnes : 1;
-			if ((data.guestCount ?? 1) > maxAllowed) {
-				return { error: "Guest count exceeds limit" };
-			}
-
-			const rows = await db
-				.insert(schema.guests)
-				.values({
-					invitationId: data.invitationId,
-					name: data.name,
-					email: data.email,
-					phone: data.phone,
-					relationship: data.relationship,
-					attendance: data.attendance,
-					guestCount: data.guestCount ?? 1,
-					dietaryRequirements: data.dietaryRequirements,
-					message: data.message,
-					rsvpSubmittedAt: new Date(),
-				})
-				.returning();
-
-			return rows[0];
+		if (invRows.length === 0) {
+			return { error: "Invitation not found" };
 		}
 
-		// localStorage fallback
-		try {
-			const guest = localSubmitRsvp(
-				data.invitationId,
-				{
-					name: data.name,
-					email: data.email,
-					phone: data.phone,
-					relationship: data.relationship,
-					attendance: data.attendance,
-					guestCount: data.guestCount ?? 1,
-					dietaryRequirements: data.dietaryRequirements,
-					message: data.message,
-				},
-				data.visitorKey,
-			);
-			return guest;
-		} catch (err) {
-			return {
-				error: err instanceof Error ? err.message : "RSVP failed",
-			};
+		const invitation = invRows[0];
+		if (invitation.status !== "published") {
+			return { error: "Invitation is not published" };
 		}
+
+		// Check guest count limits
+		const content = invitation.content as Record<string, unknown>;
+		let allowPlusOnes = false;
+		let maxPlusOnes = 0;
+		if (isCanvasDocument(content)) {
+			const formBlock = content.blockOrder
+				.map((id) => content.blocksById[id])
+				.find(
+					(block) => block?.type === "form" || block?.semantic === "rsvp-form",
+				);
+			if (typeof formBlock?.content.allowPlusOnes === "boolean") {
+				allowPlusOnes = formBlock.content.allowPlusOnes;
+			}
+			if (typeof formBlock?.content.maxPlusOnes === "number") {
+				maxPlusOnes = formBlock.content.maxPlusOnes;
+			}
+		} else {
+			const rsvp = content.rsvp as
+				| {
+						allowPlusOnes?: boolean;
+						maxPlusOnes?: number;
+				  }
+				| undefined;
+			allowPlusOnes = !!rsvp?.allowPlusOnes;
+			maxPlusOnes = rsvp?.maxPlusOnes ?? 0;
+		}
+		const maxAllowed = allowPlusOnes ? 1 + maxPlusOnes : 1;
+		if ((data.guestCount ?? 1) > maxAllowed) {
+			return { error: "Guest count exceeds limit" };
+		}
+
+		const rows = await db
+			.insert(schema.guests)
+			.values({
+				invitationId: data.invitationId,
+				name: data.name,
+				email: data.email,
+				phone: data.phone,
+				relationship: data.relationship,
+				attendance: data.attendance,
+				guestCount: data.guestCount ?? 1,
+				dietaryRequirements: data.dietaryRequirements,
+				message: data.message,
+				rsvpSubmittedAt: new Date(),
+			})
+			.returning();
+
+		return rows[0];
 	});
 
 // ── Update guest (auth required) ────────────────────────────────────
@@ -323,72 +268,54 @@ export const updateGuestFn = createServerFn({
 		const { userId } = await requireAuth(data.token);
 
 		const db = getDbOrNull();
+		if (!db) throw new Error("Database connection required");
 
-		if (db) {
-			// Verify invitation ownership
-			const invitation = await db
-				.select({ userId: schema.invitations.userId })
-				.from(schema.invitations)
-				.where(eq(schema.invitations.id, data.invitationId));
+		// Verify invitation ownership
+		const invitation = await db
+			.select({ userId: schema.invitations.userId })
+			.from(schema.invitations)
+			.where(eq(schema.invitations.id, data.invitationId));
 
-			if (invitation.length === 0) {
-				return { error: "Invitation not found" };
-			}
-			if (invitation[0].userId !== userId) {
-				return { error: "Access denied" };
-			}
-
-			// Build update fields
-			const updateFields: Record<string, unknown> = {
-				updatedAt: new Date(),
-			};
-			if (data.name !== undefined) updateFields.name = data.name;
-			if (data.email !== undefined) updateFields.email = data.email;
-			if (data.phone !== undefined) updateFields.phone = data.phone;
-			if (data.relationship !== undefined)
-				updateFields.relationship = data.relationship;
-			if (data.attendance !== undefined)
-				updateFields.attendance = data.attendance;
-			if (data.guestCount !== undefined)
-				updateFields.guestCount = data.guestCount;
-			if (data.dietaryRequirements !== undefined)
-				updateFields.dietaryRequirements = data.dietaryRequirements;
-			if (data.message !== undefined) updateFields.message = data.message;
-
-			const rows = await db
-				.update(schema.guests)
-				.set(updateFields)
-				.where(
-					and(
-						eq(schema.guests.id, data.guestId),
-						eq(schema.guests.invitationId, data.invitationId),
-					),
-				)
-				.returning();
-
-			if (rows.length === 0) {
-				return { error: "Guest not found" };
-			}
-
-			return rows[0];
-		}
-
-		// localStorage fallback - verify ownership
-		const invitation = localGetInvitationById(data.invitationId);
-		if (!invitation) {
+		if (invitation.length === 0) {
 			return { error: "Invitation not found" };
 		}
-		if (invitation.userId !== userId) {
+		if (invitation[0].userId !== userId) {
 			return { error: "Access denied" };
 		}
 
-		const { guestId, token: _, invitationId: __, ...patch } = data;
-		const updated = localUpdateGuestInInvitation(
-			data.invitationId,
-			guestId,
-			patch,
-		);
-		return updated ?? { error: "Guest not found" };
+		// Build update fields
+		const updateFields: Record<string, unknown> = {
+			updatedAt: new Date(),
+		};
+		if (data.name !== undefined) updateFields.name = data.name;
+		if (data.email !== undefined) updateFields.email = data.email;
+		if (data.phone !== undefined) updateFields.phone = data.phone;
+		if (data.relationship !== undefined)
+			updateFields.relationship = data.relationship;
+		if (data.attendance !== undefined)
+			updateFields.attendance = data.attendance;
+		if (data.guestCount !== undefined)
+			updateFields.guestCount = data.guestCount;
+		if (data.dietaryRequirements !== undefined)
+			updateFields.dietaryRequirements = data.dietaryRequirements;
+		if (data.message !== undefined) updateFields.message = data.message;
+
+		const rows = await db
+			.update(schema.guests)
+			.set(updateFields)
+			.where(
+				and(
+					eq(schema.guests.id, data.guestId),
+					eq(schema.guests.invitationId, data.invitationId),
+				),
+			)
+			.returning();
+
+		if (rows.length === 0) {
+			return { error: "Guest not found" };
+		}
+
+		return rows[0];
 	});
 
 // ── Import guests (bulk) ────────────────────────────────────────────
@@ -419,45 +346,33 @@ export const importGuestsFn = createServerFn({
 		const { userId } = await requireAuth(data.token);
 
 		const db = getDbOrNull();
+		if (!db) throw new Error("Database connection required");
 
-		if (db) {
-			// Verify invitation ownership
-			const invitation = await db
-				.select({ userId: schema.invitations.userId })
-				.from(schema.invitations)
-				.where(eq(schema.invitations.id, data.invitationId));
+		// Verify invitation ownership
+		const invitation = await db
+			.select({ userId: schema.invitations.userId })
+			.from(schema.invitations)
+			.where(eq(schema.invitations.id, data.invitationId));
 
-			if (invitation.length === 0) {
-				return { error: "Invitation not found" };
-			}
-			if (invitation[0].userId !== userId) {
-				return { error: "Access denied" };
-			}
-
-			const values = data.guests.map((guest) => ({
-				invitationId: data.invitationId,
-				name: guest.name,
-				email: guest.email,
-				phone: guest.phone,
-				relationship: guest.relationship,
-				guestCount: 1,
-			}));
-
-			const rows = await db.insert(schema.guests).values(values).returning();
-
-			return rows;
-		}
-
-		// localStorage fallback - verify ownership
-		const invitation = localGetInvitationById(data.invitationId);
-		if (!invitation) {
+		if (invitation.length === 0) {
 			return { error: "Invitation not found" };
 		}
-		if (invitation.userId !== userId) {
+		if (invitation[0].userId !== userId) {
 			return { error: "Access denied" };
 		}
 
-		return localImportGuests(data.invitationId, data.guests);
+		const values = data.guests.map((guest) => ({
+			invitationId: data.invitationId,
+			name: guest.name,
+			email: guest.email,
+			phone: guest.phone,
+			relationship: guest.relationship,
+			guestCount: 1,
+		}));
+
+		const rows = await db.insert(schema.guests).values(values).returning();
+
+		return rows;
 	});
 
 // ── Export guests as CSV ────────────────────────────────────────────
@@ -476,62 +391,42 @@ export const exportGuestsCsvFn = createServerFn({
 		const { userId } = await requireAuth(data.token);
 
 		const db = getDbOrNull();
+		if (!db) throw new Error("Database connection required");
 
-		if (db) {
-			// Verify invitation ownership
-			const invitation = await db
-				.select({ userId: schema.invitations.userId })
-				.from(schema.invitations)
-				.where(eq(schema.invitations.id, data.invitationId));
+		// Verify invitation ownership
+		const invitation = await db
+			.select({ userId: schema.invitations.userId })
+			.from(schema.invitations)
+			.where(eq(schema.invitations.id, data.invitationId));
 
-			if (invitation.length === 0) {
-				return { error: "Invitation not found" };
-			}
-			if (invitation[0].userId !== userId) {
-				return { error: "Access denied" };
-			}
-
-			const guests = await db
-				.select()
-				.from(schema.guests)
-				.where(eq(schema.guests.invitationId, data.invitationId));
-
-			const header = [
-				"name",
-				"attendance",
-				"guest_count",
-				"dietary",
-				"message",
-			];
-			const rows = guests.map((guest) => [
-				guest.name,
-				guest.attendance ?? "pending",
-				(guest.guestCount ?? 1).toString(),
-				guest.dietaryRequirements ?? "",
-				guest.message ?? "",
-			]);
-
-			const csv = [header, ...rows]
-				.map((row) =>
-					row
-						.map((value) => `"${String(value).replace(/"/g, '""')}"`)
-						.join(","),
-				)
-				.join("\n");
-
-			return { csv };
-		}
-
-		// localStorage fallback - verify ownership
-		const invitation = localGetInvitationById(data.invitationId);
-		if (!invitation) {
+		if (invitation.length === 0) {
 			return { error: "Invitation not found" };
 		}
-		if (invitation.userId !== userId) {
+		if (invitation[0].userId !== userId) {
 			return { error: "Access denied" };
 		}
 
-		return { csv: localExportGuestsCsv(data.invitationId) };
+		const guests = await db
+			.select()
+			.from(schema.guests)
+			.where(eq(schema.guests.invitationId, data.invitationId));
+
+		const header = ["name", "attendance", "guest_count", "dietary", "message"];
+		const rows = guests.map((guest) => [
+			guest.name,
+			guest.attendance ?? "pending",
+			(guest.guestCount ?? 1).toString(),
+			guest.dietaryRequirements ?? "",
+			guest.message ?? "",
+		]);
+
+		const csv = [header, ...rows]
+			.map((row) =>
+				row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(","),
+			)
+			.join("\n");
+
+		return { csv };
 	});
 
 // ── Delete guest ─────────────────────────────────────────────────────
@@ -552,47 +447,29 @@ export const deleteGuestFn = createServerFn({
 		const { userId } = await requireAuth(data.token);
 
 		const db = getDbOrNull();
+		if (!db) throw new Error("Database connection required");
 
-		if (db) {
-			const invitation = await db
-				.select({ userId: schema.invitations.userId })
-				.from(schema.invitations)
-				.where(eq(schema.invitations.id, data.invitationId));
+		const invitation = await db
+			.select({ userId: schema.invitations.userId })
+			.from(schema.invitations)
+			.where(eq(schema.invitations.id, data.invitationId));
 
-			if (invitation.length === 0) {
-				return { error: "Invitation not found" };
-			}
-			if (invitation[0].userId !== userId) {
-				return { error: "Access denied" };
-			}
-
-			await db
-				.delete(schema.guests)
-				.where(
-					and(
-						eq(schema.guests.id, data.guestId),
-						eq(schema.guests.invitationId, data.invitationId),
-					),
-				);
-
-			return { success: true };
-		}
-
-		const invitation = localGetInvitationById(data.invitationId);
-		if (!invitation) {
+		if (invitation.length === 0) {
 			return { error: "Invitation not found" };
 		}
-		if (invitation.userId !== userId) {
+		if (invitation[0].userId !== userId) {
 			return { error: "Access denied" };
 		}
 
-		const deleted = localDeleteGuestInInvitation(
-			data.invitationId,
-			data.guestId,
-		);
-		if (!deleted) {
-			return { error: "Guest not found" };
-		}
+		await db
+			.delete(schema.guests)
+			.where(
+				and(
+					eq(schema.guests.id, data.guestId),
+					eq(schema.guests.invitationId, data.invitationId),
+				),
+			);
+
 		return { success: true };
 	});
 
@@ -624,58 +501,17 @@ export const bulkUpdateGuestsFn = createServerFn({
 		const { userId } = await requireAuth(data.token);
 
 		const db = getDbOrNull();
+		if (!db) throw new Error("Database connection required");
 
-		if (db) {
-			const invitation = await db
-				.select({ userId: schema.invitations.userId })
-				.from(schema.invitations)
-				.where(eq(schema.invitations.id, data.invitationId));
+		const invitation = await db
+			.select({ userId: schema.invitations.userId })
+			.from(schema.invitations)
+			.where(eq(schema.invitations.id, data.invitationId));
 
-			if (invitation.length === 0) {
-				return { error: "Invitation not found" };
-			}
-			if (invitation[0].userId !== userId) {
-				return { error: "Access denied" };
-			}
-
-			let updated = 0;
-
-			for (const update of data.updates) {
-				const { guestId, ...fields } = update;
-				const updateFields: Record<string, unknown> = {
-					updatedAt: new Date(),
-				};
-
-				for (const [key, value] of Object.entries(fields)) {
-					if (value !== undefined) {
-						updateFields[key] = value;
-					}
-				}
-
-				const rows = await db
-					.update(schema.guests)
-					.set(updateFields)
-					.where(
-						and(
-							eq(schema.guests.id, guestId),
-							eq(schema.guests.invitationId, data.invitationId),
-						),
-					)
-					.returning();
-
-				if (rows.length > 0) {
-					updated++;
-				}
-			}
-
-			return { updated };
-		}
-
-		const invitation = localGetInvitationById(data.invitationId);
-		if (!invitation) {
+		if (invitation.length === 0) {
 			return { error: "Invitation not found" };
 		}
-		if (invitation.userId !== userId) {
+		if (invitation[0].userId !== userId) {
 			return { error: "Access denied" };
 		}
 
@@ -683,12 +519,28 @@ export const bulkUpdateGuestsFn = createServerFn({
 
 		for (const update of data.updates) {
 			const { guestId, ...fields } = update;
-			const row = localUpdateGuestInInvitation(
-				data.invitationId,
-				guestId,
-				fields,
-			);
-			if (row) {
+			const updateFields: Record<string, unknown> = {
+				updatedAt: new Date(),
+			};
+
+			for (const [key, value] of Object.entries(fields)) {
+				if (value !== undefined) {
+					updateFields[key] = value;
+				}
+			}
+
+			const rows = await db
+				.update(schema.guests)
+				.set(updateFields)
+				.where(
+					and(
+						eq(schema.guests.id, guestId),
+						eq(schema.guests.invitationId, data.invitationId),
+					),
+				)
+				.returning();
+
+			if (rows.length > 0) {
 				updated++;
 			}
 		}

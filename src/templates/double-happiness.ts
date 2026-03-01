@@ -66,6 +66,11 @@ export const doubleHappinessTemplate: TemplateConfig = {
 					label: "Hero photo",
 					type: "image",
 				},
+				{
+					id: "livingPortrait",
+					label: "Living Portrait",
+					type: "living-portrait",
+				},
 			],
 		},
 		{

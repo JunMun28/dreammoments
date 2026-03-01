@@ -6,6 +6,7 @@ import type {
 	Position,
 	Size,
 } from "@/lib/canvas/types";
+import { getStringProp } from "@/lib/hero-content";
 import { ActionsRow } from "./inspector/ActionsRow";
 import { ContentSection } from "./inspector/ContentSection";
 import { DesignTokensPanel } from "./inspector/DesignTokensPanel";
@@ -15,6 +16,7 @@ import {
 	NumberInput,
 } from "./inspector/InspectorSection";
 import { LayoutSection } from "./inspector/LayoutSection";
+import { LivingPortraitSection } from "./inspector/LivingPortraitSection";
 
 function coerceNumber(value: string, fallback: number): number {
 	const parsed = Number(value);
@@ -125,6 +127,13 @@ function BulkInspector({
 	);
 }
 
+function isHeroImageBlock(block: Block): boolean {
+	return (
+		block.type === "image" &&
+		(block.semantic === "hero-image" || block.sectionId === "hero")
+	);
+}
+
 function SingleInspector({
 	block,
 	onUpdateContent,
@@ -135,6 +144,8 @@ function SingleInspector({
 	onDuplicate,
 	onToggleLock,
 	onUpdateAnimation,
+	invitationId,
+	token,
 }: {
 	block: Block;
 	onUpdateContent: (contentPatch: Record<string, unknown>) => void;
@@ -145,6 +156,8 @@ function SingleInspector({
 	onDuplicate: () => void;
 	onToggleLock: () => void;
 	onUpdateAnimation: (animation: AnimationType) => void;
+	invitationId?: string;
+	token?: string;
 }) {
 	return (
 		<div>
@@ -163,6 +176,17 @@ function SingleInspector({
 				onRestyle={onRestyle}
 				onUpdateAnimation={onUpdateAnimation}
 			/>
+			{isHeroImageBlock(block) && invitationId && token && (
+				<LivingPortraitSection
+					invitationId={invitationId}
+					token={token}
+					heroImageUrl={getStringProp(block.content, "src") ?? ""}
+					avatarImageUrl={getStringProp(block.content, "avatarImageUrl")}
+					avatarStyle={getStringProp(block.content, "avatarStyle")}
+					animatedVideoUrl={getStringProp(block.content, "animatedVideoUrl")}
+					onUpdateContent={onUpdateContent}
+				/>
+			)}
 			<LayoutSection
 				block={block}
 				onMove={onMove}
@@ -195,6 +219,8 @@ export function BlockInspectorSidebar({
 	designTokens,
 	onDesignTokenChange,
 	onSpacingChange,
+	invitationId,
+	token,
 }: {
 	selectedBlocks: Block[];
 	onUpdateContent: (
@@ -221,6 +247,8 @@ export function BlockInspectorSidebar({
 		value: string,
 	) => void;
 	onSpacingChange?: (spacing: number) => void;
+	invitationId?: string;
+	token?: string;
 }) {
 	if (selectedBlocks.length === 0) {
 		if (designTokens && onDesignTokenChange && onSpacingChange) {
@@ -281,6 +309,8 @@ export function BlockInspectorSidebar({
 				onUpdateAnimation={(animation) =>
 					onUpdateAnimation(block.id, animation)
 				}
+				invitationId={invitationId}
+				token={token}
 			/>
 		</aside>
 	);
