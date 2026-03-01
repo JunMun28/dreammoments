@@ -17,7 +17,7 @@ const ANIMATION_PROMPT =
 	"Gentle, subtle animation. Soft breeze through hair, very slight natural breathing movement. " +
 	"Elegant, dreamlike quality. Keep the scene mostly still with only minimal, graceful motion.";
 
-const VIDEO_MODEL = "fal-ai/kling-video/v2.6/pro/image-to-video";
+const VIDEO_MODEL = "fal-ai/kling-video/v2.1/pro/image-to-video";
 
 // ── Input schemas ────────────────────────────────────────────────────
 
@@ -44,9 +44,8 @@ function configureFal() {
 export const submitAnimationFn = createServerFn({
 	method: "POST",
 })
-	.inputValidator(
-		(data: { invitationId: string; token: string }) =>
-			parseInput(submitAnimationSchema, data),
+	.inputValidator((data: { invitationId: string; token: string }) =>
+		parseInput(submitAnimationSchema, data),
 	)
 	.handler(async ({ data }) => {
 		const { userId } = await requireAuth(data.token);
@@ -74,9 +73,7 @@ export const submitAnimationFn = createServerFn({
 		const avatarImageUrl = hero?.avatarImageUrl as string | undefined;
 
 		if (!avatarImageUrl) {
-			throw ApiError.badRequest(
-				"Generate an avatar first before animating",
-			);
+			throw ApiError.badRequest("Generate an avatar first before animating");
 		}
 
 		// Rate limit check
@@ -134,9 +131,8 @@ export const submitAnimationFn = createServerFn({
 export const getAnimationStatusFn = createServerFn({
 	method: "GET",
 })
-	.inputValidator(
-		(data: { jobId: string; token: string }) =>
-			parseInput(animationStatusSchema, data),
+	.inputValidator((data: { jobId: string; token: string }) =>
+		parseInput(animationStatusSchema, data),
 	)
 	.handler(async ({ data }) => {
 		const { userId } = await requireAuth(data.token);
@@ -188,17 +184,13 @@ export const getAnimationStatusFn = createServerFn({
 					logs: false,
 				});
 
-				if (
-					status.status === "COMPLETED" ||
-					status.status === "completed"
-				) {
+				if (status.status === "COMPLETED") {
 					// Fetch the result
 					const result = await fal.queue.result(VIDEO_MODEL, {
 						requestId: job.externalJobId,
 					});
 
-					const video = (result as { video?: { url: string } })
-						.video;
+					const video = (result as { video?: { url: string } }).video;
 					if (!video?.url) {
 						await db
 							.update(schema.aiGenerations)
@@ -217,9 +209,7 @@ export const getAnimationStatusFn = createServerFn({
 						return { status: "failed" as const };
 					}
 
-					const videoBuffer = Buffer.from(
-						await videoResponse.arrayBuffer(),
-					);
+					const videoBuffer = Buffer.from(await videoResponse.arrayBuffer());
 					const hash = contentHash(videoBuffer);
 					const key = `animations/${job.invitationId}/${hash}.mp4`;
 					const animatedVideoUrl = await uploadToR2(
@@ -244,22 +234,15 @@ export const getAnimationStatusFn = createServerFn({
 					};
 				}
 
-				if (
-					status.status === "FAILED" ||
-					status.status === "failed"
-				) {
-					await db
-						.update(schema.aiGenerations)
-						.set({ status: "failed" })
-						.where(eq(schema.aiGenerations.id, data.jobId));
-					return { status: "failed" as const };
-				}
-
-				// Still processing
+				// Still in queue or in progress
 				return { status: "processing" as const };
 			} catch {
-				// If polling fails, still return processing to allow retry
-				return { status: "processing" as const };
+				// fal.ai throws on failures — mark as failed
+				await db
+					.update(schema.aiGenerations)
+					.set({ status: "failed" })
+					.where(eq(schema.aiGenerations.id, data.jobId));
+				return { status: "failed" as const };
 			}
 		}
 

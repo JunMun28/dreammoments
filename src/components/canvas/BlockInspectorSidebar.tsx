@@ -15,6 +15,7 @@ import {
 	NumberInput,
 } from "./inspector/InspectorSection";
 import { LayoutSection } from "./inspector/LayoutSection";
+import { LivingPortraitSection } from "./inspector/LivingPortraitSection";
 
 function coerceNumber(value: string, fallback: number): number {
 	const parsed = Number(value);
@@ -125,6 +126,13 @@ function BulkInspector({
 	);
 }
 
+function isHeroImageBlock(block: Block): boolean {
+	return (
+		block.type === "image" &&
+		(block.semantic === "hero-image" || block.sectionId === "hero")
+	);
+}
+
 function SingleInspector({
 	block,
 	onUpdateContent,
@@ -135,6 +143,7 @@ function SingleInspector({
 	onDuplicate,
 	onToggleLock,
 	onUpdateAnimation,
+	invitationId,
 }: {
 	block: Block;
 	onUpdateContent: (contentPatch: Record<string, unknown>) => void;
@@ -145,7 +154,15 @@ function SingleInspector({
 	onDuplicate: () => void;
 	onToggleLock: () => void;
 	onUpdateAnimation: (animation: AnimationType) => void;
+	invitationId?: string;
 }) {
+	let token = "";
+	try {
+		token = window.localStorage.getItem("dm-auth-token") ?? "";
+	} catch {
+		// localStorage not available in tests or SSR
+	}
+
 	return (
 		<div>
 			<div className="px-3 py-3">
@@ -163,6 +180,19 @@ function SingleInspector({
 				onRestyle={onRestyle}
 				onUpdateAnimation={onUpdateAnimation}
 			/>
+			{isHeroImageBlock(block) && invitationId && token && (
+				<LivingPortraitSection
+					invitationId={invitationId}
+					token={token}
+					heroImageUrl={(block.content.src as string) ?? ""}
+					avatarImageUrl={block.content.avatarImageUrl as string | undefined}
+					avatarStyle={block.content.avatarStyle as string | undefined}
+					animatedVideoUrl={
+						block.content.animatedVideoUrl as string | undefined
+					}
+					onUpdateContent={onUpdateContent}
+				/>
+			)}
 			<LayoutSection
 				block={block}
 				onMove={onMove}
@@ -195,6 +225,7 @@ export function BlockInspectorSidebar({
 	designTokens,
 	onDesignTokenChange,
 	onSpacingChange,
+	invitationId,
 }: {
 	selectedBlocks: Block[];
 	onUpdateContent: (
@@ -221,6 +252,7 @@ export function BlockInspectorSidebar({
 		value: string,
 	) => void;
 	onSpacingChange?: (spacing: number) => void;
+	invitationId?: string;
 }) {
 	if (selectedBlocks.length === 0) {
 		if (designTokens && onDesignTokenChange && onSpacingChange) {
@@ -281,6 +313,7 @@ export function BlockInspectorSidebar({
 				onUpdateAnimation={(animation) =>
 					onUpdateAnimation(block.id, animation)
 				}
+				invitationId={invitationId}
 			/>
 		</aside>
 	);

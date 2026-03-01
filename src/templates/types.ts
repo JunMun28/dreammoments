@@ -60,7 +60,15 @@ export type FieldAiTaskType =
 export interface FieldConfig {
 	id: string;
 	label: string;
-	type: "text" | "textarea" | "date" | "time" | "image" | "toggle" | "list";
+	type:
+		| "text"
+		| "textarea"
+		| "date"
+		| "time"
+		| "image"
+		| "toggle"
+		| "list"
+		| "living-portrait";
 	sample?: string;
 	required?: boolean;
 	/** If set, show an AI magic button to rewrite this field's content. */

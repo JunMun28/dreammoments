@@ -21,6 +21,7 @@ import {
 import SectionShell from "../SectionShell";
 import SectionTitle from "../SectionTitle";
 import type { TemplateInvitationProps } from "../types";
+import { HeroMedia } from "./HeroMedia";
 import "./double-happiness.css";
 
 /* ─── Design Tokens ─── */
@@ -102,8 +103,6 @@ export default function DoubleHappinessInvitation({
 	const weddingDateEn = formatDisplayDate(data.hero.date, "en-US");
 	const rsvpDeadlineEn = formatDisplayDate(data.rsvp.deadline, "en-US");
 
-	const heroImageUrl = data.hero.heroImageUrl || PLACEHOLDER_PHOTO;
-
 	return (
 		<div className="double-happiness" style={bodyFont} lang="zh-Hans">
 			{/* ════════════════════════════════════════════
@@ -117,20 +116,12 @@ export default function DoubleHappinessInvitation({
 				onAiClick={onAiClick}
 				className="relative min-h-[100svh] overflow-hidden"
 			>
-				{/* Background image */}
-				<img
-					src={heroImageUrl}
-					alt=""
-					fetchPriority="high"
-					decoding="async"
-					className="dh-ken-burns absolute inset-0 h-full w-full object-cover"
-					onError={(e) => {
-						const img = e.target as HTMLImageElement;
-						if (!img.dataset.fallback) {
-							img.dataset.fallback = "true";
-							img.src = PLACEHOLDER_PHOTO;
-						}
-					}}
+				{/* Background media (video → avatar → hero image → placeholder) */}
+				<HeroMedia
+					heroImageUrl={data.hero.heroImageUrl}
+					avatarImageUrl={data.hero.avatarImageUrl}
+					animatedVideoUrl={data.hero.animatedVideoUrl}
+					mode={mode}
 				/>
 				{/* Dark overlay */}
 				<div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/70" />

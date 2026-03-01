@@ -109,7 +109,6 @@ export const generateAvatarFn = createServerFn({
 				image_url: heroImageUrl,
 				prompt: STYLE_PROMPTS[data.style],
 				strength: 0.6,
-				image_size: "square",
 				num_inference_steps: 40,
 			},
 			pollInterval: 1000,

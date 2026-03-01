@@ -721,6 +721,7 @@ export function CanvasEditor({
 								store.getState().restyleBlock(blockId, stylePatch);
 							}
 						}}
+						invitationId={invitationId}
 						designTokens={document.designTokens}
 						onDesignTokenChange={(section, key, value) => {
 							store.getState().updateDesignToken(section, key, value);

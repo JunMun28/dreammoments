@@ -137,17 +137,26 @@ function buildBlocks(
 	const primary = tokens.colors.primary;
 	const muted = tokens.colors.muted;
 
+	// Carry living portrait URLs into the hero image block
+	const avatarImageUrl = safeText(normalized.hero.avatarImageUrl);
+	const animatedVideoUrl = safeText(normalized.hero.animatedVideoUrl);
+	const heroImageContent: Record<string, unknown> = {
+		src: avatarImageUrl || heroImage,
+		alt: `${heroNames} hero image`,
+		objectFit: "cover",
+	};
+	if (avatarImageUrl) heroImageContent.avatarImageUrl = avatarImageUrl;
+	if (animatedVideoUrl) heroImageContent.animatedVideoUrl = animatedVideoUrl;
+	if (normalized.hero.avatarStyle)
+		heroImageContent.avatarStyle = normalized.hero.avatarStyle;
+
 	const baseBlocks: Omit<Block, "zIndex">[] = [
 		{
 			id: "hero-image",
 			type: "image",
 			position: { x: 24, y: 24 },
 			size: { width: 342, height: 208 },
-			content: {
-				src: heroImage,
-				alt: `${heroNames} hero image`,
-				objectFit: "cover",
-			},
+			content: heroImageContent,
 			style: {
 				borderRadius: "22px",
 				overflow: "hidden",
