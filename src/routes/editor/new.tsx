@@ -27,9 +27,7 @@ const categoryLabels: Record<string, string> = {
 };
 
 /** Map template id to preview image path */
-const templatePreviewImages: Record<string, string> = {
-	"double-happiness": "/img/template-double-happiness.png",
-};
+const templatePreviewImages: Record<string, string> = {};
 
 function TemplateCard({
 	template,
