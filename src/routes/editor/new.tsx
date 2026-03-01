@@ -10,7 +10,7 @@ import InvitationRenderer from "../../components/templates/InvitationRenderer";
 import { RouteLoadingSpinner } from "../../components/ui/RouteLoadingSpinner";
 import { buildSampleContent } from "../../data/sample-invitation";
 import { useCreateInvitation } from "../../hooks/useInvitations";
-import { useAuth } from "../../lib/auth";
+import { useAuth } from "@clerk/tanstack-react-start";
 import { templates } from "../../templates";
 import type { TemplateConfig } from "../../templates/types";
 
@@ -145,7 +145,7 @@ function TemplatePreviewModal({
 }
 
 function TemplateSelectionPage() {
-	const { user, loading } = useAuth();
+	const { isLoaded, isSignedIn } = useAuth();
 	const navigate = useNavigate();
 	const createMutation = useCreateInvitation();
 	const [creatingId, setCreatingId] = useState<string | null>(null);
@@ -155,8 +155,8 @@ function TemplateSelectionPage() {
 		setPreviewId(templateId);
 	}, []);
 
-	if (loading) return <RouteLoadingSpinner />;
-	if (!user) return <Navigate to="/auth/login" />;
+	if (!isLoaded) return <RouteLoadingSpinner />;
+	if (!isSignedIn) return <Navigate to="/" />;
 
 	const handleSelect = async (templateId: string) => {
 		if (creatingId) return;

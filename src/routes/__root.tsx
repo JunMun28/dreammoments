@@ -15,7 +15,7 @@ import { useEffect } from "react";
 import Header from "../components/Header";
 import { ToastProvider } from "../components/ui/Toast";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
-import { AuthProvider } from "../lib/auth";
+import { ClerkProvider } from "@clerk/tanstack-react-start";
 import appCss from "../styles.css?url";
 
 // Dev-only: load react-grab for UI element inspection (⌘C to copy component info)
@@ -39,7 +39,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 		"Referrer-Policy": "strict-origin-when-cross-origin",
 		"Permissions-Policy": "camera=(), microphone=(), geolocation=()",
 		"Content-Security-Policy":
-			"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://accounts.google.com https://oauth2.googleapis.com https://www.googleapis.com https://api.stripe.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://accounts.google.com;",
+			"default-src 'self'; script-src 'self' 'unsafe-inline' https://*.clerk.accounts.dev; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https: https://img.clerk.com; connect-src 'self' https://*.clerk.accounts.dev https://api.clerk.com; frame-src https://*.clerk.accounts.dev; frame-ancestors 'none'; base-uri 'self'; form-action 'self';",
 		...(import.meta.env.PROD
 			? { "Strict-Transport-Security": "max-age=31536000; includeSubDomains" }
 			: {}),
@@ -159,7 +159,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<HeadContent />
 			</head>
 			<body>
-				<AuthProvider>
+				<ClerkProvider>
 					<ToastProvider>
 						<a href="#main-content" className="dm-skip-link">
 							Skip to main content
@@ -174,7 +174,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 							{children}
 						</main>
 					</ToastProvider>
-				</AuthProvider>
+				</ClerkProvider>
 				{import.meta.env.DEV && (
 					<TanStackDevtools
 						config={{ position: "bottom-right" }}

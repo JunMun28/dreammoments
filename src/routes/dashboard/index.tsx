@@ -28,7 +28,7 @@ import {
 	useInvitations,
 	useUpdateInvitation,
 } from "../../hooks/useInvitations";
-import { useAuth } from "../../lib/auth";
+import { useAuth } from "@clerk/tanstack-react-start";
 import {
 	asCanvasDocument,
 	isCanvasDocument,
@@ -128,7 +128,7 @@ function ConfirmDeleteDialog({
 }
 
 function DashboardScreen() {
-	const { user, loading } = useAuth();
+	const { isLoaded, isSignedIn } = useAuth();
 	const { addToast } = useToast();
 	const navigate = useNavigate();
 	const { data: serverInvitations } = useInvitations();
@@ -264,9 +264,9 @@ function DashboardScreen() {
 		);
 	}, [sortedInvitations, previewInvitationId]);
 
-	if (!user && !loading) return <Navigate to="/auth/login" />;
+	if (isLoaded && !isSignedIn) return <Navigate to="/" />;
 
-	if (loading) {
+	if (!isLoaded) {
 		return (
 			<div className="min-h-screen bg-[color:var(--dm-bg)] px-6 py-10">
 				<div className="mx-auto max-w-[1220px] space-y-8">
@@ -298,7 +298,7 @@ function DashboardScreen() {
 		);
 	}
 
-	if (!user) return <Navigate to="/auth/login" />;
+	if (!isSignedIn) return <Navigate to="/" />;
 
 	if (invitations.length === 0) {
 		return (

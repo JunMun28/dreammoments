@@ -3,7 +3,7 @@ import { useState } from "react";
 import { createCheckoutSessionFn } from "../../api/payments";
 import { RouteErrorFallback } from "../../components/ui/RouteErrorFallback";
 import { RouteLoadingSpinner } from "../../components/ui/RouteLoadingSpinner";
-import { useAuth } from "../../lib/auth";
+import { useAuth } from "@clerk/tanstack-react-start";
 import { PRICING } from "../../lib/stripe";
 
 export const Route = createFileRoute("/upgrade/")({
@@ -21,14 +21,14 @@ const PAYMENT_ICONS: Record<string, string> = {
 };
 
 function UpgradeScreen() {
-	const { user } = useAuth();
+	const { isLoaded, isSignedIn } = useAuth();
 	const navigate = useNavigate();
 	const [currency, setCurrency] = useState<"MYR" | "SGD">("MYR");
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
 
-	if (!user) return <Navigate to="/auth/login" />;
-	if (user.plan === "premium") return <Navigate to="/dashboard" />;
+	if (isLoaded && !isSignedIn) return <Navigate to="/" />;
+	/* TODO: Re-add plan gating with server-side plan data */
 
 	const price = PRICING[currency];
 	const methods =
