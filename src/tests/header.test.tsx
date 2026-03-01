@@ -2,7 +2,6 @@ import type { AnchorHTMLAttributes, ReactNode } from "react";
 import { renderToString } from "react-dom/server";
 import { describe, expect, test, vi } from "vitest";
 import Header from "../components/Header";
-import { AuthProvider } from "../lib/auth";
 
 vi.mock("@tanstack/react-router", () => ({
 	Link: ({
@@ -14,13 +13,17 @@ vi.mock("@tanstack/react-router", () => ({
 	useNavigate: () => vi.fn(),
 }));
 
+vi.mock("@clerk/tanstack-react-start", () => ({
+	useUser: () => ({ isSignedIn: false }),
+	SignedIn: ({ children }: { children: ReactNode }) => null,
+	SignedOut: ({ children }: { children: ReactNode }) => <>{children}</>,
+	SignInButton: ({ children }: { children: ReactNode }) => <>{children}</>,
+	UserButton: () => null,
+}));
+
 describe("header", () => {
 	test("nav links align vertically with buttons", () => {
-		const markup = renderToString(
-			<AuthProvider>
-				<Header />
-			</AuthProvider>,
-		);
+		const markup = renderToString(<Header />);
 		expect(markup).toContain(
 			"dm-nav-link inline-flex items-center min-h-[44px]",
 		);

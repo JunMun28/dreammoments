@@ -105,13 +105,6 @@ vi.mock("@/lib/rate-limit", () => ({
 	),
 }));
 
-vi.mock("@/lib/session", () => ({
-	createSession: vi.fn(async () => "mock-token"),
-	createRefreshToken: vi.fn(async () => "mock-refresh"),
-	verifySession: vi.fn(async () => null),
-	refreshSession: vi.fn(async () => null),
-}));
-
 vi.mock("@/lib/slug", () => ({
 	generateSlug: vi.fn((base: string) => base.toLowerCase()),
 	slugify: vi.fn((s: string) => s.toLowerCase()),
