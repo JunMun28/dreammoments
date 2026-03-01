@@ -31,7 +31,7 @@ const COLORS = {
 /* ─── Typography ─── */
 
 const headingFont: CSSProperties = {
-	fontFamily: "'Noto Serif SC', 'Songti SC', Georgia, serif",
+	fontFamily: "'ZCOOL XiaoWei', 'Noto Serif SC', 'Songti SC', Georgia, serif",
 };
 
 const bodyFont: CSSProperties = {
@@ -115,7 +115,7 @@ export default function DoubleHappinessInvitation({
 					alt=""
 					fetchPriority="high"
 					decoding="async"
-					className="absolute inset-0 h-full w-full object-cover"
+					className="dh-ken-burns absolute inset-0 h-full w-full object-cover"
 					onError={(e) => {
 						const img = e.target as HTMLImageElement;
 						if (!img.dataset.fallback) {
@@ -147,14 +147,14 @@ export default function DoubleHappinessInvitation({
 
 					<h1
 						data-reveal
-						style={accentFont}
+						style={{ ...accentFont, transitionDelay: "0.1s" }}
 						className="dm-reveal mt-8 text-4xl text-white sm:text-6xl"
 					>
 						<span {...editableProps("hero.partnerOneName", "inline-block")}>
 							{data.hero.partnerOneName}
 						</span>
 						<span
-							className="mx-3 inline-block text-3xl sm:mx-4 sm:text-5xl"
+							className="dh-gold-shimmer mx-3 inline-block text-3xl sm:mx-4 sm:text-5xl"
 							style={{ color: COLORS.gold }}
 						>
 							&
@@ -170,7 +170,11 @@ export default function DoubleHappinessInvitation({
 							"hero.tagline",
 							"dm-reveal mt-6 max-w-xl text-lg leading-relaxed",
 						)}
-						style={{ ...headingFont, color: COLORS.goldLight }}
+						style={{
+							...headingFont,
+							color: COLORS.goldLight,
+							transitionDelay: "0.2s",
+						}}
 					>
 						{data.hero.tagline}
 					</p>
@@ -178,6 +182,7 @@ export default function DoubleHappinessInvitation({
 					<div
 						data-reveal
 						className="dm-reveal mt-8 flex flex-wrap items-center justify-center gap-3 text-sm text-white/90"
+						style={{ transitionDelay: "0.3s" }}
 					>
 						<span
 							className="rounded-full border border-white/20 px-4 py-2"
