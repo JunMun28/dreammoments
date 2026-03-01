@@ -11,6 +11,7 @@ import {
 	type RsvpConfirmationProps,
 } from "../RsvpConfirmation";
 import SectionShell from "../SectionShell";
+import SectionTitle from "../SectionTitle";
 import type { TemplateInvitationProps } from "../types";
 import "./double-happiness.css";
 
@@ -296,23 +297,14 @@ export default function DoubleHappinessInvitation({
 				className="dh-section-white px-6 py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-4xl">
-					<div className="text-center">
-						<p
-							data-reveal
-							className="dm-reveal text-sm tracking-[0.5em]"
-							style={{ ...headingFont, color: COLORS.red }}
-						>
-							新 郎 新 娘
-						</p>
-						<h2
-							data-reveal
-							className="dm-reveal mt-3 text-4xl sm:text-5xl"
-							style={{ ...accentFont, color: COLORS.dark }}
-							lang="en"
-						>
-							The Couple
-						</h2>
-					</div>
+					<SectionTitle
+						zhLabel="新 郎 新 娘"
+						enHeading="The Couple"
+						primaryColor={COLORS.red}
+						darkColor={COLORS.dark}
+						headingFont={headingFont}
+						accentFont={accentFont}
+					/>
 
 					<div className="mt-14 grid gap-12 sm:grid-cols-2">
 						{/* Groom */}
@@ -422,23 +414,14 @@ export default function DoubleHappinessInvitation({
 				className="dh-section-cream px-6 py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-4xl">
-					<div className="text-center">
-						<p
-							data-reveal
-							className="dm-reveal text-sm tracking-[0.5em]"
-							style={{ ...headingFont, color: COLORS.red }}
-						>
-							爱 情 故 事
-						</p>
-						<h2
-							data-reveal
-							className="dm-reveal mt-3 text-4xl sm:text-5xl"
-							style={{ ...accentFont, color: COLORS.dark }}
-							lang="en"
-						>
-							Our Story
-						</h2>
-					</div>
+					<SectionTitle
+						zhLabel="爱 情 故 事"
+						enHeading="Our Story"
+						primaryColor={COLORS.red}
+						darkColor={COLORS.dark}
+						headingFont={headingFont}
+						accentFont={accentFont}
+					/>
 
 					<div className="relative mt-16 pl-8 sm:pl-12">
 						{/* Timeline line */}
@@ -497,23 +480,14 @@ export default function DoubleHappinessInvitation({
 				className="dh-section-white px-6 py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-5xl">
-					<div className="text-center">
-						<p
-							data-reveal
-							className="dm-reveal text-sm tracking-[0.5em]"
-							style={{ ...headingFont, color: COLORS.red }}
-						>
-							甜 蜜 瞬 间
-						</p>
-						<h2
-							data-reveal
-							className="dm-reveal mt-3 text-4xl sm:text-5xl"
-							style={{ ...accentFont, color: COLORS.dark }}
-							lang="en"
-						>
-							Gallery
-						</h2>
-					</div>
+					<SectionTitle
+						zhLabel="甜 蜜 瞬 间"
+						enHeading="Gallery"
+						primaryColor={COLORS.red}
+						darkColor={COLORS.dark}
+						headingFont={headingFont}
+						accentFont={accentFont}
+					/>
 
 					<div className="mt-12 grid gap-4 sm:grid-cols-2">
 						{data.gallery.photos.map((photo, index) => (
@@ -564,23 +538,14 @@ export default function DoubleHappinessInvitation({
 				className="dh-section-cream px-6 py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-4xl">
-					<div className="text-center">
-						<p
-							data-reveal
-							className="dm-reveal text-sm tracking-[0.5em]"
-							style={{ ...headingFont, color: COLORS.red }}
-						>
-							婚 礼 流 程
-						</p>
-						<h2
-							data-reveal
-							className="dm-reveal mt-3 text-4xl sm:text-5xl"
-							style={{ ...accentFont, color: COLORS.dark }}
-							lang="en"
-						>
-							Schedule
-						</h2>
-					</div>
+					<SectionTitle
+						zhLabel="婚 礼 流 程"
+						enHeading="Schedule"
+						primaryColor={COLORS.red}
+						darkColor={COLORS.dark}
+						headingFont={headingFont}
+						accentFont={accentFont}
+					/>
 
 					<div className="mt-14 space-y-4">
 						{data.schedule.events.map((event, index) => (
@@ -634,21 +599,14 @@ export default function DoubleHappinessInvitation({
 				className="dh-section-white px-6 py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-3xl text-center">
-					<p
-						data-reveal
-						className="dm-reveal text-sm tracking-[0.5em]"
-						style={{ ...headingFont, color: COLORS.red }}
-					>
-						婚 礼 地 点
-					</p>
-					<h2
-						data-reveal
-						className="dm-reveal mt-3 text-4xl sm:text-5xl"
-						style={{ ...accentFont, color: COLORS.dark }}
-						lang="en"
-					>
-						Venue
-					</h2>
+					<SectionTitle
+						zhLabel="婚 礼 地 点"
+						enHeading="Venue"
+						primaryColor={COLORS.red}
+						darkColor={COLORS.dark}
+						headingFont={headingFont}
+						accentFont={accentFont}
+					/>
 
 					<h3
 						data-reveal
@@ -1110,21 +1068,14 @@ export default function DoubleHappinessInvitation({
 					className="dh-section-cream px-6 py-24 sm:px-10"
 				>
 					<div className="mx-auto max-w-md text-center">
-						<p
-							data-reveal
-							className="dm-reveal text-sm tracking-[0.5em]"
-							style={{ ...headingFont, color: COLORS.red }}
-						>
-							礼 金 祝 福
-						</p>
-						<h2
-							data-reveal
-							className="dm-reveal mt-3 text-4xl"
-							style={{ ...accentFont, color: COLORS.dark }}
-							lang="en"
-						>
-							Digital Angpow
-						</h2>
+						<SectionTitle
+							zhLabel="礼 金 祝 福"
+							enHeading="Digital Angpow"
+							primaryColor={COLORS.red}
+							darkColor={COLORS.dark}
+							headingFont={headingFont}
+							accentFont={accentFont}
+						/>
 						<div data-reveal className="dm-reveal mt-8">
 							<AngpowQRCode
 								paymentUrl={data.gift.paymentUrl}
