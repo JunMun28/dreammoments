@@ -2,21 +2,32 @@
 
 /* Root wrapper scopes all template styles */
 .double-happiness {
-	--dh-red: #c8102e;
-	--dh-gold: #d4a843;
-	--dh-cream: #fff8f0;
-	--dh-dark: #2b1216;
-	--dh-deep-red: #8b1a1a;
-	--dh-gold-light: #f5e6c8;
-	--dh-muted: #8b7355;
+	--t-primary: #c8102e;
+	--t-secondary: #8b1a1a;
+	--t-accent: #d4a843;
+	--t-bg: #fff8f0;
+	--t-text: #2b1216;
+	--t-muted: #8b7355;
+	--t-bg-alt: #ffffff;
+	--t-accent-light: #f5e6c8;
+	max-width: 430px;
+	margin-left: auto;
+	margin-right: auto;
+	overflow-x: hidden;
+}
+
+@media (min-width: 431px) {
+	.double-happiness {
+		box-shadow: 0 0 40px rgba(0, 0, 0, 0.08);
+	}
 }
 
 /* ── Section alternation ── */
 .dh-section-cream {
-	background-color: var(--dh-cream);
+	background-color: var(--t-bg);
 }
 .dh-section-dark {
-	background-color: var(--dh-deep-red);
+	background-color: var(--t-secondary);
 	color: #fff8f0;
 }
 .dh-section-white {
@@ -36,7 +47,7 @@
 
 /* ── Blockquote accent (announcement section) ── */
 .dh-blockquote {
-	border-left: 3px solid var(--dh-gold);
+	border-left: 3px solid var(--t-accent);
 	padding-left: 1.5rem;
 }
 
@@ -45,9 +56,9 @@
 	width: 2px;
 	background: linear-gradient(
 		180deg,
-		var(--dh-gold),
-		var(--dh-red),
-		var(--dh-gold)
+		var(--t-accent),
+		var(--t-primary),
+		var(--t-accent)
 	);
 }
 
@@ -56,8 +67,8 @@
 	width: 12px;
 	height: 12px;
 	border-radius: 50%;
-	background-color: var(--dh-red);
-	border: 2px solid var(--dh-gold);
+	background-color: var(--t-primary);
+	border: 2px solid var(--t-accent);
 }
 
 /* ── Photo frame ── */
@@ -81,6 +92,80 @@
 	color: rgba(212, 168, 67, 0.08);
 	pointer-events: none;
 	user-select: none;
+}
+
+/* ── Scroll reveal animation (design rules §5.1) ── */
+.double-happiness .dm-reveal {
+	opacity: 0;
+	transform: translate3d(0, 30px, 0);
+	transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+		transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.double-happiness .dm-reveal.is-visible {
+	opacity: 1;
+	transform: translate3d(0, 0, 0);
+}
+
+.double-happiness .dm-reveal.is-hidden {
+	opacity: 0;
+	transform: translate3d(0, 30px, 0);
+}
+
+/* ── Countdown styling (design rules §2.2) ── */
+.double-happiness .countdown-widget {
+	text-align: center;
+}
+
+.double-happiness .countdown-units {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.double-happiness .countdown-unit {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	min-width: 4rem;
+}
+
+.double-happiness .countdown-value {
+	font-size: 2rem;
+	font-weight: 700;
+	line-height: 1.2;
+	color: var(--t-text);
+}
+
+.double-happiness .countdown-label {
+	font-size: 0.625rem;
+	text-transform: uppercase;
+	letter-spacing: 0.3em;
+	color: var(--t-muted);
+	margin-top: 0.25rem;
+}
+
+.double-happiness .countdown-separator {
+	font-size: 1.5rem;
+	color: var(--t-accent);
+	font-weight: 300;
+	align-self: flex-start;
+	margin-top: 0.25rem;
+}
+
+.double-happiness .countdown-message {
+	font-size: 1.5rem;
+	font-weight: 700;
+	color: var(--t-text);
+}
+
+.double-happiness .countdown-timezone {
+	font-size: 0.625rem;
+	text-transform: uppercase;
+	letter-spacing: 0.2em;
+	color: var(--t-muted);
+	margin-top: 1rem;
 }
 
 /* ── Reduced motion ── */
