@@ -30,6 +30,7 @@
     "canvas:migrate:dry-run": "tsx scripts/canvas_migration_dry_run.ts"
   },
   "dependencies": {
+    "@fal-ai/client": "^1.9.4",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
     "@react-three/postprocessing": "^3.0.4",

@@ -179,6 +179,9 @@ export const invitationContentSchema = z.object({
 		tagline: z.string(),
 		date: z.string(),
 		heroImageUrl: z.string().optional(),
+		avatarImageUrl: z.string().optional(),
+		avatarStyle: z.enum(["pixar", "ghibli"]).optional(),
+		animatedVideoUrl: z.string().optional(),
 	}),
 	announcement: z.object({
 		title: z.string(),

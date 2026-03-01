@@ -23,6 +23,9 @@ export interface InvitationContent {
 		tagline: string;
 		date: string;
 		heroImageUrl?: string;
+		avatarImageUrl?: string;
+		avatarStyle?: "pixar" | "ghibli";
+		animatedVideoUrl?: string;
 	};
 	announcement: {
 		title: string;
@@ -172,6 +175,9 @@ export interface AiGeneration {
 	prompt: string;
 	generatedContent: Record<string, unknown>;
 	accepted: boolean;
+	status?: string;
+	externalJobId?: string;
+	resultUrl?: string;
 	createdAt: string;
 }
 
