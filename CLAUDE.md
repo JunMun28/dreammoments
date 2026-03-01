@@ -80,13 +80,24 @@ tests/
 
 ## Pre-commit Checklist
 
-Before every commit, run these commands and ensure they all pass:
+Before every commit, run ALL of these and ensure they pass. CI will reject the PR if any fail.
 
 ```
-pnpm check            # Biome lint + format (CI runs this — must pass)
-npx tsc --noEmit      # TypeScript type check
-pnpm test --run       # Unit tests
+pnpm check                  # 1. Biome lint + format
+pnpm exec tsc --noEmit      # 2. TypeScript type check
+pnpm test --run             # 3. Unit tests (Vitest)
+pnpm build                  # 4. Production build
+pnpm db:generate            # 5. Drizzle migration drift check — if this produces
+                            #    new files in drizzle/, commit them with your changes
 ```
+
+### CI Jobs (GitHub Actions)
+
+These are the three jobs CI runs on every PR to `main`:
+
+1. **Lint, Type-check & Test** — `pnpm check` → `tsc --noEmit` → `pnpm test` → `pnpm build`
+2. **Migration drift check** — pushes schema to a test Postgres, runs `pnpm db:generate`, and fails if any `drizzle/` files are uncommitted
+3. **E2E Tests** — `pnpm exec playwright test --project=chromium` (runs after job 1 passes)
 
 ## Conventions
 

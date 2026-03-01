@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { cn } from "@/lib/utils";
 
 interface SectionTitleProps {
 	zhLabel: string;
@@ -20,12 +21,13 @@ export default function SectionTitle({
 		fontFamily: "'Noto Serif SC', 'Songti SC', serif",
 		fontWeight: 700,
 	},
-	className = "",
+	className,
 }: SectionTitleProps) {
 	return (
-		<div className={`text-center ${className}`}>
+		<div className={cn("text-center", className)}>
 			<p
 				data-reveal
+				lang="zh-Hans"
 				className="dm-reveal text-sm tracking-[0.5em]"
 				style={{ ...headingFont, color: primaryColor }}
 			>

@@ -94,17 +94,22 @@
 	user-select: none;
 }
 
-/* ── Scroll reveal animation (design rules §5.1) ── */
+/* ── Scroll reveal animation (design rules §5.1) ──
+   Overrides the global .dm-reveal (styles.css) to use the spec-correct
+   30px translate and the hardware-accelerated translate3d form. */
 .double-happiness .dm-reveal {
 	opacity: 0;
 	transform: translate3d(0, 30px, 0);
-	transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+	will-change: opacity, transform;
+	transition:
+		opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
 		transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .double-happiness .dm-reveal.is-visible {
 	opacity: 1;
 	transform: translate3d(0, 0, 0);
+	will-change: auto;
 }
 
 .double-happiness .dm-reveal.is-hidden {
@@ -120,6 +125,12 @@
 .double-happiness .countdown-units {
 	display: flex;
 	justify-content: center;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.double-happiness .countdown-unit-wrapper {
+	display: flex;
 	align-items: center;
 	gap: 0.5rem;
 }
@@ -170,6 +181,12 @@
 
 /* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
+	.double-happiness .dm-reveal {
+		/* biome-ignore lint/complexity/noImportantStyles: required for a11y override */
+		opacity: 1 !important;
+		/* biome-ignore lint/complexity/noImportantStyles: required for a11y override */
+		transform: none !important;
+	}
 	.double-happiness * {
 		/* biome-ignore lint/complexity/noImportantStyles: required for a11y override */
 		animation-duration: 0.01ms !important;
