@@ -20,9 +20,8 @@ const createCheckoutSchema = z.object({
 });
 
 export const createCheckoutSessionFn = createServerFn({ method: "POST" })
-	.inputValidator(
-		(data: { currency: "MYR" | "SGD"; invitationId?: string }) =>
-			parseInput(createCheckoutSchema, data),
+	.inputValidator((data: { currency: "MYR" | "SGD"; invitationId?: string }) =>
+		parseInput(createCheckoutSchema, data),
 	)
 	.handler(async ({ data }): Promise<{ url: string } | { error: string }> => {
 		const { userId } = await requireAuth();
@@ -214,7 +213,9 @@ export const getPaymentStatusFn = createServerFn({ method: "GET" })
 		parseInput(paymentStatusSchema, data),
 	)
 	.handler(
-		async (): Promise<{ plan: string; isPremium: boolean } | { error: string }> => {
+		async (): Promise<
+			{ plan: string; isPremium: boolean } | { error: string }
+		> => {
 			const { userId } = await requireAuth();
 
 			const db = getDbOrNull();

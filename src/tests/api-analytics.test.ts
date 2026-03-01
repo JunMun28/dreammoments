@@ -162,7 +162,6 @@ describe("getAnalyticsFn", () => {
 		);
 
 		const result = (await (getAnalyticsFn as CallableFunction)({
-
 			invitationId: "inv-1",
 			period: "7d",
 		})) as {
@@ -193,7 +192,6 @@ describe("getAnalyticsFn", () => {
 		);
 
 		const result = (await (getAnalyticsFn as CallableFunction)({
-
 			invitationId: "inv-1",
 		})) as { error: string };
 
@@ -208,7 +206,6 @@ describe("getAnalyticsFn", () => {
 		);
 
 		const result = (await (getAnalyticsFn as CallableFunction)({
-
 			invitationId: "inv-nonexistent",
 		})) as { error: string };
 

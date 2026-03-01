@@ -15,7 +15,7 @@ vi.mock("@tanstack/react-router", () => ({
 
 vi.mock("@clerk/tanstack-react-start", () => ({
 	useUser: () => ({ isSignedIn: false }),
-	SignedIn: ({ children }: { children: ReactNode }) => null,
+	SignedIn: (_props: { children: ReactNode }) => null,
 	SignedOut: ({ children }: { children: ReactNode }) => <>{children}</>,
 	SignInButton: ({ children }: { children: ReactNode }) => <>{children}</>,
 	UserButton: () => null,

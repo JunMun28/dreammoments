@@ -1,9 +1,9 @@
+import { useAuth } from "@clerk/tanstack-react-start";
 import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { createCheckoutSessionFn } from "../../api/payments";
 import { RouteErrorFallback } from "../../components/ui/RouteErrorFallback";
 import { RouteLoadingSpinner } from "../../components/ui/RouteLoadingSpinner";
-import { useAuth } from "@clerk/tanstack-react-start";
 import { PRICING } from "../../lib/stripe";
 
 export const Route = createFileRoute("/upgrade/")({

@@ -44,7 +44,7 @@ export function useInvitations() {
 				"error" in result
 			)
 				return [];
-			return result as Invitation[];
+			return result as unknown as Invitation[];
 		},
 	});
 }

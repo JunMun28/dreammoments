@@ -46,9 +46,8 @@ export interface AnalyticsData {
 export const getAnalyticsFn = createServerFn({
 	method: "GET",
 })
-	.inputValidator(
-		(data: { invitationId: string; period?: string }) =>
-			parseInput(getAnalyticsSchema, data),
+	.inputValidator((data: { invitationId: string; period?: string }) =>
+		parseInput(getAnalyticsSchema, data),
 	)
 	.handler(async ({ data }): Promise<AnalyticsData | { error: string }> => {
 		const { userId } = await requireAuth();

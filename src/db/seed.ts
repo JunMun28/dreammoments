@@ -38,24 +38,24 @@ const db = drizzle(pool, { schema });
 // Sample data
 const sampleUsers = [
 	{
+		clerkId: "seed_demo_user_001",
 		email: "demo@dreammoments.com",
 		name: "Demo User",
 		avatarUrl: null,
-		authProvider: "email" as const,
 		plan: "premium" as const,
 	},
 	{
+		clerkId: "seed_sarah_lim_002",
 		email: "sarah.lim@example.com",
 		name: "Sarah Lim",
 		avatarUrl: null,
-		authProvider: "google" as const,
 		plan: "free" as const,
 	},
 	{
+		clerkId: "seed_michael_tan_003",
 		email: "michael.tan@example.com",
 		name: "Michael Tan",
 		avatarUrl: null,
-		authProvider: "google" as const,
 		plan: "premium" as const,
 	},
 ];

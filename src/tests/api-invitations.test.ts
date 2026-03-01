@@ -188,7 +188,6 @@ describe("getInvitation", () => {
 
 		const result = await (getInvitation as CallableFunction)({
 			invitationId: "inv-1",
-
 		});
 
 		expect(result).toEqual(dbInv);
@@ -203,7 +202,6 @@ describe("getInvitation", () => {
 
 		const result = (await (getInvitation as CallableFunction)({
 			invitationId: "inv-1",
-
 		})) as { error: string };
 
 		expect(result.error).toContain("not found or access denied");
@@ -230,7 +228,6 @@ describe("createInvitationFn", () => {
 		);
 
 		const result = await (createInvitationFn as CallableFunction)({
-
 			templateId: "double-happiness",
 		});
 
@@ -306,7 +303,6 @@ describe("deleteInvitationFn", () => {
 
 		const result = (await (deleteInvitationFn as CallableFunction)({
 			invitationId: "inv-1",
-
 		})) as { error: string };
 
 		expect(result.error).toBe("Access denied");
@@ -324,7 +320,6 @@ describe("deleteInvitationFn", () => {
 
 		const result = (await (deleteInvitationFn as CallableFunction)({
 			invitationId: "inv-1",
-
 		})) as { success: boolean };
 
 		expect(result.success).toBe(true);
@@ -348,7 +343,6 @@ describe("publishInvitationFn", () => {
 
 		const result = await (publishInvitationFn as CallableFunction)({
 			invitationId: "inv-1",
-
 		});
 
 		expect(result).toBeDefined();
@@ -365,7 +359,6 @@ describe("publishInvitationFn", () => {
 
 		const result = (await (publishInvitationFn as CallableFunction)({
 			invitationId: "inv-1",
-
 		})) as { error: string };
 
 		expect(result.error).toBe("Access denied");
@@ -381,7 +374,6 @@ describe("checkSlugAvailabilityFn", () => {
 		);
 
 		const result = (await (checkSlugAvailabilityFn as CallableFunction)({
-
 			slug: "new-slug",
 		})) as { available: boolean };
 
@@ -396,7 +388,6 @@ describe("checkSlugAvailabilityFn", () => {
 		);
 
 		const result = (await (checkSlugAvailabilityFn as CallableFunction)({
-
 			slug: "taken-slug",
 		})) as { available: boolean };
 
@@ -411,7 +402,6 @@ describe("checkSlugAvailabilityFn", () => {
 		);
 
 		const result = (await (checkSlugAvailabilityFn as CallableFunction)({
-
 			slug: "my-slug",
 			invitationId: "inv-1",
 		})) as { available: boolean };
@@ -477,7 +467,7 @@ describe("patchInvitationContentFn", () => {
 		await expect(
 			(patchInvitationContentFn as CallableFunction)({
 				invitationId: "inv-1",
-	
+
 				path: "__proto__.polluted",
 				value: "x",
 			}),

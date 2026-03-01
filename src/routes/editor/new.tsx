@@ -1,3 +1,4 @@
+import { useAuth } from "@clerk/tanstack-react-start";
 import {
 	createFileRoute,
 	Link,
@@ -10,7 +11,6 @@ import InvitationRenderer from "../../components/templates/InvitationRenderer";
 import { RouteLoadingSpinner } from "../../components/ui/RouteLoadingSpinner";
 import { buildSampleContent } from "../../data/sample-invitation";
 import { useCreateInvitation } from "../../hooks/useInvitations";
-import { useAuth } from "@clerk/tanstack-react-start";
 import { templates } from "../../templates";
 import type { TemplateConfig } from "../../templates/types";
 

@@ -1,8 +1,8 @@
+import { useAuth } from "@clerk/tanstack-react-start";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { CanvasEditor } from "@/components/canvas/CanvasEditor";
 import { useInvitation } from "@/hooks/useInvitations";
-import { useAuth } from "@clerk/tanstack-react-start";
 import { asCanvasDocument } from "@/lib/canvas/document";
 import { migrateInvitationContentToCanvas } from "@/lib/canvas/migrate";
 

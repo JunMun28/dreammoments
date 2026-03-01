@@ -52,9 +52,8 @@ const removeAvatarSchema = z.object({
 export const generateAvatarFn = createServerFn({
 	method: "POST",
 })
-	.inputValidator(
-		(data: { invitationId: string; style: string }) =>
-			parseInput(generateAvatarSchema, data),
+	.inputValidator((data: { invitationId: string; style: string }) =>
+		parseInput(generateAvatarSchema, data),
 	)
 	.handler(async ({ data }) => {
 		const { userId } = await requireAuth();

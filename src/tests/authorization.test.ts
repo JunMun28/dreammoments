@@ -342,9 +342,7 @@ describe("cross-user authorization (DB path)", () => {
 describe("authentication boundary", () => {
 	test("unauthenticated request is rejected by requireAuth", async () => {
 		// With Clerk, requireAuth() throws when no valid session exists
-		mockedRequireAuth.mockRejectedValue(
-			new Error("Authentication required"),
-		);
+		mockedRequireAuth.mockRejectedValue(new Error("Authentication required"));
 
 		await expect(
 			(getInvitation as CallableFunction)({
@@ -360,9 +358,7 @@ describe("authentication boundary", () => {
 	});
 
 	test("expired session is rejected by requireAuth", async () => {
-		mockedRequireAuth.mockRejectedValue(
-			new Error("Authentication required"),
-		);
+		mockedRequireAuth.mockRejectedValue(new Error("Authentication required"));
 
 		await expect(
 			(getInvitation as CallableFunction)({

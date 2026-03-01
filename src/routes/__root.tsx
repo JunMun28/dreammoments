@@ -1,3 +1,4 @@
+import { ClerkProvider } from "@clerk/tanstack-react-start";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import type { QueryClient } from "@tanstack/react-query";
 import {
@@ -11,11 +12,9 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { useEffect } from "react";
-
 import Header from "../components/Header";
 import { ToastProvider } from "../components/ui/Toast";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
-import { ClerkProvider } from "@clerk/tanstack-react-start";
 import appCss from "../styles.css?url";
 
 // Dev-only: load react-grab for UI element inspection (⌘C to copy component info)

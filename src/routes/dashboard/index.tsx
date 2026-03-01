@@ -1,3 +1,4 @@
+import { useAuth } from "@clerk/tanstack-react-start";
 import {
 	createFileRoute,
 	Link,
@@ -28,7 +29,6 @@ import {
 	useInvitations,
 	useUpdateInvitation,
 } from "../../hooks/useInvitations";
-import { useAuth } from "@clerk/tanstack-react-start";
 import {
 	asCanvasDocument,
 	isCanvasDocument,

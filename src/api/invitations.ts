@@ -55,9 +55,8 @@ const checkSlugSchema = z.object({
 export const checkSlugAvailabilityFn = createServerFn({
 	method: "GET",
 })
-	.inputValidator(
-		(data: { slug: string; invitationId?: string }) =>
-			parseInput(checkSlugSchema, data),
+	.inputValidator((data: { slug: string; invitationId?: string }) =>
+		parseInput(checkSlugSchema, data),
 	)
 	.handler(async ({ data }) => {
 		await requireAuth();
@@ -315,11 +314,7 @@ export const publishInvitationFn = createServerFn({
 	method: "POST",
 })
 	.inputValidator(
-		(data: {
-			invitationId: string;
-			slug?: string;
-			randomize?: boolean;
-		}) => {
+		(data: { invitationId: string; slug?: string; randomize?: boolean }) => {
 			parseInput(publishInvitationSchema, {
 				invitationId: data.invitationId,
 				userId: "placeholder",
@@ -440,11 +435,8 @@ export const patchInvitationContentFn = createServerFn({
 	method: "POST",
 })
 	.inputValidator(
-		(data: {
-			invitationId: string;
-			path: string;
-			value: unknown;
-		}) => parseInput(patchContentSchema, data),
+		(data: { invitationId: string; path: string; value: unknown }) =>
+			parseInput(patchContentSchema, data),
 	)
 	// @ts-expect-error ServerFn inference expects stricter JSON type than Record<string, unknown>
 	.handler(async ({ data }) => {

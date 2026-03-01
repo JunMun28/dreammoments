@@ -1,3 +1,4 @@
+import { useAuth } from "@clerk/tanstack-react-start";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnalyticsPanel } from "../../../components/dashboard/AnalyticsPanel";
@@ -14,7 +15,6 @@ import {
 	usePublishInvitation,
 	useUnpublishInvitation,
 } from "../../../hooks/useInvitations";
-import { useAuth } from "@clerk/tanstack-react-start";
 import type {
 	AttendanceStatus,
 	Invitation,
@@ -1038,30 +1038,27 @@ function InvitationDashboard() {
 											// Slug will be applied when publishing
 										}}
 										className="h-10 w-full rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] px-3 pr-8 text-base text-[color:var(--dm-ink)]"
-										{/* TODO: Re-add plan gating with server-side plan data */}
 										autoComplete="off"
 									/>
-									{slugValue &&
-										slugValue !== invitation.slug && (
-											<span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm">
-												{slugChecking ? (
-													<span className="text-[color:var(--dm-muted)]">
-														...
-													</span>
-												) : slugAvailable === true ? (
-													<span className="text-dm-success">&#10003;</span>
-												) : slugAvailable === false ? (
-													<span className="text-dm-error">&#10007;</span>
-												) : null}
-											</span>
-										)}
-								</div>
-								{slugValue &&
-									!/^[a-z0-9-]*$/.test(slugValue) && (
-										<p className="text-xs text-dm-error">
-											Only lowercase letters, numbers, and hyphens are allowed.
-										</p>
+									{slugValue && slugValue !== invitation.slug && (
+										<span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm">
+											{slugChecking ? (
+												<span className="text-[color:var(--dm-muted)]">
+													...
+												</span>
+											) : slugAvailable === true ? (
+												<span className="text-dm-success">&#10003;</span>
+											) : slugAvailable === false ? (
+												<span className="text-dm-error">&#10007;</span>
+											) : null}
+										</span>
 									)}
+								</div>
+								{slugValue && !/^[a-z0-9-]*$/.test(slugValue) && (
+									<p className="text-xs text-dm-error">
+										Only lowercase letters, numbers, and hyphens are allowed.
+									</p>
+								)}
 							</label>
 							<div className="flex flex-wrap gap-3 text-xs uppercase tracking-[0.2em]">
 								{invitation.status !== "published" ? (

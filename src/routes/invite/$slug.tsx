@@ -1,3 +1,4 @@
+import { useAuth } from "@clerk/tanstack-react-start";
 import {
 	createFileRoute,
 	type ErrorComponentProps,
@@ -10,7 +11,6 @@ import EnvelopeAnimation from "../../components/templates/EnvelopeAnimation";
 import { RsvpConfirmation } from "../../components/templates/RsvpConfirmation";
 import { buildSampleContent } from "../../data/sample-invitation";
 import { useSubmitRsvp, useTrackView } from "../../hooks/useInvitations";
-import { useAuth } from "@clerk/tanstack-react-start";
 import { summarizeInvitationContent } from "../../lib/canvas/document";
 import { migrateInvitationContentToCanvas } from "../../lib/canvas/migrate";
 

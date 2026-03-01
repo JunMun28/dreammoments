@@ -216,9 +216,7 @@ describe("createCheckoutSessionFn", () => {
 	});
 
 	test("denies unauthenticated users", async () => {
-		mockedRequireAuth.mockRejectedValue(
-			new Error("Authentication required"),
-		);
+		mockedRequireAuth.mockRejectedValue(new Error("Authentication required"));
 
 		await expect(
 			(createCheckoutSessionFn as CallableFunction)({
@@ -237,9 +235,10 @@ describe("getPaymentStatusFn", () => {
 			mockDb as unknown as ReturnType<typeof getDbOrNull>,
 		);
 
-		const result = (await (getPaymentStatusFn as CallableFunction)(
-			{},
-		)) as { plan: string; isPremium: boolean };
+		const result = (await (getPaymentStatusFn as CallableFunction)({})) as {
+			plan: string;
+			isPremium: boolean;
+		};
 
 		expect(result.plan).toBe("premium");
 		expect(result.isPremium).toBe(true);
@@ -253,9 +252,10 @@ describe("getPaymentStatusFn", () => {
 			mockDb as unknown as ReturnType<typeof getDbOrNull>,
 		);
 
-		const result = (await (getPaymentStatusFn as CallableFunction)(
-			{},
-		)) as { plan: string; isPremium: boolean };
+		const result = (await (getPaymentStatusFn as CallableFunction)({})) as {
+			plan: string;
+			isPremium: boolean;
+		};
 
 		expect(result.plan).toBe("free");
 		expect(result.isPremium).toBe(false);
@@ -268,20 +268,18 @@ describe("getPaymentStatusFn", () => {
 			mockDb as unknown as ReturnType<typeof getDbOrNull>,
 		);
 
-		const result = (await (getPaymentStatusFn as CallableFunction)(
-			{},
-		)) as { error: string };
+		const result = (await (getPaymentStatusFn as CallableFunction)({})) as {
+			error: string;
+		};
 
 		expect(result.error).toContain("User not found");
 	});
 
 	test("denies unauthenticated users", async () => {
-		mockedRequireAuth.mockRejectedValue(
-			new Error("Authentication required"),
-		);
+		mockedRequireAuth.mockRejectedValue(new Error("Authentication required"));
 
-		await expect(
-			(getPaymentStatusFn as CallableFunction)({}),
-		).rejects.toThrow("Authentication required");
+		await expect((getPaymentStatusFn as CallableFunction)({})).rejects.toThrow(
+			"Authentication required",
+		);
 	});
 });

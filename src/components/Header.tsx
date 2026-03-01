@@ -1,9 +1,8 @@
 import {
-	SignInButton,
 	SignedIn,
 	SignedOut,
+	SignInButton,
 	UserButton,
-	useUser,
 } from "@clerk/tanstack-react-start";
 import { Link } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
@@ -18,7 +17,6 @@ const navItems = [
 
 export default function Header() {
 	const [open, setOpen] = useState(false);
-	const { isSignedIn } = useUser();
 	const hamburgerRef = useRef<HTMLButtonElement>(null);
 	const menuRef = useRef<HTMLDivElement>(null);
 

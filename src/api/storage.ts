@@ -30,9 +30,8 @@ const getUploadUrlSchema = z.object({
 export const getUploadUrlFn = createServerFn({
 	method: "POST",
 })
-	.inputValidator(
-		(data: { filename: string; contentType: string }) =>
-			parseInput(getUploadUrlSchema, data),
+	.inputValidator((data: { filename: string; contentType: string }) =>
+		parseInput(getUploadUrlSchema, data),
 	)
 	.handler(async ({ data }) => {
 		await requireAuth();

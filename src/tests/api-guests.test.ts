@@ -280,7 +280,6 @@ describe("listGuestsFn", () => {
 
 		const result = await (listGuestsFn as CallableFunction)({
 			invitationId: "inv-1",
-
 		});
 
 		expect(result).toEqual(guests);
@@ -296,7 +295,6 @@ describe("listGuestsFn", () => {
 
 		const result = (await (listGuestsFn as CallableFunction)({
 			invitationId: "inv-1",
-
 		})) as { error: string };
 
 		expect(result.error).toBe("Access denied");
@@ -442,7 +440,6 @@ describe("exportGuestsCsvFn", () => {
 
 		const result = (await (exportGuestsCsvFn as CallableFunction)({
 			invitationId: "inv-1",
-
 		})) as { csv: string };
 
 		expect(result.csv).toContain("name");
@@ -475,7 +472,6 @@ describe("exportGuestsCsvFn", () => {
 
 		const result = (await (exportGuestsCsvFn as CallableFunction)({
 			invitationId: "inv-1",
-
 		})) as { csv: string };
 
 		// Double quotes should be escaped as ""

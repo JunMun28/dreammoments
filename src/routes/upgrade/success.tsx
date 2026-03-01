@@ -1,7 +1,7 @@
+import { useAuth } from "@clerk/tanstack-react-start";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getPaymentStatusFn } from "../../api/payments";
-import { useAuth } from "@clerk/tanstack-react-start";
 
 export const Route = createFileRoute("/upgrade/success")({
 	component: UpgradeSuccessScreen,

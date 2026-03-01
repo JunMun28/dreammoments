@@ -431,15 +431,13 @@ export const exportGuestsCsvFn = createServerFn({
 export const deleteGuestFn = createServerFn({
 	method: "POST",
 })
-	.inputValidator(
-		(data: { guestId: string; invitationId: string }) => {
-			parseInput(deleteGuestSchema, {
-				...data,
-				userId: "placeholder",
-			});
-			return data;
-		},
-	)
+	.inputValidator((data: { guestId: string; invitationId: string }) => {
+		parseInput(deleteGuestSchema, {
+			...data,
+			userId: "placeholder",
+		});
+		return data;
+	})
 	.handler(async ({ data }) => {
 		const { userId } = await requireAuth();
 

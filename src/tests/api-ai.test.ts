@@ -118,7 +118,6 @@ describe("listAiGenerationsFn", () => {
 
 		const result = await (listAiGenerationsFn as CallableFunction)({
 			invitationId: "inv-1",
-
 		});
 
 		expect(result).toEqual(generations);
@@ -129,7 +128,6 @@ describe("generateAiContentFn - custom type", () => {
 	test("rejects custom type without customSystemPrompt", async () => {
 		await expect(
 			(generateAiContentFn as CallableFunction)({
-	
 				type: "custom",
 				sectionId: "custom",
 				prompt: "Create custom wedding content",
@@ -159,7 +157,6 @@ describe("generateAiContentBatchFn", () => {
 
 		try {
 			const result = (await (generateAiContentBatchFn as CallableFunction)({
-	
 				requests: [
 					{
 						type: "tagline",
