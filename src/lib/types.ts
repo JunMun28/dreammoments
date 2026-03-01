@@ -195,16 +195,3 @@ export interface Payment {
 	status: PaymentStatus;
 	createdAt: string;
 }
-
-export interface Store {
-	users: User[];
-	invitations: Invitation[];
-	guests: Guest[];
-	views: InvitationView[];
-	aiGenerations: AiGeneration[];
-	invitationSnapshots: InvitationSnapshot[];
-	payments: Payment[];
-	sessions: Record<string, string>;
-	passwords: Record<string, string>;
-	rateLimits: Record<string, { count: number; lastReset: string }>;
-}

@@ -23,6 +23,11 @@ if (typeof window !== "undefined" && import.meta.env.DEV) {
 	import("react-grab");
 }
 
+// One-time cleanup: remove legacy localStorage store for existing users
+if (typeof window !== "undefined") {
+	window.localStorage.removeItem("dm-store-v1");
+}
+
 interface MyRouterContext {
 	queryClient: QueryClient;
 }

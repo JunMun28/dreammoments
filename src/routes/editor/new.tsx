@@ -9,8 +9,8 @@ import { useCallback, useState } from "react";
 import InvitationRenderer from "../../components/templates/InvitationRenderer";
 import { RouteLoadingSpinner } from "../../components/ui/RouteLoadingSpinner";
 import { buildSampleContent } from "../../data/sample-invitation";
+import { useCreateInvitation } from "../../hooks/useInvitations";
 import { useAuth } from "../../lib/auth";
-import { createInvitation } from "../../lib/data";
 import { templates } from "../../templates";
 import type { TemplateConfig } from "../../templates/types";
 
@@ -147,6 +147,7 @@ function TemplatePreviewModal({
 function TemplateSelectionPage() {
 	const { user, loading } = useAuth();
 	const navigate = useNavigate();
+	const createMutation = useCreateInvitation();
 	const [creatingId, setCreatingId] = useState<string | null>(null);
 	const [previewId, setPreviewId] = useState<string | null>(null);
 
@@ -157,12 +158,12 @@ function TemplateSelectionPage() {
 	if (loading) return <RouteLoadingSpinner />;
 	if (!user) return <Navigate to="/auth/login" />;
 
-	const handleSelect = (templateId: string) => {
+	const handleSelect = async (templateId: string) => {
 		if (creatingId) return;
 		setCreatingId(templateId);
 
 		try {
-			const invitation = createInvitation(user.id, templateId);
+			const invitation = await createMutation.mutateAsync(templateId);
 			navigate({
 				to: "/editor/canvas/$invitationId",
 				params: { invitationId: invitation.id },

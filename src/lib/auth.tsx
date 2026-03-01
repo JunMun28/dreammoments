@@ -15,8 +15,6 @@ import {
 	signupFn,
 } from "@/api/auth";
 import { sanitizeRedirect } from "./auth-redirect";
-import { createUser, setCurrentUserId } from "./data";
-import { getStore, updateStore } from "./store";
 import type { User } from "./types";
 
 /** Refresh the access token 10 minutes before the 1-hour expiry */
@@ -75,22 +73,10 @@ const googleRedirectUri = import.meta.env.VITE_GOOGLE_REDIRECT_URI as
 export function AuthProvider({ children }: { children: React.ReactNode }) {
 	const [serverUser, setServerUser] = useState<User | undefined>(undefined);
 	const [loading, setLoading] = useState(true);
-	const [useServerAuth, setUseServerAuth] = useState(false);
 	const [sessionExpired, setSessionExpired] = useState(false);
 	const refreshTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-	// Legacy localStorage-based user (fallback when server auth is not available)
-	const legacyUserId =
-		typeof window !== "undefined"
-			? getStore().sessions.currentUserId
-			: undefined;
-	const legacyUser =
-		typeof window !== "undefined"
-			? getStore().users.find((item) => item.id === legacyUserId)
-			: undefined;
-
-	// The active user is the server-backed user if available, else the legacy one
-	const user = useServerAuth ? serverUser : (serverUser ?? legacyUser);
+	const user = serverUser;
 
 	useEffect(() => {
 		let cancelled = false;
@@ -106,15 +92,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 				if (result.user) {
 					setServerUser(result.user as User);
-					setUseServerAuth(true);
 					if (result.newToken) setStoredToken(result.newToken);
-					syncUserToLocalStore(result.user as User);
 				} else {
 					setStoredToken(null);
 					setSessionExpired(true);
 				}
 			} catch {
-				// Server unavailable, fall back to localStorage
+				// Server unavailable
 			}
 
 			if (!cancelled) setLoading(false);
@@ -145,7 +129,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				if (result.user) {
 					setServerUser(result.user as User);
 					if (result.newToken) setStoredToken(result.newToken);
-					syncUserToLocalStore(result.user as User);
 				} else {
 					setStoredToken(null);
 					setServerUser(undefined);
@@ -180,13 +163,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
 			return;
 		}
-		// Fallback for development without Google OAuth configured
-		createUser({
-			email: "google.user@dreammoments.app",
-			name: "Google User",
-			authProvider: "google",
-		});
-		setSessionExpired(false);
+		// Dev fallback without Google OAuth configured
 		window.location.href = sanitizeRedirect(redirectTo);
 	}, []);
 
@@ -194,9 +171,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		(result: { user: User; token: string; refreshToken?: string }) => {
 			setStoredToken(result.token);
 			setServerUser(result.user);
-			setUseServerAuth(true);
 			setSessionExpired(false);
-			syncUserToLocalStore(result.user);
 		},
 		[],
 	);
@@ -268,9 +243,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			});
 			if (result.user) {
 				setServerUser(result.user as User);
-				setUseServerAuth(true);
 				if (result.newToken) setStoredToken(result.newToken);
-				syncUserToLocalStore(result.user as User);
 			}
 		} catch {
 			// Silently fail - session will remain as-is
@@ -282,9 +255,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 		setStoredToken(null);
 		setServerUser(undefined);
-		setUseServerAuth(false);
 		setSessionExpired(false);
-		setCurrentUserId(null);
 
 		logoutFn({ data: { token: token ?? undefined } }).catch(() => {});
 	}, []);
@@ -312,45 +283,4 @@ export function useAuth() {
 	const context = useContext(AuthContext);
 	if (!context) throw new Error("AuthProvider missing");
 	return context;
-}
-
-/**
- * Sync a server-authenticated user into the localStorage store
- * so that legacy code (dashboard, editor, etc.) can find the user.
- */
-function syncUserToLocalStore(user: {
-	id: string;
-	email: string;
-	name?: string | null;
-	avatarUrl?: string | null;
-	authProvider: string;
-	plan: string;
-	createdAt: string;
-	updatedAt: string;
-}) {
-	if (typeof window === "undefined") return;
-
-	const store = getStore();
-	const exists = store.users.some((u) => u.id === user.id);
-
-	if (!exists) {
-		updateStore((s) => ({
-			...s,
-			users: [
-				...s.users,
-				{
-					id: user.id,
-					email: user.email,
-					name: user.name ?? undefined,
-					avatarUrl: user.avatarUrl ?? undefined,
-					authProvider: user.authProvider as "google" | "email",
-					plan: (user.plan ?? "free") as "free" | "premium",
-					createdAt: user.createdAt,
-					updatedAt: user.updatedAt,
-				},
-			],
-		}));
-	}
-
-	setCurrentUserId(user.id);
 }

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { detectDeviceType, exportGuestsCsv } from "../lib/data";
+import { detectDeviceType } from "../lib/constants";
 
 describe("data module - utilities", () => {
 	describe("detectDeviceType", () => {
@@ -39,22 +39,4 @@ describe("data module - utilities", () => {
 			expect(detectDeviceType("")).toBe("desktop");
 		});
 	});
-
-	describe("exportGuestsCsv", () => {
-		// Note: Full tests require mocking the store, which is complex.
-		// These tests verify the CSV structure when called with various guest lists.
-		test("CSV format is correct", () => {
-			// This test will use the actual store state, which may be empty
-			// We're primarily testing that the function doesn't throw
-			const csv = exportGuestsCsv("non-existent-invitation-id");
-			expect(typeof csv).toBe("string");
-			// Should always have header
-			expect(csv).toContain('"name"');
-			expect(csv).toContain('"attendance"');
-			expect(csv).toContain('"guest_count"');
-		});
-	});
 });
-
-// Note: Integration tests for data functions are in the e2e tests
-// because they require proper store setup and teardown.

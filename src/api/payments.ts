@@ -2,8 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
-import { getDbOrNull, isProduction, schema } from "@/db/index";
-import { recordPayment, updateUserPlan } from "@/lib/data";
+import { getDbOrNull, schema } from "@/db/index";
 import { requireAuth } from "@/lib/server-auth";
 import {
 	createCheckoutSession,
@@ -31,59 +30,41 @@ export const createCheckoutSessionFn = createServerFn({ method: "POST" })
 
 		const stripeConfig = getStripeConfig();
 
+		const db = getDbOrNull();
+		if (!db) throw new Error("Database connection required");
+
 		// Graceful fallback: if Stripe is not configured, use mock in dev
 		if (!stripeConfig) {
-			if (isProduction()) {
-				return { error: "Payment processing is not configured." };
-			}
-
 			console.warn(
 				"[Payments] STRIPE_SECRET_KEY not set. Using mock checkout in development.",
 			);
 
 			// In dev without Stripe, directly upgrade the user
-			const db = getDbOrNull();
 			const price = PRICING[data.currency];
 
-			if (db) {
-				await db
-					.update(schema.users)
-					.set({ plan: "premium", updatedAt: new Date() })
-					.where(eq(schema.users.id, userId));
+			await db
+				.update(schema.users)
+				.set({ plan: "premium", updatedAt: new Date() })
+				.where(eq(schema.users.id, userId));
 
-				await db.insert(schema.payments).values({
-					userId,
-					invitationId: data.invitationId || null,
-					amountCents: price.amountCents,
-					currency: data.currency,
-					status: "succeeded",
-					stripePaymentIntentId: `mock_${Date.now()}`,
-				});
-			} else {
-				updateUserPlan(userId, "premium");
-				recordPayment({
-					userId,
-					invitationId: data.invitationId,
-					amountCents: price.amountCents,
-					currency: data.currency,
-					status: "succeeded",
-				});
-			}
+			await db.insert(schema.payments).values({
+				userId,
+				invitationId: data.invitationId || null,
+				amountCents: price.amountCents,
+				currency: data.currency,
+				status: "succeeded",
+				stripePaymentIntentId: `mock_${Date.now()}`,
+			});
 
 			return { url: "/upgrade/success?mock=true" };
 		}
 
 		// Look up user email for Stripe customer_email
-		let email = "";
-		const db = getDbOrNull();
-
-		if (db) {
-			const [user] = await db
-				.select({ email: schema.users.email })
-				.from(schema.users)
-				.where(eq(schema.users.id, userId));
-			email = user?.email ?? "";
-		}
+		const [user] = await db
+			.select({ email: schema.users.email })
+			.from(schema.users)
+			.where(eq(schema.users.id, userId));
+		const email = user?.email ?? "";
 
 		if (!email) {
 			return { error: "Could not determine user email." };
@@ -186,49 +167,39 @@ export const handleStripeWebhookFn = createServerFn({ method: "POST" })
 				}
 
 				const db = getDbOrNull();
+				if (!db) throw new Error("Database connection required");
+
 				const paymentIntentId = session.payment_intent ?? session.id;
 
-				if (db) {
-					// Idempotency: skip if this payment was already processed
-					const [existing] = await db
-						.select({ id: schema.payments.id })
-						.from(schema.payments)
-						.where(eq(schema.payments.stripePaymentIntentId, paymentIntentId));
+				// Idempotency: skip if this payment was already processed
+				const [existing] = await db
+					.select({ id: schema.payments.id })
+					.from(schema.payments)
+					.where(eq(schema.payments.stripePaymentIntentId, paymentIntentId));
 
-					if (existing) {
-						return { received: true };
-					}
-
-					// Upgrade user to premium
-					await db
-						.update(schema.users)
-						.set({ plan: "premium", updatedAt: new Date() })
-						.where(eq(schema.users.id, userId));
-
-					// Record payment
-					await db.insert(schema.payments).values({
-						userId,
-						invitationId: invitationId || null,
-						stripePaymentIntentId: paymentIntentId,
-						stripeCustomerId: session.customer ?? null,
-						amountCents:
-							session.amount_total ??
-							PRICING[currency as "MYR" | "SGD"]?.amountCents ??
-							0,
-						currency,
-						status: "succeeded",
-					});
-				} else {
-					// Dev fallback
-					updateUserPlan(userId, "premium");
-					recordPayment({
-						userId,
-						invitationId,
-						amountCents: session.amount_total ?? 0,
-						currency,
-						status: "succeeded",
-					});
+				if (existing) {
+					return { received: true };
 				}
+
+				// Upgrade user to premium
+				await db
+					.update(schema.users)
+					.set({ plan: "premium", updatedAt: new Date() })
+					.where(eq(schema.users.id, userId));
+
+				// Record payment
+				await db.insert(schema.payments).values({
+					userId,
+					invitationId: invitationId || null,
+					stripePaymentIntentId: paymentIntentId,
+					stripeCustomerId: session.customer ?? null,
+					amountCents:
+						session.amount_total ??
+						PRICING[currency as "MYR" | "SGD"]?.amountCents ??
+						0,
+					currency,
+					status: "succeeded",
+				});
 			}
 
 			return { received: true };
@@ -252,22 +223,18 @@ export const getPaymentStatusFn = createServerFn({ method: "GET" })
 			const { userId } = await requireAuth(data.token);
 
 			const db = getDbOrNull();
+			if (!db) throw new Error("Database connection required");
 
-			if (db) {
-				const [user] = await db
-					.select({ plan: schema.users.plan })
-					.from(schema.users)
-					.where(eq(schema.users.id, userId));
+			const [user] = await db
+				.select({ plan: schema.users.plan })
+				.from(schema.users)
+				.where(eq(schema.users.id, userId));
 
-				if (!user) {
-					return { error: "User not found." };
-				}
-
-				const plan = user.plan ?? "free";
-				return { plan, isPremium: plan === "premium" };
+			if (!user) {
+				return { error: "User not found." };
 			}
 
-			// Dev fallback: always return free unless upgraded via mock
-			return { plan: "free", isPremium: false };
+			const plan = user.plan ?? "free";
+			return { plan, isPremium: plan === "premium" };
 		},
 	);

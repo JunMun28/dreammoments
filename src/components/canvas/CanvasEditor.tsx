@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { publishInvitationFn } from "@/api/invitations";
 import { createDocumentStore } from "@/lib/canvas/store";
 import type { Block, CanvasDocument, Position, Size } from "@/lib/canvas/types";
-import { publishInvitation, updateInvitation } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import { AiContextPopover } from "./AiContextPopover";
 import { AlignmentGuides } from "./AlignmentGuides";
@@ -443,69 +442,19 @@ export function CanvasEditor({
 
 	const handlePublish = () => {
 		void (async () => {
-			const token = (() => {
-				if (typeof window === "undefined") return null;
-				const storage = window.localStorage as
-					| {
-							getItem?: (key: string) => string | null;
-					  }
-					| Record<string, unknown>;
-				if (
-					storage &&
-					typeof (storage as { getItem?: unknown }).getItem === "function"
-				) {
-					return (
-						(storage as { getItem: (key: string) => string | null }).getItem(
-							TOKEN_KEY,
-						) ?? null
-					);
-				}
-				const fallback = (storage as Record<string, unknown>)[TOKEN_KEY];
-				return typeof fallback === "string" ? fallback : null;
-			})();
-			if (!token) {
-				publishInvitation(invitationId);
-				return;
-			}
+			if (typeof window === "undefined") return;
+			const token = window.localStorage.getItem(TOKEN_KEY);
+			if (!token) return;
 
 			try {
 				const result = await publishInvitationFn({
 					data: { invitationId, token },
 				});
 				if (result && typeof result === "object" && "error" in result) {
-					publishInvitation(invitationId);
-					return;
+					console.error("Publish failed:", (result as { error: string }).error);
 				}
-
-				const published =
-					result && typeof result === "object"
-						? (result as {
-								slug?: string;
-								publishedAt?: string;
-								templateVersion?: string;
-								templateSnapshot?: Record<string, unknown>;
-							})
-						: null;
-				const patch: {
-					status: "published";
-					slug?: string;
-					publishedAt?: string;
-					templateVersion?: string;
-					templateSnapshot?: Record<string, unknown>;
-				} = {
-					status: "published",
-				};
-				if (published?.slug) patch.slug = published.slug;
-				if (published?.publishedAt) patch.publishedAt = published.publishedAt;
-				if (published?.templateVersion) {
-					patch.templateVersion = published.templateVersion;
-				}
-				if (published?.templateSnapshot) {
-					patch.templateSnapshot = published.templateSnapshot;
-				}
-				updateInvitation(invitationId, patch);
-			} catch {
-				publishInvitation(invitationId);
+			} catch (err) {
+				console.error("Publish failed:", err);
 			}
 		})();
 	};

@@ -5,7 +5,6 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 import { publishInvitationFn } from "@/api/invitations";
 import type { CanvasDocument } from "@/lib/canvas/types";
 import { createEmptyCanvasDocument } from "@/lib/canvas/types";
-import { publishInvitation, updateInvitation } from "@/lib/data";
 import { CanvasEditor } from "./CanvasEditor";
 
 function clearStorageFallback(storage: unknown) {
@@ -41,16 +40,6 @@ vi.mock("@/api/invitations", async () => {
 		...actual,
 		publishInvitationFn: vi.fn(),
 		updateInvitationFn: vi.fn(async () => ({})),
-	};
-});
-
-vi.mock("@/lib/data", async () => {
-	const actual =
-		await vi.importActual<typeof import("@/lib/data")>("@/lib/data");
-	return {
-		...actual,
-		publishInvitation: vi.fn(),
-		updateInvitation: vi.fn(),
 	};
 });
 
@@ -351,14 +340,6 @@ describe("CanvasEditor", () => {
 			await waitFor(() =>
 				expect(vi.mocked(publishInvitationFn)).toHaveBeenCalledWith({
 					data: { invitationId: "inv-7", token: "token-123" },
-				}),
-			);
-			expect(vi.mocked(publishInvitation)).not.toHaveBeenCalled();
-			expect(vi.mocked(updateInvitation)).toHaveBeenCalledWith(
-				"inv-7",
-				expect.objectContaining({
-					status: "published",
-					slug: "server-slug",
 				}),
 			);
 		} finally {

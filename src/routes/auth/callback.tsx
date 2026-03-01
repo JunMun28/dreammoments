@@ -5,9 +5,6 @@ import {
 	DEFAULT_AUTH_REDIRECT,
 	sanitizeRedirect,
 } from "../../lib/auth-redirect";
-import { setCurrentUserId } from "../../lib/data";
-import { getStore, updateStore } from "../../lib/store";
-import type { Store } from "../../lib/types";
 
 export const Route = createFileRoute("/auth/callback")({
 	component: CallbackScreen,
@@ -86,8 +83,6 @@ function CallbackScreen() {
 				}
 
 				window.localStorage.setItem("dm-auth-token", result.token);
-
-				syncCallbackUser(result.user);
 
 				setRedirectTarget(
 					sanitizeRedirect(result.redirectTo) || DEFAULT_AUTH_REDIRECT,
@@ -188,45 +183,4 @@ function CallbackScreen() {
 			</div>
 		</div>
 	);
-}
-
-/**
- * Sync the authenticated user from the Google callback into the
- * localStorage store so legacy dashboard/editor code can find them.
- */
-function syncCallbackUser(user: {
-	id: string;
-	email: string;
-	name?: string | null;
-	avatarUrl?: string | null;
-	authProvider: string;
-	plan: string;
-	createdAt: string;
-	updatedAt: string;
-}) {
-	if (typeof window === "undefined") return;
-
-	const store = getStore();
-	const exists = store.users.some((u) => u.id === user.id);
-
-	if (!exists) {
-		updateStore((s: Store) => ({
-			...s,
-			users: [
-				...s.users,
-				{
-					id: user.id,
-					email: user.email,
-					name: user.name ?? undefined,
-					avatarUrl: user.avatarUrl ?? undefined,
-					authProvider: user.authProvider as "google" | "email",
-					plan: (user.plan ?? "free") as "free" | "premium",
-					createdAt: user.createdAt,
-					updatedAt: user.updatedAt,
-				},
-			],
-		}));
-	}
-
-	setCurrentUserId(user.id);
 }

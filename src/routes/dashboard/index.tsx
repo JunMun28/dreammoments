@@ -10,7 +10,6 @@ import {
 	Heart,
 	Mail,
 	Monitor,
-	Send,
 	Share2,
 	Smartphone,
 	Sparkles,
@@ -24,8 +23,10 @@ import { RouteErrorFallback } from "../../components/ui/RouteErrorFallback";
 import { RouteLoadingSpinner } from "../../components/ui/RouteLoadingSpinner";
 import { useToast } from "../../components/ui/Toast";
 import {
+	useCreateInvitation,
 	useDeleteInvitation,
 	useInvitations,
+	useUpdateInvitation,
 } from "../../hooks/useInvitations";
 import { useAuth } from "../../lib/auth";
 import {
@@ -33,13 +34,6 @@ import {
 	isCanvasDocument,
 	summarizeInvitationContent,
 } from "../../lib/canvas/document";
-import {
-	createInvitation,
-	getAnalytics,
-	listGuests,
-	updateInvitation,
-} from "../../lib/data";
-import { useStore } from "../../lib/store";
 import type { Invitation, InvitationStatus } from "../../lib/types";
 import { cn } from "../../lib/utils";
 import { templates } from "../../templates";
@@ -138,11 +132,10 @@ function DashboardScreen() {
 	const { addToast } = useToast();
 	const navigate = useNavigate();
 	const { data: serverInvitations } = useInvitations();
-	const localInvitations = useStore((store) =>
-		store.invitations.filter((item) => item.userId === user?.id),
-	);
-	const invitations = serverInvitations ?? localInvitations;
+	const invitations = serverInvitations ?? [];
 	const deleteMutation = useDeleteInvitation();
+	const createMutation = useCreateInvitation();
+	const updateMutation = useUpdateInvitation();
 	const [shareOpen, setShareOpen] = useState(false);
 	const [selected, setSelected] = useState<Invitation | null>(null);
 	const [deleteTarget, setDeleteTarget] = useState<Invitation | null>(null);
@@ -178,15 +171,16 @@ function DashboardScreen() {
 		async (invitation: Invitation) => {
 			setDuplicatingId(invitation.id);
 			try {
-				const newInv = createInvitation(
-					invitation.userId,
-					invitation.templateId,
-				);
-				updateInvitation(newInv.id, {
+				const newInv = await createMutation.mutateAsync(invitation.templateId);
+				await updateMutation.mutateAsync({
+					invitationId: newInv.id,
 					title: `${invitation.title} (Copy)`,
-					content: invitation.content,
+					content: invitation.content as unknown as Record<string, unknown>,
 					sectionVisibility: invitation.sectionVisibility,
-					designOverrides: invitation.designOverrides,
+					designOverrides: invitation.designOverrides as Record<
+						string,
+						unknown
+					>,
 				});
 				addToast({
 					type: "success",
@@ -200,7 +194,7 @@ function DashboardScreen() {
 				setDuplicatingId(null);
 			}
 		},
-		[addToast, navigate],
+		[addToast, navigate, createMutation, updateMutation],
 	);
 
 	const filteredInvitations = useMemo(() => {
@@ -438,8 +432,6 @@ function DashboardScreen() {
 								templates.find(
 									(template) => template.id === invitation.templateId,
 								)?.name ?? invitation.templateId;
-							const guests = listGuests(invitation.id);
-							const analytics = getAnalytics(invitation.id);
 							const isActive = invitation.id === activeInvitation?.id;
 
 							return (
@@ -541,28 +533,20 @@ function DashboardScreen() {
 												Views
 											</p>
 											<p className="mt-2 text-lg font-semibold tabular-nums text-[color:var(--dm-ink)]">
-												{analytics.totalViews}
+												{invitation.invitedCount ?? 0}
 											</p>
 										</div>
 										<div className="rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-4">
 											<p className="text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
 												RSVPs
 											</p>
-											{guests.length > 0 ? (
-												<p className="mt-2 text-lg font-semibold tabular-nums text-[color:var(--dm-ink)]">
-													{guests.length}
-												</p>
-											) : (
-												<div className="mt-2 flex items-center gap-1.5">
-													<Send
-														className="h-3 w-3 text-[color:var(--dm-muted)]"
-														aria-hidden="true"
-													/>
-													<p className="text-xs text-[color:var(--dm-muted)]">
-														No RSVPs yet
-													</p>
-												</div>
-											)}
+											<Link
+												to="/dashboard/$invitationId"
+												params={{ invitationId: invitation.id }}
+												className="mt-2 text-xs text-[color:var(--dm-accent-strong)] hover:underline"
+											>
+												View Details
+											</Link>
 										</div>
 										<div className="rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-4">
 											<p className="text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">

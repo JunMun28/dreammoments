@@ -1,11 +1,22 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { listGuestsFn, submitRsvpFn } from "@/api/guests";
+import type { AnalyticsData } from "@/api/analytics";
+import { getAnalyticsFn } from "@/api/analytics";
 import {
+	deleteGuestFn,
+	exportGuestsCsvFn,
+	importGuestsFn,
+	listGuestsFn,
+	submitRsvpFn,
+	updateGuestFn,
+} from "@/api/guests";
+import {
+	createInvitationFn,
 	deleteInvitationFn,
 	getInvitation,
 	getInvitations,
 	publishInvitationFn,
 	unpublishInvitationFn,
+	updateInvitationFn,
 } from "@/api/invitations";
 import { trackViewFn } from "@/api/public";
 import type { Invitation } from "@/lib/types";
@@ -23,6 +34,7 @@ export const invitationKeys = {
 	all: ["invitations"] as const,
 	detail: (id: string) => ["invitations", id] as const,
 	guests: (invitationId: string) => ["guests", invitationId] as const,
+	analytics: (id: string) => ["analytics", id] as const,
 };
 
 // ── Queries ─────────────────────────────────────────────────────────
@@ -74,7 +86,7 @@ export function useGuests(invitationId: string) {
 				data: { invitationId, token },
 			});
 			if (result && "error" in result) return [];
-			return result as Array<{
+			return result as unknown as Array<{
 				id: string;
 				invitationId: string;
 				name: string;
@@ -94,7 +106,96 @@ export function useGuests(invitationId: string) {
 	});
 }
 
+export function useAnalytics(invitationId: string) {
+	const token = getToken();
+	return useQuery({
+		queryKey: invitationKeys.analytics(invitationId),
+		queryFn: async () => {
+			if (!token) return null;
+			const result = await getAnalyticsFn({
+				data: { invitationId, token },
+			});
+			if (result && "error" in result) return null;
+			return result as AnalyticsData;
+		},
+		enabled: !!token && !!invitationId,
+	});
+}
+
 // ── Mutations ───────────────────────────────────────────────────────
+
+export function useCreateInvitation() {
+	const queryClient = useQueryClient();
+	const token = getToken();
+
+	return useMutation({
+		mutationFn: async (templateId: string) => {
+			if (!token) throw new Error("Not authenticated");
+			const result = await createInvitationFn({
+				data: { token, templateId },
+			});
+			if (result && typeof result === "object" && "error" in result)
+				throw new Error((result as { error: string }).error);
+			return result as Invitation;
+		},
+		onSettled: () => {
+			queryClient.invalidateQueries({ queryKey: invitationKeys.all });
+		},
+	});
+}
+
+export function useUpdateInvitation() {
+	const queryClient = useQueryClient();
+	const token = getToken();
+
+	return useMutation({
+		mutationFn: async (params: {
+			invitationId: string;
+			title?: string;
+			content?: Record<string, unknown>;
+			sectionVisibility?: Record<string, boolean>;
+			designOverrides?: Record<string, unknown>;
+			status?: "draft" | "published" | "archived";
+		}) => {
+			if (!token) throw new Error("Not authenticated");
+			const result = await updateInvitationFn({
+				data: { ...params, token },
+			});
+			if (result && typeof result === "object" && "error" in result)
+				throw new Error((result as { error: string }).error);
+			return result as Invitation;
+		},
+		onMutate: async (params) => {
+			await queryClient.cancelQueries({
+				queryKey: invitationKeys.detail(params.invitationId),
+			});
+			const previous = queryClient.getQueryData<Invitation>(
+				invitationKeys.detail(params.invitationId),
+			);
+			if (previous) {
+				queryClient.setQueryData<Invitation>(
+					invitationKeys.detail(params.invitationId),
+					{ ...previous, ...params } as Invitation,
+				);
+			}
+			return { previous };
+		},
+		onError: (_err, params, context) => {
+			if (context?.previous) {
+				queryClient.setQueryData(
+					invitationKeys.detail(params.invitationId),
+					context.previous,
+				);
+			}
+		},
+		onSettled: (_data, _err, params) => {
+			queryClient.invalidateQueries({ queryKey: invitationKeys.all });
+			queryClient.invalidateQueries({
+				queryKey: invitationKeys.detail(params.invitationId),
+			});
+		},
+	});
+}
 
 export function useDeleteInvitation() {
 	const queryClient = useQueryClient();
@@ -219,6 +320,148 @@ export function useTrackView() {
 			if (result && "error" in result)
 				throw new Error((result as { error: string }).error);
 			return result;
+		},
+	});
+}
+
+// ── Guest mutations ─────────────────────────────────────────────────
+
+export function useAddGuest() {
+	const queryClient = useQueryClient();
+	const token = getToken();
+
+	return useMutation({
+		mutationFn: async (params: {
+			invitationId: string;
+			name: string;
+			email?: string;
+			phone?: string;
+			relationship?: string;
+		}) => {
+			if (!token) throw new Error("Not authenticated");
+			const result = await importGuestsFn({
+				data: {
+					invitationId: params.invitationId,
+					token,
+					guests: [
+						{
+							name: params.name,
+							email: params.email,
+							phone: params.phone,
+							relationship: params.relationship,
+						},
+					],
+				},
+			});
+			if (result && "error" in result)
+				throw new Error((result as { error: string }).error);
+			return result;
+		},
+		onSettled: (_data, _err, params) => {
+			queryClient.invalidateQueries({
+				queryKey: invitationKeys.guests(params.invitationId),
+			});
+		},
+	});
+}
+
+export function useUpdateGuest() {
+	const queryClient = useQueryClient();
+	const token = getToken();
+
+	return useMutation({
+		mutationFn: async (params: {
+			guestId: string;
+			invitationId: string;
+			name?: string;
+			email?: string;
+			phone?: string;
+			relationship?: string;
+			attendance?: "attending" | "not_attending" | "undecided";
+			guestCount?: number;
+			dietaryRequirements?: string;
+			message?: string;
+		}) => {
+			if (!token) throw new Error("Not authenticated");
+			const result = await updateGuestFn({
+				data: { ...params, token },
+			});
+			if (result && "error" in result)
+				throw new Error((result as { error: string }).error);
+			return result;
+		},
+		onSettled: (_data, _err, params) => {
+			queryClient.invalidateQueries({
+				queryKey: invitationKeys.guests(params.invitationId),
+			});
+		},
+	});
+}
+
+export function useDeleteGuest() {
+	const queryClient = useQueryClient();
+	const token = getToken();
+
+	return useMutation({
+		mutationFn: async (params: { guestId: string; invitationId: string }) => {
+			if (!token) throw new Error("Not authenticated");
+			const result = await deleteGuestFn({
+				data: { ...params, token },
+			});
+			if (result && "error" in result)
+				throw new Error((result as { error: string }).error);
+			return result;
+		},
+		onSettled: (_data, _err, params) => {
+			queryClient.invalidateQueries({
+				queryKey: invitationKeys.guests(params.invitationId),
+			});
+		},
+	});
+}
+
+export function useImportGuests() {
+	const queryClient = useQueryClient();
+	const token = getToken();
+
+	return useMutation({
+		mutationFn: async (params: {
+			invitationId: string;
+			guests: Array<{
+				name: string;
+				email?: string;
+				phone?: string;
+				relationship?: string;
+			}>;
+		}) => {
+			if (!token) throw new Error("Not authenticated");
+			const result = await importGuestsFn({
+				data: { ...params, token },
+			});
+			if (result && "error" in result)
+				throw new Error((result as { error: string }).error);
+			return result;
+		},
+		onSettled: (_data, _err, params) => {
+			queryClient.invalidateQueries({
+				queryKey: invitationKeys.guests(params.invitationId),
+			});
+		},
+	});
+}
+
+export function useExportGuestsCsv() {
+	const token = getToken();
+
+	return useMutation({
+		mutationFn: async (invitationId: string) => {
+			if (!token) throw new Error("Not authenticated");
+			const result = await exportGuestsCsvFn({
+				data: { invitationId, token },
+			});
+			if (result && "error" in result)
+				throw new Error((result as { error: string }).error);
+			return (result as { csv: string }).csv;
 		},
 	});
 }

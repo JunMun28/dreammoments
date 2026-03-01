@@ -7,7 +7,7 @@ import {
 	useState,
 } from "react";
 import { summarizeInvitationContent } from "../../lib/canvas/document";
-import { PUBLIC_BASE_URL } from "../../lib/data";
+import { PUBLIC_BASE_URL } from "../../lib/constants";
 import { generateQrDataUrl } from "../../lib/qr";
 import type { Invitation } from "../../lib/types";
 import { useFocusTrap } from "../editor/hooks/useFocusTrap";

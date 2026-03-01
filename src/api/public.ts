@@ -2,11 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { eq } from "drizzle-orm";
 
 import { getDbOrNull, schema } from "@/db/index";
-import {
-	detectDeviceType,
-	getInvitationBySlug as localGetInvitationBySlug,
-	trackInvitationView as localTrackInvitationView,
-} from "@/lib/data";
+import { detectDeviceType } from "@/lib/constants";
 import { getPublicInvitationSchema, trackViewSchema } from "@/lib/validation";
 import { parseInput } from "./validate";
 
@@ -21,15 +17,14 @@ export const getPublicInvitation = createServerFn({
 	// @ts-expect-error ServerFn inference expects stricter JSON type than Record<string, unknown>
 	.handler(async ({ data }) => {
 		const db = getDbOrNull();
+		if (!db) throw new Error("Database connection required");
 
-		const invitation = db
-			? (
-					await db
-						.select()
-						.from(schema.invitations)
-						.where(eq(schema.invitations.slug, data.slug))
-				)[0]
-			: localGetInvitationBySlug(data.slug);
+		const invitation = (
+			await db
+				.select()
+				.from(schema.invitations)
+				.where(eq(schema.invitations.slug, data.slug))
+		)[0];
 
 		if (!invitation) {
 			return { error: "Invitation not found" };
@@ -68,50 +63,48 @@ export const trackViewFn = createServerFn({
 	)
 	.handler(async ({ data }) => {
 		const db = getDbOrNull();
+		if (!db) throw new Error("Database connection required");
+
 		const ua = data.userAgent ?? "";
 
-		if (db) {
-			// Verify invitation exists
-			const invRows = await db
-				.select({ id: schema.invitations.id })
-				.from(schema.invitations)
-				.where(eq(schema.invitations.id, data.invitationId));
+		// Verify invitation exists
+		const invRows = await db
+			.select({ id: schema.invitations.id })
+			.from(schema.invitations)
+			.where(eq(schema.invitations.id, data.invitationId));
 
-			if (invRows.length === 0) {
-				return { error: "Invitation not found" };
-			}
-
-			// Stable visitor hash used for unique-visitor analytics.
-			const stableSource = [
-				data.invitationId,
-				data.visitorKey ?? "",
-				ua,
-				data.referrer ?? "",
-			].join("|");
-			const digestBuffer = await crypto.subtle.digest(
-				"SHA-256",
-				new TextEncoder().encode(stableSource),
-			);
-			const visitorHash = Array.from(new Uint8Array(digestBuffer))
-				.map((byte) => byte.toString(16).padStart(2, "0"))
-				.join("")
-				.slice(0, 16);
-
-			const deviceType = detectDeviceType(ua);
-
-			const rows = await db
-				.insert(schema.invitationViews)
-				.values({
-					invitationId: data.invitationId,
-					userAgent: ua,
-					referrer: data.referrer,
-					visitorHash,
-					deviceType,
-				})
-				.returning();
-
-			return rows[0];
+		if (invRows.length === 0) {
+			return { error: "Invitation not found" };
 		}
 
-		return localTrackInvitationView(data.invitationId, ua, data.referrer);
+		// Stable visitor hash used for unique-visitor analytics.
+		const stableSource = [
+			data.invitationId,
+			data.visitorKey ?? "",
+			ua,
+			data.referrer ?? "",
+		].join("|");
+		const digestBuffer = await crypto.subtle.digest(
+			"SHA-256",
+			new TextEncoder().encode(stableSource),
+		);
+		const visitorHash = Array.from(new Uint8Array(digestBuffer))
+			.map((byte) => byte.toString(16).padStart(2, "0"))
+			.join("")
+			.slice(0, 16);
+
+		const deviceType = detectDeviceType(ua);
+
+		const rows = await db
+			.insert(schema.invitationViews)
+			.values({
+				invitationId: data.invitationId,
+				userAgent: ua,
+				referrer: data.referrer,
+				visitorHash,
+				deviceType,
+			})
+			.returning();
+
+		return rows[0];
 	});

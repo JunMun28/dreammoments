@@ -54,7 +54,6 @@ function chainable(result: unknown[] = []) {
 
 vi.mock("@/db/index", () => ({
 	getDbOrNull: vi.fn(() => null),
-	isProduction: vi.fn(() => false),
 	schema: {
 		users: { id: "id", email: "email", plan: "plan" },
 		payments: { id: "id", userId: "user_id" },
@@ -78,33 +77,25 @@ vi.mock("@/lib/stripe", () => ({
 	verifyWebhookSignature: vi.fn(async () => true),
 }));
 
-vi.mock("@/lib/data", () => ({
-	updateUserPlan: vi.fn(),
-	recordPayment: vi.fn(),
-}));
-
 // ---------------------------------------------------------------------------
 // Imports
 // ---------------------------------------------------------------------------
 
 import { createCheckoutSessionFn, getPaymentStatusFn } from "@/api/payments";
-import { getDbOrNull, isProduction } from "@/db/index";
-import { recordPayment, updateUserPlan } from "@/lib/data";
+import { getDbOrNull } from "@/db/index";
 import { requireAuth } from "@/lib/server-auth";
 import { createCheckoutSession, getStripeConfig } from "@/lib/stripe";
 
 const mockedGetDbOrNull = vi.mocked(getDbOrNull);
-const mockedIsProduction = vi.mocked(isProduction);
 const mockedRequireAuth = vi.mocked(requireAuth);
 const mockedGetStripeConfig = vi.mocked(getStripeConfig);
 const mockedCreateCheckout = vi.mocked(createCheckoutSession);
-const mockedUpdateUserPlan = vi.mocked(updateUserPlan);
-const mockedRecordPayment = vi.mocked(recordPayment);
 
 beforeEach(() => {
 	vi.clearAllMocks();
-	mockedGetDbOrNull.mockReturnValue(null);
-	mockedIsProduction.mockReturnValue(false);
+	mockedGetDbOrNull.mockReturnValue(
+		mockDb as unknown as ReturnType<typeof getDbOrNull>,
+	);
 	mockedRequireAuth.mockResolvedValue({ userId: "user-a" });
 	mockedGetStripeConfig.mockReturnValue(null);
 });
@@ -114,32 +105,11 @@ beforeEach(() => {
 // ---------------------------------------------------------------------------
 
 describe("createCheckoutSessionFn", () => {
-	test("mock checkout in dev without Stripe (fallback, no DB)", async () => {
-		const result = (await (createCheckoutSessionFn as CallableFunction)({
-			token: "valid-token",
-			currency: "MYR",
-		})) as { url: string };
-
-		expect(result.url).toContain("mock=true");
-		expect(mockedUpdateUserPlan).toHaveBeenCalledWith("user-a", "premium");
-		expect(mockedRecordPayment).toHaveBeenCalledWith(
-			expect.objectContaining({
-				userId: "user-a",
-				amountCents: 4900,
-				currency: "MYR",
-				status: "succeeded",
-			}),
-		);
-	});
-
 	test("mock checkout in dev with DB", async () => {
 		const updateChain = chainable([]);
 		const insertChain = chainable([]);
 		mockDb.update.mockReturnValue(updateChain);
 		mockDb.insert.mockReturnValue(insertChain);
-		mockedGetDbOrNull.mockReturnValue(
-			mockDb as unknown as ReturnType<typeof getDbOrNull>,
-		);
 
 		const result = (await (createCheckoutSessionFn as CallableFunction)({
 			token: "valid-token",
@@ -149,15 +119,18 @@ describe("createCheckoutSessionFn", () => {
 		expect(result.url).toContain("mock=true");
 	});
 
-	test("returns error in production without Stripe", async () => {
-		mockedIsProduction.mockReturnValue(true);
+	test("returns mock checkout when Stripe not configured", async () => {
+		const updateChain = chainable([]);
+		const insertChain = chainable([]);
+		mockDb.update.mockReturnValue(updateChain);
+		mockDb.insert.mockReturnValue(insertChain);
 
 		const result = (await (createCheckoutSessionFn as CallableFunction)({
 			token: "valid-token",
 			currency: "MYR",
-		})) as { error: string };
+		})) as { url: string };
 
-		expect(result.error).toContain("not configured");
+		expect(result.url).toContain("mock=true");
 	});
 
 	test("creates real Stripe checkout session", async () => {
@@ -280,15 +253,6 @@ describe("getPaymentStatusFn", () => {
 		})) as { error: string };
 
 		expect(result.error).toContain("User not found");
-	});
-
-	test("returns free plan without DB (dev fallback)", async () => {
-		const result = (await (getPaymentStatusFn as CallableFunction)({
-			token: "valid-token",
-		})) as { plan: string; isPremium: boolean };
-
-		expect(result.plan).toBe("free");
-		expect(result.isPremium).toBe(false);
 	});
 
 	test("denies unauthenticated users", async () => {

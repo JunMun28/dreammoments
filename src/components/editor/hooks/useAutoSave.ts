@@ -6,11 +6,6 @@ import {
 	useState,
 } from "react";
 import { updateInvitationFn } from "../../../api/invitations";
-import {
-	getInvitationById,
-	setInvitationVisibility,
-	updateInvitationContent,
-} from "../../../lib/data";
 import type { InvitationContent } from "../../../lib/types";
 
 export type UseAutoSaveParams = {
@@ -30,23 +25,7 @@ const INTERVAL_MS = 30000;
 
 function getStoredToken(): string | null {
 	if (typeof window === "undefined") return null;
-	const storage = window.localStorage as
-		| {
-				getItem?: (key: string) => string | null;
-		  }
-		| Record<string, unknown>;
-	if (
-		storage &&
-		typeof (storage as { getItem?: unknown }).getItem === "function"
-	) {
-		return (
-			(storage as { getItem: (key: string) => string | null }).getItem(
-				TOKEN_KEY,
-			) ?? null
-		);
-	}
-	const fallback = (storage as Record<string, unknown>)[TOKEN_KEY];
-	return typeof fallback === "string" ? fallback : null;
+	return window.localStorage.getItem(TOKEN_KEY);
 }
 
 export function useAutoSave({
@@ -77,7 +56,6 @@ export function useAutoSave({
 	const hasUnsavedChanges = version !== lastSavedVersionRef.current;
 
 	// Reset the interval timer so it counts a full INTERVAL_MS from now.
-	// This prevents debounce + interval from firing within seconds of each other.
 	const resetIntervalTimer = useCallback(() => {
 		if (intervalTimerRef.current) {
 			clearInterval(intervalTimerRef.current);
@@ -111,21 +89,17 @@ export function useAutoSave({
 		}
 
 		try {
-			// Always persist locally first
-			updateInvitationContent(invitationId, draftRef.current);
-			setInvitationVisibility(invitationId, visibilityRef.current);
-
 			const token = getStoredToken();
-			if (token) {
-				await updateInvitationFn({
-					data: {
-						invitationId,
-						token,
-						content: draftRef.current as unknown as Record<string, unknown>,
-						sectionVisibility: visibilityRef.current,
-					},
-				});
-			}
+			if (!token) throw new Error("Not authenticated");
+
+			await updateInvitationFn({
+				data: {
+					invitationId,
+					token,
+					content: draftRef.current as unknown as Record<string, unknown>,
+					sectionVisibility: visibilityRef.current,
+				},
+			});
 
 			// Save succeeded: update bookkeeping
 			lastSavedVersionRef.current = versionRef.current;
@@ -170,22 +144,13 @@ export function useAutoSave({
 	}, []);
 
 	const revertToLastSaved = useCallback(() => {
-		const invitation = getInvitationById(invitationId);
-
-		if (invitation?.content) {
-			Object.assign(draftRef.current, invitation.content);
-		}
-		if (invitation?.sectionVisibility) {
-			Object.assign(visibilityRef.current, invitation.sectionVisibility);
-		}
-
 		// Mark as saved since we reverted to last-saved state
 		lastSavedVersionRef.current = versionRef.current;
 		retryCountRef.current = 0;
 		setRetriesExhausted(false);
 		setSaveError(null);
 		setSaveStatus("saved");
-	}, [invitationId, draftRef, visibilityRef]);
+	}, []);
 
 	const markDirty = useCallback(() => {
 		if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
@@ -219,9 +184,6 @@ export function useAutoSave({
 		if (!hasUnsavedChanges) return;
 		setSaveStatus("unsaved");
 		const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-			updateInvitationContent(invitationId, draftRef.current);
-			setInvitationVisibility(invitationId, visibilityRef.current);
-
 			const token = getStoredToken();
 			if (token && navigator.sendBeacon) {
 				const payload = JSON.stringify({

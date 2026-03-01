@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { useFocusTrap } from "@/components/editor/hooks/useFocusTrap";
-import { PUBLIC_BASE_URL } from "@/lib/data";
+import { PUBLIC_BASE_URL } from "@/lib/constants";
 
 interface PublishDialogProps {
 	open: boolean;

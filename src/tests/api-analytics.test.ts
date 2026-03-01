@@ -56,7 +56,6 @@ function chainable(result: unknown[] = []) {
 
 vi.mock("@/db/index", () => ({
 	getDbOrNull: vi.fn(() => null),
-	isProduction: vi.fn(() => false),
 	schema: {
 		invitations: { id: "id", userId: "user_id" },
 		invitationViews: {
@@ -79,46 +78,22 @@ vi.mock("@/lib/server-auth", () => ({
 	requireAuth: vi.fn(async () => ({ userId: "user-a" })),
 }));
 
-vi.mock("@/lib/data", () => ({
-	getAnalytics: vi.fn(() => ({
-		totalViews: 100,
-		uniqueVisitors: 50,
-		viewsByDay: [
-			{ date: "2024-01-01", views: 10 },
-			{ date: "2024-01-02", views: 20 },
-		],
-	})),
-	getDeviceBreakdown: vi.fn(() => ({
-		mobile: 30,
-		desktop: 50,
-		tablet: 20,
-	})),
-	getInvitationById: vi.fn(() => null),
-	listGuests: vi.fn(() => [
-		{ id: "g-1", attendance: "attending" },
-		{ id: "g-2", attendance: "not_attending" },
-		{ id: "g-3", attendance: null },
-	]),
-}));
-
 // ---------------------------------------------------------------------------
 // Imports
 // ---------------------------------------------------------------------------
 
 import { getAnalyticsFn } from "@/api/analytics";
-import { getDbOrNull, isProduction } from "@/db/index";
-import { getInvitationById as localGetInvitationById } from "@/lib/data";
+import { getDbOrNull } from "@/db/index";
 import { requireAuth } from "@/lib/server-auth";
 
 const mockedGetDbOrNull = vi.mocked(getDbOrNull);
-const mockedIsProduction = vi.mocked(isProduction);
 const mockedRequireAuth = vi.mocked(requireAuth);
-const mockedLocalGetById = vi.mocked(localGetInvitationById);
 
 beforeEach(() => {
 	vi.clearAllMocks();
-	mockedGetDbOrNull.mockReturnValue(null);
-	mockedIsProduction.mockReturnValue(false);
+	mockedGetDbOrNull.mockReturnValue(
+		mockDb as unknown as ReturnType<typeof getDbOrNull>,
+	);
 	mockedRequireAuth.mockResolvedValue({ userId: "user-a" });
 });
 
@@ -127,80 +102,6 @@ beforeEach(() => {
 // ---------------------------------------------------------------------------
 
 describe("getAnalyticsFn", () => {
-	test("returns aggregated data (fallback path)", async () => {
-		const inv = { id: "inv-1", userId: "user-a" };
-		mockedLocalGetById.mockReturnValue(
-			inv as ReturnType<typeof localGetInvitationById>,
-		);
-
-		const result = (await (getAnalyticsFn as CallableFunction)({
-			token: "valid-token",
-			invitationId: "inv-1",
-			period: "30d",
-		})) as {
-			totalViews: number;
-			uniqueViews: number;
-			rsvpSummary: {
-				attending: number;
-				notAttending: number;
-				pending: number;
-				total: number;
-			};
-			viewsByDay: Array<{ date: string; count: number }>;
-			deviceBreakdown: { mobile: number; desktop: number; tablet: number };
-			topReferrers: Array<{ referrer: string; count: number }>;
-		};
-
-		expect(result.totalViews).toBe(100);
-		expect(result.uniqueViews).toBe(50);
-		expect(result.rsvpSummary.attending).toBe(1);
-		expect(result.rsvpSummary.notAttending).toBe(1);
-		expect(result.rsvpSummary.pending).toBe(1);
-		expect(result.rsvpSummary.total).toBe(3);
-		expect(result.viewsByDay).toHaveLength(2);
-		expect(result.deviceBreakdown.mobile).toBe(30);
-		expect(result.deviceBreakdown.desktop).toBe(50);
-		expect(result.topReferrers).toEqual([]);
-	});
-
-	test("denies access for wrong user (fallback)", async () => {
-		const inv = { id: "inv-1", userId: "user-b" };
-		mockedLocalGetById.mockReturnValue(
-			inv as ReturnType<typeof localGetInvitationById>,
-		);
-
-		const result = (await (getAnalyticsFn as CallableFunction)({
-			token: "valid-token",
-			invitationId: "inv-1",
-		})) as { error: string };
-
-		expect(result.error).toBe("Access denied");
-	});
-
-	test("returns error for nonexistent invitation (fallback)", async () => {
-		mockedLocalGetById.mockReturnValue(
-			null as unknown as ReturnType<typeof localGetInvitationById>,
-		);
-
-		const result = (await (getAnalyticsFn as CallableFunction)({
-			token: "valid-token",
-			invitationId: "inv-nonexistent",
-		})) as { error: string };
-
-		expect(result.error).toContain("Invitation not found");
-	});
-
-	test("throws in production without DB", async () => {
-		mockedIsProduction.mockReturnValue(true);
-
-		await expect(
-			(getAnalyticsFn as CallableFunction)({
-				token: "valid-token",
-				invitationId: "inv-1",
-			}),
-		).rejects.toThrow("Database required in production");
-	});
-
 	test("returns analytics from DB", async () => {
 		// Ownership check
 		const invOwner = { userId: "user-a" };
@@ -290,20 +191,5 @@ describe("getAnalyticsFn", () => {
 		})) as { error: string };
 
 		expect(result.error).toContain("Invitation not found");
-	});
-
-	test("defaults period to 30d", async () => {
-		const inv = { id: "inv-1", userId: "user-a" };
-		mockedLocalGetById.mockReturnValue(
-			inv as ReturnType<typeof localGetInvitationById>,
-		);
-
-		const result = (await (getAnalyticsFn as CallableFunction)({
-			token: "valid-token",
-			invitationId: "inv-1",
-		})) as { totalViews: number };
-
-		// Should not throw, and should return data
-		expect(result.totalViews).toBeDefined();
 	});
 });

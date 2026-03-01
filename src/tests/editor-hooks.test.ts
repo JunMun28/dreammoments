@@ -9,10 +9,6 @@ import type { SectionConfig } from "../templates/types";
 vi.mock("../api/invitations", () => ({
 	updateInvitationFn: vi.fn().mockResolvedValue({}),
 }));
-vi.mock("../lib/data", () => ({
-	updateInvitationContent: vi.fn(),
-	setInvitationVisibility: vi.fn(),
-}));
 
 import { useAutoSave } from "../components/editor/hooks/useAutoSave";
 import {
@@ -409,34 +405,22 @@ describe("useEditorState", () => {
 // ─── useAutoSave ────────────────────────────────────────────────────────────
 
 describe("useAutoSave", () => {
-	function clearStorageFallback(storage: unknown) {
-		const target = storage as {
-			clear?: () => void;
-			removeItem?: (key: string) => void;
-			key?: (index: number) => string | null;
-			length?: number;
-		};
-		if (typeof target.clear === "function") {
-			target.clear();
-			return;
-		}
-		if (
-			typeof target.removeItem === "function" &&
-			typeof target.key === "function" &&
-			typeof target.length === "number"
-		) {
-			for (let index = target.length - 1; index >= 0; index -= 1) {
-				const key = target.key(index);
-				if (!key) continue;
-				target.removeItem(key);
-			}
-		}
-	}
-
+	const storageMap = new Map<string, string>();
 	beforeEach(() => {
 		vi.useFakeTimers();
 		vi.clearAllMocks();
-		clearStorageFallback(localStorage);
+		storageMap.clear();
+		storageMap.set("dm-auth-token", "test-token");
+		vi.stubGlobal("localStorage", {
+			getItem: (key: string) => storageMap.get(key) ?? null,
+			setItem: (key: string, value: string) => storageMap.set(key, value),
+			removeItem: (key: string) => storageMap.delete(key),
+			clear: () => storageMap.clear(),
+			get length() {
+				return storageMap.size;
+			},
+			key: (index: number) => [...storageMap.keys()][index] ?? null,
+		});
 	});
 
 	function makeAutoSaveParams(version = 0) {
@@ -498,7 +482,7 @@ describe("useAutoSave", () => {
 	});
 
 	test("does not save when version has not changed", async () => {
-		const { updateInvitationContent } = await import("../lib/data");
+		const { updateInvitationFn } = await import("../api/invitations");
 		const params = makeAutoSaveParams(0);
 		const { result } = renderHook(() => useAutoSave(params));
 
@@ -507,17 +491,15 @@ describe("useAutoSave", () => {
 		});
 
 		// Should not have written because version === lastSavedVersion (both 0)
-		expect(updateInvitationContent).not.toHaveBeenCalled();
+		expect(updateInvitationFn).not.toHaveBeenCalled();
 		expect(result.current.saveStatus).toBe("saved");
 	});
 
 	test("reports error status when save fails", async () => {
-		const { updateInvitationContent } = await import("../lib/data");
+		const { updateInvitationFn } = await import("../api/invitations");
 		(
-			updateInvitationContent as ReturnType<typeof vi.fn>
-		).mockImplementationOnce(() => {
-			throw new Error("Storage full");
-		});
+			updateInvitationFn as unknown as ReturnType<typeof vi.fn>
+		).mockRejectedValueOnce(new Error("Storage full"));
 
 		const onSaveError = vi.fn();
 		const params = { ...makeAutoSaveParams(1), onSaveError };
