@@ -5,6 +5,7 @@ import { AddToCalendarButton } from "../../ui/AddToCalendarButton";
 import { LoadingSpinner } from "../../ui/LoadingSpinner";
 import AngpowQRCode from "../AngpowQRCode";
 import { CountdownWidget } from "../CountdownWidget";
+import { CornerFlourish } from "../decorations";
 import { makeEditableProps, parseAttendance } from "../helpers";
 import {
 	RsvpConfirmation,
@@ -218,12 +219,21 @@ export default function DoubleHappinessInvitation({
 				hidden={hiddenSections?.countdown}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="dh-section-cream px-6 py-16 sm:px-10"
+				className="dh-section-cream px-6 py-20 sm:px-10"
 			>
-				<CountdownWidget
-					targetDate={data.hero.date}
-					eventTime={data.schedule.events[0]?.time}
-				/>
+				<div className="mx-auto max-w-sm">
+					<div className="dh-ornamental-frame relative">
+						<CornerFlourish corner="tl" />
+						<CornerFlourish corner="tr" />
+						<CornerFlourish corner="bl" />
+						<CornerFlourish corner="br" />
+						<CountdownWidget
+							targetDate={data.hero.date}
+							eventTime={data.schedule.events[0]?.time}
+							displayDate={data.hero.date}
+						/>
+					</div>
+				</div>
 			</SectionShell>
 
 			{/* ════════════════════════════════════════════
