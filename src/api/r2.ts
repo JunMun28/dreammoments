@@ -19,20 +19,30 @@ function getR2Config() {
 	return { accountId, accessKeyId, secretAccessKey, bucketName, publicUrl };
 }
 
+let cachedR2Client: {
+	client: S3Client;
+	config: NonNullable<ReturnType<typeof getR2Config>>;
+} | null = null;
+
 function getR2Client() {
+	if (cachedR2Client) return cachedR2Client;
+
 	const config = getR2Config();
 	if (!config) return null;
 
-	const client = new S3Client({
-		region: "auto",
-		endpoint: `https://${config.accountId}.r2.cloudflarestorage.com`,
-		credentials: {
-			accessKeyId: config.accessKeyId,
-			secretAccessKey: config.secretAccessKey,
-		},
-	});
+	cachedR2Client = {
+		client: new S3Client({
+			region: "auto",
+			endpoint: `https://${config.accountId}.r2.cloudflarestorage.com`,
+			credentials: {
+				accessKeyId: config.accessKeyId,
+				secretAccessKey: config.secretAccessKey,
+			},
+		}),
+		config,
+	};
 
-	return { client, config };
+	return cachedR2Client;
 }
 
 /** Generate a content-addressed key from a buffer */

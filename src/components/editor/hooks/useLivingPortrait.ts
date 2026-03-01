@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getAnimationStatusFn, submitAnimationFn } from "@/api/ai-animation";
-import { generateAvatarFn } from "@/api/ai-avatar";
+import {
+	getAnimationStatusFn,
+	removeAnimationFn,
+	submitAnimationFn,
+} from "@/api/ai-animation";
+import { generateAvatarFn, removeAvatarFn } from "@/api/ai-avatar";
+import { getStringProp } from "@/lib/hero-content";
 
 export type LivingPortraitStep =
 	| "idle"
@@ -24,17 +29,19 @@ export function useLivingPortrait({
 	const [error, setError] = useState<string | null>(null);
 	const [remaining, setRemaining] = useState<number | null>(null);
 	const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-	const [videoJobId, setVideoJobId] = useState<string | null>(null);
+
+	// videoJobId is only used for internal tracking, not rendered — use ref
+	const videoJobIdRef = useRef<string | null>(null);
 
 	// Ref-based mutex to prevent double-clicks
 	const generatingRef = useRef(false);
 	const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-	const heroImageUrl = heroData.heroImageUrl as string | undefined;
+	const heroImageUrl = getStringProp(heroData, "heroImageUrl");
 	const avatarImageUrl =
-		(heroData.avatarImageUrl as string | undefined) ?? avatarPreview;
-	const avatarStyle = heroData.avatarStyle as string | undefined;
-	const animatedVideoUrl = heroData.animatedVideoUrl as string | undefined;
+		getStringProp(heroData, "avatarImageUrl") ?? avatarPreview;
+	const avatarStyle = getStringProp(heroData, "avatarStyle");
+	const animatedVideoUrl = getStringProp(heroData, "animatedVideoUrl");
 
 	// Clean up polling on unmount
 	useEffect(() => {
@@ -57,23 +64,23 @@ export function useLivingPortrait({
 					data: { invitationId, style, token },
 				});
 
-				if ("error" in result) {
-					setError(String(result.error));
+				if (result && typeof result === "object" && "error" in result) {
+					setError(String((result as { error: string }).error));
 					setStep("idle");
 					return;
 				}
 
-				const { avatarImageUrl: url, remaining: rem } = result as {
+				const typed = result as {
 					avatarImageUrl: string;
 					remaining: number;
 				};
 
 				// Show preview immediately
-				setAvatarPreview(url);
-				setRemaining(rem);
+				setAvatarPreview(typed.avatarImageUrl);
+				setRemaining(typed.remaining);
 
 				// Apply to content via handleFieldChange
-				onChange("hero.avatarImageUrl", url);
+				onChange("hero.avatarImageUrl", typed.avatarImageUrl);
 				onChange("hero.avatarStyle", style);
 
 				// If there was a video, clear it since avatar changed
@@ -103,10 +110,10 @@ export function useLivingPortrait({
 					data: { jobId, token },
 				});
 
-				if ("error" in result) {
-					setError(String(result.error));
+				if (result && typeof result === "object" && "error" in result) {
+					setError(String((result as { error: string }).error));
 					setStep("idle");
-					setVideoJobId(null);
+					videoJobIdRef.current = null;
 					return;
 				}
 
@@ -118,7 +125,7 @@ export function useLivingPortrait({
 				if (status.status === "completed" && status.animatedVideoUrl) {
 					onChange("hero.animatedVideoUrl", status.animatedVideoUrl);
 					setStep("idle");
-					setVideoJobId(null);
+					videoJobIdRef.current = null;
 					return;
 				}
 
@@ -127,7 +134,15 @@ export function useLivingPortrait({
 						"Video generation failed. The avatar will be used as your hero image instead.",
 					);
 					setStep("idle");
-					setVideoJobId(null);
+					videoJobIdRef.current = null;
+					return;
+				}
+
+				// Timeout after 120 polling attempts (~4–10 minutes)
+				if (attempt >= 120) {
+					setError("Video generation timed out. Please try again.");
+					setStep("idle");
+					videoJobIdRef.current = null;
 					return;
 				}
 
@@ -147,7 +162,7 @@ export function useLivingPortrait({
 				} else {
 					setError("Video generation timed out. Please try again.");
 					setStep("idle");
-					setVideoJobId(null);
+					videoJobIdRef.current = null;
 				}
 			}
 		},
@@ -166,22 +181,22 @@ export function useLivingPortrait({
 				data: { invitationId, token },
 			});
 
-			if ("error" in result) {
-				setError(String(result.error));
+			if (result && typeof result === "object" && "error" in result) {
+				setError(String((result as { error: string }).error));
 				setStep("idle");
 				return;
 			}
 
-			const { jobId, remaining: rem } = result as {
+			const typed = result as {
 				jobId: string;
 				remaining: number;
 			};
 
-			setVideoJobId(jobId);
-			setRemaining(rem);
+			videoJobIdRef.current = typed.jobId;
+			setRemaining(typed.remaining);
 
 			// Start polling
-			pollVideoStatus(jobId);
+			pollVideoStatus(typed.jobId);
 		} catch (err) {
 			setError(
 				err instanceof Error
@@ -194,24 +209,34 @@ export function useLivingPortrait({
 		}
 	}, [invitationId, token, avatarImageUrl, pollVideoStatus]);
 
-	const removeAvatar = useCallback(() => {
+	const removeAvatar = useCallback(async () => {
+		try {
+			await removeAvatarFn({ data: { invitationId, token } });
+		} catch {
+			// Fall through — clear UI state regardless
+		}
 		onChange("hero.avatarImageUrl", "");
 		onChange("hero.avatarStyle", "");
 		if (animatedVideoUrl) {
 			onChange("hero.animatedVideoUrl", "");
 		}
 		setAvatarPreview(null);
-	}, [onChange, animatedVideoUrl]);
+	}, [invitationId, token, onChange, animatedVideoUrl]);
 
-	const removeVideo = useCallback(() => {
+	const removeVideo = useCallback(async () => {
+		try {
+			await removeAnimationFn({ data: { invitationId, token } });
+		} catch {
+			// Fall through — clear UI state regardless
+		}
 		onChange("hero.animatedVideoUrl", "");
 		if (pollTimerRef.current) {
 			clearTimeout(pollTimerRef.current);
 			pollTimerRef.current = null;
 		}
-		setVideoJobId(null);
+		videoJobIdRef.current = null;
 		setStep("idle");
-	}, [onChange]);
+	}, [invitationId, token, onChange]);
 
 	return {
 		step,
@@ -221,7 +246,6 @@ export function useLivingPortrait({
 		avatarImageUrl,
 		avatarStyle,
 		animatedVideoUrl,
-		videoJobId,
 		generateAvatar,
 		animateAvatar,
 		removeAvatar,

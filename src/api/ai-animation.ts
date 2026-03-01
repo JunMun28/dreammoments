@@ -1,17 +1,26 @@
 import { fal } from "@fal-ai/client";
 import { createServerFn } from "@tanstack/react-start";
-import { and, eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { getDbOrNull, schema } from "@/db/index";
+import { SECTION_HERO_ANIMATION } from "@/lib/hero-content";
 import { requireAuth } from "@/lib/server-auth";
+import {
+	assertAllowedUrl,
+	claimGenerationSlot,
+	completeGenerationSlot,
+	ensureFalConfigured,
+	failGenerationSlot,
+	fetchVideoWithSizeLimit,
+	parseHeroContent,
+	verifyInvitationOwnership,
+} from "./ai-shared";
 import { ApiError } from "./errors";
-import { contentHash, uploadToR2 } from "./r2";
+import { contentHash, deleteFromR2, extractR2Key, uploadToR2 } from "./r2";
 import { parseInput } from "./validate";
 
 // ── Constants ────────────────────────────────────────────────────────
-
-const MAX_LIVING_PORTRAIT_GENERATIONS = 8;
 
 const ANIMATION_PROMPT =
 	"Gentle, subtle animation. Soft breeze through hair, very slight natural breathing movement. " +
@@ -31,13 +40,10 @@ const animationStatusSchema = z.object({
 	token: z.string().min(1, "Token is required"),
 });
 
-// ── Configure fal.ai ─────────────────────────────────────────────────
-
-function configureFal() {
-	const key = process.env.FAL_KEY;
-	if (!key) throw ApiError.unavailable("AI video service not configured");
-	fal.config({ credentials: key });
-}
+const removeAnimationSchema = z.object({
+	invitationId: z.string().uuid(),
+	token: z.string().min(1, "Token is required"),
+});
 
 // ── Submit animation job ─────────────────────────────────────────────
 
@@ -53,77 +59,57 @@ export const submitAnimationFn = createServerFn({
 		const db = getDbOrNull();
 		if (!db) throw ApiError.unavailable("Database not available");
 
-		// Verify ownership
-		const rows = await db
-			.select({ content: schema.invitations.content })
-			.from(schema.invitations)
-			.where(
-				and(
-					eq(schema.invitations.id, data.invitationId),
-					eq(schema.invitations.userId, userId),
-				),
-			);
+		const content = await verifyInvitationOwnership(
+			db,
+			data.invitationId,
+			userId,
+		);
+		const hero = parseHeroContent(content);
 
-		if (rows.length === 0) {
-			throw ApiError.forbidden("Invitation not found or access denied");
-		}
-
-		const content = rows[0].content as Record<string, unknown>;
-		const hero = content?.hero as Record<string, unknown> | undefined;
-		const avatarImageUrl = hero?.avatarImageUrl as string | undefined;
-
-		if (!avatarImageUrl) {
+		if (!hero.avatarImageUrl) {
 			throw ApiError.badRequest("Generate an avatar first before animating");
 		}
 
-		// Rate limit check
-		const countResult = await db
-			.select({ count: sql<number>`count(*)::int` })
-			.from(schema.aiGenerations)
-			.where(
-				and(
-					eq(schema.aiGenerations.invitationId, data.invitationId),
-					sql`${schema.aiGenerations.sectionId} IN ('hero-avatar', 'hero-animation')`,
-					eq(schema.aiGenerations.accepted, true),
-				),
-			);
+		// Validate avatar URL against allowlist
+		assertAllowedUrl(hero.avatarImageUrl, "Avatar image");
 
-		const usedGenerations = countResult[0]?.count ?? 0;
-		if (usedGenerations >= MAX_LIVING_PORTRAIT_GENERATIONS) {
-			throw ApiError.rateLimit(
-				`Living portrait generation limit reached (${MAX_LIVING_PORTRAIT_GENERATIONS} max).`,
-			);
+		// Claim a rate-limit slot atomically (TOCTOU-safe)
+		const slotId = await claimGenerationSlot(
+			db,
+			data.invitationId,
+			SECTION_HERO_ANIMATION,
+			ANIMATION_PROMPT,
+		);
+
+		try {
+			// Submit video generation job to fal.ai
+			ensureFalConfigured();
+
+			const { request_id } = await fal.queue.submit(VIDEO_MODEL, {
+				input: {
+					image_url: hero.avatarImageUrl,
+					prompt: ANIMATION_PROMPT,
+				},
+			});
+
+			// Update the claimed slot with the external job ID
+			await db
+				.update(schema.aiGenerations)
+				.set({
+					generatedContent: { requestId: request_id },
+					externalJobId: request_id,
+				})
+				.where(eq(schema.aiGenerations.id, slotId));
+
+			return {
+				jobId: slotId,
+				status: "processing" as const,
+				remaining: 0, // Will be recalculated on next check
+			};
+		} catch (err) {
+			await failGenerationSlot(db, slotId).catch(() => {});
+			throw err;
 		}
-
-		// Submit video generation job to fal.ai
-		configureFal();
-
-		const { request_id } = await fal.queue.submit(VIDEO_MODEL, {
-			input: {
-				image_url: avatarImageUrl,
-				prompt: ANIMATION_PROMPT,
-			},
-		});
-
-		// Record job in aiGenerations table
-		const inserted = await db
-			.insert(schema.aiGenerations)
-			.values({
-				invitationId: data.invitationId,
-				sectionId: "hero-animation",
-				prompt: ANIMATION_PROMPT,
-				generatedContent: { requestId: request_id },
-				accepted: false,
-				status: "processing",
-				externalJobId: request_id,
-			})
-			.returning({ id: schema.aiGenerations.id });
-
-		return {
-			jobId: inserted[0].id,
-			status: "processing" as const,
-			remaining: MAX_LIVING_PORTRAIT_GENERATIONS - usedGenerations - 1,
-		};
 	});
 
 // ── Poll animation status ────────────────────────────────────────────
@@ -140,10 +126,21 @@ export const getAnimationStatusFn = createServerFn({
 		const db = getDbOrNull();
 		if (!db) throw ApiError.unavailable("Database not available");
 
-		// Get the generation record
+		// Single JOIN query instead of two sequential queries
 		const rows = await db
-			.select()
+			.select({
+				id: schema.aiGenerations.id,
+				invitationId: schema.aiGenerations.invitationId,
+				status: schema.aiGenerations.status,
+				externalJobId: schema.aiGenerations.externalJobId,
+				resultUrl: schema.aiGenerations.resultUrl,
+				invUserId: schema.invitations.userId,
+			})
 			.from(schema.aiGenerations)
+			.innerJoin(
+				schema.invitations,
+				eq(schema.aiGenerations.invitationId, schema.invitations.id),
+			)
 			.where(eq(schema.aiGenerations.id, data.jobId));
 
 		if (rows.length === 0) {
@@ -152,13 +149,7 @@ export const getAnimationStatusFn = createServerFn({
 
 		const job = rows[0];
 
-		// Verify ownership via the invitation
-		const invRows = await db
-			.select({ userId: schema.invitations.userId })
-			.from(schema.invitations)
-			.where(eq(schema.invitations.id, job.invitationId));
-
-		if (invRows.length === 0 || invRows[0].userId !== userId) {
+		if (job.invUserId !== userId) {
 			throw ApiError.forbidden("Access denied");
 		}
 
@@ -176,7 +167,7 @@ export const getAnimationStatusFn = createServerFn({
 
 		// Poll fal.ai for current status
 		if (job.status === "processing" && job.externalJobId) {
-			configureFal();
+			ensureFalConfigured();
 
 			try {
 				const status = await fal.queue.status(VIDEO_MODEL, {
@@ -199,19 +190,32 @@ export const getAnimationStatusFn = createServerFn({
 						return { status: "failed" as const };
 					}
 
-					// Download video from fal.ai temporary URL and upload to R2
-					const videoResponse = await fetch(video.url);
-					if (!videoResponse.ok) {
-						await db
-							.update(schema.aiGenerations)
-							.set({ status: "failed" })
-							.where(eq(schema.aiGenerations.id, data.jobId));
-						return { status: "failed" as const };
-					}
-
-					const videoBuffer = Buffer.from(await videoResponse.arrayBuffer());
+					// Download video with size limit
+					const videoBuffer = await fetchVideoWithSizeLimit(
+						video.url,
+						"generated video",
+					);
 					const hash = contentHash(videoBuffer);
 					const key = `animations/${job.invitationId}/${hash}.mp4`;
+
+					// Delete old video from R2 before uploading new one
+					const invRows = await db
+						.select({ content: schema.invitations.content })
+						.from(schema.invitations)
+						.where(eq(schema.invitations.id, job.invitationId));
+
+					if (invRows[0]) {
+						const heroContent = parseHeroContent(
+							invRows[0].content as Record<string, unknown>,
+						);
+						if (heroContent.animatedVideoUrl) {
+							const oldKey = extractR2Key(heroContent.animatedVideoUrl);
+							if (oldKey) {
+								await deleteFromR2(oldKey).catch(() => {});
+							}
+						}
+					}
+
 					const animatedVideoUrl = await uploadToR2(
 						key,
 						videoBuffer,
@@ -219,14 +223,13 @@ export const getAnimationStatusFn = createServerFn({
 					);
 
 					// Update the generation record
-					await db
-						.update(schema.aiGenerations)
-						.set({
-							status: "completed",
-							accepted: true,
-							resultUrl: animatedVideoUrl,
-						})
-						.where(eq(schema.aiGenerations.id, data.jobId));
+					await completeGenerationSlot(db, data.jobId, {
+						generatedContent: {
+							requestId: job.externalJobId,
+							url: animatedVideoUrl,
+						},
+						resultUrl: animatedVideoUrl,
+					});
 
 					return {
 						status: "completed" as const,
@@ -247,4 +250,50 @@ export const getAnimationStatusFn = createServerFn({
 		}
 
 		return { status: job.status as "processing" | "completed" | "failed" };
+	});
+
+// ── Remove Animation ────────────────────────────────────────────────
+
+export const removeAnimationFn = createServerFn({
+	method: "POST",
+})
+	.inputValidator((data: { invitationId: string; token: string }) =>
+		parseInput(removeAnimationSchema, data),
+	)
+	.handler(async ({ data }) => {
+		const { userId } = await requireAuth(data.token);
+
+		const db = getDbOrNull();
+		if (!db) throw ApiError.unavailable("Database not available");
+
+		const content = await verifyInvitationOwnership(
+			db,
+			data.invitationId,
+			userId,
+		);
+		const hero = parseHeroContent(content);
+
+		// Delete video from R2
+		if (hero.animatedVideoUrl) {
+			const videoKey = extractR2Key(hero.animatedVideoUrl);
+			if (videoKey) {
+				await deleteFromR2(videoKey).catch(() => {});
+			}
+		}
+
+		// Patch invitation content: clear video field
+		const updatedHero = {
+			...((content.hero as Record<string, unknown>) ?? {}),
+		};
+		delete updatedHero.animatedVideoUrl;
+
+		await db
+			.update(schema.invitations)
+			.set({
+				content: { ...content, hero: updatedHero },
+				updatedAt: new Date(),
+			})
+			.where(eq(schema.invitations.id, data.invitationId));
+
+		return { success: true };
 	});

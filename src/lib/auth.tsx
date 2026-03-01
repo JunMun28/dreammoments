@@ -46,6 +46,7 @@ function setStoredToken(token: string | null) {
 
 const AuthContext = createContext<{
 	user?: User;
+	token: string | null;
 	loading: boolean;
 	sessionExpired: boolean;
 	signInWithGoogle: (redirectTo?: string) => Promise<void>;
@@ -264,6 +265,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		<AuthContext.Provider
 			value={{
 				user,
+				token: getStoredToken(),
 				loading,
 				sessionExpired,
 				signInWithGoogle,

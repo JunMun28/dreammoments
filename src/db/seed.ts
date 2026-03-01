@@ -330,6 +330,7 @@ async function seedAiGenerations(
 						"With hearts full of love and joy, we invite you to celebrate the beginning of our forever.",
 				},
 				accepted: true,
+				status: "completed",
 			},
 			{
 				invitationId: invitation.id,
@@ -352,6 +353,7 @@ async function seedAiGenerations(
 					],
 				},
 				accepted: true,
+				status: "completed",
 			},
 		);
 	}

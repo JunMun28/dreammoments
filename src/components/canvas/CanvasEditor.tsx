@@ -22,8 +22,6 @@ import { InlineTextEditor } from "./InlineTextEditor";
 import { MobileCanvasFab, MobileCanvasSheet } from "./MobileCanvasSheet";
 import { SelectionOverlay } from "./SelectionOverlay";
 
-const TOKEN_KEY = "dm-auth-token";
-
 type PositionMap = Record<string, Position>;
 type SizeMap = Record<string, Size>;
 
@@ -252,11 +250,13 @@ export function CanvasEditor({
 	title,
 	initialDocument,
 	previewSlug,
+	token,
 }: {
 	invitationId: string;
 	title: string;
 	initialDocument: CanvasDocument;
 	previewSlug: string;
+	token?: string;
 }) {
 	const canvasRef = useRef<HTMLDivElement | null>(null);
 	const storeRef = useRef<ReturnType<typeof createDocumentStore> | null>(null);
@@ -442,8 +442,6 @@ export function CanvasEditor({
 
 	const handlePublish = () => {
 		void (async () => {
-			if (typeof window === "undefined") return;
-			const token = window.localStorage.getItem(TOKEN_KEY);
 			if (!token) return;
 
 			try {
@@ -722,6 +720,7 @@ export function CanvasEditor({
 							}
 						}}
 						invitationId={invitationId}
+						token={token}
 						designTokens={document.designTokens}
 						onDesignTokenChange={(section, key, value) => {
 							store.getState().updateDesignToken(section, key, value);
@@ -797,6 +796,8 @@ export function CanvasEditor({
 						store.getState().restyleBlock(blockId, stylePatch);
 					}
 				}}
+				invitationId={invitationId}
+				token={token}
 				designTokens={document.designTokens}
 				onDesignTokenChange={(section: "colors" | "fonts", key, value) => {
 					store.getState().updateDesignToken(section, key, value);

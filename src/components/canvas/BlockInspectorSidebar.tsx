@@ -6,6 +6,7 @@ import type {
 	Position,
 	Size,
 } from "@/lib/canvas/types";
+import { getStringProp } from "@/lib/hero-content";
 import { ActionsRow } from "./inspector/ActionsRow";
 import { ContentSection } from "./inspector/ContentSection";
 import { DesignTokensPanel } from "./inspector/DesignTokensPanel";
@@ -144,6 +145,7 @@ function SingleInspector({
 	onToggleLock,
 	onUpdateAnimation,
 	invitationId,
+	token,
 }: {
 	block: Block;
 	onUpdateContent: (contentPatch: Record<string, unknown>) => void;
@@ -155,14 +157,8 @@ function SingleInspector({
 	onToggleLock: () => void;
 	onUpdateAnimation: (animation: AnimationType) => void;
 	invitationId?: string;
+	token?: string;
 }) {
-	let token = "";
-	try {
-		token = window.localStorage.getItem("dm-auth-token") ?? "";
-	} catch {
-		// localStorage not available in tests or SSR
-	}
-
 	return (
 		<div>
 			<div className="px-3 py-3">
@@ -184,12 +180,10 @@ function SingleInspector({
 				<LivingPortraitSection
 					invitationId={invitationId}
 					token={token}
-					heroImageUrl={(block.content.src as string) ?? ""}
-					avatarImageUrl={block.content.avatarImageUrl as string | undefined}
-					avatarStyle={block.content.avatarStyle as string | undefined}
-					animatedVideoUrl={
-						block.content.animatedVideoUrl as string | undefined
-					}
+					heroImageUrl={getStringProp(block.content, "src") ?? ""}
+					avatarImageUrl={getStringProp(block.content, "avatarImageUrl")}
+					avatarStyle={getStringProp(block.content, "avatarStyle")}
+					animatedVideoUrl={getStringProp(block.content, "animatedVideoUrl")}
 					onUpdateContent={onUpdateContent}
 				/>
 			)}
@@ -226,6 +220,7 @@ export function BlockInspectorSidebar({
 	onDesignTokenChange,
 	onSpacingChange,
 	invitationId,
+	token,
 }: {
 	selectedBlocks: Block[];
 	onUpdateContent: (
@@ -253,6 +248,7 @@ export function BlockInspectorSidebar({
 	) => void;
 	onSpacingChange?: (spacing: number) => void;
 	invitationId?: string;
+	token?: string;
 }) {
 	if (selectedBlocks.length === 0) {
 		if (designTokens && onDesignTokenChange && onSpacingChange) {
@@ -314,6 +310,7 @@ export function BlockInspectorSidebar({
 					onUpdateAnimation(block.id, animation)
 				}
 				invitationId={invitationId}
+				token={token}
 			/>
 		</aside>
 	);

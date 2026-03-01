@@ -98,6 +98,21 @@ describe("CanvasEditor", () => {
 			configurable: true,
 			value: vi.fn(),
 		});
+		if (typeof window.matchMedia !== "function") {
+			Object.defineProperty(window, "matchMedia", {
+				configurable: true,
+				value: vi.fn().mockImplementation((query: string) => ({
+					matches: false,
+					media: query,
+					onchange: null,
+					addListener: vi.fn(),
+					removeListener: vi.fn(),
+					addEventListener: vi.fn(),
+					removeEventListener: vi.fn(),
+					dispatchEvent: vi.fn(),
+				})),
+			});
+		}
 	});
 
 	test("supports shift multi-select", () => {
@@ -313,41 +328,24 @@ describe("CanvasEditor", () => {
 			publishedAt: "2026-02-17T08:00:00.000Z",
 			templateVersion: "v2",
 		} as Awaited<ReturnType<typeof publishInvitationFn>>);
-		const originalLocalStorage = window.localStorage;
-		Object.defineProperty(window, "localStorage", {
-			configurable: true,
-			value: {
-				...originalLocalStorage,
-				getItem: (key: string) =>
-					key === "dm-auth-token" ? "token-123" : null,
-			},
-		});
 
-		try {
-			render(
-				<CanvasEditor
-					invitationId="inv-7"
-					title="Editor Test"
-					initialDocument={buildDocument()}
-					previewSlug="test-slug"
-				/>,
-			);
+		render(
+			<CanvasEditor
+				invitationId="inv-7"
+				title="Editor Test"
+				initialDocument={buildDocument()}
+				previewSlug="test-slug"
+				token="token-123"
+			/>,
+		);
 
-			fireEvent.click(
-				screen.getByRole("button", { name: "Publish invitation" }),
-			);
+		fireEvent.click(screen.getByRole("button", { name: "Publish invitation" }));
 
-			await waitFor(() =>
-				expect(vi.mocked(publishInvitationFn)).toHaveBeenCalledWith({
-					data: { invitationId: "inv-7", token: "token-123" },
-				}),
-			);
-		} finally {
-			Object.defineProperty(window, "localStorage", {
-				configurable: true,
-				value: originalLocalStorage,
-			});
-		}
+		await waitFor(() =>
+			expect(vi.mocked(publishInvitationFn)).toHaveBeenCalledWith({
+				data: { invitationId: "inv-7", token: "token-123" },
+			}),
+		);
 	});
 
 	test("keeps local edits when initialDocument prop refreshes for same invitation", () => {

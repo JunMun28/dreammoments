@@ -12,7 +12,7 @@ export const Route = createFileRoute("/editor/canvas/$invitationId")({
 
 function CanvasEditorRoute() {
 	const { invitationId } = Route.useParams();
-	const { user, loading: authLoading } = useAuth();
+	const { user, token, loading: authLoading } = useAuth();
 	const { data: invitation, isLoading } = useInvitation(invitationId);
 
 	const canvasDocument = useMemo(() => {
@@ -68,6 +68,7 @@ function CanvasEditorRoute() {
 			title={invitation.title || "Canvas invitation"}
 			initialDocument={canvasDocument}
 			previewSlug={invitation.slug}
+			token={token ?? undefined}
 		/>
 	);
 }

@@ -4,7 +4,6 @@ import { cn } from "../../lib/utils";
 import type { FieldConfig } from "../../templates/types";
 import { ImageUploadField } from "./ImageUploadField";
 import { ListFieldEditor } from "./ListFieldEditor";
-import { LivingPortraitField } from "./LivingPortraitField";
 import { ToggleSwitch } from "./ToggleSwitch";
 
 type FieldRendererProps = {
@@ -20,12 +19,6 @@ type FieldRendererProps = {
 	onListItemsChange?: (items: Array<Record<string, unknown>>) => void;
 	/** When set, show an AI magic button to rewrite this field (e.g. tagline). */
 	onAiClick?: () => void;
-	/** Invitation ID for living portrait generation */
-	invitationId?: string;
-	/** Auth token for API calls */
-	token?: string;
-	/** Full hero section data for living portrait */
-	heroData?: Record<string, unknown>;
 };
 
 export function FieldRenderer({
@@ -40,9 +33,6 @@ export function FieldRenderer({
 	listItems,
 	onListItemsChange,
 	onAiClick,
-	invitationId,
-	token,
-	heroData,
 }: FieldRendererProps) {
 	const fieldPath = `${sectionId}.${field.id}`;
 
@@ -64,18 +54,6 @@ export function FieldRenderer({
 				label={field.label}
 				checked={checked}
 				onChange={(nextChecked) => onChange(fieldPath, nextChecked)}
-			/>
-		);
-	}
-
-	if (field.type === "living-portrait") {
-		if (!invitationId || !token) return null;
-		return (
-			<LivingPortraitField
-				invitationId={invitationId}
-				token={token}
-				heroData={heroData ?? {}}
-				onChange={onChange}
 			/>
 		);
 	}

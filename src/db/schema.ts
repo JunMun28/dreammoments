@@ -115,7 +115,7 @@ export const aiGenerations = pgTable(
 		generatedContent:
 			jsonb("generated_content").$type<Record<string, unknown>>(),
 		accepted: boolean("accepted").default(false),
-		status: varchar("status", { length: 20 }).default("pending"),
+		status: varchar("status", { length: 20 }).notNull(),
 		externalJobId: varchar("external_job_id", { length: 255 }),
 		resultUrl: text("result_url"),
 		createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -123,6 +123,11 @@ export const aiGenerations = pgTable(
 	(table) => ({
 		invitationIdx: index("idx_ai_invitation").on(table.invitationId),
 		externalJobIdx: index("idx_ai_external_job").on(table.externalJobId),
+		livingPortraitRateIdx: index("idx_ai_lp_rate").on(
+			table.invitationId,
+			table.sectionId,
+			table.accepted,
+		),
 	}),
 );
 
