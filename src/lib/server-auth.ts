@@ -38,6 +38,7 @@ export async function requireAuth(): Promise<{ userId: string; user: User }> {
 
 	if (!email) throw new Error("No email found on Clerk user");
 
+	// Use onConflictDoNothing to handle concurrent first-requests for the same user
 	const [created] = await db
 		.insert(schema.users)
 		.values({
@@ -49,12 +50,19 @@ export async function requireAuth(): Promise<{ userId: string; user: User }> {
 			avatarUrl: clerkUser.imageUrl || undefined,
 			plan: "free",
 		})
+		.onConflictDoNothing({ target: schema.users.clerkId })
 		.returning();
 
-	return {
-		userId: created.id,
-		user: dbRowToUser(created),
-	};
+	if (created) {
+		return { userId: created.id, user: dbRowToUser(created) };
+	}
+
+	// Concurrent request already inserted — re-fetch
+	const [raced] = await db
+		.select()
+		.from(schema.users)
+		.where(eq(schema.users.clerkId, clerkUserId));
+	return { userId: raced.id, user: dbRowToUser(raced) };
 }
 
 function dbRowToUser(row: typeof schema.users.$inferSelect): User {
