@@ -2,6 +2,7 @@ import type { ComponentPropsWithoutRef, ComponentType, ReactNode } from "react";
 import { renderToString } from "react-dom/server";
 import { describe, expect, test, vi } from "vitest";
 import DoubleHappinessInvitation from "../components/templates/double-happiness/DoubleHappinessInvitation";
+import SectionTitle from "../components/templates/SectionTitle";
 import type { TemplateInvitationProps } from "../components/templates/types";
 import { buildSampleContent } from "../data/sample-invitation";
 import { templates } from "../templates";
@@ -50,5 +51,16 @@ describe("template render coverage", () => {
 				});
 			expect(markup).toContain('data-section="rsvp"');
 		});
+	});
+});
+
+describe("SectionTitle", () => {
+	test("renders bilingual title with correct lang attributes", () => {
+		const html = renderToString(
+			<SectionTitle zhLabel="爱 情 故 事" enHeading="Our Story" />,
+		);
+		expect(html).toContain("爱 情 故 事");
+		expect(html).toContain("Our Story");
+		expect(html).toContain('lang="en"');
 	});
 });
