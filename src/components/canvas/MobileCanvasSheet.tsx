@@ -1,6 +1,6 @@
 import { Flower2, Image, Menu, Plus, Type } from "lucide-react";
 import { lazy, Suspense, useState } from "react";
-import type { Block, CanvasDocument } from "@/lib/canvas/types";
+import type { AnimationType, Block, CanvasDocument } from "@/lib/canvas/types";
 import { cn } from "@/lib/utils";
 import { BlockInspectorSidebar } from "./BlockInspectorSidebar";
 
@@ -54,6 +54,7 @@ export function MobileCanvasSheet({
 	onDelete,
 	onDuplicate,
 	onToggleLock,
+	onUpdateAnimation,
 	onBulkDelete,
 	onBulkLock,
 	onBulkRestyle,
@@ -72,6 +73,7 @@ export function MobileCanvasSheet({
 	onDelete: (blockId: string) => void;
 	onDuplicate: (blockId: string) => void;
 	onToggleLock: (blockId: string) => void;
+	onUpdateAnimation: (blockId: string, animation: AnimationType) => void;
 	onBulkDelete: (blockIds: string[]) => void;
 	onBulkLock: (blockIds: string[], locked: boolean) => void;
 	onBulkRestyle: (
@@ -167,6 +169,7 @@ export function MobileCanvasSheet({
 							onDelete={onDelete}
 							onDuplicate={onDuplicate}
 							onToggleLock={onToggleLock}
+							onUpdateAnimation={onUpdateAnimation}
 							onBulkDelete={onBulkDelete}
 							onBulkLock={onBulkLock}
 							onBulkRestyle={onBulkRestyle}

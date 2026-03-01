@@ -754,6 +754,9 @@ export function CanvasEditor({
 						onDelete={(blockId) => store.getState().removeBlock(blockId)}
 						onDuplicate={duplicateBlock}
 						onToggleLock={toggleBlockLock}
+						onUpdateAnimation={(blockId, animation) =>
+							store.getState().updateBlock(blockId, { animation })
+						}
 						onBulkDelete={(blockIds) => {
 							for (const blockId of blockIds) {
 								store.getState().removeBlock(blockId);
@@ -826,6 +829,9 @@ export function CanvasEditor({
 				onDelete={(blockId) => store.getState().removeBlock(blockId)}
 				onDuplicate={duplicateBlock}
 				onToggleLock={toggleBlockLock}
+				onUpdateAnimation={(blockId, animation) =>
+					store.getState().updateBlock(blockId, { animation })
+				}
 				onBulkDelete={(blockIds) => {
 					for (const blockId of blockIds) {
 						store.getState().removeBlock(blockId);

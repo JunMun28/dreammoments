@@ -1,5 +1,11 @@
 import { useState } from "react";
-import type { Block, DesignTokens, Position, Size } from "@/lib/canvas/types";
+import type {
+	AnimationType,
+	Block,
+	DesignTokens,
+	Position,
+	Size,
+} from "@/lib/canvas/types";
 import { ActionsRow } from "./inspector/ActionsRow";
 import { ContentSection } from "./inspector/ContentSection";
 import { DesignTokensPanel } from "./inspector/DesignTokensPanel";
@@ -128,6 +134,7 @@ function SingleInspector({
 	onDelete,
 	onDuplicate,
 	onToggleLock,
+	onUpdateAnimation,
 }: {
 	block: Block;
 	onUpdateContent: (contentPatch: Record<string, unknown>) => void;
@@ -137,6 +144,7 @@ function SingleInspector({
 	onDelete: () => void;
 	onDuplicate: () => void;
 	onToggleLock: () => void;
+	onUpdateAnimation: (animation: AnimationType) => void;
 }) {
 	return (
 		<div>
@@ -153,6 +161,7 @@ function SingleInspector({
 				block={block}
 				onUpdateContent={onUpdateContent}
 				onRestyle={onRestyle}
+				onUpdateAnimation={onUpdateAnimation}
 			/>
 			<LayoutSection
 				block={block}
@@ -179,6 +188,7 @@ export function BlockInspectorSidebar({
 	onDelete,
 	onDuplicate,
 	onToggleLock,
+	onUpdateAnimation,
 	onBulkDelete,
 	onBulkLock,
 	onBulkRestyle,
@@ -197,6 +207,7 @@ export function BlockInspectorSidebar({
 	onDelete: (blockId: string) => void;
 	onDuplicate: (blockId: string) => void;
 	onToggleLock: (blockId: string) => void;
+	onUpdateAnimation: (blockId: string, animation: AnimationType) => void;
 	onBulkDelete: (blockIds: string[]) => void;
 	onBulkLock: (blockIds: string[], locked: boolean) => void;
 	onBulkRestyle: (
@@ -267,6 +278,9 @@ export function BlockInspectorSidebar({
 				onDelete={() => onDelete(block.id)}
 				onDuplicate={() => onDuplicate(block.id)}
 				onToggleLock={() => onToggleLock(block.id)}
+				onUpdateAnimation={(animation) =>
+					onUpdateAnimation(block.id, animation)
+				}
 			/>
 		</aside>
 	);
