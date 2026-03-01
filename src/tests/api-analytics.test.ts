@@ -75,7 +75,18 @@ vi.mock("@/db/index", () => ({
 }));
 
 vi.mock("@/lib/server-auth", () => ({
-	requireAuth: vi.fn(async () => ({ userId: "user-a" })),
+	requireAuth: vi.fn().mockResolvedValue({
+		userId: "user-a",
+		user: {
+			id: "user-a",
+			clerkId: "clerk_test_a",
+			email: "usera@example.com",
+			name: "User A",
+			plan: "free",
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
+		},
+	}),
 }));
 
 // ---------------------------------------------------------------------------
@@ -94,7 +105,18 @@ beforeEach(() => {
 	mockedGetDbOrNull.mockReturnValue(
 		mockDb as unknown as ReturnType<typeof getDbOrNull>,
 	);
-	mockedRequireAuth.mockResolvedValue({ userId: "user-a" });
+	mockedRequireAuth.mockResolvedValue({
+		userId: "user-a",
+		user: {
+			id: "user-a",
+			clerkId: "clerk_test_a",
+			email: "usera@example.com",
+			name: "User A",
+			plan: "free",
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
+		},
+	});
 });
 
 // ---------------------------------------------------------------------------
@@ -140,7 +162,7 @@ describe("getAnalyticsFn", () => {
 		);
 
 		const result = (await (getAnalyticsFn as CallableFunction)({
-			token: "valid-token",
+
 			invitationId: "inv-1",
 			period: "7d",
 		})) as {
@@ -171,7 +193,7 @@ describe("getAnalyticsFn", () => {
 		);
 
 		const result = (await (getAnalyticsFn as CallableFunction)({
-			token: "valid-token",
+
 			invitationId: "inv-1",
 		})) as { error: string };
 
@@ -186,7 +208,7 @@ describe("getAnalyticsFn", () => {
 		);
 
 		const result = (await (getAnalyticsFn as CallableFunction)({
-			token: "valid-token",
+
 			invitationId: "inv-nonexistent",
 		})) as { error: string };
 

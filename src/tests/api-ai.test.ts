@@ -59,7 +59,18 @@ vi.mock("@/db/index", () => ({
 }));
 
 vi.mock("@/lib/server-auth", () => ({
-	requireAuth: vi.fn(async () => ({ userId: "user-a" })),
+	requireAuth: vi.fn().mockResolvedValue({
+		userId: "user-a",
+		user: {
+			id: "user-a",
+			clerkId: "clerk_test_a",
+			email: "usera@example.com",
+			name: "User A",
+			plan: "free",
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
+		},
+	}),
 }));
 
 import {
@@ -78,7 +89,18 @@ beforeEach(() => {
 	mockedGetDbOrNull.mockReturnValue(
 		mockDb as unknown as ReturnType<typeof getDbOrNull>,
 	);
-	mockedRequireAuth.mockResolvedValue({ userId: "user-a" });
+	mockedRequireAuth.mockResolvedValue({
+		userId: "user-a",
+		user: {
+			id: "user-a",
+			clerkId: "clerk_test_a",
+			email: "usera@example.com",
+			name: "User A",
+			plan: "free",
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
+		},
+	});
 });
 
 describe("listAiGenerationsFn", () => {
@@ -96,7 +118,7 @@ describe("listAiGenerationsFn", () => {
 
 		const result = await (listAiGenerationsFn as CallableFunction)({
 			invitationId: "inv-1",
-			token: "valid-token",
+
 		});
 
 		expect(result).toEqual(generations);
@@ -107,7 +129,7 @@ describe("generateAiContentFn - custom type", () => {
 	test("rejects custom type without customSystemPrompt", async () => {
 		await expect(
 			(generateAiContentFn as CallableFunction)({
-				token: "valid-token",
+	
 				type: "custom",
 				sectionId: "custom",
 				prompt: "Create custom wedding content",
@@ -137,7 +159,7 @@ describe("generateAiContentBatchFn", () => {
 
 		try {
 			const result = (await (generateAiContentBatchFn as CallableFunction)({
-				token: "valid-token",
+	
 				requests: [
 					{
 						type: "tagline",
