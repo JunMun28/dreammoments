@@ -5,7 +5,11 @@ import { AddToCalendarButton } from "../../ui/AddToCalendarButton";
 import { LoadingSpinner } from "../../ui/LoadingSpinner";
 import AngpowQRCode from "../AngpowQRCode";
 import { CountdownWidget } from "../CountdownWidget";
-import { CornerFlourish } from "../decorations";
+import {
+	CornerFlourish,
+	GoldDustParticles,
+	OrnamentalDivider,
+} from "../decorations";
 import { makeEditableProps, parseAttendance } from "../helpers";
 import {
 	RsvpConfirmation,
@@ -248,7 +252,7 @@ export default function DoubleHappinessInvitation({
 				className="dh-section-cream relative px-6 py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-3xl text-center">
-					<div className="dh-gold-divider mx-auto mb-10 w-32" />
+					<OrnamentalDivider motif="xi" width="160px" className="mb-10" />
 
 					<p
 						data-reveal
@@ -269,34 +273,36 @@ export default function DoubleHappinessInvitation({
 						{data.announcement.title}
 					</h2>
 
-					<div
-						data-reveal
-						className="dm-reveal dh-blockquote mx-auto mt-8 max-w-2xl text-left"
-					>
-						<p
-							{...editableProps(
-								"announcement.message",
-								"text-base leading-relaxed",
-							)}
-							style={{ color: COLORS.dark }}
+					<div className="mx-auto mt-8 max-w-2xl rounded-lg border border-[rgba(212,168,67,0.08)] bg-gradient-to-b from-white/50 to-transparent p-8">
+						<div
+							data-reveal
+							className="dm-reveal dh-blockquote mx-auto max-w-2xl text-left"
 						>
-							{data.announcement.message}
+							<p
+								{...editableProps(
+									"announcement.message",
+									"text-base leading-relaxed",
+								)}
+								style={{ color: COLORS.dark }}
+							>
+								{data.announcement.message}
+							</p>
+						</div>
+
+						<p
+							data-reveal
+							{...editableProps(
+								"announcement.formalText",
+								"dm-reveal mx-auto mt-6 max-w-2xl text-sm leading-relaxed",
+							)}
+							style={{ color: COLORS.muted }}
+							lang="en"
+						>
+							{data.announcement.formalText}
 						</p>
 					</div>
 
-					<p
-						data-reveal
-						{...editableProps(
-							"announcement.formalText",
-							"dm-reveal mx-auto mt-6 max-w-2xl text-sm leading-relaxed",
-						)}
-						style={{ color: COLORS.muted }}
-						lang="en"
-					>
-						{data.announcement.formalText}
-					</p>
-
-					<div className="dh-gold-divider mx-auto mt-10 w-32" />
+					<OrnamentalDivider motif="xi" width="160px" className="mt-10" />
 				</div>
 			</SectionShell>
 
@@ -324,7 +330,7 @@ export default function DoubleHappinessInvitation({
 					<div className="mt-14 grid gap-12 sm:grid-cols-2">
 						{/* Groom */}
 						<div data-reveal className="dm-reveal text-center">
-							<div className="dh-photo-frame mx-auto h-64 w-64 overflow-hidden rounded-full">
+							<div className="dh-portrait-frame mx-auto h-64 w-64 overflow-hidden rounded-full">
 								<img
 									src={data.couple.partnerOne.photoUrl || PLACEHOLDER_PHOTO}
 									alt={`${data.couple.partnerOne.fullName}`}
@@ -346,6 +352,7 @@ export default function DoubleHappinessInvitation({
 							>
 								<span>新郎</span> <span lang="en">/ THE GROOM</span>
 							</p>
+							<div className="mx-auto mt-2 h-px w-12 bg-gradient-to-r from-transparent via-[rgba(212,168,67,0.5)] to-transparent" />
 							<h3
 								{...editableProps(
 									"couple.partnerOne.fullName",
@@ -372,7 +379,7 @@ export default function DoubleHappinessInvitation({
 							className="dm-reveal text-center"
 							style={{ transitionDelay: "0.15s" }}
 						>
-							<div className="dh-photo-frame mx-auto h-64 w-64 overflow-hidden rounded-full">
+							<div className="dh-portrait-frame mx-auto h-64 w-64 overflow-hidden rounded-full">
 								<img
 									src={data.couple.partnerTwo.photoUrl || PLACEHOLDER_PHOTO}
 									alt={`${data.couple.partnerTwo.fullName}`}
@@ -394,6 +401,7 @@ export default function DoubleHappinessInvitation({
 							>
 								<span>新娘</span> <span lang="en">/ THE BRIDE</span>
 							</p>
+							<div className="mx-auto mt-2 h-px w-12 bg-gradient-to-r from-transparent via-[rgba(212,168,67,0.5)] to-transparent" />
 							<h3
 								{...editableProps(
 									"couple.partnerTwo.fullName",
@@ -452,30 +460,30 @@ export default function DoubleHappinessInvitation({
 										transitionDelay: `${Math.min(index * 0.1, 0.5)}s`,
 									}}
 								>
-									{/* Timeline dot */}
-									<div className="dh-timeline-dot absolute -left-8 top-1 sm:-left-12" />
-
-									<p
-										className="text-xs uppercase tracking-[0.25em]"
-										style={{ color: COLORS.gold }}
-									>
-										{milestone.date}
-									</p>
-									<h3
-										className="mt-2 text-2xl"
-										style={{
-											...headingFont,
-											color: COLORS.dark,
-										}}
-									>
-										{milestone.title}
-									</h3>
-									<p
-										className="mt-2 text-sm leading-relaxed"
-										style={{ color: COLORS.muted }}
-									>
-										{milestone.description}
-									</p>
+									<div className="dh-timeline-dot-premium absolute -left-[2.45rem] top-5 sm:-left-[3.45rem]" />
+									<div className="dh-milestone-card">
+										<p
+											className="inline-block rounded-full bg-[rgba(212,168,67,0.08)] px-3 py-1 text-xs uppercase tracking-[0.25em]"
+											style={{ color: COLORS.gold }}
+										>
+											{milestone.date}
+										</p>
+										<h3
+											className="mt-3 text-2xl"
+											style={{
+												...headingFont,
+												color: COLORS.dark,
+											}}
+										>
+											{milestone.title}
+										</h3>
+										<p
+											className="mt-2 text-sm leading-relaxed"
+											style={{ color: COLORS.muted }}
+										>
+											{milestone.description}
+										</p>
+									</div>
 								</article>
 							))}
 						</div>
@@ -509,7 +517,7 @@ export default function DoubleHappinessInvitation({
 							<figure
 								key={`${photo.url}-${index}`}
 								data-reveal
-								className={`dm-reveal dh-photo-frame group relative overflow-hidden rounded-xl ${index === 0 ? "sm:col-span-2" : ""}`}
+								className={`dm-reveal dh-photo-frame-premium group relative overflow-hidden rounded-xl ${index === 0 ? "sm:col-span-2" : ""}`}
 								style={{ transitionDelay: `${Math.min(index * 0.1, 0.5)}s` }}
 							>
 								<img
@@ -532,7 +540,10 @@ export default function DoubleHappinessInvitation({
 									}}
 								/>
 								<div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-								<figcaption className="absolute bottom-4 left-4 text-sm font-medium text-white">
+								<figcaption
+									className="absolute bottom-4 left-4 text-sm font-medium text-white"
+									style={{ textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}
+								>
 									{photo.caption}
 								</figcaption>
 							</figure>
@@ -567,24 +578,33 @@ export default function DoubleHappinessInvitation({
 							<article
 								key={`${event.time}-${index}`}
 								data-reveal
-								className="dm-reveal flex gap-4 rounded-xl border border-[rgba(212,168,67,0.2)] bg-white p-5"
+								className="dm-reveal dh-event-card"
 								style={{ transitionDelay: `${Math.min(index * 0.08, 0.5)}s` }}
 							>
-								<div
-									className="w-1 shrink-0 rounded-full"
-									style={{
-										background: COLORS.red,
-									}}
-								/>
+								<div className="dh-event-card-stripe" />
 								<div>
 									<p
-										className="text-xs font-semibold uppercase tracking-[0.2em]"
+										className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.2em]"
 										style={{ color: COLORS.gold }}
 									>
+										<svg
+											width="14"
+											height="14"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											strokeWidth="2"
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											aria-hidden="true"
+										>
+											<circle cx="12" cy="12" r="10" />
+											<polyline points="12 6 12 12 16 14" />
+										</svg>
 										{event.time}
 									</p>
 									<h3
-										className="mt-1 text-lg"
+										className="mt-2 text-lg"
 										style={{
 											...headingFont,
 											color: COLORS.dark,
@@ -623,79 +643,105 @@ export default function DoubleHappinessInvitation({
 						accentFont={accentFont}
 					/>
 
-					<h3
-						data-reveal
-						{...editableProps("venue.name", "dm-reveal mt-8 text-2xl")}
-						style={{ ...headingFont, color: COLORS.dark }}
-					>
-						{data.venue.name}
-					</h3>
+					<div data-reveal className="dm-reveal mx-auto mt-8 max-w-md">
+						<div className="dh-ornamental-frame relative p-8 text-center">
+							<CornerFlourish corner="tl" />
+							<CornerFlourish corner="tr" />
+							<CornerFlourish corner="bl" />
+							<CornerFlourish corner="br" />
 
-					<p
-						data-reveal
-						{...editableProps(
-							"venue.address",
-							"dm-reveal mt-3 text-sm leading-relaxed",
-						)}
-						style={{ color: COLORS.muted }}
-					>
-						{data.venue.address}
-					</p>
-
-					{data.venue.directions ? (
-						<p
-							data-reveal
-							className="dm-reveal mt-2 text-sm"
-							style={{ color: COLORS.muted }}
-						>
-							{data.venue.directions}
-						</p>
-					) : null}
-
-					{data.venue.parkingInfo ? (
-						<p
-							data-reveal
-							className="dm-reveal mt-3 text-xs uppercase tracking-[0.2em]"
-							style={{ color: COLORS.gold }}
-						>
-							{data.venue.parkingInfo}
-						</p>
-					) : null}
-
-					{data.venue.coordinates?.lat != null &&
-					data.venue.coordinates?.lng != null ? (
-						<div
-							data-reveal
-							className="dm-reveal mt-6 flex flex-wrap justify-center gap-3"
-						>
-							<a
-								href={`https://www.google.com/maps/search/?api=1&query=${data.venue.coordinates.lat},${data.venue.coordinates.lng}`}
-								target="_blank"
-								rel="noopener noreferrer"
-								className="inline-flex items-center gap-1.5 rounded-full border px-5 py-2.5 text-xs uppercase tracking-[0.15em] transition-colors hover:bg-[rgba(200,16,46,0.05)]"
-								style={{
-									borderColor: "rgba(200,16,46,0.2)",
-									color: COLORS.red,
-								}}
-								lang="en"
+							<h3
+								{...editableProps("venue.name", "text-2xl")}
+								style={{ ...headingFont, color: COLORS.dark }}
 							>
-								Google Maps
-							</a>
-							<a
-								href={`https://www.waze.com/ul?ll=${data.venue.coordinates.lat},${data.venue.coordinates.lng}&navigate=yes`}
-								target="_blank"
-								rel="noopener noreferrer"
-								className="inline-flex items-center gap-1.5 rounded-full border px-5 py-2.5 text-xs uppercase tracking-[0.15em] transition-colors hover:bg-[rgba(200,16,46,0.05)]"
-								style={{
-									borderColor: "rgba(200,16,46,0.2)",
-									color: COLORS.red,
-								}}
-								lang="en"
+								{data.venue.name}
+							</h3>
+
+							<p
+								{...editableProps(
+									"venue.address",
+									"mt-3 text-sm leading-relaxed",
+								)}
+								style={{ color: COLORS.muted }}
 							>
-								Waze
-							</a>
+								{data.venue.address}
+							</p>
+
+							{data.venue.directions ? (
+								<p className="mt-2 text-sm" style={{ color: COLORS.muted }}>
+									{data.venue.directions}
+								</p>
+							) : null}
+
+							{data.venue.parkingInfo ? (
+								<p
+									className="mt-3 text-xs uppercase tracking-[0.2em]"
+									style={{ color: COLORS.gold }}
+								>
+									{data.venue.parkingInfo}
+								</p>
+							) : null}
+
+							{data.venue.coordinates?.lat != null &&
+							data.venue.coordinates?.lng != null ? (
+								<div className="mt-6 flex flex-wrap justify-center gap-3">
+									<a
+										href={`https://www.google.com/maps/search/?api=1&query=${data.venue.coordinates.lat},${data.venue.coordinates.lng}`}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="inline-flex items-center gap-1.5 rounded-full border px-5 py-2.5 text-xs uppercase tracking-[0.15em] transition-colors hover:bg-[rgba(200,16,46,0.05)]"
+										style={{
+											borderColor: "rgba(200,16,46,0.2)",
+											color: COLORS.red,
+										}}
+										lang="en"
+									>
+										<svg
+											width="14"
+											height="14"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											strokeWidth="2"
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											aria-hidden="true"
+										>
+											<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+											<circle cx="12" cy="10" r="3" />
+										</svg>
+										Google Maps
+									</a>
+									<a
+										href={`https://www.waze.com/ul?ll=${data.venue.coordinates.lat},${data.venue.coordinates.lng}&navigate=yes`}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="inline-flex items-center gap-1.5 rounded-full border px-5 py-2.5 text-xs uppercase tracking-[0.15em] transition-colors hover:bg-[rgba(200,16,46,0.05)]"
+										style={{
+											borderColor: "rgba(200,16,46,0.2)",
+											color: COLORS.red,
+										}}
+										lang="en"
+									>
+										<svg
+											width="14"
+											height="14"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											strokeWidth="2"
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											aria-hidden="true"
+										>
+											<path d="M3 11l19-9-9 19-2-8-8-2z" />
+										</svg>
+										Waze
+									</a>
+								</div>
+							) : null}
 						</div>
-					) : null}
+					</div>
 				</div>
 			</SectionShell>
 
@@ -710,7 +756,7 @@ export default function DoubleHappinessInvitation({
 				onAiClick={onAiClick}
 				className="dh-section-dark px-6 py-24 sm:px-10"
 			>
-				<div className="mx-auto grid max-w-5xl gap-10 lg:grid-cols-[0.9fr_1.1fr]">
+				<div className="mx-auto grid max-w-5xl gap-10 lg:grid-cols-[0.9fr_auto_1.1fr]">
 					{/* Left: info */}
 					<div data-reveal className="dm-reveal space-y-5">
 						<p
@@ -770,302 +816,332 @@ export default function DoubleHappinessInvitation({
 						</div>
 					</div>
 
+					{/* Vertical gold line between info and form */}
+					<div className="hidden self-stretch lg:block">
+						<div className="h-full w-px bg-gradient-to-b from-transparent via-[rgba(212,168,67,0.3)] to-transparent" />
+					</div>
+
 					{/* Right: form or confirmation */}
 					{rsvpData ? (
-						<div
-							data-reveal
-							className="dm-reveal flex items-center justify-center rounded-2xl p-6 sm:p-8"
-							style={{
-								background: COLORS.cream,
-								border: "1px solid rgba(212,168,67,0.2)",
-							}}
-						>
-							<RsvpConfirmation
-								{...rsvpData}
-								onEdit={() => setRsvpData(null)}
-							/>
-						</div>
-					) : (
-						<form
-							data-reveal
-							className="dm-reveal rounded-2xl p-6 sm:p-8"
-							style={{
-								background: COLORS.cream,
-								border: "1px solid rgba(212,168,67,0.2)",
-							}}
-							onSubmit={async (event) => {
-								event.preventDefault();
-								if (!onRsvpSubmit || submittingRef.current) return;
-								submittingRef.current = true;
-								setIsSubmitting(true);
-
-								const formData = new FormData(event.currentTarget);
-								const name = String(formData.get("name") ?? "").trim();
-								const email = String(formData.get("email") ?? "").trim();
-								const newErrors: Record<string, string> = {};
-								if (!name) {
-									newErrors.name = "Please enter your name";
-								}
-								if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-									newErrors.email = "Please enter a valid email address";
-								}
-								if (Object.keys(newErrors).length > 0) {
-									setErrors(newErrors);
-									submittingRef.current = false;
-									setIsSubmitting(false);
-									return;
-								}
-								setErrors({});
-								setSubmitError("");
-
-								const rawGuestCount = Number(formData.get("guestCount") ?? 1);
-								const guestCount = Number.isFinite(rawGuestCount)
-									? Math.min(Math.max(rawGuestCount, 1), maxGuests)
-									: 1;
-								const attendance = parseAttendance(formData.get("attendance"));
-								const dietaryRequirements = String(
-									formData.get("dietary") ?? "",
-								);
-
-								try {
-									await onRsvpSubmit({
-										name,
-										attendance,
-										guestCount,
-										dietaryRequirements,
-										message: String(formData.get("message") ?? ""),
-										email,
-									});
-									setSubmitError("");
-									setRsvpData({
-										name,
-										attendance,
-										guestCount,
-										dietaryRequirements,
-									});
-								} catch {
-									setSubmitError("Something went wrong. Please try again.");
-								} finally {
-									submittingRef.current = false;
-									setIsSubmitting(false);
-								}
-							}}
-						>
-							<div className="grid gap-4 sm:grid-cols-2">
-								<label
-									className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em] sm:col-span-2"
-									style={{ color: COLORS.muted }}
-								>
-									<span lang="en">Name</span>
-									<input
-										name="name"
-										placeholder="Your name"
-										autoComplete="name"
-										required
-										maxLength={100}
-										aria-required="true"
-										aria-invalid={!!errors.name}
-										className="rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
-										style={{
-											borderColor: "rgba(212,168,67,0.3)",
-											color: COLORS.dark,
-										}}
-										onBlur={(e) => {
-											if (!e.target.value.trim()) {
-												setErrors((prev) => ({
-													...prev,
-													name: "Please enter your name",
-												}));
-											}
-										}}
-										onChange={() =>
-											setErrors((prev) => {
-												const { name: _, ...rest } = prev;
-												return rest;
-											})
-										}
-									/>
-									{errors.name && (
-										<p className="mt-1 text-xs text-red-500" role="alert">
-											{errors.name}
-										</p>
-									)}
-								</label>
-								<label
-									className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em] sm:col-span-2"
-									style={{ color: COLORS.muted }}
-								>
-									<span lang="en">Email</span>
-									<input
-										name="email"
-										type="email"
-										placeholder="your@email.com"
-										autoComplete="email"
-										spellCheck={false}
-										aria-invalid={!!errors.email}
-										className="rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
-										style={{
-											borderColor: "rgba(212,168,67,0.3)",
-											color: COLORS.dark,
-										}}
-										onBlur={(e) => {
-											const v = e.target.value.trim();
-											if (v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
-												setErrors((prev) => ({
-													...prev,
-													email: "Please enter a valid email address",
-												}));
-											}
-										}}
-										onChange={() =>
-											setErrors((prev) => {
-												const { email: _, ...rest } = prev;
-												return rest;
-											})
-										}
-									/>
-									{errors.email && (
-										<p className="mt-1 text-xs text-red-500" role="alert">
-											{errors.email}
-										</p>
-									)}
-								</label>
-								<label
-									className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
-									style={{ color: COLORS.muted }}
-								>
-									<span lang="en">Attendance</span>
-									<select
-										name="attendance"
-										defaultValue="attending"
-										className="rounded-lg border bg-white px-4 py-3 text-sm"
-										style={{
-											borderColor: "rgba(212,168,67,0.3)",
-											color: COLORS.dark,
-										}}
-									>
-										<option value="attending">Attending</option>
-										<option value="not_attending">Not Attending</option>
-										<option value="undecided">Undecided</option>
-									</select>
-								</label>
-								<label
-									className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
-									style={{ color: COLORS.muted }}
-								>
-									<span lang="en">Guest Count (Max: {maxGuests})</span>
-									<input
-										name="guestCount"
-										type="number"
-										min={1}
-										max={maxGuests}
-										defaultValue={1}
-										inputMode="numeric"
-										className="rounded-lg border bg-white px-4 py-3 text-sm"
-										style={{
-											borderColor: "rgba(212,168,67,0.3)",
-											color: COLORS.dark,
-										}}
-									/>
-								</label>
-								<label
-									className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em] sm:col-span-2"
-									style={{ color: COLORS.muted }}
-								>
-									<span lang="en">Dietary Requirements</span>
-									<input
-										name="dietary"
-										placeholder="e.g., Vegetarian, no pork"
-										autoComplete="off"
-										maxLength={200}
-										className="rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
-										style={{
-											borderColor: "rgba(212,168,67,0.3)",
-											color: COLORS.dark,
-										}}
-									/>
-								</label>
-								<label
-									className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em] sm:col-span-2"
-									style={{ color: COLORS.muted }}
-								>
-									<span lang="en">Message</span>
-									<textarea
-										name="message"
-										placeholder="Send your wishes to the couple"
-										autoComplete="off"
-										maxLength={500}
-										className="min-h-24 rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
-										style={{
-											borderColor: "rgba(212,168,67,0.3)",
-											color: COLORS.dark,
-										}}
-									/>
-								</label>
-								<label className="relative mt-2 flex min-h-[44px] cursor-pointer items-start gap-3 sm:col-span-2">
-									<input
-										type="checkbox"
-										name="consent"
-										required
-										aria-describedby={consentDescriptionId}
-										className="mt-0.5 h-4 w-4 rounded border-2 accent-[#C8102E]"
-										style={{
-											borderColor: "rgba(212,168,67,0.3)",
-										}}
-									/>
-									<span
-										id={consentDescriptionId}
-										className="text-xs leading-relaxed"
-										style={{ color: COLORS.muted }}
-										lang="en"
-									>
-										I consent to the collection of my personal data as described
-										in the{" "}
-										<Link
-											to="/privacy"
-											className="underline hover:no-underline"
-											style={{ color: COLORS.red }}
-											target="_blank"
-											rel="noopener noreferrer"
-										>
-											Privacy Policy
-										</Link>
-									</span>
-								</label>
+						<div className="relative">
+							<div
+								className="absolute -top-3 left-1/2 z-10 -translate-x-1/2 text-sm"
+								style={{ ...accentFont, color: COLORS.gold, opacity: 0.5 }}
+								aria-hidden="true"
+							>
+								囍
 							</div>
-
-							{rsvpStatus ? (
-								<output
-									className="mt-4 block text-sm"
-									style={{ color: COLORS.muted }}
-									aria-live="polite"
-								>
-									{rsvpStatus}
-								</output>
-							) : null}
-
-							<button
-								type="submit"
-								disabled={isSubmitting}
-								className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-3.5 text-xs font-semibold uppercase tracking-[0.3em] text-white disabled:cursor-not-allowed disabled:opacity-70"
+							<div
+								data-reveal
+								className="dm-reveal dh-ornamental-frame flex items-center justify-center rounded-2xl p-6 sm:p-8"
 								style={{
-									background: COLORS.red,
+									background: COLORS.cream,
 								}}
 							>
-								{isSubmitting && <LoadingSpinner size="sm" />}
-								{isSubmitting ? "Sending..." : "Send RSVP"}
-							</button>
+								<CornerFlourish corner="tl" />
+								<CornerFlourish corner="tr" />
+								<RsvpConfirmation
+									{...rsvpData}
+									onEdit={() => setRsvpData(null)}
+								/>
+							</div>
+						</div>
+					) : (
+						<div className="relative">
+							<div
+								className="absolute -top-3 left-1/2 z-10 -translate-x-1/2 text-sm"
+								style={{ ...accentFont, color: COLORS.gold, opacity: 0.5 }}
+								aria-hidden="true"
+							>
+								囍
+							</div>
+							<form
+								data-reveal
+								className="dm-reveal dh-ornamental-frame rounded-2xl p-6 sm:p-8"
+								style={{
+									background: COLORS.cream,
+								}}
+								onSubmit={async (event) => {
+									event.preventDefault();
+									if (!onRsvpSubmit || submittingRef.current) return;
+									submittingRef.current = true;
+									setIsSubmitting(true);
 
-							{submitError && (
-								<p
-									className="mt-3 text-center text-sm"
-									style={{ color: COLORS.red }}
-									role="alert"
+									const formData = new FormData(event.currentTarget);
+									const name = String(formData.get("name") ?? "").trim();
+									const email = String(formData.get("email") ?? "").trim();
+									const newErrors: Record<string, string> = {};
+									if (!name) {
+										newErrors.name = "Please enter your name";
+									}
+									if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+										newErrors.email = "Please enter a valid email address";
+									}
+									if (Object.keys(newErrors).length > 0) {
+										setErrors(newErrors);
+										submittingRef.current = false;
+										setIsSubmitting(false);
+										return;
+									}
+									setErrors({});
+									setSubmitError("");
+
+									const rawGuestCount = Number(formData.get("guestCount") ?? 1);
+									const guestCount = Number.isFinite(rawGuestCount)
+										? Math.min(Math.max(rawGuestCount, 1), maxGuests)
+										: 1;
+									const attendance = parseAttendance(
+										formData.get("attendance"),
+									);
+									const dietaryRequirements = String(
+										formData.get("dietary") ?? "",
+									);
+
+									try {
+										await onRsvpSubmit({
+											name,
+											attendance,
+											guestCount,
+											dietaryRequirements,
+											message: String(formData.get("message") ?? ""),
+											email,
+										});
+										setSubmitError("");
+										setRsvpData({
+											name,
+											attendance,
+											guestCount,
+											dietaryRequirements,
+										});
+									} catch {
+										setSubmitError("Something went wrong. Please try again.");
+									} finally {
+										submittingRef.current = false;
+										setIsSubmitting(false);
+									}
+								}}
+							>
+								<CornerFlourish corner="tl" />
+								<CornerFlourish corner="tr" />
+								<div className="grid gap-4 sm:grid-cols-2">
+									<label
+										className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em] sm:col-span-2"
+										style={{ color: COLORS.muted }}
+									>
+										<span lang="en">Name</span>
+										<input
+											name="name"
+											placeholder="Your name"
+											autoComplete="name"
+											required
+											maxLength={100}
+											aria-required="true"
+											aria-invalid={!!errors.name}
+											className="rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
+											style={{
+												borderColor: "rgba(212,168,67,0.3)",
+												color: COLORS.dark,
+											}}
+											onBlur={(e) => {
+												if (!e.target.value.trim()) {
+													setErrors((prev) => ({
+														...prev,
+														name: "Please enter your name",
+													}));
+												}
+											}}
+											onChange={() =>
+												setErrors((prev) => {
+													const { name: _, ...rest } = prev;
+													return rest;
+												})
+											}
+										/>
+										{errors.name && (
+											<p className="mt-1 text-xs text-red-500" role="alert">
+												{errors.name}
+											</p>
+										)}
+									</label>
+									<label
+										className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em] sm:col-span-2"
+										style={{ color: COLORS.muted }}
+									>
+										<span lang="en">Email</span>
+										<input
+											name="email"
+											type="email"
+											placeholder="your@email.com"
+											autoComplete="email"
+											spellCheck={false}
+											aria-invalid={!!errors.email}
+											className="rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
+											style={{
+												borderColor: "rgba(212,168,67,0.3)",
+												color: COLORS.dark,
+											}}
+											onBlur={(e) => {
+												const v = e.target.value.trim();
+												if (v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
+													setErrors((prev) => ({
+														...prev,
+														email: "Please enter a valid email address",
+													}));
+												}
+											}}
+											onChange={() =>
+												setErrors((prev) => {
+													const { email: _, ...rest } = prev;
+													return rest;
+												})
+											}
+										/>
+										{errors.email && (
+											<p className="mt-1 text-xs text-red-500" role="alert">
+												{errors.email}
+											</p>
+										)}
+									</label>
+									<label
+										className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
+										style={{ color: COLORS.muted }}
+									>
+										<span lang="en">Attendance</span>
+										<select
+											name="attendance"
+											defaultValue="attending"
+											className="rounded-lg border bg-white px-4 py-3 text-sm"
+											style={{
+												borderColor: "rgba(212,168,67,0.3)",
+												color: COLORS.dark,
+											}}
+										>
+											<option value="attending">Attending</option>
+											<option value="not_attending">Not Attending</option>
+											<option value="undecided">Undecided</option>
+										</select>
+									</label>
+									<label
+										className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
+										style={{ color: COLORS.muted }}
+									>
+										<span lang="en">Guest Count (Max: {maxGuests})</span>
+										<input
+											name="guestCount"
+											type="number"
+											min={1}
+											max={maxGuests}
+											defaultValue={1}
+											inputMode="numeric"
+											className="rounded-lg border bg-white px-4 py-3 text-sm"
+											style={{
+												borderColor: "rgba(212,168,67,0.3)",
+												color: COLORS.dark,
+											}}
+										/>
+									</label>
+									<label
+										className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em] sm:col-span-2"
+										style={{ color: COLORS.muted }}
+									>
+										<span lang="en">Dietary Requirements</span>
+										<input
+											name="dietary"
+											placeholder="e.g., Vegetarian, no pork"
+											autoComplete="off"
+											maxLength={200}
+											className="rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
+											style={{
+												borderColor: "rgba(212,168,67,0.3)",
+												color: COLORS.dark,
+											}}
+										/>
+									</label>
+									<label
+										className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em] sm:col-span-2"
+										style={{ color: COLORS.muted }}
+									>
+										<span lang="en">Message</span>
+										<textarea
+											name="message"
+											placeholder="Send your wishes to the couple"
+											autoComplete="off"
+											maxLength={500}
+											className="min-h-24 rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
+											style={{
+												borderColor: "rgba(212,168,67,0.3)",
+												color: COLORS.dark,
+											}}
+										/>
+									</label>
+									<label className="relative mt-2 flex min-h-[44px] cursor-pointer items-start gap-3 sm:col-span-2">
+										<input
+											type="checkbox"
+											name="consent"
+											required
+											aria-describedby={consentDescriptionId}
+											className="mt-0.5 h-4 w-4 rounded border-2 accent-[#C8102E]"
+											style={{
+												borderColor: "rgba(212,168,67,0.3)",
+											}}
+										/>
+										<span
+											id={consentDescriptionId}
+											className="text-xs leading-relaxed"
+											style={{ color: COLORS.muted }}
+											lang="en"
+										>
+											I consent to the collection of my personal data as
+											described in the{" "}
+											<Link
+												to="/privacy"
+												className="underline hover:no-underline"
+												style={{ color: COLORS.red }}
+												target="_blank"
+												rel="noopener noreferrer"
+											>
+												Privacy Policy
+											</Link>
+										</span>
+									</label>
+								</div>
+
+								{rsvpStatus ? (
+									<output
+										className="mt-4 block text-sm"
+										style={{ color: COLORS.muted }}
+										aria-live="polite"
+									>
+										{rsvpStatus}
+									</output>
+								) : null}
+
+								<button
+									type="submit"
+									disabled={isSubmitting}
+									className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-3.5 text-xs font-semibold uppercase tracking-[0.3em] text-white shadow-sm transition-all hover:shadow-lg active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
+									style={{
+										background: "linear-gradient(135deg, #C8102E, #A00D23)",
+										boxShadow: isSubmitting
+											? undefined
+											: "0 4px 12px rgba(200,16,46,0.2)",
+									}}
 								>
-									{submitError}
-								</p>
-							)}
-						</form>
+									{isSubmitting && <LoadingSpinner size="sm" />}
+									{isSubmitting ? "Sending..." : "Send RSVP"}
+								</button>
+
+								{submitError && (
+									<p
+										className="mt-3 text-center text-sm"
+										style={{ color: COLORS.red }}
+										role="alert"
+									>
+										{submitError}
+									</p>
+								)}
+							</form>
+						</div>
 					)}
 				</div>
 			</SectionShell>
@@ -1114,12 +1190,12 @@ export default function DoubleHappinessInvitation({
 				className="dh-section-cream relative px-6 pb-20 pt-16 text-center sm:px-10"
 			>
 				<div className="mx-auto max-w-3xl">
-					<div className="dh-gold-divider mx-auto mb-10 w-24" />
+					<OrnamentalDivider motif="cloud" width="120px" className="mb-10" />
 
 					<p
 						data-reveal
-						className="dm-reveal text-6xl"
-						style={{ ...accentFont, color: COLORS.red }}
+						className="dm-reveal dh-gold-shimmer mt-8 text-6xl"
+						style={accentFont}
 						aria-hidden="true"
 					>
 						囍
@@ -1145,6 +1221,8 @@ export default function DoubleHappinessInvitation({
 							{data.footer.socialLinks.hashtag}
 						</p>
 					) : null}
+
+					<GoldDustParticles count={12} className="absolute inset-0" />
 				</div>
 			</SectionShell>
 		</div>
