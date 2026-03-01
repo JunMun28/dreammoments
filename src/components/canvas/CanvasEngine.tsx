@@ -6,6 +6,7 @@ import {
 	useState,
 } from "react";
 import type { CanvasDocument } from "@/lib/canvas/types";
+import { toCssProperties } from "@/lib/canvas/types";
 import { cn } from "@/lib/utils";
 import { BlockRenderer } from "./BlockRenderer";
 
@@ -13,14 +14,6 @@ export interface CanvasEngineProps {
 	document: CanvasDocument;
 	className?: string;
 	animationsEnabled?: boolean;
-}
-
-function toCssProperties(style: Record<string, string>): CSSProperties {
-	const next: CSSProperties = {};
-	for (const [key, value] of Object.entries(style)) {
-		(next as Record<string, unknown>)[key] = value;
-	}
-	return next;
 }
 
 export function CanvasEngine({
@@ -91,7 +84,7 @@ export function CanvasEngine({
 		<div
 			ref={rootRef}
 			className={cn(
-				"mx-auto rounded-2xl border border-[color:var(--dm-border)] shadow-sm",
+				"mx-auto rounded-lg border border-[color:var(--dm-border)] shadow-sm",
 				className,
 			)}
 			style={canvasStyle}

@@ -50,7 +50,7 @@ export function Footer() {
 						<div className="mt-8">
 							<Link
 								to="/editor/new"
-								search={{ template: "love-at-dusk" }}
+								search={{ template: "double-happiness" }}
 								className="inline-flex items-center justify-center rounded-full bg-dm-primary px-8 py-4 text-lg font-medium text-dm-primary-text transition-colors hover:bg-dm-primary-hover"
 							>
 								Start Creating

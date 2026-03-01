@@ -3,13 +3,16 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, test } from "vitest";
 import { buildSampleContent } from "@/data/sample-invitation";
-import { convertBlushRomanceToCanvasDocument } from "@/lib/canvas/template-converter";
+import { convertTemplateToCanvasDocument } from "@/lib/canvas/template-converter";
 import { CanvasEngine } from "./CanvasEngine";
 
 describe("CanvasEngine", () => {
-	test("renders blush-romance canvas blocks from document JSON", () => {
-		const content = buildSampleContent("blush-romance");
-		const document = convertBlushRomanceToCanvasDocument(content);
+	test("renders double-happiness canvas blocks from document JSON", () => {
+		const content = buildSampleContent("double-happiness");
+		const document = convertTemplateToCanvasDocument(
+			"double-happiness",
+			content,
+		);
 		const { container } = render(<CanvasEngine document={document} />);
 
 		expect(

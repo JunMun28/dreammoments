@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Block } from "@/lib/canvas/types";
 
 function toText(value: unknown): string {
@@ -19,10 +19,24 @@ export function InlineTextEditor({
 	const [value, setValue] = useState(toText(block.content.text));
 	const [isComposing, setIsComposing] = useState(false);
 	const ref = useRef<HTMLDivElement | null>(null);
+	const committedRef = useRef(false);
 
 	useEffect(() => {
-		ref.current?.focus();
+		// Defer focus to next frame so the overlay is fully painted
+		const id = requestAnimationFrame(() => {
+			ref.current?.focus();
+		});
+		return () => cancelAnimationFrame(id);
 	}, []);
+
+	const commitText = useCallback(
+		(text: string) => {
+			if (committedRef.current) return;
+			committedRef.current = true;
+			onCommit(text);
+		},
+		[onCommit],
+	);
 
 	return (
 		<div className="absolute inset-0 z-50 rounded-[inherit] border border-[color:var(--dm-accent-strong)] bg-white/95">
@@ -33,7 +47,7 @@ export function InlineTextEditor({
 				aria-multiline={!singleLine}
 				tabIndex={0}
 				suppressContentEditableWarning
-				className="h-full w-full overflow-auto whitespace-pre-wrap break-words p-2 text-inherit outline-none"
+				className="h-full w-full overflow-auto whitespace-pre-wrap break-words p-2 text-inherit outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--dm-accent-strong)]"
 				onInput={(event) => {
 					setValue(event.currentTarget.textContent ?? "");
 				}}
@@ -44,16 +58,20 @@ export function InlineTextEditor({
 				}}
 				onCompositionStart={() => setIsComposing(true)}
 				onCompositionEnd={() => setIsComposing(false)}
-				onBlur={() => onCommit(value.trim())}
+				onBlur={() => {
+					// Read from DOM for IME: composition may not have flushed to React state
+					const text = ref.current?.textContent ?? value;
+					commitText(text.trim());
+				}}
 				onKeyDown={(event) => {
-					if (event.key === "Escape") {
+					if (event.key === "Escape" && !isComposing) {
 						event.preventDefault();
 						onCancel();
 						return;
 					}
 					if (singleLine && event.key === "Enter" && !isComposing) {
 						event.preventDefault();
-						onCommit(value.trim());
+						commitText(value.trim());
 					}
 				}}
 			>

@@ -111,7 +111,7 @@ export function SocialProof() {
 					</h2>
 					<Link
 						to="/editor/new"
-						search={{ template: "love-at-dusk" }}
+						search={{ template: "double-happiness" }}
 						className="hidden sm:inline-flex items-center justify-center px-6 py-3 rounded-full bg-dm-primary text-dm-primary-text text-sm font-medium transition-colors hover:bg-dm-primary-hover"
 					>
 						Start your invite

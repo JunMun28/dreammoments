@@ -10,8 +10,10 @@ import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 
 interface RevealProps {
 	children: ReactNode;
-	direction?: "up" | "left" | "right" | "none";
+	direction?: "up" | "left" | "right" | "none" | "blur" | "scale";
 	delay?: number;
+	/** Duration in seconds (default 0.8) */
+	duration?: number;
 	className?: string;
 }
 
@@ -23,6 +25,7 @@ export function Reveal({
 	children,
 	direction = "up",
 	delay = 0,
+	duration = 0.8,
 	className = "",
 }: RevealProps) {
 	const ref = useRef<HTMLDivElement>(null);
@@ -51,14 +54,18 @@ export function Reveal({
 	}, [prefersReduced]);
 
 	const transform = isVisible
-		? "translate3d(0, 0, 0)"
+		? "translate3d(0, 0, 0) scale(1)"
 		: direction === "up"
 			? "translate3d(0, 30px, 0)"
 			: direction === "left"
 				? "translate3d(-30px, 0, 0)"
 				: direction === "right"
 					? "translate3d(30px, 0, 0)"
-					: "translate3d(0, 0, 0)";
+					: direction === "scale"
+						? "scale(0.95)"
+						: "translate3d(0, 0, 0)";
+
+	const filter = direction === "blur" && !isVisible ? "blur(8px)" : "blur(0)";
 
 	return (
 		<div
@@ -67,9 +74,10 @@ export function Reveal({
 			style={{
 				opacity: isVisible ? 1 : 0,
 				transform,
+				filter: direction === "blur" ? filter : undefined,
 				transition: prefersReduced
 					? "none"
-					: `opacity 0.8s cubic-bezier(0.25, 0.1, 0.25, 1) ${delay}s, transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1) ${delay}s`,
+					: `opacity ${duration}s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s, transform ${duration}s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s, filter ${duration}s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s`,
 			}}
 		>
 			{children}
@@ -77,13 +85,103 @@ export function Reveal({
 	);
 }
 
+// ── Staggered reveal for child elements ──────────────────────────────
+
+interface StaggerProps {
+	children: ReactNode;
+	/** Delay between each child in seconds */
+	interval?: number;
+	/** Base delay before first child in seconds */
+	baseDelay?: number;
+	direction?: RevealProps["direction"];
+	className?: string;
+}
+
+/**
+ * Wraps each child in a Reveal with staggered delay.
+ * Children animate in sequentially with configurable interval.
+ */
+export function Stagger({
+	children,
+	interval = 0.1,
+	baseDelay = 0,
+	direction = "up",
+	className = "",
+}: StaggerProps) {
+	const childArray = Array.isArray(children) ? children : [children];
+
+	return (
+		<div className={className}>
+			{childArray.map((child, index) => (
+				<Reveal
+					key={index}
+					direction={direction}
+					delay={baseDelay + index * interval}
+					duration={0.8}
+				>
+					{child}
+				</Reveal>
+			))}
+		</div>
+	);
+}
+
 // ── Floating particle system ─────────────────────────────────────────
+
+type ParticlePreset =
+	| "petalRain"
+	| "goldDust"
+	| "starlight"
+	| "snowfall"
+	| "lanterns";
+
+const PARTICLE_PRESETS: Record<
+	ParticlePreset,
+	{
+		count: number;
+		color: string;
+		shape: "circle" | "petal" | "sparkle";
+		drift: "down" | "up" | "float";
+	}
+> = {
+	petalRain: {
+		count: 18,
+		color: "rgba(196, 114, 127, 0.5)",
+		shape: "petal",
+		drift: "down",
+	},
+	goldDust: {
+		count: 24,
+		color: "rgba(212, 175, 55, 0.6)",
+		shape: "sparkle",
+		drift: "up",
+	},
+	starlight: {
+		count: 16,
+		color: "rgba(255, 255, 255, 0.7)",
+		shape: "sparkle",
+		drift: "float",
+	},
+	snowfall: {
+		count: 20,
+		color: "rgba(255, 255, 255, 0.5)",
+		shape: "circle",
+		drift: "down",
+	},
+	lanterns: {
+		count: 8,
+		color: "rgba(255, 160, 50, 0.6)",
+		shape: "circle",
+		drift: "up",
+	},
+};
 
 interface ParticleFieldProps {
 	count?: number;
 	color?: string;
-	/** Particle shape: "circle" | "petal" | "sparkle" */
 	shape?: "circle" | "petal" | "sparkle";
+	/** Named preset that auto-configures count, color, shape, and drift */
+	preset?: ParticlePreset;
 	className?: string;
 }
 
@@ -102,12 +200,18 @@ interface Particle {
  * Petals for Blush Romance, sparkles for Love at Dusk, circles as default.
  */
 export function ParticleField({
-	count = 12,
-	color = "currentColor",
-	shape = "circle",
+	count: countProp,
+	color: colorProp,
+	shape: shapeProp,
+	preset,
 	className = "",
 }: ParticleFieldProps) {
 	const prefersReduced = usePrefersReducedMotion();
+	const config = preset ? PARTICLE_PRESETS[preset] : null;
+	const count = countProp ?? config?.count ?? 12;
+	const color = colorProp ?? config?.color ?? "currentColor";
+	const shape = shapeProp ?? config?.shape ?? "circle";
+	const drift = config?.drift ?? "float";
 	const particles = useMemo(
 		() =>
 			Array.from({ length: count }, (_, i) => ({
@@ -130,7 +234,13 @@ export function ParticleField({
 			aria-hidden="true"
 		>
 			{particles.map((p) => (
-				<ParticleElement key={p.id} particle={p} color={color} shape={shape} />
+				<ParticleElement
+					key={p.id}
+					particle={p}
+					color={color}
+					shape={shape}
+					drift={drift}
+				/>
 			))}
 		</div>
 	);
@@ -140,10 +250,12 @@ function ParticleElement({
 	particle: p,
 	color,
 	shape,
+	drift,
 }: {
 	particle: Particle;
 	color: string;
 	shape: "circle" | "petal" | "sparkle";
+	drift: "down" | "up" | "float";
 }) {
 	const shapeStyle =
 		shape === "petal"
@@ -175,7 +287,7 @@ function ParticleElement({
 				height: p.size,
 				...shapeStyle,
 				transform: `rotate(${p.rotate}deg)`,
-				animation: `dm-particle-float ${p.duration}s ease-in-out ${p.delay}s infinite`,
+				animation: `${drift === "down" ? "dm-particle-drift-down" : drift === "up" ? "dm-particle-drift-up" : "dm-particle-float"} ${p.duration}s ${drift === "float" ? "ease-in-out" : "linear"} ${p.delay}s infinite`,
 			}}
 		/>
 	);
@@ -355,14 +467,18 @@ export function Shimmer({
 	);
 }
 
+export type { ParticlePreset };
+
 // ── Hook: prefers-reduced-motion ─────────────────────────────────────
 
 function usePrefersReducedMotion(): boolean {
-	const [prefersReduced, setPrefersReduced] = useState(false);
+	const [prefersReduced, setPrefersReduced] = useState(() => {
+		if (typeof window === "undefined") return false;
+		return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+	});
 
 	useEffect(() => {
 		const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-		setPrefersReduced(mq.matches);
 		const handler = (e: MediaQueryListEvent) => setPrefersReduced(e.matches);
 		mq.addEventListener("change", handler);
 		return () => mq.removeEventListener("change", handler);

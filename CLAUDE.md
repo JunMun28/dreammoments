@@ -45,7 +45,7 @@ src/
   components/
     editor/            # Editor UI (context panel, toolbar, field renderers, inline edit, AI assistant)
       hooks/           # Editor hooks (useAutoSave, useEditorState, useFieldValidation, useInlineEdit, etc.)
-    templates/         # 4 wedding invitation templates (blush-romance, eternal-elegance, garden-romance, love-at-dusk)
+    templates/         # Wedding invitation template (double-happiness)
     landing/           # Landing page sections
     share/             # Share/invite modal
     ui/                # Shared UI primitives (LoadingSpinner, Skeleton)
@@ -67,7 +67,7 @@ tests/
 - **Auth**: Google OAuth + email/password via `AuthContext` in `lib/auth.tsx`; JWT sessions via `jose` in `lib/session.ts`
 - **Validation**: Zod schemas in `lib/validation.ts` for input validation
 - **Database**: 6 tables (users, invitations, guests, invitation_views, ai_generations, payments), UUID PKs, JSONB for flexible content
-- **Design tokens**: CSS custom properties (`--dm-bg`, `--dm-ink`, `--dm-peach`, `--dm-sage`, `--dm-lavender`); fonts: Outfit (body) + Reenie Beanie (accents)
+- **Design tokens**: CSS custom properties in `:root` — surfaces (`--dm-bg` #F8F8F8, `--dm-surface` #FFFFFF), ink (`--dm-ink` #1A1A1A), borders (`--dm-border` #E0E0E0), accent dusty rose (`--dm-primary` #C4727F); editor chrome font: Inter only. Template/invitation content fonts are separate.
 - **Class merging**: `cn()` helper using `clsx` + `tailwind-merge`
 - **Imports**: Path alias `@/*` maps to `./src/*`
 
@@ -77,6 +77,27 @@ tests/
 - Requires `DATABASE_URL` env var for PostgreSQL
 - Google OAuth: `VITE_GOOGLE_CLIENT_ID`, `VITE_GOOGLE_REDIRECT_URI`
 - Local env file: `.env.local`
+
+## Pre-commit Checklist
+
+Before every commit, run ALL of these and ensure they pass. CI will reject the PR if any fail.
+
+```
+pnpm check                  # 1. Biome lint + format
+pnpm exec tsc --noEmit      # 2. TypeScript type check
+pnpm test --run             # 3. Unit tests (Vitest)
+pnpm build                  # 4. Production build
+pnpm db:generate            # 5. Drizzle migration drift check — if this produces
+                            #    new files in drizzle/, commit them with your changes
+```
+
+### CI Jobs (GitHub Actions)
+
+These are the three jobs CI runs on every PR to `main`:
+
+1. **Lint, Type-check & Test** — `pnpm check` → `tsc --noEmit` → `pnpm test` → `pnpm build`
+2. **Migration drift check** — pushes schema to a test Postgres, runs `pnpm db:generate`, and fails if any `drizzle/` files are uncommitted
+3. **E2E Tests** — `pnpm exec playwright test --project=chromium` (runs after job 1 passes)
 
 ## Conventions
 

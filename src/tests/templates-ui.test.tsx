@@ -1,10 +1,10 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import type { ComponentPropsWithoutRef, ComponentType, ReactNode } from "react";
 import { renderToString } from "react-dom/server";
 import { describe, expect, test, vi } from "vitest";
-import BlushRomanceInvitation from "../components/templates/blush-romance/BlushRomanceInvitation";
-import EternalEleganceInvitation from "../components/templates/eternal-elegance/EternalEleganceInvitation";
-import GardenRomanceInvitation from "../components/templates/garden-romance/GardenRomanceInvitation";
-import LoveAtDuskInvitation from "../components/templates/love-at-dusk/LoveAtDuskInvitation";
+import DoubleHappinessInvitation from "../components/templates/double-happiness/DoubleHappinessInvitation";
+import SectionTitle from "../components/templates/SectionTitle";
 import type { TemplateInvitationProps } from "../components/templates/types";
 import { buildSampleContent } from "../data/sample-invitation";
 import { templates } from "../templates";
@@ -20,10 +20,7 @@ const templateComponents: Record<
 	string,
 	ComponentType<TemplateInvitationProps>
 > = {
-	"garden-romance": GardenRomanceInvitation,
-	"eternal-elegance": EternalEleganceInvitation,
-	"blush-romance": BlushRomanceInvitation,
-	"love-at-dusk": LoveAtDuskInvitation,
+	"double-happiness": DoubleHappinessInvitation,
 };
 
 describe("template render coverage", () => {
@@ -35,7 +32,8 @@ describe("template render coverage", () => {
 					!section.defaultVisible,
 				]),
 			);
-			const Template = templateComponents[template.id] ?? LoveAtDuskInvitation;
+			const Template =
+				templateComponents[template.id] ?? DoubleHappinessInvitation;
 			const markup = renderToString(
 				<Template
 					content={buildSampleContent(template.id)}
@@ -55,5 +53,67 @@ describe("template render coverage", () => {
 				});
 			expect(markup).toContain('data-section="rsvp"');
 		});
+	});
+});
+
+describe("SectionTitle", () => {
+	test("renders bilingual title with correct lang attributes", () => {
+		const html = renderToString(
+			<SectionTitle zhLabel="爱 情 故 事" enHeading="Our Story" />,
+		);
+		expect(html).toContain("爱 情 故 事");
+		expect(html).toContain("Our Story");
+		expect(html).toContain('lang="en"');
+	});
+});
+
+describe("design rules conformance", () => {
+	test("template CSS defines all required --t-* custom properties", () => {
+		const css = readFileSync(
+			resolve(
+				__dirname,
+				"../components/templates/double-happiness/double-happiness.css",
+			),
+			"utf-8",
+		);
+		const requiredTokens = [
+			"--t-primary",
+			"--t-secondary",
+			"--t-accent",
+			"--t-bg",
+			"--t-text",
+			"--t-muted",
+			"--t-bg-alt",
+		];
+		for (const token of requiredTokens) {
+			expect(css).toContain(token);
+		}
+	});
+
+	test("template renders sections in expected order", () => {
+		const Template = DoubleHappinessInvitation;
+		const html = renderToString(
+			<Template content={buildSampleContent("double-happiness")} />,
+		);
+		const sectionOrder = [...html.matchAll(/data-section="([^"]+)"/g)].map(
+			(m) => m[1],
+		);
+		expect(sectionOrder[0]).toBe("hero");
+		expect(sectionOrder).toContain("rsvp");
+		expect(sectionOrder).toContain("footer");
+		expect(sectionOrder.indexOf("hero")).toBeLessThan(
+			sectionOrder.indexOf("rsvp"),
+		);
+	});
+
+	test("template has reduced motion CSS", () => {
+		const css = readFileSync(
+			resolve(
+				__dirname,
+				"../components/templates/double-happiness/double-happiness.css",
+			),
+			"utf-8",
+		);
+		expect(css).toContain("prefers-reduced-motion");
 	});
 });

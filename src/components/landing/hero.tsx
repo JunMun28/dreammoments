@@ -93,7 +93,7 @@ export function Hero() {
 							<div className="flex flex-col sm:flex-row flex-wrap gap-3 w-full sm:w-auto">
 								<Link
 									to="/editor/new"
-									search={{ template: "love-at-dusk" }}
+									search={{ template: "double-happiness" }}
 									className="flex items-center justify-center sm:justify-start gap-2 px-4 sm:px-5 py-2.5 sm:py-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 rounded-lg text-white text-sm font-medium transition-colors w-full sm:w-auto cursor-pointer"
 								>
 									<svg

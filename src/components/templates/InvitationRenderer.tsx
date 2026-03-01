@@ -6,11 +6,8 @@ const templateImports: Record<
 	string,
 	() => Promise<{ default: ComponentType<TemplateInvitationProps> }>
 > = {
-	"blush-romance": () => import("./blush-romance/BlushRomanceInvitation"),
-	"eternal-elegance": () =>
-		import("./eternal-elegance/EternalEleganceInvitation"),
-	"garden-romance": () => import("./garden-romance/GardenRomanceInvitation"),
-	"love-at-dusk": () => import("./love-at-dusk/LoveAtDuskInvitation"),
+	"double-happiness": () =>
+		import("./double-happiness/DoubleHappinessInvitation"),
 };
 
 const templateComponents: Record<
@@ -20,7 +17,7 @@ const templateComponents: Record<
 	Object.entries(templateImports).map(([id, loader]) => [id, lazy(loader)]),
 );
 
-const FallbackTemplate = templateComponents["love-at-dusk"];
+const FallbackTemplate = templateComponents["double-happiness"];
 
 export function preloadTemplate(templateId: string): void {
 	templateImports[templateId]?.();

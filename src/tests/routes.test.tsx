@@ -20,7 +20,7 @@ describe("share modal", () => {
 					userId: "user-1",
 					slug: "sarah-michael",
 					title: "Sarah & Michael",
-					templateId: "love-at-dusk",
+					templateId: "double-happiness",
 					templateVersion: "1.0.0",
 					content: {
 						hero: {

@@ -8,11 +8,6 @@ export type CanvasSection = {
 	count: number;
 };
 
-function formatFallbackSectionLabel(sectionId: string): string {
-	if (sectionId === "general") return "General";
-	return sectionId.replace(/^\w/, (char) => char.toUpperCase());
-}
-
 export function resolveBlockSectionId(block: Block): string {
 	if (block.sectionId && block.sectionId.trim().length > 0) {
 		return block.sectionId;
@@ -34,13 +29,9 @@ export function buildCanvasSections(document: CanvasDocument): CanvasSection[] {
 			existing.count += 1;
 			continue;
 		}
-		const resolvedLabel = getSectionLabel(sectionId);
 		byId.set(sectionId, {
 			id: sectionId,
-			label:
-				resolvedLabel === sectionId
-					? formatFallbackSectionLabel(sectionId)
-					: resolvedLabel,
+			label: getSectionLabel(sectionId),
 			blockId,
 			count: 1,
 		});
@@ -67,7 +58,7 @@ export function CanvasSectionRail({
 
 	return (
 		<nav
-			className="flex h-full flex-col gap-2 p-2"
+			className="flex h-full flex-col gap-1 p-2"
 			aria-label="Canvas sections"
 		>
 			{sections.map((section) => {
@@ -78,16 +69,16 @@ export function CanvasSectionRail({
 						type="button"
 						onClick={() => onSectionSelect(section)}
 						aria-pressed={active}
-						className={`rounded-xl border px-2 py-2 text-left transition-colors ${
+						className={`rounded-lg px-2.5 py-2 text-left transition-colors ${
 							active
-								? "border-[color:var(--dm-accent)] bg-[color:var(--dm-accent-soft)] text-[color:var(--dm-accent-strong)]"
-								: "border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] text-[color:var(--dm-ink)] hover:bg-[color:var(--dm-surface-muted)]"
+								? "bg-[color:var(--dm-accent-strong)] text-white"
+								: "text-[color:var(--dm-ink)] hover:bg-[color:var(--dm-surface-muted)]"
 						}`}
 					>
-						<p className="truncate text-[11px] font-semibold uppercase tracking-[0.1em]">
-							{section.label}
-						</p>
-						<p className="text-[10px] text-[color:var(--dm-muted)]">
+						<p className="truncate text-[11px] font-medium">{section.label}</p>
+						<p
+							className={`text-[10px] ${active ? "text-white/70" : "text-[color:var(--dm-ink-muted)]"}`}
+						>
 							{section.count} block{section.count > 1 ? "s" : ""}
 						</p>
 					</button>

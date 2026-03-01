@@ -102,7 +102,7 @@ export default function Header() {
 							) : (
 								<Link
 									to="/editor/new"
-									search={{ template: "love-at-dusk" }}
+									search={{ template: "double-happiness" }}
 									className="rounded-full inline-flex items-center justify-center bg-dm-ink px-5 py-2.5 text-sm font-semibold leading-none text-white shadow-[0_4px_20px_-2px_rgba(0,0,0,0.12)]"
 								>
 									Start Free Trial
@@ -162,7 +162,7 @@ export default function Header() {
 							) : (
 								<Link
 									to="/editor/new"
-									search={{ template: "love-at-dusk" }}
+									search={{ template: "double-happiness" }}
 									className="rounded-full inline-flex items-center justify-center bg-dm-ink px-4 py-2 text-center text-sm font-semibold leading-none text-white"
 									onClick={closeMenu}
 								>

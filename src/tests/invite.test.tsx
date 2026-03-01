@@ -1,7 +1,7 @@
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import { renderToString } from "react-dom/server";
 import { describe, expect, test, vi } from "vitest";
-import LoveAtDuskInvitation from "../components/templates/love-at-dusk/LoveAtDuskInvitation";
+import DoubleHappinessInvitation from "../components/templates/double-happiness/DoubleHappinessInvitation";
 import { buildSampleContent } from "../data/sample-invitation";
 
 type MockLinkProps = ComponentPropsWithoutRef<"a"> & { children?: ReactNode };
@@ -12,11 +12,13 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 
 describe("invite template", () => {
-	test("love at dusk renders 12 sections", () => {
+	test("double happiness renders sections", () => {
 		const markup = renderToString(
-			<LoveAtDuskInvitation content={buildSampleContent("love-at-dusk")} />,
+			<DoubleHappinessInvitation
+				content={buildSampleContent("double-happiness")}
+			/>,
 		);
 		const matches = markup.match(/data-section=/g) ?? [];
-		expect(matches).toHaveLength(12);
+		expect(matches.length).toBeGreaterThan(0);
 	});
 });

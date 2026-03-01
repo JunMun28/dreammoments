@@ -1,10 +1,11 @@
 import type { TemplateConfig } from "./types";
 
-export const loveAtDuskTemplate: TemplateConfig = {
-	id: "love-at-dusk",
-	name: "Love at Dusk",
-	nameZh: "暮色之恋",
-	description: "Romantic Chinese elegance with cinematic scroll pacing.",
+export const doubleHappinessTemplate: TemplateConfig = {
+	id: "double-happiness",
+	name: "Double Happiness",
+	nameZh: "囍临门",
+	description:
+		"Festive Chinese red & gold wedding invitation with bilingual content, photo gallery, and digital angpow.",
 	category: "chinese",
 	version: "1.0.0",
 	aiConfig: {
@@ -13,21 +14,21 @@ export const loveAtDuskTemplate: TemplateConfig = {
 	},
 	tokens: {
 		colors: {
-			primary: "#B30E0E",
-			secondary: "#741212",
-			accent: "#FFE094",
-			background: "#0c0a08",
-			text: "#F5F5F5",
-			muted: "#B7A38A",
+			primary: "#C8102E",
+			secondary: "#8B1A1A",
+			accent: "#D4A843",
+			background: "#FFF8F0",
+			text: "#2B1216",
+			muted: "#8B7355",
 		},
 		typography: {
-			headingFont: "'Playfair Display', 'Noto Serif SC', serif",
-			bodyFont: "'Noto Serif SC', 'Manrope', serif",
-			accentFont: "'Noto Serif SC', serif",
+			headingFont: "'Ma Shan Zheng', 'Noto Serif SC', 'Songti SC', serif",
+			bodyFont: "'Noto Sans SC', 'Inter', sans-serif",
+			accentFont: "'Noto Serif SC', 'Songti SC', serif",
 		},
 		animations: {
-			scrollTriggerOffset: 120,
-			defaultDuration: 0.7,
+			scrollTriggerOffset: 100,
+			defaultDuration: 0.6,
 			easing: "easeOutCubic",
 		},
 	},
@@ -36,20 +37,21 @@ export const loveAtDuskTemplate: TemplateConfig = {
 			id: "hero",
 			type: "hero",
 			defaultVisible: true,
-			notes: "Sparkle overlay, double happiness, calligraphy headline.",
+			notes:
+				"Full-bleed photo, dark overlay, 囍 watermark, couple names, date, lunar date.",
 			fields: [
 				{
 					id: "partnerOneName",
 					label: "Groom name",
 					type: "text",
-					sample: "满小满",
+					sample: "王小明",
 					required: true,
 				},
 				{
 					id: "partnerTwoName",
 					label: "Bride name",
 					type: "text",
-					sample: "美小美",
+					sample: "李小红",
 					required: true,
 				},
 				{
@@ -57,7 +59,7 @@ export const loveAtDuskTemplate: TemplateConfig = {
 					label: "Tagline",
 					type: "text",
 					aiTaskType: "tagline",
-					sample: "Two hearts, one beautiful journey",
+					sample: "囍临门 · 永结同心",
 				},
 				{
 					id: "heroImageUrl",
@@ -70,7 +72,7 @@ export const loveAtDuskTemplate: TemplateConfig = {
 			id: "announcement",
 			type: "announcement",
 			defaultVisible: true,
-			notes: "Formal invitation copy, bilingual block.",
+			notes: "Bilingual formal invitation copy with gold blockquote border.",
 			fields: [
 				{
 					id: "title",
@@ -83,13 +85,14 @@ export const loveAtDuskTemplate: TemplateConfig = {
 					id: "message",
 					label: "Invitation message",
 					type: "textarea",
-					sample:
-						"我们怀着喜悦的心情邀请您参加我们的婚礼，见证我们的幸福时刻。",
+					sample: "亲爱的家人朋友们，我们诚挚地邀请您来参加我们的婚礼。",
 				},
 				{
 					id: "formalText",
-					label: "Formal text",
+					label: "Formal text (English)",
 					type: "textarea",
+					sample:
+						"Dear Family & Friends, we cordially invite you to celebrate our union.",
 				},
 			],
 		},
@@ -97,19 +100,19 @@ export const loveAtDuskTemplate: TemplateConfig = {
 			id: "couple",
 			type: "couple",
 			defaultVisible: true,
-			notes: "Side-by-side portraits with callout labels.",
+			notes: "Side-by-side portraits with bilingual labels.",
 			fields: [
 				{
 					id: "partnerOne.fullName",
 					label: "Groom full name",
 					type: "text",
-					sample: "满小满",
+					sample: "王小明",
 				},
 				{
 					id: "partnerTwo.fullName",
 					label: "Bride full name",
 					type: "text",
-					sample: "美小美",
+					sample: "李小红",
 				},
 				{
 					id: "partnerOne.bio",
@@ -139,7 +142,7 @@ export const loveAtDuskTemplate: TemplateConfig = {
 			id: "story",
 			type: "story",
 			defaultVisible: true,
-			notes: "Love story timeline with poetic copy blocks.",
+			notes: "Staggered timeline with gold line, red dots, circular photos.",
 			fields: [
 				{
 					id: "milestones",
@@ -152,7 +155,7 @@ export const loveAtDuskTemplate: TemplateConfig = {
 			id: "gallery",
 			type: "gallery",
 			defaultVisible: true,
-			notes: "Full-bleed photos, soft masks, sparkle overlays.",
+			notes: "2-column grid, featured photo at top, white frames.",
 			fields: [
 				{
 					id: "photos",
@@ -162,10 +165,17 @@ export const loveAtDuskTemplate: TemplateConfig = {
 			],
 		},
 		{
+			id: "countdown",
+			type: "countdown",
+			defaultVisible: true,
+			notes: "Countdown timer using CountdownWidget, reads from hero.date.",
+			fields: [],
+		},
+		{
 			id: "schedule",
 			type: "schedule",
 			defaultVisible: true,
-			notes: "Timeline layout, romantic details.",
+			notes: "Event cards with red left border, time in gold accent.",
 			fields: [
 				{
 					id: "events",
@@ -178,7 +188,7 @@ export const loveAtDuskTemplate: TemplateConfig = {
 			id: "venue",
 			type: "venue",
 			defaultVisible: true,
-			notes: "Map with Chinese date line, address, and directions.",
+			notes: "Venue name, address, Google Maps link, parking info.",
 			fields: [
 				{
 					id: "name",
@@ -200,36 +210,11 @@ export const loveAtDuskTemplate: TemplateConfig = {
 			],
 		},
 		{
-			id: "entourage",
-			type: "entourage",
-			defaultVisible: true,
-			notes: "Wedding entourage roles and names.",
-			fields: [
-				{
-					id: "members",
-					label: "Entourage list",
-					type: "list",
-				},
-			],
-		},
-		{
-			id: "registry",
-			type: "registry",
-			defaultVisible: false,
-			notes: "Optional gift registry grid.",
-			fields: [
-				{
-					id: "note",
-					label: "Gift preference",
-					type: "textarea",
-				},
-			],
-		},
-		{
 			id: "rsvp",
 			type: "rsvp",
 			defaultVisible: true,
-			notes: "Minimal RSVP form with name and guest count.",
+			notes:
+				"Full RSVP form: name, email, attendance, guests, dietary, message, consent.",
 			fields: [
 				{
 					id: "deadline",
@@ -249,16 +234,40 @@ export const loveAtDuskTemplate: TemplateConfig = {
 			],
 		},
 		{
+			id: "gift",
+			type: "gift",
+			defaultVisible: false,
+			notes: "Digital angpow with AngpowQRCode, gold border card.",
+			fields: [
+				{
+					id: "paymentUrl",
+					label: "Payment URL",
+					type: "text",
+				},
+				{
+					id: "paymentMethod",
+					label: "Payment method",
+					type: "text",
+					sample: "paynow",
+				},
+				{
+					id: "recipientName",
+					label: "Recipient name",
+					type: "text",
+				},
+			],
+		},
+		{
 			id: "footer",
 			type: "footer",
 			defaultVisible: true,
-			notes: "Thank you and closing line.",
+			notes: "Bilingual thank you, 囍 motif, social links.",
 			fields: [
 				{
 					id: "message",
 					label: "Footer message",
 					type: "text",
-					sample: "期待与您在婚礼相见。",
+					sample: "感谢您的祝福，期待与您在婚礼相见。",
 				},
 			],
 		},

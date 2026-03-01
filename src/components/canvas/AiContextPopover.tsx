@@ -211,8 +211,8 @@ export function AiContextPopover({
 	}, [block]);
 
 	return (
-		<div className="absolute left-0 top-full z-[60] mt-2 w-56 rounded-xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-2 shadow-md">
-			<div className="mb-1 flex items-center gap-1 px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-[color:var(--dm-muted)]">
+		<div className="absolute left-0 top-full z-[60] mt-2 w-56 rounded-lg border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-2 shadow-md">
+			<div className="mb-1 flex items-center gap-1 px-2 py-1 text-[11px] font-medium text-[color:var(--dm-ink-muted)]">
 				<Sparkles className="h-3 w-3" aria-hidden="true" />
 				AI suggestions
 			</div>
@@ -229,20 +229,20 @@ export function AiContextPopover({
 						}}
 					>
 						<p>{action.label}</p>
-						<p className="text-[10px] uppercase tracking-[0.1em] text-[color:var(--dm-muted)]">
+						<p className="text-[11px] text-[color:var(--dm-ink-soft)]">
 							{action.description}
 						</p>
 					</button>
 				))}
 			</div>
 			<div className="mt-2 flex items-center justify-between px-1">
-				<p className="text-[10px] text-[color:var(--dm-muted)]">
+				<p className="text-[11px] text-[color:var(--dm-ink-soft)]">
 					{selected ? `Preview: ${selected}` : "Preview + apply"}
 				</p>
 				<div className="flex items-center gap-1">
 					<button
 						type="button"
-						className="rounded-full border border-[color:var(--dm-border)] px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] disabled:opacity-50"
+						className="rounded-lg border border-[color:var(--dm-border)] px-2 py-0.5 text-[11px] font-medium disabled:opacity-50"
 						onClick={() => {
 							if (!pendingPatch || !pendingType) return;
 							onApply(pendingPatch, pendingType);
@@ -254,7 +254,7 @@ export function AiContextPopover({
 					</button>
 					<button
 						type="button"
-						className="rounded-full border border-[color:var(--dm-border)] px-2 py-0.5 text-[10px] uppercase tracking-[0.12em]"
+						className="rounded-lg border border-[color:var(--dm-border)] px-2 py-0.5 text-[11px] font-medium"
 						onClick={onClose}
 					>
 						Close

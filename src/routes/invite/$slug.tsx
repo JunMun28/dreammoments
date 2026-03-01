@@ -4,9 +4,10 @@ import {
 	Link,
 } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { ScenePageEngine } from "@/components/canvas/ScenePageEngine";
 import { getPublicInvitation } from "../../api/public";
-import { CanvasEngine } from "../../components/canvas/CanvasEngine";
 import EnvelopeAnimation from "../../components/templates/EnvelopeAnimation";
+import { RsvpConfirmation } from "../../components/templates/RsvpConfirmation";
 import { buildSampleContent } from "../../data/sample-invitation";
 import { useSubmitRsvp, useTrackView } from "../../hooks/useInvitations";
 import { useAuth } from "../../lib/auth";
@@ -56,12 +57,8 @@ function InviteLoadingState() {
 	);
 }
 
-const TEMPLATE_NAMES = new Set([
-	"blush-romance",
-	"garden-romance",
-	"eternal-elegance",
-	"love-at-dusk",
-]);
+const DEFAULT_TEMPLATE = "double-happiness";
+const TEMPLATE_NAMES = new Set([DEFAULT_TEMPLATE]);
 
 function capitalize(s: string): string {
 	return s.charAt(0).toUpperCase() + s.slice(1);
@@ -72,9 +69,9 @@ function parseCoupleNames(slug: string): string {
 	const parts = cleaned.split("-").filter(Boolean);
 
 	const nameparts: string[] = [];
-	for (const part of parts) {
-		if (TEMPLATE_NAMES.has(parts.slice(parts.indexOf(part)).join("-"))) break;
-		nameparts.push(part);
+	for (let i = 0; i < parts.length; i++) {
+		if (TEMPLATE_NAMES.has(parts.slice(i).join("-"))) break;
+		nameparts.push(parts[i]);
 	}
 
 	if (nameparts.length >= 3) {
@@ -147,18 +144,7 @@ export const Route = createFileRoute("/invite/$slug")({
 	errorComponent: InviteErrorFallback,
 });
 
-const lightTemplates = new Set([
-	"garden-romance",
-	"eternal-elegance",
-	"blush-romance",
-]);
-
-function resolveSampleTemplate(slug: string) {
-	if (slug.includes("blush-romance")) return "blush-romance";
-	if (slug.includes("garden-romance")) return "garden-romance";
-	if (slug.includes("eternal-elegance")) return "eternal-elegance";
-	return "love-at-dusk";
-}
+const lightTemplates = TEMPLATE_NAMES;
 
 function CanvasRsvpCard({
 	onSubmit,
@@ -253,7 +239,12 @@ function InviteScreen() {
 		storeInvitation ??
 		(loaderData?.invitation as typeof storeInvitation) ??
 		null;
-	const [rsvpStatus, setRsvpStatus] = useState("");
+	const [rsvpResult, setRsvpResult] = useState<{
+		name: string;
+		attendance: "attending" | "not_attending" | "undecided";
+		guestCount: number;
+	} | null>(null);
+	const [rsvpError, setRsvpError] = useState("");
 	const handleEnvelopeComplete = useCallback(() => {}, []);
 	const trackViewMutation = useTrackView();
 	const submitRsvpMutation = useSubmitRsvp();
@@ -264,7 +255,7 @@ function InviteScreen() {
 	const templateId =
 		(invitation?.templateSnapshot as { id?: string } | undefined)?.id ??
 		invitation?.templateId ??
-		resolveSampleTemplate(slug);
+		DEFAULT_TEMPLATE;
 	const sourceContent = invitation?.content ?? buildSampleContent(templateId);
 	const canvasDocument = migrateInvitationContentToCanvas(
 		sourceContent,
@@ -313,10 +304,7 @@ function InviteScreen() {
 
 	const headerLabel = useMemo(() => {
 		if (!isSample) return summary.title;
-		const label = templateId
-			.split("-")
-			.map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
-			.join(" ");
+		const label = templateId.split("-").map(capitalize).join(" ");
 		return `${label} Sample Invitation`;
 	}, [summary.title, isSample, templateId]);
 
@@ -335,7 +323,8 @@ function InviteScreen() {
 		}) => {
 			if (!invitation || invitation.status !== "published") return;
 			const visitorKey =
-				localStorage.getItem("dm-visitor") ?? `${Date.now()}-${Math.random()}`;
+				localStorage.getItem("dm-visitor") ??
+				`${Date.now()}-${Math.random().toString(36).slice(2)}`;
 			localStorage.setItem("dm-visitor", visitorKey);
 
 			submitRsvpMutation.mutate(
@@ -351,7 +340,11 @@ function InviteScreen() {
 				},
 				{
 					onSuccess: () => {
-						setRsvpStatus("RSVP received. Thank you!");
+						setRsvpResult({
+							name: payload.name,
+							attendance: payload.attendance,
+							guestCount: payload.guestCount,
+						});
 						try {
 							localStorage.setItem(
 								storageKey,
@@ -368,7 +361,11 @@ function InviteScreen() {
 						// Fall back to local store
 						try {
 							submitRsvp(invitation.id, payload, visitorKey);
-							setRsvpStatus("RSVP received. Thank you!");
+							setRsvpResult({
+								name: payload.name,
+								attendance: payload.attendance,
+								guestCount: payload.guestCount,
+							});
 							try {
 								localStorage.setItem(
 									storageKey,
@@ -381,7 +378,7 @@ function InviteScreen() {
 							} catch {}
 							setAlreadySubmitted(true);
 						} catch {
-							setRsvpStatus("RSVP limit reached. Please try again later.");
+							setRsvpError("RSVP limit reached. Please try again later.");
 						}
 					},
 				},
@@ -419,10 +416,10 @@ function InviteScreen() {
 			onComplete={handleEnvelopeComplete}
 			coupleNames={summary.title}
 		>
-			<div className={`min-h-screen ${shellClass}`}>
+			<div className={shellClass}>
 				{/* Fix 11: Only show header for sample invitations */}
 				{isSample && (
-					<header className="border-b border-[color:var(--dm-border)] px-6 py-6 text-xs uppercase tracking-[0.4em] text-[color:var(--dm-accent-strong)]">
+					<header className="fixed top-0 left-0 right-0 z-50 border-b border-[color:var(--dm-border)] bg-[color:var(--dm-bg)]/80 backdrop-blur-sm px-6 py-3 text-xs uppercase tracking-[0.4em] text-[color:var(--dm-accent-strong)]">
 						<div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
 							<p className="text-center">{headerLabel}</p>
 							<Link
@@ -435,20 +432,29 @@ function InviteScreen() {
 						</div>
 					</header>
 				)}
-				<div className="mx-auto max-w-[430px] p-4">
-					<CanvasEngine document={canvasDocument} />
-					{invitation?.status === "published" ? (
+				<ScenePageEngine document={canvasDocument} />
+				{invitation?.status === "published" ? (
+					rsvpResult || alreadySubmitted ? (
+						<RsvpConfirmation
+							name={rsvpResult?.name ?? "Guest"}
+							attendance={rsvpResult?.attendance ?? "attending"}
+							guestCount={rsvpResult?.guestCount}
+							onEdit={() => {
+								setRsvpResult(null);
+								setAlreadySubmitted(false);
+								try {
+									localStorage.removeItem(storageKey);
+								} catch {}
+							}}
+						/>
+					) : (
 						<CanvasRsvpCard
-							disabled={alreadySubmitted}
-							statusMessage={
-								alreadySubmitted
-									? "You have already submitted your RSVP. Thank you!"
-									: rsvpStatus
-							}
+							disabled={submitRsvpMutation.isPending}
+							statusMessage={rsvpError}
 							onSubmit={(payload) => handleRsvpSubmit(payload)}
 						/>
-					) : null}
-				</div>
+					)
+				) : null}
 			</div>
 		</EnvelopeAnimation>
 	);

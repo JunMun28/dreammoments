@@ -75,7 +75,7 @@ vi.mock("@/lib/data", () => ({
 	createInvitation: vi.fn(() => ({
 		id: "local-inv-1",
 		userId: "user-a",
-		templateId: "blush-romance",
+		templateId: "double-happiness",
 		title: "Sample",
 		status: "draft",
 	})),
@@ -111,7 +111,7 @@ vi.mock("@/data/sample-invitation", () => ({
 vi.mock("@/templates/index", () => ({
 	templates: [
 		{
-			id: "blush-romance",
+			id: "double-happiness",
 			version: "1.0",
 			sections: [
 				{ id: "hero", defaultVisible: true },
@@ -286,7 +286,7 @@ describe("createInvitationFn", () => {
 	test("creates invitation (fallback path)", async () => {
 		const result = await (createInvitationFn as CallableFunction)({
 			token: "valid-token",
-			templateId: "blush-romance",
+			templateId: "double-happiness",
 		});
 
 		expect(result).toBeDefined();
@@ -297,7 +297,7 @@ describe("createInvitationFn", () => {
 		const created = {
 			id: "db-inv-1",
 			userId: "user-a",
-			templateId: "blush-romance",
+			templateId: "double-happiness",
 			title: "Alice & Bob",
 			slug: "alice-bob",
 			status: "draft",
@@ -313,7 +313,7 @@ describe("createInvitationFn", () => {
 
 		const result = await (createInvitationFn as CallableFunction)({
 			token: "valid-token",
-			templateId: "blush-romance",
+			templateId: "double-happiness",
 		});
 
 		expect(result.id).toBe("db-inv-1");

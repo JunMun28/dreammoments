@@ -18,6 +18,11 @@ import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import { AuthProvider } from "../lib/auth";
 import appCss from "../styles.css?url";
 
+// Dev-only: load react-grab for UI element inspection (⌘C to copy component info)
+if (typeof window !== "undefined" && import.meta.env.DEV) {
+	import("react-grab");
+}
+
 interface MyRouterContext {
 	queryClient: QueryClient;
 }
@@ -69,11 +74,11 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 			{
 				rel: "preload",
 				as: "style",
-				href: "https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Reenie+Beanie&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Serif+SC:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&family=Sacramento&family=Pinyon+Script&family=Manrope:wght@300;400;500;600;700&display=swap",
+				href: "https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Reenie+Beanie&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Noto+Serif+SC:wght@400;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Lato:wght@300;400;700&family=Sacramento&family=Pinyon+Script&family=Manrope:wght@300;400;500;600;700&family=Great+Vibes&family=Dancing+Script:wght@400;700&family=Ma+Shan+Zheng&family=Noto+Sans+SC:wght@400;700&display=swap",
 			},
 			{
 				rel: "stylesheet",
-				href: "https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Reenie+Beanie&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Serif+SC:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&family=Sacramento&family=Pinyon+Script&family=Manrope:wght@300;400;500;600;700&display=swap",
+				href: "https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Reenie+Beanie&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Noto+Serif+SC:wght@400;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Lato:wght@300;400;700&family=Sacramento&family=Pinyon+Script&family=Manrope:wght@300;400;500;600;700&family=Great+Vibes&family=Dancing+Script:wght@400;700&family=Ma+Shan+Zheng&family=Noto+Sans+SC:wght@400;700&display=swap",
 			},
 			{
 				rel: "stylesheet",

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { publishInvitationFn } from "@/api/invitations";
 import { createDocumentStore } from "@/lib/canvas/store";
 import type { Block, CanvasDocument, Position, Size } from "@/lib/canvas/types";
@@ -9,14 +9,18 @@ import { AlignmentGuides } from "./AlignmentGuides";
 import { BlockInspectorSidebar } from "./BlockInspectorSidebar";
 import { BlockRenderer } from "./BlockRenderer";
 import { BlockToolbar } from "./BlockToolbar";
+import { CanvasListView } from "./CanvasListView";
 import { buildCanvasSections, CanvasSectionRail } from "./CanvasSectionRail";
 import { CanvasToolbar } from "./CanvasToolbar";
+import { CanvasZoomControls } from "./CanvasZoomControls";
 import { useCanvasAutoSave } from "./hooks/useCanvasAutoSave";
 import { useCanvasKeyboard } from "./hooks/useCanvasKeyboard";
+import { useCanvasZoom } from "./hooks/useCanvasZoom";
 import { useDragBlock } from "./hooks/useDragBlock";
 import { useResizeBlock } from "./hooks/useResizeBlock";
 import { type GuideLine, useSnapGuides } from "./hooks/useSnapGuides";
 import { InlineTextEditor } from "./InlineTextEditor";
+import { MobileCanvasFab, MobileCanvasSheet } from "./MobileCanvasSheet";
 import { SelectionOverlay } from "./SelectionOverlay";
 
 const TOKEN_KEY = "dm-auth-token";
@@ -73,104 +77,6 @@ function resolveAnimationStyle(
 	return {};
 }
 
-function ListView({
-	document,
-	onMove,
-	onResize,
-	onDelete,
-}: {
-	document: CanvasDocument;
-	onMove: (blockId: string, position: Position) => void;
-	onResize: (blockId: string, size: Size) => void;
-	onDelete: (blockId: string) => void;
-}) {
-	return (
-		<div className="grid gap-2 p-3">
-			{document.blockOrder.map((blockId) => {
-				const block = document.blocksById[blockId];
-				if (!block) return null;
-				return (
-					<div
-						key={`list-${block.id}`}
-						className="rounded-xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] p-3"
-					>
-						<div className="flex items-center justify-between gap-2">
-							<p className="text-xs uppercase tracking-[0.14em] text-[color:var(--dm-muted)]">
-								{block.type}
-							</p>
-							<button
-								type="button"
-								onClick={() => onDelete(block.id)}
-								className="rounded-full border border-red-300 px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-red-600"
-							>
-								Delete
-							</button>
-						</div>
-						<div className="mt-2 grid grid-cols-2 gap-2 text-xs">
-							<label className="grid gap-1">
-								<span>X</span>
-								<input
-									type="number"
-									value={Math.round(block.position.x)}
-									onChange={(event) =>
-										onMove(block.id, {
-											x: Number(event.target.value),
-											y: block.position.y,
-										})
-									}
-									className="rounded border border-[color:var(--dm-border)] px-2 py-1"
-								/>
-							</label>
-							<label className="grid gap-1">
-								<span>Y</span>
-								<input
-									type="number"
-									value={Math.round(block.position.y)}
-									onChange={(event) =>
-										onMove(block.id, {
-											x: block.position.x,
-											y: Number(event.target.value),
-										})
-									}
-									className="rounded border border-[color:var(--dm-border)] px-2 py-1"
-								/>
-							</label>
-							<label className="grid gap-1">
-								<span>Width</span>
-								<input
-									type="number"
-									value={Math.round(block.size.width)}
-									onChange={(event) =>
-										onResize(block.id, {
-											width: Number(event.target.value),
-											height: block.size.height,
-										})
-									}
-									className="rounded border border-[color:var(--dm-border)] px-2 py-1"
-								/>
-							</label>
-							<label className="grid gap-1">
-								<span>Height</span>
-								<input
-									type="number"
-									value={Math.round(block.size.height)}
-									onChange={(event) =>
-										onResize(block.id, {
-											width: block.size.width,
-											height: Number(event.target.value),
-										})
-									}
-									className="rounded border border-[color:var(--dm-border)] px-2 py-1"
-								/>
-							</label>
-						</div>
-					</div>
-				);
-			})}
-		</div>
-	);
-}
-
 function CanvasBlockNode({
 	block,
 	canvasRef,
@@ -182,8 +88,6 @@ function CanvasBlockNode({
 	onDelete,
 	onDuplicate,
 	onLockToggle,
-	onBringForward,
-	onSendBackward,
 	onBringToFront,
 	onSendToBack,
 	onAiClick,
@@ -211,8 +115,6 @@ function CanvasBlockNode({
 	onDelete: () => void;
 	onDuplicate: () => void;
 	onLockToggle: () => void;
-	onBringForward: () => void;
-	onSendBackward: () => void;
 	onBringToFront: () => void;
 	onSendToBack: () => void;
 	onAiClick: () => void;
@@ -277,7 +179,7 @@ function CanvasBlockNode({
 		<div
 			className={cn(
 				"absolute rounded-[inherit] transition-shadow",
-				selected ? "z-30 shadow-[0_0_0_2px_rgba(217,70,116,0.25)]" : "z-10",
+				selected ? "z-30 shadow-[0_0_0_2px_rgba(196,114,127,0.25)]" : "z-10",
 				block.locked ? "opacity-80" : "cursor-move",
 			)}
 			style={{
@@ -319,7 +221,6 @@ function CanvasBlockNode({
 			{selected ? (
 				<>
 					<SelectionOverlay
-						block={block}
 						onResizePointerDown={resize.onPointerDown}
 						onResizePointerMove={resize.onPointerMove}
 						onResizePointerUp={resize.onPointerUp}
@@ -330,8 +231,6 @@ function CanvasBlockNode({
 						onDelete={onDelete}
 						onDuplicate={onDuplicate}
 						onLockToggle={onLockToggle}
-						onBringForward={onBringForward}
-						onSendBackward={onSendBackward}
 						onBringToFront={onBringToFront}
 						onSendToBack={onSendToBack}
 						onAiClick={onAiClick}
@@ -379,9 +278,18 @@ export function CanvasEditor({
 	const [previewSizes, setPreviewSizes] = useState<SizeMap>({});
 	const [showListView, setShowListView] = useState(false);
 	const [aiBlockId, setAiBlockId] = useState<string | null>(null);
-	const [animationsEnabled, setAnimationsEnabled] = useState(true);
+	const [animationsEnabled, setAnimationsEnabled] = useState(() => {
+		if (
+			typeof window === "undefined" ||
+			typeof window.matchMedia !== "function"
+		)
+			return true;
+		return !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+	});
 	const [activeSectionId, setActiveSectionId] = useState<string>("");
+	const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
 	const initialRenderRef = useRef(true);
+	const zoom = useCanvasZoom();
 	const save = useCanvasAutoSave({ invitationId, document });
 	const documentUpdatedAt = document.metadata.updatedAt;
 
@@ -430,6 +338,45 @@ export function CanvasEditor({
 		if (section.id === activeSectionId) return;
 		setActiveSectionId(section.id);
 	}, [selectedBlocks, sections, activeSectionId]);
+
+	useEffect(() => {
+		const el = canvasRef.current;
+		if (!el) return;
+		const handler = zoom.handleWheel;
+		el.addEventListener("wheel", handler, { passive: false });
+		return () => el.removeEventListener("wheel", handler);
+	}, [zoom.handleWheel]);
+
+	// Warn before leaving with unsaved changes
+	useEffect(() => {
+		if (save.status !== "unsaved" && save.status !== "saving") return;
+		const handler = (e: BeforeUnloadEvent) => {
+			e.preventDefault();
+		};
+		window.addEventListener("beforeunload", handler);
+		return () => window.removeEventListener("beforeunload", handler);
+	}, [save.status]);
+
+	const handleZoomIn = useCallback(
+		() => zoom.zoomTo(zoom.camera.z * 1.25),
+		[zoom],
+	);
+	const handleZoomOut = useCallback(
+		() => zoom.zoomTo(zoom.camera.z / 1.25),
+		[zoom],
+	);
+	const handleZoomReset = useCallback(() => zoom.resetZoom(), [zoom]);
+	const handleZoomFit = useCallback(() => {
+		const el = canvasRef.current;
+		if (!el) return;
+		const rect = el.getBoundingClientRect();
+		zoom.fitContent(
+			document.canvas.width,
+			document.canvas.height,
+			rect.width,
+			rect.height,
+		);
+	}, [zoom, document.canvas.width, document.canvas.height]);
 
 	const getPosition = (blockId: string): Position | null =>
 		store.getState().document.blocksById[blockId]?.position ?? null;
@@ -632,45 +579,20 @@ export function CanvasEditor({
 				canRedo={canRedo}
 				onUndo={() => store.temporal.getState().undo()}
 				onRedo={() => store.temporal.getState().redo()}
-				onSave={() => void save.saveNow()}
 				saveStatus={save.status}
 				onAddBlock={handleAddBlock}
 				onToggleListView={() => setShowListView((prev) => !prev)}
 				listView={showListView}
 				animationsEnabled={animationsEnabled}
 				onToggleAnimations={() => setAnimationsEnabled((prev) => !prev)}
-				designTokens={document.designTokens}
-				onDesignTokenChange={(section, key, value) => {
-					store.getState().updateDesignToken(section, key, value);
-					if (section === "fonts") {
-						const latest = store.getState().document;
-						for (const blockId of latest.blockOrder) {
-							const block = latest.blocksById[blockId];
-							if (!block) continue;
-							if (key === "heading" && block.type === "heading") {
-								store.getState().restyleBlock(block.id, { fontFamily: value });
-							}
-							if (
-								key === "body" &&
-								(block.type === "text" ||
-									block.type === "timeline" ||
-									block.type === "map" ||
-									block.type === "form")
-							) {
-								store.getState().restyleBlock(block.id, { fontFamily: value });
-							}
-						}
-					}
-				}}
-				onSpacingChange={(spacing) => store.getState().setGridSpacing(spacing)}
 				onPreview={() => window.open(`/invite/${previewSlug}`, "_blank")}
 				onPublish={handlePublish}
 			/>
 
-			<div className="mx-auto w-full max-w-[1440px] p-4 pb-24 lg:grid lg:grid-cols-[190px_minmax(0,1fr)_360px] lg:gap-4 lg:pb-6">
-				<aside className="hidden rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] lg:block">
+			<div className="mx-auto w-full max-w-[1440px] px-2 pb-24 pt-2 lg:grid lg:grid-cols-[190px_minmax(0,1fr)_360px] lg:gap-2 lg:pb-2">
+				<aside className="hidden rounded-lg border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] lg:block">
 					<div className="border-b border-[color:var(--dm-border)] px-3 py-2">
-						<p className="text-[10px] uppercase tracking-[0.14em] text-[color:var(--dm-muted)]">
+						<p className="text-[11px] font-medium text-[color:var(--dm-ink-muted)]">
 							Sections
 						</p>
 					</div>
@@ -683,23 +605,23 @@ export function CanvasEditor({
 
 				<div className="min-w-0">
 					{showListView ? (
-						<ListView
+						<CanvasListView
 							document={document}
-							onMove={moveBlock}
-							onResize={resizeBlock}
-							onDelete={(blockId) => store.getState().removeBlock(blockId)}
+							selectedBlockIds={selectedBlockIds}
+							onSelect={(blockId) => store.getState().selectBlock(blockId)}
 						/>
 					) : (
-						<div className="flex justify-center">
+						<div className="flex justify-center rounded-lg dm-canvas-grid">
 							<div
 								ref={canvasRef}
-								className="relative h-[calc(100svh-180px)] max-h-[820px] overflow-auto rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] shadow-sm"
+								className="relative h-[calc(100svh-120px)] overflow-auto bg-[color:var(--dm-surface)]"
 								role="region"
 								aria-label="Invitation canvas"
 								style={{
 									width: document.canvas.width,
 									backgroundColor:
-										document.designTokens.colors.background || "var(--dm-surface)",
+										document.designTokens.colors.background ||
+										"var(--dm-surface)",
 								}}
 								onClick={(event) => {
 									if (event.target === event.currentTarget) {
@@ -716,110 +638,108 @@ export function CanvasEditor({
 									}
 								}}
 							>
-								{blocks.map((block) => (
-									<CanvasBlockNode
-										key={block.id}
-										block={block}
-										canvasRef={canvasRef}
-										selected={selectedBlockIds.includes(block.id)}
-										previewPosition={previewPositions[block.id]}
-										previewSize={previewSizes[block.id]}
-										onSelect={(additive) =>
-											store.getState().selectBlock(block.id, additive)
-										}
-										onDoubleClick={() => {
-											if (block.type === "text" || block.type === "heading") {
-												store.getState().startEditing(block.id);
+								<div
+									style={{
+										transform: `translate(${zoom.camera.x}px, ${zoom.camera.y}px) scale(${zoom.camera.z})`,
+										transformOrigin: "0 0",
+										width: document.canvas.width,
+										minHeight: document.canvas.height,
+									}}
+								>
+									{blocks.map((block) => (
+										<CanvasBlockNode
+											key={block.id}
+											block={block}
+											canvasRef={canvasRef}
+											selected={selectedBlockIds.includes(block.id)}
+											previewPosition={previewPositions[block.id]}
+											previewSize={previewSizes[block.id]}
+											onSelect={(additive) =>
+												store.getState().selectBlock(block.id, additive)
 											}
-										}}
-										onDelete={() => store.getState().removeBlock(block.id)}
-										onDuplicate={() => duplicateBlock(block.id)}
-										onLockToggle={() => toggleBlockLock(block.id)}
-										onBringForward={() => {
-											const order = [...store.getState().document.blockOrder];
-											const index = order.indexOf(block.id);
-											if (index < 0 || index === order.length - 1) return;
-											[order[index], order[index + 1]] = [
-												order[index + 1],
-												order[index],
-											];
-											store.getState().reorderBlocks(order);
-										}}
-										onSendBackward={() => {
-											const order = [...store.getState().document.blockOrder];
-											const index = order.indexOf(block.id);
-											if (index <= 0) return;
-											[order[index], order[index - 1]] = [
-												order[index - 1],
-												order[index],
-											];
-											store.getState().reorderBlocks(order);
-										}}
-										onBringToFront={() => {
-											const order = [...store.getState().document.blockOrder];
-											const index = order.indexOf(block.id);
-											if (index < 0 || index === order.length - 1) return;
-											order.splice(index, 1);
-											order.push(block.id);
-											store.getState().reorderBlocks(order);
-										}}
-										onSendToBack={() => {
-											const order = [...store.getState().document.blockOrder];
-											const index = order.indexOf(block.id);
-											if (index <= 0) return;
-											order.splice(index, 1);
-											order.unshift(block.id);
-											store.getState().reorderBlocks(order);
-										}}
-										onAiClick={() =>
-											setAiBlockId((current) =>
-												current === block.id ? null : block.id,
-											)
-										}
-										onMoveCommit={(position) => moveBlock(block.id, position)}
-										onResizeCommit={(size) => resizeBlock(block.id, size)}
-										onPreviewMove={(position, nextGuides) => {
-											setPreviewPositions((prev) => ({
-												...prev,
-												[block.id]: position,
-											}));
-											setGuides(nextGuides);
-										}}
-										onPreviewResize={(size) =>
-											setPreviewSizes((prev) => ({ ...prev, [block.id]: size }))
-										}
-										onClearGuides={() => setGuides([])}
-										snapPosition={({ position, size, disableSnap }) =>
-											calculateSnap({
-												position,
-												size,
-												activeBlockId: block.id,
-												blocks,
-												disableSnap,
-											})
-										}
-										showAi={aiBlockId === block.id}
-										onAiApply={(patch) => applyAiPatch(block.id, patch)}
-										onAiClose={() => setAiBlockId(null)}
-										editing={editingBlockId === block.id}
-										onInlineCommit={(text) => updateTextContent(block.id, text)}
-										onInlineCancel={() => store.getState().stopEditing()}
-										animationsEnabled={animationsEnabled}
+											onDoubleClick={() => {
+												if (block.type === "text" || block.type === "heading") {
+													store.getState().startEditing(block.id);
+												}
+											}}
+											onDelete={() => store.getState().removeBlock(block.id)}
+											onDuplicate={() => duplicateBlock(block.id)}
+											onLockToggle={() => toggleBlockLock(block.id)}
+											onBringToFront={() => {
+												const order = [...store.getState().document.blockOrder];
+												const index = order.indexOf(block.id);
+												if (index < 0 || index === order.length - 1) return;
+												order.splice(index, 1);
+												order.push(block.id);
+												store.getState().reorderBlocks(order);
+											}}
+											onSendToBack={() => {
+												const order = [...store.getState().document.blockOrder];
+												const index = order.indexOf(block.id);
+												if (index <= 0) return;
+												order.splice(index, 1);
+												order.unshift(block.id);
+												store.getState().reorderBlocks(order);
+											}}
+											onAiClick={() =>
+												setAiBlockId((current) =>
+													current === block.id ? null : block.id,
+												)
+											}
+											onMoveCommit={(position) => moveBlock(block.id, position)}
+											onResizeCommit={(size) => resizeBlock(block.id, size)}
+											onPreviewMove={(position, nextGuides) => {
+												setPreviewPositions((prev) => ({
+													...prev,
+													[block.id]: position,
+												}));
+												setGuides(nextGuides);
+											}}
+											onPreviewResize={(size) =>
+												setPreviewSizes((prev) => ({
+													...prev,
+													[block.id]: size,
+												}))
+											}
+											onClearGuides={() => setGuides([])}
+											snapPosition={({ position, size, disableSnap }) =>
+												calculateSnap({
+													position,
+													size,
+													activeBlockId: block.id,
+													blocks,
+													disableSnap,
+												})
+											}
+											showAi={aiBlockId === block.id}
+											onAiApply={(patch) => applyAiPatch(block.id, patch)}
+											onAiClose={() => setAiBlockId(null)}
+											editing={editingBlockId === block.id}
+											onInlineCommit={(text) =>
+												updateTextContent(block.id, text)
+											}
+											onInlineCancel={() => store.getState().stopEditing()}
+											animationsEnabled={animationsEnabled}
+										/>
+									))}
+									<AlignmentGuides
+										guides={guides}
+										canvasWidth={document.canvas.width}
+										canvasHeight={document.canvas.height}
 									/>
-								))}
-								<AlignmentGuides
-									guides={guides}
-									canvasWidth={document.canvas.width}
-									canvasHeight={document.canvas.height}
-								/>
+								</div>
 							</div>
 						</div>
 					)}
 				</div>
 
-				<aside className="hidden overflow-hidden rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] lg:block">
+				<aside
+					className="hidden overflow-hidden rounded-lg border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] lg:block"
+					role="group"
+					aria-label="Element inspector"
+				>
 					<div className="border-b border-[color:var(--dm-border)] px-4 py-3">
-						<p className="text-[10px] uppercase tracking-[0.14em] text-[color:var(--dm-muted)]">
+						<p className="text-[11px] font-medium text-[color:var(--dm-ink-muted)]">
 							Element inspector
 						</p>
 					</div>
@@ -834,6 +754,9 @@ export function CanvasEditor({
 						onDelete={(blockId) => store.getState().removeBlock(blockId)}
 						onDuplicate={duplicateBlock}
 						onToggleLock={toggleBlockLock}
+						onUpdateAnimation={(blockId, animation) =>
+							store.getState().updateBlock(blockId, { animation })
+						}
 						onBulkDelete={(blockIds) => {
 							for (const blockId of blockIds) {
 								store.getState().removeBlock(blockId);
@@ -849,35 +772,87 @@ export function CanvasEditor({
 								store.getState().restyleBlock(blockId, stylePatch);
 							}
 						}}
+						designTokens={document.designTokens}
+						onDesignTokenChange={(section, key, value) => {
+							store.getState().updateDesignToken(section, key, value);
+							if (section === "fonts") {
+								const latest = store.getState().document;
+								for (const blockId of latest.blockOrder) {
+									const block = latest.blocksById[blockId];
+									if (!block) continue;
+									if (key === "heading" && block.type === "heading") {
+										store
+											.getState()
+											.restyleBlock(block.id, { fontFamily: value });
+									}
+									if (
+										key === "body" &&
+										(block.type === "text" ||
+											block.type === "timeline" ||
+											block.type === "map" ||
+											block.type === "form")
+									) {
+										store
+											.getState()
+											.restyleBlock(block.id, { fontFamily: value });
+									}
+								}
+							}
+						}}
+						onSpacingChange={(spacing) =>
+							store.getState().setGridSpacing(spacing)
+						}
 					/>
 				</aside>
 			</div>
 
-			<div className="fixed inset-x-0 bottom-0 z-40 border-t border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] px-4 py-2 sm:hidden">
-				<div className="mx-auto flex max-w-md items-center justify-between gap-2">
-					<button
-						type="button"
-						className="min-h-11 flex-1 rounded-full border border-[color:var(--dm-border)] px-3 py-2 text-[10px] uppercase tracking-[0.14em]"
-						onClick={() => handleAddBlock("text")}
-					>
-						Add text
-					</button>
-					<button
-						type="button"
-						className="min-h-11 flex-1 rounded-full border border-[color:var(--dm-border)] px-3 py-2 text-[10px] uppercase tracking-[0.14em]"
-						onClick={() => handleAddBlock("image")}
-					>
-						Add image
-					</button>
-					<button
-						type="button"
-						className="min-h-11 flex-1 rounded-full border border-[color:var(--dm-border)] px-3 py-2 text-[10px] uppercase tracking-[0.14em]"
-						onClick={() => handleAddBlock("decorative")}
-					>
-						Add decor
-					</button>
-				</div>
-			</div>
+			<CanvasZoomControls
+				camera={zoom.camera}
+				onZoomIn={handleZoomIn}
+				onZoomOut={handleZoomOut}
+				onReset={handleZoomReset}
+				onFit={handleZoomFit}
+			/>
+
+			<MobileCanvasFab onClick={() => setMobileSheetOpen(true)} />
+			<MobileCanvasSheet
+				open={mobileSheetOpen}
+				onClose={() => setMobileSheetOpen(false)}
+				selectedBlocks={selectedBlocks}
+				onAddBlock={handleAddBlock}
+				onUpdateContent={updateBlockContentPatch}
+				onRestyle={(blockId, stylePatch) =>
+					store.getState().restyleBlock(blockId, stylePatch)
+				}
+				onMove={moveBlock}
+				onResize={resizeBlock}
+				onDelete={(blockId) => store.getState().removeBlock(blockId)}
+				onDuplicate={duplicateBlock}
+				onToggleLock={toggleBlockLock}
+				onUpdateAnimation={(blockId, animation) =>
+					store.getState().updateBlock(blockId, { animation })
+				}
+				onBulkDelete={(blockIds) => {
+					for (const blockId of blockIds) {
+						store.getState().removeBlock(blockId);
+					}
+				}}
+				onBulkLock={(blockIds, locked) => {
+					for (const blockId of blockIds) {
+						store.getState().updateBlock(blockId, { locked });
+					}
+				}}
+				onBulkRestyle={(blockIds, stylePatch) => {
+					for (const blockId of blockIds) {
+						store.getState().restyleBlock(blockId, stylePatch);
+					}
+				}}
+				designTokens={document.designTokens}
+				onDesignTokenChange={(section: "colors" | "fonts", key, value) => {
+					store.getState().updateDesignToken(section, key, value);
+				}}
+				onSpacingChange={(spacing) => store.getState().setGridSpacing(spacing)}
+			/>
 		</div>
 	);
 }

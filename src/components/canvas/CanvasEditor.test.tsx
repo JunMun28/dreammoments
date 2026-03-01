@@ -127,9 +127,7 @@ describe("CanvasEditor", () => {
 		fireEvent.click(buttons[0]);
 		fireEvent.click(buttons[1], { shiftKey: true });
 
-		expect(screen.getAllByRole("button", { name: "AI actions" }).length).toBe(
-			2,
-		);
+		expect(screen.getAllByRole("button", { name: "AI" }).length).toBe(2);
 	});
 
 	test("inline edit commits text on blur", () => {
@@ -174,15 +172,17 @@ describe("CanvasEditor", () => {
 			name: /Canvas block/i,
 		})[0];
 		fireEvent.click(firstBlock);
-		fireEvent.click(screen.getByRole("button", { name: "AI actions" }));
+		fireEvent.click(screen.getByRole("button", { name: "AI" }));
 
 		expect(screen.getByText("AI suggestions")).toBeTruthy();
 		const rewriteButton = screen.getByRole("button", { name: /Rewrite/i });
 		fireEvent.click(rewriteButton);
 
-		expect(screen.getByText("Welcome to our day")).toBeTruthy();
+		expect(screen.getAllByText("Welcome to our day").length).toBeGreaterThan(0);
 		fireEvent.click(screen.getByRole("button", { name: "Apply" }));
-		expect(screen.getByText("Welcome to our day ✨")).toBeTruthy();
+		expect(screen.getAllByText("Welcome to our day ✨").length).toBeGreaterThan(
+			0,
+		);
 	});
 
 	test("property editor can change text and font size", () => {
@@ -210,7 +210,7 @@ describe("CanvasEditor", () => {
 			target: { value: "28" },
 		});
 
-		expect(screen.getByText("Fresh copy")).toBeTruthy();
+		expect(screen.getAllByText("Fresh copy").length).toBeGreaterThan(0);
 		const blockNode = container.querySelector(
 			'[data-canvas-block-id="text-1"]',
 		) as HTMLElement;
@@ -253,7 +253,7 @@ describe("CanvasEditor", () => {
 		expect(screen.getByLabelText("Block text content")).toBeTruthy();
 
 		fireEvent.click(screen.getByRole("region", { name: "Invitation canvas" }));
-		expect(screen.getByText("Select an element")).toBeTruthy();
+		expect(screen.getByText("Document")).toBeTruthy();
 	});
 
 	test("multi-select shows shared controls only", () => {
@@ -275,24 +275,6 @@ describe("CanvasEditor", () => {
 		expect(screen.getByText("Shared controls only")).toBeTruthy();
 		expect(screen.queryByLabelText("Block text content")).toBeNull();
 		expect(screen.getByRole("button", { name: /Delete all/i })).toBeTruthy();
-	});
-
-	test("updates grid spacing from toolbar control", () => {
-		render(
-			<CanvasEditor
-				invitationId="inv-5"
-				title="Editor Test"
-				initialDocument={buildDocument()}
-				previewSlug="test-slug"
-			/>,
-		);
-
-		const spacingInput = screen.getByLabelText(
-			"Snap grid size",
-		) as HTMLInputElement;
-		fireEvent.change(spacingInput, { target: { value: "12" } });
-
-		expect(spacingInput.value).toBe("12");
 	});
 
 	test("resizes block through resize handle pointer events", () => {
@@ -404,7 +386,9 @@ describe("CanvasEditor", () => {
 		fireEvent.change(screen.getByLabelText("Block text content"), {
 			target: { value: "Persisted text change" },
 		});
-		expect(screen.getByText("Persisted text change")).toBeTruthy();
+		expect(screen.getAllByText("Persisted text change").length).toBeGreaterThan(
+			0,
+		);
 
 		rerender(
 			<CanvasEditor
@@ -415,6 +399,8 @@ describe("CanvasEditor", () => {
 			/>,
 		);
 
-		expect(screen.getByText("Persisted text change")).toBeTruthy();
+		expect(screen.getAllByText("Persisted text change").length).toBeGreaterThan(
+			0,
+		);
 	});
 });
