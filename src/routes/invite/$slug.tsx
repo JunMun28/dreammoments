@@ -62,6 +62,7 @@ const TEMPLATE_NAMES = new Set([
 	"garden-romance",
 	"eternal-elegance",
 	"love-at-dusk",
+	"double-happiness",
 ]);
 
 function capitalize(s: string): string {
@@ -152,12 +153,14 @@ const lightTemplates = new Set([
 	"garden-romance",
 	"eternal-elegance",
 	"blush-romance",
+	"double-happiness",
 ]);
 
 function resolveSampleTemplate(slug: string) {
 	if (slug.includes("blush-romance")) return "blush-romance";
 	if (slug.includes("garden-romance")) return "garden-romance";
 	if (slug.includes("eternal-elegance")) return "eternal-elegance";
+	if (slug.includes("double-happiness")) return "double-happiness";
 	return "love-at-dusk";
 }
 

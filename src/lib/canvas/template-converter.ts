@@ -9,6 +9,7 @@ const TEMPLATE_ACCENT_BY_ID: Record<string, string> = {
 	"eternal-elegance": "#C9A962",
 	"garden-romance": "#3F5F4E",
 	"love-at-dusk": "#8A5BFF",
+	"double-happiness": "#D4A843",
 };
 
 const DEFAULT_COLORS = {
