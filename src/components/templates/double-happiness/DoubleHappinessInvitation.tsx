@@ -6,9 +6,11 @@ import { LoadingSpinner } from "../../ui/LoadingSpinner";
 import AngpowQRCode from "../AngpowQRCode";
 import { CountdownWidget } from "../CountdownWidget";
 import {
+	CloudBorder,
 	CornerFlourish,
 	GoldDustParticles,
 	OrnamentalDivider,
+	SectionSeparator,
 } from "../decorations";
 import { makeEditableProps, parseAttendance } from "../helpers";
 import { MusicPlayer } from "../MusicPlayer";
@@ -215,6 +217,11 @@ export default function DoubleHappinessInvitation({
 				</div>
 			</SectionShell>
 
+			{/* Between hero and countdown */}
+			{!hiddenSections?.hero && !hiddenSections?.countdown && (
+				<SectionSeparator variant="cloud" />
+			)}
+
 			{/* ════════════════════════════════════════════
 			    2. COUNTDOWN
 			    ════════════════════════════════════════════ */}
@@ -224,8 +231,10 @@ export default function DoubleHappinessInvitation({
 				hidden={hiddenSections?.countdown}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="dh-section-cream px-6 py-20 sm:px-10"
+				className="dh-section-cream relative overflow-hidden px-6 py-20 sm:px-10"
 			>
+				<CloudBorder position="top-left" opacity={0.05} size={100} />
+				<CloudBorder position="bottom-right" opacity={0.05} size={100} />
 				<div className="mx-auto max-w-sm">
 					<div className="dh-ornamental-frame relative">
 						<CornerFlourish corner="tl" />
@@ -241,6 +250,11 @@ export default function DoubleHappinessInvitation({
 				</div>
 			</SectionShell>
 
+			{/* Between countdown and announcement */}
+			{!hiddenSections?.countdown && !hiddenSections?.announcement && (
+				<SectionSeparator variant="xi" />
+			)}
+
 			{/* ════════════════════════════════════════════
 			    3. ANNOUNCEMENT — Bilingual formal greeting
 			    ════════════════════════════════════════════ */}
@@ -250,8 +264,10 @@ export default function DoubleHappinessInvitation({
 				hidden={hiddenSections?.announcement}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="dh-section-cream relative px-6 py-24 sm:px-10"
+				className="dh-section-cream relative overflow-hidden px-6 py-24 sm:px-10"
 			>
+				<CloudBorder position="top-left" opacity={0.05} size={100} />
+				<CloudBorder position="bottom-right" opacity={0.05} size={100} />
 				<div className="mx-auto max-w-3xl text-center">
 					<OrnamentalDivider motif="xi" width="160px" className="mb-10" />
 
@@ -306,6 +322,11 @@ export default function DoubleHappinessInvitation({
 					<OrnamentalDivider motif="xi" width="160px" className="mt-10" />
 				</div>
 			</SectionShell>
+
+			{/* Between announcement and couple */}
+			{!hiddenSections?.announcement && !hiddenSections?.couple && (
+				<SectionSeparator variant="floral" />
+			)}
 
 			{/* ════════════════════════════════════════════
 			    4. COUPLE — Side-by-side portraits
@@ -426,6 +447,11 @@ export default function DoubleHappinessInvitation({
 				</div>
 			</SectionShell>
 
+			{/* Between couple and story */}
+			{!hiddenSections?.couple && !hiddenSections?.story && (
+				<SectionSeparator variant="cloud" />
+			)}
+
 			{/* ════════════════════════════════════════════
 			    5. STORY — Timeline with gold line
 			    ════════════════════════════════════════════ */}
@@ -435,8 +461,10 @@ export default function DoubleHappinessInvitation({
 				hidden={hiddenSections?.story}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="dh-section-cream px-6 py-24 sm:px-10"
+				className="dh-section-cream relative overflow-hidden px-6 py-24 sm:px-10"
 			>
+				<CloudBorder position="top-left" opacity={0.05} size={100} />
+				<CloudBorder position="bottom-right" opacity={0.05} size={100} />
 				<div className="mx-auto max-w-4xl">
 					<SectionTitle
 						zhLabel="爱 情 故 事"
@@ -491,6 +519,11 @@ export default function DoubleHappinessInvitation({
 					</div>
 				</div>
 			</SectionShell>
+
+			{/* Between story and gallery */}
+			{!hiddenSections?.story && !hiddenSections?.gallery && (
+				<SectionSeparator variant="xi" />
+			)}
 
 			{/* ════════════════════════════════════════════
 			    6. GALLERY — 2-column grid
@@ -553,6 +586,11 @@ export default function DoubleHappinessInvitation({
 				</div>
 			</SectionShell>
 
+			{/* Between gallery and schedule */}
+			{!hiddenSections?.gallery && !hiddenSections?.schedule && (
+				<SectionSeparator variant="floral" />
+			)}
+
 			{/* ════════════════════════════════════════════
 			    7. SCHEDULE — Event cards
 			    ════════════════════════════════════════════ */}
@@ -562,8 +600,10 @@ export default function DoubleHappinessInvitation({
 				hidden={hiddenSections?.schedule}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="dh-section-cream px-6 py-24 sm:px-10"
+				className="dh-section-cream relative overflow-hidden px-6 py-24 sm:px-10"
 			>
+				<CloudBorder position="top-left" opacity={0.05} size={100} />
+				<CloudBorder position="bottom-right" opacity={0.05} size={100} />
 				<div className="mx-auto max-w-4xl">
 					<SectionTitle
 						zhLabel="婚 礼 流 程"
@@ -622,6 +662,11 @@ export default function DoubleHappinessInvitation({
 					</div>
 				</div>
 			</SectionShell>
+
+			{/* Between schedule and venue */}
+			{!hiddenSections?.schedule && !hiddenSections?.venue && (
+				<SectionSeparator variant="cloud" />
+			)}
 
 			{/* ════════════════════════════════════════════
 			    8. VENUE — Name, address, map link
@@ -745,6 +790,11 @@ export default function DoubleHappinessInvitation({
 					</div>
 				</div>
 			</SectionShell>
+
+			{/* Between venue and rsvp */}
+			{!hiddenSections?.venue && !hiddenSections?.rsvp && (
+				<SectionSeparator variant="xi" />
+			)}
 
 			{/* ════════════════════════════════════════════
 			    9. RSVP — Full form on deep red bg
@@ -1179,6 +1229,9 @@ export default function DoubleHappinessInvitation({
 				</SectionShell>
 			)}
 
+			{/* Between rsvp/gift and footer */}
+			{!hiddenSections?.footer && <SectionSeparator variant="floral" />}
+
 			{/* ════════════════════════════════════════════
 			    11. FOOTER — Bilingual thank you
 			    ════════════════════════════════════════════ */}
@@ -1188,8 +1241,10 @@ export default function DoubleHappinessInvitation({
 				hidden={hiddenSections?.footer}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="dh-section-cream relative px-6 pb-20 pt-16 text-center sm:px-10"
+				className="dh-section-cream relative overflow-hidden px-6 pb-20 pt-16 text-center sm:px-10"
 			>
+				<CloudBorder position="top-left" opacity={0.05} size={100} />
+				<CloudBorder position="bottom-right" opacity={0.05} size={100} />
 				<div className="mx-auto max-w-3xl">
 					<OrnamentalDivider motif="cloud" width="120px" className="mb-10" />
 
