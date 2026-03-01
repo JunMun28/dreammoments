@@ -127,9 +127,7 @@ describe("CanvasEditor", () => {
 		fireEvent.click(buttons[0]);
 		fireEvent.click(buttons[1], { shiftKey: true });
 
-		expect(screen.getAllByRole("button", { name: "AI" }).length).toBe(
-			2,
-		);
+		expect(screen.getAllByRole("button", { name: "AI" }).length).toBe(2);
 	});
 
 	test("inline edit commits text on blur", () => {
@@ -182,7 +180,9 @@ describe("CanvasEditor", () => {
 
 		expect(screen.getAllByText("Welcome to our day").length).toBeGreaterThan(0);
 		fireEvent.click(screen.getByRole("button", { name: "Apply" }));
-		expect(screen.getAllByText("Welcome to our day ✨").length).toBeGreaterThan(0);
+		expect(screen.getAllByText("Welcome to our day ✨").length).toBeGreaterThan(
+			0,
+		);
 	});
 
 	test("property editor can change text and font size", () => {
@@ -386,7 +386,9 @@ describe("CanvasEditor", () => {
 		fireEvent.change(screen.getByLabelText("Block text content"), {
 			target: { value: "Persisted text change" },
 		});
-		expect(screen.getAllByText("Persisted text change").length).toBeGreaterThan(0);
+		expect(screen.getAllByText("Persisted text change").length).toBeGreaterThan(
+			0,
+		);
 
 		rerender(
 			<CanvasEditor
@@ -397,6 +399,8 @@ describe("CanvasEditor", () => {
 			/>,
 		);
 
-		expect(screen.getAllByText("Persisted text change").length).toBeGreaterThan(0);
+		expect(screen.getAllByText("Persisted text change").length).toBeGreaterThan(
+			0,
+		);
 	});
 });

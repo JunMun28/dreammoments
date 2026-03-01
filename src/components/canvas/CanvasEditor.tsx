@@ -9,21 +9,18 @@ import { AlignmentGuides } from "./AlignmentGuides";
 import { BlockInspectorSidebar } from "./BlockInspectorSidebar";
 import { BlockRenderer } from "./BlockRenderer";
 import { BlockToolbar } from "./BlockToolbar";
+import { CanvasListView } from "./CanvasListView";
 import { buildCanvasSections, CanvasSectionRail } from "./CanvasSectionRail";
 import { CanvasToolbar } from "./CanvasToolbar";
+import { CanvasZoomControls } from "./CanvasZoomControls";
 import { useCanvasAutoSave } from "./hooks/useCanvasAutoSave";
 import { useCanvasKeyboard } from "./hooks/useCanvasKeyboard";
+import { useCanvasZoom } from "./hooks/useCanvasZoom";
 import { useDragBlock } from "./hooks/useDragBlock";
 import { useResizeBlock } from "./hooks/useResizeBlock";
 import { type GuideLine, useSnapGuides } from "./hooks/useSnapGuides";
-import { CanvasListView } from "./CanvasListView";
-import { CanvasZoomControls } from "./CanvasZoomControls";
-import { useCanvasZoom } from "./hooks/useCanvasZoom";
 import { InlineTextEditor } from "./InlineTextEditor";
-import {
-	MobileCanvasFab,
-	MobileCanvasSheet,
-} from "./MobileCanvasSheet";
+import { MobileCanvasFab, MobileCanvasSheet } from "./MobileCanvasSheet";
 import { SelectionOverlay } from "./SelectionOverlay";
 
 const TOKEN_KEY = "dm-auth-token";
@@ -182,7 +179,7 @@ function CanvasBlockNode({
 		<div
 			className={cn(
 				"absolute rounded-[inherit] transition-shadow",
-				selected ? "z-30 shadow-[0_0_0_2px_rgba(217,70,116,0.25)]" : "z-10",
+				selected ? "z-30 shadow-[0_0_0_2px_rgba(196,114,127,0.25)]" : "z-10",
 				block.locked ? "opacity-80" : "cursor-move",
 			)}
 			style={{
@@ -224,7 +221,6 @@ function CanvasBlockNode({
 			{selected ? (
 				<>
 					<SelectionOverlay
-						block={block}
 						onResizePointerDown={resize.onPointerDown}
 						onResizePointerMove={resize.onPointerMove}
 						onResizePointerUp={resize.onPointerUp}
@@ -283,7 +279,10 @@ export function CanvasEditor({
 	const [showListView, setShowListView] = useState(false);
 	const [aiBlockId, setAiBlockId] = useState<string | null>(null);
 	const [animationsEnabled, setAnimationsEnabled] = useState(() => {
-		if (typeof window === "undefined" || typeof window.matchMedia !== "function")
+		if (
+			typeof window === "undefined" ||
+			typeof window.matchMedia !== "function"
+		)
 			return true;
 		return !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 	});
@@ -590,10 +589,10 @@ export function CanvasEditor({
 				onPublish={handlePublish}
 			/>
 
-			<div className="mx-auto w-full max-w-[1440px] p-4 pb-24 lg:grid lg:grid-cols-[190px_minmax(0,1fr)_360px] lg:gap-4 lg:pb-6">
-				<aside className="hidden rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] lg:block">
+			<div className="mx-auto w-full max-w-[1440px] px-2 pb-24 pt-2 lg:grid lg:grid-cols-[190px_minmax(0,1fr)_360px] lg:gap-2 lg:pb-2">
+				<aside className="hidden rounded-lg border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] lg:block">
 					<div className="border-b border-[color:var(--dm-border)] px-3 py-2">
-						<p className="text-[10px] uppercase tracking-[0.14em] text-[color:var(--dm-muted)]">
+						<p className="text-[11px] font-medium text-[color:var(--dm-ink-muted)]">
 							Sections
 						</p>
 					</div>
@@ -609,21 +608,20 @@ export function CanvasEditor({
 						<CanvasListView
 							document={document}
 							selectedBlockIds={selectedBlockIds}
-							onSelect={(blockId) =>
-								store.getState().selectBlock(blockId)
-							}
+							onSelect={(blockId) => store.getState().selectBlock(blockId)}
 						/>
 					) : (
-						<div className="flex justify-center">
+						<div className="flex justify-center rounded-lg dm-canvas-grid">
 							<div
 								ref={canvasRef}
-								className="relative h-[calc(100svh-180px)] max-h-[820px] overflow-hidden rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] shadow-sm"
+								className="relative h-[calc(100svh-120px)] overflow-auto bg-[color:var(--dm-surface)]"
 								role="region"
 								aria-label="Invitation canvas"
 								style={{
 									width: document.canvas.width,
 									backgroundColor:
-										document.designTokens.colors.background || "var(--dm-surface)",
+										document.designTokens.colors.background ||
+										"var(--dm-surface)",
 								}}
 								onClick={(event) => {
 									if (event.target === event.currentTarget) {
@@ -648,82 +646,87 @@ export function CanvasEditor({
 										minHeight: document.canvas.height,
 									}}
 								>
-								{blocks.map((block) => (
-									<CanvasBlockNode
-										key={block.id}
-										block={block}
-										canvasRef={canvasRef}
-										selected={selectedBlockIds.includes(block.id)}
-										previewPosition={previewPositions[block.id]}
-										previewSize={previewSizes[block.id]}
-										onSelect={(additive) =>
-											store.getState().selectBlock(block.id, additive)
-										}
-										onDoubleClick={() => {
-											if (block.type === "text" || block.type === "heading") {
-												store.getState().startEditing(block.id);
+									{blocks.map((block) => (
+										<CanvasBlockNode
+											key={block.id}
+											block={block}
+											canvasRef={canvasRef}
+											selected={selectedBlockIds.includes(block.id)}
+											previewPosition={previewPositions[block.id]}
+											previewSize={previewSizes[block.id]}
+											onSelect={(additive) =>
+												store.getState().selectBlock(block.id, additive)
 											}
-										}}
-										onDelete={() => store.getState().removeBlock(block.id)}
-										onDuplicate={() => duplicateBlock(block.id)}
-										onLockToggle={() => toggleBlockLock(block.id)}
-										onBringToFront={() => {
-											const order = [...store.getState().document.blockOrder];
-											const index = order.indexOf(block.id);
-											if (index < 0 || index === order.length - 1) return;
-											order.splice(index, 1);
-											order.push(block.id);
-											store.getState().reorderBlocks(order);
-										}}
-										onSendToBack={() => {
-											const order = [...store.getState().document.blockOrder];
-											const index = order.indexOf(block.id);
-											if (index <= 0) return;
-											order.splice(index, 1);
-											order.unshift(block.id);
-											store.getState().reorderBlocks(order);
-										}}
-										onAiClick={() =>
-											setAiBlockId((current) =>
-												current === block.id ? null : block.id,
-											)
-										}
-										onMoveCommit={(position) => moveBlock(block.id, position)}
-										onResizeCommit={(size) => resizeBlock(block.id, size)}
-										onPreviewMove={(position, nextGuides) => {
-											setPreviewPositions((prev) => ({
-												...prev,
-												[block.id]: position,
-											}));
-											setGuides(nextGuides);
-										}}
-										onPreviewResize={(size) =>
-											setPreviewSizes((prev) => ({ ...prev, [block.id]: size }))
-										}
-										onClearGuides={() => setGuides([])}
-										snapPosition={({ position, size, disableSnap }) =>
-											calculateSnap({
-												position,
-												size,
-												activeBlockId: block.id,
-												blocks,
-												disableSnap,
-											})
-										}
-										showAi={aiBlockId === block.id}
-										onAiApply={(patch) => applyAiPatch(block.id, patch)}
-										onAiClose={() => setAiBlockId(null)}
-										editing={editingBlockId === block.id}
-										onInlineCommit={(text) => updateTextContent(block.id, text)}
-										onInlineCancel={() => store.getState().stopEditing()}
-										animationsEnabled={animationsEnabled}
+											onDoubleClick={() => {
+												if (block.type === "text" || block.type === "heading") {
+													store.getState().startEditing(block.id);
+												}
+											}}
+											onDelete={() => store.getState().removeBlock(block.id)}
+											onDuplicate={() => duplicateBlock(block.id)}
+											onLockToggle={() => toggleBlockLock(block.id)}
+											onBringToFront={() => {
+												const order = [...store.getState().document.blockOrder];
+												const index = order.indexOf(block.id);
+												if (index < 0 || index === order.length - 1) return;
+												order.splice(index, 1);
+												order.push(block.id);
+												store.getState().reorderBlocks(order);
+											}}
+											onSendToBack={() => {
+												const order = [...store.getState().document.blockOrder];
+												const index = order.indexOf(block.id);
+												if (index <= 0) return;
+												order.splice(index, 1);
+												order.unshift(block.id);
+												store.getState().reorderBlocks(order);
+											}}
+											onAiClick={() =>
+												setAiBlockId((current) =>
+													current === block.id ? null : block.id,
+												)
+											}
+											onMoveCommit={(position) => moveBlock(block.id, position)}
+											onResizeCommit={(size) => resizeBlock(block.id, size)}
+											onPreviewMove={(position, nextGuides) => {
+												setPreviewPositions((prev) => ({
+													...prev,
+													[block.id]: position,
+												}));
+												setGuides(nextGuides);
+											}}
+											onPreviewResize={(size) =>
+												setPreviewSizes((prev) => ({
+													...prev,
+													[block.id]: size,
+												}))
+											}
+											onClearGuides={() => setGuides([])}
+											snapPosition={({ position, size, disableSnap }) =>
+												calculateSnap({
+													position,
+													size,
+													activeBlockId: block.id,
+													blocks,
+													disableSnap,
+												})
+											}
+											showAi={aiBlockId === block.id}
+											onAiApply={(patch) => applyAiPatch(block.id, patch)}
+											onAiClose={() => setAiBlockId(null)}
+											editing={editingBlockId === block.id}
+											onInlineCommit={(text) =>
+												updateTextContent(block.id, text)
+											}
+											onInlineCancel={() => store.getState().stopEditing()}
+											animationsEnabled={animationsEnabled}
+										/>
+									))}
+									<AlignmentGuides
+										guides={guides}
+										canvasWidth={document.canvas.width}
+										canvasHeight={document.canvas.height}
 									/>
-								))}
-								<AlignmentGuides
-									guides={guides}
-									canvasWidth={document.canvas.width}
-									canvasHeight={document.canvas.height}
-								/>
 								</div>
 							</div>
 						</div>
@@ -731,12 +734,12 @@ export function CanvasEditor({
 				</div>
 
 				<aside
-					className="hidden overflow-hidden rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] lg:block"
+					className="hidden overflow-hidden rounded-lg border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] lg:block"
 					role="group"
 					aria-label="Element inspector"
 				>
 					<div className="border-b border-[color:var(--dm-border)] px-4 py-3">
-						<p className="text-[10px] uppercase tracking-[0.14em] text-[color:var(--dm-muted)]">
+						<p className="text-[11px] font-medium text-[color:var(--dm-ink-muted)]">
 							Element inspector
 						</p>
 					</div>
@@ -775,7 +778,9 @@ export function CanvasEditor({
 									const block = latest.blocksById[blockId];
 									if (!block) continue;
 									if (key === "heading" && block.type === "heading") {
-										store.getState().restyleBlock(block.id, { fontFamily: value });
+										store
+											.getState()
+											.restyleBlock(block.id, { fontFamily: value });
 									}
 									if (
 										key === "body" &&
@@ -784,12 +789,16 @@ export function CanvasEditor({
 											block.type === "map" ||
 											block.type === "form")
 									) {
-										store.getState().restyleBlock(block.id, { fontFamily: value });
+										store
+											.getState()
+											.restyleBlock(block.id, { fontFamily: value });
 									}
 								}
 							}
 						}}
-						onSpacingChange={(spacing) => store.getState().setGridSpacing(spacing)}
+						onSpacingChange={(spacing) =>
+							store.getState().setGridSpacing(spacing)
+						}
 					/>
 				</aside>
 			</div>

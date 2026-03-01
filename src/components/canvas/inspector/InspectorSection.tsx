@@ -17,7 +17,7 @@ export function InspectorSection({
 			<button
 				type="button"
 				onClick={() => setOpen((prev) => !prev)}
-				className="flex w-full items-center justify-between px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-[color:var(--dm-ink-muted)] hover:bg-[color:var(--dm-surface-muted)] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[color:var(--dm-focus)] focus-visible:outline-none"
+				className="flex w-full items-center justify-between px-3 py-2 text-[11px] font-medium text-[color:var(--dm-ink-muted)] hover:bg-[color:var(--dm-surface-muted)] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[color:var(--dm-focus)] focus-visible:outline-none"
 			>
 				{title}
 				<ChevronDown
@@ -39,7 +39,7 @@ export function InspectorField({
 }) {
 	return (
 		<div className="grid gap-1">
-			<span className="text-[10px] uppercase tracking-[0.12em] text-[color:var(--dm-ink-soft)]">
+			<span className="text-[11px] text-[color:var(--dm-ink-soft)]">
 				{label}
 			</span>
 			{children}

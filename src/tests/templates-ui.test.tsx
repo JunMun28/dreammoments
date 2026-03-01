@@ -1,10 +1,7 @@
 import type { ComponentPropsWithoutRef, ComponentType, ReactNode } from "react";
 import { renderToString } from "react-dom/server";
 import { describe, expect, test, vi } from "vitest";
-import BlushRomanceInvitation from "../components/templates/blush-romance/BlushRomanceInvitation";
-import EternalEleganceInvitation from "../components/templates/eternal-elegance/EternalEleganceInvitation";
-import GardenRomanceInvitation from "../components/templates/garden-romance/GardenRomanceInvitation";
-import LoveAtDuskInvitation from "../components/templates/love-at-dusk/LoveAtDuskInvitation";
+import DoubleHappinessInvitation from "../components/templates/double-happiness/DoubleHappinessInvitation";
 import type { TemplateInvitationProps } from "../components/templates/types";
 import { buildSampleContent } from "../data/sample-invitation";
 import { templates } from "../templates";
@@ -20,10 +17,7 @@ const templateComponents: Record<
 	string,
 	ComponentType<TemplateInvitationProps>
 > = {
-	"garden-romance": GardenRomanceInvitation,
-	"eternal-elegance": EternalEleganceInvitation,
-	"blush-romance": BlushRomanceInvitation,
-	"love-at-dusk": LoveAtDuskInvitation,
+	"double-happiness": DoubleHappinessInvitation,
 };
 
 describe("template render coverage", () => {
@@ -35,7 +29,8 @@ describe("template render coverage", () => {
 					!section.defaultVisible,
 				]),
 			);
-			const Template = templateComponents[template.id] ?? LoveAtDuskInvitation;
+			const Template =
+				templateComponents[template.id] ?? DoubleHappinessInvitation;
 			const markup = renderToString(
 				<Template
 					content={buildSampleContent(template.id)}

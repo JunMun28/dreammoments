@@ -1,6 +1,10 @@
 import { useMemo } from "react";
 import type { Block } from "@/lib/canvas/types";
-import { InspectorField, InspectorSection, NumberInput } from "./InspectorSection";
+import {
+	InspectorField,
+	InspectorSection,
+	NumberInput,
+} from "./InspectorSection";
 
 export function ContentSection({
 	block,
@@ -59,9 +63,7 @@ export function ContentSection({
 							value={
 								typeof block.content.src === "string" ? block.content.src : ""
 							}
-							onChange={(event) =>
-								onUpdateContent({ src: event.target.value })
-							}
+							onChange={(event) => onUpdateContent({ src: event.target.value })}
 							aria-label="Image URL"
 							className="w-full rounded-lg border border-[color:var(--dm-border)] px-2 py-1.5 text-xs text-[color:var(--dm-ink)]"
 						/>
@@ -72,9 +74,7 @@ export function ContentSection({
 							value={
 								typeof block.content.alt === "string" ? block.content.alt : ""
 							}
-							onChange={(event) =>
-								onUpdateContent({ alt: event.target.value })
-							}
+							onChange={(event) => onUpdateContent({ alt: event.target.value })}
 							aria-label="Image alt text"
 							className="w-full rounded-lg border border-[color:var(--dm-border)] px-2 py-1.5 text-xs text-[color:var(--dm-ink)]"
 						/>
@@ -107,11 +107,9 @@ export function ContentSection({
 						value={
 							typeof block.content.color === "string"
 								? block.content.color
-								: "#d94674"
+								: "#C4727F"
 						}
-						onChange={(event) =>
-							onUpdateContent({ color: event.target.value })
-						}
+						onChange={(event) => onUpdateContent({ color: event.target.value })}
 						aria-label="Decorative color"
 						className="h-9 w-full rounded border border-[color:var(--dm-border)] p-1"
 					/>

@@ -57,13 +57,8 @@ function InviteLoadingState() {
 	);
 }
 
-const TEMPLATE_NAMES = new Set([
-	"blush-romance",
-	"garden-romance",
-	"eternal-elegance",
-	"love-at-dusk",
-	"double-happiness",
-]);
+const DEFAULT_TEMPLATE = "double-happiness";
+const TEMPLATE_NAMES = new Set([DEFAULT_TEMPLATE]);
 
 function capitalize(s: string): string {
 	return s.charAt(0).toUpperCase() + s.slice(1);
@@ -74,9 +69,9 @@ function parseCoupleNames(slug: string): string {
 	const parts = cleaned.split("-").filter(Boolean);
 
 	const nameparts: string[] = [];
-	for (const part of parts) {
-		if (TEMPLATE_NAMES.has(parts.slice(parts.indexOf(part)).join("-"))) break;
-		nameparts.push(part);
+	for (let i = 0; i < parts.length; i++) {
+		if (TEMPLATE_NAMES.has(parts.slice(i).join("-"))) break;
+		nameparts.push(parts[i]);
 	}
 
 	if (nameparts.length >= 3) {
@@ -149,20 +144,7 @@ export const Route = createFileRoute("/invite/$slug")({
 	errorComponent: InviteErrorFallback,
 });
 
-const lightTemplates = new Set([
-	"garden-romance",
-	"eternal-elegance",
-	"blush-romance",
-	"double-happiness",
-]);
-
-function resolveSampleTemplate(slug: string) {
-	if (slug.includes("blush-romance")) return "blush-romance";
-	if (slug.includes("garden-romance")) return "garden-romance";
-	if (slug.includes("eternal-elegance")) return "eternal-elegance";
-	if (slug.includes("double-happiness")) return "double-happiness";
-	return "love-at-dusk";
-}
+const lightTemplates = TEMPLATE_NAMES;
 
 function CanvasRsvpCard({
 	onSubmit,
@@ -273,7 +255,7 @@ function InviteScreen() {
 	const templateId =
 		(invitation?.templateSnapshot as { id?: string } | undefined)?.id ??
 		invitation?.templateId ??
-		resolveSampleTemplate(slug);
+		DEFAULT_TEMPLATE;
 	const sourceContent = invitation?.content ?? buildSampleContent(templateId);
 	const canvasDocument = migrateInvitationContentToCanvas(
 		sourceContent,
@@ -322,10 +304,7 @@ function InviteScreen() {
 
 	const headerLabel = useMemo(() => {
 		if (!isSample) return summary.title;
-		const label = templateId
-			.split("-")
-			.map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
-			.join(" ");
+		const label = templateId.split("-").map(capitalize).join(" ");
 		return `${label} Sample Invitation`;
 	}, [summary.title, isSample, templateId]);
 
@@ -344,7 +323,8 @@ function InviteScreen() {
 		}) => {
 			if (!invitation || invitation.status !== "published") return;
 			const visitorKey =
-				localStorage.getItem("dm-visitor") ?? `${Date.now()}-${Math.random()}`;
+				localStorage.getItem("dm-visitor") ??
+				`${Date.now()}-${Math.random().toString(36).slice(2)}`;
 			localStorage.setItem("dm-visitor", visitorKey);
 
 			submitRsvpMutation.mutate(

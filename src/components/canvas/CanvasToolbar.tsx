@@ -54,7 +54,7 @@ function SaveBadge({ status }: { status: string }) {
 					: "Unsaved";
 	return (
 		<span
-			className="rounded-full bg-[color:var(--dm-surface-muted)] px-2 py-0.5 text-[10px] uppercase tracking-wider text-[color:var(--dm-ink-muted)]"
+			className="rounded bg-[color:var(--dm-surface-muted)] px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-[color:var(--dm-ink-muted)]"
 			role="status"
 			aria-live="polite"
 		>
@@ -93,7 +93,7 @@ export function CanvasToolbar({
 	onToggleAnimations: () => void;
 }) {
 	return (
-		<div className="sticky top-0 z-50 border-b border-[color:var(--dm-border)] bg-[color:var(--dm-bg)]/95 px-4 py-2 backdrop-blur">
+		<div className="sticky top-0 z-50 border-b border-[color:var(--dm-border)] bg-[color:var(--dm-bg)] px-4 py-2">
 			<div className="flex items-center gap-1">
 				<p className="mr-2 shrink-0 text-sm font-semibold text-[color:var(--dm-ink)]">
 					{title}

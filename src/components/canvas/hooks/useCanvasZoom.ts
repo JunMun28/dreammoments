@@ -12,12 +12,9 @@ export function useCanvasZoom() {
 	const isPanningRef = useRef(false);
 	const lastPointerRef = useRef<{ x: number; y: number } | null>(null);
 
-	const zoomTo = useCallback(
-		(level: number) => {
-			setCamera((prev) => zoomAtPoint(prev, { x: 0, y: 0 }, level));
-		},
-		[],
-	);
+	const zoomTo = useCallback((level: number) => {
+		setCamera((prev) => zoomAtPoint(prev, { x: 0, y: 0 }, level));
+	}, []);
 
 	const zoomAtScreenPoint = useCallback(
 		(screenX: number, screenY: number, nextZoom: number) => {
@@ -28,23 +25,20 @@ export function useCanvasZoom() {
 		[],
 	);
 
-	const handleWheel = useCallback(
-		(event: WheelEvent) => {
-			// Cmd/Ctrl + scroll = zoom
-			if (event.metaKey || event.ctrlKey) {
-				event.preventDefault();
-				const zoomFactor = event.deltaY > 0 ? 0.95 : 1.05;
-				setCamera((prev) =>
-					zoomAtPoint(
-						prev,
-						{ x: event.clientX, y: event.clientY },
-						prev.z * zoomFactor,
-					),
-				);
-			}
-		},
-		[],
-	);
+	const handleWheel = useCallback((event: WheelEvent) => {
+		// Cmd/Ctrl + scroll = zoom
+		if (event.metaKey || event.ctrlKey) {
+			event.preventDefault();
+			const zoomFactor = event.deltaY > 0 ? 0.95 : 1.05;
+			setCamera((prev) =>
+				zoomAtPoint(
+					prev,
+					{ x: event.clientX, y: event.clientY },
+					prev.z * zoomFactor,
+				),
+			);
+		}
+	}, []);
 
 	const startPan = useCallback((clientX: number, clientY: number) => {
 		isPanningRef.current = true;

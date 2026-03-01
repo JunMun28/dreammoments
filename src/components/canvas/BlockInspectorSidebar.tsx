@@ -141,7 +141,7 @@ function SingleInspector({
 	return (
 		<div>
 			<div className="px-3 py-3">
-				<p className="text-[10px] uppercase tracking-[0.14em] text-[color:var(--dm-ink-muted)]">
+				<p className="text-[11px] text-[color:var(--dm-ink-muted)]">
 					Selected block
 				</p>
 				<p className="text-sm font-semibold capitalize text-[color:var(--dm-ink)]">
@@ -149,7 +149,11 @@ function SingleInspector({
 				</p>
 			</div>
 
-			<ContentSection block={block} onUpdateContent={onUpdateContent} onRestyle={onRestyle} />
+			<ContentSection
+				block={block}
+				onUpdateContent={onUpdateContent}
+				onRestyle={onRestyle}
+			/>
 			<LayoutSection
 				block={block}
 				onMove={onMove}

@@ -1,5 +1,9 @@
 import type { Block, Position, Size } from "@/lib/canvas/types";
-import { InspectorField, InspectorSection, NumberInput } from "./InspectorSection";
+import {
+	InspectorField,
+	InspectorSection,
+	NumberInput,
+} from "./InspectorSection";
 
 function coerceNumber(value: string, fallback: number): number {
 	const parsed = Number(value);

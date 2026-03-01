@@ -89,44 +89,20 @@ describe("buildSampleContent", () => {
 		);
 	});
 
-	test("customizes for love-at-dusk template", () => {
-		const content = buildSampleContent("love-at-dusk");
-		expect(content.hero.tagline).toBe("暮色里相遇，星光里相守");
+	test("customizes for double-happiness template", () => {
+		const content = buildSampleContent("double-happiness");
+		expect(content.hero.tagline).toBe("囍临门 · 永结同心");
+		expect(content.hero.partnerOneName).toBe("王小明");
+		expect(content.hero.partnerTwoName).toBe("李小红");
 		expect(content.announcement.title).toBe("我们结婚啦");
-		expect(content.footer.message).toBe("期待与您在婚礼相见。");
-	});
-
-	test("customizes for blush-romance template", () => {
-		const content = buildSampleContent("blush-romance");
-		expect(content.hero.tagline).toBe(
-			"Soft blush tones for a timeless promise.",
-		);
-		expect(content.announcement.title).toBe("Blush Romance");
-		expect(content.footer.message).toBe("With love, in gentle blush.");
-	});
-
-	test("customizes for garden-romance template", () => {
-		const content = buildSampleContent("garden-romance");
-		expect(content.hero.tagline).toBe("良缘天定 · 佳期如梦");
-		expect(content.announcement.formalText).toContain("谨定于");
-		expect(content.footer.message).toBe("百年好合 · 永结同心");
-	});
-
-	test("customizes for eternal-elegance template", () => {
-		const content = buildSampleContent("eternal-elegance");
-		expect(content.hero.tagline).toBe("Forever begins in elegant simplicity.");
-		expect(content.announcement.title).toBe("Eternal Elegance");
-		expect(content.footer.message).toBe("With love and gratitude.");
 	});
 
 	test("creates deep copy of content", () => {
-		const content1 = buildSampleContent("blush-romance");
-		const content2 = buildSampleContent("blush-romance");
+		const content1 = buildSampleContent("double-happiness");
+		const content2 = buildSampleContent("double-happiness");
 
 		// Modifying one should not affect the other
 		content1.hero.partnerOneName = "Modified";
-		expect(content2.hero.partnerOneName).toBe(
-			baseSampleContent.hero.partnerOneName,
-		);
+		expect(content2.hero.partnerOneName).toBe("王小明");
 	});
 });

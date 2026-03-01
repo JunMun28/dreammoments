@@ -19,6 +19,7 @@ import {
 	type ParticlePreset,
 } from "@/components/templates/animations";
 import type { Block, CanvasDocument } from "@/lib/canvas/types";
+import { toCssProperties } from "@/lib/canvas/types";
 import { cn } from "@/lib/utils";
 import { BlockRenderer } from "./BlockRenderer";
 
@@ -72,33 +73,12 @@ function getHeroImageSrc(blocks: Block[]): string | null {
 	return null;
 }
 
-function toCssProperties(style: Record<string, string>): CSSProperties {
-	const next: CSSProperties = {};
-	for (const [key, value] of Object.entries(style)) {
-		(next as Record<string, unknown>)[key] = value;
-	}
-	return next;
-}
-
-/** Map template IDs to particle and overlay presets */
-function getTemplateEffects(templateId: string): {
+/** Default particle and overlay presets for scene rendering. */
+function getTemplateEffects(): {
 	particle: ParticlePreset | null;
 	overlay: string | null;
 } {
-	switch (templateId) {
-		case "blush-romance":
-			return { particle: "petalRain", overlay: "dm-overlay-romantic" };
-		case "eternal-elegance":
-			return { particle: "goldDust", overlay: "dm-overlay-cinematic" };
-		case "garden-romance":
-			return { particle: "petalRain", overlay: "dm-overlay-romantic" };
-		case "love-at-dusk":
-			return { particle: "starlight", overlay: "dm-overlay-dramatic" };
-		case "double-happiness":
-			return { particle: "lanterns", overlay: "dm-overlay-golden" };
-		default:
-			return { particle: "goldDust", overlay: "dm-overlay-cinematic" };
-	}
+	return { particle: "lanterns", overlay: "dm-overlay-golden" };
 }
 
 /* ── Content Scale Hook ──────────────────────────────────────── */
@@ -366,10 +346,6 @@ function SceneProgressDots({
 /* ── Music Player ────────────────────────────────────────────── */
 
 const TEMPLATE_MUSIC: Record<string, string | null> = {
-	"blush-romance": null,
-	"eternal-elegance": null,
-	"garden-romance": null,
-	"love-at-dusk": null,
 	"double-happiness": null,
 };
 
@@ -467,10 +443,7 @@ export function ScenePageEngine({
 	const canvasWidth = doc.canvas.width;
 	const backgroundColor = doc.designTokens.colors.background ?? "#ffffff";
 	const accentColor = doc.designTokens.colors.primary ?? "#C4727F";
-	const effects = useMemo(
-		() => getTemplateEffects(doc.templateId),
-		[doc.templateId],
-	);
+	const effects = useMemo(() => getTemplateEffects(), []);
 	const contentScale = useContentScale(canvasWidth);
 
 	// Track active section via IntersectionObserver

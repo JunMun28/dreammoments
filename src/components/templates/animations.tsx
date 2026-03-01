@@ -128,17 +128,52 @@ export function Stagger({
 
 // ── Floating particle system ─────────────────────────────────────────
 
-type ParticlePreset = "petalRain" | "goldDust" | "starlight" | "snowfall" | "lanterns";
+type ParticlePreset =
+	| "petalRain"
+	| "goldDust"
+	| "starlight"
+	| "snowfall"
+	| "lanterns";
 
 const PARTICLE_PRESETS: Record<
 	ParticlePreset,
-	{ count: number; color: string; shape: "circle" | "petal" | "sparkle"; drift: "down" | "up" | "float" }
+	{
+		count: number;
+		color: string;
+		shape: "circle" | "petal" | "sparkle";
+		drift: "down" | "up" | "float";
+	}
 > = {
-	petalRain: { count: 18, color: "rgba(196, 114, 127, 0.5)", shape: "petal", drift: "down" },
-	goldDust: { count: 24, color: "rgba(212, 175, 55, 0.6)", shape: "sparkle", drift: "up" },
-	starlight: { count: 16, color: "rgba(255, 255, 255, 0.7)", shape: "sparkle", drift: "float" },
-	snowfall: { count: 20, color: "rgba(255, 255, 255, 0.5)", shape: "circle", drift: "down" },
-	lanterns: { count: 8, color: "rgba(255, 160, 50, 0.6)", shape: "circle", drift: "up" },
+	petalRain: {
+		count: 18,
+		color: "rgba(196, 114, 127, 0.5)",
+		shape: "petal",
+		drift: "down",
+	},
+	goldDust: {
+		count: 24,
+		color: "rgba(212, 175, 55, 0.6)",
+		shape: "sparkle",
+		drift: "up",
+	},
+	starlight: {
+		count: 16,
+		color: "rgba(255, 255, 255, 0.7)",
+		shape: "sparkle",
+		drift: "float",
+	},
+	snowfall: {
+		count: 20,
+		color: "rgba(255, 255, 255, 0.5)",
+		shape: "circle",
+		drift: "down",
+	},
+	lanterns: {
+		count: 8,
+		color: "rgba(255, 160, 50, 0.6)",
+		shape: "circle",
+		drift: "up",
+	},
 };
 
 interface ParticleFieldProps {
@@ -199,7 +234,13 @@ export function ParticleField({
 			aria-hidden="true"
 		>
 			{particles.map((p) => (
-				<ParticleElement key={p.id} particle={p} color={color} shape={shape} drift={drift} />
+				<ParticleElement
+					key={p.id}
+					particle={p}
+					color={color}
+					shape={shape}
+					drift={drift}
+				/>
 			))}
 		</div>
 	);
@@ -431,11 +472,13 @@ export type { ParticlePreset };
 // ── Hook: prefers-reduced-motion ─────────────────────────────────────
 
 function usePrefersReducedMotion(): boolean {
-	const [prefersReduced, setPrefersReduced] = useState(false);
+	const [prefersReduced, setPrefersReduced] = useState(() => {
+		if (typeof window === "undefined") return false;
+		return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+	});
 
 	useEffect(() => {
 		const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-		setPrefersReduced(mq.matches);
 		const handler = (e: MediaQueryListEvent) => setPrefersReduced(e.matches);
 		mq.addEventListener("change", handler);
 		return () => mq.removeEventListener("change", handler);

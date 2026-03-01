@@ -39,7 +39,7 @@ export function CanvasZoomControls({
 
 	return (
 		<div
-			className="fixed bottom-4 right-4 z-50 hidden items-center gap-0.5 rounded-xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)]/95 px-1.5 py-1 shadow-[0_2px_12px_rgba(74,78,85,0.08)] backdrop-blur-sm lg:flex"
+			className="fixed bottom-3 right-3 z-50 hidden items-center gap-0.5 rounded-lg border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] px-1.5 py-1 shadow-sm lg:flex"
 			role="toolbar"
 			aria-label="Zoom controls"
 		>

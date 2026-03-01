@@ -1,5 +1,5 @@
-import { lazy, Suspense, useState } from "react";
 import { Flower2, Image, Menu, Plus, Type } from "lucide-react";
+import { lazy, Suspense, useState } from "react";
 import type { Block, CanvasDocument } from "@/lib/canvas/types";
 import { cn } from "@/lib/utils";
 import { BlockInspectorSidebar } from "./BlockInspectorSidebar";
@@ -21,12 +21,10 @@ function AddBlockButton({
 		<button
 			type="button"
 			onClick={onClick}
-			className="flex flex-col items-center gap-1 rounded-xl border border-[color:var(--dm-border)] px-4 py-3 text-[color:var(--dm-ink)] transition-colors hover:bg-[color:var(--dm-surface-muted)]"
+			className="flex flex-col items-center gap-1 rounded-lg border border-[color:var(--dm-border)] px-4 py-3 text-[color:var(--dm-ink)] transition-colors hover:bg-[color:var(--dm-surface-muted)]"
 		>
 			{icon}
-			<span className="text-[10px] uppercase tracking-[0.12em]">
-				{label}
-			</span>
+			<span className="text-[11px] font-medium">{label}</span>
 		</button>
 	);
 }
@@ -36,7 +34,7 @@ export function MobileCanvasFab({ onClick }: { onClick: () => void }) {
 		<button
 			type="button"
 			onClick={onClick}
-			className="fixed bottom-5 right-5 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-[color:var(--dm-peach)] text-white shadow-lg transition-transform active:scale-95 sm:hidden"
+			className="fixed bottom-5 right-5 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-[color:var(--dm-primary)] text-white shadow-md transition-transform active:scale-95 sm:hidden"
 			aria-label="Open inspector"
 		>
 			<Menu className="h-5 w-5" />
@@ -70,10 +68,7 @@ export function MobileCanvasSheet({
 	onUpdateContent: (blockId: string, patch: Record<string, unknown>) => void;
 	onRestyle: (blockId: string, stylePatch: Record<string, string>) => void;
 	onMove: (blockId: string, position: { x: number; y: number }) => void;
-	onResize: (
-		blockId: string,
-		size: { width: number; height: number },
-	) => void;
+	onResize: (blockId: string, size: { width: number; height: number }) => void;
 	onDelete: (blockId: string) => void;
 	onDuplicate: (blockId: string) => void;
 	onToggleLock: (blockId: string) => void;
@@ -103,7 +98,7 @@ export function MobileCanvasSheet({
 						type="button"
 						onClick={() => setTab("inspector")}
 						className={cn(
-							"rounded-full px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.12em] transition-colors",
+							"rounded-lg px-3 py-1.5 text-[11px] font-medium transition-colors",
 							tab === "inspector"
 								? "bg-[color:var(--dm-peach)]/15 text-[color:var(--dm-peach)]"
 								: "text-[color:var(--dm-muted)]",
@@ -115,7 +110,7 @@ export function MobileCanvasSheet({
 						type="button"
 						onClick={() => setTab("add")}
 						className={cn(
-							"rounded-full px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.12em] transition-colors",
+							"rounded-lg px-3 py-1.5 text-[11px] font-medium transition-colors",
 							tab === "add"
 								? "bg-[color:var(--dm-peach)]/15 text-[color:var(--dm-peach)]"
 								: "text-[color:var(--dm-muted)]",
@@ -139,9 +134,7 @@ export function MobileCanvasSheet({
 							/>
 							<AddBlockButton
 								label="Heading"
-								icon={
-									<span className="text-sm font-bold">H</span>
-								}
+								icon={<span className="text-sm font-bold">H</span>}
 								onClick={() => {
 									onAddBlock("heading");
 									onClose();

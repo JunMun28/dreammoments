@@ -1,20 +1,9 @@
 import { describe, expect, test } from "vitest";
-import {
-	blushRomanceTemplate,
-	doubleHappinessTemplate,
-	eternalEleganceTemplate,
-	gardenRomanceTemplate,
-	loveAtDuskTemplate,
-	templates,
-} from "../templates";
+import { doubleHappinessTemplate, templates } from "../templates";
 
 describe("templates array", () => {
-	test("contains all five templates", () => {
-		expect(templates).toHaveLength(5);
-		expect(templates.map((t) => t.id)).toContain("blush-romance");
-		expect(templates.map((t) => t.id)).toContain("love-at-dusk");
-		expect(templates.map((t) => t.id)).toContain("garden-romance");
-		expect(templates.map((t) => t.id)).toContain("eternal-elegance");
+	test("contains the double-happiness template", () => {
+		expect(templates).toHaveLength(1);
 		expect(templates.map((t) => t.id)).toContain("double-happiness");
 	});
 
@@ -119,60 +108,6 @@ describe("templates array", () => {
 });
 
 describe("individual templates", () => {
-	describe("blushRomanceTemplate", () => {
-		test("has correct ID", () => {
-			expect(blushRomanceTemplate.id).toBe("blush-romance");
-		});
-
-		test("has correct name", () => {
-			expect(blushRomanceTemplate.name).toBe("Blush Romance");
-			expect(blushRomanceTemplate.nameZh).toBe("胭脂之恋");
-		});
-
-		test("has expected sections", () => {
-			const sectionIds = blushRomanceTemplate.sections.map((s) => s.id);
-			expect(sectionIds).toContain("hero");
-			expect(sectionIds).toContain("announcement");
-			expect(sectionIds).toContain("story");
-			expect(sectionIds).toContain("gallery");
-			expect(sectionIds).toContain("schedule");
-			expect(sectionIds).toContain("venue");
-			expect(sectionIds).toContain("rsvp");
-			expect(sectionIds).toContain("faq");
-			expect(sectionIds).toContain("footer");
-		});
-	});
-
-	describe("loveAtDuskTemplate", () => {
-		test("has correct ID", () => {
-			expect(loveAtDuskTemplate.id).toBe("love-at-dusk");
-		});
-
-		test("has correct category", () => {
-			expect(loveAtDuskTemplate.category).toBe("chinese");
-		});
-	});
-
-	describe("gardenRomanceTemplate", () => {
-		test("has correct ID", () => {
-			expect(gardenRomanceTemplate.id).toBe("garden-romance");
-		});
-
-		test("has correct category", () => {
-			expect(gardenRomanceTemplate.category).toBe("chinese");
-		});
-	});
-
-	describe("eternalEleganceTemplate", () => {
-		test("has correct ID", () => {
-			expect(eternalEleganceTemplate.id).toBe("eternal-elegance");
-		});
-
-		test("has correct category", () => {
-			expect(eternalEleganceTemplate.category).toBe("western");
-		});
-	});
-
 	describe("doubleHappinessTemplate", () => {
 		test("has correct ID", () => {
 			expect(doubleHappinessTemplate.id).toBe("double-happiness");

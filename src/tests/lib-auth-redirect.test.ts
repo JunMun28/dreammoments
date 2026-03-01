@@ -66,9 +66,9 @@ describe("readRedirectFromSearch", () => {
 	});
 
 	test("decodes URL-encoded redirect", () => {
-		const search = "?redirect=%2Feditor%2Fnew%3Ftemplate%3Dblush-romance";
+		const search = "?redirect=%2Feditor%2Fnew%3Ftemplate%3Ddouble-happiness";
 		expect(readRedirectFromSearch(search)).toBe(
-			"/editor/new?template=blush-romance",
+			"/editor/new?template=double-happiness",
 		);
 	});
 

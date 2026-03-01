@@ -163,7 +163,7 @@ vi.mock("@/data/sample-invitation", () => ({
 vi.mock("@/templates/index", () => ({
 	templates: [
 		{
-			id: "blush-romance",
+			id: "double-happiness",
 			version: "1.0",
 			sections: [{ id: "hero", defaultVisible: true }],
 		},

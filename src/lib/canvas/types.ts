@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react";
+
 export type CanvasDocumentVersion = "2.0";
 
 export type BlockType =
@@ -94,6 +96,15 @@ export interface CanvasDocument {
 	blockOrder: string[];
 	designTokens: DesignTokens;
 	metadata: CanvasDocumentMetadata;
+}
+
+/** Cast a block's string→string style record to React CSSProperties. */
+export function toCssProperties(style: Record<string, string>): CSSProperties {
+	const next: CSSProperties = {};
+	for (const [key, value] of Object.entries(style)) {
+		(next as Record<string, unknown>)[key] = value;
+	}
+	return next;
 }
 
 export function createEmptyCanvasDocument(

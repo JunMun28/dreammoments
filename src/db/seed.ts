@@ -60,12 +60,7 @@ const sampleUsers = [
 	},
 ];
 
-const templateIds = [
-	"love-at-dusk",
-	"blush-romance",
-	"garden-romance",
-	"eternal-elegance",
-];
+const templateIds = ["double-happiness"];
 
 async function clearDatabase() {
 	console.log("Clearing existing data...");
@@ -128,8 +123,8 @@ async function seedInvitations(users: (typeof schema.users.$inferSelect)[]) {
 					footer: true,
 				},
 				designOverrides: {},
-				status: templateId === "love-at-dusk" ? "published" : "draft",
-				publishedAt: templateId === "love-at-dusk" ? new Date() : null,
+				status: "published",
+				publishedAt: new Date(),
 				aiGenerationsUsed: 0,
 				invitedCount: 0,
 			});
@@ -139,12 +134,12 @@ async function seedInvitations(users: (typeof schema.users.$inferSelect)[]) {
 	// Create invitation for Sarah
 	const sarahUser = users.find((u) => u.email === "sarah.lim@example.com");
 	if (sarahUser) {
-		const content = buildSampleContent("garden-romance");
+		const content = buildSampleContent("double-happiness");
 		invitations.push({
 			userId: sarahUser.id,
 			slug: `sarah-michael-wedding-${Date.now().toString(36)}`,
 			title: "Sarah & Michael Wedding",
-			templateId: "garden-romance",
+			templateId: "double-happiness",
 			templateVersion: "1.0.0",
 			templateSnapshot: null,
 			content: content as unknown as Record<string, unknown>,

@@ -86,7 +86,9 @@
 /* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
 	.double-happiness * {
+		/* biome-ignore lint/complexity/noImportantStyles: required for a11y override */
 		animation-duration: 0.01ms !important;
+		/* biome-ignore lint/complexity/noImportantStyles: required for a11y override */
 		transition-duration: 0.01ms !important;
 	}
 }

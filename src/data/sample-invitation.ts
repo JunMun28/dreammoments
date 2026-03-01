@@ -142,31 +142,6 @@ export const baseSampleContent: InvitationContent = {
 
 export function buildSampleContent(templateId: string): InvitationContent {
 	const base = structuredClone(baseSampleContent);
-	if (templateId === "love-at-dusk") {
-		base.hero.tagline = "暮色里相遇，星光里相守";
-		base.announcement.title = "我们结婚啦";
-		base.announcement.formalText = "诚挚邀请您参加我们的婚礼。";
-		base.footer.message = "期待与您在婚礼相见。";
-	}
-	if (templateId === "blush-romance") {
-		base.hero.tagline = "Soft blush tones for a timeless promise.";
-		base.announcement.title = "Blush Romance";
-		base.footer.message = "With love, in gentle blush.";
-	}
-	if (templateId === "garden-romance") {
-		base.hero.tagline = "良缘天定 · 佳期如梦";
-		base.announcement.title = "We Joyfully Invite You";
-		base.announcement.message =
-			"Together with our beloved families, we request the honour of your presence at the celebration of our marriage.";
-		base.announcement.formalText =
-			"谨定于良辰吉日，诚邀阁下拨冗光临，共证我们的幸福时刻。";
-		base.footer.message = "百年好合 · 永结同心";
-	}
-	if (templateId === "eternal-elegance") {
-		base.hero.tagline = "Forever begins in elegant simplicity.";
-		base.announcement.title = "Eternal Elegance";
-		base.footer.message = "With love and gratitude.";
-	}
 	if (templateId === "double-happiness") {
 		base.hero.tagline = "囍临门 · 永结同心";
 		base.hero.partnerOneName = "王小明";

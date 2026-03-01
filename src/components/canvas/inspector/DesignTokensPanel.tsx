@@ -1,5 +1,9 @@
 import type { DesignTokens } from "@/lib/canvas/types";
-import { InspectorField, InspectorSection, NumberInput } from "./InspectorSection";
+import {
+	InspectorField,
+	InspectorSection,
+	NumberInput,
+} from "./InspectorSection";
 
 export function DesignTokensPanel({
 	designTokens,
@@ -83,9 +87,7 @@ export function DesignTokensPanel({
 						min={1}
 						max={24}
 						suffix="px"
-						onChange={(next) =>
-							onSpacingChange(Math.max(1, Number(next) || 8))
-						}
+						onChange={(next) => onSpacingChange(Math.max(1, Number(next) || 8))}
 					/>
 				</InspectorField>
 			</InspectorSection>

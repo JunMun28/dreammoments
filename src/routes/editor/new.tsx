@@ -28,10 +28,6 @@ const categoryLabels: Record<string, string> = {
 
 /** Map template id to preview image path */
 const templatePreviewImages: Record<string, string> = {
-	"blush-romance": "/img/template-blush-romance.png",
-	"love-at-dusk": "/img/template-love-at-dusk.png",
-	"garden-romance": "/img/template-garden-romance.png",
-	"eternal-elegance": "/img/template-eternal-elegance.png",
 	"double-happiness": "/img/template-double-happiness.png",
 };
 

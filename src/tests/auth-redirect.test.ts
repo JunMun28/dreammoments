@@ -9,8 +9,8 @@ import {
 
 describe("auth redirect", () => {
 	test("keeps valid internal redirect", () => {
-		expect(sanitizeRedirect("/editor/new?template=love-at-dusk")).toBe(
-			"/editor/new?template=love-at-dusk",
+		expect(sanitizeRedirect("/editor/new?template=double-happiness")).toBe(
+			"/editor/new?template=double-happiness",
 		);
 	});
 
@@ -29,22 +29,22 @@ describe("auth redirect", () => {
 	test("reads redirect query for login and signup", () => {
 		expect(
 			readRedirectFromSearch(
-				"?redirect=%2Feditor%2Fnew%3Ftemplate%3Dblush-romance",
+				"?redirect=%2Feditor%2Fnew%3Ftemplate%3Ddouble-happiness",
 			),
-		).toBe("/editor/new?template=blush-romance");
+		).toBe("/editor/new?template=double-happiness");
 	});
 
 	test("reads oauth state redirect for callback", () => {
 		expect(
 			readRedirectFromStateSearch(
-				"?code=abc&state=%252Feditor%252Fnew%253Ftemplate%253Dgarden-romance",
+				"?code=abc&state=%252Feditor%252Fnew%253Ftemplate%253Ddouble-happiness",
 			),
-		).toBe("/editor/new?template=garden-romance");
+		).toBe("/editor/new?template=double-happiness");
 	});
 
 	test("builds redirect from current editor path and search", () => {
 		expect(
-			buildRedirectFromLocation("/editor/new", "?template=eternal-elegance"),
-		).toBe("/editor/new?template=eternal-elegance");
+			buildRedirectFromLocation("/editor/new", "?template=double-happiness"),
+		).toBe("/editor/new?template=double-happiness");
 	});
 });

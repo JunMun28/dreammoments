@@ -6,12 +6,7 @@ import { buildSampleContent } from "@/data/sample-invitation";
 import { convertTemplateToCanvasDocument } from "@/lib/canvas/template-converter";
 import { CanvasEngine } from "./CanvasEngine";
 
-const TEMPLATE_IDS = [
-	"blush-romance",
-	"eternal-elegance",
-	"garden-romance",
-	"love-at-dusk",
-] as const;
+const TEMPLATE_IDS = ["double-happiness"] as const;
 
 describe("Canvas template fidelity", () => {
 	test.each(TEMPLATE_IDS)(

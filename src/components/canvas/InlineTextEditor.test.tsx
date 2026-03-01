@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, test, vi, beforeEach, afterEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { InlineTextEditor } from "./InlineTextEditor";
 
 function makeBlock(text: string) {
@@ -20,13 +20,10 @@ function makeBlock(text: string) {
 
 describe("InlineTextEditor", () => {
 	beforeEach(() => {
-		vi.stubGlobal(
-			"requestAnimationFrame",
-			(callback: FrameRequestCallback) => {
-				callback(0);
-				return 1;
-			},
-		);
+		vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+			callback(0);
+			return 1;
+		});
 		vi.stubGlobal("cancelAnimationFrame", vi.fn());
 	});
 

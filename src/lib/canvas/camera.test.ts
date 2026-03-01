@@ -1,11 +1,11 @@
 import { describe, expect, test } from "vitest";
 import {
 	type Camera,
+	canvasToScreen,
 	DEFAULT_CAMERA,
+	fitToViewport,
 	MAX_ZOOM,
 	MIN_ZOOM,
-	canvasToScreen,
-	fitToViewport,
 	panCamera,
 	screenToCanvas,
 	zoomAtPoint,

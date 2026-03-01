@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import type { Block, BlockType, CanvasDocument } from "@/lib/canvas/types";
 import { cn } from "@/lib/utils";
+import { getSectionLabel } from "@/templates/types";
 import { resolveBlockSectionId } from "./CanvasSectionRail";
 
 function blockTypeIcon(type: BlockType) {
@@ -81,7 +82,7 @@ function ListRow({ block, selected, onSelect }: ListRowProps) {
 				<p className="truncate text-xs font-medium text-[color:var(--dm-ink)]">
 					{blockPreviewText(block)}
 				</p>
-				<p className="text-[10px] text-[color:var(--dm-muted)]">
+				<p className="text-[11px] text-[color:var(--dm-ink-soft)]">
 					{block.type}
 					{block.locked ? " · locked" : ""}
 				</p>
@@ -128,8 +129,8 @@ export function CanvasListView({
 			{hasSections
 				? Array.from(sectionMap.entries()).map(([sectionId, sectionBlocks]) => (
 						<div key={sectionId}>
-							<p className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[color:var(--dm-muted)]">
-								{sectionId.replace(/^\w/, (c) => c.toUpperCase())}
+							<p className="px-3 py-1.5 text-[11px] font-medium text-[color:var(--dm-ink-muted)]">
+								{getSectionLabel(sectionId)}
 							</p>
 							{sectionBlocks.map((block) => (
 								<ListRow

@@ -5,10 +5,6 @@ import type { TemplateConfig } from "@/templates/types";
 import type { Block, CanvasDocument, DesignTokens } from "./types";
 
 const TEMPLATE_ACCENT_BY_ID: Record<string, string> = {
-	"blush-romance": "#D94674",
-	"eternal-elegance": "#C9A962",
-	"garden-romance": "#3F5F4E",
-	"love-at-dusk": "#8A5BFF",
 	"double-happiness": "#D4A843",
 };
 
@@ -421,12 +417,6 @@ export function convertToCanvasDocument(
 			migrationToolVersion: "canvas-migrator-1",
 		},
 	};
-}
-
-export function convertBlushRomanceToCanvasDocument(
-	content: InvitationContent,
-): CanvasDocument {
-	return convertToCanvasDocument("blush-romance", content);
 }
 
 export function convertTemplateToCanvasDocument(

@@ -63,7 +63,7 @@ export function BlockToolbar({
 }) {
 	return (
 		<div
-			className="absolute -top-11 left-1/2 z-50 flex -translate-x-1/2 items-center gap-0.5 rounded-xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)]/95 px-1.5 py-1 shadow-[0_2px_12px_rgba(74,78,85,0.08)] backdrop-blur-sm"
+			className="absolute -top-11 left-1/2 z-50 flex -translate-x-1/2 items-center gap-0.5 rounded-lg border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] px-1.5 py-1 shadow-sm"
 			role="toolbar"
 			aria-label="Block actions"
 			onPointerDown={(e) => e.stopPropagation()}
@@ -86,15 +86,8 @@ export function BlockToolbar({
 
 			<Separator />
 
-			<IconButton
-				label={locked ? "Unlock" : "Lock"}
-				onClick={onLockToggle}
-			>
-				{locked ? (
-					<Unlock className="h-4 w-4" />
-				) : (
-					<Lock className="h-4 w-4" />
-				)}
+			<IconButton label={locked ? "Unlock" : "Lock"} onClick={onLockToggle}>
+				{locked ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
 			</IconButton>
 			<IconButton label="Delete" onClick={onDelete} danger>
 				<Trash2 className="h-4 w-4" />
