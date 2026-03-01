@@ -6,18 +6,16 @@ import {
 	pgTable,
 	text,
 	timestamp,
-	uniqueIndex,
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
 	id: uuid("id").defaultRandom().primaryKey(),
-	email: varchar("email", { length: 255 }).notNull().unique(),
+	clerkId: varchar("clerk_id", { length: 255 }).notNull().unique(),
+	email: varchar("email", { length: 255 }).notNull(),
 	name: varchar("name", { length: 255 }),
 	avatarUrl: text("avatar_url"),
-	passwordHash: text("password_hash"),
-	authProvider: varchar("auth_provider", { length: 50 }).notNull(),
 	plan: varchar("plan", { length: 20 }).default("free"),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -127,54 +125,6 @@ export const aiGenerations = pgTable(
 			table.invitationId,
 			table.sectionId,
 			table.accepted,
-		),
-	}),
-);
-
-export const passwordResetTokens = pgTable(
-	"password_reset_tokens",
-	{
-		id: uuid("id").defaultRandom().primaryKey(),
-		userId: uuid("user_id")
-			.notNull()
-			.references(() => users.id, { onDelete: "cascade" }),
-		tokenHash: varchar("token_hash", { length: 64 }).notNull(),
-		expiresAt: timestamp("expires_at").notNull(),
-		usedAt: timestamp("used_at"),
-		createdAt: timestamp("created_at").defaultNow().notNull(),
-	},
-	(table) => ({
-		tokenHashIdx: index("idx_reset_token_hash").on(table.tokenHash),
-		userIdx: index("idx_reset_user").on(table.userId),
-	}),
-);
-
-export const tokenBlocklist = pgTable(
-	"token_blocklist",
-	{
-		id: uuid("id").defaultRandom().primaryKey(),
-		tokenHash: varchar("token_hash", { length: 64 }).notNull(),
-		expiresAt: timestamp("expires_at").notNull(),
-		createdAt: timestamp("created_at").defaultNow().notNull(),
-	},
-	(table) => ({
-		tokenHashIdx: index("idx_blocklist_token_hash").on(table.tokenHash),
-	}),
-);
-
-export const rateLimitEntries = pgTable(
-	"rate_limit_entries",
-	{
-		id: uuid("id").defaultRandom().primaryKey(),
-		key: varchar("key", { length: 255 }).notNull(),
-		storeName: varchar("store_name", { length: 100 }).notNull(),
-		count: integer("count").default(0).notNull(),
-		resetAt: timestamp("reset_at").notNull(),
-	},
-	(table) => ({
-		keyStoreIdx: uniqueIndex("idx_rate_limit_key_store").on(
-			table.key,
-			table.storeName,
 		),
 	}),
 );
