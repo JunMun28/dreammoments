@@ -4,13 +4,6 @@ import { updateInvitationFn } from "../../../api/invitations";
 import { generateAiContent } from "../../../lib/ai";
 import type { InvitationContent } from "../../../lib/types";
 
-const TOKEN_KEY = "dm-auth-token";
-
-function getToken(): string | null {
-	if (typeof window === "undefined") return null;
-	return window.localStorage.getItem(TOKEN_KEY);
-}
-
 export type AiTaskType =
 	| "schedule"
 	| "faq"
@@ -129,13 +122,11 @@ export function useAiAssistant({
 		setAiPanel((prev) => ({ ...prev, error: undefined }));
 		setAiGenerating(true);
 		try {
-			const token = getToken();
 			const result = (await generateAiContent({
 				type: aiPanel.type,
 				sectionId: aiPanel.sectionId,
 				prompt: aiPanel.prompt,
 				context: draft,
-				token: token ?? undefined,
 			})) as Record<string, unknown>;
 			if (controller.signal.aborted) return;
 			setAiPanel((prev) => ({
@@ -180,16 +171,12 @@ export function useAiAssistant({
 			if (onApplyStyleOverrides) {
 				onApplyStyleOverrides(overrides);
 			} else {
-				const token = getToken();
-				if (token) {
-					void updateInvitationFn({
-						data: {
-							invitationId,
-							token,
-							designOverrides: overrides as Record<string, unknown>,
-						},
-					});
-				}
+				void updateInvitationFn({
+					data: {
+						invitationId,
+						designOverrides: overrides as Record<string, unknown>,
+					},
+				});
 			}
 		} else {
 			const next = structuredClone(draft);
@@ -211,19 +198,15 @@ export function useAiAssistant({
 		}
 
 		if (aiPanel.result) {
-			const token = getToken();
-			if (token) {
-				void applyAiResultFn({
-					data: {
-						token,
-						invitationId,
-						type: aiPanel.type,
-						sectionId: aiPanel.sectionId,
-						aiResult: aiPanel.result,
-						generationId: aiPanel.generationId,
-					},
-				});
-			}
+			void applyAiResultFn({
+				data: {
+					invitationId,
+					type: aiPanel.type,
+					sectionId: aiPanel.sectionId,
+					aiResult: aiPanel.result,
+					generationId: aiPanel.generationId,
+				},
+			});
 		}
 		setAiPanel((prev) => ({ ...prev, result: undefined }));
 	}, [

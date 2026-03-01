@@ -6,7 +6,6 @@ import { InspectorSection } from "./InspectorSection";
 
 interface LivingPortraitSectionProps {
 	invitationId: string;
-	token: string;
 	/** Current image src from the hero block */
 	heroImageUrl: string;
 	/** Current avatar URL from block content */
@@ -25,7 +24,6 @@ interface LivingPortraitSectionProps {
  */
 export function LivingPortraitSection({
 	invitationId,
-	token,
 	heroImageUrl,
 	avatarImageUrl,
 	avatarStyle: currentStyle,
@@ -72,7 +70,6 @@ export function LivingPortraitSection({
 		removeVideo,
 	} = useLivingPortrait({
 		invitationId,
-		token,
 		heroData,
 		onChange: handleChange,
 	});

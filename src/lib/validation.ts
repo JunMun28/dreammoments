@@ -165,7 +165,6 @@ export type TrackViewInput = z.infer<typeof trackViewSchema>;
 
 export const listAiGenerationsSchema = z.object({
 	invitationId: z.string().min(1, "invitationId is required"),
-	token: z.string().min(1, "Token is required"),
 });
 
 export type ListAiGenerationsInput = z.infer<typeof listAiGenerationsSchema>;

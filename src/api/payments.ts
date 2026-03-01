@@ -15,18 +15,17 @@ import { parseInput } from "./validate";
 // ── Create Checkout Session ─────────────────────────────────────────
 
 const createCheckoutSchema = z.object({
-	token: z.string().min(1, "Token is required"),
 	currency: z.enum(["MYR", "SGD"]),
 	invitationId: z.string().optional(),
 });
 
 export const createCheckoutSessionFn = createServerFn({ method: "POST" })
 	.inputValidator(
-		(data: { token: string; currency: "MYR" | "SGD"; invitationId?: string }) =>
+		(data: { currency: "MYR" | "SGD"; invitationId?: string }) =>
 			parseInput(createCheckoutSchema, data),
 	)
 	.handler(async ({ data }): Promise<{ url: string } | { error: string }> => {
-		const { userId } = await requireAuth(data.token);
+		const { userId } = await requireAuth();
 
 		const stripeConfig = getStripeConfig();
 
@@ -208,19 +207,15 @@ export const handleStripeWebhookFn = createServerFn({ method: "POST" })
 
 // ── Payment Status ──────────────────────────────────────────────────
 
-const paymentStatusSchema = z.object({
-	token: z.string().min(1, "Token is required"),
-});
+const paymentStatusSchema = z.object({});
 
 export const getPaymentStatusFn = createServerFn({ method: "GET" })
-	.inputValidator((data: { token: string }) =>
+	.inputValidator((data: Record<string, never>) =>
 		parseInput(paymentStatusSchema, data),
 	)
 	.handler(
-		async ({
-			data,
-		}): Promise<{ plan: string; isPremium: boolean } | { error: string }> => {
-			const { userId } = await requireAuth(data.token);
+		async (): Promise<{ plan: string; isPremium: boolean } | { error: string }> => {
+			const { userId } = await requireAuth();
 
 			const db = getDbOrNull();
 			if (!db) throw new Error("Database connection required");

@@ -85,7 +85,6 @@ export const listGuestsFn = createServerFn({
 	.inputValidator(
 		(data: {
 			invitationId: string;
-			token: string;
 			filter?: "attending" | "not_attending" | "undecided" | "pending";
 			search?: string;
 			relationship?: string;
@@ -101,7 +100,7 @@ export const listGuestsFn = createServerFn({
 		},
 	)
 	.handler(async ({ data }) => {
-		const { userId } = await requireAuth(data.token);
+		const { userId } = await requireAuth();
 
 		const db = getDbOrNull();
 		if (!db) throw new Error("Database connection required");
@@ -249,7 +248,6 @@ export const updateGuestFn = createServerFn({
 	.inputValidator(
 		(data: {
 			guestId: string;
-			token: string;
 			invitationId: string;
 			name?: string;
 			email?: string;
@@ -265,7 +263,7 @@ export const updateGuestFn = createServerFn({
 		},
 	)
 	.handler(async ({ data }) => {
-		const { userId } = await requireAuth(data.token);
+		const { userId } = await requireAuth();
 
 		const db = getDbOrNull();
 		if (!db) throw new Error("Database connection required");
@@ -326,7 +324,6 @@ export const importGuestsFn = createServerFn({
 	.inputValidator(
 		(data: {
 			invitationId: string;
-			token: string;
 			guests: Array<{
 				name: string;
 				email?: string;
@@ -343,7 +340,7 @@ export const importGuestsFn = createServerFn({
 		},
 	)
 	.handler(async ({ data }) => {
-		const { userId } = await requireAuth(data.token);
+		const { userId } = await requireAuth();
 
 		const db = getDbOrNull();
 		if (!db) throw new Error("Database connection required");
@@ -380,7 +377,7 @@ export const importGuestsFn = createServerFn({
 export const exportGuestsCsvFn = createServerFn({
 	method: "GET",
 })
-	.inputValidator((data: { invitationId: string; token: string }) => {
+	.inputValidator((data: { invitationId: string }) => {
 		parseInput(exportGuestsSchema, {
 			invitationId: data.invitationId,
 			userId: "placeholder",
@@ -388,7 +385,7 @@ export const exportGuestsCsvFn = createServerFn({
 		return data;
 	})
 	.handler(async ({ data }) => {
-		const { userId } = await requireAuth(data.token);
+		const { userId } = await requireAuth();
 
 		const db = getDbOrNull();
 		if (!db) throw new Error("Database connection required");
@@ -435,7 +432,7 @@ export const deleteGuestFn = createServerFn({
 	method: "POST",
 })
 	.inputValidator(
-		(data: { guestId: string; token: string; invitationId: string }) => {
+		(data: { guestId: string; invitationId: string }) => {
 			parseInput(deleteGuestSchema, {
 				...data,
 				userId: "placeholder",
@@ -444,7 +441,7 @@ export const deleteGuestFn = createServerFn({
 		},
 	)
 	.handler(async ({ data }) => {
-		const { userId } = await requireAuth(data.token);
+		const { userId } = await requireAuth();
 
 		const db = getDbOrNull();
 		if (!db) throw new Error("Database connection required");
@@ -481,7 +478,6 @@ export const bulkUpdateGuestsFn = createServerFn({
 	.inputValidator(
 		(data: {
 			invitationId: string;
-			token: string;
 			updates: Array<{
 				guestId: string;
 				name?: string;
@@ -498,7 +494,7 @@ export const bulkUpdateGuestsFn = createServerFn({
 		},
 	)
 	.handler(async ({ data }) => {
-		const { userId } = await requireAuth(data.token);
+		const { userId } = await requireAuth();
 
 		const db = getDbOrNull();
 		if (!db) throw new Error("Database connection required");

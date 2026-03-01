@@ -284,19 +284,11 @@ function InvitationDashboard() {
 			setSlugChecking(true);
 			slugTimerRef.current = setTimeout(async () => {
 				try {
-					const token =
-						typeof window !== "undefined"
-							? window.localStorage.getItem("dm-auth-token")
-							: null;
-					if (!token) {
-						setSlugChecking(false);
-						return;
-					}
 					const { checkSlugAvailabilityFn } = await import(
 						"../../../api/invitations"
 					);
 					const result = await checkSlugAvailabilityFn({
-						data: { token, slug: value, invitationId },
+						data: { slug: value, invitationId },
 					});
 					setSlugAvailable(result.available);
 				} catch {

@@ -46,7 +46,6 @@ interface GenerateAiContentOptions {
 	sectionId: string;
 	prompt: string;
 	context: InvitationContent;
-	token?: string;
 }
 
 // Function overloads for type-safe returns
@@ -80,14 +79,12 @@ export async function generateAiContent({
 	sectionId,
 	prompt,
 	context,
-	token,
 }: GenerateAiContentOptions & {
 	type: "schedule" | "faq" | "story" | "tagline" | "style" | "translate";
 }) {
 	try {
 		const result = await generateAiContentFn({
 			data: {
-				token: token ?? localStorage.getItem("dm-auth-token") ?? "",
 				type,
 				sectionId,
 				prompt,

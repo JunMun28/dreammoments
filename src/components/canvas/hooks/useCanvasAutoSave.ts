@@ -2,15 +2,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { updateInvitationFn } from "@/api/invitations";
 import type { CanvasDocument } from "@/lib/canvas/types";
 
-const TOKEN_KEY = "dm-auth-token";
 const DEBOUNCE_MS = 1200;
 
 type SaveStatus = "saved" | "saving" | "unsaved" | "error";
-
-function getToken(): string | null {
-	if (typeof window === "undefined") return null;
-	return window.localStorage.getItem(TOKEN_KEY);
-}
 
 export function useCanvasAutoSave({
 	invitationId,
@@ -39,13 +33,9 @@ export function useCanvasAutoSave({
 			savingRef.current = true;
 			setStatus("saving");
 			try {
-				const token = getToken();
-				if (!token) throw new Error("Not authenticated");
-
 				await updateInvitationFn({
 					data: {
 						invitationId,
-						token,
 						content: nextDoc as unknown as Record<string, unknown>,
 					},
 				});

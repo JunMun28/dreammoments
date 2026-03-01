@@ -68,7 +68,6 @@ function CanvasEditorRoute() {
 			title={invitation.title || "Canvas invitation"}
 			initialDocument={canvasDocument}
 			previewSlug={invitation.slug}
-			token={token ?? undefined}
 		/>
 	);
 }

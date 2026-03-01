@@ -261,7 +261,6 @@ function parseAiResponse(
 
 const generateAiContentSchema = z
 	.object({
-		token: z.string().min(1, "Token is required"),
 		type: z.enum([
 			"schedule",
 			"faq",
@@ -298,7 +297,6 @@ export const generateAiContentFn = createServerFn({
 })
 	.inputValidator(
 		(data: {
-			token: string;
 			type: AiGenerationType;
 			sectionId: string;
 			prompt: string;
@@ -308,7 +306,7 @@ export const generateAiContentFn = createServerFn({
 	)
 	// @ts-expect-error ServerFn inference expects stricter JSON type than Record<string, unknown>
 	.handler(async ({ data }) => {
-		await requireAuth(data.token);
+		await requireAuth();
 
 		const apiKey = process.env.AI_API_KEY;
 
@@ -410,12 +408,12 @@ export const generateAiContentFn = createServerFn({
 export const listAiGenerationsFn = createServerFn({
 	method: "GET",
 })
-	.inputValidator((data: { invitationId: string; token: string }) =>
+	.inputValidator((data: { invitationId: string }) =>
 		parseInput(listAiGenerationsSchema, data),
 	)
 	// @ts-expect-error ServerFn inference expects stricter JSON type than Record<string, unknown>
 	.handler(async ({ data }) => {
-		const { userId } = await requireAuth(data.token);
+		const { userId } = await requireAuth();
 
 		const db = getDbOrNull();
 		if (!db) throw new Error("Database connection required");
@@ -443,7 +441,6 @@ export const listAiGenerationsFn = createServerFn({
 
 const applyAiResultSchema = z.object({
 	invitationId: z.string().min(1),
-	token: z.string().min(1),
 	type: z.enum([
 		"schedule",
 		"faq",
@@ -464,7 +461,6 @@ export const applyAiResultFn = createServerFn({
 	.inputValidator(
 		(data: {
 			invitationId: string;
-			token: string;
 			type: AiGenerationType;
 			sectionId: string;
 			aiResult: Record<string, unknown>;
@@ -473,7 +469,7 @@ export const applyAiResultFn = createServerFn({
 	)
 	// @ts-expect-error ServerFn inference expects stricter JSON type
 	.handler(async ({ data }) => {
-		const { userId } = await requireAuth(data.token);
+		const { userId } = await requireAuth();
 
 		const db = getDbOrNull();
 		if (!db) throw new Error("Database connection required");
@@ -566,7 +562,6 @@ function applyAiToContent(
 
 const generateAiContentBatchSchema = z
 	.object({
-		token: z.string().min(1),
 		requests: z
 			.array(
 				z.object({
@@ -609,7 +604,6 @@ export const generateAiContentBatchFn = createServerFn({
 })
 	.inputValidator(
 		(data: {
-			token: string;
 			requests: Array<{
 				type: AiGenerationType;
 				sectionId: string;
@@ -621,7 +615,7 @@ export const generateAiContentBatchFn = createServerFn({
 	)
 	// @ts-expect-error ServerFn inference expects stricter JSON type than Record<string, unknown>
 	.handler(async ({ data }) => {
-		await requireAuth(data.token);
+		await requireAuth();
 
 		const apiKey = process.env.AI_API_KEY;
 		if (!apiKey) {

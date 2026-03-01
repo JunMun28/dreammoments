@@ -23,7 +23,6 @@ function getR2Config() {
 // ── Get upload URL ──────────────────────────────────────────────────
 
 const getUploadUrlSchema = z.object({
-	token: z.string().min(1, "Token is required").optional(),
 	filename: z.string().min(1, "Filename is required"),
 	contentType: z.enum(["image/jpeg", "image/png", "image/webp"]),
 });
@@ -32,11 +31,11 @@ export const getUploadUrlFn = createServerFn({
 	method: "POST",
 })
 	.inputValidator(
-		(data: { token?: string; filename: string; contentType: string }) =>
+		(data: { filename: string; contentType: string }) =>
 			parseInput(getUploadUrlSchema, data),
 	)
 	.handler(async ({ data }) => {
-		await requireAuth(data.token);
+		await requireAuth();
 
 		const r2 = getR2Config();
 		if (!r2) {
@@ -61,18 +60,17 @@ export const getUploadUrlFn = createServerFn({
 // ── Confirm upload ──────────────────────────────────────────────────
 
 const confirmUploadSchema = z.object({
-	token: z.string().min(1, "Token is required").optional(),
 	key: z.string().min(1, "Key is required"),
 });
 
 export const confirmUploadFn = createServerFn({
 	method: "POST",
 })
-	.inputValidator((data: { token?: string; key: string }) =>
+	.inputValidator((data: { key: string }) =>
 		parseInput(confirmUploadSchema, data),
 	)
 	.handler(async ({ data }) => {
-		await requireAuth(data.token);
+		await requireAuth();
 
 		const r2 = getR2Config();
 		if (!r2) {

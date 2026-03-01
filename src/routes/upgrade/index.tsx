@@ -41,15 +41,8 @@ function UpgradeScreen() {
 		setError("");
 
 		try {
-			const token = window.localStorage.getItem("dm-auth-token");
-			if (!token) {
-				setError("Please log in to continue.");
-				setLoading(false);
-				return;
-			}
-
 			const result = await createCheckoutSessionFn({
-				data: { token, currency },
+				data: { currency },
 			});
 
 			if ("error" in result) {

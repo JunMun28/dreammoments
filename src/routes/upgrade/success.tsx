@@ -27,14 +27,8 @@ function UpgradeSuccessScreen() {
 		}, VERIFICATION_TIMEOUT_MS);
 
 		try {
-			const token = window.localStorage.getItem("dm-auth-token");
-			if (!token) {
-				setChecking(false);
-				return;
-			}
-
 			const result = await getPaymentStatusFn({
-				data: { token },
+				data: {} as Record<string, never>,
 			});
 
 			if ("isPremium" in result && result.isPremium) {

@@ -250,13 +250,11 @@ export function CanvasEditor({
 	title,
 	initialDocument,
 	previewSlug,
-	token,
 }: {
 	invitationId: string;
 	title: string;
 	initialDocument: CanvasDocument;
 	previewSlug: string;
-	token?: string;
 }) {
 	const canvasRef = useRef<HTMLDivElement | null>(null);
 	const storeRef = useRef<ReturnType<typeof createDocumentStore> | null>(null);
@@ -442,11 +440,9 @@ export function CanvasEditor({
 
 	const handlePublish = () => {
 		void (async () => {
-			if (!token) return;
-
 			try {
 				const result = await publishInvitationFn({
-					data: { invitationId, token },
+					data: { invitationId },
 				});
 				if (result && typeof result === "object" && "error" in result) {
 					console.error("Publish failed:", (result as { error: string }).error);
@@ -720,7 +716,6 @@ export function CanvasEditor({
 							}
 						}}
 						invitationId={invitationId}
-						token={token}
 						designTokens={document.designTokens}
 						onDesignTokenChange={(section, key, value) => {
 							store.getState().updateDesignToken(section, key, value);
@@ -797,7 +792,6 @@ export function CanvasEditor({
 					}
 				}}
 				invitationId={invitationId}
-				token={token}
 				designTokens={document.designTokens}
 				onDesignTokenChange={(section: "colors" | "fonts", key, value) => {
 					store.getState().updateDesignToken(section, key, value);

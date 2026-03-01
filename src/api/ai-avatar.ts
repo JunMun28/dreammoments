@@ -41,12 +41,10 @@ const STYLE_PROMPTS: Record<"pixar" | "ghibli", string> = {
 const generateAvatarSchema = z.object({
 	invitationId: z.string().uuid(),
 	style: z.enum(["pixar", "ghibli"]),
-	token: z.string().min(1, "Token is required"),
 });
 
 const removeAvatarSchema = z.object({
 	invitationId: z.string().uuid(),
-	token: z.string().min(1, "Token is required"),
 });
 
 // ── Generate Avatar ─────────────────────────────────────────────────
@@ -55,11 +53,11 @@ export const generateAvatarFn = createServerFn({
 	method: "POST",
 })
 	.inputValidator(
-		(data: { invitationId: string; style: string; token: string }) =>
+		(data: { invitationId: string; style: string }) =>
 			parseInput(generateAvatarSchema, data),
 	)
 	.handler(async ({ data }) => {
-		const { userId } = await requireAuth(data.token);
+		const { userId } = await requireAuth();
 
 		const db = getDbOrNull();
 		if (!db) throw ApiError.unavailable("Database not available");
@@ -161,11 +159,11 @@ export const generateAvatarFn = createServerFn({
 export const removeAvatarFn = createServerFn({
 	method: "POST",
 })
-	.inputValidator((data: { invitationId: string; token: string }) =>
+	.inputValidator((data: { invitationId: string }) =>
 		parseInput(removeAvatarSchema, data),
 	)
 	.handler(async ({ data }) => {
-		const { userId } = await requireAuth(data.token);
+		const { userId } = await requireAuth();
 
 		const db = getDbOrNull();
 		if (!db) throw ApiError.unavailable("Database not available");
