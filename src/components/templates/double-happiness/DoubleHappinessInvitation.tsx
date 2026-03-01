@@ -11,6 +11,7 @@ import {
 	OrnamentalDivider,
 } from "../decorations";
 import { makeEditableProps, parseAttendance } from "../helpers";
+import { MusicPlayer } from "../MusicPlayer";
 import {
 	RsvpConfirmation,
 	type RsvpConfirmationProps,
@@ -1225,6 +1226,10 @@ export default function DoubleHappinessInvitation({
 					<GoldDustParticles count={12} className="absolute inset-0" />
 				</div>
 			</SectionShell>
+
+			{data.musicUrl && mode !== "editor" && (
+				<MusicPlayer audioUrl={data.musicUrl} />
+			)}
 		</div>
 	);
 }
