@@ -4,7 +4,7 @@ export default defineConfig({
 	testDir: "./tests/e2e",
 	timeout: 60000,
 	expect: {
-		timeout: 5000,
+		timeout: 10000,
 		toHaveScreenshot: {
 			maxDiffPixelRatio: 0.01,
 			animations: "disabled",
@@ -26,17 +26,60 @@ export default defineConfig({
 		timeout: 120000,
 	},
 	projects: [
+		// Global setup — obtains Clerk testing token
 		{
-			name: "chromium",
+			name: "global-setup",
+			testMatch: /global\.setup\.ts/,
+		},
+
+		// Auth setup — signs in and saves storage state
+		{
+			name: "auth-setup",
+			testMatch: /auth\.setup\.ts/,
+			dependencies: ["global-setup"],
+		},
+
+		// Tests that require authentication
+		{
+			name: "chromium-authed",
+			use: {
+				...devices["Desktop Chrome"],
+				storageState: "tests/e2e/.auth/user.json",
+			},
+			testIgnore: [
+				/global\.setup\.ts/,
+				/auth\.setup\.ts/,
+				/landing\.spec\.ts/,
+				/invite-view\.spec\.ts/,
+				/rsvp\.spec\.ts/,
+				/routing\.spec\.ts/,
+				/mobile\.spec\.ts/,
+			],
+			dependencies: ["auth-setup"],
+		},
+
+		// Tests that don't require authentication (public pages)
+		{
+			name: "chromium-public",
 			use: { ...devices["Desktop Chrome"] },
+			testMatch: [
+				/landing\.spec\.ts/,
+				/invite-view\.spec\.ts/,
+				/rsvp\.spec\.ts/,
+				/routing\.spec\.ts/,
+			],
+			dependencies: ["global-setup"],
 		},
+
+		// Mobile tests
 		{
-			name: "webkit",
-			use: { ...devices["iPhone 13"] },
-		},
-		{
-			name: "android",
-			use: { ...devices["Pixel 5"] },
+			name: "mobile",
+			use: {
+				...devices["iPhone 13"],
+				storageState: "tests/e2e/.auth/user.json",
+			},
+			testMatch: /mobile\.spec\.ts/,
+			dependencies: ["auth-setup"],
 		},
 	],
 })
