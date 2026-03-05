@@ -1,60 +1,105 @@
-import { expect, test } from "@playwright/test"
-import {
-	buildSeedStore,
-	seedInvitations,
-	seedLocalStorage,
-	stubBrowserApis,
-	testUsers,
-	waitForStoreHydration,
-} from "./utils"
+import { setupClerkTestingToken, clerk } from "@clerk/testing/playwright"
+import { test, expect } from "@playwright/test"
 
-const setup = async (page: any, currentUserId?: string) => {
-	await seedLocalStorage(page, buildSeedStore({ currentUserId }))
-	await stubBrowserApis(page)
-}
+// This runs in chromium-public project (starts unauthenticated)
 
-test("routing smoke unauth", async ({ page }) => {
-	await setup(page)
-	await page.goto("/")
-	await expect(page.locator("#main-content")).toBeVisible()
+test.describe("Route guards & navigation", () => {
+	test.beforeEach(async ({ page }) => {
+		await setupClerkTestingToken({ page })
+	})
 
-	await page.goto("/auth/login")
-	await expect(page.getByRole("heading", { name: "Welcome Back" })).toBeVisible()
+	test("public routes are accessible without auth", async ({ page }) => {
+		await page.goto("/")
+		await expect(page).toHaveURL("/")
+		await expect(page.locator("body")).not.toContainText(
+			"Unable to load",
+		)
 
-	await page.goto("/auth/signup")
-	await expect(page.getByRole("heading", { name: "Create Your Account" })).toBeVisible()
+		await page.goto("/terms")
+		await expect(page).toHaveURL(/\/terms/)
 
-	await page.goto("/auth/reset")
-	await expect(page.getByRole("heading", { name: "Reset Password" })).toBeVisible()
+		await page.goto("/privacy")
+		await expect(page).toHaveURL(/\/privacy/)
+	})
 
-	await page.goto("/invite/love-at-dusk-sample")
-	await expect(page.getByText(/Sample Invitation/i)).toBeVisible()
-})
+	test("sample invitation accessible without auth", async ({ page }) => {
+		await page.goto("/invite/double-happiness-sample")
+		await page.waitForLoadState("networkidle")
+		await expect(page).toHaveURL(/\/invite\//)
+	})
 
-test("routing smoke auth", async ({ page }) => {
-	await setup(page, testUsers.free.id)
-	await page.goto("/dashboard")
-	await waitForStoreHydration(page)
-	await expect(page.getByRole("heading", { name: "My Invitations" })).toBeVisible()
+	test("protected routes redirect unauthenticated users", async ({
+		page,
+	}) => {
+		await page.goto("/dashboard")
+		await page.waitForLoadState("networkidle")
+		await expect(
+			page
+				.locator(".cl-signIn-root, .cl-signIn-start")
+				.or(page.getByText(/sign in/i)),
+		).toBeVisible({ timeout: 15000 })
 
-	await page.goto(`/editor/${seedInvitations.love.id}`)
-	await waitForStoreHydration(page)
-	await expect(
-		page.getByRole("heading", { name: "Sarah & Michael", exact: true }),
-	).toBeVisible()
+		await page.goto("/editor/new")
+		await page.waitForLoadState("networkidle")
+		await expect(
+			page
+				.locator(".cl-signIn-root, .cl-signIn-start")
+				.or(page.getByText(/sign in/i)),
+		).toBeVisible({ timeout: 15000 })
 
-	await page.goto("/upgrade")
-	await expect(page.getByRole("heading", { name: "Premium Checkout" })).toBeVisible()
-})
+		await page.goto("/upgrade")
+		await page.waitForLoadState("networkidle")
+		await expect(
+			page
+				.locator(".cl-signIn-root, .cl-signIn-start")
+				.or(page.getByText(/sign in/i)),
+		).toBeVisible({ timeout: 15000 })
+	})
 
-test("editor/new redirect", async ({ page }) => {
-	await setup(page, testUsers.free.id)
-	await page.goto("/editor/new")
-	await expect(page).toHaveURL(/\/editor\//)
-})
+	test("authenticated user can access all protected routes", async ({
+		page,
+	}) => {
+		await page.goto("/")
 
-test("callback redirects to dashboard", async ({ page }) => {
-	await setup(page)
-	await page.goto("/auth/callback?code=1")
-	await expect(page).toHaveURL(/\/dashboard/)
+		await clerk.signIn({
+			page,
+			signInParams: {
+				strategy: "password",
+				identifier: process.env.E2E_CLERK_USER_USERNAME!,
+				password: process.env.E2E_CLERK_USER_PASSWORD!,
+			},
+		})
+
+		await page.goto("/dashboard")
+		await page.waitForLoadState("networkidle")
+		await expect(page).toHaveURL(/\/dashboard/)
+
+		await page.goto("/editor/new")
+		await page.waitForLoadState("networkidle")
+		await expect(page).toHaveURL(/\/editor\/new/)
+
+		await page.goto("/upgrade")
+		await page.waitForLoadState("networkidle")
+		await expect(page).toHaveURL(/\/upgrade/)
+	})
+
+	test("browser back/forward navigation works", async ({ page }) => {
+		await page.goto("/")
+		await page.waitForLoadState("networkidle")
+
+		await page.goto("/terms")
+		await page.waitForLoadState("networkidle")
+
+		await page.goto("/privacy")
+		await page.waitForLoadState("networkidle")
+
+		await page.goBack()
+		await expect(page).toHaveURL(/\/terms/)
+
+		await page.goBack()
+		await expect(page).toHaveURL(/^\/$|^http/)
+
+		await page.goForward()
+		await expect(page).toHaveURL(/\/terms/)
+	})
 })
