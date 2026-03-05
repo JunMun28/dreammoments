@@ -1,35 +1,35 @@
 import { expect, test } from "@playwright/test"
 import { drag, swipe } from "./helpers/gestures"
 import {
-	buildSeedStore,
-	mockMobileMatchMedia,
-	seedInvitations,
-	seedLocalStorage,
-	stubBrowserApis,
-	testUsers,
-	waitForStoreHydration,
-} from "./utils"
+	seedInvitation,
+	getOrCreateTestUser,
+	cleanupTestInvitations,
+	closeTestDb,
+} from "./fixtures/seed"
+import { stubBrowserApis } from "./utils"
 
 const MOBILE_VIEWPORT = { width: 390, height: 844 }
 
-const setupMobileEditor = async (page: any) => {
-	await page.addInitScript(() => {
-		class NoopObserver {
-			observe() {}
-			unobserve() {}
-			disconnect() {}
-		}
-		// @ts-expect-error test override
-		window.IntersectionObserver = NoopObserver
-	})
-	const store = buildSeedStore({ currentUserId: testUsers.free.id })
-	await seedLocalStorage(page, store)
-	await stubBrowserApis(page)
-	await mockMobileMatchMedia(page, true)
-	await page.setViewportSize(MOBILE_VIEWPORT)
-}
-
 test.describe("gesture interactions", () => {
+	let testUserId: string
+	let invitationId: string
+
+	test.beforeAll(async () => {
+		const user = await getOrCreateTestUser()
+		testUserId = user.id
+		const invitation = await seedInvitation({
+			userId: testUserId,
+			slug: "e2e-test-gestures",
+			status: "draft",
+		})
+		invitationId = invitation.id
+	})
+
+	test.afterAll(async () => {
+		await cleanupTestInvitations(testUserId)
+		await closeTestDb()
+	})
+
 	// Touch events may not be fully supported in all browser engines
 	// These tests verify the gesture helper wiring and basic behavior
 
@@ -39,9 +39,11 @@ test.describe("gesture interactions", () => {
 			test.skip(true, "Touch events require mobile browser project")
 		}
 
-		await setupMobileEditor(page)
-		await page.goto(`/editor/${seedInvitations.love.id}`)
-		await waitForStoreHydration(page)
+		await stubBrowserApis(page)
+		await page.setViewportSize(MOBILE_VIEWPORT)
+		await page.goto(`/editor/canvas/${invitationId}`)
+		await page.waitForLoadState("networkidle")
+		await page.waitForTimeout(3000)
 
 		// Open bottom sheet by tapping a section
 		const sectionEl = page.locator('[data-section="hero"]').first()
@@ -62,9 +64,11 @@ test.describe("gesture interactions", () => {
 			test.skip(true, "Touch events require mobile browser project")
 		}
 
-		await setupMobileEditor(page)
-		await page.goto(`/editor/${seedInvitations.love.id}`)
-		await waitForStoreHydration(page)
+		await stubBrowserApis(page)
+		await page.setViewportSize(MOBILE_VIEWPORT)
+		await page.goto(`/editor/canvas/${invitationId}`)
+		await page.waitForLoadState("networkidle")
+		await page.waitForTimeout(3000)
 
 		const sectionEl = page.locator('[data-section="hero"]').first()
 		if (!(await sectionEl.isVisible())) return
@@ -83,9 +87,11 @@ test.describe("gesture interactions", () => {
 	})
 
 	test("swipe helper works with different directions", async ({ page }) => {
-		await setupMobileEditor(page)
-		await page.goto(`/editor/${seedInvitations.love.id}`)
-		await waitForStoreHydration(page)
+		await stubBrowserApis(page)
+		await page.setViewportSize(MOBILE_VIEWPORT)
+		await page.goto(`/editor/canvas/${invitationId}`)
+		await page.waitForLoadState("networkidle")
+		await page.waitForTimeout(3000)
 
 		// Verify the swipe helper doesn't throw for basic usage
 		const body = page.locator("body")

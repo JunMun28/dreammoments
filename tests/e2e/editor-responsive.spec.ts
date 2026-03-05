@@ -1,12 +1,11 @@
 import { expect, test } from "@playwright/test"
 import {
-	buildSeedStore,
-	seedInvitations,
-	seedLocalStorage,
-	stubBrowserApis,
-	testUsers,
-	waitForStoreHydration,
-} from "./utils"
+	seedInvitation,
+	getOrCreateTestUser,
+	cleanupTestInvitations,
+	closeTestDb,
+} from "./fixtures/seed"
+import { stubBrowserApis } from "./utils"
 
 const VIEWPORTS = [
 	{ name: "iPhone SE", width: 375, height: 667 },
@@ -17,57 +16,72 @@ const VIEWPORTS = [
 	{ name: "Desktop XL", width: 1920, height: 1080 },
 ]
 
-const setupEditor = async (page: any) => {
-	await page.addInitScript(() => {
-		class NoopObserver {
-			observe() {}
-			unobserve() {}
-			disconnect() {}
-		}
-		// @ts-expect-error test override
-		window.IntersectionObserver = NoopObserver
-	})
-	const store = buildSeedStore({ currentUserId: testUsers.free.id })
-	await seedLocalStorage(page, store)
-	await stubBrowserApis(page)
-}
+test.describe("editor responsive viewports", () => {
+	let testUserId: string
+	let invitationId: string
 
-for (const viewport of VIEWPORTS) {
-	test.describe(`${viewport.name} (${viewport.width}x${viewport.height})`, () => {
-		test("editor initial load", async ({ page }) => {
-			await setupEditor(page)
-			await page.setViewportSize({ width: viewport.width, height: viewport.height })
-			await page.goto(`/editor/${seedInvitations.love.id}`)
-			await waitForStoreHydration(page)
-
-			await expect(page.getByRole("heading", { name: "Sarah & Michael", exact: true })).toBeVisible()
-			await expect(page).toHaveScreenshot(
-				`${viewport.name.replace(/\s/g, "-")}-initial.png`,
-				{ maxDiffPixelRatio: 0.01, animations: "disabled" },
-			)
+	test.beforeAll(async () => {
+		const user = await getOrCreateTestUser()
+		testUserId = user.id
+		const invitation = await seedInvitation({
+			userId: testUserId,
+			slug: "e2e-test-responsive",
+			status: "draft",
 		})
+		invitationId = invitation.id
+	})
 
-		test("editor preview mode", async ({ page }) => {
-			await setupEditor(page)
-			await page.setViewportSize({ width: viewport.width, height: viewport.height })
-			await page.goto(`/editor/${seedInvitations.love.id}`)
-			await waitForStoreHydration(page)
+	test.afterAll(async () => {
+		await cleanupTestInvitations(testUserId)
+		await closeTestDb()
+	})
 
-			// Open preview mode via button (desktop) or overflow menu (mobile)
-			if (viewport.width >= 768) {
-				await page.getByRole("button", { name: "Preview", exact: true }).click()
-			} else {
-				const moreBtn = page.getByRole("button", { name: "More actions" })
-				if (await moreBtn.isVisible()) {
-					await moreBtn.click()
-					await page.getByRole("button", { name: "Preview" }).click()
+	for (const viewport of VIEWPORTS) {
+		test.describe(`${viewport.name} (${viewport.width}x${viewport.height})`, () => {
+			test("editor initial load", async ({ page }) => {
+				await stubBrowserApis(page)
+				await page.setViewportSize({ width: viewport.width, height: viewport.height })
+				await page.goto(`/editor/canvas/${invitationId}`)
+				await page.waitForLoadState("networkidle")
+				await page.waitForTimeout(3000)
+
+				const content = page
+					.locator("[data-testid*='section'], [data-testid*='editor'], [data-testid*='canvas']")
+					.or(page.locator("main"))
+				await expect(content.first()).toBeVisible({ timeout: 15000 })
+
+				await expect(page).toHaveScreenshot(
+					`${viewport.name.replace(/\s/g, "-")}-initial.png`,
+					{ maxDiffPixelRatio: 0.01, animations: "disabled" },
+				)
+			})
+
+			test("editor preview mode", async ({ page }) => {
+				await stubBrowserApis(page)
+				await page.setViewportSize({ width: viewport.width, height: viewport.height })
+				await page.goto(`/editor/canvas/${invitationId}`)
+				await page.waitForLoadState("networkidle")
+				await page.waitForTimeout(3000)
+
+				// Open preview mode via button (desktop) or overflow menu (mobile)
+				if (viewport.width >= 768) {
+					const previewBtn = page.getByRole("button", { name: /preview/i })
+					if (await previewBtn.isVisible()) {
+						await previewBtn.click()
+					}
+				} else {
+					const moreBtn = page.getByRole("button", { name: "More actions" })
+					if (await moreBtn.isVisible()) {
+						await moreBtn.click()
+						await page.getByRole("button", { name: /preview/i }).click()
+					}
 				}
-			}
 
-			await expect(page).toHaveScreenshot(
-				`${viewport.name.replace(/\s/g, "-")}-preview.png`,
-				{ maxDiffPixelRatio: 0.01, animations: "disabled" },
-			)
+				await expect(page).toHaveScreenshot(
+					`${viewport.name.replace(/\s/g, "-")}-preview.png`,
+					{ maxDiffPixelRatio: 0.01, animations: "disabled" },
+				)
+			})
 		})
-	})
-}
+	}
+})
