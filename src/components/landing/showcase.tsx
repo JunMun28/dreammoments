@@ -59,8 +59,6 @@ export function Showcase() {
 		return () => ctx.revert();
 	}, []);
 
-	const trackWidth = `${(photos.length + 2) * 85}vw`;
-
 	return (
 		// biome-ignore lint/correctness/useUniqueElementIds: scroll navigation anchor
 		<section
@@ -70,11 +68,10 @@ export function Showcase() {
 		>
 			<div
 				ref={trackRef}
-				className="flex items-center gap-8 px-[10vw]"
-				style={{ width: trackWidth, height: "100vh" }}
+				className="flex h-[100svh] w-max items-center gap-6 pl-[8vw] pr-[4vw]"
 			>
 				{/* Intro text panel */}
-				<div className="flex h-[70vh] w-[40vw] shrink-0 flex-col justify-center lg:w-[30vw]">
+				<div className="flex h-[70vh] w-[35vw] shrink-0 flex-col justify-center lg:w-[25vw]">
 					<p className="font-script text-gold text-3xl sm:text-4xl md:text-5xl">
 						Our templates
 					</p>
@@ -87,7 +84,7 @@ export function Showcase() {
 				{photos.map((photo) => (
 					<div
 						key={photo.src}
-						className="group relative h-[70vh] w-[75vw] shrink-0 overflow-hidden rounded-2xl sm:w-[60vw] lg:w-[50vw]"
+						className="group relative h-[70vh] w-[70vw] shrink-0 overflow-hidden rounded-2xl sm:w-[55vw] lg:w-[42vw]"
 					>
 						<img
 							src={photo.src}
@@ -104,7 +101,7 @@ export function Showcase() {
 				))}
 
 				{/* Template preview card */}
-				<div className="flex h-[70vh] w-[75vw] shrink-0 flex-col items-center justify-center rounded-2xl border border-border bg-muted px-8 text-center sm:w-[60vw] lg:w-[50vw]">
+				<div className="flex h-[70vh] w-[70vw] shrink-0 flex-col items-center justify-center rounded-2xl border border-border bg-muted px-8 text-center sm:w-[55vw] lg:w-[42vw]">
 					<p className="font-script text-gold text-2xl sm:text-3xl">
 						See it in action
 					</p>
