@@ -1,5 +1,5 @@
-import { useAuth } from "@clerk/tanstack-react-start";
-import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
+import { RedirectToSignIn, useAuth } from "@clerk/tanstack-react-start";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getPaymentStatusFn } from "../../api/payments";
 
@@ -48,7 +48,7 @@ function UpgradeSuccessScreen() {
 		};
 	}, [checkManually]);
 
-	if (isLoaded && !isSignedIn) return <Navigate to="/" />;
+	if (isLoaded && !isSignedIn) return <RedirectToSignIn />;
 
 	return (
 		<div className="min-h-screen bg-[color:var(--dm-bg)] px-6 py-16">

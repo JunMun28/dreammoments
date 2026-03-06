@@ -1,5 +1,5 @@
-import { useAuth } from "@clerk/tanstack-react-start";
-import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
+import { RedirectToSignIn, useAuth } from "@clerk/tanstack-react-start";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { CanvasEditor } from "@/components/canvas/CanvasEditor";
 import { useInvitation } from "@/hooks/useInvitations";
@@ -12,7 +12,7 @@ export const Route = createFileRoute("/editor/canvas/$invitationId")({
 
 function CanvasEditorRoute() {
 	const { invitationId } = Route.useParams();
-	const { isLoaded, isSignedIn, userId } = useAuth();
+	const { isLoaded, isSignedIn } = useAuth();
 	const { data: invitation, isLoading } = useInvitation(invitationId);
 
 	const canvasDocument = useMemo(() => {
@@ -36,8 +36,11 @@ function CanvasEditorRoute() {
 		);
 	}
 
-	if (!isSignedIn) return <Navigate to="/" />;
-	if (!invitation || invitation.userId !== userId) {
+	if (!isSignedIn) return <RedirectToSignIn />;
+	// The API already filters by authenticated user's DB ID via requireAuth(),
+	// so if the invitation was returned, the user owns it. No need for a
+	// client-side ownership check comparing DB UUID with Clerk user ID.
+	if (!invitation) {
 		return (
 			<div className="min-h-screen bg-[color:var(--dm-bg)] px-6 py-10">
 				<p className="text-sm text-[color:var(--dm-muted)]">

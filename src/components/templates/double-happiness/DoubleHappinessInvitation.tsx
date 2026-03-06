@@ -5,13 +5,6 @@ import { AddToCalendarButton } from "../../ui/AddToCalendarButton";
 import { LoadingSpinner } from "../../ui/LoadingSpinner";
 import AngpowQRCode from "../AngpowQRCode";
 import { CountdownWidget } from "../CountdownWidget";
-import {
-	CloudBorder,
-	CornerFlourish,
-	GoldDustParticles,
-	OrnamentalDivider,
-	SectionSeparator,
-} from "../decorations";
 import { makeEditableProps, parseAttendance } from "../helpers";
 import { MusicPlayer } from "../MusicPlayer";
 import {
@@ -26,21 +19,20 @@ import "./double-happiness.css";
 
 /* ─── Design Tokens ─── */
 
-// NEVER use gold text on red bg (2.66:1 fails WCAG)
 const COLORS = {
-	red: "#C8102E",
-	gold: "#D4A843",
-	cream: "#FFF8F0",
-	dark: "#2B1216",
-	deepRed: "#8B1A1A",
-	goldLight: "#F5E6C8",
-	muted: "#8B7355",
+	primary: "#B07D62",
+	accent: "#C5A880",
+	cream: "#F9F8F6",
+	dark: "#3A2E2A",
+	espresso: "#3A2E2A",
+	accentLight: "#E8DDD1",
+	muted: "#8C7E74",
 } as const;
 
 /* ─── Typography ─── */
 
 const headingFont: CSSProperties = {
-	fontFamily: "'ZCOOL XiaoWei', 'Noto Serif SC', 'Songti SC', Georgia, serif",
+	fontFamily: "'Noto Serif SC', 'Songti SC', Georgia, serif",
 };
 
 const bodyFont: CSSProperties = {
@@ -106,7 +98,7 @@ export default function DoubleHappinessInvitation({
 	return (
 		<div className="double-happiness" style={bodyFont} lang="zh-Hans">
 			{/* ════════════════════════════════════════════
-			    1. HERO — Full-bleed photo with dark overlay
+			    1. HERO — Full-bleed photo with espresso overlay
 			    ════════════════════════════════════════════ */}
 			<SectionShell
 				sectionId="hero"
@@ -116,17 +108,17 @@ export default function DoubleHappinessInvitation({
 				onAiClick={onAiClick}
 				className="relative min-h-[100svh] overflow-hidden"
 			>
-				{/* Background media (video → avatar → hero image → placeholder) */}
+				{/* Background media */}
 				<HeroMedia
 					heroImageUrl={data.hero.heroImageUrl}
 					avatarImageUrl={data.hero.avatarImageUrl}
 					animatedVideoUrl={data.hero.animatedVideoUrl}
 					mode={mode}
 				/>
-				{/* Dark overlay */}
-				<div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/70" />
+				{/* Warm espresso overlay */}
+				<div className="absolute inset-0 bg-gradient-to-b from-[#3A2E2A]/40 via-[#3A2E2A]/30 to-[#3A2E2A]/60" />
 
-				{/* 囍 watermark */}
+				{/* 囍 watermark — subtle */}
 				<span
 					className="dh-xi-watermark absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
 					aria-hidden="true"
@@ -136,14 +128,6 @@ export default function DoubleHappinessInvitation({
 				</span>
 
 				<div className="relative z-10 mx-auto flex min-h-[100svh] max-w-4xl flex-col items-center justify-center px-6 py-20 text-center">
-					<p
-						data-reveal
-						className="dm-reveal text-xs uppercase tracking-[0.5em]"
-						style={{ color: COLORS.goldLight }}
-					>
-						<span lang="en">WE ARE GETTING MARRIED</span>
-					</p>
-
 					<h1
 						data-reveal
 						style={{ ...accentFont, transitionDelay: "0.1s" }}
@@ -154,9 +138,9 @@ export default function DoubleHappinessInvitation({
 						</span>
 						<span
 							className="dh-gold-shimmer mx-3 inline-block text-3xl sm:mx-4 sm:text-5xl"
-							style={{ color: COLORS.gold }}
+							style={{ color: COLORS.accent }}
 						>
-							&
+							·
 						</span>
 						<span {...editableProps("hero.partnerTwoName", "inline-block")}>
 							{data.hero.partnerTwoName}
@@ -171,7 +155,7 @@ export default function DoubleHappinessInvitation({
 						)}
 						style={{
 							...headingFont,
-							color: COLORS.goldLight,
+							color: COLORS.accentLight,
 							transitionDelay: "0.2s",
 						}}
 					>
@@ -184,12 +168,12 @@ export default function DoubleHappinessInvitation({
 						style={{ transitionDelay: "0.3s" }}
 					>
 						<span
-							className="rounded-full border border-white/20 px-4 py-2"
+							className="rounded-full border border-[rgba(197,168,128,0.3)] px-4 py-2"
 							lang="en"
 						>
 							{weddingDateEn}
 						</span>
-						<span className="rounded-full border border-white/20 px-4 py-2">
+						<span className="rounded-full border border-[rgba(197,168,128,0.3)] px-4 py-2">
 							{data.venue.name}
 						</span>
 					</div>
@@ -208,13 +192,8 @@ export default function DoubleHappinessInvitation({
 				</div>
 			</SectionShell>
 
-			{/* Between hero and countdown */}
-			{!hiddenSections?.hero && !hiddenSections?.countdown && (
-				<SectionSeparator variant="cloud" />
-			)}
-
 			{/* ════════════════════════════════════════════
-			    2. COUNTDOWN
+			    2. COUNTDOWN — Clean centered layout
 			    ════════════════════════════════════════════ */}
 			<SectionShell
 				sectionId="countdown"
@@ -222,29 +201,18 @@ export default function DoubleHappinessInvitation({
 				hidden={hiddenSections?.countdown}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="dh-section-cream relative overflow-hidden px-6 py-20 sm:px-10"
+				className="dh-section-cream relative overflow-hidden px-6 py-16 sm:px-10"
 			>
-				<CloudBorder position="top-left" opacity={0.05} size={100} />
-				<CloudBorder position="bottom-right" opacity={0.05} size={100} />
 				<div className="mx-auto max-w-sm">
-					<div className="dh-ornamental-frame relative">
-						<CornerFlourish corner="tl" />
-						<CornerFlourish corner="tr" />
-						<CornerFlourish corner="bl" />
-						<CornerFlourish corner="br" />
-						<CountdownWidget
-							targetDate={data.hero.date}
-							eventTime={data.schedule.events[0]?.time}
-							displayDate={data.hero.date}
-						/>
-					</div>
+					<div className="dh-divider-luxury mb-8 w-24 mx-auto" />
+					<CountdownWidget
+						targetDate={data.hero.date}
+						eventTime={data.schedule.events[0]?.time}
+						displayDate={data.hero.date}
+					/>
+					<div className="dh-divider-luxury mt-8 w-24 mx-auto" />
 				</div>
 			</SectionShell>
-
-			{/* Between countdown and announcement */}
-			{!hiddenSections?.countdown && !hiddenSections?.announcement && (
-				<SectionSeparator variant="xi" />
-			)}
 
 			{/* ════════════════════════════════════════════
 			    3. ANNOUNCEMENT — Bilingual formal greeting
@@ -255,19 +223,25 @@ export default function DoubleHappinessInvitation({
 				hidden={hiddenSections?.announcement}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="dh-section-cream relative overflow-hidden px-6 py-24 sm:px-10"
+				className="dh-section-white relative overflow-hidden px-6 py-24 sm:px-10"
 			>
-				<CloudBorder position="top-left" opacity={0.05} size={100} />
-				<CloudBorder position="bottom-right" opacity={0.05} size={100} />
 				<div className="mx-auto max-w-3xl text-center">
-					<OrnamentalDivider motif="xi" width="160px" className="mb-10" />
+					<div className="dh-divider-luxury mb-10 w-40 mx-auto" />
 
 					<p
 						data-reveal
 						className="dm-reveal text-sm tracking-[0.5em]"
-						style={{ ...headingFont, color: COLORS.red }}
+						style={{ ...headingFont, color: COLORS.primary }}
 					>
 						诚 挚 邀 请
+					</p>
+					<p
+						data-reveal
+						className="dm-reveal mt-1 text-xs tracking-[0.3em]"
+						style={{ color: COLORS.muted }}
+						lang="en"
+					>
+						INVITATION
 					</p>
 
 					<h2
@@ -281,7 +255,7 @@ export default function DoubleHappinessInvitation({
 						{data.announcement.title}
 					</h2>
 
-					<div className="mx-auto mt-8 max-w-2xl rounded-lg border border-[rgba(212,168,67,0.08)] bg-gradient-to-b from-white/50 to-transparent p-8">
+					<div className="mx-auto mt-8 max-w-2xl rounded-lg border border-[rgba(197,168,128,0.08)] bg-gradient-to-b from-white/50 to-transparent p-8">
 						<div
 							data-reveal
 							className="dm-reveal dh-blockquote mx-auto max-w-2xl text-left"
@@ -289,7 +263,7 @@ export default function DoubleHappinessInvitation({
 							<p
 								{...editableProps(
 									"announcement.message",
-									"text-base leading-relaxed",
+									"whitespace-pre-line text-base leading-relaxed",
 								)}
 								style={{ color: COLORS.dark }}
 							>
@@ -310,17 +284,12 @@ export default function DoubleHappinessInvitation({
 						</p>
 					</div>
 
-					<OrnamentalDivider motif="xi" width="160px" className="mt-10" />
+					<div className="dh-divider-luxury mt-10 w-40 mx-auto" />
 				</div>
 			</SectionShell>
 
-			{/* Between announcement and couple */}
-			{!hiddenSections?.announcement && !hiddenSections?.couple && (
-				<SectionSeparator variant="floral" />
-			)}
-
 			{/* ════════════════════════════════════════════
-			    4. COUPLE — Side-by-side portraits
+			    4. COUPLE — Rounded-rectangle portraits
 			    ════════════════════════════════════════════ */}
 			<SectionShell
 				sectionId="couple"
@@ -328,13 +297,13 @@ export default function DoubleHappinessInvitation({
 				hidden={hiddenSections?.couple}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="dh-section-white px-6 py-24 sm:px-10"
+				className="dh-section-cream px-6 py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-4xl">
 					<SectionTitle
-						zhLabel="新 郎 新 娘"
+						zhLabel="新 人 简 介"
 						enHeading="The Couple"
-						primaryColor={COLORS.red}
+						primaryColor={COLORS.primary}
 						darkColor={COLORS.dark}
 						headingFont={headingFont}
 						accentFont={accentFont}
@@ -343,7 +312,7 @@ export default function DoubleHappinessInvitation({
 					<div className="mt-14 grid gap-12 sm:grid-cols-2">
 						{/* Groom */}
 						<div data-reveal className="dm-reveal text-center">
-							<div className="dh-portrait-frame mx-auto h-64 w-64 overflow-hidden rounded-full">
+							<div className="dh-portrait-frame mx-auto h-72 w-56 overflow-hidden">
 								<img
 									src={data.couple.partnerOne.photoUrl || PLACEHOLDER_PHOTO}
 									alt={`${data.couple.partnerOne.fullName}`}
@@ -361,11 +330,11 @@ export default function DoubleHappinessInvitation({
 							</div>
 							<p
 								className="mt-4 text-xs uppercase tracking-[0.3em]"
-								style={{ color: COLORS.gold }}
+								style={{ color: COLORS.accent }}
 							>
 								<span>新郎</span> <span lang="en">/ THE GROOM</span>
 							</p>
-							<div className="mx-auto mt-2 h-px w-12 bg-gradient-to-r from-transparent via-[rgba(212,168,67,0.5)] to-transparent" />
+							<div className="mx-auto mt-2 h-px w-12 bg-gradient-to-r from-transparent via-[rgba(197,168,128,0.5)] to-transparent" />
 							<h3
 								{...editableProps(
 									"couple.partnerOne.fullName",
@@ -378,7 +347,7 @@ export default function DoubleHappinessInvitation({
 							<p
 								{...editableProps(
 									"couple.partnerOne.bio",
-									"mt-2 text-sm leading-relaxed",
+									"mt-2 whitespace-pre-line text-sm leading-relaxed",
 								)}
 								style={{ color: COLORS.muted }}
 							>
@@ -392,7 +361,7 @@ export default function DoubleHappinessInvitation({
 							className="dm-reveal text-center"
 							style={{ transitionDelay: "0.15s" }}
 						>
-							<div className="dh-portrait-frame mx-auto h-64 w-64 overflow-hidden rounded-full">
+							<div className="dh-portrait-frame mx-auto h-72 w-56 overflow-hidden">
 								<img
 									src={data.couple.partnerTwo.photoUrl || PLACEHOLDER_PHOTO}
 									alt={`${data.couple.partnerTwo.fullName}`}
@@ -410,11 +379,11 @@ export default function DoubleHappinessInvitation({
 							</div>
 							<p
 								className="mt-4 text-xs uppercase tracking-[0.3em]"
-								style={{ color: COLORS.gold }}
+								style={{ color: COLORS.accent }}
 							>
 								<span>新娘</span> <span lang="en">/ THE BRIDE</span>
 							</p>
-							<div className="mx-auto mt-2 h-px w-12 bg-gradient-to-r from-transparent via-[rgba(212,168,67,0.5)] to-transparent" />
+							<div className="mx-auto mt-2 h-px w-12 bg-gradient-to-r from-transparent via-[rgba(197,168,128,0.5)] to-transparent" />
 							<h3
 								{...editableProps(
 									"couple.partnerTwo.fullName",
@@ -427,7 +396,7 @@ export default function DoubleHappinessInvitation({
 							<p
 								{...editableProps(
 									"couple.partnerTwo.bio",
-									"mt-2 text-sm leading-relaxed",
+									"mt-2 whitespace-pre-line text-sm leading-relaxed",
 								)}
 								style={{ color: COLORS.muted }}
 							>
@@ -438,13 +407,8 @@ export default function DoubleHappinessInvitation({
 				</div>
 			</SectionShell>
 
-			{/* Between couple and story */}
-			{!hiddenSections?.couple && !hiddenSections?.story && (
-				<SectionSeparator variant="cloud" />
-			)}
-
 			{/* ════════════════════════════════════════════
-			    5. STORY — Timeline with gold line
+			    5. STORY — Timeline with champagne gradient
 			    ════════════════════════════════════════════ */}
 			<SectionShell
 				sectionId="story"
@@ -452,15 +416,13 @@ export default function DoubleHappinessInvitation({
 				hidden={hiddenSections?.story}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="dh-section-cream relative overflow-hidden px-6 py-24 sm:px-10"
+				className="dh-section-white relative overflow-hidden px-6 py-24 sm:px-10"
 			>
-				<CloudBorder position="top-left" opacity={0.05} size={100} />
-				<CloudBorder position="bottom-right" opacity={0.05} size={100} />
 				<div className="mx-auto max-w-4xl">
 					<SectionTitle
 						zhLabel="爱 情 故 事"
 						enHeading="Our Story"
-						primaryColor={COLORS.red}
+						primaryColor={COLORS.primary}
 						darkColor={COLORS.dark}
 						headingFont={headingFont}
 						accentFont={accentFont}
@@ -483,8 +445,11 @@ export default function DoubleHappinessInvitation({
 									<div className="dh-timeline-dot-premium absolute -left-[2.45rem] top-5 sm:-left-[3.45rem]" />
 									<div className="dh-milestone-card">
 										<p
-											className="inline-block rounded-full bg-[rgba(212,168,67,0.08)] px-3 py-1 text-xs uppercase tracking-[0.25em]"
-											style={{ color: COLORS.gold }}
+											className="inline-block rounded-full px-3 py-1 text-xs uppercase tracking-[0.25em]"
+											style={{
+												color: COLORS.primary,
+												backgroundColor: "rgba(197,168,128,0.1)",
+											}}
 										>
 											{milestone.date}
 										</p>
@@ -498,7 +463,7 @@ export default function DoubleHappinessInvitation({
 											{milestone.title}
 										</h3>
 										<p
-											className="mt-2 text-sm leading-relaxed"
+											className="mt-2 whitespace-pre-line text-sm leading-relaxed"
 											style={{ color: COLORS.muted }}
 										>
 											{milestone.description}
@@ -511,13 +476,8 @@ export default function DoubleHappinessInvitation({
 				</div>
 			</SectionShell>
 
-			{/* Between story and gallery */}
-			{!hiddenSections?.story && !hiddenSections?.gallery && (
-				<SectionSeparator variant="xi" />
-			)}
-
 			{/* ════════════════════════════════════════════
-			    6. GALLERY — 2-column grid
+			    6. GALLERY — Staggered layout with clean shadows
 			    ════════════════════════════════════════════ */}
 			<SectionShell
 				sectionId="gallery"
@@ -525,13 +485,13 @@ export default function DoubleHappinessInvitation({
 				hidden={hiddenSections?.gallery}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="dh-section-white px-6 py-24 sm:px-10"
+				className="dh-section-cream px-6 py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-5xl">
 					<SectionTitle
-						zhLabel="甜 蜜 瞬 间"
+						zhLabel="幸 福 留 影"
 						enHeading="Gallery"
-						primaryColor={COLORS.red}
+						primaryColor={COLORS.primary}
 						darkColor={COLORS.dark}
 						headingFont={headingFont}
 						accentFont={accentFont}
@@ -542,7 +502,7 @@ export default function DoubleHappinessInvitation({
 							<figure
 								key={`${photo.url}-${index}`}
 								data-reveal
-								className={`dm-reveal dh-photo-frame-premium group relative overflow-hidden rounded-xl ${index === 0 ? "sm:col-span-2" : ""}`}
+								className={`dm-reveal dh-photo-frame-premium group relative overflow-hidden ${index === 0 ? "sm:col-span-2" : ""}`}
 								style={{ transitionDelay: `${Math.min(index * 0.1, 0.5)}s` }}
 							>
 								<img
@@ -554,7 +514,7 @@ export default function DoubleHappinessInvitation({
 									height={index === 0 ? 500 : 600}
 									className={`w-full object-cover ${index === 0 ? "h-72 sm:h-96" : "h-64 sm:h-80"}`}
 									style={{
-										backgroundColor: COLORS.goldLight,
+										backgroundColor: COLORS.accentLight,
 									}}
 									onError={(e) => {
 										const img = e.target as HTMLImageElement;
@@ -577,13 +537,8 @@ export default function DoubleHappinessInvitation({
 				</div>
 			</SectionShell>
 
-			{/* Between gallery and schedule */}
-			{!hiddenSections?.gallery && !hiddenSections?.schedule && (
-				<SectionSeparator variant="floral" />
-			)}
-
 			{/* ════════════════════════════════════════════
-			    7. SCHEDULE — Event cards
+			    7. SCHEDULE — Event cards with champagne left border
 			    ════════════════════════════════════════════ */}
 			<SectionShell
 				sectionId="schedule"
@@ -591,15 +546,13 @@ export default function DoubleHappinessInvitation({
 				hidden={hiddenSections?.schedule}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="dh-section-cream relative overflow-hidden px-6 py-24 sm:px-10"
+				className="dh-section-white relative overflow-hidden px-6 py-24 sm:px-10"
 			>
-				<CloudBorder position="top-left" opacity={0.05} size={100} />
-				<CloudBorder position="bottom-right" opacity={0.05} size={100} />
 				<div className="mx-auto max-w-4xl">
 					<SectionTitle
 						zhLabel="婚 礼 流 程"
 						enHeading="Schedule"
-						primaryColor={COLORS.red}
+						primaryColor={COLORS.primary}
 						darkColor={COLORS.dark}
 						headingFont={headingFont}
 						accentFont={accentFont}
@@ -617,7 +570,7 @@ export default function DoubleHappinessInvitation({
 								<div>
 									<p
 										className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.2em]"
-										style={{ color: COLORS.gold }}
+										style={{ color: COLORS.accent }}
 									>
 										<svg
 											width="14"
@@ -654,13 +607,8 @@ export default function DoubleHappinessInvitation({
 				</div>
 			</SectionShell>
 
-			{/* Between schedule and venue */}
-			{!hiddenSections?.schedule && !hiddenSections?.venue && (
-				<SectionSeparator variant="cloud" />
-			)}
-
 			{/* ════════════════════════════════════════════
-			    8. VENUE — Name, address, map link
+			    8. VENUE — Clean card with champagne buttons
 			    ════════════════════════════════════════════ */}
 			<SectionShell
 				sectionId="venue"
@@ -668,25 +616,20 @@ export default function DoubleHappinessInvitation({
 				hidden={hiddenSections?.venue}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="dh-section-white px-6 py-24 sm:px-10"
+				className="dh-section-cream px-6 py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-3xl text-center">
 					<SectionTitle
-						zhLabel="婚 礼 地 点"
+						zhLabel="婚 宴 地 点"
 						enHeading="Venue"
-						primaryColor={COLORS.red}
+						primaryColor={COLORS.primary}
 						darkColor={COLORS.dark}
 						headingFont={headingFont}
 						accentFont={accentFont}
 					/>
 
 					<div data-reveal className="dm-reveal mx-auto mt-8 max-w-md">
-						<div className="dh-ornamental-frame relative p-8 text-center">
-							<CornerFlourish corner="tl" />
-							<CornerFlourish corner="tr" />
-							<CornerFlourish corner="bl" />
-							<CornerFlourish corner="br" />
-
+						<div className="rounded-2xl border border-[rgba(197,168,128,0.15)] bg-white p-8 text-center shadow-sm">
 							<h3
 								{...editableProps("venue.name", "text-2xl")}
 								style={{ ...headingFont, color: COLORS.dark }}
@@ -713,7 +656,7 @@ export default function DoubleHappinessInvitation({
 							{data.venue.parkingInfo ? (
 								<p
 									className="mt-3 text-xs uppercase tracking-[0.2em]"
-									style={{ color: COLORS.gold }}
+									style={{ color: COLORS.accent }}
 								>
 									{data.venue.parkingInfo}
 								</p>
@@ -726,10 +669,10 @@ export default function DoubleHappinessInvitation({
 										href={`https://www.google.com/maps/search/?api=1&query=${data.venue.coordinates.lat},${data.venue.coordinates.lng}`}
 										target="_blank"
 										rel="noopener noreferrer"
-										className="inline-flex items-center gap-1.5 rounded-full border px-5 py-2.5 text-xs uppercase tracking-[0.15em] transition-colors hover:bg-[rgba(200,16,46,0.05)]"
+										className="inline-flex items-center gap-1.5 rounded-full border px-5 py-2.5 text-xs uppercase tracking-[0.15em] transition-colors hover:bg-[rgba(176,125,98,0.05)]"
 										style={{
-											borderColor: "rgba(200,16,46,0.2)",
-											color: COLORS.red,
+											borderColor: "rgba(176,125,98,0.2)",
+											color: COLORS.primary,
 										}}
 										lang="en"
 									>
@@ -753,10 +696,10 @@ export default function DoubleHappinessInvitation({
 										href={`https://www.waze.com/ul?ll=${data.venue.coordinates.lat},${data.venue.coordinates.lng}&navigate=yes`}
 										target="_blank"
 										rel="noopener noreferrer"
-										className="inline-flex items-center gap-1.5 rounded-full border px-5 py-2.5 text-xs uppercase tracking-[0.15em] transition-colors hover:bg-[rgba(200,16,46,0.05)]"
+										className="inline-flex items-center gap-1.5 rounded-full border px-5 py-2.5 text-xs uppercase tracking-[0.15em] transition-colors hover:bg-[rgba(176,125,98,0.05)]"
 										style={{
-											borderColor: "rgba(200,16,46,0.2)",
-											color: COLORS.red,
+											borderColor: "rgba(176,125,98,0.2)",
+											color: COLORS.primary,
 										}}
 										lang="en"
 									>
@@ -782,13 +725,8 @@ export default function DoubleHappinessInvitation({
 				</div>
 			</SectionShell>
 
-			{/* Between venue and rsvp */}
-			{!hiddenSections?.venue && !hiddenSections?.rsvp && (
-				<SectionSeparator variant="xi" />
-			)}
-
 			{/* ════════════════════════════════════════════
-			    9. RSVP — Full form on deep red bg
+			    9. RSVP — Espresso background with champagne form
 			    ════════════════════════════════════════════ */}
 			<SectionShell
 				sectionId="rsvp"
@@ -805,21 +743,21 @@ export default function DoubleHappinessInvitation({
 							className="text-sm tracking-[0.5em]"
 							style={{
 								...headingFont,
-								color: COLORS.goldLight,
+								color: COLORS.accentLight,
 							}}
 						>
 							敬 请 回 复
 						</p>
 						<h2
 							className="text-4xl sm:text-5xl"
-							style={{ ...accentFont, color: "#FFF8F0" }}
+							style={{ ...accentFont, color: "#F9F8F6" }}
 							lang="en"
 						>
 							RSVP
 						</h2>
 						<p
 							className="max-w-md text-sm leading-relaxed"
-							style={{ color: "rgba(255,248,240,0.7)" }}
+							style={{ color: "rgba(249,248,246,0.7)" }}
 							lang="en"
 						>
 							{data.rsvp.customMessage ||
@@ -834,21 +772,21 @@ export default function DoubleHappinessInvitation({
 						>
 							<p
 								className="text-[0.6rem] uppercase tracking-[0.3em]"
-								style={{ color: COLORS.goldLight }}
+								style={{ color: COLORS.accentLight }}
 								lang="en"
 							>
 								RSVP Deadline
 							</p>
 							<p
 								className="mt-2 text-sm"
-								style={{ color: "#FFF8F0" }}
+								style={{ color: "#F9F8F6" }}
 								lang="en"
 							>
 								{rsvpDeadlineEn}
 							</p>
 							<p
 								className="mt-3 text-xs uppercase tracking-[0.2em]"
-								style={{ color: "rgba(255,248,240,0.5)" }}
+								style={{ color: "rgba(249,248,246,0.5)" }}
 								lang="en"
 							>
 								{data.rsvp.allowPlusOnes
@@ -858,30 +796,21 @@ export default function DoubleHappinessInvitation({
 						</div>
 					</div>
 
-					{/* Vertical gold line between info and form */}
+					{/* Vertical champagne line */}
 					<div className="hidden self-stretch lg:block">
-						<div className="h-full w-px bg-gradient-to-b from-transparent via-[rgba(212,168,67,0.3)] to-transparent" />
+						<div className="h-full w-px bg-gradient-to-b from-transparent via-[rgba(197,168,128,0.3)] to-transparent" />
 					</div>
 
 					{/* Right: form or confirmation */}
 					{rsvpData ? (
 						<div className="relative">
 							<div
-								className="absolute -top-3 left-1/2 z-10 -translate-x-1/2 text-sm"
-								style={{ ...accentFont, color: COLORS.gold, opacity: 0.5 }}
-								aria-hidden="true"
-							>
-								囍
-							</div>
-							<div
 								data-reveal
-								className="dm-reveal dh-ornamental-frame flex items-center justify-center rounded-2xl p-6 sm:p-8"
+								className="dm-reveal flex items-center justify-center rounded-2xl border border-[rgba(197,168,128,0.15)] p-6 sm:p-8"
 								style={{
 									background: COLORS.cream,
 								}}
 							>
-								<CornerFlourish corner="tl" />
-								<CornerFlourish corner="tr" />
 								<RsvpConfirmation
 									{...rsvpData}
 									onEdit={() => setRsvpData(null)}
@@ -890,16 +819,9 @@ export default function DoubleHappinessInvitation({
 						</div>
 					) : (
 						<div className="relative">
-							<div
-								className="absolute -top-3 left-1/2 z-10 -translate-x-1/2 text-sm"
-								style={{ ...accentFont, color: COLORS.gold, opacity: 0.5 }}
-								aria-hidden="true"
-							>
-								囍
-							</div>
 							<form
 								data-reveal
-								className="dm-reveal dh-ornamental-frame rounded-2xl p-6 sm:p-8"
+								className="dm-reveal rounded-2xl border border-[rgba(197,168,128,0.15)] p-6 sm:p-10"
 								style={{
 									background: COLORS.cream,
 								}}
@@ -963,11 +885,9 @@ export default function DoubleHappinessInvitation({
 									}
 								}}
 							>
-								<CornerFlourish corner="tl" />
-								<CornerFlourish corner="tr" />
-								<div className="grid gap-4 sm:grid-cols-2">
+								<div className="grid gap-5">
 									<label
-										className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em] sm:col-span-2"
+										className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
 										style={{ color: COLORS.muted }}
 									>
 										<span lang="en">Name</span>
@@ -981,7 +901,7 @@ export default function DoubleHappinessInvitation({
 											aria-invalid={!!errors.name}
 											className="rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
 											style={{
-												borderColor: "rgba(212,168,67,0.3)",
+												borderColor: "rgba(197,168,128,0.3)",
 												color: COLORS.dark,
 											}}
 											onBlur={(e) => {
@@ -1006,7 +926,7 @@ export default function DoubleHappinessInvitation({
 										)}
 									</label>
 									<label
-										className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em] sm:col-span-2"
+										className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
 										style={{ color: COLORS.muted }}
 									>
 										<span lang="en">Email</span>
@@ -1019,7 +939,7 @@ export default function DoubleHappinessInvitation({
 											aria-invalid={!!errors.email}
 											className="rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
 											style={{
-												borderColor: "rgba(212,168,67,0.3)",
+												borderColor: "rgba(197,168,128,0.3)",
 												color: COLORS.dark,
 											}}
 											onBlur={(e) => {
@@ -1054,7 +974,7 @@ export default function DoubleHappinessInvitation({
 											defaultValue="attending"
 											className="rounded-lg border bg-white px-4 py-3 text-sm"
 											style={{
-												borderColor: "rgba(212,168,67,0.3)",
+												borderColor: "rgba(197,168,128,0.3)",
 												color: COLORS.dark,
 											}}
 										>
@@ -1077,13 +997,13 @@ export default function DoubleHappinessInvitation({
 											inputMode="numeric"
 											className="rounded-lg border bg-white px-4 py-3 text-sm"
 											style={{
-												borderColor: "rgba(212,168,67,0.3)",
+												borderColor: "rgba(197,168,128,0.3)",
 												color: COLORS.dark,
 											}}
 										/>
 									</label>
 									<label
-										className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em] sm:col-span-2"
+										className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
 										style={{ color: COLORS.muted }}
 									>
 										<span lang="en">Dietary Requirements</span>
@@ -1094,13 +1014,13 @@ export default function DoubleHappinessInvitation({
 											maxLength={200}
 											className="rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
 											style={{
-												borderColor: "rgba(212,168,67,0.3)",
+												borderColor: "rgba(197,168,128,0.3)",
 												color: COLORS.dark,
 											}}
 										/>
 									</label>
 									<label
-										className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em] sm:col-span-2"
+										className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
 										style={{ color: COLORS.muted }}
 									>
 										<span lang="en">Message</span>
@@ -1111,20 +1031,20 @@ export default function DoubleHappinessInvitation({
 											maxLength={500}
 											className="min-h-24 rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
 											style={{
-												borderColor: "rgba(212,168,67,0.3)",
+												borderColor: "rgba(197,168,128,0.3)",
 												color: COLORS.dark,
 											}}
 										/>
 									</label>
-									<label className="relative mt-2 flex min-h-[44px] cursor-pointer items-start gap-3 sm:col-span-2">
+									<label className="relative mt-2 flex min-h-[44px] cursor-pointer items-start gap-3">
 										<input
 											type="checkbox"
 											name="consent"
 											required
 											aria-describedby={consentDescriptionId}
-											className="mt-0.5 h-4 w-4 rounded border-2 accent-[#C8102E]"
+											className="mt-0.5 h-4 w-4 rounded border-2 accent-[#B07D62]"
 											style={{
-												borderColor: "rgba(212,168,67,0.3)",
+												borderColor: "rgba(197,168,128,0.3)",
 											}}
 										/>
 										<span
@@ -1138,7 +1058,7 @@ export default function DoubleHappinessInvitation({
 											<Link
 												to="/privacy"
 												className="underline hover:no-underline"
-												style={{ color: COLORS.red }}
+												style={{ color: COLORS.primary }}
 												target="_blank"
 												rel="noopener noreferrer"
 											>
@@ -1163,10 +1083,10 @@ export default function DoubleHappinessInvitation({
 									disabled={isSubmitting}
 									className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-3.5 text-xs font-semibold uppercase tracking-[0.3em] text-white shadow-sm transition-all hover:shadow-lg active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
 									style={{
-										background: "linear-gradient(135deg, #C8102E, #A00D23)",
+										background: "linear-gradient(135deg, #B07D62, #8A5D42)",
 										boxShadow: isSubmitting
 											? undefined
-											: "0 4px 12px rgba(200,16,46,0.2)",
+											: "0 4px 12px rgba(176,125,98,0.2)",
 									}}
 								>
 									{isSubmitting && <LoadingSpinner size="sm" />}
@@ -1176,7 +1096,7 @@ export default function DoubleHappinessInvitation({
 								{submitError && (
 									<p
 										className="mt-3 text-center text-sm"
-										style={{ color: COLORS.red }}
+										style={{ color: "#c44" }}
 										role="alert"
 									>
 										{submitError}
@@ -1189,7 +1109,7 @@ export default function DoubleHappinessInvitation({
 			</SectionShell>
 
 			{/* ════════════════════════════════════════════
-			    10. GIFT — Digital angpow (hidden by default)
+			    10. GIFT — Digital angpow
 			    ════════════════════════════════════════════ */}
 			{data.gift && (
 				<SectionShell
@@ -1204,7 +1124,7 @@ export default function DoubleHappinessInvitation({
 						<SectionTitle
 							zhLabel="礼 金 祝 福"
 							enHeading="Digital Angpow"
-							primaryColor={COLORS.red}
+							primaryColor={COLORS.primary}
 							darkColor={COLORS.dark}
 							headingFont={headingFont}
 							accentFont={accentFont}
@@ -1220,11 +1140,8 @@ export default function DoubleHappinessInvitation({
 				</SectionShell>
 			)}
 
-			{/* Between rsvp/gift and footer */}
-			{!hiddenSections?.footer && <SectionSeparator variant="floral" />}
-
 			{/* ════════════════════════════════════════════
-			    11. FOOTER — Bilingual thank you
+			    11. FOOTER — Minimal champagne closing
 			    ════════════════════════════════════════════ */}
 			<SectionShell
 				sectionId="footer"
@@ -1234,10 +1151,8 @@ export default function DoubleHappinessInvitation({
 				onAiClick={onAiClick}
 				className="dh-section-cream relative overflow-hidden px-6 pb-20 pt-16 text-center sm:px-10"
 			>
-				<CloudBorder position="top-left" opacity={0.05} size={100} />
-				<CloudBorder position="bottom-right" opacity={0.05} size={100} />
 				<div className="mx-auto max-w-3xl">
-					<OrnamentalDivider motif="cloud" width="120px" className="mb-10" />
+					<div className="dh-divider-luxury mb-10 w-24 mx-auto" />
 
 					<p
 						data-reveal
@@ -1268,8 +1183,6 @@ export default function DoubleHappinessInvitation({
 							{data.footer.socialLinks.hashtag}
 						</p>
 					) : null}
-
-					<GoldDustParticles count={12} className="absolute inset-0" />
 				</div>
 			</SectionShell>
 

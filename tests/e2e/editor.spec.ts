@@ -1,3 +1,4 @@
+import { setupClerkTestingToken } from "@clerk/testing/playwright"
 import { test, expect } from "@playwright/test"
 import {
 	seedInvitation,
@@ -7,8 +8,13 @@ import {
 } from "./fixtures/seed"
 
 test.describe("Canvas editor", () => {
+	test.describe.configure({ mode: "serial" })
 	let testUserId: string
 	let invitationId: string
+
+	test.beforeEach(async ({ page }) => {
+		await setupClerkTestingToken({ page })
+	})
 
 	test.beforeAll(async () => {
 		const user = await getOrCreateTestUser()
@@ -29,7 +35,7 @@ test.describe("Canvas editor", () => {
 
 	test("editor loads with section rail and content", async ({ page }) => {
 		await page.goto(`/editor/canvas/${invitationId}`)
-		await page.waitForLoadState("networkidle")
+		await page.waitForLoadState("domcontentloaded")
 		await page.waitForTimeout(3000)
 
 		const content = page.locator(
@@ -40,7 +46,7 @@ test.describe("Canvas editor", () => {
 
 	test("section switching updates content panel", async ({ page }) => {
 		await page.goto(`/editor/canvas/${invitationId}`)
-		await page.waitForLoadState("networkidle")
+		await page.waitForLoadState("domcontentloaded")
 		await page.waitForTimeout(3000)
 
 		const sectionItems = page.locator(
@@ -57,7 +63,7 @@ test.describe("Canvas editor", () => {
 
 	test("section visibility toggle works", async ({ page }) => {
 		await page.goto(`/editor/canvas/${invitationId}`)
-		await page.waitForLoadState("networkidle")
+		await page.waitForLoadState("domcontentloaded")
 		await page.waitForTimeout(3000)
 
 		const toggles = page.locator(
@@ -79,7 +85,7 @@ test.describe("Canvas editor", () => {
 
 	test("autosave indicator shows after changes", async ({ page }) => {
 		await page.goto(`/editor/canvas/${invitationId}`)
-		await page.waitForLoadState("networkidle")
+		await page.waitForLoadState("domcontentloaded")
 		await page.waitForTimeout(3000)
 
 		const input = page
@@ -97,7 +103,7 @@ test.describe("Canvas editor", () => {
 
 	test("preview mode shows the invitation", async ({ page }) => {
 		await page.goto(`/editor/canvas/${invitationId}`)
-		await page.waitForLoadState("networkidle")
+		await page.waitForLoadState("domcontentloaded")
 		await page.waitForTimeout(3000)
 
 		const previewBtn = page.getByRole("button", {

@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/tanstack-react-start";
+import { RedirectToSignIn, useAuth } from "@clerk/tanstack-react-start";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnalyticsPanel } from "../../../components/dashboard/AnalyticsPanel";
@@ -379,7 +379,7 @@ function InvitationDashboard() {
 		return { summary, notes };
 	}, [guests]);
 
-	if (isLoaded && !isSignedIn) return <Navigate to="/" />;
+	if (isLoaded && !isSignedIn) return <RedirectToSignIn />;
 
 	if (!isLoaded) {
 		return (
@@ -406,7 +406,7 @@ function InvitationDashboard() {
 		);
 	}
 
-	if (!isSignedIn) return <Navigate to="/" />;
+	if (!isSignedIn) return <RedirectToSignIn />;
 	if (!invitation) return <Navigate to="/dashboard" />;
 	if (invitation.userId !== userId) {
 		return (

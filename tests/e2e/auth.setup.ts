@@ -1,10 +1,19 @@
-import { clerk } from "@clerk/testing/playwright"
+import { clerk, setupClerkTestingToken } from "@clerk/testing/playwright"
 import { test as setup, expect } from "@playwright/test"
 
 const authFile = "tests/e2e/.auth/user.json"
 
 setup("authenticate", async ({ page }) => {
+	setup.setTimeout(120000)
+
+	// Must set up testing token before navigating to avoid redirect loops
+	await setupClerkTestingToken({ page })
+
 	await page.goto("/")
+	await page.waitForLoadState("domcontentloaded")
+	// Wait for the app to hydrate and Clerk to initialize
+	await page.waitForTimeout(5000)
+
 	await clerk.signIn({
 		page,
 		signInParams: {
@@ -15,13 +24,16 @@ setup("authenticate", async ({ page }) => {
 	})
 
 	// Wait for auth to settle
-	await page.waitForTimeout(2000)
+	await page.waitForTimeout(3000)
 
-	// Verify we're signed in by checking for user button
-	await expect(page.locator(".cl-userButtonTrigger")).toBeVisible({
-		timeout: 10000,
-	})
+	// Navigate to a protected page to verify auth works and capture session cookies
+	await page.goto("/dashboard")
+	await page.waitForLoadState("domcontentloaded")
+	await page.waitForTimeout(5000)
 
-	// Save signed-in state
+	// Verify we're on the dashboard (not redirected to sign-in)
+	expect(page.url()).toContain("/dashboard")
+
+	// Save signed-in state with proper session cookies
 	await page.context().storageState({ path: authFile })
 })

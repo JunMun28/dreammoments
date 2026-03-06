@@ -5,7 +5,7 @@ export const doubleHappinessTemplate: TemplateConfig = {
 	name: "Double Happiness",
 	nameZh: "囍临门",
 	description:
-		"Festive Chinese red & gold wedding invitation with bilingual content, photo gallery, and digital angpow.",
+		"Modern luxury champagne & espresso wedding invitation with bilingual content, photo gallery, and digital angpow.",
 	category: "chinese",
 	version: "1.0.0",
 	aiConfig: {
@@ -14,21 +14,21 @@ export const doubleHappinessTemplate: TemplateConfig = {
 	},
 	tokens: {
 		colors: {
-			primary: "#C8102E",
-			secondary: "#8B1A1A",
-			accent: "#D4A843",
-			background: "#FFF8F0",
-			text: "#2B1216",
-			muted: "#8B7355",
+			primary: "#B07D62",
+			secondary: "#3A2E2A",
+			accent: "#C5A880",
+			background: "#F9F8F6",
+			text: "#3A2E2A",
+			muted: "#8C7E74",
 		},
 		typography: {
-			headingFont: "'Ma Shan Zheng', 'Noto Serif SC', 'Songti SC', serif",
+			headingFont: "'Noto Serif SC', 'Songti SC', Georgia, serif",
 			bodyFont: "'Noto Sans SC', 'Inter', sans-serif",
 			accentFont: "'Noto Serif SC', 'Songti SC', serif",
 		},
 		animations: {
 			scrollTriggerOffset: 100,
-			defaultDuration: 0.6,
+			defaultDuration: 0.8,
 			easing: "easeOutCubic",
 		},
 	},
@@ -59,7 +59,7 @@ export const doubleHappinessTemplate: TemplateConfig = {
 					label: "Tagline",
 					type: "text",
 					aiTaskType: "tagline",
-					sample: "囍临门 · 永结同心",
+					sample: "始于初见，止于终老",
 				},
 				{
 					id: "heroImageUrl",

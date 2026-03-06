@@ -10,13 +10,16 @@ import {
 // This runs in the chromium-public project (no auth)
 
 test.describe("Public invitation view", () => {
+	// Run tests serially to share seeded data from beforeAll
+	test.describe.configure({ mode: "serial" })
+
 	let testUserId: string
 	let publishedSlug: string
 
 	test.beforeAll(async () => {
 		const user = await getOrCreateTestUser()
 		testUserId = user.id
-		publishedSlug = "e2e-test-invite-view"
+		publishedSlug = `e2e-test-invite-view-${Date.now()}`
 		await seedInvitation({
 			userId: testUserId,
 			slug: publishedSlug,
@@ -35,7 +38,7 @@ test.describe("Public invitation view", () => {
 
 	test("published invitation renders hero section", async ({ page }) => {
 		await page.goto(`/invite/${publishedSlug}`)
-		await page.waitForLoadState("networkidle")
+		await page.waitForLoadState("domcontentloaded")
 		await page.waitForTimeout(3000)
 
 		const heroText = await page.textContent("body")
@@ -44,7 +47,7 @@ test.describe("Public invitation view", () => {
 
 	test("invitation renders multiple sections", async ({ page }) => {
 		await page.goto(`/invite/${publishedSlug}`)
-		await page.waitForLoadState("networkidle")
+		await page.waitForLoadState("domcontentloaded")
 		await page.waitForTimeout(5000)
 
 		const body = page.locator("body")
@@ -57,7 +60,7 @@ test.describe("Public invitation view", () => {
 		page,
 	}) => {
 		await page.goto("/invite/double-happiness-sample")
-		await page.waitForLoadState("networkidle")
+		await page.waitForLoadState("domcontentloaded")
 		await page.waitForTimeout(5000)
 
 		await expect(
@@ -70,7 +73,7 @@ test.describe("Public invitation view", () => {
 
 	test("non-existent slug shows error", async ({ page }) => {
 		await page.goto("/invite/this-slug-does-not-exist-ever-12345")
-		await page.waitForLoadState("networkidle")
+		await page.waitForLoadState("domcontentloaded")
 		await page.waitForTimeout(3000)
 	})
 })

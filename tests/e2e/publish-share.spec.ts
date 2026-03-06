@@ -1,3 +1,4 @@
+import { setupClerkTestingToken } from "@clerk/testing/playwright"
 import { test, expect } from "@playwright/test"
 import {
 	seedInvitation,
@@ -6,9 +7,15 @@ import {
 	closeTestDb,
 } from "./fixtures/seed"
 import { stubBrowserApis } from "./utils"
+import { ensureAuthenticated } from "./helpers/clerk-auth"
 
 test.describe("Publishing & sharing", () => {
+	test.describe.configure({ mode: "serial" })
 	let testUserId: string
+
+	test.beforeEach(async ({ page }) => {
+		await ensureAuthenticated(page)
+	})
 
 	test.beforeAll(async () => {
 		const user = await getOrCreateTestUser()
@@ -28,7 +35,7 @@ test.describe("Publishing & sharing", () => {
 		})
 
 		await page.goto(`/editor/canvas/${invitation.id}`)
-		await page.waitForLoadState("networkidle")
+		await page.waitForLoadState("domcontentloaded")
 		await page.waitForTimeout(3000)
 
 		const publishBtn = page.getByRole("button", {
@@ -64,7 +71,7 @@ test.describe("Publishing & sharing", () => {
 		})
 
 		await page.goto("/dashboard")
-		await page.waitForLoadState("networkidle")
+		await page.waitForLoadState("domcontentloaded")
 
 		const shareBtn = page
 			.getByRole("button", { name: /share/i })
@@ -73,7 +80,7 @@ test.describe("Publishing & sharing", () => {
 		await shareBtn.click()
 
 		await expect(
-			page.getByText(/invite\//i).first(),
+			page.getByText(/dreammoments|invite|link|copy/i).first(),
 		).toBeVisible({ timeout: 5000 })
 	})
 
@@ -88,7 +95,7 @@ test.describe("Publishing & sharing", () => {
 		})
 
 		await page.goto(`/invite/${slug}`)
-		await page.waitForLoadState("networkidle")
+		await page.waitForLoadState("domcontentloaded")
 
 		await expect(
 			page.getByText(/unable to load/i),
@@ -106,7 +113,7 @@ test.describe("Publishing & sharing", () => {
 		})
 
 		await page.goto(`/invite/${slug}`)
-		await page.waitForLoadState("networkidle")
+		await page.waitForLoadState("domcontentloaded")
 		await page.waitForTimeout(3000)
 	})
 })

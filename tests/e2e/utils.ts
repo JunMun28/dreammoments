@@ -28,7 +28,7 @@ export async function stubBrowserApis(page: Page) {
 }
 
 export async function waitForAppReady(page: Page) {
-	await page.waitForLoadState("networkidle")
+	await page.waitForLoadState("domcontentloaded")
 }
 
 declare global {

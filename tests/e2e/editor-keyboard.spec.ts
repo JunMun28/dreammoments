@@ -1,3 +1,4 @@
+import { setupClerkTestingToken } from "@clerk/testing/playwright"
 import { expect, test } from "@playwright/test"
 import {
 	seedInvitation,
@@ -30,9 +31,10 @@ test.describe("keyboard shortcuts", () => {
 	})
 
 	test.beforeEach(async ({ page }) => {
+		await setupClerkTestingToken({ page })
 		await stubBrowserApis(page)
 		await page.goto(`/editor/canvas/${invitationId}`)
-		await page.waitForLoadState("networkidle")
+		await page.waitForLoadState("domcontentloaded")
 		await page.waitForTimeout(3000)
 	})
 

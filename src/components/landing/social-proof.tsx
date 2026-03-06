@@ -72,6 +72,7 @@ export function SocialProof() {
 	}, []);
 
 	return (
+		// biome-ignore lint/correctness/useUniqueElementIds: scroll navigation anchor
 		<section
 			ref={sectionRef}
 			id="social-proof"

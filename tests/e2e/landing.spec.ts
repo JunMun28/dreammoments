@@ -17,15 +17,23 @@ test.describe("Landing page", () => {
 	})
 
 	test("theme toggle switches between light and dark", async ({ page }) => {
-		const toggle = page.getByRole("button", { name: /theme|dark|light/i })
-		if (await toggle.isVisible()) {
-			const wrapper = page.locator("[data-theme]").first()
-			const initialTheme = await wrapper.getAttribute("data-theme")
+		const toggle = page.locator(
+			"button[aria-label*='theme' i], button[aria-label*='dark' i], button[aria-label*='light' i]",
+		)
+		if (await toggle.first().isVisible()) {
+			// The landing page uses a CSS class "dark" on a wrapper div
+			const wrapper = page.locator(".landing").first()
+			const hasDarkBefore = await wrapper.evaluate((el) =>
+				el.classList.contains("dark"),
+			)
 
-			await toggle.click()
+			await toggle.first().click()
+			await page.waitForTimeout(500)
 
-			const newTheme = await wrapper.getAttribute("data-theme")
-			expect(newTheme).not.toBe(initialTheme)
+			const hasDarkAfter = await wrapper.evaluate((el) =>
+				el.classList.contains("dark"),
+			)
+			expect(hasDarkAfter).not.toBe(hasDarkBefore)
 		}
 	})
 
@@ -64,11 +72,13 @@ test.describe("Landing page", () => {
 		}
 	})
 
-	test("primary CTA navigates to template selection", async ({ page }) => {
+	test("primary CTA links to template selection", async ({ page }) => {
 		const cta = page.getByRole("link", { name: /start creating|get started/i })
 		if (await cta.first().isVisible()) {
-			await cta.first().click()
-			await page.waitForURL(/\/editor\/new/)
+			// Verify the link points to the right destination without navigating
+			// (navigating would redirect to Clerk sign-in since we're unauthenticated)
+			const href = await cta.first().getAttribute("href")
+			expect(href).toContain("/editor/new")
 		}
 	})
 

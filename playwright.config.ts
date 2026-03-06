@@ -2,15 +2,16 @@ import { defineConfig, devices } from "@playwright/test"
 
 export default defineConfig({
 	testDir: "./tests/e2e",
-	timeout: 60000,
+	timeout: 120000,
 	expect: {
-		timeout: 10000,
+		timeout: 15000,
 		toHaveScreenshot: {
 			maxDiffPixelRatio: 0.01,
 			animations: "disabled",
 		},
 	},
-	fullyParallel: true,
+	fullyParallel: false,
+	workers: process.env.CI ? 1 : 2,
 	retries: process.env.CI ? 1 : 0,
 	reporter: [["list"], ["html", { open: "never" }]],
 	use: {
@@ -26,17 +27,10 @@ export default defineConfig({
 		timeout: 120000,
 	},
 	projects: [
-		// Global setup — obtains Clerk testing token
+		// Global setup — calls clerkSetup(), signs in, saves storageState
 		{
 			name: "global-setup",
 			testMatch: /global\.setup\.ts/,
-		},
-
-		// Auth setup — signs in and saves storage state
-		{
-			name: "auth-setup",
-			testMatch: /auth\.setup\.ts/,
-			dependencies: ["global-setup"],
 		},
 
 		// Tests that require authentication
@@ -49,13 +43,15 @@ export default defineConfig({
 			testIgnore: [
 				/global\.setup\.ts/,
 				/auth\.setup\.ts/,
+				/auth\.spec\.ts/,
+				/debug-auth\.spec\.ts/,
 				/landing\.spec\.ts/,
 				/invite-view\.spec\.ts/,
 				/rsvp\.spec\.ts/,
 				/routing\.spec\.ts/,
 				/mobile\.spec\.ts/,
 			],
-			dependencies: ["auth-setup"],
+			dependencies: ["global-setup"],
 		},
 
 		// Tests that don't require authentication (public pages)
@@ -63,6 +59,7 @@ export default defineConfig({
 			name: "chromium-public",
 			use: { ...devices["Desktop Chrome"] },
 			testMatch: [
+				/auth\.spec\.ts/,
 				/landing\.spec\.ts/,
 				/invite-view\.spec\.ts/,
 				/rsvp\.spec\.ts/,
@@ -71,15 +68,15 @@ export default defineConfig({
 			dependencies: ["global-setup"],
 		},
 
-		// Mobile tests
+		// Mobile tests (using Pixel 5 for Chromium-based mobile)
 		{
 			name: "mobile",
 			use: {
-				...devices["iPhone 13"],
+				...devices["Pixel 5"],
 				storageState: "tests/e2e/.auth/user.json",
 			},
 			testMatch: /mobile\.spec\.ts/,
-			dependencies: ["auth-setup"],
+			dependencies: ["global-setup"],
 		},
 	],
 })

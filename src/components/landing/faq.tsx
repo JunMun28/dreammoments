@@ -32,6 +32,7 @@ export function Faq() {
 	const [openIndex, setOpenIndex] = useState<number | null>(null);
 
 	return (
+		// biome-ignore lint/correctness/useUniqueElementIds: scroll navigation anchor
 		<section id="faq" className="bg-background py-24 sm:py-32">
 			<div className="mx-auto max-w-2xl px-6">
 				{/* Header */}
@@ -43,7 +44,7 @@ export function Faq() {
 				</div>
 
 				{/* Accordion */}
-				<dl role="list" className="divide-y divide-border">
+				<dl className="divide-y divide-border">
 					{faqs.map((faq, i) => {
 						const isOpen = openIndex === i;
 						return (
@@ -53,9 +54,7 @@ export function Faq() {
 										type="button"
 										className="flex w-full items-center justify-between text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring rounded-sm"
 										aria-expanded={isOpen}
-										onClick={() =>
-											setOpenIndex(isOpen ? null : i)
-										}
+										onClick={() => setOpenIndex(isOpen ? null : i)}
 									>
 										<span className="text-base font-medium text-foreground">
 											{faq.question}

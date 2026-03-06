@@ -1,3 +1,4 @@
+import { setupClerkTestingToken } from "@clerk/testing/playwright"
 import { expect, test } from "@playwright/test"
 import {
 	seedInvitation,
@@ -19,6 +20,10 @@ const VIEWPORTS = [
 test.describe("editor responsive viewports", () => {
 	let testUserId: string
 	let invitationId: string
+
+	test.beforeEach(async ({ page }) => {
+		await setupClerkTestingToken({ page })
+	})
 
 	test.beforeAll(async () => {
 		const user = await getOrCreateTestUser()
@@ -42,7 +47,7 @@ test.describe("editor responsive viewports", () => {
 				await stubBrowserApis(page)
 				await page.setViewportSize({ width: viewport.width, height: viewport.height })
 				await page.goto(`/editor/canvas/${invitationId}`)
-				await page.waitForLoadState("networkidle")
+				await page.waitForLoadState("domcontentloaded")
 				await page.waitForTimeout(3000)
 
 				const content = page
@@ -60,7 +65,7 @@ test.describe("editor responsive viewports", () => {
 				await stubBrowserApis(page)
 				await page.setViewportSize({ width: viewport.width, height: viewport.height })
 				await page.goto(`/editor/canvas/${invitationId}`)
-				await page.waitForLoadState("networkidle")
+				await page.waitForLoadState("domcontentloaded")
 				await page.waitForTimeout(3000)
 
 				// Open preview mode via button (desktop) or overflow menu (mobile)

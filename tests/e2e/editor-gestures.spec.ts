@@ -1,3 +1,4 @@
+import { setupClerkTestingToken } from "@clerk/testing/playwright"
 import { expect, test } from "@playwright/test"
 import { drag, swipe } from "./helpers/gestures"
 import {
@@ -13,6 +14,10 @@ const MOBILE_VIEWPORT = { width: 390, height: 844 }
 test.describe("gesture interactions", () => {
 	let testUserId: string
 	let invitationId: string
+
+	test.beforeEach(async ({ page }) => {
+		await setupClerkTestingToken({ page })
+	})
 
 	test.beforeAll(async () => {
 		const user = await getOrCreateTestUser()
@@ -42,7 +47,7 @@ test.describe("gesture interactions", () => {
 		await stubBrowserApis(page)
 		await page.setViewportSize(MOBILE_VIEWPORT)
 		await page.goto(`/editor/canvas/${invitationId}`)
-		await page.waitForLoadState("networkidle")
+		await page.waitForLoadState("domcontentloaded")
 		await page.waitForTimeout(3000)
 
 		// Open bottom sheet by tapping a section
@@ -67,7 +72,7 @@ test.describe("gesture interactions", () => {
 		await stubBrowserApis(page)
 		await page.setViewportSize(MOBILE_VIEWPORT)
 		await page.goto(`/editor/canvas/${invitationId}`)
-		await page.waitForLoadState("networkidle")
+		await page.waitForLoadState("domcontentloaded")
 		await page.waitForTimeout(3000)
 
 		const sectionEl = page.locator('[data-section="hero"]').first()
@@ -90,7 +95,7 @@ test.describe("gesture interactions", () => {
 		await stubBrowserApis(page)
 		await page.setViewportSize(MOBILE_VIEWPORT)
 		await page.goto(`/editor/canvas/${invitationId}`)
-		await page.waitForLoadState("networkidle")
+		await page.waitForLoadState("domcontentloaded")
 		await page.waitForTimeout(3000)
 
 		// Verify the swipe helper doesn't throw for basic usage

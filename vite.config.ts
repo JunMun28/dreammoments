@@ -37,6 +37,26 @@ const config = defineConfig({
 	resolve: {
 		alias: {
 			"@": fileURLToPath(new URL("./src", import.meta.url)),
+			// React 19 ships useSyncExternalStore natively. The CJS shim package
+			// breaks Vite's ESM dev server, so redirect to thin ESM wrappers.
+			"use-sync-external-store/shim/with-selector.js": fileURLToPath(
+				new URL(
+					"./src/lib/use-sync-external-store-with-selector-shim.ts",
+					import.meta.url,
+				),
+			),
+			"use-sync-external-store/shim/with-selector": fileURLToPath(
+				new URL(
+					"./src/lib/use-sync-external-store-with-selector-shim.ts",
+					import.meta.url,
+				),
+			),
+			"use-sync-external-store/shim/index.js": fileURLToPath(
+				new URL("./src/lib/use-sync-external-store-shim.ts", import.meta.url),
+			),
+			"use-sync-external-store/shim": fileURLToPath(
+				new URL("./src/lib/use-sync-external-store-shim.ts", import.meta.url),
+			),
 		},
 	},
 	server: {

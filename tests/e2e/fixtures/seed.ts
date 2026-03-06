@@ -35,12 +35,17 @@ export async function getOrCreateTestUser(
 ) {
 	const db = getTestDb()
 	const email = process.env.E2E_CLERK_USER_USERNAME!
-	const [existing] = await db
+
+	// Prefer the real Clerk user (created by JIT on first sign-in) over fake test users
+	const allMatches = await db
 		.select()
 		.from(schema.users)
 		.where(eq(schema.users.email, email))
 
-	if (existing) return existing
+	// Real Clerk user IDs start with "user_", test ones start with "test_"
+	const realUser = allMatches.find((u) => u.clerkId.startsWith("user_"))
+	if (realUser) return realUser
+	if (allMatches.length > 0) return allMatches[0]
 
 	const [created] = await db
 		.insert(schema.users)
@@ -81,6 +86,9 @@ export async function seedInvitation(options?: {
 
 	const slug =
 		options?.slug ?? `e2e-test-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
+
+	// Clean up any existing invitation with the same slug to avoid unique constraint violations
+	await db.delete(schema.invitations).where(eq(schema.invitations.slug, slug))
 
 	const [invitation] = await db
 		.insert(schema.invitations)

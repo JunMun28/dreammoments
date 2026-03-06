@@ -1,5 +1,5 @@
-import { useAuth } from "@clerk/tanstack-react-start";
-import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
+import { RedirectToSignIn, useAuth } from "@clerk/tanstack-react-start";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { createCheckoutSessionFn } from "../../api/payments";
 import { RouteErrorFallback } from "../../components/ui/RouteErrorFallback";
@@ -27,7 +27,7 @@ function UpgradeScreen() {
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
 
-	if (isLoaded && !isSignedIn) return <Navigate to="/" />;
+	if (isLoaded && !isSignedIn) return <RedirectToSignIn />;
 	/* TODO: Re-add plan gating with server-side plan data */
 
 	const price = PRICING[currency];

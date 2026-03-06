@@ -39,8 +39,7 @@ export function Showcase() {
 		if (!section || !track) return;
 
 		const ctx = gsap.context(() => {
-			const getScrollDistance = () =>
-				track.scrollWidth - window.innerWidth;
+			const getScrollDistance = () => track.scrollWidth - window.innerWidth;
 
 			gsap.to(track, {
 				x: () => -getScrollDistance(),
@@ -63,6 +62,7 @@ export function Showcase() {
 	const trackWidth = `${(photos.length + 2) * 85}vw`;
 
 	return (
+		// biome-ignore lint/correctness/useUniqueElementIds: scroll navigation anchor
 		<section
 			ref={sectionRef}
 			id="showcase"
@@ -112,9 +112,8 @@ export function Showcase() {
 						One invitation. Every detail.
 					</h3>
 					<p className="text-muted-foreground mt-4 max-w-md text-base leading-relaxed sm:text-lg">
-						Bilingual invitations, built-in RSVP, and personal
-						messaging — everything your guests need, beautifully
-						presented.
+						Bilingual invitations, built-in RSVP, and personal messaging —
+						everything your guests need, beautifully presented.
 					</p>
 					<Link
 						to="/editor/new"

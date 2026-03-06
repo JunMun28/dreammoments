@@ -61,6 +61,7 @@ export function Hero() {
 	}, []);
 
 	return (
+		// biome-ignore lint/correctness/useUniqueElementIds: scroll navigation anchor
 		<section
 			ref={sectionRef}
 			id="hero"

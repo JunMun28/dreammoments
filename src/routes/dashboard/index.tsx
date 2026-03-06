@@ -1,10 +1,5 @@
-import { useAuth } from "@clerk/tanstack-react-start";
-import {
-	createFileRoute,
-	Link,
-	Navigate,
-	useNavigate,
-} from "@tanstack/react-router";
+import { RedirectToSignIn, useAuth } from "@clerk/tanstack-react-start";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
 	Copy,
 	Eye,
@@ -210,9 +205,11 @@ function DashboardScreen() {
 
 	const sortedInvitations = useMemo(
 		() =>
-			[...filteredInvitations].sort((a, b) =>
-				b.updatedAt.localeCompare(a.updatedAt),
-			),
+			[...filteredInvitations].sort((a, b) => {
+				const dateA = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+				const dateB = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+				return dateB - dateA;
+			}),
 		[filteredInvitations],
 	);
 
@@ -264,7 +261,7 @@ function DashboardScreen() {
 		);
 	}, [sortedInvitations, previewInvitationId]);
 
-	if (isLoaded && !isSignedIn) return <Navigate to="/" />;
+	if (isLoaded && !isSignedIn) return <RedirectToSignIn />;
 
 	if (!isLoaded) {
 		return (
@@ -298,7 +295,7 @@ function DashboardScreen() {
 		);
 	}
 
-	if (!isSignedIn) return <Navigate to="/" />;
+	if (!isSignedIn) return <RedirectToSignIn />;
 
 	if (invitations.length === 0) {
 		return (
