@@ -153,7 +153,7 @@ function ServiceItem({ title }: { title: string }) {
 	return (
 		<div
 			ref={itemRef}
-			className="relative overflow-hidden border-t border-foreground/10"
+			className="relative overflow-hidden border-t border-border"
 		>
 			<a
 				href="#services-menu"
@@ -161,7 +161,7 @@ function ServiceItem({ title }: { title: string }) {
 				onMouseEnter={handleMouseEnter}
 				onMouseLeave={handleMouseLeave}
 			>
-				<span className="text-[clamp(1.5rem,4vw,4rem)] font-light tracking-tight text-foreground">
+				<span className="font-heading text-[clamp(1.5rem,4vw,4rem)] font-light tracking-tight text-foreground">
 					{title}
 				</span>
 			</a>
@@ -176,7 +176,7 @@ function ServiceItem({ title }: { title: string }) {
 					className="flex items-center h-full px-6 sm:px-12 lg:px-24"
 					style={{ transform: "translateY(-101%)" }}
 				>
-					<span className="text-[clamp(1.5rem,4vw,4rem)] font-light tracking-tight text-background">
+					<span className="font-heading text-[clamp(1.5rem,4vw,4rem)] font-light tracking-tight text-background">
 						{chars}
 					</span>
 				</div>
@@ -241,10 +241,10 @@ export function Services() {
 			>
 				<h2
 					ref={titleRef}
-					className="text-center text-[clamp(2.5rem,7vw,7rem)] font-medium leading-[1.1] tracking-tight text-foreground max-w-[87.5rem]"
+					className="font-heading text-center text-[clamp(2.5rem,7vw,7rem)] font-medium leading-[1.1] tracking-tight text-foreground max-w-[87.5rem]"
 				>
 					<SplitText>
-						Everything you need between save-the-date and final thank-you.
+						Every detail, from save-the-date to the last dance.
 					</SplitText>
 				</h2>
 			</div>
@@ -255,7 +255,7 @@ export function Services() {
 					{services.map((service) => (
 						<ServiceItem key={service.id} title={service.title} />
 					))}
-					<div className="border-t border-foreground/10" />
+					<div className="border-t border-border" />
 				</div>
 			</div>
 		</section>

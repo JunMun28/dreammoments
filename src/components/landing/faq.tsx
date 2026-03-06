@@ -66,7 +66,7 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
 	return (
 		<div
 			ref={itemRef}
-			className="border border-foreground/10 rounded-2xl overflow-hidden"
+			className="shadow-soft border border-border rounded-2xl overflow-hidden"
 		>
 			<button
 				type="button"
@@ -77,7 +77,7 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
 					{question}
 				</span>
 				<span
-					className="relative w-6 h-6 shrink-0 text-foreground transition-transform duration-300"
+					className="relative w-6 h-6 shrink-0 text-gold transition-transform duration-300"
 					style={{ transform: isOpen ? "rotate(45deg)" : "rotate(0deg)" }}
 				>
 					<span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-[1.5px] bg-current" />
@@ -89,7 +89,7 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
 				style={{ gridTemplateRows: isOpen ? "1fr" : "0fr" }}
 			>
 				<div className="overflow-hidden">
-					<p className="px-6 pb-6 text-foreground/70 leading-relaxed">
+					<p className="px-6 pb-6 text-muted-foreground leading-relaxed">
 						{answer}
 					</p>
 				</div>
@@ -134,7 +134,7 @@ export function Faq() {
 				{/* Title */}
 				<h2
 					ref={titleRef}
-					className="text-4xl lg:text-5xl font-medium tracking-tight text-foreground text-center mb-12 lg:mb-16"
+					className="font-heading text-4xl lg:text-5xl font-medium tracking-tight text-foreground text-center mb-12 lg:mb-16"
 				>
 					Frequently Asked
 					<br />

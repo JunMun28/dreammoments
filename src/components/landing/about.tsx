@@ -51,12 +51,23 @@ export function About() {
 						</svg>
 					</motion.div>
 
-					{/* Small Text */}
+					{/* Script accent subtitle */}
 					<motion.p
 						initial={{ opacity: 0, y: 20 }}
 						whileInView={{ opacity: 1, y: 0 }}
 						viewport={{ once: true }}
 						transition={{ duration: 0.6, delay: 0.2 }}
+						className="font-script text-2xl text-gold"
+					>
+						reimagined with love
+					</motion.p>
+
+					{/* Small Text */}
+					<motion.p
+						initial={{ opacity: 0, y: 20 }}
+						whileInView={{ opacity: 1, y: 0 }}
+						viewport={{ once: true }}
+						transition={{ duration: 0.6, delay: 0.25 }}
 						className="text-xs sm:text-sm uppercase tracking-wider text-muted-foreground font-medium"
 					>
 						WEDDING INVITATIONS REIMAGINED
@@ -68,7 +79,7 @@ export function About() {
 						whileInView={{ opacity: 1, y: 0 }}
 						viewport={{ once: true }}
 						transition={{ duration: 0.6, delay: 0.3 }}
-						className="text-xl sm:text-3xl font-normal text-foreground text-center leading-tight max-w-xl"
+						className="font-heading text-xl sm:text-3xl font-normal text-foreground text-center leading-tight max-w-xl"
 					>
 						DreamMoments turns your timeline, photos, and traditions into a
 						living wedding page your guests actually enjoy using.
@@ -83,7 +94,7 @@ export function About() {
 					>
 						<a
 							href="#services-menu"
-							className="group cursor-pointer px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-dm-primary hover:bg-dm-primary-hover text-dm-primary-text font-medium text-sm sm:text-base transition-colors duration-200 flex items-center gap-2"
+							className="group cursor-pointer px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-gold hover:opacity-90 text-white font-medium text-sm sm:text-base transition-colors duration-200 flex items-center gap-2"
 						>
 							<span>How it works</span>
 							<ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 group-hover:translate-x-1" />

@@ -106,13 +106,13 @@ export function SocialProof() {
 					ref={headerRef}
 					className="flex items-center justify-between mb-12 lg:mb-16"
 				>
-					<h2 className="text-3xl lg:text-4xl font-medium tracking-tight text-foreground">
+					<h2 className="font-heading text-3xl lg:text-4xl font-medium tracking-tight text-foreground">
 						Loved by modern couples
 					</h2>
 					<Link
 						to="/editor/new"
 						search={{ template: "double-happiness" }}
-						className="hidden sm:inline-flex items-center justify-center px-6 py-3 rounded-full bg-dm-primary text-dm-primary-text text-sm font-medium transition-colors hover:bg-dm-primary-hover"
+						className="hidden sm:inline-flex items-center justify-center px-6 py-3 rounded-full bg-gold text-white text-sm font-medium transition-colors hover:opacity-90"
 					>
 						Start your invite
 					</Link>
@@ -141,37 +141,37 @@ export function SocialProof() {
 						</div>
 					</div>
 
-					<div className="lg:col-span-2 row-span-2 bg-muted/50 rounded-2xl p-8 flex flex-col">
+					<div className="lg:col-span-2 row-span-2 shadow-soft border border-border bg-muted rounded-2xl p-8 flex flex-col">
 						<div>
-							<QuoteIcon className="w-10 h-10 text-foreground/20 mb-6" />
-							<blockquote className="text-2xl lg:text-3xl font-medium leading-snug text-foreground">
+							<QuoteIcon className="w-10 h-10 text-gold mb-6" />
+							<blockquote className="font-heading text-2xl lg:text-3xl font-medium leading-snug text-foreground">
 								DreamMoments made our invitation feel personal and premium. Our
 								families RSVP&apos;d without calling us once.
 							</blockquote>
 							<div className="mt-6">
 								<p className="font-semibold text-foreground">Mei Lin Tan</p>
-								<p className="text-sm text-foreground/60">
+								<p className="text-sm text-muted-foreground">
 									Bride, Kuala Lumpur
 								</p>
 							</div>
 						</div>
 						<div className="flex items-center justify-between mt-auto pt-8">
-							<span className="text-xl font-semibold text-foreground">
+							<span className="font-heading text-xl font-semibold text-foreground">
 								DreamMoments
 							</span>
 							<a
 								href="#projects"
-								className="w-10 h-10 rounded-full bg-dm-primary/20 flex items-center justify-center hover:bg-dm-primary hover:text-dm-primary-text transition-colors text-foreground"
+								className="w-10 h-10 rounded-full bg-gold/20 flex items-center justify-center hover:bg-gold hover:text-white transition-colors text-foreground"
 							>
 								<ArrowIcon className="w-4 h-4" />
 							</a>
 						</div>
 					</div>
 
-					<div className="bg-muted/50 rounded-2xl p-6 flex flex-col">
+					<div className="shadow-soft border border-border bg-muted rounded-2xl p-6 flex flex-col">
 						<div className="flex-1">
-							<p className="text-3xl font-semibold text-foreground">84%</p>
-							<p className="text-sm text-foreground/60 mt-1">
+							<p className="text-3xl font-semibold text-gold">84%</p>
+							<p className="text-sm text-muted-foreground mt-1">
 								RSVP within 48 hours
 							</p>
 						</div>
@@ -181,17 +181,17 @@ export function SocialProof() {
 							</span>
 							<a
 								href="#services-menu"
-								className="w-10 h-10 rounded-full bg-dm-primary/20 flex items-center justify-center hover:bg-dm-primary hover:text-dm-primary-text transition-colors text-foreground"
+								className="w-10 h-10 rounded-full bg-gold/20 flex items-center justify-center hover:bg-gold hover:text-white transition-colors text-foreground"
 							>
 								<ArrowIcon className="w-4 h-4" />
 							</a>
 						</div>
 					</div>
 
-					<div className="bg-muted/50 rounded-2xl p-6 flex flex-col">
+					<div className="shadow-soft border border-border bg-muted rounded-2xl p-6 flex flex-col">
 						<div className="flex-1">
-							<p className="text-3xl font-semibold text-foreground">3 hrs</p>
-							<p className="text-sm text-foreground/60 mt-1">
+							<p className="text-3xl font-semibold text-gold">3 hrs</p>
+							<p className="text-sm text-muted-foreground mt-1">
 								Saved weekly on guest coordination
 							</p>
 						</div>
@@ -201,19 +201,19 @@ export function SocialProof() {
 							</span>
 							<a
 								href="#faq"
-								className="w-10 h-10 rounded-full bg-dm-primary/20 flex items-center justify-center hover:bg-dm-primary hover:text-dm-primary-text transition-colors text-foreground"
+								className="w-10 h-10 rounded-full bg-gold/20 flex items-center justify-center hover:bg-gold hover:text-white transition-colors text-foreground"
 							>
 								<ArrowIcon className="w-4 h-4" />
 							</a>
 						</div>
 					</div>
 
-					<div className="bg-muted/50 rounded-2xl p-8 flex flex-col">
+					<div className="shadow-soft border border-border bg-muted rounded-2xl p-8 flex flex-col">
 						<div className="flex-1">
-							<p className="text-3xl lg:text-4xl font-semibold text-foreground">
+							<p className="text-3xl lg:text-4xl font-semibold text-gold">
 								Top 1%
 							</p>
-							<p className="text-foreground/60 mt-2">
+							<p className="text-muted-foreground mt-2">
 								Recommended by modern wedding planners
 							</p>
 						</div>
@@ -224,18 +224,18 @@ export function SocialProof() {
 						</div>
 					</div>
 
-					<div className="lg:col-span-3 bg-muted/50 rounded-2xl p-8 flex flex-col">
-						<p className="text-xl lg:text-2xl font-medium leading-relaxed text-foreground max-w-3xl flex-1">
+					<div className="lg:col-span-3 shadow-soft border border-border bg-muted rounded-2xl p-8 flex flex-col">
+						<p className="font-heading text-xl lg:text-2xl font-medium leading-relaxed text-foreground max-w-3xl flex-1">
 							From first draft to wedding week, DreamMoments helps couples stay
 							calm, clear, and beautifully organized.
 						</p>
 						<div className="flex items-center justify-between mt-auto pt-6">
-							<span className="text-xl font-semibold text-foreground">
+							<span className="font-heading text-xl font-semibold text-foreground">
 								DreamMoments
 							</span>
 							<a
 								href="#hero"
-								className="w-10 h-10 rounded-full bg-dm-primary/20 flex items-center justify-center hover:bg-dm-primary hover:text-dm-primary-text transition-colors text-foreground"
+								className="w-10 h-10 rounded-full bg-gold/20 flex items-center justify-center hover:bg-gold hover:text-white transition-colors text-foreground"
 							>
 								<ArrowIcon className="w-4 h-4" />
 							</a>

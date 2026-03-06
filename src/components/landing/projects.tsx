@@ -75,11 +75,11 @@ function BlobCursor({ isVisible }: { isVisible: boolean }) {
 		>
 			<motion.div style={{ rotate }}>
 				<motion.div
-					className="flex h-20 w-20 items-center justify-center rounded-full bg-dm-primary"
+					className="flex h-20 w-20 items-center justify-center rounded-full bg-gold"
 					style={{ scaleX: scaleAlongMotion, scaleY: scalePerp }}
 				>
 					<motion.span
-						className="text-sm font-medium uppercase tracking-wide text-dm-primary-text"
+						className="text-sm font-medium uppercase tracking-wide text-white"
 						style={{
 							rotate: useTransform(rotate, (r) => -r),
 							scaleX: useTransform(scaleAlongMotion, (s) => 1 / s),
@@ -252,7 +252,7 @@ function ProjectOverlay({
 							alt={`${project.titleUp} ${project.titleDown}`}
 							className="h-full w-full object-cover"
 						/>
-						<div className="absolute inset-0 bg-black/40" />
+						<div className="absolute inset-0 bg-rose-950/40" />
 					</motion.div>
 					<motion.div
 						className="absolute left-4 top-4 z-10 sm:left-6 sm:top-6 md:left-12 md:top-12 lg:left-16 lg:top-16"
@@ -266,10 +266,8 @@ function ProjectOverlay({
 						}}
 					>
 						<h2 className="text-[clamp(2rem,8vw,6rem)] font-medium leading-[0.95] tracking-tight text-white">
-							<span className="block">{project.titleUp}</span>
-							<span className="block font-serif italic">
-								{project.titleDown}
-							</span>
+							<span className="block font-heading">{project.titleUp}</span>
+							<span className="block font-script">{project.titleDown}</span>
 						</h2>
 					</motion.div>
 					<motion.div
@@ -459,9 +457,11 @@ function ProjectItem({
 							ref={titleRef}
 							className="text-[clamp(2.5rem,6vw,6rem)] leading-[1.05] tracking-tight text-foreground mb-8"
 						>
-							<span className="font-medium">{project.titleUp}</span>
+							<span className="font-heading font-medium">
+								{project.titleUp}
+							</span>
 							<br />
-							<span className="font-serif italic">{project.titleDown}</span>
+							<span className="font-script">{project.titleDown}</span>
 						</h3>
 						<p
 							ref={descRef}
@@ -470,7 +470,7 @@ function ProjectItem({
 							{project.description}
 						</p>
 						<p
-							className={`mt-4 text-lg font-semibold text-foreground ${isEven ? "" : "md:ml-auto"}`}
+							className={`mt-4 text-lg font-semibold text-gold ${isEven ? "" : "md:ml-auto"}`}
 						>
 							SGD {project.price}
 						</p>
@@ -480,7 +480,7 @@ function ProjectItem({
 								e.stopPropagation();
 								onClick();
 							}}
-							className={`mt-6 w-fit rounded-full bg-dm-primary px-6 py-3 text-sm font-medium text-dm-primary-text transition-colors hover:bg-dm-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--dm-focus)] md:hidden ${isEven ? "" : "md:ml-auto"}`}
+							className={`mt-6 w-fit rounded-full bg-gold px-6 py-3 text-sm font-medium text-white transition-colors hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--agency-ring)] md:hidden ${isEven ? "" : "md:ml-auto"}`}
 						>
 							View template
 						</button>
@@ -515,9 +515,10 @@ export function Projects() {
 			<div className="pb-16">
 				<VelocityText
 					baseVelocity={80}
-					className="text-[clamp(4rem,12vw,14rem)] font-medium italic tracking-tight text-foreground uppercase px-8"
+					className="text-[clamp(4rem,12vw,14rem)] font-medium tracking-tight text-foreground uppercase px-8"
 				>
-					<span className="font-serif font-thin">Our Templates</span>&nbsp;
+					<span className="font-heading italic font-thin">Our Templates</span>
+					&nbsp;
 				</VelocityText>
 			</div>
 			<div className="flex flex-col">
