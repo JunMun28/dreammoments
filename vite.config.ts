@@ -63,8 +63,7 @@ const config = defineConfig({
 		host: true,
 		port: 3000,
 		watch: {
-			usePolling: true,
-			interval: 200,
+			ignored: ["**/routeTree.gen.ts"],
 		},
 	},
 	test: {

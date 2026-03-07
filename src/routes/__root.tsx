@@ -17,11 +17,6 @@ import { ToastProvider } from "../components/ui/Toast";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import appCss from "../styles.css?url";
 
-// Dev-only: load react-grab for UI element inspection (⌘C to copy component info)
-if (typeof window !== "undefined" && import.meta.env.DEV) {
-	import("react-grab");
-}
-
 // One-time cleanup: remove legacy localStorage store for existing users
 if (typeof window !== "undefined") {
 	window.localStorage.removeItem("dm-store-v1");
@@ -153,11 +148,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 	}, [router]);
 
 	return (
-		<html lang="en">
+		<html lang="en" suppressHydrationWarning>
 			<head>
 				<HeadContent />
 			</head>
-			<body>
+			<body suppressHydrationWarning>
 				<ClerkProvider>
 					<ToastProvider>
 						<a href="#main-content" className="dm-skip-link">
