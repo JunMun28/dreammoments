@@ -2,16 +2,16 @@
 
 /* Root wrapper scopes all template styles */
 .double-happiness {
-	--t-primary: #8b5e4b; /* WCAG AA safe (4.5:1 on #F9F8F6) */
-	--t-secondary: #3a2e2a;
-	--t-accent: #c5a880;
-	--t-bg: #f9f8f6;
-	--t-text: #3a2e2a;
-	--t-muted: #8c7e74;
+	--t-primary: #e8764b;
+	--t-secondary: #0a1628;
+	--t-accent: #c9a96e;
+	--t-bg: #faf7f2;
+	--t-text: #0a1628;
+	--t-muted: #64748b;
 	--t-bg-alt: #ffffff;
-	--t-accent-light: #e8ddd1;
-	--t-accent-deep: #96724e;
-	--t-accent-glow: rgba(197, 168, 128, 0.15);
+	--t-accent-light: #e8dfd0;
+	--t-accent-deep: #b8862d;
+	--t-accent-glow: rgba(201, 169, 110, 0.15);
 	max-width: 430px;
 	margin-left: auto;
 	margin-right: auto;
@@ -39,7 +39,7 @@
 }
 .dh-section-dark {
 	background-color: var(--t-secondary);
-	color: #f9f8f6;
+	color: #faf7f2;
 }
 .dh-section-white {
 	background-color: #ffffff;
@@ -51,7 +51,7 @@
 	background: linear-gradient(
 		90deg,
 		transparent,
-		rgba(197, 168, 128, 0.5),
+		rgba(201, 169, 110, 0.5),
 		transparent
 	);
 }
@@ -62,9 +62,9 @@
 	background: linear-gradient(
 		90deg,
 		transparent,
-		rgba(197, 168, 128, 0.4),
-		rgba(176, 125, 98, 0.3),
-		rgba(197, 168, 128, 0.4),
+		rgba(201, 169, 110, 0.4),
+		rgba(232, 118, 75, 0.3),
+		rgba(201, 169, 110, 0.4),
 		transparent
 	);
 	margin: 0 auto;
@@ -98,8 +98,8 @@
 
 /* ── Photo frame ── */
 .dh-photo-frame {
-	border: 1px solid rgba(197, 168, 128, 0.3);
-	box-shadow: 0 2px 8px rgba(58, 46, 42, 0.08);
+	border: 1px solid rgba(201, 169, 110, 0.3);
+	box-shadow: 0 2px 8px rgba(10, 22, 40, 0.08);
 }
 
 /* ── RSVP form focus indicators ── */
@@ -108,13 +108,13 @@
 .double-happiness textarea:focus-visible {
 	outline: 2px solid #ffffff;
 	outline-offset: 2px;
-	box-shadow: 0 0 0 4px rgba(176, 125, 98, 0.5);
+	box-shadow: 0 0 0 4px rgba(232, 118, 75, 0.5);
 }
 
 /* ── 囍 watermark ── */
 .dh-xi-watermark {
 	font-size: 12rem;
-	color: rgba(58, 46, 42, 0.05);
+	color: rgba(10, 22, 40, 0.05);
 	pointer-events: none;
 	user-select: none;
 }
@@ -249,19 +249,19 @@
 /* ── Milestone card ── */
 .dh-milestone-card {
 	background: #ffffff;
-	border: 1px solid rgba(197, 168, 128, 0.15);
+	border: 1px solid rgba(201, 169, 110, 0.15);
 	border-radius: 12px;
 	padding: 1.25rem;
-	box-shadow: 0 2px 8px rgba(58, 46, 42, 0.05);
+	box-shadow: 0 2px 8px rgba(10, 22, 40, 0.05);
 }
 
 /* ── Schedule event card ── */
 .dh-event-card {
 	background: #ffffff;
-	border: 1px solid rgba(197, 168, 128, 0.15);
+	border: 1px solid rgba(201, 169, 110, 0.15);
 	border-radius: 12px;
 	padding: 1.25rem;
-	box-shadow: 0 4px 16px rgba(58, 46, 42, 0.06);
+	box-shadow: 0 4px 16px rgba(10, 22, 40, 0.06);
 	display: flex;
 	gap: 1rem;
 }
@@ -275,8 +275,8 @@
 
 /* ── Photo frame with clean shadow ── */
 .dh-photo-frame-premium {
-	border: 1px solid rgba(197, 168, 128, 0.2);
-	box-shadow: 0 4px 20px rgba(58, 46, 42, 0.08);
+	border: 1px solid rgba(201, 169, 110, 0.2);
+	box-shadow: 0 4px 20px rgba(10, 22, 40, 0.08);
 	border-radius: 20px;
 	overflow: hidden;
 }
@@ -285,8 +285,8 @@
 .dh-portrait-frame {
 	position: relative;
 	border-radius: 20px;
-	border: 1px solid rgba(197, 168, 128, 0.2);
-	box-shadow: 0 4px 16px rgba(58, 46, 42, 0.06);
+	border: 1px solid rgba(201, 169, 110, 0.2);
+	box-shadow: 0 4px 16px rgba(10, 22, 40, 0.06);
 }
 
 /* ── Timeline dot ── */
@@ -296,7 +296,7 @@
 	border-radius: 50%;
 	background-color: var(--t-primary);
 	border: 2px solid var(--t-accent);
-	box-shadow: 0 0 0 3px rgba(197, 168, 128, 0.1);
+	box-shadow: 0 0 0 3px rgba(201, 169, 110, 0.1);
 }
 
 /* ── Ken Burns hero animation ── */

@@ -22,27 +22,27 @@ import "./double-happiness.css";
 /* ─── Design Tokens ─── */
 
 const COLORS = {
-	primary: "#B07D62",
-	accent: "#C5A880",
-	cream: "#F9F8F6",
-	dark: "#3A2E2A",
-	espresso: "#3A2E2A",
-	accentLight: "#E8DDD1",
-	muted: "#8C7E74",
+	primary: "#E8764B",
+	accent: "#C9A96E",
+	cream: "#FAF7F2",
+	dark: "#0A1628",
+	espresso: "#0A1628",
+	accentLight: "#E8DFD0",
+	muted: "#64748B",
 } as const;
 
 /* ─── Typography ─── */
 
 const headingFont: CSSProperties = {
-	fontFamily: "'Noto Serif SC', 'Songti SC', Georgia, serif",
+	fontFamily: "'Cinzel', 'Noto Serif SC', Georgia, serif",
 };
 
 const bodyFont: CSSProperties = {
-	fontFamily: "Inter, 'Noto Sans SC', system-ui, sans-serif",
+	fontFamily: "'Josefin Sans', 'Noto Sans SC', system-ui, sans-serif",
 };
 
 const accentFont: CSSProperties = {
-	fontFamily: "'Noto Serif SC', 'Songti SC', serif",
+	fontFamily: "'Cinzel', 'Noto Serif SC', serif",
 	fontWeight: 700,
 };
 
@@ -118,7 +118,7 @@ export default function DoubleHappinessInvitation({
 					mode={mode}
 				/>
 				{/* Warm espresso overlay */}
-				<div className="absolute inset-0 bg-gradient-to-b from-[#3A2E2A]/40 via-[#3A2E2A]/30 to-[#3A2E2A]/60" />
+				<div className="absolute inset-0 bg-gradient-to-b from-[#0A1628]/40 via-[#0A1628]/30 to-[#0A1628]/60" />
 
 				{/* 囍 watermark — subtle */}
 				<span
@@ -170,12 +170,12 @@ export default function DoubleHappinessInvitation({
 						style={{ transitionDelay: "0.3s" }}
 					>
 						<span
-							className="rounded-full border border-[rgba(197,168,128,0.3)] px-4 py-2"
+							className="rounded-full border border-[rgba(201,169,110,0.3)] px-4 py-2"
 							lang="en"
 						>
 							{weddingDateEn}
 						</span>
-						<span className="rounded-full border border-[rgba(197,168,128,0.3)] px-4 py-2">
+						<span className="rounded-full border border-[rgba(201,169,110,0.3)] px-4 py-2">
 							{data.venue.name}
 						</span>
 					</div>
@@ -257,7 +257,7 @@ export default function DoubleHappinessInvitation({
 						{data.announcement.title}
 					</h2>
 
-					<div className="mx-auto mt-8 max-w-2xl rounded-lg border border-[rgba(197,168,128,0.08)] bg-gradient-to-b from-white/50 to-transparent p-8">
+					<div className="mx-auto mt-8 max-w-2xl rounded-lg border border-[rgba(201,169,110,0.08)] bg-gradient-to-b from-white/50 to-transparent p-8">
 						<div
 							data-reveal
 							className="dm-reveal dh-blockquote mx-auto max-w-2xl text-left"
@@ -336,7 +336,7 @@ export default function DoubleHappinessInvitation({
 							>
 								<span>新郎</span> <span lang="en">/ THE GROOM</span>
 							</p>
-							<div className="mx-auto mt-2 h-px w-12 bg-gradient-to-r from-transparent via-[rgba(197,168,128,0.5)] to-transparent" />
+							<div className="mx-auto mt-2 h-px w-12 bg-gradient-to-r from-transparent via-[rgba(201,169,110,0.5)] to-transparent" />
 							<h3
 								{...editableProps(
 									"couple.partnerOne.fullName",
@@ -385,7 +385,7 @@ export default function DoubleHappinessInvitation({
 							>
 								<span>新娘</span> <span lang="en">/ THE BRIDE</span>
 							</p>
-							<div className="mx-auto mt-2 h-px w-12 bg-gradient-to-r from-transparent via-[rgba(197,168,128,0.5)] to-transparent" />
+							<div className="mx-auto mt-2 h-px w-12 bg-gradient-to-r from-transparent via-[rgba(201,169,110,0.5)] to-transparent" />
 							<h3
 								{...editableProps(
 									"couple.partnerTwo.fullName",
@@ -450,7 +450,7 @@ export default function DoubleHappinessInvitation({
 											className="inline-block rounded-full px-3 py-1 text-xs uppercase tracking-[0.25em]"
 											style={{
 												color: COLORS.primary,
-												backgroundColor: "rgba(197,168,128,0.1)",
+												backgroundColor: "rgba(201,169,110,0.1)",
 											}}
 										>
 											{milestone.date}
@@ -603,7 +603,7 @@ export default function DoubleHappinessInvitation({
 					/>
 
 					<div data-reveal className="dm-reveal mx-auto mt-8 max-w-md">
-						<div className="rounded-2xl border border-[rgba(197,168,128,0.15)] bg-white p-8 text-center shadow-sm">
+						<div className="rounded-2xl border border-[rgba(201,169,110,0.15)] bg-white p-8 text-center shadow-sm">
 							<h3
 								{...editableProps("venue.name", "text-2xl")}
 								style={{ ...headingFont, color: COLORS.dark }}
@@ -643,9 +643,9 @@ export default function DoubleHappinessInvitation({
 										href={`https://www.google.com/maps/search/?api=1&query=${data.venue.coordinates.lat},${data.venue.coordinates.lng}`}
 										target="_blank"
 										rel="noopener noreferrer"
-										className="inline-flex items-center gap-1.5 rounded-full border px-5 py-2.5 text-xs uppercase tracking-[0.15em] transition-colors hover:bg-[rgba(176,125,98,0.05)]"
+										className="inline-flex items-center gap-1.5 rounded-full border px-5 py-2.5 text-xs uppercase tracking-[0.15em] transition-colors hover:bg-[rgba(232,118,75,0.05)]"
 										style={{
-											borderColor: "rgba(176,125,98,0.2)",
+											borderColor: "rgba(232,118,75,0.2)",
 											color: COLORS.primary,
 										}}
 										lang="en"
@@ -670,9 +670,9 @@ export default function DoubleHappinessInvitation({
 										href={`https://www.waze.com/ul?ll=${data.venue.coordinates.lat},${data.venue.coordinates.lng}&navigate=yes`}
 										target="_blank"
 										rel="noopener noreferrer"
-										className="inline-flex items-center gap-1.5 rounded-full border px-5 py-2.5 text-xs uppercase tracking-[0.15em] transition-colors hover:bg-[rgba(176,125,98,0.05)]"
+										className="inline-flex items-center gap-1.5 rounded-full border px-5 py-2.5 text-xs uppercase tracking-[0.15em] transition-colors hover:bg-[rgba(232,118,75,0.05)]"
 										style={{
-											borderColor: "rgba(176,125,98,0.2)",
+											borderColor: "rgba(232,118,75,0.2)",
 											color: COLORS.primary,
 										}}
 										lang="en"
@@ -724,14 +724,14 @@ export default function DoubleHappinessInvitation({
 						</p>
 						<h2
 							className="text-4xl sm:text-5xl"
-							style={{ ...accentFont, color: "#F9F8F6" }}
+							style={{ ...accentFont, color: "#FAF7F2" }}
 							lang="en"
 						>
 							RSVP
 						</h2>
 						<p
 							className="max-w-md text-sm leading-relaxed"
-							style={{ color: "rgba(249,248,246,0.7)" }}
+							style={{ color: "rgba(250,247,242,0.7)" }}
 							lang="en"
 						>
 							{data.rsvp.customMessage ||
@@ -753,14 +753,14 @@ export default function DoubleHappinessInvitation({
 							</p>
 							<p
 								className="mt-2 text-sm"
-								style={{ color: "#F9F8F6" }}
+								style={{ color: "#FAF7F2" }}
 								lang="en"
 							>
 								{rsvpDeadlineEn}
 							</p>
 							<p
 								className="mt-3 text-xs uppercase tracking-[0.2em]"
-								style={{ color: "rgba(249,248,246,0.5)" }}
+								style={{ color: "rgba(250,247,242,0.5)" }}
 								lang="en"
 							>
 								{data.rsvp.allowPlusOnes
@@ -772,7 +772,7 @@ export default function DoubleHappinessInvitation({
 
 					{/* Vertical champagne line */}
 					<div className="hidden self-stretch lg:block">
-						<div className="h-full w-px bg-gradient-to-b from-transparent via-[rgba(197,168,128,0.3)] to-transparent" />
+						<div className="h-full w-px bg-gradient-to-b from-transparent via-[rgba(201,169,110,0.3)] to-transparent" />
 					</div>
 
 					{/* Right: form or confirmation */}
@@ -780,7 +780,7 @@ export default function DoubleHappinessInvitation({
 						<div className="relative">
 							<div
 								data-reveal
-								className="dm-reveal flex items-center justify-center rounded-2xl border border-[rgba(197,168,128,0.15)] p-6 sm:p-8"
+								className="dm-reveal flex items-center justify-center rounded-2xl border border-[rgba(201,169,110,0.15)] p-6 sm:p-8"
 								style={{
 									background: COLORS.cream,
 								}}
@@ -795,7 +795,7 @@ export default function DoubleHappinessInvitation({
 						<div className="relative">
 							<form
 								data-reveal
-								className="dm-reveal rounded-2xl border border-[rgba(197,168,128,0.15)] p-6 sm:p-10"
+								className="dm-reveal rounded-2xl border border-[rgba(201,169,110,0.15)] p-6 sm:p-10"
 								style={{
 									background: COLORS.cream,
 								}}
@@ -875,7 +875,7 @@ export default function DoubleHappinessInvitation({
 											aria-invalid={!!errors.name}
 											className="rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
 											style={{
-												borderColor: "rgba(197,168,128,0.3)",
+												borderColor: "rgba(201,169,110,0.3)",
 												color: COLORS.dark,
 											}}
 											onBlur={(e) => {
@@ -913,7 +913,7 @@ export default function DoubleHappinessInvitation({
 											aria-invalid={!!errors.email}
 											className="rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
 											style={{
-												borderColor: "rgba(197,168,128,0.3)",
+												borderColor: "rgba(201,169,110,0.3)",
 												color: COLORS.dark,
 											}}
 											onBlur={(e) => {
@@ -948,7 +948,7 @@ export default function DoubleHappinessInvitation({
 											defaultValue="attending"
 											className="rounded-lg border bg-white px-4 py-3 text-sm"
 											style={{
-												borderColor: "rgba(197,168,128,0.3)",
+												borderColor: "rgba(201,169,110,0.3)",
 												color: COLORS.dark,
 											}}
 										>
@@ -971,7 +971,7 @@ export default function DoubleHappinessInvitation({
 											inputMode="numeric"
 											className="rounded-lg border bg-white px-4 py-3 text-sm"
 											style={{
-												borderColor: "rgba(197,168,128,0.3)",
+												borderColor: "rgba(201,169,110,0.3)",
 												color: COLORS.dark,
 											}}
 										/>
@@ -989,7 +989,7 @@ export default function DoubleHappinessInvitation({
 											defaultValue=""
 											className="rounded-lg border bg-white px-4 py-3 text-sm"
 											style={{
-												borderColor: "rgba(197,168,128,0.3)",
+												borderColor: "rgba(201,169,110,0.3)",
 												color: COLORS.dark,
 											}}
 										>
@@ -1013,7 +1013,7 @@ export default function DoubleHappinessInvitation({
 											maxLength={500}
 											className="min-h-24 rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
 											style={{
-												borderColor: "rgba(197,168,128,0.3)",
+												borderColor: "rgba(201,169,110,0.3)",
 												color: COLORS.dark,
 											}}
 										/>
@@ -1024,9 +1024,9 @@ export default function DoubleHappinessInvitation({
 											name="consent"
 											required
 											aria-describedby={consentDescriptionId}
-											className="mt-0.5 h-4 w-4 rounded border-2 accent-[#B07D62]"
+											className="mt-0.5 h-4 w-4 rounded border-2 accent-[#E8764B]"
 											style={{
-												borderColor: "rgba(197,168,128,0.3)",
+												borderColor: "rgba(201,169,110,0.3)",
 											}}
 										/>
 										<span
@@ -1065,10 +1065,10 @@ export default function DoubleHappinessInvitation({
 									disabled={isSubmitting}
 									className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-3.5 text-xs font-semibold uppercase tracking-[0.3em] text-white shadow-sm transition-all hover:shadow-lg active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
 									style={{
-										background: "linear-gradient(135deg, #B07D62, #8A5D42)",
+										background: "linear-gradient(135deg, #E8764B, #C45A30)",
 										boxShadow: isSubmitting
 											? undefined
-											: "0 4px 12px rgba(176,125,98,0.2)",
+											: "0 4px 12px rgba(232,118,75,0.2)",
 									}}
 								>
 									{isSubmitting && <LoadingSpinner size="sm" />}

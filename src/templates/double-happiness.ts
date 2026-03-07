@@ -14,17 +14,17 @@ export const doubleHappinessTemplate: TemplateConfig = {
 	},
 	tokens: {
 		colors: {
-			primary: "#B07D62",
-			secondary: "#3A2E2A",
-			accent: "#C5A880",
-			background: "#F9F8F6",
-			text: "#3A2E2A",
-			muted: "#8C7E74",
+			primary: "#E8764B",
+			secondary: "#0A1628",
+			accent: "#C9A96E",
+			background: "#FAF7F2",
+			text: "#0A1628",
+			muted: "#64748B",
 		},
 		typography: {
-			headingFont: "'Noto Serif SC', 'Songti SC', Georgia, serif",
-			bodyFont: "'Noto Sans SC', 'Inter', sans-serif",
-			accentFont: "'Noto Serif SC', 'Songti SC', serif",
+			headingFont: "'Cinzel', 'Noto Serif SC', Georgia, serif",
+			bodyFont: "'Josefin Sans', 'Noto Sans SC', sans-serif",
+			accentFont: "'Cinzel', 'Noto Serif SC', serif",
 		},
 		animations: {
 			scrollTriggerOffset: 100,
