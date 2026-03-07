@@ -1,17 +1,17 @@
-/* ─── Classical Chinese Template (经典中式) ─── */
+/* ─── Classical Chinese / Crimson Ink Template ─── */
 
 /* Root wrapper scopes all template styles */
 .classical-chinese {
-	--t-primary: #c41e3a;
-	--t-secondary: #1a0f0a;
-	--t-accent: #d4a843;
-	--t-bg: #fff8ef;
-	--t-text: #1a0f0a;
-	--t-muted: #8a7f7a;
-	--t-bg-alt: #ffffff;
-	--t-accent-light: #f5e6c8;
-	--t-accent-deep: #b8922f;
-	--t-accent-glow: rgba(212, 168, 67, 0.15);
+	--t-primary: #d4380d;
+	--t-secondary: #0c0c0c;
+	--t-accent: #b8860b;
+	--t-bg: #f5f0e8;
+	--t-text: #0c0c0c;
+	--t-muted: #6b5e50;
+	--t-bg-alt: #f5f0e8;
+	--t-accent-light: #e8dfd0;
+	--t-accent-deep: #96700a;
+	--t-accent-glow: rgba(184, 134, 11, 0.15);
 	max-width: 430px;
 	margin-left: auto;
 	margin-right: auto;
@@ -20,7 +20,7 @@
 
 @media (min-width: 431px) {
 	.classical-chinese {
-		box-shadow: 0 0 40px rgba(0, 0, 0, 0.08);
+		box-shadow: 0 0 40px rgba(0, 0, 0, 0.12);
 	}
 }
 
@@ -38,11 +38,58 @@
 	background-color: var(--t-bg);
 }
 .cc-section-white {
-	background-color: #ffffff;
+	background-color: #f5f0e8;
 }
 .cc-section-lacquer {
 	background-color: var(--t-secondary);
-	color: #fff8ef;
+	color: #f5f0e8;
+}
+.cc-section-obsidian {
+	background-color: #0c0c0c;
+	color: #f5f0e8;
+}
+
+/* ── Ink paper texture ── */
+.cc-ink-texture {
+	background-image:
+		repeating-linear-gradient(
+			0deg,
+			transparent,
+			transparent 2px,
+			rgba(107, 94, 80, 0.03) 2px,
+			rgba(107, 94, 80, 0.03) 4px
+		),
+		repeating-linear-gradient(
+			90deg,
+			transparent,
+			transparent 2px,
+			rgba(107, 94, 80, 0.02) 2px,
+			rgba(107, 94, 80, 0.02) 4px
+		);
+}
+
+/* ── Vermillion seal stamp ── */
+.cc-seal {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 4.5rem;
+	height: 4.5rem;
+	border-radius: 50%;
+	background-color: #d4380d;
+	color: #f5f0e8;
+	font-family: "Cormorant", "Noto Serif SC", serif;
+	font-weight: 700;
+	font-size: 1.5rem;
+	border: 2px solid rgba(184, 134, 11, 0.4);
+	transform: rotate(-3deg);
+	box-shadow: 0 2px 12px rgba(212, 56, 13, 0.3);
+}
+
+/* ── Brush stroke divider ── */
+.cc-brush-divider {
+	display: block;
+	margin: 0 auto;
 }
 
 /* ── 囍 reveal animation ── */
@@ -64,7 +111,7 @@
 /* ── 囍 watermark ── */
 .cc-xi-watermark {
 	font-size: 12rem;
-	color: rgba(196, 30, 58, 0.06);
+	color: rgba(212, 56, 13, 0.06);
 	pointer-events: none;
 	user-select: none;
 }
@@ -77,14 +124,14 @@
 			90deg,
 			transparent 0px,
 			transparent 10px,
-			rgba(212, 168, 67, 0.15) 10px,
-			rgba(212, 168, 67, 0.15) 12px,
+			rgba(184, 134, 11, 0.15) 10px,
+			rgba(184, 134, 11, 0.15) 12px,
 			transparent 12px,
 			transparent 22px
 		),
 		radial-gradient(
 			ellipse 20px 16px at 20px 0px,
-			rgba(212, 168, 67, 0.1) 50%,
+			rgba(184, 134, 11, 0.1) 50%,
 			transparent 51%
 		);
 	background-size: 40px 24px;
@@ -126,9 +173,9 @@
 	background: linear-gradient(
 		90deg,
 		transparent,
-		rgba(212, 168, 67, 0.4),
-		rgba(196, 30, 58, 0.3),
-		rgba(212, 168, 67, 0.4),
+		rgba(184, 134, 11, 0.4),
+		rgba(212, 56, 13, 0.3),
+		rgba(184, 134, 11, 0.4),
 		transparent
 	);
 	margin: 0 auto;
@@ -158,35 +205,35 @@
 	border-radius: 50%;
 	background-color: var(--t-primary);
 	border: 2px solid var(--t-accent);
-	box-shadow: 0 0 0 3px rgba(212, 168, 67, 0.1);
+	box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.1);
 }
 
-/* ── Traditional portrait frame (gold double-line border) ── */
+/* ── Traditional portrait frame ── */
 .cc-portrait-frame {
 	position: relative;
 	border-radius: 4px;
 	border: 2px solid var(--t-accent);
-	outline: 2px solid rgba(212, 168, 67, 0.3);
+	outline: 2px solid rgba(184, 134, 11, 0.3);
 	outline-offset: 4px;
-	box-shadow: 0 4px 16px rgba(26, 15, 10, 0.08);
+	box-shadow: 0 4px 16px rgba(12, 12, 12, 0.08);
 }
 
 /* ── Milestone card ── */
 .cc-milestone-card {
-	background: #ffffff;
-	border: 1px solid rgba(212, 168, 67, 0.2);
+	background: #f5f0e8;
+	border: 1px solid rgba(184, 134, 11, 0.2);
 	border-radius: 12px;
 	padding: 1.25rem;
-	box-shadow: 0 2px 8px rgba(26, 15, 10, 0.05);
+	box-shadow: 0 2px 8px rgba(12, 12, 12, 0.05);
 }
 
 /* ── Schedule event card ── */
 .cc-event-card {
-	background: #ffffff;
-	border: 1px solid rgba(212, 168, 67, 0.2);
+	background: #f5f0e8;
+	border: 1px solid rgba(184, 134, 11, 0.2);
 	border-radius: 12px;
 	padding: 1.25rem;
-	box-shadow: 0 4px 16px rgba(26, 15, 10, 0.06);
+	box-shadow: 0 4px 16px rgba(12, 12, 12, 0.06);
 	display: flex;
 	gap: 1rem;
 }
@@ -202,30 +249,9 @@
 .classical-chinese input:focus-visible,
 .classical-chinese select:focus-visible,
 .classical-chinese textarea:focus-visible {
-	outline: 2px solid #ffffff;
+	outline: 2px solid #f5f0e8;
 	outline-offset: 2px;
-	box-shadow: 0 0 0 4px rgba(196, 30, 58, 0.4);
-}
-
-/* ── Scroll reveal animation ── */
-.classical-chinese .dm-reveal {
-	opacity: 0;
-	transform: translate3d(0, 40px, 0);
-	will-change: opacity, transform;
-	transition:
-		opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-		transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.classical-chinese .dm-reveal.is-visible {
-	opacity: 1;
-	transform: translate3d(0, 0, 0);
-	will-change: auto;
-}
-
-.classical-chinese .dm-reveal.is-hidden {
-	opacity: 0;
-	transform: translate3d(0, 40px, 0);
+	box-shadow: 0 0 0 4px rgba(212, 56, 13, 0.4);
 }
 
 /* ── Countdown styling ── */
@@ -307,12 +333,6 @@
 
 /* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
-	.classical-chinese .dm-reveal {
-		/* biome-ignore lint/complexity/noImportantStyles: required for a11y override */
-		opacity: 1 !important;
-		/* biome-ignore lint/complexity/noImportantStyles: required for a11y override */
-		transform: none !important;
-	}
 	.classical-chinese * {
 		/* biome-ignore lint/complexity/noImportantStyles: required for a11y override */
 		animation-duration: 0.01ms !important;

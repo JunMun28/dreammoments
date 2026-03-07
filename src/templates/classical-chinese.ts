@@ -5,7 +5,7 @@ export const classicalChineseTemplate: TemplateConfig = {
 	name: "Classical Chinese",
 	nameZh: "经典中式",
 	description:
-		"Traditional red and gold with ink wash transitions and animated Double Happiness reveal.",
+		"Bold vermillion and obsidian with ink-brush calligraphy, seal stamp reveals, and high-contrast sections.",
 	category: "chinese",
 	version: "1.0.0",
 	aiConfig: {
@@ -14,17 +14,17 @@ export const classicalChineseTemplate: TemplateConfig = {
 	},
 	tokens: {
 		colors: {
-			primary: "#C41E3A",
-			secondary: "#1A0F0A",
-			accent: "#D4A843",
-			background: "#FFF8EF",
-			text: "#1A0F0A",
-			muted: "#8A7F7A",
+			primary: "#D4380D",
+			secondary: "#0C0C0C",
+			accent: "#B8860B",
+			background: "#F5F0E8",
+			text: "#0C0C0C",
+			muted: "#6B5E50",
 		},
 		typography: {
-			headingFont: "'KaiTi', 'Noto Serif SC', serif",
-			bodyFont: "'Songti SC', 'Noto Sans SC', sans-serif",
-			accentFont: "'KaiTi', 'Noto Serif SC', serif",
+			headingFont: "'Cormorant', 'Noto Serif SC', Georgia, serif",
+			bodyFont: "'DM Sans', 'Noto Sans SC', sans-serif",
+			accentFont: "'Cormorant', 'Noto Serif SC', serif",
 		},
 		animations: {
 			scrollTriggerOffset: 100,
