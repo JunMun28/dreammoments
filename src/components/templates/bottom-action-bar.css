@@ -1,0 +1,83 @@
+/* ─── Bottom Action Bar ─── */
+
+.bottom-action-bar {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	z-index: 100;
+	display: flex;
+	align-items: center;
+	justify-content: space-around;
+	background: rgba(255, 255, 255, 0.85);
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
+	border-top: 1px solid rgba(0, 0, 0, 0.06);
+	padding: 0.5rem 1rem;
+	padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+}
+
+.bottom-action-bar__btn {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	min-width: 44px;
+	min-height: 44px;
+	border: none;
+	background: none;
+	cursor: pointer;
+	color: #555;
+	transition: color 0.15s ease;
+	position: relative;
+	-webkit-tap-highlight-color: transparent;
+}
+
+.bottom-action-bar__btn:active {
+	color: var(--bar-primary, #c4727f);
+}
+
+.bottom-action-bar__btn:focus-visible {
+	outline: 2px solid var(--bar-primary, #c4727f);
+	outline-offset: 2px;
+	border-radius: 8px;
+}
+
+.bottom-action-bar__like-count {
+	font-size: 0.625rem;
+	font-variant-numeric: tabular-nums;
+	line-height: 1;
+	margin-top: 2px;
+	color: inherit;
+}
+
+.bottom-action-bar__hearts {
+	position: absolute;
+	top: 0;
+	left: 50%;
+	pointer-events: none;
+}
+
+.bottom-action-bar__float-heart {
+	position: absolute;
+	animation: heart-float 800ms ease-out forwards;
+}
+
+@keyframes heart-float {
+	0% {
+		opacity: 1;
+		transform: translate(-50%, 0) scale(0.5);
+	}
+	100% {
+		opacity: 0;
+		transform: translate(-50%, var(--float-y, -60px)) scale(1);
+	}
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+	.bottom-action-bar__float-heart {
+		/* biome-ignore lint/complexity/noImportantStyles: required for a11y override */
+		animation-duration: 0.01ms !important;
+	}
+}

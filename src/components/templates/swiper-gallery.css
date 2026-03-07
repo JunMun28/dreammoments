@@ -1,0 +1,63 @@
+/* ─── SwiperGallery shared component ─── */
+
+.swiper-gallery .img-placeholder {
+	position: relative;
+	overflow: hidden;
+	border-radius: 12px;
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+
+.swiper-gallery .img-placeholder.has-blur {
+	filter: blur(20px);
+	transition: filter 0.5s ease-out;
+}
+
+.swiper-gallery .img-placeholder.loaded {
+	filter: blur(0);
+}
+
+.swiper-gallery .img-placeholder img {
+	display: block;
+	width: 100%;
+	height: auto;
+	object-fit: cover;
+	border-radius: 12px;
+}
+
+/* ── Pagination dots ── */
+.swiper-gallery .swiper-pagination-bullet {
+	background-color: var(--swiper-gallery-color, #c4727f);
+	opacity: 0.4;
+	transition: opacity 0.3s ease;
+}
+
+.swiper-gallery .swiper-pagination-bullet-active {
+	opacity: 1;
+}
+
+/* ── Caption ── */
+.swiper-gallery .slide-caption {
+	text-align: center;
+	padding: 0.75rem 0.5rem 0;
+	font-size: 0.875rem;
+	line-height: 1.5;
+	color: var(--swiper-gallery-caption-color, #3a3a3a);
+}
+
+.swiper-gallery .slide-caption-zh {
+	font-size: 0.8125rem;
+	margin-top: 0.125rem;
+	opacity: 0.75;
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+	.swiper-gallery .img-placeholder.has-blur {
+		/* biome-ignore lint/complexity/noImportantStyles: required for a11y override */
+		filter: none !important;
+		/* biome-ignore lint/complexity/noImportantStyles: required for a11y override */
+		transition: none !important;
+	}
+}
