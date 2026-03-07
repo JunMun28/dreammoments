@@ -5,7 +5,7 @@ export const romanticCinematicTemplate: TemplateConfig = {
 	name: "Romantic Cinematic",
 	nameZh: "浪漫光影",
 	description:
-		"Dreamy dusty rose & champagne gold with cinematic parallax and film-grain textures.",
+		"Moody rosewood & deep aubergine with cinematic curtain reveals and starlight particles.",
 	category: "chinese",
 	version: "1.0.0",
 	aiConfig: {
@@ -14,18 +14,17 @@ export const romanticCinematicTemplate: TemplateConfig = {
 	},
 	tokens: {
 		colors: {
-			primary: "#8B4A55",
-			secondary: "#2D1F2B",
-			accent: "#C5A880",
-			background: "#FBF5F3",
-			text: "#2D1F2B",
-			muted: "#8A7F7A",
+			primary: "#C2566B",
+			secondary: "#1A1225",
+			accent: "#DDD5E9",
+			background: "#F8F5F0",
+			text: "#1A1225",
+			muted: "#7A6E85",
 		},
 		typography: {
-			headingFont:
-				"'Playfair Display', 'Noto Serif SC', 'Songti SC', Georgia, serif",
-			bodyFont: "'Inter', 'Noto Sans SC', system-ui, sans-serif",
-			accentFont: "'Playfair Display', 'Noto Serif SC', serif",
+			headingFont: "'Bodoni Moda', 'Noto Serif SC', Georgia, serif",
+			bodyFont: "'Jost', 'Noto Sans SC', sans-serif",
+			accentFont: "'Bodoni Moda', 'Noto Serif SC', serif",
 		},
 		animations: {
 			scrollTriggerOffset: 100,
@@ -39,7 +38,7 @@ export const romanticCinematicTemplate: TemplateConfig = {
 			type: "hero",
 			defaultVisible: true,
 			notes:
-				"Full-bleed photo, film-grain overlay, letterbox bars, oversized Playfair names, gradient to plum.",
+				"Full-bleed photo, film-grain overlay, curtain clipPath reveal, oversized Bodoni Moda names, gradient to aubergine.",
 			fields: [
 				{
 					id: "partnerOneName",
@@ -79,7 +78,7 @@ export const romanticCinematicTemplate: TemplateConfig = {
 			type: "announcement",
 			defaultVisible: true,
 			notes:
-				"Bilingual formal invitation copy with dusty rose blockquote border.",
+				"Bilingual formal invitation copy with rosewood blockquote border.",
 			fields: [
 				{
 					id: "title",
@@ -149,8 +148,7 @@ export const romanticCinematicTemplate: TemplateConfig = {
 			id: "story",
 			type: "story",
 			defaultVisible: true,
-			notes:
-				"Staggered timeline with dusty rose line, gold dots, circular photos.",
+			notes: "Staggered timeline with rosewood line, frosted lavender dots.",
 			fields: [
 				{
 					id: "milestones",
@@ -163,7 +161,7 @@ export const romanticCinematicTemplate: TemplateConfig = {
 			id: "gallery",
 			type: "gallery",
 			defaultVisible: true,
-			notes: "Swiper gallery with film-grain overlay on hover.",
+			notes: "Swiper gallery with film-strip borders.",
 			fields: [
 				{
 					id: "photos",
@@ -183,7 +181,8 @@ export const romanticCinematicTemplate: TemplateConfig = {
 			id: "schedule",
 			type: "schedule",
 			defaultVisible: true,
-			notes: "Event cards with dusty rose left border, time in gold accent.",
+			notes:
+				"Event cards with rosewood left border, time in frosted lavender accent.",
 			fields: [
 				{
 					id: "events",
@@ -245,7 +244,7 @@ export const romanticCinematicTemplate: TemplateConfig = {
 			id: "gift",
 			type: "gift",
 			defaultVisible: false,
-			notes: "Digital angpow with AngpowQRCode, gold border card.",
+			notes: "Digital angpow with AngpowQRCode, rosewood border card.",
 			fields: [
 				{
 					id: "paymentUrl",

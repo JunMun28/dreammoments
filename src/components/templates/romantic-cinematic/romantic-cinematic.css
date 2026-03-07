@@ -1,17 +1,17 @@
-/* ─── Romantic Cinematic Template (浪漫光影) ─── */
+/* ─── Romantic Cinematic Template — Noir Rosé (浪漫光影) ─── */
 
 /* Root wrapper scopes all template styles */
 .romantic-cinematic {
-	--t-primary: #8b4a55;
-	--t-secondary: #2d1f2b;
-	--t-accent: #c5a880;
-	--t-bg: #fbf5f3;
-	--t-text: #2d1f2b;
-	--t-muted: #8a7f7a;
+	--t-primary: #c2566b;
+	--t-secondary: #1a1225;
+	--t-accent: #ddd5e9;
+	--t-bg: #f8f5f0;
+	--t-text: #1a1225;
+	--t-muted: #7a6e85;
 	--t-bg-alt: #ffffff;
-	--t-accent-light: #e8ddd1;
-	--t-accent-deep: #6b3340;
-	--t-accent-glow: rgba(197, 168, 128, 0.15);
+	--t-accent-light: #ede8f3;
+	--t-accent-deep: #9e3a50;
+	--t-accent-glow: rgba(221, 213, 233, 0.15);
 	max-width: 430px;
 	margin-left: auto;
 	margin-right: auto;
@@ -34,15 +34,24 @@
 }
 
 /* ── Section alternation ── */
-.rc-section-blush {
+.rc-section-parchment {
 	background-color: var(--t-bg);
 }
 .rc-section-white {
 	background-color: #ffffff;
 }
+.rc-section-aubergine {
+	background-color: var(--t-secondary);
+	color: #f8f5f0;
+}
+
+/* Legacy aliases for backward compat */
+.rc-section-blush {
+	background-color: var(--t-bg);
+}
 .rc-section-plum {
 	background-color: var(--t-secondary);
-	color: #fbf5f3;
+	color: #f8f5f0;
 }
 
 /* ── Film-grain overlay ── */
@@ -56,6 +65,12 @@
 	z-index: 1;
 }
 
+/* ── Film-strip borders for gallery slides ── */
+.rc-film-strip {
+	border-top: 2px solid var(--t-primary);
+	border-bottom: 2px solid var(--t-primary);
+}
+
 /* ── Letterbox bar ── */
 .rc-letterbox-bar {
 	height: 1px;
@@ -63,15 +78,15 @@
 	opacity: 0.5;
 }
 
-/* ── Champagne gold shimmer effect ── */
+/* ── Rosewood shimmer effect ── */
 .rc-gold-shimmer {
 	background: linear-gradient(
 		110deg,
-		var(--t-accent) 0%,
-		var(--t-accent-light) 45%,
+		var(--t-primary) 0%,
+		var(--t-accent) 45%,
 		#fff 50%,
-		var(--t-accent-light) 55%,
-		var(--t-accent) 100%
+		var(--t-accent) 55%,
+		var(--t-primary) 100%
 	);
 	background-size: 200% 100%;
 	-webkit-background-clip: text;
@@ -97,9 +112,9 @@
 	background: linear-gradient(
 		90deg,
 		transparent,
-		rgba(197, 168, 128, 0.4),
-		rgba(139, 74, 85, 0.3),
-		rgba(197, 168, 128, 0.4),
+		rgba(194, 86, 107, 0.4),
+		rgba(221, 213, 233, 0.3),
+		rgba(194, 86, 107, 0.4),
 		transparent
 	);
 	margin: 0 auto;
@@ -129,25 +144,25 @@
 	border-radius: 50%;
 	background-color: var(--t-accent);
 	border: 2px solid var(--t-primary);
-	box-shadow: 0 0 0 3px rgba(139, 74, 85, 0.1);
+	box-shadow: 0 0 0 3px rgba(194, 86, 107, 0.1);
 }
 
 /* ── Milestone card ── */
 .rc-milestone-card {
 	background: #ffffff;
-	border: 1px solid rgba(139, 74, 85, 0.12);
+	border: 1px solid rgba(194, 86, 107, 0.12);
 	border-radius: 12px;
 	padding: 1.25rem;
-	box-shadow: 0 2px 8px rgba(45, 31, 43, 0.05);
+	box-shadow: 0 2px 8px rgba(26, 18, 37, 0.05);
 }
 
 /* ── Schedule event card ── */
 .rc-event-card {
 	background: #ffffff;
-	border: 1px solid rgba(139, 74, 85, 0.12);
+	border: 1px solid rgba(194, 86, 107, 0.12);
 	border-radius: 12px;
 	padding: 1.25rem;
-	box-shadow: 0 4px 16px rgba(45, 31, 43, 0.06);
+	box-shadow: 0 4px 16px rgba(26, 18, 37, 0.06);
 	display: flex;
 	gap: 1rem;
 }
@@ -163,35 +178,14 @@
 .rc-portrait-frame {
 	position: relative;
 	border-radius: 20px;
-	border: 1px solid rgba(139, 74, 85, 0.15);
-	box-shadow: 0 4px 16px rgba(45, 31, 43, 0.06);
+	border: 1px solid rgba(194, 86, 107, 0.15);
+	box-shadow: 0 4px 16px rgba(26, 18, 37, 0.06);
 }
 
 /* ── Photo frame ── */
 .rc-photo-frame {
-	border: 1px solid rgba(139, 74, 85, 0.15);
-	box-shadow: 0 2px 8px rgba(45, 31, 43, 0.08);
-}
-
-/* ── Scroll reveal animation ── */
-.romantic-cinematic .dm-reveal {
-	opacity: 0;
-	transform: translate3d(0, 40px, 0);
-	will-change: opacity, transform;
-	transition:
-		opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-		transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.romantic-cinematic .dm-reveal.is-visible {
-	opacity: 1;
-	transform: translate3d(0, 0, 0);
-	will-change: auto;
-}
-
-.romantic-cinematic .dm-reveal.is-hidden {
-	opacity: 0;
-	transform: translate3d(0, 40px, 0);
+	border: 1px solid rgba(194, 86, 107, 0.15);
+	box-shadow: 0 2px 8px rgba(26, 18, 37, 0.08);
 }
 
 /* ── Countdown styling ── */
@@ -277,17 +271,11 @@
 .romantic-cinematic textarea:focus-visible {
 	outline: 2px solid #ffffff;
 	outline-offset: 2px;
-	box-shadow: 0 0 0 4px rgba(139, 74, 85, 0.5);
+	box-shadow: 0 0 0 4px rgba(194, 86, 107, 0.5);
 }
 
 /* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
-	.romantic-cinematic .dm-reveal {
-		/* biome-ignore lint/complexity/noImportantStyles: required for a11y override */
-		opacity: 1 !important;
-		/* biome-ignore lint/complexity/noImportantStyles: required for a11y override */
-		transform: none !important;
-	}
 	.romantic-cinematic * {
 		/* biome-ignore lint/complexity/noImportantStyles: required for a11y override */
 		animation-duration: 0.01ms !important;
