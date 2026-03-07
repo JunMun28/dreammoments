@@ -1,5 +1,4 @@
 export type PlanTier = "free" | "premium";
-export type AuthProvider = "google" | "email";
 export type InvitationStatus = "draft" | "published" | "archived";
 export type AttendanceStatus = "attending" | "not_attending" | "undecided";
 export type PaymentStatus = "pending" | "succeeded" | "failed";
@@ -7,10 +6,10 @@ export type DeviceType = "mobile" | "tablet" | "desktop";
 
 export interface User {
 	id: string;
+	clerkId: string;
 	email: string;
 	name?: string;
 	avatarUrl?: string;
-	authProvider: AuthProvider;
 	plan: PlanTier;
 	createdAt: string;
 	updatedAt: string;

@@ -1,152 +1,95 @@
-"use client";
-
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useEffect, useRef, useState } from "react";
-
-if (typeof window !== "undefined") {
-	gsap.registerPlugin(ScrollTrigger);
-}
+import { useState } from "react";
 
 const faqs = [
 	{
-		question: "Do guests need to install an app?",
-		answer: "No. Guests open a link in any browser and RSVP instantly.",
-	},
-	{
-		question: "Can we include English and Chinese content?",
+		question: "Do my guests need to download an app?",
 		answer:
-			"Yes. You can present bilingual content clearly in one invitation flow.",
+			"No. Your invitation is a beautiful web page that works on any device. Guests just tap the link you share - no app needed.",
 	},
 	{
-		question: "Can we manage plus-ones and meal preferences?",
+		question: "Can I have my invitation in both English and Chinese?",
 		answer:
-			"Yes. RSVP forms can capture attendance, plus-ones, and dietary details.",
+			"Yes! All our templates support bilingual content. Your guests can switch between languages with one tap.",
 	},
 	{
-		question: "Can we update details after sharing the link?",
-		answer: "Yes. Edits publish instantly so guests always see latest info.",
-	},
-	{
-		question: "Can we start free before upgrading?",
+		question: "How do RSVPs and plus-ones work?",
 		answer:
-			"Yes. Draft first, then upgrade only when you are ready to publish premium features.",
+			"Guests RSVP directly from the invitation. They can confirm plus-ones, select meal preferences, and leave you a message - all in one flow.",
+	},
+	{
+		question: "Can I update details after sending?",
+		answer:
+			"Absolutely. Change venue details, timings, or any content in real-time. Guests always see the latest version.",
+	},
+	{
+		question: "Is there a free trial?",
+		answer:
+			"Yes. Create and preview your full invitation for free. You only pay when you're ready to publish and share with guests.",
 	},
 ];
 
-function FaqItem({ question, answer }: { question: string; answer: string }) {
-	const [isOpen, setIsOpen] = useState(false);
-	const itemRef = useRef<HTMLDivElement>(null);
-
-	useEffect(() => {
-		if (!itemRef.current) return;
-
-		const ctx = gsap.context(() => {
-			gsap.fromTo(
-				itemRef.current,
-				{ y: 40, opacity: 0 },
-				{
-					y: 0,
-					opacity: 1,
-					duration: 0.6,
-					ease: "power3.out",
-					scrollTrigger: {
-						trigger: itemRef.current,
-						start: "top 90%",
-						end: "top 70%",
-						scrub: 1,
-					},
-				},
-			);
-		}, itemRef);
-
-		return () => ctx.revert();
-	}, []);
-
-	return (
-		<div
-			ref={itemRef}
-			className="border border-foreground/10 rounded-2xl overflow-hidden"
-		>
-			<button
-				type="button"
-				onClick={() => setIsOpen(!isOpen)}
-				className="w-full flex items-center justify-between p-6 text-left cursor-pointer"
-			>
-				<span className="text-lg font-medium text-foreground pr-4">
-					{question}
-				</span>
-				<span
-					className="relative w-6 h-6 shrink-0 text-foreground transition-transform duration-300"
-					style={{ transform: isOpen ? "rotate(45deg)" : "rotate(0deg)" }}
-				>
-					<span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-[1.5px] bg-current" />
-					<span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[1.5px] h-4 bg-current" />
-				</span>
-			</button>
-			<div
-				className="grid transition-all duration-300 ease-out"
-				style={{ gridTemplateRows: isOpen ? "1fr" : "0fr" }}
-			>
-				<div className="overflow-hidden">
-					<p className="px-6 pb-6 text-foreground/70 leading-relaxed">
-						{answer}
-					</p>
-				</div>
-			</div>
-		</div>
-	);
-}
-
 export function Faq() {
-	const sectionRef = useRef<HTMLElement>(null);
-	const titleRef = useRef<HTMLHeadingElement>(null);
-
-	useEffect(() => {
-		if (!sectionRef.current) return;
-
-		const ctx = gsap.context(() => {
-			gsap.fromTo(
-				titleRef.current,
-				{ y: 60, opacity: 0 },
-				{
-					y: 0,
-					opacity: 1,
-					duration: 1,
-					ease: "power3.out",
-					scrollTrigger: {
-						trigger: sectionRef.current,
-						start: "top 75%",
-						end: "top 50%",
-						scrub: 1,
-					},
-				},
-			);
-		}, sectionRef);
-
-		return () => ctx.revert();
-	}, []);
+	const [openIndex, setOpenIndex] = useState<number | null>(null);
 
 	return (
-		// biome-ignore lint/correctness/useUniqueElementIds: stable hash target for in-page navigation
-		<section ref={sectionRef} id="faq" className="bg-background py-24 lg:py-32">
-			<div className="px-6 sm:px-12 lg:px-24 max-w-4xl mx-auto">
-				{/* Title */}
-				<h2
-					ref={titleRef}
-					className="text-4xl lg:text-5xl font-medium tracking-tight text-foreground text-center mb-12 lg:mb-16"
-				>
-					Frequently Asked
-					<br />
-					Questions
-				</h2>
-
-				{/* FAQ Items */}
-				<div className="flex flex-col gap-4">
-					{faqs.map((faq, index) => (
-						<FaqItem key={index} question={faq.question} answer={faq.answer} />
-					))}
+		// biome-ignore lint/correctness/useUniqueElementIds: scroll navigation anchor
+		<section id="faq" className="bg-background py-24 sm:py-32">
+			<div className="mx-auto max-w-2xl px-6">
+				{/* Header */}
+				<div className="text-center mb-16">
+					<p className="font-script text-lg text-gold">Common questions</p>
+					<h2 className="font-heading text-3xl sm:text-4xl font-light text-foreground mt-3">
+						Everything you need to know
+					</h2>
 				</div>
+
+				{/* Accordion */}
+				<dl className="divide-y divide-border">
+					{faqs.map((faq, i) => {
+						const isOpen = openIndex === i;
+						return (
+							<div key={faq.question} className="py-5">
+								<dt>
+									<button
+										type="button"
+										className="flex w-full items-center justify-between text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring rounded-sm"
+										aria-expanded={isOpen}
+										onClick={() => setOpenIndex(isOpen ? null : i)}
+									>
+										<span className="text-base font-medium text-foreground">
+											{faq.question}
+										</span>
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											viewBox="0 0 20 20"
+											fill="currentColor"
+											aria-hidden="true"
+											className={`ml-4 h-5 w-5 shrink-0 text-gold transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
+										>
+											<path
+												fillRule="evenodd"
+												d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
+												clipRule="evenodd"
+											/>
+										</svg>
+									</button>
+								</dt>
+								<dd
+									className="grid transition-[grid-template-rows] duration-300 ease-out"
+									style={{
+										gridTemplateRows: isOpen ? "1fr" : "0fr",
+									}}
+								>
+									<div className="overflow-hidden">
+										<p className="pt-4 text-muted-foreground leading-relaxed">
+											{faq.answer}
+										</p>
+									</div>
+								</dd>
+							</div>
+						);
+					})}
+				</dl>
 			</div>
 		</section>
 	);

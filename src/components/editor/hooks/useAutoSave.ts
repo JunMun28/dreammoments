@@ -18,15 +18,9 @@ export type UseAutoSaveParams = {
 
 export type SaveStatus = "saved" | "saving" | "unsaved" | "error";
 
-const TOKEN_KEY = "dm-auth-token";
 const RETRY_DELAYS = [5000, 15000, 30000];
 const DEBOUNCE_MS = 2000;
 const INTERVAL_MS = 30000;
-
-function getStoredToken(): string | null {
-	if (typeof window === "undefined") return null;
-	return window.localStorage.getItem(TOKEN_KEY);
-}
 
 export function useAutoSave({
 	invitationId,
@@ -89,13 +83,9 @@ export function useAutoSave({
 		}
 
 		try {
-			const token = getStoredToken();
-			if (!token) throw new Error("Not authenticated");
-
 			await updateInvitationFn({
 				data: {
 					invitationId,
-					token,
 					content: draftRef.current as unknown as Record<string, unknown>,
 					sectionVisibility: visibilityRef.current,
 				},
@@ -184,11 +174,9 @@ export function useAutoSave({
 		if (!hasUnsavedChanges) return;
 		setSaveStatus("unsaved");
 		const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-			const token = getStoredToken();
-			if (token && navigator.sendBeacon) {
+			if (navigator.sendBeacon) {
 				const payload = JSON.stringify({
 					invitationId,
-					token,
 					content: draftRef.current,
 					sectionVisibility: visibilityRef.current,
 				});

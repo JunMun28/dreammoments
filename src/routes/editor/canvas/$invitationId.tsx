@@ -1,8 +1,8 @@
-import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
+import { RedirectToSignIn, useAuth } from "@clerk/tanstack-react-start";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { CanvasEditor } from "@/components/canvas/CanvasEditor";
 import { useInvitation } from "@/hooks/useInvitations";
-import { useAuth } from "@/lib/auth";
 import { asCanvasDocument } from "@/lib/canvas/document";
 import { migrateInvitationContentToCanvas } from "@/lib/canvas/migrate";
 
@@ -12,7 +12,7 @@ export const Route = createFileRoute("/editor/canvas/$invitationId")({
 
 function CanvasEditorRoute() {
 	const { invitationId } = Route.useParams();
-	const { user, token, loading: authLoading } = useAuth();
+	const { isLoaded, isSignedIn } = useAuth();
 	const { data: invitation, isLoading } = useInvitation(invitationId);
 
 	const canvasDocument = useMemo(() => {
@@ -26,7 +26,7 @@ function CanvasEditorRoute() {
 		);
 	}, [invitation]);
 
-	if (authLoading || isLoading) {
+	if (!isLoaded || isLoading) {
 		return (
 			<div className="flex min-h-screen items-center justify-center bg-[color:var(--dm-bg)]">
 				<p className="text-xs uppercase tracking-[0.18em] text-[color:var(--dm-muted)]">
@@ -36,8 +36,11 @@ function CanvasEditorRoute() {
 		);
 	}
 
-	if (!user) return <Navigate to="/auth/login" />;
-	if (!invitation || invitation.userId !== user.id) {
+	if (!isSignedIn) return <RedirectToSignIn />;
+	// The API already filters by authenticated user's DB ID via requireAuth(),
+	// so if the invitation was returned, the user owns it. No need for a
+	// client-side ownership check comparing DB UUID with Clerk user ID.
+	if (!invitation) {
 		return (
 			<div className="min-h-screen bg-[color:var(--dm-bg)] px-6 py-10">
 				<p className="text-sm text-[color:var(--dm-muted)]">
@@ -68,7 +71,6 @@ function CanvasEditorRoute() {
 			title={invitation.title || "Canvas invitation"}
 			initialDocument={canvasDocument}
 			previewSlug={invitation.slug}
-			token={token ?? undefined}
 		/>
 	);
 }

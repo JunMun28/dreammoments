@@ -48,7 +48,6 @@ async function generateUniqueDbSlug(
 // ── Check slug availability ─────────────────────────────────────────
 
 const checkSlugSchema = z.object({
-	token: z.string().min(1, "Token is required"),
 	slug: z.string().min(1, "Slug is required"),
 	invitationId: z.string().optional(),
 });
@@ -56,12 +55,11 @@ const checkSlugSchema = z.object({
 export const checkSlugAvailabilityFn = createServerFn({
 	method: "GET",
 })
-	.inputValidator(
-		(data: { token: string; slug: string; invitationId?: string }) =>
-			parseInput(checkSlugSchema, data),
+	.inputValidator((data: { slug: string; invitationId?: string }) =>
+		parseInput(checkSlugSchema, data),
 	)
 	.handler(async ({ data }) => {
-		await requireAuth(data.token);
+		await requireAuth();
 
 		const db = getDbOrNull();
 		if (!db) throw new Error("Database connection required");
@@ -77,19 +75,12 @@ export const checkSlugAvailabilityFn = createServerFn({
 
 // ── List user invitations ───────────────────────────────────────────
 
-const getInvitationsSchema = z.object({
-	token: z.string().min(1, "Token is required"),
-});
-
 export const getInvitations = createServerFn({
 	method: "GET",
 })
-	.inputValidator((data: { token: string }) =>
-		parseInput(getInvitationsSchema, data),
-	)
 	// @ts-expect-error ServerFn inference expects stricter JSON type than Record<string, unknown>
-	.handler(async ({ data }) => {
-		const { userId } = await requireAuth(data.token);
+	.handler(async () => {
+		const { userId } = await requireAuth();
 
 		const db = getDbOrNull();
 		if (!db) throw new Error("Database connection required");
@@ -106,18 +97,17 @@ export const getInvitations = createServerFn({
 
 const getInvitationSchema = z.object({
 	invitationId: z.string().min(1, "invitationId is required"),
-	token: z.string().min(1, "Token is required"),
 });
 
 export const getInvitation = createServerFn({
 	method: "GET",
 })
-	.inputValidator((data: { invitationId: string; token: string }) =>
+	.inputValidator((data: { invitationId: string }) =>
 		parseInput(getInvitationSchema, data),
 	)
 	// @ts-expect-error ServerFn inference expects stricter JSON type than Record<string, unknown>
 	.handler(async ({ data }) => {
-		const { userId } = await requireAuth(data.token);
+		const { userId } = await requireAuth();
 
 		const db = getDbOrNull();
 		if (!db) throw new Error("Database connection required");
@@ -144,7 +134,7 @@ export const getInvitation = createServerFn({
 export const createInvitationFn = createServerFn({
 	method: "POST",
 })
-	.inputValidator((data: { token: string; templateId: string }) => {
+	.inputValidator((data: { templateId: string }) => {
 		parseInput(createInvitationSchema, {
 			userId: "placeholder",
 			templateId: data.templateId,
@@ -153,7 +143,7 @@ export const createInvitationFn = createServerFn({
 	})
 	// @ts-expect-error ServerFn inference expects stricter JSON type than Record<string, unknown>
 	.handler(async ({ data }) => {
-		const { userId } = await requireAuth(data.token);
+		const { userId } = await requireAuth();
 
 		const db = getDbOrNull();
 		if (!db) throw new Error("Database connection required");
@@ -206,7 +196,6 @@ export const updateInvitationFn = createServerFn({
 	.inputValidator(
 		(data: {
 			invitationId: string;
-			token: string;
 			title?: string;
 			content?: Record<string, unknown>;
 			sectionVisibility?: Record<string, boolean>;
@@ -222,7 +211,7 @@ export const updateInvitationFn = createServerFn({
 	)
 	// @ts-expect-error ServerFn inference expects stricter JSON type than Record<string, unknown>
 	.handler(async ({ data }) => {
-		const { userId } = await requireAuth(data.token);
+		const { userId } = await requireAuth();
 
 		const db = getDbOrNull();
 		if (!db) throw new Error("Database connection required");
@@ -281,7 +270,7 @@ export const updateInvitationFn = createServerFn({
 export const deleteInvitationFn = createServerFn({
 	method: "POST",
 })
-	.inputValidator((data: { invitationId: string; token: string }) => {
+	.inputValidator((data: { invitationId: string }) => {
 		parseInput(deleteInvitationSchema, {
 			invitationId: data.invitationId,
 			userId: "placeholder",
@@ -289,7 +278,7 @@ export const deleteInvitationFn = createServerFn({
 		return data;
 	})
 	.handler(async ({ data }) => {
-		const { userId } = await requireAuth(data.token);
+		const { userId } = await requireAuth();
 
 		const db = getDbOrNull();
 		if (!db) throw new Error("Database connection required");
@@ -320,12 +309,7 @@ export const publishInvitationFn = createServerFn({
 	method: "POST",
 })
 	.inputValidator(
-		(data: {
-			invitationId: string;
-			token: string;
-			slug?: string;
-			randomize?: boolean;
-		}) => {
+		(data: { invitationId: string; slug?: string; randomize?: boolean }) => {
 			parseInput(publishInvitationSchema, {
 				invitationId: data.invitationId,
 				userId: "placeholder",
@@ -337,7 +321,7 @@ export const publishInvitationFn = createServerFn({
 	)
 	// @ts-expect-error ServerFn inference expects stricter JSON type than Record<string, unknown>
 	.handler(async ({ data }) => {
-		const { userId } = await requireAuth(data.token);
+		const { userId } = await requireAuth();
 
 		const db = getDbOrNull();
 		if (!db) throw new Error("Database connection required");
@@ -391,7 +375,7 @@ export const publishInvitationFn = createServerFn({
 export const unpublishInvitationFn = createServerFn({
 	method: "POST",
 })
-	.inputValidator((data: { invitationId: string; token: string }) => {
+	.inputValidator((data: { invitationId: string }) => {
 		parseInput(unpublishInvitationSchema, {
 			invitationId: data.invitationId,
 			userId: "placeholder",
@@ -400,7 +384,7 @@ export const unpublishInvitationFn = createServerFn({
 	})
 	// @ts-expect-error ServerFn inference expects stricter JSON type than Record<string, unknown>
 	.handler(async ({ data }) => {
-		const { userId } = await requireAuth(data.token);
+		const { userId } = await requireAuth();
 
 		const db = getDbOrNull();
 		if (!db) throw new Error("Database connection required");
@@ -435,7 +419,6 @@ export const unpublishInvitationFn = createServerFn({
 
 const patchContentSchema = z.object({
 	invitationId: z.string().min(1, "invitationId is required"),
-	token: z.string().min(1, "Token is required"),
 	path: z
 		.string()
 		.min(1, "path is required")
@@ -447,16 +430,12 @@ export const patchInvitationContentFn = createServerFn({
 	method: "POST",
 })
 	.inputValidator(
-		(data: {
-			invitationId: string;
-			token: string;
-			path: string;
-			value: unknown;
-		}) => parseInput(patchContentSchema, data),
+		(data: { invitationId: string; path: string; value: unknown }) =>
+			parseInput(patchContentSchema, data),
 	)
 	// @ts-expect-error ServerFn inference expects stricter JSON type than Record<string, unknown>
 	.handler(async ({ data }) => {
-		const { userId } = await requireAuth(data.token);
+		const { userId } = await requireAuth();
 
 		const db = getDbOrNull();
 		if (!db) throw new Error("Database connection required");

@@ -61,7 +61,18 @@ vi.mock("@/db/index", () => ({
 }));
 
 vi.mock("@/lib/server-auth", () => ({
-	requireAuth: vi.fn(async () => ({ userId: "user-a" })),
+	requireAuth: vi.fn().mockResolvedValue({
+		userId: "user-a",
+		user: {
+			id: "user-a",
+			clerkId: "clerk_test_a",
+			email: "usera@example.com",
+			name: "User A",
+			plan: "free",
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
+		},
+	}),
 }));
 
 vi.mock("@/lib/stripe", () => ({
@@ -96,7 +107,18 @@ beforeEach(() => {
 	mockedGetDbOrNull.mockReturnValue(
 		mockDb as unknown as ReturnType<typeof getDbOrNull>,
 	);
-	mockedRequireAuth.mockResolvedValue({ userId: "user-a" });
+	mockedRequireAuth.mockResolvedValue({
+		userId: "user-a",
+		user: {
+			id: "user-a",
+			clerkId: "clerk_test_a",
+			email: "usera@example.com",
+			name: "User A",
+			plan: "free",
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
+		},
+	});
 	mockedGetStripeConfig.mockReturnValue(null);
 });
 
@@ -112,7 +134,6 @@ describe("createCheckoutSessionFn", () => {
 		mockDb.insert.mockReturnValue(insertChain);
 
 		const result = (await (createCheckoutSessionFn as CallableFunction)({
-			token: "valid-token",
 			currency: "SGD",
 		})) as { url: string };
 
@@ -126,7 +147,6 @@ describe("createCheckoutSessionFn", () => {
 		mockDb.insert.mockReturnValue(insertChain);
 
 		const result = (await (createCheckoutSessionFn as CallableFunction)({
-			token: "valid-token",
 			currency: "MYR",
 		})) as { url: string };
 
@@ -147,7 +167,6 @@ describe("createCheckoutSessionFn", () => {
 		);
 
 		const result = (await (createCheckoutSessionFn as CallableFunction)({
-			token: "valid-token",
 			currency: "MYR",
 		})) as { url: string };
 
@@ -168,7 +187,6 @@ describe("createCheckoutSessionFn", () => {
 		);
 
 		const result = (await (createCheckoutSessionFn as CallableFunction)({
-			token: "valid-token",
 			currency: "MYR",
 		})) as { error: string };
 
@@ -191,7 +209,6 @@ describe("createCheckoutSessionFn", () => {
 		mockedCreateCheckout.mockRejectedValue(new Error("Stripe API error"));
 
 		const result = (await (createCheckoutSessionFn as CallableFunction)({
-			token: "valid-token",
 			currency: "MYR",
 		})) as { error: string };
 
@@ -199,12 +216,13 @@ describe("createCheckoutSessionFn", () => {
 	});
 
 	test("denies unauthenticated users", async () => {
+		mockedRequireAuth.mockRejectedValue(new Error("Authentication required"));
+
 		await expect(
 			(createCheckoutSessionFn as CallableFunction)({
-				token: "",
 				currency: "MYR",
 			}),
-		).rejects.toThrow("Token is required");
+		).rejects.toThrow("Authentication required");
 	});
 });
 
@@ -217,9 +235,10 @@ describe("getPaymentStatusFn", () => {
 			mockDb as unknown as ReturnType<typeof getDbOrNull>,
 		);
 
-		const result = (await (getPaymentStatusFn as CallableFunction)({
-			token: "valid-token",
-		})) as { plan: string; isPremium: boolean };
+		const result = (await (getPaymentStatusFn as CallableFunction)({})) as {
+			plan: string;
+			isPremium: boolean;
+		};
 
 		expect(result.plan).toBe("premium");
 		expect(result.isPremium).toBe(true);
@@ -233,9 +252,10 @@ describe("getPaymentStatusFn", () => {
 			mockDb as unknown as ReturnType<typeof getDbOrNull>,
 		);
 
-		const result = (await (getPaymentStatusFn as CallableFunction)({
-			token: "valid-token",
-		})) as { plan: string; isPremium: boolean };
+		const result = (await (getPaymentStatusFn as CallableFunction)({})) as {
+			plan: string;
+			isPremium: boolean;
+		};
 
 		expect(result.plan).toBe("free");
 		expect(result.isPremium).toBe(false);
@@ -248,16 +268,18 @@ describe("getPaymentStatusFn", () => {
 			mockDb as unknown as ReturnType<typeof getDbOrNull>,
 		);
 
-		const result = (await (getPaymentStatusFn as CallableFunction)({
-			token: "valid-token",
-		})) as { error: string };
+		const result = (await (getPaymentStatusFn as CallableFunction)({})) as {
+			error: string;
+		};
 
 		expect(result.error).toContain("User not found");
 	});
 
 	test("denies unauthenticated users", async () => {
-		await expect(
-			(getPaymentStatusFn as CallableFunction)({ token: "" }),
-		).rejects.toThrow("Token is required");
+		mockedRequireAuth.mockRejectedValue(new Error("Authentication required"));
+
+		await expect((getPaymentStatusFn as CallableFunction)({})).rejects.toThrow(
+			"Authentication required",
+		);
 	});
 });

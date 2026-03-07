@@ -1,16 +1,11 @@
-import {
-	createFileRoute,
-	Link,
-	Navigate,
-	useNavigate,
-} from "@tanstack/react-router";
+import { RedirectToSignIn, useAuth } from "@clerk/tanstack-react-start";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { X } from "lucide-react";
 import { useCallback, useState } from "react";
 import InvitationRenderer from "../../components/templates/InvitationRenderer";
 import { RouteLoadingSpinner } from "../../components/ui/RouteLoadingSpinner";
 import { buildSampleContent } from "../../data/sample-invitation";
 import { useCreateInvitation } from "../../hooks/useInvitations";
-import { useAuth } from "../../lib/auth";
 import { templates } from "../../templates";
 import type { TemplateConfig } from "../../templates/types";
 
@@ -79,11 +74,13 @@ function TemplatePreviewModal({
 	onClose,
 	onSelect,
 	isCreating,
+	error,
 }: {
 	templateId: string;
 	onClose: () => void;
 	onSelect: (templateId: string) => void;
 	isCreating: boolean;
+	error: string | null;
 }) {
 	const content = buildSampleContent(templateId);
 	const template = templates.find((t) => t.id === templateId);
@@ -103,9 +100,12 @@ function TemplatePreviewModal({
 			aria-label={`Preview ${template?.name ?? "template"}`}
 		>
 			<div className="flex items-center justify-between border-b border-[color:var(--dm-border)] bg-[color:var(--dm-bg)] px-6 py-3">
-				<span className="text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
-					Preview &mdash; {template?.name}
-				</span>
+				<div className="flex items-center gap-4">
+					<span className="text-xs uppercase tracking-[0.2em] text-[color:var(--dm-muted)]">
+						Preview &mdash; {template?.name}
+					</span>
+					{error && <span className="text-xs text-red-500">{error}</span>}
+				</div>
 				<div className="flex items-center gap-3">
 					<button
 						type="button"
@@ -145,31 +145,36 @@ function TemplatePreviewModal({
 }
 
 function TemplateSelectionPage() {
-	const { user, loading } = useAuth();
+	const { isLoaded, isSignedIn } = useAuth();
 	const navigate = useNavigate();
 	const createMutation = useCreateInvitation();
 	const [creatingId, setCreatingId] = useState<string | null>(null);
+	const [createError, setCreateError] = useState<string | null>(null);
 	const [previewId, setPreviewId] = useState<string | null>(null);
 
 	const handlePreview = useCallback((templateId: string) => {
 		setPreviewId(templateId);
 	}, []);
 
-	if (loading) return <RouteLoadingSpinner />;
-	if (!user) return <Navigate to="/auth/login" />;
+	if (!isLoaded) return <RouteLoadingSpinner />;
+	if (!isSignedIn) return <RedirectToSignIn />;
 
 	const handleSelect = async (templateId: string) => {
 		if (creatingId) return;
 		setCreatingId(templateId);
+		setCreateError(null);
 
 		try {
 			const invitation = await createMutation.mutateAsync(templateId);
-			navigate({
+			await navigate({
 				to: "/editor/canvas/$invitationId",
 				params: { invitationId: invitation.id },
 			});
-		} catch {
+		} catch (err) {
 			setCreatingId(null);
+			setCreateError(
+				err instanceof Error ? err.message : "Failed to create invitation",
+			);
 		}
 	};
 
@@ -222,9 +227,13 @@ function TemplateSelectionPage() {
 			{previewId && (
 				<TemplatePreviewModal
 					templateId={previewId}
-					onClose={() => setPreviewId(null)}
+					onClose={() => {
+						setPreviewId(null);
+						setCreateError(null);
+					}}
 					onSelect={handleSelect}
 					isCreating={creatingId === previewId}
+					error={createError}
 				/>
 			)}
 		</div>

@@ -19,16 +19,8 @@ export function AnalyticsPanel({ invitationId }: AnalyticsPanelProps) {
 		setLoading(true);
 		setError(null);
 		try {
-			const token =
-				typeof window !== "undefined"
-					? window.localStorage.getItem("dm-auth-token")
-					: null;
-			if (!token) {
-				setError("Not authenticated");
-				return;
-			}
 			const result = await getAnalyticsFn({
-				data: { token, invitationId, period },
+				data: { invitationId, period },
 			});
 			if ("error" in result) {
 				setError(result.error);

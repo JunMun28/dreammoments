@@ -15,18 +15,16 @@ import { parseInput } from "./validate";
 // ── Create Checkout Session ─────────────────────────────────────────
 
 const createCheckoutSchema = z.object({
-	token: z.string().min(1, "Token is required"),
 	currency: z.enum(["MYR", "SGD"]),
 	invitationId: z.string().optional(),
 });
 
 export const createCheckoutSessionFn = createServerFn({ method: "POST" })
-	.inputValidator(
-		(data: { token: string; currency: "MYR" | "SGD"; invitationId?: string }) =>
-			parseInput(createCheckoutSchema, data),
+	.inputValidator((data: { currency: "MYR" | "SGD"; invitationId?: string }) =>
+		parseInput(createCheckoutSchema, data),
 	)
 	.handler(async ({ data }): Promise<{ url: string } | { error: string }> => {
-		const { userId } = await requireAuth(data.token);
+		const { userId } = await requireAuth();
 
 		const stripeConfig = getStripeConfig();
 
@@ -208,33 +206,25 @@ export const handleStripeWebhookFn = createServerFn({ method: "POST" })
 
 // ── Payment Status ──────────────────────────────────────────────────
 
-const paymentStatusSchema = z.object({
-	token: z.string().min(1, "Token is required"),
-});
+export const getPaymentStatusFn = createServerFn({ method: "GET" }).handler(
+	async (): Promise<
+		{ plan: string; isPremium: boolean } | { error: string }
+	> => {
+		const { userId } = await requireAuth();
 
-export const getPaymentStatusFn = createServerFn({ method: "GET" })
-	.inputValidator((data: { token: string }) =>
-		parseInput(paymentStatusSchema, data),
-	)
-	.handler(
-		async ({
-			data,
-		}): Promise<{ plan: string; isPremium: boolean } | { error: string }> => {
-			const { userId } = await requireAuth(data.token);
+		const db = getDbOrNull();
+		if (!db) throw new Error("Database connection required");
 
-			const db = getDbOrNull();
-			if (!db) throw new Error("Database connection required");
+		const [user] = await db
+			.select({ plan: schema.users.plan })
+			.from(schema.users)
+			.where(eq(schema.users.id, userId));
 
-			const [user] = await db
-				.select({ plan: schema.users.plan })
-				.from(schema.users)
-				.where(eq(schema.users.id, userId));
+		if (!user) {
+			return { error: "User not found." };
+		}
 
-			if (!user) {
-				return { error: "User not found." };
-			}
-
-			const plan = user.plan ?? "free";
-			return { plan, isPremium: plan === "premium" };
-		},
-	);
+		const plan = user.plan ?? "free";
+		return { plan, isPremium: plan === "premium" };
+	},
+);

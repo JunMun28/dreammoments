@@ -5,7 +5,7 @@ import type { TemplateConfig } from "@/templates/types";
 import type { Block, CanvasDocument, DesignTokens } from "./types";
 
 const TEMPLATE_ACCENT_BY_ID: Record<string, string> = {
-	"double-happiness": "#D4A843",
+	"double-happiness": "#C5A880",
 };
 
 const DEFAULT_COLORS = {
@@ -150,6 +150,12 @@ function buildBlocks(
 	if (normalized.hero.avatarStyle)
 		heroImageContent.avatarStyle = normalized.hero.avatarStyle;
 
+	// Hero text is rendered over a full-bleed photo with dark gradient overlay
+	// in ScenePageEngine, so use white/light colors for readability.
+	const heroTextColor = "#FFFFFF";
+	const heroAccentColor = "#E8DDD1";
+	const heroMetaColor = "rgba(255,255,255,0.8)";
+
 	const baseBlocks: Omit<Block, "zIndex">[] = [
 		{
 			id: "hero-image",
@@ -177,7 +183,7 @@ function buildBlocks(
 				fontSize: "42px",
 				lineHeight: "1.05",
 				textAlign: "center",
-				color: tokens.colors.text,
+				color: heroTextColor,
 			},
 			animation: "fadeInUp",
 			sectionId: "hero",
@@ -194,7 +200,7 @@ function buildBlocks(
 				fontSize: "30px",
 				lineHeight: "1.1",
 				textAlign: "center",
-				color: accent,
+				color: heroAccentColor,
 			},
 			animation: "fadeInUp",
 			sectionId: "hero",
@@ -212,7 +218,7 @@ function buildBlocks(
 				letterSpacing: "0.16em",
 				textTransform: "uppercase",
 				textAlign: "center",
-				color: muted,
+				color: heroMetaColor,
 			},
 			sectionId: "hero",
 			semantic: "event-meta",

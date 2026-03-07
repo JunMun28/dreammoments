@@ -321,7 +321,7 @@ describe("CanvasEditor", () => {
 		expect(resizedNode.style.height).toBe("90px");
 	});
 
-	test("publishes with server API when auth token exists", async () => {
+	test("publishes with server API", async () => {
 		vi.mocked(publishInvitationFn).mockResolvedValue({
 			slug: "server-slug",
 			status: "published",
@@ -335,7 +335,6 @@ describe("CanvasEditor", () => {
 				title="Editor Test"
 				initialDocument={buildDocument()}
 				previewSlug="test-slug"
-				token="token-123"
 			/>,
 		);
 
@@ -343,7 +342,7 @@ describe("CanvasEditor", () => {
 
 		await waitFor(() =>
 			expect(vi.mocked(publishInvitationFn)).toHaveBeenCalledWith({
-				data: { invitationId: "inv-7", token: "token-123" },
+				data: { invitationId: "inv-7" },
 			}),
 		);
 	});

@@ -1,9 +1,5 @@
-import {
-	createFileRoute,
-	Link,
-	Navigate,
-	useNavigate,
-} from "@tanstack/react-router";
+import { RedirectToSignIn, useAuth } from "@clerk/tanstack-react-start";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
 	Copy,
 	Eye,
@@ -28,7 +24,6 @@ import {
 	useInvitations,
 	useUpdateInvitation,
 } from "../../hooks/useInvitations";
-import { useAuth } from "../../lib/auth";
 import {
 	asCanvasDocument,
 	isCanvasDocument,
@@ -128,7 +123,7 @@ function ConfirmDeleteDialog({
 }
 
 function DashboardScreen() {
-	const { user, loading } = useAuth();
+	const { isLoaded, isSignedIn } = useAuth();
 	const { addToast } = useToast();
 	const navigate = useNavigate();
 	const { data: serverInvitations } = useInvitations();
@@ -210,9 +205,11 @@ function DashboardScreen() {
 
 	const sortedInvitations = useMemo(
 		() =>
-			[...filteredInvitations].sort((a, b) =>
-				b.updatedAt.localeCompare(a.updatedAt),
-			),
+			[...filteredInvitations].sort((a, b) => {
+				const dateA = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+				const dateB = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+				return dateB - dateA;
+			}),
 		[filteredInvitations],
 	);
 
@@ -264,9 +261,9 @@ function DashboardScreen() {
 		);
 	}, [sortedInvitations, previewInvitationId]);
 
-	if (!user && !loading) return <Navigate to="/auth/login" />;
+	if (isLoaded && !isSignedIn) return <RedirectToSignIn />;
 
-	if (loading) {
+	if (!isLoaded) {
 		return (
 			<div className="min-h-screen bg-[color:var(--dm-bg)] px-6 py-10">
 				<div className="mx-auto max-w-[1220px] space-y-8">
@@ -298,7 +295,7 @@ function DashboardScreen() {
 		);
 	}
 
-	if (!user) return <Navigate to="/auth/login" />;
+	if (!isSignedIn) return <RedirectToSignIn />;
 
 	if (invitations.length === 0) {
 		return (

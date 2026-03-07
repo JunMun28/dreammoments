@@ -8,7 +8,7 @@ function sanitizeFilename(name: string): string {
 	return basename.replace(CONTROL_CHARS, "").replace(/\.\./g, "") || "upload";
 }
 
-export async function uploadImage(file: File, token?: string) {
+export async function uploadImage(file: File) {
 	if (
 		file.type === "image/jpeg" ||
 		file.type === "image/png" ||
@@ -16,7 +16,6 @@ export async function uploadImage(file: File, token?: string) {
 	) {
 		const signed = await getUploadUrlFn({
 			data: {
-				token,
 				filename: sanitizeFilename(file.name),
 				contentType: file.type,
 			},
@@ -34,7 +33,6 @@ export async function uploadImage(file: File, token?: string) {
 
 			const confirmed = await confirmUploadFn({
 				data: {
-					token,
 					key: signed.key,
 				},
 			});

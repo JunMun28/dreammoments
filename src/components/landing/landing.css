@@ -1,3 +1,6 @@
+/* Google Fonts: Great Vibes (script accent) + Cormorant Infant (heading serif) */
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Infant:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Great+Vibes&display=swap");
+
 /* biome-ignore lint/suspicious/noUnknownAtRules: Tailwind CSS v4 custom at-rule */
 @theme inline {
 	--color-background: var(--agency-background);
@@ -6,30 +9,34 @@
 	--color-muted-foreground: var(--agency-muted-foreground);
 	--color-border: var(--agency-border);
 	--color-ring: var(--agency-ring);
+	--color-gold: var(--agency-gold);
 	--breakpoint-3xl: 120rem;
 }
 
 .landing {
-	--agency-background: #fff9f9; /* Pale Cream/Pink */
-	--agency-foreground: #4a4e55; /* Warm Grey */
-	--agency-muted: #f9f5f9; /* Pale Lilac/Grey */
-	--agency-muted-foreground: #767a85; /* Medium Grey */
-	--agency-border: #e0bbe4; /* Lilac */
-	--agency-ring: #fda4af; /* Primary Pink - matches dm-primary */
+	--agency-background: #faf9f6; /* Warm cream */
+	--agency-foreground: #1a2e1a; /* Deep forest green */
+	--agency-muted: #f0ede6; /* Muted cream */
+	--agency-muted-foreground: #4a6741; /* Sage green */
+	--agency-border: #c5cec0; /* Soft green-gray */
+	--agency-ring: #2d5a27; /* Forest green focus */
+	--agency-gold: #b8860b; /* Dark goldenrod */
 
 	background-color: var(--agency-background);
 	color: var(--agency-foreground);
 	isolation: isolate;
 	min-height: 100vh;
+	scroll-behavior: smooth;
 }
 
 .landing.dark {
-	--agency-background: #4a4e55; /* Warm Grey */
-	--agency-foreground: #fff9f9; /* Pale Cream/Pink */
-	--agency-muted: #60646c; /* Lighter Grey */
-	--agency-muted-foreground: #d1d5db; /* Soft Light Grey */
-	--agency-border: #a1a5b0; /* Light Grey */
-	--agency-ring: #e0bbe4; /* Lilac */
+	--agency-background: #0f1a0f; /* Deep forest black */
+	--agency-foreground: #f0ede6; /* Warm cream */
+	--agency-muted: #1a2e1a; /* Muted dark green */
+	--agency-muted-foreground: #a3b89a; /* Sage light */
+	--agency-border: #2d5a27; /* Dark green border */
+	--agency-ring: #6db365; /* Green focus ring */
+	--agency-gold: #d4a017; /* Bright gold */
 }
 
 /* Tailwind token utilities from @theme can be unreliable in this app shell.
@@ -75,7 +82,79 @@
 	outline-offset: 2px;
 }
 
+/* ── Typography utilities ─────────────────────────────────────────── */
+
+.font-script {
+	font-family: "Great Vibes", cursive;
+}
+
+.font-heading {
+	font-family: "Cormorant Infant", serif;
+}
+
+/* ── Soft shadow utilities ────────────────────────────────────────── */
+
+.shadow-soft {
+	box-shadow:
+		0 4px 24px -4px rgba(26, 46, 26, 0.08),
+		0 2px 8px -2px rgba(26, 46, 26, 0.04);
+}
+
+.landing.dark .shadow-soft {
+	box-shadow:
+		0 4px 24px -4px rgba(0, 0, 0, 0.3),
+		0 2px 8px -2px rgba(0, 0, 0, 0.2);
+}
+
+/* ── Gold CTA utilities ──────────────────────────────────────────── */
+
+.landing .bg-gold {
+	background-color: var(--agency-gold);
+}
+
+.landing .text-gold {
+	color: var(--agency-gold);
+}
+
+/* ── Cinematic animations ─────────────────────────────────────────── */
+
+@keyframes dm-cinema-fade {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes dm-cinema-up {
+	from {
+		opacity: 0;
+		transform: translateY(40px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.dm-cinema-fade {
+	opacity: 0;
+	animation: dm-cinema-fade 1.2s ease-out forwards;
+	animation-delay: var(--delay, 0s);
+}
+
+.dm-cinema-up {
+	opacity: 0;
+	animation: dm-cinema-up 0.8s ease-out forwards;
+	animation-delay: var(--delay, 0s);
+}
+
 @media (prefers-reduced-motion: reduce) {
+	.landing {
+		scroll-behavior: auto;
+	}
+
 	.landing *,
 	.landing *::before,
 	.landing *::after {

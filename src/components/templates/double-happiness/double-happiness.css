@@ -1,19 +1,17 @@
-@import url("https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&display=swap");
-
 /* ─── Double Happiness Template (囍临门) ─── */
 
 /* Root wrapper scopes all template styles */
 .double-happiness {
-	--t-primary: #c8102e;
-	--t-secondary: #8b1a1a;
-	--t-accent: #d4a843;
-	--t-bg: #fff8f0;
-	--t-text: #2b1216;
-	--t-muted: #8b7355;
+	--t-primary: #b07d62;
+	--t-secondary: #3a2e2a;
+	--t-accent: #c5a880;
+	--t-bg: #f9f8f6;
+	--t-text: #3a2e2a;
+	--t-muted: #8c7e74;
 	--t-bg-alt: #ffffff;
-	--t-accent-light: #f5e6c8;
-	--t-accent-deep: #b8860b;
-	--t-accent-glow: rgba(212, 168, 67, 0.15);
+	--t-accent-light: #e8ddd1;
+	--t-accent-deep: #96724e;
+	--t-accent-glow: rgba(197, 168, 128, 0.15);
 	max-width: 430px;
 	margin-left: auto;
 	margin-right: auto;
@@ -32,21 +30,35 @@
 }
 .dh-section-dark {
 	background-color: var(--t-secondary);
-	color: #fff8f0;
+	color: #f9f8f6;
 }
 .dh-section-white {
 	background-color: #ffffff;
 }
 
-/* ── Gold decorative divider (non-text, 3:1 contrast is sufficient) ── */
+/* ── Champagne decorative divider ── */
 .dh-gold-divider {
 	height: 1px;
 	background: linear-gradient(
 		90deg,
 		transparent,
-		rgba(212, 168, 67, 0.5),
+		rgba(197, 168, 128, 0.5),
 		transparent
 	);
+}
+
+/* ── Luxury thin gradient divider ── */
+.dh-divider-luxury {
+	height: 1px;
+	background: linear-gradient(
+		90deg,
+		transparent,
+		rgba(197, 168, 128, 0.4),
+		rgba(176, 125, 98, 0.3),
+		rgba(197, 168, 128, 0.4),
+		transparent
+	);
+	margin: 0 auto;
 }
 
 /* ── Blockquote accent (announcement section) ── */
@@ -77,37 +89,36 @@
 
 /* ── Photo frame ── */
 .dh-photo-frame {
-	border: 1px solid rgba(212, 168, 67, 0.3);
-	box-shadow: 0 2px 8px rgba(43, 18, 22, 0.08);
+	border: 1px solid rgba(197, 168, 128, 0.3);
+	box-shadow: 0 2px 8px rgba(58, 46, 42, 0.08);
 }
 
-/* ── RSVP form focus indicators on festive backgrounds ── */
+/* ── RSVP form focus indicators ── */
 .double-happiness input:focus-visible,
 .double-happiness select:focus-visible,
 .double-happiness textarea:focus-visible {
 	outline: 2px solid #ffffff;
 	outline-offset: 2px;
-	box-shadow: 0 0 0 4px rgba(200, 16, 46, 0.5);
+	box-shadow: 0 0 0 4px rgba(176, 125, 98, 0.5);
 }
 
 /* ── 囍 watermark ── */
 .dh-xi-watermark {
 	font-size: 12rem;
-	color: rgba(212, 168, 67, 0.08);
+	color: rgba(58, 46, 42, 0.05);
 	pointer-events: none;
 	user-select: none;
 }
 
-/* ── Scroll reveal animation (design rules §5.1) ──
-   Overrides the global .dm-reveal (styles.css) to use the spec-correct
-   30px translate and the hardware-accelerated translate3d form. */
+/* ── Scroll reveal animation ──
+   40px translate + 0.8s duration for luxury feel */
 .double-happiness .dm-reveal {
 	opacity: 0;
-	transform: translate3d(0, 30px, 0);
+	transform: translate3d(0, 40px, 0);
 	will-change: opacity, transform;
 	transition:
-		opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-		transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+		opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+		transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .double-happiness .dm-reveal.is-visible {
@@ -118,10 +129,10 @@
 
 .double-happiness .dm-reveal.is-hidden {
 	opacity: 0;
-	transform: translate3d(0, 30px, 0);
+	transform: translate3d(0, 40px, 0);
 }
 
-/* ── Countdown styling (enhanced) ── */
+/* ── Countdown styling ── */
 .double-happiness .countdown-widget {
 	text-align: center;
 	padding: 2rem 1.5rem;
@@ -198,7 +209,7 @@
 	margin-top: 1.25rem;
 }
 
-/* ── Gold foil shimmer effect ── */
+/* ── Champagne shimmer effect ── */
 .dh-gold-shimmer {
 	background: linear-gradient(
 		110deg,
@@ -226,39 +237,22 @@
 	}
 }
 
-/* ── Ornamental double-border frame ── */
-.dh-ornamental-frame {
-	position: relative;
-	border: 2px solid rgba(212, 168, 67, 0.3);
-	padding: 2rem;
-	border-radius: 4px;
-}
-
-.dh-ornamental-frame::before {
-	content: "";
-	position: absolute;
-	inset: 6px;
-	border: 1px solid rgba(212, 168, 67, 0.15);
-	border-radius: 2px;
-	pointer-events: none;
-}
-
-/* ── Enhanced milestone card ── */
+/* ── Milestone card ── */
 .dh-milestone-card {
 	background: #ffffff;
-	border: 1px solid rgba(212, 168, 67, 0.15);
+	border: 1px solid rgba(197, 168, 128, 0.15);
 	border-radius: 12px;
 	padding: 1.25rem;
-	box-shadow: 0 2px 8px rgba(43, 18, 22, 0.05);
+	box-shadow: 0 2px 8px rgba(58, 46, 42, 0.05);
 }
 
-/* ── Enhanced schedule event card ── */
+/* ── Schedule event card ── */
 .dh-event-card {
 	background: #ffffff;
-	border: 1px solid rgba(212, 168, 67, 0.15);
+	border: 1px solid rgba(197, 168, 128, 0.15);
 	border-radius: 12px;
 	padding: 1.25rem;
-	box-shadow: 0 4px 16px rgba(43, 18, 22, 0.06);
+	box-shadow: 0 4px 16px rgba(58, 46, 42, 0.06);
 	display: flex;
 	gap: 1rem;
 }
@@ -270,48 +264,30 @@
 	background: linear-gradient(180deg, var(--t-primary), var(--t-accent));
 }
 
-/* ── Enhanced photo frame with gold glow ── */
+/* ── Photo frame with clean shadow ── */
 .dh-photo-frame-premium {
-	border: 1px solid rgba(212, 168, 67, 0.3);
-	box-shadow:
-		0 2px 8px rgba(43, 18, 22, 0.08),
-		0 4px 16px rgba(212, 168, 67, 0.1);
-	border-radius: 16px;
+	border: 1px solid rgba(197, 168, 128, 0.2);
+	box-shadow: 0 4px 20px rgba(58, 46, 42, 0.08);
+	border-radius: 20px;
 	overflow: hidden;
 }
 
-/* ── Double-ring portrait frame ── */
+/* ── Portrait frame (rounded rectangle) ── */
 .dh-portrait-frame {
 	position: relative;
-	border-radius: 50%;
+	border-radius: 20px;
+	border: 1px solid rgba(197, 168, 128, 0.2);
+	box-shadow: 0 4px 16px rgba(58, 46, 42, 0.06);
 }
 
-.dh-portrait-frame::before {
-	content: "";
-	position: absolute;
-	inset: -6px;
-	border-radius: 50%;
-	border: 2px solid rgba(212, 168, 67, 0.4);
-	pointer-events: none;
-}
-
-.dh-portrait-frame::after {
-	content: "";
-	position: absolute;
-	inset: -2px;
-	border-radius: 50%;
-	border: 1px solid rgba(212, 168, 67, 0.2);
-	pointer-events: none;
-}
-
-/* ── Enhanced timeline dot ── */
+/* ── Timeline dot ── */
 .dh-timeline-dot-premium {
 	width: 14px;
 	height: 14px;
 	border-radius: 50%;
 	background-color: var(--t-primary);
 	border: 2px solid var(--t-accent);
-	box-shadow: 0 0 0 3px rgba(212, 168, 67, 0.1);
+	box-shadow: 0 0 0 3px rgba(197, 168, 128, 0.1);
 }
 
 /* ── Ken Burns hero animation ── */

@@ -139,20 +139,27 @@ function SceneSection({
 	contentScale: number;
 }) {
 	const ref = useRef<HTMLDivElement>(null);
-	const [isVisible, setIsVisible] = useState(false);
+	// SSR: all sections visible by default (no JS needed for basic display).
+	// After hydration, off-screen sections hide and animate in on scroll.
+	const [isVisible, setIsVisible] = useState(true);
 	const hasImages = section.blocks.some((b) => b.type === "image");
 
 	useEffect(() => {
+		if (isHero) return; // Hero always stays visible
 		const el = ref.current;
 		if (!el) return;
 
 		const prefersReduced = window.matchMedia(
 			"(prefers-reduced-motion: reduce)",
 		).matches;
-		if (prefersReduced) {
-			setIsVisible(true);
-			return;
-		}
+		if (prefersReduced) return; // Already visible, keep it
+
+		// If section is already in viewport, keep visible; otherwise hide for scroll animation
+		const rect = el.getBoundingClientRect();
+		if (rect.top < window.innerHeight * 0.9) return;
+
+		// Section is below viewport — hide it so it can animate in on scroll
+		setIsVisible(false);
 
 		const observer = new IntersectionObserver(
 			([entry]) => {
@@ -165,7 +172,7 @@ function SceneSection({
 		);
 		observer.observe(el);
 		return () => observer.disconnect();
-	}, []);
+	}, [isHero]);
 
 	// Calculate section height from block positions
 	const sectionBounds = useMemo(() => {
@@ -383,10 +390,11 @@ function SceneProgressDots({
 					aria-current={i === activeIndex ? "step" : undefined}
 				>
 					<span
-						className="block rounded-full transition-all duration-300"
+						className="block rounded-full transition-[transform,background-color,box-shadow] duration-300"
 						style={{
-							width: i === activeIndex ? 8 : 5,
-							height: i === activeIndex ? 8 : 5,
+							width: 6,
+							height: 6,
+							transform: i === activeIndex ? "scale(1.33)" : "scale(1)",
 							backgroundColor:
 								i === activeIndex ? accentColor : "rgba(255,255,255,0.4)",
 							boxShadow:

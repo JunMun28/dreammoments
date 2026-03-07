@@ -1,7 +1,7 @@
-import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
+import { RedirectToSignIn, useAuth } from "@clerk/tanstack-react-start";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getPaymentStatusFn } from "../../api/payments";
-import { useAuth } from "../../lib/auth";
 
 export const Route = createFileRoute("/upgrade/success")({
 	component: UpgradeSuccessScreen,
@@ -10,7 +10,7 @@ export const Route = createFileRoute("/upgrade/success")({
 const VERIFICATION_TIMEOUT_MS = 15_000;
 
 function UpgradeSuccessScreen() {
-	const { user, refreshUser } = useAuth();
+	const { isLoaded, isSignedIn } = useAuth();
 	const [verified, setVerified] = useState(false);
 	const [checking, setChecking] = useState(true);
 	const [timedOut, setTimedOut] = useState(false);
@@ -27,27 +27,18 @@ function UpgradeSuccessScreen() {
 		}, VERIFICATION_TIMEOUT_MS);
 
 		try {
-			const token = window.localStorage.getItem("dm-auth-token");
-			if (!token) {
-				setChecking(false);
-				return;
-			}
-
-			const result = await getPaymentStatusFn({
-				data: { token },
-			});
+			const result = await getPaymentStatusFn();
 
 			if ("isPremium" in result && result.isPremium) {
 				setVerified(true);
 				if (timeoutRef.current) clearTimeout(timeoutRef.current);
-				await refreshUser();
 			}
 		} catch {
 			// Non-critical: user can still see success page
 		} finally {
 			setChecking(false);
 		}
-	}, [refreshUser]);
+	}, []);
 
 	useEffect(() => {
 		void checkManually();
@@ -57,7 +48,7 @@ function UpgradeSuccessScreen() {
 		};
 	}, [checkManually]);
 
-	if (!user) return <Navigate to="/auth/login" />;
+	if (isLoaded && !isSignedIn) return <RedirectToSignIn />;
 
 	return (
 		<div className="min-h-screen bg-[color:var(--dm-bg)] px-6 py-16">

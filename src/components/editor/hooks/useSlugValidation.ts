@@ -119,10 +119,8 @@ export function useSlugValidation({ invitationId }: UseSlugValidationOptions) {
 			slugCheckVersion.current += 1;
 			const currentVersion = slugCheckVersion.current;
 			slugCheckTimer.current = setTimeout(() => {
-				const token = window.localStorage.getItem("dm-auth-token");
-				if (!token) return;
 				void checkSlugAvailabilityFn({
-					data: { token, slug: normalized, invitationId },
+					data: { slug: normalized, invitationId },
 				})
 					.then((result: { available: boolean }) => {
 						// Only apply if this is still the latest request

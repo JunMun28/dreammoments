@@ -4,6 +4,12 @@
  * All animations respect prefers-reduced-motion via the motion library's built-in support.
  */
 
+import {
+	motion,
+	useReducedMotion,
+	useScroll,
+	useTransform,
+} from "motion/react";
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 
 // ── Scroll-reveal wrapper ────────────────────────────────────────────
@@ -18,7 +24,7 @@ interface RevealProps {
 }
 
 /**
- * Fade-in + slide on scroll using Intersection Observer.
+ * Fade-in + slide on scroll using Motion whileInView.
  * Falls back to visible if prefers-reduced-motion is set.
  */
 export function Reveal({
@@ -28,60 +34,51 @@ export function Reveal({
 	duration = 0.8,
 	className = "",
 }: RevealProps) {
-	const ref = useRef<HTMLDivElement>(null);
-	const [isVisible, setIsVisible] = useState(false);
-	const prefersReduced = usePrefersReducedMotion();
+	const shouldReduce = useReducedMotion();
 
-	useEffect(() => {
-		if (prefersReduced) {
-			setIsVisible(true);
-			return;
+	const getInitialTransform = () => {
+		switch (direction) {
+			case "up":
+				return "translate3d(0, 30px, 0)";
+			case "left":
+				return "translate3d(-30px, 0, 0)";
+			case "right":
+				return "translate3d(30px, 0, 0)";
+			case "scale":
+				return "scale(0.95)";
+			case "blur":
+				return "translate3d(0, 0, 0)";
+			case "none":
+				return "translate3d(0, 0, 0)";
 		}
-		const el = ref.current;
-		if (!el) return;
+	};
 
-		const observer = new IntersectionObserver(
-			([entry]) => {
-				if (entry.isIntersecting) {
-					setIsVisible(true);
-					observer.unobserve(el);
-				}
-			},
-			{ threshold: 0.15, rootMargin: "0px 0px -50px 0px" },
-		);
-		observer.observe(el);
-		return () => observer.disconnect();
-	}, [prefersReduced]);
-
-	const transform = isVisible
-		? "translate3d(0, 0, 0) scale(1)"
-		: direction === "up"
-			? "translate3d(0, 30px, 0)"
-			: direction === "left"
-				? "translate3d(-30px, 0, 0)"
-				: direction === "right"
-					? "translate3d(30px, 0, 0)"
-					: direction === "scale"
-						? "scale(0.95)"
-						: "translate3d(0, 0, 0)";
-
-	const filter = direction === "blur" && !isVisible ? "blur(8px)" : "blur(0)";
+	if (shouldReduce) {
+		return <div className={className}>{children}</div>;
+	}
 
 	return (
-		<div
-			ref={ref}
+		<motion.div
 			className={className}
-			style={{
-				opacity: isVisible ? 1 : 0,
-				transform,
-				filter: direction === "blur" ? filter : undefined,
-				transition: prefersReduced
-					? "none"
-					: `opacity ${duration}s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s, transform ${duration}s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s, filter ${duration}s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s`,
+			initial={{
+				opacity: 0,
+				transform: getInitialTransform(),
+				filter: direction === "blur" ? "blur(8px)" : undefined,
+			}}
+			whileInView={{
+				opacity: 1,
+				transform: "translate3d(0, 0, 0) scale(1)",
+				filter: direction === "blur" ? "blur(0)" : undefined,
+			}}
+			viewport={{ once: true, amount: 0.15, margin: "0px 0px -50px 0px" }}
+			transition={{
+				duration,
+				ease: [0.16, 1, 0.3, 1],
+				delay,
 			}}
 		>
 			{children}
-		</div>
+		</motion.div>
 	);
 }
 
@@ -206,7 +203,7 @@ export function ParticleField({
 	preset,
 	className = "",
 }: ParticleFieldProps) {
-	const prefersReduced = usePrefersReducedMotion();
+	const prefersReduced = useReducedMotion();
 	const config = preset ? PARTICLE_PRESETS[preset] : null;
 	const count = countProp ?? config?.count ?? 12;
 	const color = colorProp ?? config?.color ?? "currentColor";
@@ -302,43 +299,30 @@ interface ParallaxProps {
 }
 
 /**
- * Simple CSS parallax using scroll position.
- * Speed: 0.5 = half scroll speed (background feel), -0.2 = slight counter-scroll.
+ * Scroll-driven parallax using Motion useScroll + useTransform.
+ * Speed: 0.3 = subtle parallax (background feel), negative = counter-scroll.
  */
 export function Parallax({
 	children,
 	speed = 0.3,
 	className = "",
 }: ParallaxProps) {
+	const shouldReduce = useReducedMotion();
 	const ref = useRef<HTMLDivElement>(null);
-	const [offset, setOffset] = useState(0);
-	const prefersReduced = usePrefersReducedMotion();
+	const { scrollYProgress } = useScroll({
+		target: ref,
+		offset: ["start end", "end start"],
+	});
+	const y = useTransform(scrollYProgress, [0, 1], [0, 100 * speed]);
 
-	useEffect(() => {
-		if (prefersReduced) return;
-		const handleScroll = () => {
-			if (!ref.current) return;
-			const rect = ref.current.getBoundingClientRect();
-			const viewHeight = window.innerHeight;
-			const progress = (viewHeight - rect.top) / (viewHeight + rect.height);
-			setOffset(progress * 100 * speed);
-		};
-		window.addEventListener("scroll", handleScroll, { passive: true });
-		handleScroll();
-		return () => window.removeEventListener("scroll", handleScroll);
-	}, [speed, prefersReduced]);
+	if (shouldReduce) {
+		return <div className={className}>{children}</div>;
+	}
 
 	return (
-		<div
-			ref={ref}
-			className={className}
-			style={{
-				transform: prefersReduced ? "none" : `translateY(${offset}px)`,
-				willChange: prefersReduced ? "auto" : "transform",
-			}}
-		>
+		<motion.div ref={ref} style={{ y }} className={className}>
 			{children}
-		</div>
+		</motion.div>
 	);
 }
 
@@ -374,7 +358,7 @@ export function DrawPath({
 	const [length, setLength] = useState(0);
 	const [isVisible, setIsVisible] = useState(false);
 	const svgRef = useRef<SVGSVGElement>(null);
-	const prefersReduced = usePrefersReducedMotion();
+	const prefersReduced = useReducedMotion();
 
 	useEffect(() => {
 		if (pathRef.current) {
@@ -447,7 +431,7 @@ export function Shimmer({
 	color = "rgba(201, 169, 98, 0.15)",
 	className = "",
 }: ShimmerProps) {
-	const prefersReduced = usePrefersReducedMotion();
+	const prefersReduced = useReducedMotion();
 
 	return (
 		<div className={`relative overflow-hidden ${className}`}>
@@ -468,21 +452,3 @@ export function Shimmer({
 }
 
 export type { ParticlePreset };
-
-// ── Hook: prefers-reduced-motion ─────────────────────────────────────
-
-function usePrefersReducedMotion(): boolean {
-	const [prefersReduced, setPrefersReduced] = useState(() => {
-		if (typeof window === "undefined") return false;
-		return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-	});
-
-	useEffect(() => {
-		const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-		const handler = (e: MediaQueryListEvent) => setPrefersReduced(e.matches);
-		mq.addEventListener("change", handler);
-		return () => mq.removeEventListener("change", handler);
-	}, []);
-
-	return prefersReduced;
-}

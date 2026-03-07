@@ -1,9 +1,9 @@
-import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
+import { RedirectToSignIn, useAuth } from "@clerk/tanstack-react-start";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { createCheckoutSessionFn } from "../../api/payments";
 import { RouteErrorFallback } from "../../components/ui/RouteErrorFallback";
 import { RouteLoadingSpinner } from "../../components/ui/RouteLoadingSpinner";
-import { useAuth } from "../../lib/auth";
 import { PRICING } from "../../lib/stripe";
 
 export const Route = createFileRoute("/upgrade/")({
@@ -21,14 +21,14 @@ const PAYMENT_ICONS: Record<string, string> = {
 };
 
 function UpgradeScreen() {
-	const { user } = useAuth();
+	const { isLoaded, isSignedIn } = useAuth();
 	const navigate = useNavigate();
 	const [currency, setCurrency] = useState<"MYR" | "SGD">("MYR");
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
 
-	if (!user) return <Navigate to="/auth/login" />;
-	if (user.plan === "premium") return <Navigate to="/dashboard" />;
+	if (isLoaded && !isSignedIn) return <RedirectToSignIn />;
+	/* TODO: Re-add plan gating with server-side plan data */
 
 	const price = PRICING[currency];
 	const methods =
@@ -41,15 +41,8 @@ function UpgradeScreen() {
 		setError("");
 
 		try {
-			const token = window.localStorage.getItem("dm-auth-token");
-			if (!token) {
-				setError("Please log in to continue.");
-				setLoading(false);
-				return;
-			}
-
 			const result = await createCheckoutSessionFn({
-				data: { token, currency },
+				data: { currency },
 			});
 
 			if ("error" in result) {

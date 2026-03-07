@@ -32,17 +32,14 @@ const VIDEO_MODEL = "fal-ai/kling-video/v2.1/pro/image-to-video";
 
 const submitAnimationSchema = z.object({
 	invitationId: z.string().uuid(),
-	token: z.string().min(1, "Token is required"),
 });
 
 const animationStatusSchema = z.object({
 	jobId: z.string().uuid(),
-	token: z.string().min(1, "Token is required"),
 });
 
 const removeAnimationSchema = z.object({
 	invitationId: z.string().uuid(),
-	token: z.string().min(1, "Token is required"),
 });
 
 // ── Submit animation job ─────────────────────────────────────────────
@@ -50,11 +47,11 @@ const removeAnimationSchema = z.object({
 export const submitAnimationFn = createServerFn({
 	method: "POST",
 })
-	.inputValidator((data: { invitationId: string; token: string }) =>
+	.inputValidator((data: { invitationId: string }) =>
 		parseInput(submitAnimationSchema, data),
 	)
 	.handler(async ({ data }) => {
-		const { userId } = await requireAuth(data.token);
+		const { userId } = await requireAuth();
 
 		const db = getDbOrNull();
 		if (!db) throw ApiError.unavailable("Database not available");
@@ -117,11 +114,11 @@ export const submitAnimationFn = createServerFn({
 export const getAnimationStatusFn = createServerFn({
 	method: "GET",
 })
-	.inputValidator((data: { jobId: string; token: string }) =>
+	.inputValidator((data: { jobId: string }) =>
 		parseInput(animationStatusSchema, data),
 	)
 	.handler(async ({ data }) => {
-		const { userId } = await requireAuth(data.token);
+		const { userId } = await requireAuth();
 
 		const db = getDbOrNull();
 		if (!db) throw ApiError.unavailable("Database not available");
@@ -257,11 +254,11 @@ export const getAnimationStatusFn = createServerFn({
 export const removeAnimationFn = createServerFn({
 	method: "POST",
 })
-	.inputValidator((data: { invitationId: string; token: string }) =>
+	.inputValidator((data: { invitationId: string }) =>
 		parseInput(removeAnimationSchema, data),
 	)
 	.handler(async ({ data }) => {
-		const { userId } = await requireAuth(data.token);
+		const { userId } = await requireAuth();
 
 		const db = getDbOrNull();
 		if (!db) throw ApiError.unavailable("Database not available");

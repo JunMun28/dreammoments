@@ -21,13 +21,6 @@ import {
 import { trackViewFn } from "@/api/public";
 import type { Invitation } from "@/lib/types";
 
-const TOKEN_KEY = "dm-auth-token";
-
-function getToken(): string | null {
-	if (typeof window === "undefined") return null;
-	return window.localStorage.getItem(TOKEN_KEY);
-}
-
 // ── Query keys ──────────────────────────────────────────────────────
 
 export const invitationKeys = {
@@ -40,12 +33,10 @@ export const invitationKeys = {
 // ── Queries ─────────────────────────────────────────────────────────
 
 export function useInvitations() {
-	const token = getToken();
 	return useQuery({
 		queryKey: invitationKeys.all,
 		queryFn: async () => {
-			if (!token) return [];
-			const result = await getInvitations({ data: { token } });
+			const result = await getInvitations();
 			if (
 				result &&
 				typeof result === "object" &&
@@ -53,37 +44,32 @@ export function useInvitations() {
 				"error" in result
 			)
 				return [];
-			return result as Invitation[];
+			return result as unknown as Invitation[];
 		},
-		enabled: !!token,
 	});
 }
 
 export function useInvitation(id: string) {
-	const token = getToken();
 	return useQuery({
 		queryKey: invitationKeys.detail(id),
 		queryFn: async () => {
-			if (!token) return null;
 			const result = await getInvitation({
-				data: { invitationId: id, token },
+				data: { invitationId: id },
 			});
 			if (result && typeof result === "object" && "error" in result)
 				return null;
 			return result as Invitation;
 		},
-		enabled: !!token && !!id,
+		enabled: !!id,
 	});
 }
 
 export function useGuests(invitationId: string) {
-	const token = getToken();
 	return useQuery({
 		queryKey: invitationKeys.guests(invitationId),
 		queryFn: async () => {
-			if (!token) return [];
 			const result = await listGuestsFn({
-				data: { invitationId, token },
+				data: { invitationId },
 			});
 			if (result && "error" in result) return [];
 			return result as unknown as Array<{
@@ -102,23 +88,21 @@ export function useGuests(invitationId: string) {
 				updatedAt: string;
 			}>;
 		},
-		enabled: !!token && !!invitationId,
+		enabled: !!invitationId,
 	});
 }
 
 export function useAnalytics(invitationId: string) {
-	const token = getToken();
 	return useQuery({
 		queryKey: invitationKeys.analytics(invitationId),
 		queryFn: async () => {
-			if (!token) return null;
 			const result = await getAnalyticsFn({
-				data: { invitationId, token },
+				data: { invitationId },
 			});
 			if (result && "error" in result) return null;
 			return result as AnalyticsData;
 		},
-		enabled: !!token && !!invitationId,
+		enabled: !!invitationId,
 	});
 }
 
@@ -126,13 +110,11 @@ export function useAnalytics(invitationId: string) {
 
 export function useCreateInvitation() {
 	const queryClient = useQueryClient();
-	const token = getToken();
 
 	return useMutation({
 		mutationFn: async (templateId: string) => {
-			if (!token) throw new Error("Not authenticated");
 			const result = await createInvitationFn({
-				data: { token, templateId },
+				data: { templateId },
 			});
 			if (result && typeof result === "object" && "error" in result)
 				throw new Error((result as { error: string }).error);
@@ -146,7 +128,6 @@ export function useCreateInvitation() {
 
 export function useUpdateInvitation() {
 	const queryClient = useQueryClient();
-	const token = getToken();
 
 	return useMutation({
 		mutationFn: async (params: {
@@ -157,9 +138,8 @@ export function useUpdateInvitation() {
 			designOverrides?: Record<string, unknown>;
 			status?: "draft" | "published" | "archived";
 		}) => {
-			if (!token) throw new Error("Not authenticated");
 			const result = await updateInvitationFn({
-				data: { ...params, token },
+				data: { ...params },
 			});
 			if (result && typeof result === "object" && "error" in result)
 				throw new Error((result as { error: string }).error);
@@ -199,13 +179,11 @@ export function useUpdateInvitation() {
 
 export function useDeleteInvitation() {
 	const queryClient = useQueryClient();
-	const token = getToken();
 
 	return useMutation({
 		mutationFn: async (invitationId: string) => {
-			if (!token) throw new Error("Not authenticated");
 			const result = await deleteInvitationFn({
-				data: { invitationId, token },
+				data: { invitationId },
 			});
 			if (result && "error" in result)
 				throw new Error((result as { error: string }).error);
@@ -236,7 +214,6 @@ export function useDeleteInvitation() {
 
 export function usePublishInvitation() {
 	const queryClient = useQueryClient();
-	const token = getToken();
 
 	return useMutation({
 		mutationFn: async ({
@@ -246,9 +223,8 @@ export function usePublishInvitation() {
 			invitationId: string;
 			slug?: string;
 		}) => {
-			if (!token) throw new Error("Not authenticated");
 			const result = await publishInvitationFn({
-				data: { invitationId, token, slug },
+				data: { invitationId, slug },
 			});
 			if (result && typeof result === "object" && "error" in result)
 				throw new Error((result as { error: string }).error);
@@ -265,13 +241,11 @@ export function usePublishInvitation() {
 
 export function useUnpublishInvitation() {
 	const queryClient = useQueryClient();
-	const token = getToken();
 
 	return useMutation({
 		mutationFn: async (invitationId: string) => {
-			if (!token) throw new Error("Not authenticated");
 			const result = await unpublishInvitationFn({
-				data: { invitationId, token },
+				data: { invitationId },
 			});
 			if (result && typeof result === "object" && "error" in result)
 				throw new Error((result as { error: string }).error);
@@ -328,7 +302,6 @@ export function useTrackView() {
 
 export function useAddGuest() {
 	const queryClient = useQueryClient();
-	const token = getToken();
 
 	return useMutation({
 		mutationFn: async (params: {
@@ -338,11 +311,9 @@ export function useAddGuest() {
 			phone?: string;
 			relationship?: string;
 		}) => {
-			if (!token) throw new Error("Not authenticated");
 			const result = await importGuestsFn({
 				data: {
 					invitationId: params.invitationId,
-					token,
 					guests: [
 						{
 							name: params.name,
@@ -367,7 +338,6 @@ export function useAddGuest() {
 
 export function useUpdateGuest() {
 	const queryClient = useQueryClient();
-	const token = getToken();
 
 	return useMutation({
 		mutationFn: async (params: {
@@ -382,9 +352,8 @@ export function useUpdateGuest() {
 			dietaryRequirements?: string;
 			message?: string;
 		}) => {
-			if (!token) throw new Error("Not authenticated");
 			const result = await updateGuestFn({
-				data: { ...params, token },
+				data: { ...params },
 			});
 			if (result && "error" in result)
 				throw new Error((result as { error: string }).error);
@@ -400,13 +369,11 @@ export function useUpdateGuest() {
 
 export function useDeleteGuest() {
 	const queryClient = useQueryClient();
-	const token = getToken();
 
 	return useMutation({
 		mutationFn: async (params: { guestId: string; invitationId: string }) => {
-			if (!token) throw new Error("Not authenticated");
 			const result = await deleteGuestFn({
-				data: { ...params, token },
+				data: { ...params },
 			});
 			if (result && "error" in result)
 				throw new Error((result as { error: string }).error);
@@ -422,7 +389,6 @@ export function useDeleteGuest() {
 
 export function useImportGuests() {
 	const queryClient = useQueryClient();
-	const token = getToken();
 
 	return useMutation({
 		mutationFn: async (params: {
@@ -434,9 +400,8 @@ export function useImportGuests() {
 				relationship?: string;
 			}>;
 		}) => {
-			if (!token) throw new Error("Not authenticated");
 			const result = await importGuestsFn({
-				data: { ...params, token },
+				data: { ...params },
 			});
 			if (result && "error" in result)
 				throw new Error((result as { error: string }).error);
@@ -451,13 +416,10 @@ export function useImportGuests() {
 }
 
 export function useExportGuestsCsv() {
-	const token = getToken();
-
 	return useMutation({
 		mutationFn: async (invitationId: string) => {
-			if (!token) throw new Error("Not authenticated");
 			const result = await exportGuestsCsvFn({
-				data: { invitationId, token },
+				data: { invitationId },
 			});
 			if (result && "error" in result)
 				throw new Error((result as { error: string }).error);

@@ -1,3 +1,4 @@
+import { useAuth } from "@clerk/tanstack-react-start";
 import {
 	createFileRoute,
 	type ErrorComponentProps,
@@ -10,7 +11,6 @@ import EnvelopeAnimation from "../../components/templates/EnvelopeAnimation";
 import { RsvpConfirmation } from "../../components/templates/RsvpConfirmation";
 import { buildSampleContent } from "../../data/sample-invitation";
 import { useSubmitRsvp, useTrackView } from "../../hooks/useInvitations";
-import { useAuth } from "../../lib/auth";
 import { summarizeInvitationContent } from "../../lib/canvas/document";
 import { migrateInvitationContentToCanvas } from "../../lib/canvas/migrate";
 
@@ -223,7 +223,7 @@ function CanvasRsvpCard({
 
 function InviteScreen() {
 	const { slug } = Route.useParams();
-	const { user } = useAuth();
+	const { isSignedIn } = useAuth();
 	const loaderData = Route.useLoaderData() as
 		| {
 				invitation: Record<string, unknown> | null;
@@ -402,7 +402,7 @@ function InviteScreen() {
 								search={{ template: templateId }}
 								className="shrink-0 whitespace-nowrap rounded-full border border-[color:var(--dm-border)] bg-[color:var(--dm-surface)] px-4 py-2 text-[10px] font-semibold tracking-[0.22em] text-[color:var(--dm-accent-strong)]"
 							>
-								{user ? "Use template" : "Create yours"}
+								{isSignedIn ? "Use template" : "Create yours"}
 							</Link>
 						</div>
 					</header>

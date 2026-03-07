@@ -78,7 +78,18 @@ vi.mock("@/db/index", () => ({
 }));
 
 vi.mock("@/lib/server-auth", () => ({
-	requireAuth: vi.fn(async () => ({ userId: "user-a" })),
+	requireAuth: vi.fn().mockResolvedValue({
+		userId: "user-a",
+		user: {
+			id: "user-a",
+			clerkId: "clerk_test_a",
+			email: "usera@example.com",
+			name: "User A",
+			plan: "free",
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
+		},
+	}),
 }));
 
 vi.mock("@/lib/rate-limit", () => ({
@@ -111,7 +122,18 @@ beforeEach(() => {
 	mockedGetDbOrNull.mockReturnValue(
 		mockDb as unknown as ReturnType<typeof getDbOrNull>,
 	);
-	mockedRequireAuth.mockResolvedValue({ userId: "user-a" });
+	mockedRequireAuth.mockResolvedValue({
+		userId: "user-a",
+		user: {
+			id: "user-a",
+			clerkId: "clerk_test_a",
+			email: "usera@example.com",
+			name: "User A",
+			plan: "free",
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
+		},
+	});
 	mockedCreateDbRateLimiter.mockReturnValue(mockRsvpLimiter);
 	mockRsvpLimiter.mockResolvedValue({
 		allowed: true,
@@ -258,7 +280,6 @@ describe("listGuestsFn", () => {
 
 		const result = await (listGuestsFn as CallableFunction)({
 			invitationId: "inv-1",
-			token: "valid-token",
 		});
 
 		expect(result).toEqual(guests);
@@ -274,7 +295,6 @@ describe("listGuestsFn", () => {
 
 		const result = (await (listGuestsFn as CallableFunction)({
 			invitationId: "inv-1",
-			token: "valid-token",
 		})) as { error: string };
 
 		expect(result.error).toBe("Access denied");
@@ -292,7 +312,7 @@ describe("updateGuestFn", () => {
 
 		const result = (await (updateGuestFn as CallableFunction)({
 			guestId: "g-1",
-			token: "valid-token",
+
 			invitationId: "inv-1",
 			name: "Hacked",
 		})) as { error: string };
@@ -318,7 +338,7 @@ describe("updateGuestFn", () => {
 
 		const result = await (updateGuestFn as CallableFunction)({
 			guestId: "g-1",
-			token: "valid-token",
+
 			invitationId: "inv-1",
 			name: "Updated",
 		});
@@ -340,7 +360,7 @@ describe("deleteGuestFn", () => {
 
 		const result = (await (deleteGuestFn as CallableFunction)({
 			guestId: "g-1",
-			token: "valid-token",
+
 			invitationId: "inv-1",
 		})) as { success: boolean };
 
@@ -361,7 +381,7 @@ describe("bulkUpdateGuestsFn", () => {
 
 		const result = (await (bulkUpdateGuestsFn as CallableFunction)({
 			invitationId: "inv-1",
-			token: "valid-token",
+
 			updates: [{ guestId: "g-1", attendance: "attending" }],
 		})) as { updated: number };
 
@@ -387,7 +407,7 @@ describe("importGuestsFn", () => {
 
 		const result = await (importGuestsFn as CallableFunction)({
 			invitationId: "inv-1",
-			token: "valid-token",
+
 			guests: [{ name: "Alice" }, { name: "Bob" }],
 		});
 
@@ -420,7 +440,6 @@ describe("exportGuestsCsvFn", () => {
 
 		const result = (await (exportGuestsCsvFn as CallableFunction)({
 			invitationId: "inv-1",
-			token: "valid-token",
 		})) as { csv: string };
 
 		expect(result.csv).toContain("name");
@@ -453,7 +472,6 @@ describe("exportGuestsCsvFn", () => {
 
 		const result = (await (exportGuestsCsvFn as CallableFunction)({
 			invitationId: "inv-1",
-			token: "valid-token",
 		})) as { csv: string };
 
 		// Double quotes should be escaped as ""

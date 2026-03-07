@@ -1,7 +1,15 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import {
+	SignedIn,
+	SignedOut,
+	SignInButton,
+	UserButton,
+	useAuth,
+} from "@clerk/tanstack-react-start";
+import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useAuth } from "../lib/auth";
+import { getPaymentStatusFn } from "../api/payments";
 import { useFocusTrap } from "./editor/hooks/useFocusTrap";
 
 const navItems = [
@@ -12,8 +20,17 @@ const navItems = [
 
 export default function Header() {
 	const [open, setOpen] = useState(false);
-	const { user, signOut } = useAuth();
-	const navigate = useNavigate();
+	const { isSignedIn } = useAuth();
+	const { data: planData } = useQuery({
+		queryKey: ["payment-status"],
+		queryFn: async () => {
+			const result = await getPaymentStatusFn();
+			if ("error" in result) return null;
+			return result;
+		},
+		enabled: !!isSignedIn,
+	});
+	const isFreePlan = isSignedIn && planData && !planData.isPremium;
 	const hamburgerRef = useRef<HTMLButtonElement>(null);
 	const menuRef = useRef<HTMLDivElement>(null);
 
@@ -21,11 +38,6 @@ export default function Header() {
 		setOpen(false);
 		hamburgerRef.current?.focus();
 	}, []);
-
-	const handleSignOut = useCallback(() => {
-		signOut();
-		navigate({ to: "/" });
-	}, [signOut, navigate]);
 
 	useFocusTrap(menuRef, {
 		enabled: open,
@@ -68,38 +80,15 @@ export default function Header() {
 
 					<div className="flex items-center justify-end gap-2">
 						<div className="hidden items-center gap-2 md:flex">
-							{user ? (
-								<button
-									type="button"
-									onClick={handleSignOut}
-									className="rounded-full inline-flex items-center justify-center border border-dm-border bg-dm-surface/60 px-4 py-2 text-xs font-semibold leading-none text-dm-ink"
-								>
-									Sign out
-								</button>
-							) : (
-								<Link
-									to="/auth/login"
-									className="rounded-full inline-flex items-center justify-center border border-dm-border bg-dm-surface/60 px-4 py-2 text-xs font-semibold leading-none text-dm-ink"
-								>
-									Sign in
-								</Link>
-							)}
-							{user?.plan === "free" ? (
-								<Link
-									to="/upgrade"
-									className="rounded-full inline-flex items-center justify-center border border-dm-peach/40 bg-dm-surface px-4 py-2 text-xs font-semibold leading-none text-dm-ink"
-								>
-									Upgrade
-								</Link>
-							) : null}
-							{user ? (
-								<Link
-									to="/dashboard"
-									className="rounded-full inline-flex items-center justify-center bg-dm-ink px-5 py-2.5 text-sm font-semibold leading-none text-white shadow-[0_4px_20px_-2px_rgba(0,0,0,0.12)]"
-								>
-									Open App
-								</Link>
-							) : (
+							<SignedOut>
+								<SignInButton mode="redirect">
+									<button
+										type="button"
+										className="rounded-full inline-flex items-center justify-center border border-dm-border bg-dm-surface/60 px-4 py-2 text-xs font-semibold leading-none text-dm-ink"
+									>
+										Sign in
+									</button>
+								</SignInButton>
 								<Link
 									to="/editor/new"
 									search={{ template: "double-happiness" }}
@@ -107,7 +96,24 @@ export default function Header() {
 								>
 									Start Free Trial
 								</Link>
-							)}
+							</SignedOut>
+							<SignedIn>
+								{isFreePlan && (
+									<Link
+										to="/upgrade"
+										className="rounded-full inline-flex items-center justify-center border border-dm-peach/40 bg-dm-surface px-4 py-2 text-xs font-semibold leading-none text-dm-ink"
+									>
+										Upgrade
+									</Link>
+								)}
+								<Link
+									to="/dashboard"
+									className="rounded-full inline-flex items-center justify-center bg-dm-ink px-5 py-2.5 text-sm font-semibold leading-none text-white shadow-[0_4px_20px_-2px_rgba(0,0,0,0.12)]"
+								>
+									Open App
+								</Link>
+								<UserButton />
+							</SignedIn>
 						</div>
 						<button
 							ref={hamburgerRef}
@@ -151,7 +157,7 @@ export default function Header() {
 									{item.label}
 								</Link>
 							))}
-							{user ? (
+							<SignedIn>
 								<Link
 									to="/dashboard"
 									className="rounded-full inline-flex items-center justify-center bg-dm-ink px-4 py-2 text-center text-sm font-semibold leading-none text-white"
@@ -159,7 +165,17 @@ export default function Header() {
 								>
 									Open App
 								</Link>
-							) : (
+								{isFreePlan && (
+									<Link
+										to="/upgrade"
+										className="rounded-full inline-flex items-center justify-center border border-dm-peach/40 px-4 py-2 text-center text-xs font-semibold leading-none text-dm-ink"
+										onClick={closeMenu}
+									>
+										Upgrade
+									</Link>
+								)}
+							</SignedIn>
+							<SignedOut>
 								<Link
 									to="/editor/new"
 									search={{ template: "double-happiness" }}
@@ -168,36 +184,15 @@ export default function Header() {
 								>
 									Start Free Trial
 								</Link>
-							)}
-							{user?.plan === "free" ? (
-								<Link
-									to="/upgrade"
-									className="rounded-full inline-flex items-center justify-center border border-dm-peach/40 px-4 py-2 text-center text-xs font-semibold leading-none text-dm-ink"
-									onClick={closeMenu}
-								>
-									Upgrade
-								</Link>
-							) : null}
-							{user ? (
-								<button
-									type="button"
-									onClick={() => {
-										handleSignOut();
-										closeMenu();
-									}}
-									className="rounded-full inline-flex items-center justify-center border border-dm-border px-4 py-2 text-xs font-semibold leading-none text-dm-ink"
-								>
-									Sign out
-								</button>
-							) : (
-								<Link
-									to="/auth/login"
-									className="rounded-full inline-flex items-center justify-center border border-dm-border px-4 py-2 text-xs font-semibold leading-none text-dm-ink"
-									onClick={closeMenu}
-								>
-									Sign in
-								</Link>
-							)}
+								<SignInButton mode="redirect">
+									<button
+										type="button"
+										className="rounded-full inline-flex items-center justify-center border border-dm-border px-4 py-2 text-xs font-semibold leading-none text-dm-ink"
+									>
+										Sign in
+									</button>
+								</SignInButton>
+							</SignedOut>
 						</div>
 					</div>
 				</>

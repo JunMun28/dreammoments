@@ -19,10 +19,6 @@ import { Route as UpgradeSuccessRouteImport } from './routes/upgrade/success'
 import { Route as InviteSlugRouteImport } from './routes/invite/$slug'
 import { Route as EditorNewRouteImport } from './routes/editor/new'
 import { Route as EditorInvitationIdRouteImport } from './routes/editor/$invitationId'
-import { Route as AuthSignupRouteImport } from './routes/auth/signup'
-import { Route as AuthResetRouteImport } from './routes/auth/reset'
-import { Route as AuthLoginRouteImport } from './routes/auth/login'
-import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as DashboardInvitationIdIndexRouteImport } from './routes/dashboard/$invitationId/index'
 import { Route as EditorCanvasInvitationIdRouteImport } from './routes/editor/canvas/$invitationId'
 
@@ -76,26 +72,6 @@ const EditorInvitationIdRoute = EditorInvitationIdRouteImport.update({
   path: '/editor/$invitationId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthSignupRoute = AuthSignupRouteImport.update({
-  id: '/auth/signup',
-  path: '/auth/signup',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthResetRoute = AuthResetRouteImport.update({
-  id: '/auth/reset',
-  path: '/auth/reset',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthLoginRoute = AuthLoginRouteImport.update({
-  id: '/auth/login',
-  path: '/auth/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthCallbackRoute = AuthCallbackRouteImport.update({
-  id: '/auth/callback',
-  path: '/auth/callback',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const DashboardInvitationIdIndexRoute =
   DashboardInvitationIdIndexRouteImport.update({
     id: '/dashboard/$invitationId/',
@@ -114,10 +90,6 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/upgrade': typeof UpgradeRouteWithChildren
-  '/auth/callback': typeof AuthCallbackRoute
-  '/auth/login': typeof AuthLoginRoute
-  '/auth/reset': typeof AuthResetRoute
-  '/auth/signup': typeof AuthSignupRoute
   '/editor/$invitationId': typeof EditorInvitationIdRoute
   '/editor/new': typeof EditorNewRoute
   '/invite/$slug': typeof InviteSlugRoute
@@ -131,10 +103,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
-  '/auth/callback': typeof AuthCallbackRoute
-  '/auth/login': typeof AuthLoginRoute
-  '/auth/reset': typeof AuthResetRoute
-  '/auth/signup': typeof AuthSignupRoute
   '/editor/$invitationId': typeof EditorInvitationIdRoute
   '/editor/new': typeof EditorNewRoute
   '/invite/$slug': typeof InviteSlugRoute
@@ -150,10 +118,6 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/upgrade': typeof UpgradeRouteWithChildren
-  '/auth/callback': typeof AuthCallbackRoute
-  '/auth/login': typeof AuthLoginRoute
-  '/auth/reset': typeof AuthResetRoute
-  '/auth/signup': typeof AuthSignupRoute
   '/editor/$invitationId': typeof EditorInvitationIdRoute
   '/editor/new': typeof EditorNewRoute
   '/invite/$slug': typeof InviteSlugRoute
@@ -170,10 +134,6 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/terms'
     | '/upgrade'
-    | '/auth/callback'
-    | '/auth/login'
-    | '/auth/reset'
-    | '/auth/signup'
     | '/editor/$invitationId'
     | '/editor/new'
     | '/invite/$slug'
@@ -187,10 +147,6 @@ export interface FileRouteTypes {
     | '/'
     | '/privacy'
     | '/terms'
-    | '/auth/callback'
-    | '/auth/login'
-    | '/auth/reset'
-    | '/auth/signup'
     | '/editor/$invitationId'
     | '/editor/new'
     | '/invite/$slug'
@@ -205,10 +161,6 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/terms'
     | '/upgrade'
-    | '/auth/callback'
-    | '/auth/login'
-    | '/auth/reset'
-    | '/auth/signup'
     | '/editor/$invitationId'
     | '/editor/new'
     | '/invite/$slug'
@@ -224,10 +176,6 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
   UpgradeRoute: typeof UpgradeRouteWithChildren
-  AuthCallbackRoute: typeof AuthCallbackRoute
-  AuthLoginRoute: typeof AuthLoginRoute
-  AuthResetRoute: typeof AuthResetRoute
-  AuthSignupRoute: typeof AuthSignupRoute
   EditorInvitationIdRoute: typeof EditorInvitationIdRoute
   EditorNewRoute: typeof EditorNewRoute
   InviteSlugRoute: typeof InviteSlugRoute
@@ -308,34 +256,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EditorInvitationIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth/signup': {
-      id: '/auth/signup'
-      path: '/auth/signup'
-      fullPath: '/auth/signup'
-      preLoaderRoute: typeof AuthSignupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/reset': {
-      id: '/auth/reset'
-      path: '/auth/reset'
-      fullPath: '/auth/reset'
-      preLoaderRoute: typeof AuthResetRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/login': {
-      id: '/auth/login'
-      path: '/auth/login'
-      fullPath: '/auth/login'
-      preLoaderRoute: typeof AuthLoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/callback': {
-      id: '/auth/callback'
-      path: '/auth/callback'
-      fullPath: '/auth/callback'
-      preLoaderRoute: typeof AuthCallbackRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/dashboard/$invitationId/': {
       id: '/dashboard/$invitationId/'
       path: '/dashboard/$invitationId'
@@ -371,10 +291,6 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
   UpgradeRoute: UpgradeRouteWithChildren,
-  AuthCallbackRoute: AuthCallbackRoute,
-  AuthLoginRoute: AuthLoginRoute,
-  AuthResetRoute: AuthResetRoute,
-  AuthSignupRoute: AuthSignupRoute,
   EditorInvitationIdRoute: EditorInvitationIdRoute,
   EditorNewRoute: EditorNewRoute,
   InviteSlugRoute: InviteSlugRoute,
@@ -387,10 +303,11 @@ export const routeTree = rootRouteImport
   ._addFileTypes<FileRouteTypes>()
 
 import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
+import type { startInstance } from './start.ts'
 declare module '@tanstack/react-start' {
   interface Register {
     ssr: true
     router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
   }
 }

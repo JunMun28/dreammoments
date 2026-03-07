@@ -1,67 +1,79 @@
-import { getCookie } from "@tanstack/react-start/server";
+import { auth, clerkClient } from "@clerk/tanstack-react-start/server";
 import { eq } from "drizzle-orm";
 import { getDbOrNull, schema } from "@/db/index";
-import { AUTH_ACCESS_COOKIE } from "./auth-cookies";
-import { verifySession } from "./session";
-
-function getAuthCookieSafely() {
-	try {
-		return getCookie(AUTH_ACCESS_COOKIE);
-	} catch {
-		return undefined;
-	}
-}
+import type { User } from "./types";
 
 /**
- * Hash a token using SHA-256 for blocklist lookups.
+ * Verify the Clerk session and return the authenticated user from DB.
+ * Creates a DB record on first encounter (just-in-time sync).
  */
-async function hashToken(token: string): Promise<string> {
-	const encoded = new TextEncoder().encode(token);
-	const hashBuffer = await crypto.subtle.digest("SHA-256", encoded);
-	return Array.from(new Uint8Array(hashBuffer))
-		.map((b) => b.toString(16).padStart(2, "0"))
-		.join("");
-}
-
-/**
- * Check whether a token has been revoked (added to the blocklist).
- * Returns true if the token is blocked, false otherwise.
- */
-async function isTokenBlocked(token: string): Promise<boolean> {
-	const db = getDbOrNull();
-	if (!db) return false;
-
-	const hash = await hashToken(token);
-	const [entry] = await db
-		.select()
-		.from(schema.tokenBlocklist)
-		.where(eq(schema.tokenBlocklist.tokenHash, hash));
-
-	return !!entry;
-}
-
-/**
- * Verify a JWT token and return the authenticated user's ID.
- * Throws an error if the token is missing, invalid, expired, or revoked.
- */
-export async function requireAuth(
-	token: string | undefined,
-): Promise<{ userId: string }> {
-	const tokenToVerify = token ?? getAuthCookieSafely();
-	if (!tokenToVerify) {
+export async function requireAuth(): Promise<{ userId: string; user: User }> {
+	const { userId: clerkUserId } = await auth();
+	if (!clerkUserId) {
 		throw new Error("Authentication required");
 	}
 
-	const session = await verifySession(tokenToVerify, "access");
-	if (!session) {
-		throw new Error("Invalid or expired session");
+	const db = getDbOrNull();
+	if (!db) throw new Error("Database connection required");
+
+	// Look up existing user by Clerk ID
+	const [existing] = await db
+		.select()
+		.from(schema.users)
+		.where(eq(schema.users.clerkId, clerkUserId));
+
+	if (existing) {
+		return {
+			userId: existing.id,
+			user: dbRowToUser(existing),
+		};
 	}
 
-	// Check if the token has been revoked
-	const blocked = await isTokenBlocked(tokenToVerify);
-	if (blocked) {
-		throw new Error("Token has been revoked");
+	// First encounter — create user from Clerk profile
+	const clerkUser = await clerkClient().users.getUser(clerkUserId);
+	const email =
+		clerkUser.emailAddresses.find(
+			(e) => e.id === clerkUser.primaryEmailAddressId,
+		)?.emailAddress ?? clerkUser.emailAddresses[0]?.emailAddress;
+
+	if (!email) throw new Error("No email found on Clerk user");
+
+	// Use onConflictDoNothing to handle concurrent first-requests for the same user
+	const [created] = await db
+		.insert(schema.users)
+		.values({
+			clerkId: clerkUserId,
+			email,
+			name:
+				[clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(" ") ||
+				undefined,
+			avatarUrl: clerkUser.imageUrl || undefined,
+			plan: "free",
+		})
+		.onConflictDoNothing({ target: schema.users.clerkId })
+		.returning();
+
+	if (created) {
+		return { userId: created.id, user: dbRowToUser(created) };
 	}
 
-	return { userId: session.userId };
+	// Concurrent request already inserted — re-fetch
+	const [raced] = await db
+		.select()
+		.from(schema.users)
+		.where(eq(schema.users.clerkId, clerkUserId));
+	return { userId: raced.id, user: dbRowToUser(raced) };
+}
+
+function dbRowToUser(row: typeof schema.users.$inferSelect): User {
+	return {
+		id: row.id,
+		clerkId: row.clerkId,
+		email: row.email,
+		name: row.name ?? undefined,
+		avatarUrl: row.avatarUrl ?? undefined,
+		plan: (row.plan as "free" | "premium") ?? "free",
+		createdAt: row.createdAt.toISOString(),
+		updatedAt: row.updatedAt.toISOString(),
+	};
 }

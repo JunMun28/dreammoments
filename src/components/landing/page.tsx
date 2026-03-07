@@ -1,15 +1,15 @@
 "use client";
 
-import { About } from "./about";
 import "./landing.css";
+import { ClosingCta } from "./closing-cta";
 import { Faq } from "./faq";
 import { Footer } from "./footer";
 import { Header } from "./header";
 import { Hero } from "./hero";
-import { OverlayProvider } from "./overlay-context";
-import { Projects } from "./projects";
-import { Services } from "./services";
+import { Showcase } from "./showcase";
+import { SkipToContent } from "./skip-to-content";
 import { SmoothScroll } from "./smooth-scroll";
+import { SocialProof } from "./social-proof";
 import { LandingThemeProvider, useLandingTheme } from "./theme-context";
 import { ThemeSwitch } from "./theme-switch";
 
@@ -17,22 +17,22 @@ function LandingContent() {
 	const { resolvedTheme } = useLandingTheme();
 
 	return (
-		<OverlayProvider>
-			<SmoothScroll>
-				<div className={`landing ${resolvedTheme === "dark" ? "dark" : ""}`}>
-					<Header />
-					<ThemeSwitch />
-					<main className="relative z-10 flex-1 bg-background">
-						<Hero />
-						<Projects />
-						<Services />
-						<About />
-						<Faq />
-					</main>
-					<Footer />
-				</div>
-			</SmoothScroll>
-		</OverlayProvider>
+		<SmoothScroll>
+			<div className={`landing ${resolvedTheme === "dark" ? "dark" : ""}`}>
+				<SkipToContent />
+				<Header />
+				<ThemeSwitch />
+				{/* biome-ignore lint/correctness/useUniqueElementIds: skip-to-content target */}
+				<main id="main-content" className="relative z-10 flex-1">
+					<Hero />
+					<Showcase />
+					<SocialProof />
+					<Faq />
+					<ClosingCta />
+				</main>
+				<Footer />
+			</div>
+		</SmoothScroll>
 	);
 }
 

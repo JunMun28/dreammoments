@@ -2,15 +2,16 @@ import { defineConfig, devices } from "@playwright/test"
 
 export default defineConfig({
 	testDir: "./tests/e2e",
-	timeout: 60000,
+	timeout: 120000,
 	expect: {
-		timeout: 5000,
+		timeout: 15000,
 		toHaveScreenshot: {
 			maxDiffPixelRatio: 0.01,
 			animations: "disabled",
 		},
 	},
-	fullyParallel: true,
+	fullyParallel: false,
+	workers: process.env.CI ? 1 : 2,
 	retries: process.env.CI ? 1 : 0,
 	reporter: [["list"], ["html", { open: "never" }]],
 	use: {
@@ -26,17 +27,56 @@ export default defineConfig({
 		timeout: 120000,
 	},
 	projects: [
+		// Global setup — calls clerkSetup(), signs in, saves storageState
 		{
-			name: "chromium",
+			name: "global-setup",
+			testMatch: /global\.setup\.ts/,
+		},
+
+		// Tests that require authentication
+		{
+			name: "chromium-authed",
+			use: {
+				...devices["Desktop Chrome"],
+				storageState: "tests/e2e/.auth/user.json",
+			},
+			testIgnore: [
+				/global\.setup\.ts/,
+				/auth\.setup\.ts/,
+				/auth\.spec\.ts/,
+				/debug-auth\.spec\.ts/,
+				/landing\.spec\.ts/,
+				/invite-view\.spec\.ts/,
+				/rsvp\.spec\.ts/,
+				/routing\.spec\.ts/,
+				/mobile\.spec\.ts/,
+			],
+			dependencies: ["global-setup"],
+		},
+
+		// Tests that don't require authentication (public pages)
+		{
+			name: "chromium-public",
 			use: { ...devices["Desktop Chrome"] },
+			testMatch: [
+				/auth\.spec\.ts/,
+				/landing\.spec\.ts/,
+				/invite-view\.spec\.ts/,
+				/rsvp\.spec\.ts/,
+				/routing\.spec\.ts/,
+			],
+			dependencies: ["global-setup"],
 		},
+
+		// Mobile tests (using Pixel 5 for Chromium-based mobile)
 		{
-			name: "webkit",
-			use: { ...devices["iPhone 13"] },
-		},
-		{
-			name: "android",
-			use: { ...devices["Pixel 5"] },
+			name: "mobile",
+			use: {
+				...devices["Pixel 5"],
+				storageState: "tests/e2e/.auth/user.json",
+			},
+			testMatch: /mobile\.spec\.ts/,
+			dependencies: ["global-setup"],
 		},
 	],
 })

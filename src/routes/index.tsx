@@ -7,7 +7,7 @@ export const Route = createFileRoute("/")({
 			{
 				rel: "preload",
 				as: "image",
-				href: "/img/mock-project1.webp",
+				href: "/photos/landing/hero-bg.jpg",
 			},
 		],
 	}),

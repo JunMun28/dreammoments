@@ -1,3 +1,4 @@
+import { RedirectToSignIn, useAuth } from "@clerk/tanstack-react-start";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnalyticsPanel } from "../../../components/dashboard/AnalyticsPanel";
@@ -14,7 +15,6 @@ import {
 	usePublishInvitation,
 	useUnpublishInvitation,
 } from "../../../hooks/useInvitations";
-import { useAuth } from "../../../lib/auth";
 import type {
 	AttendanceStatus,
 	Invitation,
@@ -204,7 +204,7 @@ function ConfirmPublishDialog({
 
 function InvitationDashboard() {
 	const { invitationId } = Route.useParams();
-	const { user, loading } = useAuth();
+	const { isLoaded, isSignedIn, userId } = useAuth();
 	const { addToast } = useToast();
 	const { data: serverInvitation } = useInvitation(invitationId);
 	const invitation = serverInvitation ?? null;
@@ -284,19 +284,11 @@ function InvitationDashboard() {
 			setSlugChecking(true);
 			slugTimerRef.current = setTimeout(async () => {
 				try {
-					const token =
-						typeof window !== "undefined"
-							? window.localStorage.getItem("dm-auth-token")
-							: null;
-					if (!token) {
-						setSlugChecking(false);
-						return;
-					}
 					const { checkSlugAvailabilityFn } = await import(
 						"../../../api/invitations"
 					);
 					const result = await checkSlugAvailabilityFn({
-						data: { token, slug: value, invitationId },
+						data: { slug: value, invitationId },
 					});
 					setSlugAvailable(result.available);
 				} catch {
@@ -360,10 +352,10 @@ function InvitationDashboard() {
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: only fire once when invitation missing
 	useEffect(() => {
-		if (!invitation && !loading) {
+		if (!invitation && isLoaded) {
 			addToast({ type: "error", message: "Invitation not found" });
 		}
-	}, [!invitation, loading]);
+	}, [!invitation, isLoaded]);
 
 	const totalGuests = guests.reduce((sum, guest) => sum + guest.guestCount, 0);
 	const attending = guests.filter(
@@ -387,9 +379,9 @@ function InvitationDashboard() {
 		return { summary, notes };
 	}, [guests]);
 
-	if (!user && !loading) return <Navigate to="/auth/login" />;
+	if (isLoaded && !isSignedIn) return <RedirectToSignIn />;
 
-	if (loading) {
+	if (!isLoaded) {
 		return (
 			<div className="min-h-screen bg-[color:var(--dm-bg)] px-6 py-10">
 				<div className="mx-auto max-w-6xl space-y-8">
@@ -414,9 +406,9 @@ function InvitationDashboard() {
 		);
 	}
 
-	if (!user) return <Navigate to="/auth/login" />;
+	if (!isSignedIn) return <RedirectToSignIn />;
 	if (!invitation) return <Navigate to="/dashboard" />;
-	if (invitation.userId !== user.id) {
+	if (invitation.userId !== userId) {
 		return (
 			<div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
 				<h1 className="font-display text-4xl font-bold text-[color:var(--dm-ink)]">
@@ -664,37 +656,29 @@ function InvitationDashboard() {
 									? "Exporting..."
 									: "Export Guests CSV"}
 							</button>
-							{user.plan === "premium" ? (
-								<label className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)]">
-									Import Guests CSV
-									<input
-										type="file"
-										accept=".csv"
-										className="hidden"
-										onChange={async (event) => {
-											const file = event.target.files?.[0];
-											if (!file) return;
-											const text = await file.text();
-											const rows = parseCsv(text);
-											setImportRows(rows);
-											if (rows.length > 0) {
-												const headers = Object.keys(rows[0]);
-												setMapping(autoDetectMapping(headers));
-												setImportStep("preview");
-											}
-											// Reset input so same file can be re-selected
-											event.target.value = "";
-										}}
-									/>
-								</label>
-							) : (
-								<Link
-									to="/upgrade"
-									className="text-sm text-[color:var(--dm-accent-strong)] hover:underline"
-								>
-									Upgrade to import from CSV
-								</Link>
-							)}
+							{/* TODO: Re-add plan gating with server-side plan data */}
+							<label className="rounded-full border border-[color:var(--dm-border)] px-4 py-2 text-[color:var(--dm-ink)]">
+								Import Guests CSV
+								<input
+									type="file"
+									accept=".csv"
+									className="hidden"
+									onChange={async (event) => {
+										const file = event.target.files?.[0];
+										if (!file) return;
+										const text = await file.text();
+										const rows = parseCsv(text);
+										setImportRows(rows);
+										if (rows.length > 0) {
+											const headers = Object.keys(rows[0]);
+											setMapping(autoDetectMapping(headers));
+											setImportStep("preview");
+										}
+										// Reset input so same file can be re-selected
+										event.target.value = "";
+									}}
+								/>
+							</label>
 						</div>
 
 						{importRows.length > 0 && importStep !== "idle" ? (
@@ -1054,32 +1038,27 @@ function InvitationDashboard() {
 											// Slug will be applied when publishing
 										}}
 										className="h-10 w-full rounded-2xl border border-[color:var(--dm-border)] bg-[color:var(--dm-surface-muted)] px-3 pr-8 text-base text-[color:var(--dm-ink)]"
-										disabled={user.plan !== "premium"}
 										autoComplete="off"
 									/>
-									{user.plan === "premium" &&
-										slugValue &&
-										slugValue !== invitation.slug && (
-											<span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm">
-												{slugChecking ? (
-													<span className="text-[color:var(--dm-muted)]">
-														...
-													</span>
-												) : slugAvailable === true ? (
-													<span className="text-dm-success">&#10003;</span>
-												) : slugAvailable === false ? (
-													<span className="text-dm-error">&#10007;</span>
-												) : null}
-											</span>
-										)}
-								</div>
-								{user.plan === "premium" &&
-									slugValue &&
-									!/^[a-z0-9-]*$/.test(slugValue) && (
-										<p className="text-xs text-dm-error">
-											Only lowercase letters, numbers, and hyphens are allowed.
-										</p>
+									{slugValue && slugValue !== invitation.slug && (
+										<span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm">
+											{slugChecking ? (
+												<span className="text-[color:var(--dm-muted)]">
+													...
+												</span>
+											) : slugAvailable === true ? (
+												<span className="text-dm-success">&#10003;</span>
+											) : slugAvailable === false ? (
+												<span className="text-dm-error">&#10007;</span>
+											) : null}
+										</span>
 									)}
+								</div>
+								{slugValue && !/^[a-z0-9-]*$/.test(slugValue) && (
+									<p className="text-xs text-dm-error">
+										Only lowercase letters, numbers, and hyphens are allowed.
+									</p>
+								)}
 							</label>
 							<div className="flex flex-wrap gap-3 text-xs uppercase tracking-[0.2em]">
 								{invitation.status !== "published" ? (
@@ -1100,9 +1079,7 @@ function InvitationDashboard() {
 									</button>
 								)}
 							</div>
-							{user.plan !== "premium" ? (
-								<p className="text-xs text-dm-error">Upgrade to edit slug.</p>
-							) : null}
+							{/* TODO: Re-add plan gating with server-side plan data */}
 						</div>
 					</div>
 				</div>

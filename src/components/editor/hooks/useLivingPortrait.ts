@@ -14,14 +14,12 @@ export type LivingPortraitStep =
 
 interface UseLivingPortraitOptions {
 	invitationId: string;
-	token: string;
 	heroData: Record<string, unknown>;
 	onChange: (fieldPath: string, value: string | boolean) => void;
 }
 
 export function useLivingPortrait({
 	invitationId,
-	token,
 	heroData,
 	onChange,
 }: UseLivingPortraitOptions) {
@@ -61,7 +59,7 @@ export function useLivingPortrait({
 
 			try {
 				const result = await generateAvatarFn({
-					data: { invitationId, style, token },
+					data: { invitationId, style },
 				});
 
 				if (result && typeof result === "object" && "error" in result) {
@@ -100,14 +98,14 @@ export function useLivingPortrait({
 				generatingRef.current = false;
 			}
 		},
-		[invitationId, token, onChange, animatedVideoUrl],
+		[invitationId, onChange, animatedVideoUrl],
 	);
 
 	const pollVideoStatus = useCallback(
 		async (jobId: string, attempt = 0) => {
 			try {
 				const result = await getAnimationStatusFn({
-					data: { jobId, token },
+					data: { jobId },
 				});
 
 				if (result && typeof result === "object" && "error" in result) {
@@ -166,7 +164,7 @@ export function useLivingPortrait({
 				}
 			}
 		},
-		[token, onChange],
+		[onChange],
 	);
 
 	const animateAvatar = useCallback(async () => {
@@ -178,7 +176,7 @@ export function useLivingPortrait({
 
 		try {
 			const result = await submitAnimationFn({
-				data: { invitationId, token },
+				data: { invitationId },
 			});
 
 			if (result && typeof result === "object" && "error" in result) {
@@ -207,11 +205,11 @@ export function useLivingPortrait({
 		} finally {
 			generatingRef.current = false;
 		}
-	}, [invitationId, token, avatarImageUrl, pollVideoStatus]);
+	}, [invitationId, avatarImageUrl, pollVideoStatus]);
 
 	const removeAvatar = useCallback(async () => {
 		try {
-			await removeAvatarFn({ data: { invitationId, token } });
+			await removeAvatarFn({ data: { invitationId } });
 		} catch {
 			// Fall through — clear UI state regardless
 		}
@@ -221,11 +219,11 @@ export function useLivingPortrait({
 			onChange("hero.animatedVideoUrl", "");
 		}
 		setAvatarPreview(null);
-	}, [invitationId, token, onChange, animatedVideoUrl]);
+	}, [invitationId, onChange, animatedVideoUrl]);
 
 	const removeVideo = useCallback(async () => {
 		try {
-			await removeAnimationFn({ data: { invitationId, token } });
+			await removeAnimationFn({ data: { invitationId } });
 		} catch {
 			// Fall through — clear UI state regardless
 		}
@@ -236,7 +234,7 @@ export function useLivingPortrait({
 		}
 		videoJobIdRef.current = null;
 		setStep("idle");
-	}, [invitationId, token, onChange]);
+	}, [invitationId, onChange]);
 
 	return {
 		step,

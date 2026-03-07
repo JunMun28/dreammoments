@@ -66,7 +66,18 @@ vi.mock("@/db/index", () => ({
 }));
 
 vi.mock("@/lib/server-auth", () => ({
-	requireAuth: vi.fn(async () => ({ userId: "user-a" })),
+	requireAuth: vi.fn().mockResolvedValue({
+		userId: "user-a",
+		user: {
+			id: "user-a",
+			clerkId: "clerk_test_a",
+			email: "usera@example.com",
+			name: "User A",
+			plan: "free",
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
+		},
+	}),
 }));
 
 vi.mock("@/lib/slug", () => ({
@@ -118,7 +129,18 @@ beforeEach(() => {
 	mockedGetDbOrNull.mockReturnValue(
 		mockDb as unknown as ReturnType<typeof getDbOrNull>,
 	);
-	mockedRequireAuth.mockResolvedValue({ userId: "user-a" });
+	mockedRequireAuth.mockResolvedValue({
+		userId: "user-a",
+		user: {
+			id: "user-a",
+			clerkId: "clerk_test_a",
+			email: "usera@example.com",
+			name: "User A",
+			plan: "free",
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
+		},
+	});
 });
 
 // ---------------------------------------------------------------------------
@@ -145,9 +167,7 @@ describe("getInvitations", () => {
 			mockDb as unknown as ReturnType<typeof getDbOrNull>,
 		);
 
-		const result = await (getInvitations as CallableFunction)({
-			token: "valid-token",
-		});
+		const result = await (getInvitations as CallableFunction)({});
 
 		expect(result).toEqual(dbInvitations);
 	});
@@ -168,7 +188,6 @@ describe("getInvitation", () => {
 
 		const result = await (getInvitation as CallableFunction)({
 			invitationId: "inv-1",
-			token: "valid-token",
 		});
 
 		expect(result).toEqual(dbInv);
@@ -183,7 +202,6 @@ describe("getInvitation", () => {
 
 		const result = (await (getInvitation as CallableFunction)({
 			invitationId: "inv-1",
-			token: "valid-token",
 		})) as { error: string };
 
 		expect(result.error).toContain("not found or access denied");
@@ -210,7 +228,6 @@ describe("createInvitationFn", () => {
 		);
 
 		const result = await (createInvitationFn as CallableFunction)({
-			token: "valid-token",
 			templateId: "double-happiness",
 		});
 
@@ -230,7 +247,7 @@ describe("updateInvitationFn", () => {
 
 		const result = (await (updateInvitationFn as CallableFunction)({
 			invitationId: "inv-1",
-			token: "valid-token",
+
 			title: "Hacked",
 		})) as { error: string };
 
@@ -246,7 +263,7 @@ describe("updateInvitationFn", () => {
 
 		const result = (await (updateInvitationFn as CallableFunction)({
 			invitationId: "inv-1",
-			token: "valid-token",
+
 			title: "X",
 		})) as { error: string };
 
@@ -267,7 +284,7 @@ describe("updateInvitationFn", () => {
 
 		const result = await (updateInvitationFn as CallableFunction)({
 			invitationId: "inv-1",
-			token: "valid-token",
+
 			title: "New Title",
 		});
 
@@ -286,7 +303,6 @@ describe("deleteInvitationFn", () => {
 
 		const result = (await (deleteInvitationFn as CallableFunction)({
 			invitationId: "inv-1",
-			token: "valid-token",
 		})) as { error: string };
 
 		expect(result.error).toBe("Access denied");
@@ -304,7 +320,6 @@ describe("deleteInvitationFn", () => {
 
 		const result = (await (deleteInvitationFn as CallableFunction)({
 			invitationId: "inv-1",
-			token: "valid-token",
 		})) as { success: boolean };
 
 		expect(result.success).toBe(true);
@@ -328,7 +343,6 @@ describe("publishInvitationFn", () => {
 
 		const result = await (publishInvitationFn as CallableFunction)({
 			invitationId: "inv-1",
-			token: "valid-token",
 		});
 
 		expect(result).toBeDefined();
@@ -345,7 +359,6 @@ describe("publishInvitationFn", () => {
 
 		const result = (await (publishInvitationFn as CallableFunction)({
 			invitationId: "inv-1",
-			token: "valid-token",
 		})) as { error: string };
 
 		expect(result.error).toBe("Access denied");
@@ -361,7 +374,6 @@ describe("checkSlugAvailabilityFn", () => {
 		);
 
 		const result = (await (checkSlugAvailabilityFn as CallableFunction)({
-			token: "valid-token",
 			slug: "new-slug",
 		})) as { available: boolean };
 
@@ -376,7 +388,6 @@ describe("checkSlugAvailabilityFn", () => {
 		);
 
 		const result = (await (checkSlugAvailabilityFn as CallableFunction)({
-			token: "valid-token",
 			slug: "taken-slug",
 		})) as { available: boolean };
 
@@ -391,7 +402,6 @@ describe("checkSlugAvailabilityFn", () => {
 		);
 
 		const result = (await (checkSlugAvailabilityFn as CallableFunction)({
-			token: "valid-token",
 			slug: "my-slug",
 			invitationId: "inv-1",
 		})) as { available: boolean };
@@ -422,7 +432,7 @@ describe("patchInvitationContentFn", () => {
 
 		const result = await (patchInvitationContentFn as CallableFunction)({
 			invitationId: "inv-1",
-			token: "valid-token",
+
 			path: "hero.tagline",
 			value: "Forever Yours",
 		});
@@ -437,7 +447,7 @@ describe("patchInvitationContentFn", () => {
 
 		const result = (await (patchInvitationContentFn as CallableFunction)({
 			invitationId: "inv-1",
-			token: "valid-token",
+
 			path: "hero.tagline",
 			value: "Hacked",
 		})) as { error: string };
@@ -457,7 +467,7 @@ describe("patchInvitationContentFn", () => {
 		await expect(
 			(patchInvitationContentFn as CallableFunction)({
 				invitationId: "inv-1",
-				token: "valid-token",
+
 				path: "__proto__.polluted",
 				value: "x",
 			}),

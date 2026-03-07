@@ -16,6 +16,6 @@ describe("templates registry", () => {
 	});
 
 	test("double happiness tokens include palette", () => {
-		expect(doubleHappinessTemplate.tokens.colors.primary).toBe("#C8102E");
+		expect(doubleHappinessTemplate.tokens.colors.primary).toBe("#B07D62");
 	});
 });

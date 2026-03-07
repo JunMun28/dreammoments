@@ -17,7 +17,6 @@ import { parseInput } from "./validate";
 // ── Analytics schema ────────────────────────────────────────────────
 
 const getAnalyticsSchema = z.object({
-	token: z.string().min(1, "Token is required"),
 	invitationId: z.string().min(1, "invitationId is required"),
 	period: z.enum(["7d", "30d", "all"]).default("30d"),
 });
@@ -47,12 +46,11 @@ export interface AnalyticsData {
 export const getAnalyticsFn = createServerFn({
 	method: "GET",
 })
-	.inputValidator(
-		(data: { token: string; invitationId: string; period?: string }) =>
-			parseInput(getAnalyticsSchema, data),
+	.inputValidator((data: { invitationId: string; period?: string }) =>
+		parseInput(getAnalyticsSchema, data),
 	)
 	.handler(async ({ data }): Promise<AnalyticsData | { error: string }> => {
-		const { userId } = await requireAuth(data.token);
+		const { userId } = await requireAuth();
 
 		const db = getDbOrNull();
 		if (!db) throw new Error("Database connection required");

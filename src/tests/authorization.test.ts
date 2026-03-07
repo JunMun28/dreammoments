@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
  * Cross-user authorization tests.
  *
  * These tests verify that user A cannot access user B's resources,
- * even with a valid authentication token. The key boundary is the
+ * even with a valid Clerk session. The key boundary is the
  * ownership check in each API handler.
  */
 
@@ -94,7 +94,18 @@ vi.mock("@/db/index", () => ({
 
 // Default: user-a is authenticated
 vi.mock("@/lib/server-auth", () => ({
-	requireAuth: vi.fn(async () => ({ userId: "user-a" })),
+	requireAuth: vi.fn().mockResolvedValue({
+		userId: "user-a",
+		user: {
+			id: "user-a",
+			clerkId: "clerk_test_a",
+			email: "usera@example.com",
+			name: "User A",
+			plan: "free",
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
+		},
+	}),
 }));
 
 vi.mock("@/lib/rate-limit", () => ({
@@ -103,13 +114,6 @@ vi.mock("@/lib/rate-limit", () => ({
 	createDbRateLimiter: vi.fn(() =>
 		vi.fn(async () => ({ allowed: true, remaining: 9, resetAt: 0 })),
 	),
-}));
-
-vi.mock("@/lib/session", () => ({
-	createSession: vi.fn(async () => "mock-token"),
-	createRefreshToken: vi.fn(async () => "mock-refresh"),
-	verifySession: vi.fn(async () => null),
-	refreshSession: vi.fn(async () => null),
 }));
 
 vi.mock("@/lib/slug", () => ({
@@ -193,7 +197,18 @@ beforeEach(() => {
 		mockDb as unknown as ReturnType<typeof getDbOrNull>,
 	);
 	// User A is authenticated
-	mockedRequireAuth.mockResolvedValue({ userId: USER_A });
+	mockedRequireAuth.mockResolvedValue({
+		userId: USER_A,
+		user: {
+			id: USER_A,
+			clerkId: "clerk_test_a",
+			email: "usera@example.com",
+			name: "User A",
+			plan: "free",
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
+		},
+	});
 });
 
 // ---------------------------------------------------------------------------
@@ -214,7 +229,6 @@ describe("cross-user authorization (DB path)", () => {
 
 		const result = (await (getInvitation as CallableFunction)({
 			invitationId: "inv-b-1",
-			token: "token-a",
 		})) as { error: string };
 
 		expect(result.error).toContain("not found or access denied");
@@ -227,7 +241,6 @@ describe("cross-user authorization (DB path)", () => {
 
 		const result = (await (updateInvitationFn as CallableFunction)({
 			invitationId: "inv-b-1",
-			token: "token-a",
 			title: "Hacked",
 		})) as { error: string };
 
@@ -241,7 +254,6 @@ describe("cross-user authorization (DB path)", () => {
 
 		const result = (await (deleteInvitationFn as CallableFunction)({
 			invitationId: "inv-b-1",
-			token: "token-a",
 		})) as { error: string };
 
 		expect(result.error).toBe("Access denied");
@@ -254,7 +266,6 @@ describe("cross-user authorization (DB path)", () => {
 
 		const result = (await (publishInvitationFn as CallableFunction)({
 			invitationId: "inv-b-1",
-			token: "token-a",
 		})) as { error: string };
 
 		expect(result.error).toBe("Access denied");
@@ -267,7 +278,6 @@ describe("cross-user authorization (DB path)", () => {
 
 		const result = (await (listGuestsFn as CallableFunction)({
 			invitationId: "inv-b-1",
-			token: "token-a",
 		})) as { error: string };
 
 		expect(result.error).toBe("Access denied");
@@ -280,7 +290,6 @@ describe("cross-user authorization (DB path)", () => {
 
 		const result = (await (exportGuestsCsvFn as CallableFunction)({
 			invitationId: "inv-b-1",
-			token: "token-a",
 		})) as { error: string };
 
 		expect(result.error).toBe("Access denied");
@@ -293,7 +302,6 @@ describe("cross-user authorization (DB path)", () => {
 
 		const result = (await (importGuestsFn as CallableFunction)({
 			invitationId: "inv-b-1",
-			token: "token-a",
 			guests: [{ name: "Injected" }],
 		})) as { error: string };
 
@@ -307,7 +315,6 @@ describe("cross-user authorization (DB path)", () => {
 
 		const result = (await (updateGuestFn as CallableFunction)({
 			guestId: "guest-1",
-			token: "token-a",
 			invitationId: "inv-b-1",
 			name: "Hacked",
 		})) as { error: string };
@@ -321,7 +328,6 @@ describe("cross-user authorization (DB path)", () => {
 		mockDb.select.mockReturnValue(selectChain);
 
 		const result = (await (getAnalyticsFn as CallableFunction)({
-			token: "token-a",
 			invitationId: "inv-b-1",
 		})) as { error: string };
 
@@ -334,47 +340,43 @@ describe("cross-user authorization (DB path)", () => {
 // ---------------------------------------------------------------------------
 
 describe("authentication boundary", () => {
-	test("empty token is rejected", async () => {
-		// Endpoints with token in their Zod schema reject empty tokens at validation
-		// or the handler rejects access when requireAuth detects the invalid token
-		const invResult = await (getInvitation as CallableFunction)({
-			invitationId: "inv-1",
-			token: "",
-		}).catch((err: Error) => ({ error: err.message }));
-		expect((invResult as { error: string }).error).toBeTruthy();
-
-		const analyticsResult = await (getAnalyticsFn as CallableFunction)({
-			token: "",
-			invitationId: "inv-1",
-		}).catch((err: Error) => ({ error: err.message }));
-		expect((analyticsResult as { error: string }).error).toBeTruthy();
-	});
-
-	test("invalid token is rejected by requireAuth", async () => {
-		mockedRequireAuth.mockRejectedValue(
-			new Error("Invalid or expired session"),
-		);
+	test("unauthenticated request is rejected by requireAuth", async () => {
+		// With Clerk, requireAuth() throws when no valid session exists
+		mockedRequireAuth.mockRejectedValue(new Error("Authentication required"));
 
 		await expect(
 			(getInvitation as CallableFunction)({
 				invitationId: "inv-1",
-				token: "invalid-jwt",
 			}),
-		).rejects.toThrow("Invalid or expired session");
+		).rejects.toThrow("Authentication required");
+
+		await expect(
+			(getAnalyticsFn as CallableFunction)({
+				invitationId: "inv-1",
+			}),
+		).rejects.toThrow("Authentication required");
+	});
+
+	test("expired session is rejected by requireAuth", async () => {
+		mockedRequireAuth.mockRejectedValue(new Error("Authentication required"));
+
+		await expect(
+			(getInvitation as CallableFunction)({
+				invitationId: "inv-1",
+			}),
+		).rejects.toThrow("Authentication required");
 
 		await expect(
 			(updateInvitationFn as CallableFunction)({
 				invitationId: "inv-1",
-				token: "invalid-jwt",
 				title: "X",
 			}),
-		).rejects.toThrow("Invalid or expired session");
+		).rejects.toThrow("Authentication required");
 
 		await expect(
 			(deleteInvitationFn as CallableFunction)({
 				invitationId: "inv-1",
-				token: "invalid-jwt",
 			}),
-		).rejects.toThrow("Invalid or expired session");
+		).rejects.toThrow("Authentication required");
 	});
 });

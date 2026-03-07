@@ -410,7 +410,6 @@ describe("useAutoSave", () => {
 		vi.useFakeTimers();
 		vi.clearAllMocks();
 		storageMap.clear();
-		storageMap.set("dm-auth-token", "test-token");
 		vi.stubGlobal("localStorage", {
 			getItem: (key: string) => storageMap.get(key) ?? null,
 			setItem: (key: string, value: string) => storageMap.set(key, value),
