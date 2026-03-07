@@ -1,10 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ChevronDown } from "lucide-react";
+import { animate, scroll } from "motion";
 import { useEffect, useRef } from "react";
-
-gsap.registerPlugin(ScrollTrigger);
 
 export function Hero() {
 	const sectionRef = useRef<HTMLElement>(null);
@@ -18,46 +15,59 @@ export function Hero() {
 		).matches;
 		if (prefersReducedMotion) return;
 
-		const ctx = gsap.context(() => {
-			// Ken Burns slow zoom on background
-			gsap.to(bgRef.current, {
-				scale: 1.12,
-				ease: "none",
-				scrollTrigger: {
-					trigger: sectionRef.current,
-					start: "top top",
-					end: "bottom top",
-					scrub: true,
-				},
-			});
+		const cleanups: VoidFunction[] = [];
 
-			// Foliage foreground parallax (faster)
-			gsap.to(foliageRef.current, {
-				yPercent: -30,
-				ease: "none",
-				scrollTrigger: {
-					trigger: sectionRef.current,
-					start: "top top",
-					end: "bottom top",
-					scrub: true,
-				},
-			});
+		// Ken Burns slow zoom on background — S-tier via WAAPI ScrollTimeline
+		if (bgRef.current && sectionRef.current) {
+			cleanups.push(
+				scroll(
+					animate(
+						bgRef.current,
+						{ transform: ["scale(1)", "scale(1.12)"] },
+						{ ease: "linear" },
+					),
+					{ target: sectionRef.current },
+				),
+			);
+		}
 
-			// Content fades out on scroll
-			gsap.to(contentRef.current, {
-				opacity: 0,
-				yPercent: -20,
-				ease: "none",
-				scrollTrigger: {
-					trigger: sectionRef.current,
-					start: "top top",
-					end: "40% top",
-					scrub: true,
-				},
-			});
-		}, sectionRef);
+		// Foliage foreground parallax (faster)
+		if (foliageRef.current && sectionRef.current) {
+			cleanups.push(
+				scroll(
+					animate(
+						foliageRef.current,
+						{ transform: ["translateY(0)", "translateY(-30%)"] },
+						{ ease: "linear" },
+					),
+					{ target: sectionRef.current },
+				),
+			);
+		}
 
-		return () => ctx.revert();
+		// Content fades out on scroll
+		if (contentRef.current && sectionRef.current) {
+			cleanups.push(
+				scroll(
+					animate(
+						contentRef.current,
+						{
+							opacity: [1, 0],
+							transform: ["translateY(0)", "translateY(-20%)"],
+						},
+						{ ease: "linear" },
+					),
+					{
+						target: sectionRef.current,
+						offset: ["start start", "0.4 start"],
+					},
+				),
+			);
+		}
+
+		return () => {
+			for (const cleanup of cleanups) cleanup();
+		};
 	}, []);
 
 	return (
@@ -129,7 +139,7 @@ export function Hero() {
 					<Link
 						to="/editor/new"
 						search={{ template: "double-happiness" }}
-						className="inline-block px-8 sm:px-10 py-3.5 sm:py-4 bg-gold hover:opacity-90 rounded-full text-white text-sm sm:text-base font-semibold tracking-wide transition-all duration-300 hover:shadow-[0_8px_32px_rgba(202,138,4,0.35)] hover:-translate-y-0.5 active:translate-y-0"
+						className="inline-block px-8 sm:px-10 py-3.5 sm:py-4 bg-gold hover:opacity-90 rounded-full text-white text-sm sm:text-base font-semibold tracking-wide transition-[transform,box-shadow,opacity] duration-300 hover:shadow-[0_8px_32px_rgba(202,138,4,0.35)] hover:-translate-y-0.5 active:translate-y-0"
 					>
 						Start Creating
 					</Link>

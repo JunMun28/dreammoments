@@ -390,10 +390,11 @@ function SceneProgressDots({
 					aria-current={i === activeIndex ? "step" : undefined}
 				>
 					<span
-						className="block rounded-full transition-all duration-300"
+						className="block rounded-full transition-[transform,background-color,box-shadow] duration-300"
 						style={{
-							width: i === activeIndex ? 8 : 5,
-							height: i === activeIndex ? 8 : 5,
+							width: 6,
+							height: 6,
+							transform: i === activeIndex ? "scale(1.33)" : "scale(1)",
 							backgroundColor:
 								i === activeIndex ? accentColor : "rgba(255,255,255,0.4)",
 							boxShadow:

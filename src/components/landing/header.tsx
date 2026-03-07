@@ -27,15 +27,7 @@ const menuItems = [
 export function Header() {
 	const [activeSection, setActiveSection] = useState("Home");
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
-	const [isMobile, setIsMobile] = useState(false);
 	const isOnHero = activeSection === "Home";
-
-	useEffect(() => {
-		const checkMobile = () => setIsMobile(window.innerWidth < 640);
-		checkMobile();
-		window.addEventListener("resize", checkMobile);
-		return () => window.removeEventListener("resize", checkMobile);
-	}, []);
 
 	useEffect(() => {
 		const handleScroll = () => {
@@ -71,15 +63,15 @@ export function Header() {
 
 	return (
 		<motion.header
-			initial={{ opacity: 0, y: -20 }}
-			animate={{ opacity: 1, y: 0 }}
+			initial={{ opacity: 0, transform: "translateY(-20px)" }}
+			animate={{ opacity: 1, transform: "translateY(0)" }}
 			transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
 			className="fixed left-0 right-0 top-0 z-50 px-4 py-6 sm:px-12 sm:py-12 lg:px-24"
 		>
 			<div className="mx-auto flex max-w-[90rem] items-center justify-between gap-4 2xl:max-w-[112.5rem] min-[120rem]:max-w-[137.5rem]">
 				<motion.a
 					href="/"
-					className={`font-heading flex h-12 shrink-0 items-center justify-center rounded-xl px-4 text-base font-semibold tracking-tight shadow-[0_8px_32px_0_rgba(26,46,26,0.07)] backdrop-blur-xl sm:h-16 sm:rounded-2xl sm:px-5 sm:text-xl transition-all duration-300 hover:scale-[1.02] ${pillClass}`}
+					className={`font-heading flex h-12 shrink-0 items-center justify-center rounded-xl px-4 text-base font-semibold tracking-tight shadow-[0_8px_32px_0_rgba(26,46,26,0.07)] backdrop-blur-xl sm:h-16 sm:rounded-2xl sm:px-5 sm:text-xl transition-[transform,opacity] duration-300 hover:scale-[1.02] ${pillClass}`}
 					initial={{ opacity: 0, x: -20 }}
 					animate={{ opacity: 1, x: 0 }}
 					transition={{
@@ -120,17 +112,14 @@ export function Header() {
 
 					<div className="relative h-12 w-52 sm:h-16 sm:w-64">
 						<motion.div
+							layout
 							className={`absolute right-0 top-0 w-52 overflow-hidden rounded-xl shadow-[0_8px_32px_0_rgba(26,46,26,0.07)] backdrop-blur-xl sm:h-auto sm:w-64 sm:rounded-2xl ${pillClass}`}
-							initial={{ opacity: 0, x: 20 }}
-							animate={{
-								opacity: 1,
-								x: 0,
-								height: isMenuOpen ? "auto" : isMobile ? 48 : 64,
-							}}
+							initial={{ opacity: 0 }}
+							animate={{ opacity: 1 }}
 							transition={{
 								duration: 0.4,
 								ease: [0.22, 1, 0.36, 1],
-								height: { duration: 0.4, ease: [0.22, 1, 0.36, 1] },
+								layout: { duration: 0.35, ease: [0.22, 1, 0.36, 1] },
 								delay: 0.2,
 							}}
 						>
@@ -150,7 +139,9 @@ export function Header() {
 								</span>
 								<motion.div
 									className="relative h-5 w-5 sm:h-6 sm:w-6"
-									animate={{ rotate: isMenuOpen ? 45 : 0 }}
+									animate={{
+										transform: isMenuOpen ? "rotate(45deg)" : "rotate(0deg)",
+									}}
 									transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
 								>
 									<span className="absolute left-1/2 top-0 h-5 w-[1.5px] -translate-x-1/2 bg-current sm:h-6" />
@@ -171,9 +162,12 @@ export function Header() {
 											{menuItems.map((item, index) => (
 												<motion.li
 													key={item.label}
-													initial={{ opacity: 0, x: -10 }}
-													animate={{ opacity: 1, x: 0 }}
-													exit={{ opacity: 0, x: -10 }}
+													initial={{
+														opacity: 0,
+														transform: "translateX(-10px)",
+													}}
+													animate={{ opacity: 1, transform: "translateX(0)" }}
+													exit={{ opacity: 0, transform: "translateX(-10px)" }}
 													transition={{
 														duration: 0.3,
 														delay: 0.05 * index,

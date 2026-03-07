@@ -26,6 +26,7 @@
 	color: var(--agency-foreground);
 	isolation: isolate;
 	min-height: 100vh;
+	scroll-behavior: smooth;
 }
 
 .landing.dark {
@@ -150,6 +151,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+	.landing {
+		scroll-behavior: auto;
+	}
+
 	.landing *,
 	.landing *::before,
 	.landing *::after {
