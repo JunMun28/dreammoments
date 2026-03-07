@@ -130,7 +130,10 @@ type ParticlePreset =
 	| "goldDust"
 	| "starlight"
 	| "snowfall"
-	| "lanterns";
+	| "lanterns"
+	| "copperDust"
+	| "inkDrops"
+	| "emberGlow";
 
 const PARTICLE_PRESETS: Record<
 	ParticlePreset,
@@ -170,6 +173,24 @@ const PARTICLE_PRESETS: Record<
 		color: "rgba(255, 160, 50, 0.6)",
 		shape: "circle",
 		drift: "up",
+	},
+	copperDust: {
+		count: 20,
+		color: "rgba(232, 118, 75, 0.4)",
+		shape: "sparkle",
+		drift: "up",
+	},
+	inkDrops: {
+		count: 6,
+		color: "rgba(12, 12, 12, 0.3)",
+		shape: "circle",
+		drift: "down",
+	},
+	emberGlow: {
+		count: 14,
+		color: "rgba(194, 87, 26, 0.5)",
+		shape: "sparkle",
+		drift: "float",
 	},
 };
 
@@ -447,6 +468,196 @@ export function Shimmer({
 					aria-hidden="true"
 				/>
 			)}
+		</div>
+	);
+}
+
+// ── ClipReveal – section-transition via animated clipPath ────────────
+
+interface ClipRevealProps {
+	children: ReactNode;
+	shape?: "diagonal" | "circle" | "curtain" | "inset";
+	delay?: number;
+	duration?: number;
+	className?: string;
+}
+
+/**
+ * Reveals content via an animated clipPath transition.
+ * Supports diagonal, circle, curtain, and inset shapes.
+ */
+export function ClipReveal({
+	children,
+	shape = "inset",
+	delay = 0,
+	duration = 1.2,
+	className = "",
+}: ClipRevealProps) {
+	const shouldReduce = useReducedMotion();
+
+	const clips: Record<string, { from: string; to: string }> = {
+		diagonal: {
+			from: "polygon(0 0, 0 0, 0 100%, 0 100%)",
+			to: "polygon(0 0, 100% 0, 100% 100%, 0 100%)",
+		},
+		circle: {
+			from: "circle(0% at 50% 50%)",
+			to: "circle(75% at 50% 50%)",
+		},
+		curtain: {
+			from: "inset(0 50% 0 50%)",
+			to: "inset(0 0% 0 0%)",
+		},
+		inset: {
+			from: "inset(10% 10% 10% 10%)",
+			to: "inset(0% 0% 0% 0%)",
+		},
+	};
+
+	if (shouldReduce) {
+		return <div className={className}>{children}</div>;
+	}
+
+	const { from, to } = clips[shape];
+
+	return (
+		<motion.div
+			className={className}
+			initial={{ clipPath: from, opacity: 0.3 }}
+			whileInView={{ clipPath: to, opacity: 1 }}
+			viewport={{ once: true, amount: 0.2 }}
+			transition={{
+				clipPath: { duration, ease: [0.16, 1, 0.3, 1], delay },
+				opacity: { duration: duration * 0.5, delay },
+			}}
+		>
+			{children}
+		</motion.div>
+	);
+}
+
+// ── LetterboxReveal – cinematic bars that slide apart ────────────────
+
+interface LetterboxRevealProps {
+	children: ReactNode;
+	barColor?: string;
+	className?: string;
+}
+
+/**
+ * Cinematic letterbox bars that slide open to reveal hero content.
+ */
+export function LetterboxReveal({
+	children,
+	barColor = "#0A1628",
+	className = "",
+}: LetterboxRevealProps) {
+	const shouldReduce = useReducedMotion();
+
+	if (shouldReduce) {
+		return <div className={className}>{children}</div>;
+	}
+
+	return (
+		<div className={`relative overflow-hidden ${className}`}>
+			{children}
+			{/* Top bar */}
+			<motion.div
+				className="pointer-events-none absolute inset-x-0 top-0 z-20"
+				style={{ backgroundColor: barColor, height: "50%" }}
+				initial={{ y: 0 }}
+				animate={{ y: "-100%" }}
+				transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
+			/>
+			{/* Bottom bar */}
+			<motion.div
+				className="pointer-events-none absolute inset-x-0 bottom-0 z-20"
+				style={{ backgroundColor: barColor, height: "50%" }}
+				initial={{ y: 0 }}
+				animate={{ y: "100%" }}
+				transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
+			/>
+		</div>
+	);
+}
+
+// ── SplitText – names enter from opposite sides ──────────────────────
+
+interface SplitTextProps {
+	left: ReactNode;
+	right: ReactNode;
+	separator?: ReactNode;
+	className?: string;
+	separatorClassName?: string;
+}
+
+/**
+ * Names enter from opposite sides with spring physics.
+ * The separator scales in between the two halves.
+ */
+export function SplitText({
+	left,
+	right,
+	separator = "·",
+	className = "",
+	separatorClassName = "",
+}: SplitTextProps) {
+	const shouldReduce = useReducedMotion();
+
+	if (shouldReduce) {
+		return (
+			<div className={className}>
+				<span>{left}</span>
+				<span className={separatorClassName}>{separator}</span>
+				<span>{right}</span>
+			</div>
+		);
+	}
+
+	return (
+		<div className={className}>
+			<motion.span
+				className="inline-block"
+				initial={{ opacity: 0, transform: "translateX(-40px)" }}
+				whileInView={{ opacity: 1, transform: "translateX(0)" }}
+				viewport={{ once: true }}
+				transition={{
+					type: "spring",
+					bounce: 0.2,
+					visualDuration: 0.7,
+					delay: 0.5,
+				}}
+			>
+				{left}
+			</motion.span>
+			<motion.span
+				className={`inline-block ${separatorClassName}`}
+				initial={{ opacity: 0, transform: "scale(0)" }}
+				whileInView={{ opacity: 1, transform: "scale(1)" }}
+				viewport={{ once: true }}
+				transition={{
+					type: "spring",
+					bounce: 0.3,
+					visualDuration: 0.5,
+					delay: 0.9,
+				}}
+			>
+				{separator}
+			</motion.span>
+			<motion.span
+				className="inline-block"
+				initial={{ opacity: 0, transform: "translateX(40px)" }}
+				whileInView={{ opacity: 1, transform: "translateX(0)" }}
+				viewport={{ once: true }}
+				transition={{
+					type: "spring",
+					bounce: 0.2,
+					visualDuration: 0.7,
+					delay: 0.6,
+				}}
+			>
+				{right}
+			</motion.span>
 		</div>
 	);
 }
