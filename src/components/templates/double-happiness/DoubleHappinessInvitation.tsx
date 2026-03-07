@@ -1,9 +1,18 @@
 import { Link } from "@tanstack/react-router";
 import { type CSSProperties, useId, useRef, useState } from "react";
-import { useScrollReveal } from "../../../lib/scroll-effects";
 import { AddToCalendarButton } from "../../ui/AddToCalendarButton";
 import { LoadingSpinner } from "../../ui/LoadingSpinner";
 import AngpowQRCode from "../AngpowQRCode";
+import {
+	DrawPath,
+	LetterboxReveal,
+	Parallax,
+	ParticleField,
+	Reveal,
+	Shimmer,
+	SplitText,
+	Stagger,
+} from "../animations";
 import BottomActionBar from "../BottomActionBar";
 import { CountdownWidget } from "../CountdownWidget";
 import { makeEditableProps, parseAttendance } from "../helpers";
@@ -46,6 +55,22 @@ const accentFont: CSSProperties = {
 	fontWeight: 700,
 };
 
+/* ─── Art Deco Divider ─── */
+
+function ArtDecoDivider({ className = "" }: { className?: string }) {
+	return (
+		<DrawPath
+			d="M0,30 L20,10 L40,30 L60,10 L80,30 L100,10 L120,30"
+			stroke={COLORS.accent}
+			strokeWidth={1.5}
+			width={160}
+			height={40}
+			duration={1.5}
+			className={`mx-auto ${className}`}
+		/>
+	);
+}
+
 /* ─── Helpers ─── */
 
 const formatDisplayDate = (rawDate: string, locale: string) => {
@@ -74,8 +99,6 @@ export default function DoubleHappinessInvitation({
 	onRsvpSubmit,
 	rsvpStatus,
 }: TemplateInvitationProps) {
-	useScrollReveal();
-
 	const consentDescriptionId = useId();
 	const data = content;
 	const editableProps = makeEditableProps(mode, onInlineEdit);
@@ -110,88 +133,103 @@ export default function DoubleHappinessInvitation({
 				onAiClick={onAiClick}
 				className="relative min-h-[100svh] overflow-hidden"
 			>
-				{/* Background media */}
-				<HeroMedia
-					heroImageUrl={data.hero.heroImageUrl}
-					avatarImageUrl={data.hero.avatarImageUrl}
-					animatedVideoUrl={data.hero.animatedVideoUrl}
-					mode={mode}
-				/>
-				{/* Warm espresso overlay */}
-				<div className="absolute inset-0 bg-gradient-to-b from-[#0A1628]/40 via-[#0A1628]/30 to-[#0A1628]/60" />
+				<LetterboxReveal barColor="#0A1628">
+					{/* Background media */}
+					<Parallax speed={0.3} className="absolute inset-0">
+						<HeroMedia
+							heroImageUrl={data.hero.heroImageUrl}
+							avatarImageUrl={data.hero.avatarImageUrl}
+							animatedVideoUrl={data.hero.animatedVideoUrl}
+							mode={mode}
+						/>
+					</Parallax>
+					{/* Warm espresso overlay */}
+					<div className="absolute inset-0 bg-gradient-to-b from-[#0A1628]/40 via-[#0A1628]/30 to-[#0A1628]/60" />
 
-				{/* 囍 watermark — subtle */}
-				<span
-					className="dh-xi-watermark absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-					aria-hidden="true"
-					style={accentFont}
-				>
-					囍
-				</span>
+					{/* Art Deco sunburst background */}
+					<div className="dh-sunburst absolute inset-0" aria-hidden="true" />
 
-				<div className="relative z-10 mx-auto flex min-h-[100svh] max-w-4xl flex-col items-center justify-center px-6 py-20 text-center">
-					<h1
-						data-reveal
-						style={{ ...accentFont, transitionDelay: "0.1s" }}
-						className="dm-reveal mt-8 text-4xl text-white sm:text-6xl"
-					>
-						<span {...editableProps("hero.partnerOneName", "inline-block")}>
-							{data.hero.partnerOneName}
-						</span>
+					{/* Copper dust particles */}
+					<ParticleField preset="copperDust" />
+
+					{/* 囍 watermark — subtle with shimmer */}
+					<Shimmer>
 						<span
-							className="dh-gold-shimmer mx-3 inline-block text-3xl sm:mx-4 sm:text-5xl"
-							style={{ color: COLORS.accent }}
+							className="dh-xi-watermark absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+							aria-hidden="true"
+							style={accentFont}
 						>
-							·
+							囍
 						</span>
-						<span {...editableProps("hero.partnerTwoName", "inline-block")}>
-							{data.hero.partnerTwoName}
-						</span>
-					</h1>
+					</Shimmer>
 
-					<p
-						data-reveal
-						{...editableProps(
-							"hero.tagline",
-							"dm-reveal mt-6 max-w-xl text-lg leading-relaxed",
-						)}
-						style={{
-							...headingFont,
-							color: COLORS.accentLight,
-							transitionDelay: "0.2s",
-						}}
-					>
-						{data.hero.tagline}
-					</p>
-
-					<div
-						data-reveal
-						className="dm-reveal mt-8 flex flex-wrap items-center justify-center gap-3 text-sm text-white/90"
-						style={{ transitionDelay: "0.3s" }}
-					>
-						<span
-							className="rounded-full border border-[rgba(201,169,110,0.3)] px-4 py-2"
-							lang="en"
-						>
-							{weddingDateEn}
-						</span>
-						<span className="rounded-full border border-[rgba(201,169,110,0.3)] px-4 py-2">
-							{data.venue.name}
-						</span>
-					</div>
-
-					{mode !== "editor" && (
-						<div className="mt-6">
-							<AddToCalendarButton
-								title={`${data.hero.partnerOneName} & ${data.hero.partnerTwoName}'s Wedding`}
-								date={data.hero.date}
-								venue={data.venue.name}
-								address={data.venue.address}
-								variant="dark"
+					<div className="relative z-10 mx-auto flex min-h-[100svh] max-w-4xl flex-col items-center justify-center px-6 py-20 text-center">
+						<h1 style={accentFont}>
+							<SplitText
+								left={
+									<span
+										{...editableProps("hero.partnerOneName", "inline-block")}
+									>
+										{data.hero.partnerOneName}
+									</span>
+								}
+								right={
+									<span
+										{...editableProps("hero.partnerTwoName", "inline-block")}
+									>
+										{data.hero.partnerTwoName}
+									</span>
+								}
+								separator="·"
+								className="mt-8 text-4xl text-white sm:text-6xl"
+								separatorClassName="dh-gold-shimmer mx-3 text-3xl sm:mx-4 sm:text-5xl"
 							/>
-						</div>
-					)}
-				</div>
+						</h1>
+
+						<Reveal direction="up" delay={0.8}>
+							<p
+								{...editableProps(
+									"hero.tagline",
+									"mt-6 max-w-xl text-lg leading-relaxed",
+								)}
+								style={{
+									...headingFont,
+									color: COLORS.accentLight,
+								}}
+							>
+								{data.hero.tagline}
+							</p>
+						</Reveal>
+
+						<Reveal direction="up" delay={1.0}>
+							<div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-sm text-white/90">
+								<span
+									className="rounded-full border border-[rgba(201,169,110,0.3)] px-4 py-2"
+									lang="en"
+								>
+									{weddingDateEn}
+								</span>
+								<span className="rounded-full border border-[rgba(201,169,110,0.3)] px-4 py-2">
+									{data.venue.name}
+								</span>
+							</div>
+						</Reveal>
+
+						{mode !== "editor" && (
+							<Reveal direction="up" delay={1.2}>
+								<div className="mt-6">
+									<AddToCalendarButton
+										title={`${data.hero.partnerOneName} & ${data.hero.partnerTwoName}'s Wedding`}
+										date={data.hero.date}
+										venue={data.venue.name}
+										address={data.venue.address}
+										variant="dark"
+									/>
+								</div>
+							</Reveal>
+						)}
+					</div>
+				</LetterboxReveal>
 			</SectionShell>
 
 			{/* ════════════════════════════════════════════
@@ -206,13 +244,15 @@ export default function DoubleHappinessInvitation({
 				className="dh-section-cream relative overflow-hidden px-6 py-16 sm:px-10"
 			>
 				<div className="mx-auto max-w-sm">
-					<div className="dh-divider-luxury mb-8 w-24 mx-auto" />
-					<CountdownWidget
-						targetDate={data.hero.date}
-						eventTime={data.schedule.events[0]?.time}
-						displayDate={data.hero.date}
-					/>
-					<div className="dh-divider-luxury mt-8 w-24 mx-auto" />
+					<ArtDecoDivider className="mb-8" />
+					<Reveal direction="up">
+						<CountdownWidget
+							targetDate={data.hero.date}
+							eventTime={data.schedule.events[0]?.time}
+							displayDate={data.hero.date}
+						/>
+					</Reveal>
+					<ArtDecoDivider className="mt-8" />
 				</div>
 			</SectionShell>
 
@@ -228,65 +268,64 @@ export default function DoubleHappinessInvitation({
 				className="dh-section-white relative overflow-hidden px-6 py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-3xl text-center">
-					<div className="dh-divider-luxury mb-10 w-40 mx-auto" />
+					<ArtDecoDivider className="mb-10" />
 
-					<p
-						data-reveal
-						className="dm-reveal text-sm tracking-[0.5em]"
-						style={{ ...headingFont, color: COLORS.primary }}
-					>
-						诚 挚 邀 请
-					</p>
-					<p
-						data-reveal
-						className="dm-reveal mt-1 text-xs tracking-[0.3em]"
-						style={{ color: COLORS.muted }}
-						lang="en"
-					>
-						INVITATION
-					</p>
-
-					<h2
-						data-reveal
-						{...editableProps(
-							"announcement.title",
-							"dm-reveal mt-6 text-4xl sm:text-5xl",
-						)}
-						style={{ ...accentFont, color: COLORS.dark }}
-					>
-						{data.announcement.title}
-					</h2>
-
-					<div className="mx-auto mt-8 max-w-2xl rounded-lg border border-[rgba(201,169,110,0.08)] bg-gradient-to-b from-white/50 to-transparent p-8">
-						<div
-							data-reveal
-							className="dm-reveal dh-blockquote mx-auto max-w-2xl text-left"
-						>
-							<p
-								{...editableProps(
-									"announcement.message",
-									"whitespace-pre-line text-base leading-relaxed",
-								)}
-								style={{ color: COLORS.dark }}
-							>
-								{data.announcement.message}
-							</p>
-						</div>
-
+					<Reveal direction="up">
 						<p
-							data-reveal
-							{...editableProps(
-								"announcement.formalText",
-								"dm-reveal mx-auto mt-6 max-w-2xl text-sm leading-relaxed",
-							)}
+							className="text-sm tracking-[0.5em]"
+							style={{ ...headingFont, color: COLORS.primary }}
+						>
+							诚 挚 邀 请
+						</p>
+						<p
+							className="mt-1 text-xs tracking-[0.3em]"
 							style={{ color: COLORS.muted }}
 							lang="en"
 						>
-							{data.announcement.formalText}
+							INVITATION
 						</p>
-					</div>
+					</Reveal>
 
-					<div className="dh-divider-luxury mt-10 w-40 mx-auto" />
+					<Reveal direction="up" delay={0.15}>
+						<h2
+							{...editableProps(
+								"announcement.title",
+								"mt-6 text-4xl sm:text-5xl",
+							)}
+							style={{ ...accentFont, color: COLORS.dark }}
+						>
+							{data.announcement.title}
+						</h2>
+					</Reveal>
+
+					<Reveal direction="up" delay={0.25}>
+						<div className="mx-auto mt-8 max-w-2xl rounded-lg border border-[rgba(201,169,110,0.08)] bg-gradient-to-b from-white/50 to-transparent p-8">
+							<div className="dh-blockquote mx-auto max-w-2xl text-left">
+								<p
+									{...editableProps(
+										"announcement.message",
+										"whitespace-pre-line text-base leading-relaxed",
+									)}
+									style={{ color: COLORS.dark }}
+								>
+									{data.announcement.message}
+								</p>
+							</div>
+
+							<p
+								{...editableProps(
+									"announcement.formalText",
+									"mx-auto mt-6 max-w-2xl text-sm leading-relaxed",
+								)}
+								style={{ color: COLORS.muted }}
+								lang="en"
+							>
+								{data.announcement.formalText}
+							</p>
+						</div>
+					</Reveal>
+
+					<ArtDecoDivider className="mt-10" />
 				</div>
 			</SectionShell>
 
@@ -311,9 +350,9 @@ export default function DoubleHappinessInvitation({
 						accentFont={accentFont}
 					/>
 
-					<div className="mt-14 grid gap-12 sm:grid-cols-2">
+					<Stagger interval={0.15} className="mt-14 grid gap-12 sm:grid-cols-2">
 						{/* Groom */}
-						<div data-reveal className="dm-reveal text-center">
+						<div className="text-center">
 							<div className="dh-portrait-frame mx-auto h-72 w-56 overflow-hidden">
 								<img
 									src={data.couple.partnerOne.photoUrl || PLACEHOLDER_PHOTO}
@@ -358,11 +397,7 @@ export default function DoubleHappinessInvitation({
 						</div>
 
 						{/* Bride */}
-						<div
-							data-reveal
-							className="dm-reveal text-center"
-							style={{ transitionDelay: "0.15s" }}
-						>
+						<div className="text-center">
 							<div className="dh-portrait-frame mx-auto h-72 w-56 overflow-hidden">
 								<img
 									src={data.couple.partnerTwo.photoUrl || PLACEHOLDER_PHOTO}
@@ -405,7 +440,7 @@ export default function DoubleHappinessInvitation({
 								{data.couple.partnerTwo.bio}
 							</p>
 						</div>
-					</div>
+					</Stagger>
 				</div>
 			</SectionShell>
 
@@ -434,17 +469,13 @@ export default function DoubleHappinessInvitation({
 						{/* Timeline line */}
 						<div className="dh-timeline-line absolute left-1 top-0 h-full sm:left-3" />
 
-						<div className="space-y-16">
+						<Stagger interval={0.12} className="space-y-16">
 							{data.story.milestones.map((milestone, index) => (
 								<article
 									key={`${milestone.date}-${index}`}
-									data-reveal
-									className="dm-reveal relative"
-									style={{
-										transitionDelay: `${Math.min(index * 0.1, 0.5)}s`,
-									}}
+									className="relative"
 								>
-									<div className="dh-timeline-dot-premium absolute -left-[2.45rem] top-5 sm:-left-[3.45rem]" />
+									<div className="dh-timeline-dot-premium dh-timeline-dot-pulse absolute -left-[2.45rem] top-5 sm:-left-[3.45rem]" />
 									<div className="dh-milestone-card">
 										<p
 											className="inline-block rounded-full px-3 py-1 text-xs uppercase tracking-[0.25em]"
@@ -473,7 +504,7 @@ export default function DoubleHappinessInvitation({
 									</div>
 								</article>
 							))}
-						</div>
+						</Stagger>
 					</div>
 				</div>
 			</SectionShell>
@@ -499,7 +530,7 @@ export default function DoubleHappinessInvitation({
 						accentFont={accentFont}
 					/>
 
-					<div className="mt-12" data-reveal>
+					<Reveal direction="scale" className="mt-12">
 						<SwiperGallery
 							photos={data.gallery.photos.map((p) => ({
 								url: p.url,
@@ -507,7 +538,7 @@ export default function DoubleHappinessInvitation({
 							}))}
 							primaryColor={COLORS.primary}
 						/>
-					</div>
+					</Reveal>
 				</div>
 			</SectionShell>
 
@@ -532,14 +563,9 @@ export default function DoubleHappinessInvitation({
 						accentFont={accentFont}
 					/>
 
-					<div className="mt-14 space-y-4">
+					<Stagger interval={0.1} className="mt-14 space-y-4">
 						{data.schedule.events.map((event, index) => (
-							<article
-								key={`${event.time}-${index}`}
-								data-reveal
-								className="dm-reveal dh-event-card"
-								style={{ transitionDelay: `${Math.min(index * 0.08, 0.5)}s` }}
-							>
+							<article key={`${event.time}-${index}`} className="dh-event-card">
 								<div className="dh-event-card-stripe" />
 								<div>
 									<p
@@ -577,7 +603,7 @@ export default function DoubleHappinessInvitation({
 								</div>
 							</article>
 						))}
-					</div>
+					</Stagger>
 				</div>
 			</SectionShell>
 
@@ -602,7 +628,7 @@ export default function DoubleHappinessInvitation({
 						accentFont={accentFont}
 					/>
 
-					<div data-reveal className="dm-reveal mx-auto mt-8 max-w-md">
+					<Reveal direction="up" className="mx-auto mt-8 max-w-md">
 						<div className="rounded-2xl border border-[rgba(201,169,110,0.15)] bg-white p-8 text-center shadow-sm">
 							<h3
 								{...editableProps("venue.name", "text-2xl")}
@@ -695,7 +721,7 @@ export default function DoubleHappinessInvitation({
 								</div>
 							) : null}
 						</div>
-					</div>
+					</Reveal>
 				</div>
 			</SectionShell>
 
@@ -712,7 +738,7 @@ export default function DoubleHappinessInvitation({
 			>
 				<div className="mx-auto grid max-w-5xl gap-10 lg:grid-cols-[0.9fr_auto_1.1fr]">
 					{/* Left: info */}
-					<div data-reveal className="dm-reveal space-y-5">
+					<Reveal direction="left" className="space-y-5">
 						<p
 							className="text-sm tracking-[0.5em]"
 							style={{
@@ -768,7 +794,7 @@ export default function DoubleHappinessInvitation({
 									: "This invitation is for one guest"}
 							</p>
 						</div>
-					</div>
+					</Reveal>
 
 					{/* Vertical champagne line */}
 					<div className="hidden self-stretch lg:block">
@@ -778,326 +804,332 @@ export default function DoubleHappinessInvitation({
 					{/* Right: form or confirmation */}
 					{rsvpData ? (
 						<div className="relative">
-							<div
-								data-reveal
-								className="dm-reveal flex items-center justify-center rounded-2xl border border-[rgba(201,169,110,0.15)] p-6 sm:p-8"
-								style={{
-									background: COLORS.cream,
-								}}
-							>
-								<RsvpConfirmation
-									{...rsvpData}
-									onEdit={() => setRsvpData(null)}
-								/>
-							</div>
+							<Reveal direction="right">
+								<div
+									className="flex items-center justify-center rounded-2xl border border-[rgba(201,169,110,0.15)] p-6 sm:p-8"
+									style={{
+										background: COLORS.cream,
+									}}
+								>
+									<RsvpConfirmation
+										{...rsvpData}
+										onEdit={() => setRsvpData(null)}
+									/>
+								</div>
+							</Reveal>
 						</div>
 					) : (
 						<div className="relative">
-							<form
-								data-reveal
-								className="dm-reveal rounded-2xl border border-[rgba(201,169,110,0.15)] p-6 sm:p-10"
-								style={{
-									background: COLORS.cream,
-								}}
-								onSubmit={async (event) => {
-									event.preventDefault();
-									if (!onRsvpSubmit || submittingRef.current) return;
-									submittingRef.current = true;
-									setIsSubmitting(true);
+							<Reveal direction="right">
+								<form
+									className="rounded-2xl border border-[rgba(201,169,110,0.15)] p-6 sm:p-10"
+									style={{
+										background: COLORS.cream,
+									}}
+									onSubmit={async (event) => {
+										event.preventDefault();
+										if (!onRsvpSubmit || submittingRef.current) return;
+										submittingRef.current = true;
+										setIsSubmitting(true);
 
-									const formData = new FormData(event.currentTarget);
-									const name = String(formData.get("name") ?? "").trim();
-									const email = String(formData.get("email") ?? "").trim();
-									const newErrors: Record<string, string> = {};
-									if (!name) {
-										newErrors.name = "Please enter your name";
-									}
-									if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-										newErrors.email = "Please enter a valid email address";
-									}
-									if (Object.keys(newErrors).length > 0) {
-										setErrors(newErrors);
-										submittingRef.current = false;
-										setIsSubmitting(false);
-										return;
-									}
-									setErrors({});
-									setSubmitError("");
-
-									const rawGuestCount = Number(formData.get("guestCount") ?? 1);
-									const guestCount = Number.isFinite(rawGuestCount)
-										? Math.min(Math.max(rawGuestCount, 1), maxGuests)
-										: 1;
-									const attendance = parseAttendance(
-										formData.get("attendance"),
-									);
-									const dietaryRequirements = String(
-										formData.get("dietary") ?? "",
-									);
-
-									try {
-										await onRsvpSubmit({
-											name,
-											attendance,
-											guestCount,
-											dietaryRequirements,
-											message: String(formData.get("message") ?? ""),
-											email,
-										});
+										const formData = new FormData(event.currentTarget);
+										const name = String(formData.get("name") ?? "").trim();
+										const email = String(formData.get("email") ?? "").trim();
+										const newErrors: Record<string, string> = {};
+										if (!name) {
+											newErrors.name = "Please enter your name";
+										}
+										if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+											newErrors.email = "Please enter a valid email address";
+										}
+										if (Object.keys(newErrors).length > 0) {
+											setErrors(newErrors);
+											submittingRef.current = false;
+											setIsSubmitting(false);
+											return;
+										}
+										setErrors({});
 										setSubmitError("");
-										setRsvpData({
-											name,
-											attendance,
-											guestCount,
-											dietaryRequirements,
-										});
-									} catch {
-										setSubmitError("Something went wrong. Please try again.");
-									} finally {
-										submittingRef.current = false;
-										setIsSubmitting(false);
-									}
-								}}
-							>
-								<div className="grid gap-5">
-									<label
-										className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
-										style={{ color: COLORS.muted }}
-									>
-										<span lang="en">Name</span>
-										<input
-											name="name"
-											placeholder="Your name"
-											autoComplete="name"
-											required
-											maxLength={100}
-											aria-required="true"
-											aria-invalid={!!errors.name}
-											className="rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
-											style={{
-												borderColor: "rgba(201,169,110,0.3)",
-												color: COLORS.dark,
-											}}
-											onBlur={(e) => {
-												if (!e.target.value.trim()) {
-													setErrors((prev) => ({
-														...prev,
-														name: "Please enter your name",
-													}));
-												}
-											}}
-											onChange={() =>
-												setErrors((prev) => {
-													const { name: _, ...rest } = prev;
-													return rest;
-												})
-											}
-										/>
-										{errors.name && (
-											<p className="mt-1 text-xs text-red-500" role="alert">
-												{errors.name}
-											</p>
-										)}
-									</label>
-									<label
-										className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
-										style={{ color: COLORS.muted }}
-									>
-										<span lang="en">Email</span>
-										<input
-											name="email"
-											type="email"
-											placeholder="your@email.com"
-											autoComplete="email"
-											spellCheck={false}
-											aria-invalid={!!errors.email}
-											className="rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
-											style={{
-												borderColor: "rgba(201,169,110,0.3)",
-												color: COLORS.dark,
-											}}
-											onBlur={(e) => {
-												const v = e.target.value.trim();
-												if (v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
-													setErrors((prev) => ({
-														...prev,
-														email: "Please enter a valid email address",
-													}));
-												}
-											}}
-											onChange={() =>
-												setErrors((prev) => {
-													const { email: _, ...rest } = prev;
-													return rest;
-												})
-											}
-										/>
-										{errors.email && (
-											<p className="mt-1 text-xs text-red-500" role="alert">
-												{errors.email}
-											</p>
-										)}
-									</label>
-									<label
-										className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
-										style={{ color: COLORS.muted }}
-									>
-										<span lang="en">Attendance</span>
-										<select
-											name="attendance"
-											defaultValue="attending"
-											className="rounded-lg border bg-white px-4 py-3 text-sm"
-											style={{
-												borderColor: "rgba(201,169,110,0.3)",
-												color: COLORS.dark,
-											}}
+
+										const rawGuestCount = Number(
+											formData.get("guestCount") ?? 1,
+										);
+										const guestCount = Number.isFinite(rawGuestCount)
+											? Math.min(Math.max(rawGuestCount, 1), maxGuests)
+											: 1;
+										const attendance = parseAttendance(
+											formData.get("attendance"),
+										);
+										const dietaryRequirements = String(
+											formData.get("dietary") ?? "",
+										);
+
+										try {
+											await onRsvpSubmit({
+												name,
+												attendance,
+												guestCount,
+												dietaryRequirements,
+												message: String(formData.get("message") ?? ""),
+												email,
+											});
+											setSubmitError("");
+											setRsvpData({
+												name,
+												attendance,
+												guestCount,
+												dietaryRequirements,
+											});
+										} catch {
+											setSubmitError("Something went wrong. Please try again.");
+										} finally {
+											submittingRef.current = false;
+											setIsSubmitting(false);
+										}
+									}}
+								>
+									<div className="grid gap-5">
+										<label
+											className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
+											style={{ color: COLORS.muted }}
 										>
-											<option value="attending">Attending</option>
-											<option value="not_attending">Not Attending</option>
-											<option value="undecided">Undecided</option>
-										</select>
-									</label>
-									<label
-										className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
-										style={{ color: COLORS.muted }}
-									>
-										<span lang="en">Guest Count (Max: {maxGuests})</span>
-										<input
-											name="guestCount"
-											type="number"
-											min={1}
-											max={maxGuests}
-											defaultValue={1}
-											inputMode="numeric"
-											className="rounded-lg border bg-white px-4 py-3 text-sm"
-											style={{
-												borderColor: "rgba(201,169,110,0.3)",
-												color: COLORS.dark,
-											}}
-										/>
-									</label>
-									<label
-										className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
-										style={{ color: COLORS.muted }}
-									>
-										<span>
-											<span lang="en">Dietary Requirements</span>{" "}
-											<span lang="zh-Hans">/ 饮食要求</span>
-										</span>
-										<select
-											name="dietary"
-											defaultValue=""
-											className="rounded-lg border bg-white px-4 py-3 text-sm"
-											style={{
-												borderColor: "rgba(201,169,110,0.3)",
-												color: COLORS.dark,
-											}}
+											<span lang="en">Name</span>
+											<input
+												name="name"
+												placeholder="Your name"
+												autoComplete="name"
+												required
+												maxLength={100}
+												aria-required="true"
+												aria-invalid={!!errors.name}
+												className="rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
+												style={{
+													borderColor: "rgba(201,169,110,0.3)",
+													color: COLORS.dark,
+												}}
+												onBlur={(e) => {
+													if (!e.target.value.trim()) {
+														setErrors((prev) => ({
+															...prev,
+															name: "Please enter your name",
+														}));
+													}
+												}}
+												onChange={() =>
+													setErrors((prev) => {
+														const { name: _, ...rest } = prev;
+														return rest;
+													})
+												}
+											/>
+											{errors.name && (
+												<p className="mt-1 text-xs text-red-500" role="alert">
+													{errors.name}
+												</p>
+											)}
+										</label>
+										<label
+											className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
+											style={{ color: COLORS.muted }}
 										>
-											<option value="">No restrictions</option>
-											<option value="halal">Halal</option>
-											<option value="vegetarian">Vegetarian</option>
-											<option value="no-beef">No Beef</option>
-											<option value="no-seafood">No Seafood</option>
-											<option value="other">Other (specify in message)</option>
-										</select>
-									</label>
-									<label
-										className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
-										style={{ color: COLORS.muted }}
+											<span lang="en">Email</span>
+											<input
+												name="email"
+												type="email"
+												placeholder="your@email.com"
+												autoComplete="email"
+												spellCheck={false}
+												aria-invalid={!!errors.email}
+												className="rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
+												style={{
+													borderColor: "rgba(201,169,110,0.3)",
+													color: COLORS.dark,
+												}}
+												onBlur={(e) => {
+													const v = e.target.value.trim();
+													if (v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
+														setErrors((prev) => ({
+															...prev,
+															email: "Please enter a valid email address",
+														}));
+													}
+												}}
+												onChange={() =>
+													setErrors((prev) => {
+														const { email: _, ...rest } = prev;
+														return rest;
+													})
+												}
+											/>
+											{errors.email && (
+												<p className="mt-1 text-xs text-red-500" role="alert">
+													{errors.email}
+												</p>
+											)}
+										</label>
+										<label
+											className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
+											style={{ color: COLORS.muted }}
+										>
+											<span lang="en">Attendance</span>
+											<select
+												name="attendance"
+												defaultValue="attending"
+												className="rounded-lg border bg-white px-4 py-3 text-sm"
+												style={{
+													borderColor: "rgba(201,169,110,0.3)",
+													color: COLORS.dark,
+												}}
+											>
+												<option value="attending">Attending</option>
+												<option value="not_attending">Not Attending</option>
+												<option value="undecided">Undecided</option>
+											</select>
+										</label>
+										<label
+											className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
+											style={{ color: COLORS.muted }}
+										>
+											<span lang="en">Guest Count (Max: {maxGuests})</span>
+											<input
+												name="guestCount"
+												type="number"
+												min={1}
+												max={maxGuests}
+												defaultValue={1}
+												inputMode="numeric"
+												className="rounded-lg border bg-white px-4 py-3 text-sm"
+												style={{
+													borderColor: "rgba(201,169,110,0.3)",
+													color: COLORS.dark,
+												}}
+											/>
+										</label>
+										<label
+											className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
+											style={{ color: COLORS.muted }}
+										>
+											<span>
+												<span lang="en">Dietary Requirements</span>{" "}
+												<span lang="zh-Hans">/ 饮食要求</span>
+											</span>
+											<select
+												name="dietary"
+												defaultValue=""
+												className="rounded-lg border bg-white px-4 py-3 text-sm"
+												style={{
+													borderColor: "rgba(201,169,110,0.3)",
+													color: COLORS.dark,
+												}}
+											>
+												<option value="">No restrictions</option>
+												<option value="halal">Halal</option>
+												<option value="vegetarian">Vegetarian</option>
+												<option value="no-beef">No Beef</option>
+												<option value="no-seafood">No Seafood</option>
+												<option value="other">
+													Other (specify in message)
+												</option>
+											</select>
+										</label>
+										<label
+											className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
+											style={{ color: COLORS.muted }}
+										>
+											<span lang="en">Message</span>
+											<textarea
+												name="message"
+												placeholder="Send your wishes to the couple"
+												autoComplete="off"
+												maxLength={500}
+												className="min-h-24 rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
+												style={{
+													borderColor: "rgba(201,169,110,0.3)",
+													color: COLORS.dark,
+												}}
+											/>
+										</label>
+										<label className="relative mt-2 flex min-h-[44px] cursor-pointer items-start gap-3">
+											<input
+												type="checkbox"
+												name="consent"
+												required
+												aria-describedby={consentDescriptionId}
+												className="mt-0.5 h-4 w-4 rounded border-2 accent-[#E8764B]"
+												style={{
+													borderColor: "rgba(201,169,110,0.3)",
+												}}
+											/>
+											<span
+												id={consentDescriptionId}
+												className="text-xs leading-relaxed"
+												style={{ color: COLORS.muted }}
+												lang="en"
+											>
+												I consent to the collection of my personal data as
+												described in the{" "}
+												<Link
+													to="/privacy"
+													className="underline hover:no-underline"
+													style={{ color: COLORS.primary }}
+													target="_blank"
+													rel="noopener noreferrer"
+												>
+													Privacy Policy
+												</Link>
+											</span>
+										</label>
+									</div>
+
+									{rsvpStatus ? (
+										<output
+											className="mt-4 block text-sm"
+											style={{ color: COLORS.muted }}
+											aria-live="polite"
+										>
+											{rsvpStatus}
+										</output>
+									) : null}
+
+									<button
+										type="submit"
+										disabled={isSubmitting}
+										className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-3.5 text-xs font-semibold uppercase tracking-[0.3em] text-white shadow-sm transition-all hover:shadow-lg active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
+										style={{
+											background: "linear-gradient(135deg, #E8764B, #C45A30)",
+											boxShadow: isSubmitting
+												? undefined
+												: "0 4px 12px rgba(232,118,75,0.2)",
+										}}
 									>
-										<span lang="en">Message</span>
-										<textarea
-											name="message"
-											placeholder="Send your wishes to the couple"
-											autoComplete="off"
-											maxLength={500}
-											className="min-h-24 rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
-											style={{
-												borderColor: "rgba(201,169,110,0.3)",
-												color: COLORS.dark,
-											}}
-										/>
-									</label>
-									<label className="relative mt-2 flex min-h-[44px] cursor-pointer items-start gap-3">
-										<input
-											type="checkbox"
-											name="consent"
-											required
-											aria-describedby={consentDescriptionId}
-											className="mt-0.5 h-4 w-4 rounded border-2 accent-[#E8764B]"
-											style={{
-												borderColor: "rgba(201,169,110,0.3)",
-											}}
-										/>
-										<span
-											id={consentDescriptionId}
-											className="text-xs leading-relaxed"
+										{isSubmitting && <LoadingSpinner size="sm" />}
+										{isSubmitting ? "Sending..." : "Send RSVP"}
+									</button>
+
+									{submitError && (
+										<p
+											className="mt-3 text-center text-sm"
+											style={{ color: "#c44" }}
+											role="alert"
+										>
+											{submitError}
+										</p>
+									)}
+
+									{data.couple?.contactPhone && (
+										<a
+											href={`https://wa.me/${data.couple.contactPhone}?text=${encodeURIComponent("Hi, I would like to RSVP for your wedding!")}`}
+											target="_blank"
+											rel="noopener noreferrer"
+											className="mt-3 block text-center text-sm underline"
 											style={{ color: COLORS.muted }}
 											lang="en"
 										>
-											I consent to the collection of my personal data as
-											described in the{" "}
-											<Link
-												to="/privacy"
-												className="underline hover:no-underline"
-												style={{ color: COLORS.primary }}
-												target="_blank"
-												rel="noopener noreferrer"
-											>
-												Privacy Policy
-											</Link>
-										</span>
-									</label>
-								</div>
-
-								{rsvpStatus ? (
-									<output
-										className="mt-4 block text-sm"
-										style={{ color: COLORS.muted }}
-										aria-live="polite"
-									>
-										{rsvpStatus}
-									</output>
-								) : null}
-
-								<button
-									type="submit"
-									disabled={isSubmitting}
-									className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-3.5 text-xs font-semibold uppercase tracking-[0.3em] text-white shadow-sm transition-all hover:shadow-lg active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
-									style={{
-										background: "linear-gradient(135deg, #E8764B, #C45A30)",
-										boxShadow: isSubmitting
-											? undefined
-											: "0 4px 12px rgba(232,118,75,0.2)",
-									}}
-								>
-									{isSubmitting && <LoadingSpinner size="sm" />}
-									{isSubmitting ? "Sending..." : "Send RSVP"}
-								</button>
-
-								{submitError && (
-									<p
-										className="mt-3 text-center text-sm"
-										style={{ color: "#c44" }}
-										role="alert"
-									>
-										{submitError}
-									</p>
-								)}
-
-								{data.couple?.contactPhone && (
-									<a
-										href={`https://wa.me/${data.couple.contactPhone}?text=${encodeURIComponent("Hi, I would like to RSVP for your wedding!")}`}
-										target="_blank"
-										rel="noopener noreferrer"
-										className="mt-3 block text-center text-sm underline"
-										style={{ color: COLORS.muted }}
-										lang="en"
-									>
-										Or RSVP via WhatsApp
-									</a>
-								)}
-							</form>
+											Or RSVP via WhatsApp
+										</a>
+									)}
+								</form>
+							</Reveal>
 						</div>
 					)}
 				</div>
@@ -1124,13 +1156,13 @@ export default function DoubleHappinessInvitation({
 							headingFont={headingFont}
 							accentFont={accentFont}
 						/>
-						<div data-reveal className="dm-reveal mt-8">
+						<Reveal direction="up" className="mt-8">
 							<AngpowQRCode
 								paymentUrl={data.gift.paymentUrl}
 								paymentMethod={data.gift.paymentMethod}
 								recipientName={data.gift.recipientName}
 							/>
-						</div>
+						</Reveal>
 					</div>
 				</SectionShell>
 			)}
@@ -1147,36 +1179,41 @@ export default function DoubleHappinessInvitation({
 				className="dh-section-cream relative overflow-hidden px-6 pb-20 pt-16 text-center sm:px-10"
 			>
 				<div className="mx-auto max-w-3xl">
-					<div className="dh-divider-luxury mb-10 w-24 mx-auto" />
+					<ArtDecoDivider className="mb-10" />
 
-					<p
-						data-reveal
-						className="dm-reveal dh-gold-shimmer mt-8 text-6xl"
-						style={accentFont}
-						aria-hidden="true"
-					>
-						囍
-					</p>
+					<Reveal direction="blur">
+						<Shimmer>
+							<p
+								className="dh-gold-shimmer mt-8 text-6xl"
+								style={accentFont}
+								aria-hidden="true"
+							>
+								囍
+							</p>
+						</Shimmer>
+					</Reveal>
 
-					<p
-						data-reveal
-						{...editableProps(
-							"footer.message",
-							"dm-reveal mt-6 whitespace-pre-line text-lg leading-relaxed",
-						)}
-						style={{ ...headingFont, color: COLORS.dark }}
-					>
-						{data.footer.message}
-					</p>
+					<Reveal direction="up" delay={0.2}>
+						<p
+							{...editableProps(
+								"footer.message",
+								"mt-6 whitespace-pre-line text-lg leading-relaxed",
+							)}
+							style={{ ...headingFont, color: COLORS.dark }}
+						>
+							{data.footer.message}
+						</p>
+					</Reveal>
 
 					{data.footer.socialLinks?.hashtag ? (
-						<p
-							data-reveal
-							className="dm-reveal mt-5 text-xs uppercase tracking-[0.28em]"
-							style={{ color: COLORS.muted }}
-						>
-							{data.footer.socialLinks.hashtag}
-						</p>
+						<Reveal direction="up" delay={0.3}>
+							<p
+								className="mt-5 text-xs uppercase tracking-[0.28em]"
+								style={{ color: COLORS.muted }}
+							>
+								{data.footer.socialLinks.hashtag}
+							</p>
+						</Reveal>
 					) : null}
 				</div>
 			</SectionShell>

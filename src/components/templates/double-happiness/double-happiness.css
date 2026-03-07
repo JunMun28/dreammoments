@@ -322,6 +322,30 @@
 	}
 }
 
+/* ── Art Deco sunburst background ── */
+.dh-sunburst {
+	background: repeating-conic-gradient(
+		rgba(201, 169, 110, 0.03) 0deg 10deg,
+		transparent 10deg 20deg
+	);
+	pointer-events: none;
+}
+
+/* ── Timeline dot spring pulse ── */
+.dh-timeline-dot-pulse {
+	animation: dh-dot-pulse 2s ease-in-out infinite;
+}
+
+@keyframes dh-dot-pulse {
+	0%,
+	100% {
+		box-shadow: 0 0 0 3px rgba(201, 169, 110, 0.1);
+	}
+	50% {
+		box-shadow: 0 0 0 6px rgba(201, 169, 110, 0.2);
+	}
+}
+
 /* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
 	.double-happiness .dm-reveal {
