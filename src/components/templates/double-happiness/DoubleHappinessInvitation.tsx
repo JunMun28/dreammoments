@@ -1006,18 +1006,26 @@ export default function DoubleHappinessInvitation({
 										className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
 										style={{ color: COLORS.muted }}
 									>
-										<span lang="en">Dietary Requirements</span>
-										<input
+										<span>
+											<span lang="en">Dietary Requirements</span>{" "}
+											<span lang="zh-Hans">/ 饮食要求</span>
+										</span>
+										<select
 											name="dietary"
-											placeholder="e.g., Vegetarian, no pork"
-											autoComplete="off"
-											maxLength={200}
-											className="rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
+											defaultValue=""
+											className="rounded-lg border bg-white px-4 py-3 text-sm"
 											style={{
 												borderColor: "rgba(197,168,128,0.3)",
 												color: COLORS.dark,
 											}}
-										/>
+										>
+											<option value="">No restrictions</option>
+											<option value="halal">Halal</option>
+											<option value="vegetarian">Vegetarian</option>
+											<option value="no-beef">No Beef</option>
+											<option value="no-seafood">No Seafood</option>
+											<option value="other">Other (specify in message)</option>
+										</select>
 									</label>
 									<label
 										className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
@@ -1101,6 +1109,19 @@ export default function DoubleHappinessInvitation({
 									>
 										{submitError}
 									</p>
+								)}
+
+								{data.couple?.contactPhone && (
+									<a
+										href={`https://wa.me/${data.couple.contactPhone}?text=${encodeURIComponent("Hi, I would like to RSVP for your wedding!")}`}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="mt-3 block text-center text-sm underline"
+										style={{ color: COLORS.muted }}
+										lang="en"
+									>
+										Or RSVP via WhatsApp
+									</a>
 								)}
 							</form>
 						</div>

@@ -42,6 +42,7 @@ export interface InvitationContent {
 			bio: string;
 			photoUrl?: string;
 		};
+		contactPhone?: string;
 	};
 	story: {
 		milestones: Array<{
