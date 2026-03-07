@@ -162,6 +162,7 @@ export function buildSampleContent(templateId: string): InvitationContent {
 			bio: "浪漫细腻，喜欢花艺与烘焙。\n相信每一天都值得用心经营。",
 			photoUrl: "/photos/bride-portrait.jpg",
 		};
+		base.couple.contactPhone = "60123456789";
 		base.story.milestones = [
 			{
 				date: "2020",
