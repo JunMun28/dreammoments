@@ -1,0 +1,322 @@
+/* ─── Classical Chinese Template (经典中式) ─── */
+
+/* Root wrapper scopes all template styles */
+.classical-chinese {
+	--t-primary: #c41e3a;
+	--t-secondary: #1a0f0a;
+	--t-accent: #d4a843;
+	--t-bg: #fff8ef;
+	--t-text: #1a0f0a;
+	--t-muted: #8a7f7a;
+	--t-bg-alt: #ffffff;
+	--t-accent-light: #f5e6c8;
+	--t-accent-deep: #b8922f;
+	--t-accent-glow: rgba(212, 168, 67, 0.15);
+	max-width: 430px;
+	margin-left: auto;
+	margin-right: auto;
+	overflow-x: hidden;
+}
+
+@media (min-width: 431px) {
+	.classical-chinese {
+		box-shadow: 0 0 40px rgba(0, 0, 0, 0.08);
+	}
+}
+
+/* ── Off-screen rendering optimization ── */
+.classical-chinese section {
+	content-visibility: auto;
+	contain-intrinsic-size: 0 500px;
+}
+.classical-chinese section:first-of-type {
+	content-visibility: visible;
+}
+
+/* ── Section backgrounds ── */
+.cc-section-ivory {
+	background-color: var(--t-bg);
+}
+.cc-section-white {
+	background-color: #ffffff;
+}
+.cc-section-lacquer {
+	background-color: var(--t-secondary);
+	color: #fff8ef;
+}
+
+/* ── 囍 reveal animation ── */
+.cc-xi-reveal {
+	animation: cc-xi-reveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes cc-xi-reveal {
+	0% {
+		opacity: 0;
+		transform: scale(0.5);
+	}
+	100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+/* ── 囍 watermark ── */
+.cc-xi-watermark {
+	font-size: 12rem;
+	color: rgba(196, 30, 58, 0.06);
+	pointer-events: none;
+	user-select: none;
+}
+
+/* ── Cloud border decorative element ── */
+.cc-cloud-border {
+	height: 24px;
+	background:
+		repeating-linear-gradient(
+			90deg,
+			transparent 0px,
+			transparent 10px,
+			rgba(212, 168, 67, 0.15) 10px,
+			rgba(212, 168, 67, 0.15) 12px,
+			transparent 12px,
+			transparent 22px
+		),
+		radial-gradient(
+			ellipse 20px 16px at 20px 0px,
+			rgba(212, 168, 67, 0.1) 50%,
+			transparent 51%
+		);
+	background-size: 40px 24px;
+	background-repeat: repeat-x;
+	background-position: center;
+}
+
+/* ── Gold shimmer effect ── */
+.cc-gold-shimmer {
+	background: linear-gradient(
+		110deg,
+		var(--t-accent) 0%,
+		var(--t-accent-light) 45%,
+		#fff 50%,
+		var(--t-accent-light) 55%,
+		var(--t-accent) 100%
+	);
+	background-size: 200% 100%;
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+	color: transparent;
+	animation: cc-gold-shimmer 3s ease-in-out infinite;
+}
+
+@keyframes cc-gold-shimmer {
+	0%,
+	100% {
+		background-position: 200% center;
+	}
+	50% {
+		background-position: 0% center;
+	}
+}
+
+/* ── Luxury thin gradient divider ── */
+.cc-divider-luxury {
+	height: 1px;
+	background: linear-gradient(
+		90deg,
+		transparent,
+		rgba(212, 168, 67, 0.4),
+		rgba(196, 30, 58, 0.3),
+		rgba(212, 168, 67, 0.4),
+		transparent
+	);
+	margin: 0 auto;
+}
+
+/* ── Blockquote accent (announcement section) ── */
+.cc-blockquote {
+	border-left: 3px solid var(--t-accent);
+	padding-left: 1.5rem;
+}
+
+/* ── Timeline vertical line ── */
+.cc-timeline-line {
+	width: 2px;
+	background: linear-gradient(
+		180deg,
+		var(--t-accent),
+		var(--t-primary),
+		var(--t-accent)
+	);
+}
+
+/* ── Timeline dot ── */
+.cc-timeline-dot {
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+	background-color: var(--t-primary);
+	border: 2px solid var(--t-accent);
+	box-shadow: 0 0 0 3px rgba(212, 168, 67, 0.1);
+}
+
+/* ── Traditional portrait frame (gold double-line border) ── */
+.cc-portrait-frame {
+	position: relative;
+	border-radius: 4px;
+	border: 2px solid var(--t-accent);
+	outline: 2px solid rgba(212, 168, 67, 0.3);
+	outline-offset: 4px;
+	box-shadow: 0 4px 16px rgba(26, 15, 10, 0.08);
+}
+
+/* ── Milestone card ── */
+.cc-milestone-card {
+	background: #ffffff;
+	border: 1px solid rgba(212, 168, 67, 0.2);
+	border-radius: 12px;
+	padding: 1.25rem;
+	box-shadow: 0 2px 8px rgba(26, 15, 10, 0.05);
+}
+
+/* ── Schedule event card ── */
+.cc-event-card {
+	background: #ffffff;
+	border: 1px solid rgba(212, 168, 67, 0.2);
+	border-radius: 12px;
+	padding: 1.25rem;
+	box-shadow: 0 4px 16px rgba(26, 15, 10, 0.06);
+	display: flex;
+	gap: 1rem;
+}
+
+.cc-event-card-stripe {
+	width: 3px;
+	flex-shrink: 0;
+	border-radius: 9999px;
+	background: linear-gradient(180deg, var(--t-primary), var(--t-accent));
+}
+
+/* ── RSVP form focus indicators ── */
+.classical-chinese input:focus-visible,
+.classical-chinese select:focus-visible,
+.classical-chinese textarea:focus-visible {
+	outline: 2px solid #ffffff;
+	outline-offset: 2px;
+	box-shadow: 0 0 0 4px rgba(196, 30, 58, 0.4);
+}
+
+/* ── Scroll reveal animation ── */
+.classical-chinese .dm-reveal {
+	opacity: 0;
+	transform: translate3d(0, 40px, 0);
+	will-change: opacity, transform;
+	transition:
+		opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+		transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.classical-chinese .dm-reveal.is-visible {
+	opacity: 1;
+	transform: translate3d(0, 0, 0);
+	will-change: auto;
+}
+
+.classical-chinese .dm-reveal.is-hidden {
+	opacity: 0;
+	transform: translate3d(0, 40px, 0);
+}
+
+/* ── Countdown styling ── */
+.classical-chinese .countdown-widget {
+	text-align: center;
+	padding: 2rem 1.5rem;
+}
+
+.classical-chinese .countdown-date {
+	font-size: 0.875rem;
+	letter-spacing: 0.25em;
+	color: var(--t-muted);
+	margin-bottom: 1.5rem;
+}
+
+.classical-chinese .countdown-date-zh {
+	font-size: 1rem;
+	letter-spacing: 0.3em;
+	color: var(--t-text);
+	margin-bottom: 0.5rem;
+}
+
+.classical-chinese .countdown-units {
+	display: flex;
+	justify-content: center;
+	align-items: flex-start;
+	gap: 0.25rem;
+}
+
+.classical-chinese .countdown-unit-wrapper {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.25rem;
+}
+
+.classical-chinese .countdown-unit {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	min-width: 4.5rem;
+}
+
+.classical-chinese .countdown-value {
+	font-size: 2.5rem;
+	font-weight: 700;
+	line-height: 1.1;
+	color: var(--t-text);
+	font-variant-numeric: tabular-nums;
+}
+
+.classical-chinese .countdown-label {
+	font-size: 0.5625rem;
+	text-transform: uppercase;
+	letter-spacing: 0.3em;
+	color: var(--t-muted);
+	margin-top: 0.5rem;
+}
+
+.classical-chinese .countdown-separator {
+	font-size: 1.75rem;
+	color: var(--t-accent);
+	font-weight: 300;
+	margin-top: 0.25rem;
+}
+
+.classical-chinese .countdown-message {
+	font-size: 1.5rem;
+	font-weight: 700;
+	color: var(--t-text);
+}
+
+.classical-chinese .countdown-timezone {
+	font-size: 0.5625rem;
+	text-transform: uppercase;
+	letter-spacing: 0.2em;
+	color: var(--t-muted);
+	margin-top: 1.25rem;
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+	.classical-chinese .dm-reveal {
+		/* biome-ignore lint/complexity/noImportantStyles: required for a11y override */
+		opacity: 1 !important;
+		/* biome-ignore lint/complexity/noImportantStyles: required for a11y override */
+		transform: none !important;
+	}
+	.classical-chinese * {
+		/* biome-ignore lint/complexity/noImportantStyles: required for a11y override */
+		animation-duration: 0.01ms !important;
+		/* biome-ignore lint/complexity/noImportantStyles: required for a11y override */
+		transition-duration: 0.01ms !important;
+	}
+}

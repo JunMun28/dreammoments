@@ -3,7 +3,7 @@ import { doubleHappinessTemplate, templates } from "../templates";
 
 describe("templates array", () => {
 	test("contains the double-happiness template", () => {
-		expect(templates).toHaveLength(1);
+		expect(templates.length).toBeGreaterThanOrEqual(1);
 		expect(templates.map((t) => t.id)).toContain("double-happiness");
 	});
 

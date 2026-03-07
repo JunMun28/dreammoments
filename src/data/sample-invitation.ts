@@ -235,6 +235,98 @@ export function buildSampleContent(templateId: string): InvitationContent {
 			hashtag: "#嘉伟诗琪大婚",
 		};
 	}
+	if (templateId === "classical-chinese") {
+		base.hero.partnerOneName = "张明辉";
+		base.hero.partnerTwoName = "王婉仪";
+		base.hero.tagline = "百年好合 · 永结同心";
+		base.hero.heroImageUrl = "/photos/hero-couple.jpg";
+		base.announcement.title = "谨定于良辰吉日";
+		base.announcement.message =
+			"谨择吉日，诚邀亲友，共证良缘，同贺新禧。\n愿得一心人，白首不相离。\n恭请光临，共襄盛举。";
+		base.announcement.formalText =
+			"We respectfully invite you to witness and celebrate our union on this auspicious day.";
+		base.couple.partnerOne = {
+			fullName: "张明辉",
+			bio: "温文尔雅，精于书画，志在四方。\n以诗书为伴，以山水为友。",
+			photoUrl: "/photos/groom-portrait.jpg",
+		};
+		base.couple.partnerTwo = {
+			fullName: "王婉仪",
+			bio: "端庄贤淑，才华横溢，琴棋书画皆通。\n以花为媒，以茶会友。",
+			photoUrl: "/photos/bride-portrait.jpg",
+		};
+		base.couple.contactPhone = "60123456789";
+		base.story.milestones = [
+			{
+				date: "2019",
+				title: "初遇 · First Encounter",
+				description:
+					"月下花前初相见，一顾倾城再顾倾国。\n缘分天定，那年春日的茶会上，目光交汇的瞬间，便已心动。",
+				photoUrl: "/photos/candid-laugh.jpg",
+			},
+			{
+				date: "2021",
+				title: "情深 · Growing Bond",
+				description:
+					"执子之手，共赏四季风华。\n琴瑟和鸣，诗书唱和，日子平淡却温馨如画。",
+				photoUrl: "/photos/couple-walking.jpg",
+			},
+			{
+				date: "2024",
+				title: "盟誓 · The Vow",
+				description:
+					"愿得一心人，白首不相离。\n以天地为证，以日月为鉴，许下一生一世的承诺。",
+				photoUrl: "/photos/ceremony-moment.jpg",
+			},
+			{
+				date: "2025",
+				title: "佳期 · The Day",
+				description: "龙凤呈祥，百年好合。\n良辰吉日，共结连理，开启永恒篇章。",
+				photoUrl: "/photos/couple-sunset.jpg",
+			},
+		];
+		base.gallery.photos = [
+			{ url: "/photos/hero-couple.jpg", caption: "琴瑟和鸣" },
+			{ url: "/photos/couple-walking.jpg", caption: "执手偕行" },
+			{ url: "/photos/candid-laugh.jpg", caption: "相视而笑" },
+			{ url: "/photos/garden-portrait.jpg", caption: "花好月圆" },
+			{ url: "/photos/couple-sunset.jpg", caption: "夕阳相伴" },
+			{ url: "/photos/reception-toast.jpg", caption: "举杯同庆" },
+		];
+		base.schedule.events = [
+			{
+				time: "5:00 PM",
+				title: "迎宾入席",
+				description: "Welcome & Seating",
+			},
+			{
+				time: "5:30 PM",
+				title: "证婚大典",
+				description: "Wedding Ceremony",
+			},
+			{
+				time: "6:00 PM",
+				title: "合影留念",
+				description: "Group Photos",
+			},
+			{
+				time: "7:00 PM",
+				title: "喜宴开席",
+				description: "Wedding Banquet",
+			},
+			{
+				time: "9:30 PM",
+				title: "答谢宾客",
+				description: "Thank You & After Party",
+			},
+		];
+		base.footer.message =
+			"百年好合，永结同心。\nA hundred years of harmony, hearts forever entwined.";
+		base.footer.socialLinks = {
+			instagram: "@dreammoments",
+			hashtag: "#明辉婉仪喜结良缘",
+		};
+	}
 	if (templateId === "romantic-cinematic") {
 		base.hero.partnerOneName = "Wei Jun";
 		base.hero.partnerTwoName = "Mei Ling";

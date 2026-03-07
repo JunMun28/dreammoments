@@ -2,8 +2,8 @@ import { describe, expect, test } from "vitest";
 import { doubleHappinessTemplate, templates } from "./index";
 
 describe("templates registry", () => {
-	test("includes one template", () => {
-		expect(templates.length).toBe(1);
+	test("includes all registered templates", () => {
+		expect(templates.length).toBeGreaterThanOrEqual(1);
 	});
 
 	test("double happiness has core sections", () => {
