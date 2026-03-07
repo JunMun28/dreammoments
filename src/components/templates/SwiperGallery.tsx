@@ -2,8 +2,10 @@ import { type CSSProperties, useCallback, useRef } from "react";
 import { Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { cn } from "@/lib/utils";
-import "swiper/swiper.css";
-import "swiper/modules/pagination.css";
+// @ts-expect-error -- Swiper v12 CSS exports resolve at runtime via package.json exports
+import "swiper/css";
+// @ts-expect-error -- Swiper v12 CSS exports resolve at runtime via package.json exports
+import "swiper/css/pagination";
 import "./swiper-gallery.css";
 
 export interface GalleryPhoto {

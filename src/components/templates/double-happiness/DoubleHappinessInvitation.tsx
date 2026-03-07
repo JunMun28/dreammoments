@@ -4,6 +4,7 @@ import { useScrollReveal } from "../../../lib/scroll-effects";
 import { AddToCalendarButton } from "../../ui/AddToCalendarButton";
 import { LoadingSpinner } from "../../ui/LoadingSpinner";
 import AngpowQRCode from "../AngpowQRCode";
+import BottomActionBar from "../BottomActionBar";
 import { CountdownWidget } from "../CountdownWidget";
 import { makeEditableProps, parseAttendance } from "../helpers";
 import { MusicPlayer } from "../MusicPlayer";
@@ -13,6 +14,7 @@ import {
 } from "../RsvpConfirmation";
 import SectionShell from "../SectionShell";
 import SectionTitle from "../SectionTitle";
+import SwiperGallery from "../SwiperGallery";
 import type { TemplateInvitationProps } from "../types";
 import { HeroMedia } from "./HeroMedia";
 import "./double-happiness.css";
@@ -497,42 +499,14 @@ export default function DoubleHappinessInvitation({
 						accentFont={accentFont}
 					/>
 
-					<div className="mt-12 grid gap-4 sm:grid-cols-2">
-						{data.gallery.photos.map((photo, index) => (
-							<figure
-								key={`${photo.url}-${index}`}
-								data-reveal
-								className={`dm-reveal dh-photo-frame-premium group relative overflow-hidden ${index === 0 ? "sm:col-span-2" : ""}`}
-								style={{ transitionDelay: `${Math.min(index * 0.1, 0.5)}s` }}
-							>
-								<img
-									src={photo.url || PLACEHOLDER_PHOTO}
-									alt={photo.caption || "Couple memory"}
-									loading="lazy"
-									decoding="async"
-									width={900}
-									height={index === 0 ? 500 : 600}
-									className={`w-full object-cover ${index === 0 ? "h-72 sm:h-96" : "h-64 sm:h-80"}`}
-									style={{
-										backgroundColor: COLORS.accentLight,
-									}}
-									onError={(e) => {
-										const img = e.target as HTMLImageElement;
-										if (!img.dataset.fallback) {
-											img.dataset.fallback = "true";
-											img.src = PLACEHOLDER_PHOTO;
-										}
-									}}
-								/>
-								<div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-								<figcaption
-									className="absolute bottom-4 left-4 text-sm font-medium text-white"
-									style={{ textShadow: "0 1px 3px rgba(0,0,0,0.5)" }}
-								>
-									{photo.caption}
-								</figcaption>
-							</figure>
-						))}
+					<div className="mt-12" data-reveal>
+						<SwiperGallery
+							photos={data.gallery.photos.map((p) => ({
+								url: p.url,
+								caption: p.caption,
+							}))}
+							primaryColor={COLORS.primary}
+						/>
 					</div>
 				</div>
 			</SectionShell>
@@ -1209,6 +1183,22 @@ export default function DoubleHappinessInvitation({
 
 			{data.musicUrl && mode !== "editor" && (
 				<MusicPlayer audioUrl={data.musicUrl} />
+			)}
+
+			{mode !== "editor" && (
+				<BottomActionBar
+					primaryColor={COLORS.primary}
+					onGiftClick={() =>
+						document
+							.getElementById("gift")
+							?.scrollIntoView({ behavior: "smooth" })
+					}
+					onMessageClick={() =>
+						document
+							.getElementById("rsvp")
+							?.scrollIntoView({ behavior: "smooth" })
+					}
+				/>
 			)}
 		</div>
 	);
