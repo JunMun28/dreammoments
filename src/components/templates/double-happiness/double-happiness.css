@@ -2,7 +2,7 @@
 
 /* Root wrapper scopes all template styles */
 .double-happiness {
-	--t-primary: #b07d62;
+	--t-primary: #8b5e4b; /* WCAG AA safe (4.5:1 on #F9F8F6) */
 	--t-secondary: #3a2e2a;
 	--t-accent: #c5a880;
 	--t-bg: #f9f8f6;
@@ -22,6 +22,15 @@
 	.double-happiness {
 		box-shadow: 0 0 40px rgba(0, 0, 0, 0.08);
 	}
+}
+
+/* ── Off-screen rendering optimization ── */
+.double-happiness section {
+	content-visibility: auto;
+	contain-intrinsic-size: 0 500px;
+}
+.double-happiness section:first-of-type {
+	content-visibility: visible;
 }
 
 /* ── Section alternation ── */
