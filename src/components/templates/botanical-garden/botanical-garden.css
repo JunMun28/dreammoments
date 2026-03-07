@@ -1,18 +1,18 @@
-/* ─── Botanical Garden Template (花园物语) ─── */
+/* ─── Terra Botanica Template (花园物语) ─── */
 
 /* Root wrapper scopes all template styles */
 .botanical-garden {
-	--t-primary: #3d5a3e;
-	--t-secondary: #2c3e2c;
-	--t-accent: #d4a880;
-	--t-bg: #f7f5f0;
-	--t-text: #2c3e2c;
-	--t-muted: #8a7f7a;
-	--t-bg-alt: #ffffff;
-	--t-accent-light: #e8ddd1;
-	--t-accent-deep: #b8956a;
-	--t-accent-glow: rgba(212, 168, 128, 0.15);
-	--t-sage: #e8ede8;
+	--t-primary: #064e3b;
+	--t-secondary: #1c1917;
+	--t-accent: #c2571a;
+	--t-bg: #f5e6d3;
+	--t-text: #1c1917;
+	--t-muted: #6b5e50;
+	--t-bg-alt: #e8f0e8;
+	--t-accent-light: #e8dfd0;
+	--t-accent-deep: #a34815;
+	--t-accent-glow: rgba(194, 87, 26, 0.15);
+	--t-sage: #e8f0e8;
 	max-width: 430px;
 	margin-left: auto;
 	margin-right: auto;
@@ -35,14 +35,15 @@
 }
 
 /* ── Section backgrounds ── */
-.bg-section-linen {
+.bg-section-sand {
 	background-color: var(--t-bg);
-}
-.bg-section-white {
-	background-color: #ffffff;
 }
 .bg-section-sage {
 	background-color: var(--t-sage);
+}
+.bg-section-charcoal {
+	background-color: var(--t-secondary);
+	color: var(--t-bg);
 }
 
 /* ── Watercolor wash effect ── */
@@ -50,12 +51,12 @@
 	background-image:
 		radial-gradient(
 			ellipse at 10% 20%,
-			rgba(61, 90, 62, 0.04) 0%,
+			rgba(6, 78, 59, 0.04) 0%,
 			transparent 60%
 		),
 		radial-gradient(
 			ellipse at 90% 80%,
-			rgba(61, 90, 62, 0.04) 0%,
+			rgba(194, 87, 26, 0.03) 0%,
 			transparent 60%
 		);
 }
@@ -67,7 +68,7 @@
 	background: linear-gradient(
 		90deg,
 		transparent,
-		rgba(61, 90, 62, 0.3),
+		rgba(6, 78, 59, 0.3),
 		transparent
 	);
 	margin: 0 auto;
@@ -84,13 +85,13 @@
 	background-color: var(--t-primary);
 }
 
-/* ── Gold accent divider ── */
+/* ── Terracotta accent divider ── */
 .bg-gold-accent {
 	height: 1px;
 	background: linear-gradient(
 		90deg,
 		transparent,
-		rgba(212, 168, 128, 0.5),
+		rgba(194, 87, 26, 0.5),
 		transparent
 	);
 	margin: 0 auto;
@@ -118,27 +119,27 @@
 	width: 14px;
 	height: 14px;
 	border-radius: 50%;
-	background-color: var(--t-primary);
-	border: 2px solid var(--t-accent);
-	box-shadow: 0 0 0 3px rgba(61, 90, 62, 0.1);
+	background-color: var(--t-accent);
+	border: 2px solid var(--t-primary);
+	box-shadow: 0 0 0 3px rgba(6, 78, 59, 0.1);
 }
 
 /* ── Milestone card ── */
 .bg-milestone-card {
-	background: #ffffff;
-	border: 1px solid rgba(61, 90, 62, 0.12);
+	background: var(--t-bg);
+	border: 1px solid rgba(6, 78, 59, 0.12);
 	border-radius: 12px;
 	padding: 1.25rem;
-	box-shadow: 0 2px 8px rgba(44, 62, 44, 0.05);
+	box-shadow: 0 2px 8px rgba(28, 25, 23, 0.05);
 }
 
 /* ── Schedule event card ── */
 .bg-event-card {
-	background: #ffffff;
-	border: 1px solid rgba(61, 90, 62, 0.12);
+	background: var(--t-bg);
+	border: 1px solid rgba(6, 78, 59, 0.12);
 	border-radius: 12px;
 	padding: 1.25rem;
-	box-shadow: 0 4px 16px rgba(44, 62, 44, 0.06);
+	box-shadow: 0 4px 16px rgba(28, 25, 23, 0.06);
 	display: flex;
 	gap: 1rem;
 }
@@ -150,19 +151,33 @@
 	background: linear-gradient(180deg, var(--t-primary), var(--t-accent));
 }
 
-/* ── Botanical photo frame ── */
+/* ── Botanical photo frame — terracotta double-border ── */
+.bg-botanical-frame {
+	position: relative;
+	border-radius: 16px;
+	border: 2px solid var(--t-accent);
+	box-shadow:
+		0 0 0 4px var(--t-bg),
+		0 0 0 6px rgba(194, 87, 26, 0.3);
+	overflow: hidden;
+}
+
+/* ── Portrait frame ── */
 .bg-portrait-frame {
 	position: relative;
 	border-radius: 16px;
-	border: 2px solid rgba(61, 90, 62, 0.15);
-	box-shadow: 0 4px 16px rgba(44, 62, 44, 0.06);
+	border: 2px solid var(--t-accent);
+	box-shadow:
+		0 0 0 4px var(--t-bg),
+		0 0 0 6px rgba(194, 87, 26, 0.3),
+		0 4px 16px rgba(28, 25, 23, 0.06);
 }
 
-/* ── Photo frame with botanical border ── */
+/* ── Photo frame ── */
 .bg-photo-frame {
-	border: 2px solid rgba(61, 90, 62, 0.15);
+	border: 2px solid rgba(6, 78, 59, 0.15);
 	border-radius: 16px;
-	box-shadow: 0 2px 8px rgba(44, 62, 44, 0.08);
+	box-shadow: 0 2px 8px rgba(28, 25, 23, 0.08);
 	overflow: hidden;
 }
 
@@ -172,29 +187,7 @@
 .botanical-garden textarea:focus-visible {
 	outline: 2px solid #ffffff;
 	outline-offset: 2px;
-	box-shadow: 0 0 0 4px rgba(61, 90, 62, 0.5);
-}
-
-/* ── Scroll reveal animation ──
-   40px translate + 0.9s duration for organic feel */
-.botanical-garden .dm-reveal {
-	opacity: 0;
-	transform: translate3d(0, 40px, 0);
-	will-change: opacity, transform;
-	transition:
-		opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
-		transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.botanical-garden .dm-reveal.is-visible {
-	opacity: 1;
-	transform: translate3d(0, 0, 0);
-	will-change: auto;
-}
-
-.botanical-garden .dm-reveal.is-hidden {
-	opacity: 0;
-	transform: translate3d(0, 40px, 0);
+	box-shadow: 0 0 0 4px rgba(6, 78, 59, 0.5);
 }
 
 /* ── Countdown styling ── */
@@ -274,7 +267,7 @@
 	margin-top: 1.25rem;
 }
 
-/* ── Gold shimmer effect ── */
+/* ── Terracotta shimmer effect ── */
 .bg-gold-shimmer {
 	background: linear-gradient(
 		110deg,
@@ -304,12 +297,6 @@
 
 /* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
-	.botanical-garden .dm-reveal {
-		/* biome-ignore lint/complexity/noImportantStyles: required for a11y override */
-		opacity: 1 !important;
-		/* biome-ignore lint/complexity/noImportantStyles: required for a11y override */
-		transform: none !important;
-	}
 	.botanical-garden * {
 		/* biome-ignore lint/complexity/noImportantStyles: required for a11y override */
 		animation-duration: 0.01ms !important;

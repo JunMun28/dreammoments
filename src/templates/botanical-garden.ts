@@ -5,7 +5,7 @@ export const botanicalGardenTemplate: TemplateConfig = {
 	name: "Botanical Garden",
 	nameZh: "花园物语",
 	description:
-		"Fresh forest green and warm gold with botanical illustrations and organic reveals.",
+		"Earthy emerald and burnt terracotta with botanical line-art and organic reveals.",
 	category: "garden",
 	version: "1.0.0",
 	aiConfig: {
@@ -14,17 +14,17 @@ export const botanicalGardenTemplate: TemplateConfig = {
 	},
 	tokens: {
 		colors: {
-			primary: "#3D5A3E",
-			secondary: "#2C3E2C",
-			accent: "#D4A880",
-			background: "#F7F5F0",
-			text: "#2C3E2C",
-			muted: "#8A7F7A",
+			primary: "#064E3B",
+			secondary: "#1C1917",
+			accent: "#C2571A",
+			background: "#F5E6D3",
+			text: "#1C1917",
+			muted: "#6B5E50",
 		},
 		typography: {
 			headingFont: "'Cormorant Garamond', 'Noto Serif SC', Georgia, serif",
-			bodyFont: "'Inter', 'Noto Sans SC', sans-serif",
-			accentFont: "'Cormorant Garamond', 'Noto Serif SC', Georgia, serif",
+			bodyFont: "'Outfit', 'Noto Sans SC', sans-serif",
+			accentFont: "'Cormorant Garamond', 'Noto Serif SC', serif",
 		},
 		animations: {
 			scrollTriggerOffset: 100,
@@ -38,7 +38,7 @@ export const botanicalGardenTemplate: TemplateConfig = {
 			type: "hero",
 			defaultVisible: true,
 			notes:
-				"Centered names in Cormorant Garamond, green gradient overlay, leaf SVG border decoration.",
+				"Diagonal clipPath reveal, emerald overlay, terracotta ember particles, oversized Cormorant Garamond names.",
 			fields: [
 				{
 					id: "partnerOneName",
@@ -105,7 +105,8 @@ export const botanicalGardenTemplate: TemplateConfig = {
 			id: "couple",
 			type: "couple",
 			defaultVisible: true,
-			notes: "Side-by-side portraits with botanical photo frames.",
+			notes:
+				"Side-by-side portraits with terracotta double-border botanical frames.",
 			fields: [
 				{
 					id: "partnerOne.fullName",
@@ -149,7 +150,7 @@ export const botanicalGardenTemplate: TemplateConfig = {
 			type: "story",
 			defaultVisible: true,
 			notes:
-				"Staggered timeline with green line, gold dots, botanical card styling.",
+				"Staggered timeline with DrawPath vine line, terracotta dots, botanical card styling.",
 			fields: [
 				{
 					id: "milestones",
@@ -162,7 +163,7 @@ export const botanicalGardenTemplate: TemplateConfig = {
 			id: "gallery",
 			type: "gallery",
 			defaultVisible: true,
-			notes: "Swiper gallery with botanical photo frames.",
+			notes: "Swiper gallery with staggered bloom-in reveals.",
 			fields: [
 				{
 					id: "photos",
@@ -182,7 +183,8 @@ export const botanicalGardenTemplate: TemplateConfig = {
 			id: "schedule",
 			type: "schedule",
 			defaultVisible: true,
-			notes: "Event cards with green left border, gold time accent.",
+			notes:
+				"Event cards with emerald left border, terracotta time accent, staggered reveals.",
 			fields: [
 				{
 					id: "events",
@@ -267,7 +269,7 @@ export const botanicalGardenTemplate: TemplateConfig = {
 			id: "footer",
 			type: "footer",
 			defaultVisible: true,
-			notes: "Bilingual thank you with leaf motif.",
+			notes: "Bilingual thank you with botanical divider.",
 			fields: [
 				{
 					id: "message",

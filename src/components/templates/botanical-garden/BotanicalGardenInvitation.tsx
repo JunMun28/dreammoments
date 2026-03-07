@@ -1,9 +1,15 @@
 import { Link } from "@tanstack/react-router";
 import { type CSSProperties, useId, useRef, useState } from "react";
-import { useScrollReveal } from "../../../lib/scroll-effects";
 import { AddToCalendarButton } from "../../ui/AddToCalendarButton";
 import { LoadingSpinner } from "../../ui/LoadingSpinner";
 import AngpowQRCode from "../AngpowQRCode";
+import {
+	ClipReveal,
+	DrawPath,
+	ParticleField,
+	Reveal,
+	Stagger,
+} from "../animations";
 import BottomActionBar from "../BottomActionBar";
 import { CountdownWidget } from "../CountdownWidget";
 import { makeEditableProps, parseAttendance } from "../helpers";
@@ -21,12 +27,13 @@ import "./botanical-garden.css";
 /* ─── Design Tokens ─── */
 
 const COLORS = {
-	primary: "#3D5A3E",
-	accent: "#D4A880",
-	cream: "#F7F5F0",
-	dark: "#2C3E2C",
-	muted: "#8A7F7A",
-	accentLight: "#E8DDD1",
+	primary: "#064E3B",
+	accent: "#C2571A",
+	cream: "#F5E6D3",
+	dark: "#1C1917",
+	espresso: "#1C1917",
+	accentLight: "#E8DFD0",
+	muted: "#6B5E50",
 } as const;
 
 /* ─── Typography ─── */
@@ -36,11 +43,11 @@ const headingFont: CSSProperties = {
 };
 
 const bodyFont: CSSProperties = {
-	fontFamily: "Inter, 'Noto Sans SC', system-ui, sans-serif",
+	fontFamily: "'Outfit', 'Noto Sans SC', system-ui, sans-serif",
 };
 
 const accentFont: CSSProperties = {
-	fontFamily: "'Cormorant Garamond', 'Noto Serif SC', Georgia, serif",
+	fontFamily: "'Cormorant Garamond', 'Noto Serif SC', serif",
 	fontWeight: 700,
 };
 
@@ -60,33 +67,19 @@ const formatDisplayDate = (rawDate: string, locale: string) => {
 const PLACEHOLDER_PHOTO =
 	"https://images.unsplash.com/photo-1519741497674-611481863552?w=900&h=900&fit=crop";
 
-/* ─── Leaf SVG decoration ─── */
+/* ─── Botanical vine divider (DrawPath) ─── */
 
-function LeafDecoration({ className }: { className?: string }) {
+function BotanicalDivider({ className = "" }: { className?: string }) {
 	return (
-		<svg
-			className={className}
-			width="60"
-			height="24"
-			viewBox="0 0 60 24"
-			fill="none"
-			aria-hidden="true"
-		>
-			<path
-				d="M30 2c-8 0-16 4-20 10 4 6 12 10 20 10s16-4 20-10c-4-6-12-10-20-10z"
-				stroke="rgba(61,90,62,0.3)"
-				strokeWidth="1"
-				fill="none"
-			/>
-			<line
-				x1="30"
-				y1="2"
-				x2="30"
-				y2="22"
-				stroke="rgba(61,90,62,0.2)"
-				strokeWidth="1"
-			/>
-		</svg>
+		<DrawPath
+			d="M0,20 Q15,5 30,15 Q45,25 60,12 Q75,0 90,15 Q105,30 120,18 Q135,6 150,20"
+			stroke={COLORS.primary}
+			strokeWidth={1.5}
+			width={150}
+			height={30}
+			duration={1.2}
+			className={`mx-auto ${className}`}
+		/>
 	);
 }
 
@@ -102,8 +95,6 @@ export default function BotanicalGardenInvitation({
 	onRsvpSubmit,
 	rsvpStatus,
 }: TemplateInvitationProps) {
-	useScrollReveal();
-
 	const consentDescriptionId = useId();
 	const data = content;
 	const editableProps = makeEditableProps(mode, onInlineEdit);
@@ -128,7 +119,7 @@ export default function BotanicalGardenInvitation({
 	return (
 		<div className="botanical-garden" style={bodyFont} lang="zh-Hans">
 			{/* ════════════════════════════════════════════
-			    1. HERO — Forest green overlay with leaf decoration
+			    1. HERO — Diagonal clipPath reveal with ember particles
 			    ════════════════════════════════════════════ */}
 			<SectionShell
 				sectionId="hero"
@@ -138,101 +129,99 @@ export default function BotanicalGardenInvitation({
 				onAiClick={onAiClick}
 				className="relative min-h-[100svh] overflow-hidden"
 			>
-				{/* Background image */}
-				<img
-					src={data.hero.heroImageUrl || PLACEHOLDER_PHOTO}
-					alt=""
-					className="absolute inset-0 h-full w-full object-cover"
-					onError={(e) => {
-						const img = e.target as HTMLImageElement;
-						if (!img.dataset.fallback) {
-							img.dataset.fallback = "true";
-							img.src = PLACEHOLDER_PHOTO;
-						}
-					}}
-				/>
-				{/* Green gradient overlay */}
-				<div className="absolute inset-0 bg-gradient-to-b from-[#2C3E2C]/50 via-[#2C3E2C]/30 to-[#2C3E2C]/60" />
+				<ClipReveal shape="diagonal" className="absolute inset-0">
+					{/* Background image */}
+					<img
+						src={data.hero.heroImageUrl || PLACEHOLDER_PHOTO}
+						alt=""
+						className="absolute inset-0 h-full w-full object-cover"
+						onError={(e) => {
+							const img = e.target as HTMLImageElement;
+							if (!img.dataset.fallback) {
+								img.dataset.fallback = "true";
+								img.src = PLACEHOLDER_PHOTO;
+							}
+						}}
+					/>
+					{/* Emerald gradient overlay */}
+					<div className="absolute inset-0 bg-gradient-to-b from-[#1C1917]/50 via-[#064E3B]/30 to-[#1C1917]/60" />
+				</ClipReveal>
 
-				{/* Top leaf decoration */}
-				<div
-					className="absolute left-1/2 top-8 -translate-x-1/2"
-					aria-hidden="true"
-				>
-					<LeafDecoration />
-				</div>
+				{/* Ember glow particles */}
+				<ParticleField preset="emberGlow" />
 
 				<div className="relative z-10 mx-auto flex min-h-[100svh] max-w-4xl flex-col items-center justify-center px-6 py-20 text-center">
-					<h1
-						data-reveal
-						style={{ ...accentFont, transitionDelay: "0.1s" }}
-						className="dm-reveal mt-8 text-4xl text-white sm:text-6xl"
-					>
-						<span {...editableProps("hero.partnerOneName", "inline-block")}>
-							{data.hero.partnerOneName}
-						</span>
-						<span
-							className="bg-gold-shimmer mx-3 inline-block text-3xl sm:mx-4 sm:text-5xl"
-							style={{ color: COLORS.accent }}
+					<Reveal direction="scale" duration={0.9}>
+						<h1
+							style={accentFont}
+							className="mt-8 text-4xl text-white sm:text-6xl"
 						>
-							&amp;
-						</span>
-						<span {...editableProps("hero.partnerTwoName", "inline-block")}>
-							{data.hero.partnerTwoName}
-						</span>
-					</h1>
+							<span {...editableProps("hero.partnerOneName", "inline-block")}>
+								{data.hero.partnerOneName}
+							</span>
+							<span
+								className="bg-gold-shimmer mx-3 inline-block text-3xl sm:mx-4 sm:text-5xl"
+								style={{ color: COLORS.accent }}
+							>
+								&amp;
+							</span>
+							<span {...editableProps("hero.partnerTwoName", "inline-block")}>
+								{data.hero.partnerTwoName}
+							</span>
+						</h1>
+					</Reveal>
 
-					<p
-						data-reveal
-						{...editableProps(
-							"hero.tagline",
-							"dm-reveal mt-6 max-w-xl text-lg leading-relaxed",
-						)}
-						style={{
-							...headingFont,
-							color: COLORS.accentLight,
-							transitionDelay: "0.2s",
-						}}
-						lang="en"
-					>
-						{data.hero.tagline}
-					</p>
-
-					<div
-						data-reveal
-						className="dm-reveal mt-8 flex flex-wrap items-center justify-center gap-3 text-sm text-white/90"
-						style={{ transitionDelay: "0.3s" }}
-					>
-						<span
-							className="rounded-full border border-[rgba(212,168,128,0.3)] px-4 py-2"
+					<Reveal direction="up" delay={0.2} duration={0.9}>
+						<p
+							{...editableProps(
+								"hero.tagline",
+								"mt-6 max-w-xl text-lg leading-relaxed",
+							)}
+							style={{
+								...headingFont,
+								color: COLORS.accentLight,
+							}}
 							lang="en"
 						>
-							{weddingDateEn}
-						</span>
-						<span className="rounded-full border border-[rgba(212,168,128,0.3)] px-4 py-2">
-							{data.venue.name}
-						</span>
-					</div>
+							{data.hero.tagline}
+						</p>
+					</Reveal>
+
+					<Reveal direction="up" delay={0.3} duration={0.9}>
+						<div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-sm text-white/90">
+							<span
+								className="rounded-full border border-[rgba(194,87,26,0.3)] px-4 py-2"
+								lang="en"
+							>
+								{weddingDateEn}
+							</span>
+							<span className="rounded-full border border-[rgba(194,87,26,0.3)] px-4 py-2">
+								{data.venue.name}
+							</span>
+						</div>
+					</Reveal>
 
 					{mode !== "editor" && (
-						<div className="mt-6">
-							<AddToCalendarButton
-								title={`${data.hero.partnerOneName} & ${data.hero.partnerTwoName}'s Wedding`}
-								date={data.hero.date}
-								venue={data.venue.name}
-								address={data.venue.address}
-								variant="dark"
-							/>
-						</div>
+						<Reveal direction="up" delay={0.4} duration={0.9}>
+							<div className="mt-6">
+								<AddToCalendarButton
+									title={`${data.hero.partnerOneName} & ${data.hero.partnerTwoName}'s Wedding`}
+									date={data.hero.date}
+									venue={data.venue.name}
+									address={data.venue.address}
+									variant="dark"
+								/>
+							</div>
+						</Reveal>
 					)}
 				</div>
 
-				{/* Bottom leaf decoration */}
+				{/* Bottom botanical divider */}
 				<div
 					className="absolute bottom-8 left-1/2 -translate-x-1/2"
 					aria-hidden="true"
 				>
-					<LeafDecoration />
+					<BotanicalDivider />
 				</div>
 			</SectionShell>
 
@@ -245,16 +234,18 @@ export default function BotanicalGardenInvitation({
 				hidden={hiddenSections?.countdown}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="bg-section-linen relative overflow-hidden px-6 py-16 sm:px-10"
+				className="bg-section-sand relative overflow-hidden px-6 py-16 sm:px-10"
 			>
 				<div className="mx-auto max-w-sm">
-					<div className="bg-leaf-divider mb-8 w-24 mx-auto" />
-					<CountdownWidget
-						targetDate={data.hero.date}
-						eventTime={data.schedule.events[0]?.time}
-						displayDate={data.hero.date}
-					/>
-					<div className="bg-leaf-divider mt-8 w-24 mx-auto" />
+					<BotanicalDivider className="mb-8" />
+					<Reveal direction="up" duration={0.9}>
+						<CountdownWidget
+							targetDate={data.hero.date}
+							eventTime={data.schedule.events[0]?.time}
+							displayDate={data.hero.date}
+						/>
+					</Reveal>
+					<BotanicalDivider className="mt-8" />
 				</div>
 			</SectionShell>
 
@@ -267,62 +258,62 @@ export default function BotanicalGardenInvitation({
 				hidden={hiddenSections?.announcement}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="bg-section-white bg-watercolor-wash relative overflow-hidden px-6 py-24 sm:px-10"
+				className="bg-section-sage bg-watercolor-wash relative overflow-hidden px-6 py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-3xl text-center">
-					<div className="bg-leaf-divider mb-10 w-40 mx-auto" />
+					<BotanicalDivider className="mb-10" />
 
-					<p
-						data-reveal
-						className="dm-reveal text-sm tracking-[0.5em]"
-						style={{ ...headingFont, color: COLORS.primary }}
-						lang="en"
-					>
-						TOGETHER WITH OUR FAMILIES
-					</p>
-
-					<h2
-						data-reveal
-						{...editableProps(
-							"announcement.title",
-							"dm-reveal mt-6 text-4xl sm:text-5xl",
-						)}
-						style={{ ...accentFont, color: COLORS.dark }}
-						lang="en"
-					>
-						{data.announcement.title}
-					</h2>
-
-					<div className="mx-auto mt-8 max-w-2xl rounded-lg border border-[rgba(61,90,62,0.08)] bg-gradient-to-b from-white/50 to-transparent p-8">
-						<div
-							data-reveal
-							className="dm-reveal bg-blockquote mx-auto max-w-2xl text-left"
+					<Reveal direction="up" duration={0.9}>
+						<p
+							className="text-sm tracking-[0.5em]"
+							style={{ ...headingFont, color: COLORS.primary }}
+							lang="en"
 						>
+							TOGETHER WITH OUR FAMILIES
+						</p>
+					</Reveal>
+
+					<Reveal direction="up" delay={0.1} duration={0.9}>
+						<h2
+							{...editableProps(
+								"announcement.title",
+								"mt-6 text-4xl sm:text-5xl",
+							)}
+							style={{ ...accentFont, color: COLORS.dark }}
+							lang="en"
+						>
+							{data.announcement.title}
+						</h2>
+					</Reveal>
+
+					<Reveal direction="up" delay={0.2} duration={0.9}>
+						<div className="mx-auto mt-8 max-w-2xl rounded-lg border border-[rgba(6,78,59,0.08)] bg-gradient-to-b from-white/50 to-transparent p-8">
+							<div className="bg-blockquote mx-auto max-w-2xl text-left">
+								<p
+									{...editableProps(
+										"announcement.message",
+										"whitespace-pre-line text-base leading-relaxed",
+									)}
+									style={{ color: COLORS.dark }}
+									lang="en"
+								>
+									{data.announcement.message}
+								</p>
+							</div>
+
 							<p
 								{...editableProps(
-									"announcement.message",
-									"whitespace-pre-line text-base leading-relaxed",
+									"announcement.formalText",
+									"mx-auto mt-6 max-w-2xl text-sm leading-relaxed",
 								)}
-								style={{ color: COLORS.dark }}
-								lang="en"
+								style={{ color: COLORS.muted }}
 							>
-								{data.announcement.message}
+								{data.announcement.formalText}
 							</p>
 						</div>
+					</Reveal>
 
-						<p
-							data-reveal
-							{...editableProps(
-								"announcement.formalText",
-								"dm-reveal mx-auto mt-6 max-w-2xl text-sm leading-relaxed",
-							)}
-							style={{ color: COLORS.muted }}
-						>
-							{data.announcement.formalText}
-						</p>
-					</div>
-
-					<div className="bg-leaf-divider mt-10 w-40 mx-auto" />
+					<BotanicalDivider className="mt-10" />
 				</div>
 			</SectionShell>
 
@@ -335,7 +326,7 @@ export default function BotanicalGardenInvitation({
 				hidden={hiddenSections?.couple}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="bg-section-sage px-6 py-24 sm:px-10"
+				className="bg-section-sand px-6 py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-4xl">
 					<SectionTitle
@@ -347,9 +338,13 @@ export default function BotanicalGardenInvitation({
 						accentFont={accentFont}
 					/>
 
-					<div className="mt-14 grid gap-12 sm:grid-cols-2">
+					<Stagger
+						interval={0.15}
+						direction="up"
+						className="mt-14 grid gap-12 sm:grid-cols-2"
+					>
 						{/* Partner One */}
-						<div data-reveal className="dm-reveal text-center">
+						<div className="text-center">
 							<div className="bg-portrait-frame mx-auto h-72 w-56 overflow-hidden">
 								<img
 									src={data.couple.partnerOne.photoUrl || PLACEHOLDER_PHOTO}
@@ -370,7 +365,7 @@ export default function BotanicalGardenInvitation({
 								className="mx-auto mt-4 flex justify-center"
 								aria-hidden="true"
 							>
-								<LeafDecoration />
+								<BotanicalDivider />
 							</div>
 							<h3
 								{...editableProps(
@@ -394,11 +389,7 @@ export default function BotanicalGardenInvitation({
 						</div>
 
 						{/* Partner Two */}
-						<div
-							data-reveal
-							className="dm-reveal text-center"
-							style={{ transitionDelay: "0.15s" }}
-						>
+						<div className="text-center">
 							<div className="bg-portrait-frame mx-auto h-72 w-56 overflow-hidden">
 								<img
 									src={data.couple.partnerTwo.photoUrl || PLACEHOLDER_PHOTO}
@@ -419,7 +410,7 @@ export default function BotanicalGardenInvitation({
 								className="mx-auto mt-4 flex justify-center"
 								aria-hidden="true"
 							>
-								<LeafDecoration />
+								<BotanicalDivider />
 							</div>
 							<h3
 								{...editableProps(
@@ -441,7 +432,7 @@ export default function BotanicalGardenInvitation({
 								{data.couple.partnerTwo.bio}
 							</p>
 						</div>
-					</div>
+					</Stagger>
 				</div>
 			</SectionShell>
 
@@ -454,7 +445,7 @@ export default function BotanicalGardenInvitation({
 				hidden={hiddenSections?.story}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="bg-section-white bg-watercolor-wash relative overflow-hidden px-6 py-24 sm:px-10"
+				className="bg-section-sage bg-watercolor-wash relative overflow-hidden px-6 py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-4xl">
 					<SectionTitle
@@ -467,18 +458,25 @@ export default function BotanicalGardenInvitation({
 					/>
 
 					<div className="relative mt-16 pl-8 sm:pl-12">
-						{/* Timeline line */}
-						<div className="bg-timeline-line absolute left-1 top-0 h-full sm:left-3" />
+						{/* Timeline vine line via DrawPath */}
+						<div className="absolute left-1 top-0 h-full sm:left-3">
+							<DrawPath
+								d="M1,0 L1,500"
+								stroke={COLORS.primary}
+								strokeWidth={2}
+								width={2}
+								height={500}
+								viewBox="0 0 2 500"
+								duration={2}
+								className="h-full w-[2px]"
+							/>
+						</div>
 
-						<div className="space-y-16">
+						<Stagger interval={0.1} direction="up" className="space-y-16">
 							{data.story.milestones.map((milestone, index) => (
 								<article
 									key={`${milestone.date}-${index}`}
-									data-reveal
-									className="dm-reveal relative"
-									style={{
-										transitionDelay: `${Math.min(index * 0.1, 0.5)}s`,
-									}}
+									className="relative"
 								>
 									<div className="bg-timeline-dot absolute -left-[2.45rem] top-5 sm:-left-[3.45rem]" />
 									<div className="bg-milestone-card">
@@ -486,7 +484,7 @@ export default function BotanicalGardenInvitation({
 											className="inline-block rounded-full px-3 py-1 text-xs uppercase tracking-[0.25em]"
 											style={{
 												color: COLORS.primary,
-												backgroundColor: "rgba(61,90,62,0.08)",
+												backgroundColor: "rgba(6,78,59,0.08)",
 											}}
 										>
 											{milestone.date}
@@ -509,13 +507,13 @@ export default function BotanicalGardenInvitation({
 									</div>
 								</article>
 							))}
-						</div>
+						</Stagger>
 					</div>
 				</div>
 			</SectionShell>
 
 			{/* ════════════════════════════════════════════
-			    6. GALLERY — Swiper with botanical frames
+			    6. GALLERY — Swiper with bloom-in stagger
 			    ════════════════════════════════════════════ */}
 			<SectionShell
 				sectionId="gallery"
@@ -523,7 +521,7 @@ export default function BotanicalGardenInvitation({
 				hidden={hiddenSections?.gallery}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="bg-section-sage px-6 py-24 sm:px-10"
+				className="bg-section-sand px-6 py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-5xl">
 					<SectionTitle
@@ -535,7 +533,7 @@ export default function BotanicalGardenInvitation({
 						accentFont={accentFont}
 					/>
 
-					<div className="mt-12" data-reveal>
+					<Reveal direction="scale" duration={0.9} className="mt-12">
 						<SwiperGallery
 							photos={data.gallery.photos.map((p) => ({
 								url: p.url,
@@ -543,12 +541,12 @@ export default function BotanicalGardenInvitation({
 							}))}
 							primaryColor={COLORS.primary}
 						/>
-					</div>
+					</Reveal>
 				</div>
 			</SectionShell>
 
 			{/* ════════════════════════════════════════════
-			    7. SCHEDULE — Event cards with green left border
+			    7. SCHEDULE — Event cards with emerald left border
 			    ════════════════════════════════════════════ */}
 			<SectionShell
 				sectionId="schedule"
@@ -556,7 +554,7 @@ export default function BotanicalGardenInvitation({
 				hidden={hiddenSections?.schedule}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="bg-section-white relative overflow-hidden px-6 py-24 sm:px-10"
+				className="bg-section-sage relative overflow-hidden px-6 py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-4xl">
 					<SectionTitle
@@ -568,14 +566,9 @@ export default function BotanicalGardenInvitation({
 						accentFont={accentFont}
 					/>
 
-					<div className="mt-14 space-y-4">
+					<Stagger interval={0.1} direction="up" className="mt-14 space-y-4">
 						{data.schedule.events.map((event, index) => (
-							<article
-								key={`${event.time}-${index}`}
-								data-reveal
-								className="dm-reveal bg-event-card"
-								style={{ transitionDelay: `${Math.min(index * 0.08, 0.5)}s` }}
-							>
+							<article key={`${event.time}-${index}`} className="bg-event-card">
 								<div className="bg-event-card-stripe" />
 								<div>
 									<p
@@ -613,12 +606,12 @@ export default function BotanicalGardenInvitation({
 								</div>
 							</article>
 						))}
-					</div>
+					</Stagger>
 				</div>
 			</SectionShell>
 
 			{/* ════════════════════════════════════════════
-			    8. VENUE — Clean card with green buttons
+			    8. VENUE — Clean card with emerald buttons
 			    ════════════════════════════════════════════ */}
 			<SectionShell
 				sectionId="venue"
@@ -626,7 +619,7 @@ export default function BotanicalGardenInvitation({
 				hidden={hiddenSections?.venue}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="bg-section-linen px-6 py-24 sm:px-10"
+				className="bg-section-sand px-6 py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-3xl text-center">
 					<SectionTitle
@@ -638,11 +631,21 @@ export default function BotanicalGardenInvitation({
 						accentFont={accentFont}
 					/>
 
-					<div data-reveal className="dm-reveal mx-auto mt-8 max-w-md">
-						<div className="rounded-2xl border border-[rgba(61,90,62,0.12)] bg-white p-8 text-center shadow-sm">
+					<Reveal
+						direction="up"
+						duration={0.9}
+						className="mx-auto mt-8 max-w-md"
+					>
+						<div
+							className="rounded-2xl border border-[rgba(6,78,59,0.12)] p-8 text-center shadow-sm"
+							style={{ backgroundColor: COLORS.cream }}
+						>
 							<h3
 								{...editableProps("venue.name", "text-2xl")}
-								style={{ ...headingFont, color: COLORS.dark }}
+								style={{
+									...headingFont,
+									color: COLORS.dark,
+								}}
 								lang="en"
 							>
 								{data.venue.name}
@@ -681,9 +684,9 @@ export default function BotanicalGardenInvitation({
 										href={`https://www.google.com/maps/search/?api=1&query=${data.venue.coordinates.lat},${data.venue.coordinates.lng}`}
 										target="_blank"
 										rel="noopener noreferrer"
-										className="inline-flex items-center gap-1.5 rounded-full border px-5 py-2.5 text-xs uppercase tracking-[0.15em] transition-colors hover:bg-[rgba(61,90,62,0.05)]"
+										className="inline-flex items-center gap-1.5 rounded-full border px-5 py-2.5 text-xs uppercase tracking-[0.15em] transition-colors hover:bg-[rgba(6,78,59,0.05)]"
 										style={{
-											borderColor: "rgba(61,90,62,0.2)",
+											borderColor: "rgba(6,78,59,0.2)",
 											color: COLORS.primary,
 										}}
 										lang="en"
@@ -708,9 +711,9 @@ export default function BotanicalGardenInvitation({
 										href={`https://www.waze.com/ul?ll=${data.venue.coordinates.lat},${data.venue.coordinates.lng}&navigate=yes`}
 										target="_blank"
 										rel="noopener noreferrer"
-										className="inline-flex items-center gap-1.5 rounded-full border px-5 py-2.5 text-xs uppercase tracking-[0.15em] transition-colors hover:bg-[rgba(61,90,62,0.05)]"
+										className="inline-flex items-center gap-1.5 rounded-full border px-5 py-2.5 text-xs uppercase tracking-[0.15em] transition-colors hover:bg-[rgba(6,78,59,0.05)]"
 										style={{
-											borderColor: "rgba(61,90,62,0.2)",
+											borderColor: "rgba(6,78,59,0.2)",
 											color: COLORS.primary,
 										}}
 										lang="en"
@@ -733,12 +736,12 @@ export default function BotanicalGardenInvitation({
 								</div>
 							) : null}
 						</div>
-					</div>
+					</Reveal>
 				</div>
 			</SectionShell>
 
 			{/* ════════════════════════════════════════════
-			    9. RSVP — Dark evergreen background
+			    9. RSVP — Dark charcoal background
 			    ════════════════════════════════════════════ */}
 			<SectionShell
 				sectionId="rsvp"
@@ -746,12 +749,11 @@ export default function BotanicalGardenInvitation({
 				hidden={hiddenSections?.rsvp}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="px-6 py-24 sm:px-10"
-				style={{ backgroundColor: "#2C3E2C", color: "#F7F5F0" }}
+				className="bg-section-charcoal px-6 py-24 sm:px-10"
 			>
 				<div className="mx-auto grid max-w-5xl gap-10 lg:grid-cols-[0.9fr_auto_1.1fr]">
 					{/* Left: info */}
-					<div data-reveal className="dm-reveal space-y-5">
+					<Reveal direction="up" duration={0.9} className="space-y-5">
 						<p
 							className="text-sm tracking-[0.5em]"
 							style={{
@@ -764,14 +766,17 @@ export default function BotanicalGardenInvitation({
 						</p>
 						<h2
 							className="text-4xl sm:text-5xl"
-							style={{ ...accentFont, color: "#F7F5F0" }}
+							style={{
+								...accentFont,
+								color: COLORS.cream,
+							}}
 							lang="en"
 						>
 							RSVP
 						</h2>
 						<p
 							className="max-w-md text-sm leading-relaxed"
-							style={{ color: "rgba(247,245,240,0.7)" }}
+							style={{ color: "rgba(245,230,211,0.7)" }}
 							lang="en"
 						>
 							{data.rsvp.customMessage ||
@@ -793,14 +798,14 @@ export default function BotanicalGardenInvitation({
 							</p>
 							<p
 								className="mt-2 text-sm"
-								style={{ color: "#F7F5F0" }}
+								style={{ color: COLORS.cream }}
 								lang="en"
 							>
 								{rsvpDeadlineEn}
 							</p>
 							<p
 								className="mt-3 text-xs uppercase tracking-[0.2em]"
-								style={{ color: "rgba(247,245,240,0.5)" }}
+								style={{ color: "rgba(245,230,211,0.5)" }}
 								lang="en"
 							>
 								{data.rsvp.allowPlusOnes
@@ -808,336 +813,343 @@ export default function BotanicalGardenInvitation({
 									: "This invitation is for one guest"}
 							</p>
 						</div>
-					</div>
+					</Reveal>
 
 					{/* Vertical divider */}
 					<div className="hidden self-stretch lg:block">
-						<div className="h-full w-px bg-gradient-to-b from-transparent via-[rgba(212,168,128,0.3)] to-transparent" />
+						<div className="h-full w-px bg-gradient-to-b from-transparent via-[rgba(194,87,26,0.3)] to-transparent" />
 					</div>
 
 					{/* Right: form or confirmation */}
 					{rsvpData ? (
 						<div className="relative">
-							<div
-								data-reveal
-								className="dm-reveal flex items-center justify-center rounded-2xl border border-[rgba(61,90,62,0.15)] p-6 sm:p-8"
-								style={{
-									background: COLORS.cream,
-								}}
+							<Reveal
+								direction="up"
+								duration={0.9}
+								className="flex items-center justify-center rounded-2xl border border-[rgba(6,78,59,0.15)] p-6 sm:p-8"
 							>
-								<RsvpConfirmation
-									{...rsvpData}
-									onEdit={() => setRsvpData(null)}
-								/>
-							</div>
+								<div style={{ background: COLORS.cream }}>
+									<RsvpConfirmation
+										{...rsvpData}
+										onEdit={() => setRsvpData(null)}
+									/>
+								</div>
+							</Reveal>
 						</div>
 					) : (
 						<div className="relative">
-							<form
-								data-reveal
-								className="dm-reveal rounded-2xl border border-[rgba(61,90,62,0.15)] p-6 sm:p-10"
-								style={{
-									background: COLORS.cream,
-								}}
-								onSubmit={async (event) => {
-									event.preventDefault();
-									if (!onRsvpSubmit || submittingRef.current) return;
-									submittingRef.current = true;
-									setIsSubmitting(true);
+							<Reveal direction="up" duration={0.9}>
+								<form
+									className="rounded-2xl border border-[rgba(6,78,59,0.15)] p-6 sm:p-10"
+									style={{
+										background: COLORS.cream,
+									}}
+									onSubmit={async (event) => {
+										event.preventDefault();
+										if (!onRsvpSubmit || submittingRef.current) return;
+										submittingRef.current = true;
+										setIsSubmitting(true);
 
-									const formData = new FormData(event.currentTarget);
-									const name = String(formData.get("name") ?? "").trim();
-									const email = String(formData.get("email") ?? "").trim();
-									const newErrors: Record<string, string> = {};
-									if (!name) {
-										newErrors.name = "Please enter your name";
-									}
-									if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-										newErrors.email = "Please enter a valid email address";
-									}
-									if (Object.keys(newErrors).length > 0) {
-										setErrors(newErrors);
-										submittingRef.current = false;
-										setIsSubmitting(false);
-										return;
-									}
-									setErrors({});
-									setSubmitError("");
-
-									const rawGuestCount = Number(formData.get("guestCount") ?? 1);
-									const guestCount = Number.isFinite(rawGuestCount)
-										? Math.min(Math.max(rawGuestCount, 1), maxGuests)
-										: 1;
-									const attendance = parseAttendance(
-										formData.get("attendance"),
-									);
-									const dietaryRequirements = String(
-										formData.get("dietary") ?? "",
-									);
-
-									try {
-										await onRsvpSubmit({
-											name,
-											attendance,
-											guestCount,
-											dietaryRequirements,
-											message: String(formData.get("message") ?? ""),
-											email,
-										});
+										const formData = new FormData(event.currentTarget);
+										const name = String(formData.get("name") ?? "").trim();
+										const email = String(formData.get("email") ?? "").trim();
+										const newErrors: Record<string, string> = {};
+										if (!name) {
+											newErrors.name = "Please enter your name";
+										}
+										if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+											newErrors.email = "Please enter a valid email address";
+										}
+										if (Object.keys(newErrors).length > 0) {
+											setErrors(newErrors);
+											submittingRef.current = false;
+											setIsSubmitting(false);
+											return;
+										}
+										setErrors({});
 										setSubmitError("");
-										setRsvpData({
-											name,
-											attendance,
-											guestCount,
-											dietaryRequirements,
-										});
-									} catch {
-										setSubmitError("Something went wrong. Please try again.");
-									} finally {
-										submittingRef.current = false;
-										setIsSubmitting(false);
-									}
-								}}
-							>
-								<div className="grid gap-5">
-									<label
-										className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
-										style={{ color: COLORS.muted }}
-									>
-										<span lang="en">Name</span>
-										<input
-											name="name"
-											placeholder="Your name"
-											autoComplete="name"
-											required
-											maxLength={100}
-											aria-required="true"
-											aria-invalid={!!errors.name}
-											className="rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
-											style={{
-												borderColor: "rgba(61,90,62,0.3)",
-												color: COLORS.dark,
-											}}
-											onBlur={(e) => {
-												if (!e.target.value.trim()) {
-													setErrors((prev) => ({
-														...prev,
-														name: "Please enter your name",
-													}));
-												}
-											}}
-											onChange={() =>
-												setErrors((prev) => {
-													const { name: _, ...rest } = prev;
-													return rest;
-												})
-											}
-										/>
-										{errors.name && (
-											<p className="mt-1 text-xs text-red-500" role="alert">
-												{errors.name}
-											</p>
-										)}
-									</label>
-									<label
-										className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
-										style={{ color: COLORS.muted }}
-									>
-										<span lang="en">Email</span>
-										<input
-											name="email"
-											type="email"
-											placeholder="your@email.com"
-											autoComplete="email"
-											spellCheck={false}
-											aria-invalid={!!errors.email}
-											className="rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
-											style={{
-												borderColor: "rgba(61,90,62,0.3)",
-												color: COLORS.dark,
-											}}
-											onBlur={(e) => {
-												const v = e.target.value.trim();
-												if (v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
-													setErrors((prev) => ({
-														...prev,
-														email: "Please enter a valid email address",
-													}));
-												}
-											}}
-											onChange={() =>
-												setErrors((prev) => {
-													const { email: _, ...rest } = prev;
-													return rest;
-												})
-											}
-										/>
-										{errors.email && (
-											<p className="mt-1 text-xs text-red-500" role="alert">
-												{errors.email}
-											</p>
-										)}
-									</label>
-									<label
-										className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
-										style={{ color: COLORS.muted }}
-									>
-										<span lang="en">Attendance</span>
-										<select
-											name="attendance"
-											defaultValue="attending"
-											className="rounded-lg border bg-white px-4 py-3 text-sm"
-											style={{
-												borderColor: "rgba(61,90,62,0.3)",
-												color: COLORS.dark,
-											}}
+
+										const rawGuestCount = Number(
+											formData.get("guestCount") ?? 1,
+										);
+										const guestCount = Number.isFinite(rawGuestCount)
+											? Math.min(Math.max(rawGuestCount, 1), maxGuests)
+											: 1;
+										const attendance = parseAttendance(
+											formData.get("attendance"),
+										);
+										const dietaryRequirements = String(
+											formData.get("dietary") ?? "",
+										);
+
+										try {
+											await onRsvpSubmit({
+												name,
+												attendance,
+												guestCount,
+												dietaryRequirements,
+												message: String(formData.get("message") ?? ""),
+												email,
+											});
+											setSubmitError("");
+											setRsvpData({
+												name,
+												attendance,
+												guestCount,
+												dietaryRequirements,
+											});
+										} catch {
+											setSubmitError("Something went wrong. Please try again.");
+										} finally {
+											submittingRef.current = false;
+											setIsSubmitting(false);
+										}
+									}}
+								>
+									<div className="grid gap-5">
+										<label
+											className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
+											style={{ color: COLORS.muted }}
 										>
-											<option value="attending">Attending</option>
-											<option value="not_attending">Not Attending</option>
-											<option value="undecided">Undecided</option>
-										</select>
-									</label>
-									<label
-										className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
-										style={{ color: COLORS.muted }}
-									>
-										<span lang="en">Guest Count (Max: {maxGuests})</span>
-										<input
-											name="guestCount"
-											type="number"
-											min={1}
-											max={maxGuests}
-											defaultValue={1}
-											inputMode="numeric"
-											className="rounded-lg border bg-white px-4 py-3 text-sm"
-											style={{
-												borderColor: "rgba(61,90,62,0.3)",
-												color: COLORS.dark,
-											}}
-										/>
-									</label>
-									<label
-										className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
-										style={{ color: COLORS.muted }}
-									>
-										<span>
-											<span lang="en">Dietary Requirements</span>{" "}
-											<span lang="zh-Hans">/ 饮食要求</span>
-										</span>
-										<select
-											name="dietary"
-											defaultValue=""
-											className="rounded-lg border bg-white px-4 py-3 text-sm"
-											style={{
-												borderColor: "rgba(61,90,62,0.3)",
-												color: COLORS.dark,
-											}}
+											<span lang="en">Name</span>
+											<input
+												name="name"
+												placeholder="Your name"
+												autoComplete="name"
+												required
+												maxLength={100}
+												aria-required="true"
+												aria-invalid={!!errors.name}
+												className="rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
+												style={{
+													borderColor: "rgba(6,78,59,0.3)",
+													color: COLORS.dark,
+												}}
+												onBlur={(e) => {
+													if (!e.target.value.trim()) {
+														setErrors((prev) => ({
+															...prev,
+															name: "Please enter your name",
+														}));
+													}
+												}}
+												onChange={() =>
+													setErrors((prev) => {
+														const { name: _, ...rest } = prev;
+														return rest;
+													})
+												}
+											/>
+											{errors.name && (
+												<p className="mt-1 text-xs text-red-500" role="alert">
+													{errors.name}
+												</p>
+											)}
+										</label>
+										<label
+											className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
+											style={{ color: COLORS.muted }}
 										>
-											<option value="">No restrictions</option>
-											<option value="halal">Halal</option>
-											<option value="vegetarian">Vegetarian</option>
-											<option value="no-beef">No Beef</option>
-											<option value="no-seafood">No Seafood</option>
-											<option value="other">Other (specify in message)</option>
-										</select>
-									</label>
-									<label
-										className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
-										style={{ color: COLORS.muted }}
+											<span lang="en">Email</span>
+											<input
+												name="email"
+												type="email"
+												placeholder="your@email.com"
+												autoComplete="email"
+												spellCheck={false}
+												aria-invalid={!!errors.email}
+												className="rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
+												style={{
+													borderColor: "rgba(6,78,59,0.3)",
+													color: COLORS.dark,
+												}}
+												onBlur={(e) => {
+													const v = e.target.value.trim();
+													if (v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
+														setErrors((prev) => ({
+															...prev,
+															email: "Please enter a valid email address",
+														}));
+													}
+												}}
+												onChange={() =>
+													setErrors((prev) => {
+														const { email: _, ...rest } = prev;
+														return rest;
+													})
+												}
+											/>
+											{errors.email && (
+												<p className="mt-1 text-xs text-red-500" role="alert">
+													{errors.email}
+												</p>
+											)}
+										</label>
+										<label
+											className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
+											style={{ color: COLORS.muted }}
+										>
+											<span lang="en">Attendance</span>
+											<select
+												name="attendance"
+												defaultValue="attending"
+												className="rounded-lg border bg-white px-4 py-3 text-sm"
+												style={{
+													borderColor: "rgba(6,78,59,0.3)",
+													color: COLORS.dark,
+												}}
+											>
+												<option value="attending">Attending</option>
+												<option value="not_attending">Not Attending</option>
+												<option value="undecided">Undecided</option>
+											</select>
+										</label>
+										<label
+											className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
+											style={{ color: COLORS.muted }}
+										>
+											<span lang="en">Guest Count (Max: {maxGuests})</span>
+											<input
+												name="guestCount"
+												type="number"
+												min={1}
+												max={maxGuests}
+												defaultValue={1}
+												inputMode="numeric"
+												className="rounded-lg border bg-white px-4 py-3 text-sm"
+												style={{
+													borderColor: "rgba(6,78,59,0.3)",
+													color: COLORS.dark,
+												}}
+											/>
+										</label>
+										<label
+											className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
+											style={{ color: COLORS.muted }}
+										>
+											<span>
+												<span lang="en">Dietary Requirements</span>{" "}
+												<span lang="zh-Hans">/ 饮食要求</span>
+											</span>
+											<select
+												name="dietary"
+												defaultValue=""
+												className="rounded-lg border bg-white px-4 py-3 text-sm"
+												style={{
+													borderColor: "rgba(6,78,59,0.3)",
+													color: COLORS.dark,
+												}}
+											>
+												<option value="">No restrictions</option>
+												<option value="halal">Halal</option>
+												<option value="vegetarian">Vegetarian</option>
+												<option value="no-beef">No Beef</option>
+												<option value="no-seafood">No Seafood</option>
+												<option value="other">
+													Other (specify in message)
+												</option>
+											</select>
+										</label>
+										<label
+											className="flex flex-col gap-2 text-[0.6rem] uppercase tracking-[0.28em]"
+											style={{ color: COLORS.muted }}
+										>
+											<span lang="en">Message</span>
+											<textarea
+												name="message"
+												placeholder="Send your wishes to the couple"
+												autoComplete="off"
+												maxLength={500}
+												className="min-h-24 rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
+												style={{
+													borderColor: "rgba(6,78,59,0.3)",
+													color: COLORS.dark,
+												}}
+											/>
+										</label>
+										<label className="relative mt-2 flex min-h-[44px] cursor-pointer items-start gap-3">
+											<input
+												type="checkbox"
+												name="consent"
+												required
+												aria-describedby={consentDescriptionId}
+												className="mt-0.5 h-4 w-4 rounded border-2 accent-[#064E3B]"
+												style={{
+													borderColor: "rgba(6,78,59,0.3)",
+												}}
+											/>
+											<span
+												id={consentDescriptionId}
+												className="text-xs leading-relaxed"
+												style={{ color: COLORS.muted }}
+												lang="en"
+											>
+												I consent to the collection of my personal data as
+												described in the{" "}
+												<Link
+													to="/privacy"
+													className="underline hover:no-underline"
+													style={{
+														color: COLORS.primary,
+													}}
+													target="_blank"
+													rel="noopener noreferrer"
+												>
+													Privacy Policy
+												</Link>
+											</span>
+										</label>
+									</div>
+
+									{rsvpStatus ? (
+										<output
+											className="mt-4 block text-sm"
+											style={{ color: COLORS.muted }}
+											aria-live="polite"
+										>
+											{rsvpStatus}
+										</output>
+									) : null}
+
+									<button
+										type="submit"
+										disabled={isSubmitting}
+										className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-3.5 text-xs font-semibold uppercase tracking-[0.3em] text-white shadow-sm transition-all hover:shadow-lg active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
+										style={{
+											background: "linear-gradient(135deg, #064E3B, #1C1917)",
+											boxShadow: isSubmitting
+												? undefined
+												: "0 4px 12px rgba(6,78,59,0.2)",
+										}}
 									>
-										<span lang="en">Message</span>
-										<textarea
-											name="message"
-											placeholder="Send your wishes to the couple"
-											autoComplete="off"
-											maxLength={500}
-											className="min-h-24 rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
-											style={{
-												borderColor: "rgba(61,90,62,0.3)",
-												color: COLORS.dark,
-											}}
-										/>
-									</label>
-									<label className="relative mt-2 flex min-h-[44px] cursor-pointer items-start gap-3">
-										<input
-											type="checkbox"
-											name="consent"
-											required
-											aria-describedby={consentDescriptionId}
-											className="mt-0.5 h-4 w-4 rounded border-2 accent-[#3D5A3E]"
-											style={{
-												borderColor: "rgba(61,90,62,0.3)",
-											}}
-										/>
-										<span
-											id={consentDescriptionId}
-											className="text-xs leading-relaxed"
+										{isSubmitting && <LoadingSpinner size="sm" />}
+										{isSubmitting ? "Sending..." : "Send RSVP"}
+									</button>
+
+									{submitError && (
+										<p
+											className="mt-3 text-center text-sm"
+											style={{ color: "#c44" }}
+											role="alert"
+										>
+											{submitError}
+										</p>
+									)}
+
+									{data.couple?.contactPhone && (
+										<a
+											href={`https://wa.me/${data.couple.contactPhone}?text=${encodeURIComponent("Hi, I would like to RSVP for your wedding!")}`}
+											target="_blank"
+											rel="noopener noreferrer"
+											className="mt-3 block text-center text-sm underline"
 											style={{ color: COLORS.muted }}
 											lang="en"
 										>
-											I consent to the collection of my personal data as
-											described in the{" "}
-											<Link
-												to="/privacy"
-												className="underline hover:no-underline"
-												style={{ color: COLORS.primary }}
-												target="_blank"
-												rel="noopener noreferrer"
-											>
-												Privacy Policy
-											</Link>
-										</span>
-									</label>
-								</div>
-
-								{rsvpStatus ? (
-									<output
-										className="mt-4 block text-sm"
-										style={{ color: COLORS.muted }}
-										aria-live="polite"
-									>
-										{rsvpStatus}
-									</output>
-								) : null}
-
-								<button
-									type="submit"
-									disabled={isSubmitting}
-									className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-3.5 text-xs font-semibold uppercase tracking-[0.3em] text-white shadow-sm transition-all hover:shadow-lg active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
-									style={{
-										background: "linear-gradient(135deg, #3D5A3E, #2C3E2C)",
-										boxShadow: isSubmitting
-											? undefined
-											: "0 4px 12px rgba(61,90,62,0.2)",
-									}}
-								>
-									{isSubmitting && <LoadingSpinner size="sm" />}
-									{isSubmitting ? "Sending..." : "Send RSVP"}
-								</button>
-
-								{submitError && (
-									<p
-										className="mt-3 text-center text-sm"
-										style={{ color: "#c44" }}
-										role="alert"
-									>
-										{submitError}
-									</p>
-								)}
-
-								{data.couple?.contactPhone && (
-									<a
-										href={`https://wa.me/${data.couple.contactPhone}?text=${encodeURIComponent("Hi, I would like to RSVP for your wedding!")}`}
-										target="_blank"
-										rel="noopener noreferrer"
-										className="mt-3 block text-center text-sm underline"
-										style={{ color: COLORS.muted }}
-										lang="en"
-									>
-										Or RSVP via WhatsApp
-									</a>
-								)}
-							</form>
+											Or RSVP via WhatsApp
+										</a>
+									)}
+								</form>
+							</Reveal>
 						</div>
 					)}
 				</div>
@@ -1153,7 +1165,7 @@ export default function BotanicalGardenInvitation({
 					hidden={hiddenSections?.gift}
 					onSelect={onSectionSelect}
 					onAiClick={onAiClick}
-					className="bg-section-linen px-6 py-24 sm:px-10"
+					className="bg-section-sage px-6 py-24 sm:px-10"
 				>
 					<div className="mx-auto max-w-md text-center">
 						<SectionTitle
@@ -1164,13 +1176,13 @@ export default function BotanicalGardenInvitation({
 							headingFont={headingFont}
 							accentFont={accentFont}
 						/>
-						<div data-reveal className="dm-reveal mt-8">
+						<Reveal direction="up" duration={0.9} className="mt-8">
 							<AngpowQRCode
 								paymentUrl={data.gift.paymentUrl}
 								paymentMethod={data.gift.paymentMethod}
 								recipientName={data.gift.recipientName}
 							/>
-						</div>
+						</Reveal>
 					</div>
 				</SectionShell>
 			)}
@@ -1184,39 +1196,39 @@ export default function BotanicalGardenInvitation({
 				hidden={hiddenSections?.footer}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="bg-section-linen relative overflow-hidden px-6 pb-20 pt-16 text-center sm:px-10"
+				className="bg-section-sand relative overflow-hidden px-6 pb-20 pt-16 text-center sm:px-10"
 			>
 				<div className="mx-auto max-w-3xl">
-					<div className="bg-leaf-divider mb-10 w-24 mx-auto" />
+					<BotanicalDivider className="mb-10" />
 
-					<div
-						data-reveal
-						className="dm-reveal mt-8 flex justify-center"
-						aria-hidden="true"
-					>
-						<LeafDecoration className="scale-150" />
-					</div>
+					<Reveal direction="up" duration={0.9}>
+						<div className="mt-8 flex justify-center" aria-hidden="true">
+							<BotanicalDivider />
+						</div>
+					</Reveal>
 
-					<p
-						data-reveal
-						{...editableProps(
-							"footer.message",
-							"dm-reveal mt-6 whitespace-pre-line text-lg leading-relaxed",
-						)}
-						style={{ ...headingFont, color: COLORS.dark }}
-						lang="en"
-					>
-						{data.footer.message}
-					</p>
+					<Reveal direction="up" delay={0.1} duration={0.9}>
+						<p
+							{...editableProps(
+								"footer.message",
+								"mt-6 whitespace-pre-line text-lg leading-relaxed",
+							)}
+							style={{ ...headingFont, color: COLORS.dark }}
+							lang="en"
+						>
+							{data.footer.message}
+						</p>
+					</Reveal>
 
 					{data.footer.socialLinks?.hashtag ? (
-						<p
-							data-reveal
-							className="dm-reveal mt-5 text-xs uppercase tracking-[0.28em]"
-							style={{ color: COLORS.muted }}
-						>
-							{data.footer.socialLinks.hashtag}
-						</p>
+						<Reveal direction="up" delay={0.2} duration={0.9}>
+							<p
+								className="mt-5 text-xs uppercase tracking-[0.28em]"
+								style={{ color: COLORS.muted }}
+							>
+								{data.footer.socialLinks.hashtag}
+							</p>
+						</Reveal>
 					) : null}
 				</div>
 			</SectionShell>
