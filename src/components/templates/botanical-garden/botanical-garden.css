@@ -1,0 +1,319 @@
+/* ─── Botanical Garden Template (花园物语) ─── */
+
+/* Root wrapper scopes all template styles */
+.botanical-garden {
+	--t-primary: #3d5a3e;
+	--t-secondary: #2c3e2c;
+	--t-accent: #d4a880;
+	--t-bg: #f7f5f0;
+	--t-text: #2c3e2c;
+	--t-muted: #8a7f7a;
+	--t-bg-alt: #ffffff;
+	--t-accent-light: #e8ddd1;
+	--t-accent-deep: #b8956a;
+	--t-accent-glow: rgba(212, 168, 128, 0.15);
+	--t-sage: #e8ede8;
+	max-width: 430px;
+	margin-left: auto;
+	margin-right: auto;
+	overflow-x: hidden;
+}
+
+@media (min-width: 431px) {
+	.botanical-garden {
+		box-shadow: 0 0 40px rgba(0, 0, 0, 0.08);
+	}
+}
+
+/* ── Off-screen rendering optimization ── */
+.botanical-garden section {
+	content-visibility: auto;
+	contain-intrinsic-size: 0 500px;
+}
+.botanical-garden section:first-of-type {
+	content-visibility: visible;
+}
+
+/* ── Section backgrounds ── */
+.bg-section-linen {
+	background-color: var(--t-bg);
+}
+.bg-section-white {
+	background-color: #ffffff;
+}
+.bg-section-sage {
+	background-color: var(--t-sage);
+}
+
+/* ── Watercolor wash effect ── */
+.bg-watercolor-wash {
+	background-image:
+		radial-gradient(
+			ellipse at 10% 20%,
+			rgba(61, 90, 62, 0.04) 0%,
+			transparent 60%
+		),
+		radial-gradient(
+			ellipse at 90% 80%,
+			rgba(61, 90, 62, 0.04) 0%,
+			transparent 60%
+		);
+}
+
+/* ── Leaf divider ── */
+.bg-leaf-divider {
+	position: relative;
+	height: 1px;
+	background: linear-gradient(
+		90deg,
+		transparent,
+		rgba(61, 90, 62, 0.3),
+		transparent
+	);
+	margin: 0 auto;
+}
+.bg-leaf-divider::after {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%) rotate(45deg);
+	width: 8px;
+	height: 8px;
+	border-radius: 0 50% 50% 50%;
+	background-color: var(--t-primary);
+}
+
+/* ── Gold accent divider ── */
+.bg-gold-accent {
+	height: 1px;
+	background: linear-gradient(
+		90deg,
+		transparent,
+		rgba(212, 168, 128, 0.5),
+		transparent
+	);
+	margin: 0 auto;
+}
+
+/* ── Blockquote accent (announcement section) ── */
+.bg-blockquote {
+	border-left: 3px solid var(--t-accent);
+	padding-left: 1.5rem;
+}
+
+/* ── Timeline vertical line ── */
+.bg-timeline-line {
+	width: 2px;
+	background: linear-gradient(
+		180deg,
+		var(--t-primary),
+		var(--t-accent),
+		var(--t-primary)
+	);
+}
+
+/* ── Timeline dot ── */
+.bg-timeline-dot {
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+	background-color: var(--t-primary);
+	border: 2px solid var(--t-accent);
+	box-shadow: 0 0 0 3px rgba(61, 90, 62, 0.1);
+}
+
+/* ── Milestone card ── */
+.bg-milestone-card {
+	background: #ffffff;
+	border: 1px solid rgba(61, 90, 62, 0.12);
+	border-radius: 12px;
+	padding: 1.25rem;
+	box-shadow: 0 2px 8px rgba(44, 62, 44, 0.05);
+}
+
+/* ── Schedule event card ── */
+.bg-event-card {
+	background: #ffffff;
+	border: 1px solid rgba(61, 90, 62, 0.12);
+	border-radius: 12px;
+	padding: 1.25rem;
+	box-shadow: 0 4px 16px rgba(44, 62, 44, 0.06);
+	display: flex;
+	gap: 1rem;
+}
+
+.bg-event-card-stripe {
+	width: 3px;
+	flex-shrink: 0;
+	border-radius: 9999px;
+	background: linear-gradient(180deg, var(--t-primary), var(--t-accent));
+}
+
+/* ── Botanical photo frame ── */
+.bg-portrait-frame {
+	position: relative;
+	border-radius: 16px;
+	border: 2px solid rgba(61, 90, 62, 0.15);
+	box-shadow: 0 4px 16px rgba(44, 62, 44, 0.06);
+}
+
+/* ── Photo frame with botanical border ── */
+.bg-photo-frame {
+	border: 2px solid rgba(61, 90, 62, 0.15);
+	border-radius: 16px;
+	box-shadow: 0 2px 8px rgba(44, 62, 44, 0.08);
+	overflow: hidden;
+}
+
+/* ── RSVP form focus indicators ── */
+.botanical-garden input:focus-visible,
+.botanical-garden select:focus-visible,
+.botanical-garden textarea:focus-visible {
+	outline: 2px solid #ffffff;
+	outline-offset: 2px;
+	box-shadow: 0 0 0 4px rgba(61, 90, 62, 0.5);
+}
+
+/* ── Scroll reveal animation ──
+   40px translate + 0.9s duration for organic feel */
+.botanical-garden .dm-reveal {
+	opacity: 0;
+	transform: translate3d(0, 40px, 0);
+	will-change: opacity, transform;
+	transition:
+		opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+		transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.botanical-garden .dm-reveal.is-visible {
+	opacity: 1;
+	transform: translate3d(0, 0, 0);
+	will-change: auto;
+}
+
+.botanical-garden .dm-reveal.is-hidden {
+	opacity: 0;
+	transform: translate3d(0, 40px, 0);
+}
+
+/* ── Countdown styling ── */
+.botanical-garden .countdown-widget {
+	text-align: center;
+	padding: 2rem 1.5rem;
+}
+
+.botanical-garden .countdown-date {
+	font-size: 0.875rem;
+	letter-spacing: 0.25em;
+	color: var(--t-muted);
+	margin-bottom: 1.5rem;
+}
+
+.botanical-garden .countdown-date-zh {
+	font-size: 1rem;
+	letter-spacing: 0.3em;
+	color: var(--t-text);
+	margin-bottom: 0.5rem;
+}
+
+.botanical-garden .countdown-units {
+	display: flex;
+	justify-content: center;
+	align-items: flex-start;
+	gap: 0.25rem;
+}
+
+.botanical-garden .countdown-unit-wrapper {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.25rem;
+}
+
+.botanical-garden .countdown-unit {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	min-width: 4.5rem;
+}
+
+.botanical-garden .countdown-value {
+	font-size: 2.5rem;
+	font-weight: 700;
+	line-height: 1.1;
+	color: var(--t-text);
+	font-variant-numeric: tabular-nums;
+}
+
+.botanical-garden .countdown-label {
+	font-size: 0.5625rem;
+	text-transform: uppercase;
+	letter-spacing: 0.3em;
+	color: var(--t-muted);
+	margin-top: 0.5rem;
+}
+
+.botanical-garden .countdown-separator {
+	font-size: 1.75rem;
+	color: var(--t-accent);
+	font-weight: 300;
+	margin-top: 0.25rem;
+}
+
+.botanical-garden .countdown-message {
+	font-size: 1.5rem;
+	font-weight: 700;
+	color: var(--t-text);
+}
+
+.botanical-garden .countdown-timezone {
+	font-size: 0.5625rem;
+	text-transform: uppercase;
+	letter-spacing: 0.2em;
+	color: var(--t-muted);
+	margin-top: 1.25rem;
+}
+
+/* ── Gold shimmer effect ── */
+.bg-gold-shimmer {
+	background: linear-gradient(
+		110deg,
+		var(--t-accent) 0%,
+		var(--t-accent-light) 45%,
+		#fff 50%,
+		var(--t-accent-light) 55%,
+		var(--t-accent) 100%
+	);
+	background-size: 200% 100%;
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+	color: transparent;
+	animation: bg-gold-shimmer 3s ease-in-out infinite;
+}
+
+@keyframes bg-gold-shimmer {
+	0%,
+	100% {
+		background-position: 200% center;
+	}
+	50% {
+		background-position: 0% center;
+	}
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+	.botanical-garden .dm-reveal {
+		/* biome-ignore lint/complexity/noImportantStyles: required for a11y override */
+		opacity: 1 !important;
+		/* biome-ignore lint/complexity/noImportantStyles: required for a11y override */
+		transform: none !important;
+	}
+	.botanical-garden * {
+		/* biome-ignore lint/complexity/noImportantStyles: required for a11y override */
+		animation-duration: 0.01ms !important;
+		/* biome-ignore lint/complexity/noImportantStyles: required for a11y override */
+		transition-duration: 0.01ms !important;
+	}
+}

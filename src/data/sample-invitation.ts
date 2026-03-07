@@ -235,5 +235,145 @@ export function buildSampleContent(templateId: string): InvitationContent {
 			hashtag: "#嘉伟诗琪大婚",
 		};
 	}
+	if (templateId === "romantic-cinematic") {
+		base.hero.partnerOneName = "Wei Jun";
+		base.hero.partnerTwoName = "Mei Ling";
+		base.hero.tagline = "A love story written in the stars";
+		base.hero.heroImageUrl = "/photos/hero-couple.jpg";
+		base.announcement.title = "We're Getting Married";
+		base.announcement.message =
+			"Together with our families, we joyfully invite you to share in our happiness as we exchange wedding vows.\nYour presence would mean the world to us on this special day.";
+		base.announcement.formalText =
+			"诚挚邀请您见证我们的幸福时刻。\n愿与您共同分享这份喜悦与感动。";
+		base.couple.partnerOne = {
+			fullName: "Wei Jun",
+			bio: "Steady and thoughtful, always chasing sunsets.\nA dreamer who believes in forever.",
+			photoUrl: "/photos/groom-portrait.jpg",
+		};
+		base.couple.partnerTwo = {
+			fullName: "Mei Ling",
+			bio: "Warm-hearted, loves travel and photography.\nFinds beauty in every little moment.",
+			photoUrl: "/photos/bride-portrait.jpg",
+		};
+		base.couple.contactPhone = "60123456789";
+		base.story.milestones = [
+			{
+				date: "2019",
+				title: "First Glance \u00B7 \u521D\u89C1",
+				description:
+					"A chance encounter at a rooftop cafe.\nOne smile, and the world stood still.",
+				photoUrl: "/photos/candid-laugh.jpg",
+			},
+			{
+				date: "2021",
+				title: "Falling Deep \u00B7 \u76F8\u604B",
+				description:
+					"Late-night conversations, sunrise hikes, and a love that grew with every shared moment.",
+				photoUrl: "/photos/couple-walking.jpg",
+			},
+			{
+				date: "2024",
+				title: "The Promise \u00B7 \u627F\u8BFA",
+				description:
+					"Under a canopy of stars, he asked. She said yes.\nForever begins now.",
+				photoUrl: "/photos/ceremony-moment.jpg",
+			},
+			{
+				date: "2025",
+				title: "Forever After \u00B7 \u6C38\u8FDC",
+				description:
+					"Every love story is beautiful, but ours is our favourite.\n\u5F80\u540E\u4F59\u751F\uFF0C\u56DB\u5B63\u4E0E\u4F60\u3002",
+				photoUrl: "/photos/couple-sunset.jpg",
+			},
+		];
+		base.gallery.photos = [
+			{ url: "/photos/hero-couple.jpg", caption: "Together always" },
+			{ url: "/photos/couple-walking.jpg", caption: "Side by side" },
+			{ url: "/photos/candid-laugh.jpg", caption: "Pure joy" },
+			{ url: "/photos/garden-portrait.jpg", caption: "Golden hour" },
+			{ url: "/photos/couple-sunset.jpg", caption: "Into the sunset" },
+			{ url: "/photos/reception-toast.jpg", caption: "Cheers to love" },
+		];
+		base.schedule.events = [
+			{
+				time: "5:00 PM",
+				title: "Guest Arrival",
+				description: "Welcome & Registration",
+			},
+			{
+				time: "5:30 PM",
+				title: "Wedding Ceremony",
+				description: "Exchange of Vows",
+			},
+			{
+				time: "6:00 PM",
+				title: "Group Photos",
+				description: "Capture the memories",
+			},
+			{
+				time: "7:00 PM",
+				title: "Wedding Banquet",
+				description: "Dinner & Celebrations",
+			},
+			{
+				time: "9:30 PM",
+				title: "After Party",
+				description: "Dancing & Festivities",
+			},
+		];
+		base.footer.message =
+			"Thank you for celebrating with us.\n\u611F\u8C22\u60A8\u7684\u795D\u798F\uFF0C\u671F\u5F85\u4E0E\u60A8\u5728\u5A5A\u793C\u76F8\u89C1\u3002";
+		base.footer.socialLinks = {
+			instagram: "@dreammoments",
+			hashtag: "#WeiJunMeiLing",
+		};
+	}
+	if (templateId === "botanical-garden") {
+		base.hero.partnerOneName = "Emily";
+		base.hero.partnerTwoName = "James";
+		base.hero.tagline = "Where love blooms eternal";
+		base.hero.heroImageUrl = "/photos/hero-couple.jpg";
+		base.announcement.title = "You're Invited";
+		base.announcement.message =
+			"Together with our families, we joyfully invite you to celebrate our union in a garden of love and laughter.";
+		base.announcement.formalText =
+			"诚挚邀请您来见证我们的幸福时刻，与我们共同庆祝爱的花开。";
+		base.couple.partnerOne = {
+			fullName: "Emily Chen",
+			bio: "Loves nature walks, watercolour painting, and Sunday brunch.\nBelieves every garden tells a story.",
+			photoUrl: "/photos/groom-portrait.jpg",
+		};
+		base.couple.partnerTwo = {
+			fullName: "James Wong",
+			bio: "An adventurer at heart who finds peace in the garden.\nAlways chasing the next sunrise.",
+			photoUrl: "/photos/bride-portrait.jpg",
+		};
+		base.story.milestones = [
+			{
+				date: "2019",
+				title: "First Meeting",
+				description:
+					"A chance encounter at the botanical gardens turned a Sunday stroll into the beginning of forever.",
+			},
+			{
+				date: "2021",
+				title: "Growing Together",
+				description:
+					"Through seasons and adventures, our love took root and blossomed into something beautiful.",
+			},
+			{
+				date: "2024",
+				title: "The Proposal",
+				description:
+					"Under a canopy of wisteria, surrounded by the scent of jasmine, he asked and she said yes.",
+			},
+		];
+		base.footer.message =
+			"Thank you for being part of our story.\nLove grows where you plant it.";
+		base.footer.socialLinks = {
+			instagram: "@dreammoments",
+			hashtag: "#EmilyAndJames",
+		};
+	}
 	return base;
 }

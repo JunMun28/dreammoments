@@ -8,6 +8,12 @@ const templateImports: Record<
 > = {
 	"double-happiness": () =>
 		import("./double-happiness/DoubleHappinessInvitation"),
+	"romantic-cinematic": () =>
+		import("./romantic-cinematic/RomanticCinematicInvitation"),
+	"botanical-garden": () =>
+		import("./botanical-garden/BotanicalGardenInvitation"),
+	"classical-chinese": () =>
+		import("./classical-chinese/ClassicalChineseInvitation"),
 };
 
 const templateComponents: Record<
