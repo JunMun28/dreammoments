@@ -26,13 +26,13 @@ import "./botanical-garden.css";
 /* ─── Design Tokens ─── */
 
 const COLORS = {
-	primary: "#064E3B",
-	accent: "#C2571A",
+	primary: "#044430",
+	accent: "#B84A12",
 	cream: "#F5E6D3",
 	dark: "#1C1917",
 	espresso: "#1C1917",
-	accentLight: "#E8DFD0",
-	muted: "#6B5E50",
+	accentLight: "#DDD2C0",
+	muted: "#524539",
 } as const;
 
 /* ─── Typography ─── */

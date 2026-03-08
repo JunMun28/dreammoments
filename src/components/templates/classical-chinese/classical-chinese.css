@@ -2,16 +2,16 @@
 
 /* Root wrapper scopes all template styles */
 .classical-chinese {
-	--t-primary: #d4380d;
+	--t-primary: #c41b00;
 	--t-secondary: #0c0c0c;
-	--t-accent: #b8860b;
+	--t-accent: #c8920f;
 	--t-bg: #f5f0e8;
 	--t-text: #0c0c0c;
-	--t-muted: #6b5e50;
+	--t-muted: #524539;
 	--t-bg-alt: #f5f0e8;
-	--t-accent-light: #e8dfd0;
-	--t-accent-deep: #96700a;
-	--t-accent-glow: rgba(184, 134, 11, 0.15);
+	--t-accent-light: #ddd2c0;
+	--t-accent-deep: #7a5d08;
+	--t-accent-glow: rgba(200, 146, 15, 0.18);
 	max-width: 430px;
 	margin-left: auto;
 	margin-right: auto;

@@ -2,16 +2,16 @@
 
 /* Root wrapper scopes all template styles */
 .romantic-cinematic {
-	--t-primary: #c2566b;
+	--t-primary: #a8354d;
 	--t-secondary: #1a1225;
-	--t-accent: #ddd5e9;
+	--t-accent: #c4b5d4;
 	--t-bg: #f8f5f0;
 	--t-text: #1a1225;
-	--t-muted: #7a6e85;
+	--t-muted: #5c5168;
 	--t-bg-alt: #ffffff;
-	--t-accent-light: #ede8f3;
-	--t-accent-deep: #9e3a50;
-	--t-accent-glow: rgba(221, 213, 233, 0.15);
+	--t-accent-light: #e0d8eb;
+	--t-accent-deep: #7e2538;
+	--t-accent-glow: rgba(168, 53, 77, 0.15);
 	max-width: 430px;
 	margin-left: auto;
 	margin-right: auto;
@@ -112,9 +112,9 @@
 	background: linear-gradient(
 		90deg,
 		transparent,
-		rgba(194, 86, 107, 0.4),
-		rgba(221, 213, 233, 0.3),
-		rgba(194, 86, 107, 0.4),
+		rgba(168, 53, 77, 0.4),
+		rgba(196, 181, 212, 0.3),
+		rgba(168, 53, 77, 0.4),
 		transparent
 	);
 	margin: 0 auto;
@@ -144,13 +144,13 @@
 	border-radius: 50%;
 	background-color: var(--t-accent);
 	border: 2px solid var(--t-primary);
-	box-shadow: 0 0 0 3px rgba(194, 86, 107, 0.1);
+	box-shadow: 0 0 0 3px rgba(168, 53, 77, 0.1);
 }
 
 /* ── Milestone card ── */
 .rc-milestone-card {
 	background: #ffffff;
-	border: 1px solid rgba(194, 86, 107, 0.12);
+	border: 1px solid rgba(168, 53, 77, 0.12);
 	border-radius: 12px;
 	padding: 1.25rem;
 	box-shadow: 0 2px 8px rgba(26, 18, 37, 0.05);
@@ -159,7 +159,7 @@
 /* ── Schedule event card ── */
 .rc-event-card {
 	background: #ffffff;
-	border: 1px solid rgba(194, 86, 107, 0.12);
+	border: 1px solid rgba(168, 53, 77, 0.12);
 	border-radius: 12px;
 	padding: 1.25rem;
 	box-shadow: 0 4px 16px rgba(26, 18, 37, 0.06);
@@ -178,13 +178,13 @@
 .rc-portrait-frame {
 	position: relative;
 	border-radius: 20px;
-	border: 1px solid rgba(194, 86, 107, 0.15);
+	border: 1px solid rgba(168, 53, 77, 0.15);
 	box-shadow: 0 4px 16px rgba(26, 18, 37, 0.06);
 }
 
 /* ── Photo frame ── */
 .rc-photo-frame {
-	border: 1px solid rgba(194, 86, 107, 0.15);
+	border: 1px solid rgba(168, 53, 77, 0.15);
 	box-shadow: 0 2px 8px rgba(26, 18, 37, 0.08);
 }
 
@@ -283,7 +283,7 @@
 	background: linear-gradient(
 		to right,
 		transparent,
-		rgba(194, 86, 107, 0.4),
+		rgba(168, 53, 77, 0.4),
 		transparent
 	);
 }
@@ -291,7 +291,7 @@
 /* ── Love letter parchment card ── */
 .rc-love-letter {
 	background: linear-gradient(135deg, #fdf8f0 0%, #f5ede0 100%);
-	border: 1px solid rgba(194, 86, 107, 0.15);
+	border: 1px solid rgba(168, 53, 77, 0.15);
 	box-shadow:
 		0 4px 20px rgba(26, 18, 37, 0.08),
 		inset 0 1px 0 rgba(255, 255, 255, 0.6);
@@ -319,7 +319,7 @@
 .rc-schedule-card {
 	background: rgba(26, 18, 37, 0.6);
 	backdrop-filter: blur(8px);
-	border: 1px solid rgba(221, 213, 233, 0.1);
+	border: 1px solid rgba(196, 181, 212, 0.1);
 	border-radius: 12px;
 	transition:
 		transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
@@ -328,7 +328,7 @@
 @media (hover: hover) {
 	.rc-schedule-card:hover {
 		transform: translateY(-2px);
-		border-color: rgba(194, 86, 107, 0.3);
+		border-color: rgba(168, 53, 77, 0.3);
 	}
 }
 
@@ -338,14 +338,14 @@
 .romantic-cinematic textarea:focus-visible {
 	outline: 2px solid #ffffff;
 	outline-offset: 2px;
-	box-shadow: 0 0 0 4px rgba(194, 86, 107, 0.5);
+	box-shadow: 0 0 0 4px rgba(168, 53, 77, 0.5);
 }
 
 /* ── Form input focus — aubergine accent ── */
 .rc-form-input:focus {
-	outline: 2px solid var(--rc-primary, #c2566b);
+	outline: 2px solid var(--rc-primary, #a8354d);
 	outline-offset: 2px;
-	box-shadow: 0 0 0 4px rgba(194, 86, 107, 0.12);
+	box-shadow: 0 0 0 4px rgba(168, 53, 77, 0.12);
 }
 
 /* ── Reduced motion ── */

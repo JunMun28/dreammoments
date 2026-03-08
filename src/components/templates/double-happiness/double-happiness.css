@@ -2,16 +2,16 @@
 
 /* Root wrapper scopes all template styles */
 .double-happiness {
-	--t-primary: #e8764b;
+	--t-primary: #d4622a;
 	--t-secondary: #0a1628;
-	--t-accent: #c9a96e;
+	--t-accent: #b8862d;
 	--t-bg: #faf7f2;
 	--t-text: #0a1628;
-	--t-muted: #64748b;
+	--t-muted: #4a5568;
 	--t-bg-alt: #ffffff;
-	--t-accent-light: #e8dfd0;
-	--t-accent-deep: #b8862d;
-	--t-accent-glow: rgba(201, 169, 110, 0.15);
+	--t-accent-light: #e0d4bc;
+	--t-accent-deep: #9a6e1a;
+	--t-accent-glow: rgba(184, 134, 45, 0.18);
 	max-width: 430px;
 	margin-left: auto;
 	margin-right: auto;

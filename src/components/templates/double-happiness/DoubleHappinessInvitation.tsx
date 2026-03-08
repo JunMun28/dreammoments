@@ -30,13 +30,13 @@ import "./double-happiness.css";
 /* ─── Design Tokens ─── */
 
 const COLORS = {
-	primary: "#E8764B",
-	accent: "#C9A96E",
+	primary: "#D4622A",
+	accent: "#B8862D",
 	cream: "#FAF7F2",
 	dark: "#0A1628",
 	espresso: "#0A1628",
-	accentLight: "#E8DFD0",
-	muted: "#64748B",
+	accentLight: "#E0D4BC",
+	muted: "#4A5568",
 } as const;
 
 /* ─── Typography ─── */

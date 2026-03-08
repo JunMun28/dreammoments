@@ -18,13 +18,13 @@ import "./classical-chinese.css";
 /* ─── Design Tokens ─── */
 
 const COLORS = {
-	primary: "#D4380D",
-	accent: "#B8860B",
+	primary: "#C41B00",
+	accent: "#C8920F",
 	cream: "#F5F0E8",
 	dark: "#0C0C0C",
 	espresso: "#0C0C0C",
-	accentLight: "#E8DFD0",
-	muted: "#6B5E50",
+	accentLight: "#DDD2C0",
+	muted: "#524539",
 } as const;
 
 /* ─── Typography ─── */

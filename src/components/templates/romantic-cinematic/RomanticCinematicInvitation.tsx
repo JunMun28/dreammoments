@@ -28,13 +28,13 @@ import "./romantic-cinematic.css";
 /* ─── Design Tokens ─── */
 
 const COLORS = {
-	primary: "#C2566B",
-	accent: "#DDD5E9",
+	primary: "#A8354D",
+	accent: "#C4B5D4",
 	cream: "#F8F5F0",
 	dark: "#1A1225",
 	espresso: "#1A1225",
-	accentLight: "#EDE8F3",
-	muted: "#7A6E85",
+	accentLight: "#E0D8EB",
+	muted: "#5C5168",
 } as const;
 
 /* ─── Typography ─── */
@@ -199,12 +199,12 @@ export default function RomanticCinematicInvitation({
 						<Reveal direction="up" delay={0.4} duration={0.9}>
 							<div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-sm text-white/90">
 								<span
-									className="rounded-full border border-[rgba(221,213,233,0.3)] px-4 py-2"
+									className="rounded-full border border-[rgba(196,181,212,0.3)] px-4 py-2"
 									lang="en"
 								>
 									{weddingDateEn}
 								</span>
-								<span className="rounded-full border border-[rgba(221,213,233,0.3)] px-4 py-2">
+								<span className="rounded-full border border-[rgba(196,181,212,0.3)] px-4 py-2">
 									{data.venue.name}
 								</span>
 							</div>
@@ -621,7 +621,7 @@ export default function RomanticCinematicInvitation({
 
 					<Reveal direction="up" duration={0.9}>
 						<div className="mx-auto mt-8 max-w-md">
-							<div className="rounded-2xl border border-[rgba(194,86,107,0.12)] bg-white p-8 text-center shadow-sm">
+							<div className="rounded-2xl border border-[rgba(168,53,77,0.12)] bg-white p-8 text-center shadow-sm">
 								<h3
 									{...editableProps("venue.name", "text-2xl")}
 									style={{
@@ -664,9 +664,9 @@ export default function RomanticCinematicInvitation({
 											href={`https://www.google.com/maps/search/?api=1&query=${data.venue.coordinates.lat},${data.venue.coordinates.lng}`}
 											target="_blank"
 											rel="noopener noreferrer"
-											className="inline-flex items-center gap-1.5 rounded-full border px-5 py-2.5 text-xs uppercase tracking-[0.15em] transition-colors hover:bg-[rgba(194,86,107,0.05)]"
+											className="inline-flex items-center gap-1.5 rounded-full border px-5 py-2.5 text-xs uppercase tracking-[0.15em] transition-colors hover:bg-[rgba(168,53,77,0.05)]"
 											style={{
-												borderColor: "rgba(194,86,107,0.2)",
+												borderColor: "rgba(168,53,77,0.2)",
 												color: COLORS.primary,
 											}}
 											lang="en"
@@ -691,9 +691,9 @@ export default function RomanticCinematicInvitation({
 											href={`https://www.waze.com/ul?ll=${data.venue.coordinates.lat},${data.venue.coordinates.lng}&navigate=yes`}
 											target="_blank"
 											rel="noopener noreferrer"
-											className="inline-flex items-center gap-1.5 rounded-full border px-5 py-2.5 text-xs uppercase tracking-[0.15em] transition-colors hover:bg-[rgba(194,86,107,0.05)]"
+											className="inline-flex items-center gap-1.5 rounded-full border px-5 py-2.5 text-xs uppercase tracking-[0.15em] transition-colors hover:bg-[rgba(168,53,77,0.05)]"
 											style={{
-												borderColor: "rgba(194,86,107,0.2)",
+												borderColor: "rgba(168,53,77,0.2)",
 												color: COLORS.primary,
 											}}
 											lang="en"
@@ -784,7 +784,7 @@ export default function RomanticCinematicInvitation({
 						<Reveal direction="up" duration={0.9}>
 							<div className="mt-8">
 								<div
-									className="flex items-center justify-center rounded-2xl border border-[rgba(194,86,107,0.15)] p-6 sm:p-8"
+									className="flex items-center justify-center rounded-2xl border border-[rgba(168,53,77,0.15)] p-6 sm:p-8"
 									style={{ background: COLORS.cream }}
 								>
 									<RsvpConfirmation
@@ -798,7 +798,7 @@ export default function RomanticCinematicInvitation({
 						<Reveal direction="up" duration={0.9}>
 							<div className="mt-8">
 								<form
-									className="rounded-2xl border border-[rgba(194,86,107,0.15)] p-6 text-left sm:p-10"
+									className="rounded-2xl border border-[rgba(168,53,77,0.15)] p-6 text-left sm:p-10"
 									style={{ background: COLORS.cream }}
 									onSubmit={async (event) => {
 										event.preventDefault();
@@ -878,7 +878,7 @@ export default function RomanticCinematicInvitation({
 												aria-invalid={!!errors.name}
 												className="rc-form-input rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
 												style={{
-													borderColor: "rgba(194,86,107,0.2)",
+													borderColor: "rgba(168,53,77,0.2)",
 													color: COLORS.dark,
 												}}
 												onBlur={(e) => {
@@ -916,7 +916,7 @@ export default function RomanticCinematicInvitation({
 												aria-invalid={!!errors.email}
 												className="rc-form-input rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
 												style={{
-													borderColor: "rgba(194,86,107,0.2)",
+													borderColor: "rgba(168,53,77,0.2)",
 													color: COLORS.dark,
 												}}
 												onBlur={(e) => {
@@ -951,7 +951,7 @@ export default function RomanticCinematicInvitation({
 												defaultValue="attending"
 												className="rc-form-input rounded-lg border bg-white px-4 py-3 text-sm"
 												style={{
-													borderColor: "rgba(194,86,107,0.2)",
+													borderColor: "rgba(168,53,77,0.2)",
 													color: COLORS.dark,
 												}}
 											>
@@ -974,7 +974,7 @@ export default function RomanticCinematicInvitation({
 												inputMode="numeric"
 												className="rc-form-input rounded-lg border bg-white px-4 py-3 text-sm"
 												style={{
-													borderColor: "rgba(194,86,107,0.2)",
+													borderColor: "rgba(168,53,77,0.2)",
 													color: COLORS.dark,
 												}}
 											/>
@@ -992,7 +992,7 @@ export default function RomanticCinematicInvitation({
 												defaultValue=""
 												className="rc-form-input rounded-lg border bg-white px-4 py-3 text-sm"
 												style={{
-													borderColor: "rgba(194,86,107,0.2)",
+													borderColor: "rgba(168,53,77,0.2)",
 													color: COLORS.dark,
 												}}
 											>
@@ -1018,7 +1018,7 @@ export default function RomanticCinematicInvitation({
 												maxLength={500}
 												className="rc-form-input min-h-24 rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
 												style={{
-													borderColor: "rgba(194,86,107,0.2)",
+													borderColor: "rgba(168,53,77,0.2)",
 													color: COLORS.dark,
 												}}
 											/>
@@ -1029,9 +1029,9 @@ export default function RomanticCinematicInvitation({
 												name="consent"
 												required
 												aria-describedby={consentDescriptionId}
-												className="mt-0.5 h-4 w-4 rounded border-2 accent-[#C2566B]"
+												className="mt-0.5 h-4 w-4 rounded border-2 accent-[#A8354D]"
 												style={{
-													borderColor: "rgba(194,86,107,0.3)",
+													borderColor: "rgba(168,53,77,0.3)",
 												}}
 											/>
 											<span
@@ -1072,10 +1072,10 @@ export default function RomanticCinematicInvitation({
 										disabled={isSubmitting}
 										className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-3.5 text-xs font-semibold uppercase tracking-[0.3em] text-white shadow-sm transition-all hover:shadow-lg active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
 										style={{
-											background: "linear-gradient(135deg, #C2566B, #9E3A50)",
+											background: "linear-gradient(135deg, #A8354D, #7E2538)",
 											boxShadow: isSubmitting
 												? undefined
-												: "0 4px 12px rgba(194,86,107,0.2)",
+												: "0 4px 12px rgba(168,53,77,0.2)",
 										}}
 									>
 										{isSubmitting && <LoadingSpinner size="sm" />}

@@ -2,17 +2,17 @@
 
 /* Root wrapper scopes all template styles */
 .botanical-garden {
-	--t-primary: #064e3b;
+	--t-primary: #044430;
 	--t-secondary: #1c1917;
-	--t-accent: #c2571a;
+	--t-accent: #b84a12;
 	--t-bg: #f5e6d3;
 	--t-text: #1c1917;
-	--t-muted: #6b5e50;
-	--t-bg-alt: #e8f0e8;
-	--t-accent-light: #e8dfd0;
-	--t-accent-deep: #a34815;
-	--t-accent-glow: rgba(194, 87, 26, 0.15);
-	--t-sage: #e8f0e8;
+	--t-muted: #524539;
+	--t-bg-alt: #dde8dd;
+	--t-accent-light: #ddd2c0;
+	--t-accent-deep: #8f3a0e;
+	--t-accent-glow: rgba(184, 74, 18, 0.18);
+	--t-sage: #dde8dd;
 	max-width: 430px;
 	margin-left: auto;
 	margin-right: auto;
