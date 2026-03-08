@@ -20,7 +20,6 @@ import {
 } from "../RsvpConfirmation";
 import SectionShell from "../SectionShell";
 import SectionTitle from "../SectionTitle";
-import SwiperGallery from "../SwiperGallery";
 import type { TemplateInvitationProps } from "../types";
 import "./botanical-garden.css";
 
@@ -226,99 +225,7 @@ export default function BotanicalGardenInvitation({
 			</SectionShell>
 
 			{/* ════════════════════════════════════════════
-			    2. COUNTDOWN
-			    ════════════════════════════════════════════ */}
-			<SectionShell
-				sectionId="countdown"
-				mode={mode}
-				hidden={hiddenSections?.countdown}
-				onSelect={onSectionSelect}
-				onAiClick={onAiClick}
-				className="bg-section-sand relative overflow-hidden px-6 py-16 sm:px-10"
-			>
-				<div className="mx-auto max-w-sm">
-					<BotanicalDivider className="mb-8" />
-					<Reveal direction="up" duration={0.9}>
-						<CountdownWidget
-							targetDate={data.hero.date}
-							eventTime={data.schedule.events[0]?.time}
-							displayDate={data.hero.date}
-						/>
-					</Reveal>
-					<BotanicalDivider className="mt-8" />
-				</div>
-			</SectionShell>
-
-			{/* ════════════════════════════════════════════
-			    3. ANNOUNCEMENT — Bilingual formal greeting
-			    ════════════════════════════════════════════ */}
-			<SectionShell
-				sectionId="announcement"
-				mode={mode}
-				hidden={hiddenSections?.announcement}
-				onSelect={onSectionSelect}
-				onAiClick={onAiClick}
-				className="bg-section-sage bg-watercolor-wash relative overflow-hidden px-6 py-24 sm:px-10"
-			>
-				<div className="mx-auto max-w-3xl text-center">
-					<BotanicalDivider className="mb-10" />
-
-					<Reveal direction="up" duration={0.9}>
-						<p
-							className="text-sm tracking-[0.5em]"
-							style={{ ...headingFont, color: COLORS.primary }}
-							lang="en"
-						>
-							TOGETHER WITH OUR FAMILIES
-						</p>
-					</Reveal>
-
-					<Reveal direction="up" delay={0.1} duration={0.9}>
-						<h2
-							{...editableProps(
-								"announcement.title",
-								"mt-6 text-4xl sm:text-5xl",
-							)}
-							style={{ ...accentFont, color: COLORS.dark }}
-							lang="en"
-						>
-							{data.announcement.title}
-						</h2>
-					</Reveal>
-
-					<Reveal direction="up" delay={0.2} duration={0.9}>
-						<div className="mx-auto mt-8 max-w-2xl rounded-lg border border-[rgba(6,78,59,0.08)] bg-gradient-to-b from-white/50 to-transparent p-8">
-							<div className="bg-blockquote mx-auto max-w-2xl text-left">
-								<p
-									{...editableProps(
-										"announcement.message",
-										"whitespace-pre-line text-base leading-relaxed",
-									)}
-									style={{ color: COLORS.dark }}
-									lang="en"
-								>
-									{data.announcement.message}
-								</p>
-							</div>
-
-							<p
-								{...editableProps(
-									"announcement.formalText",
-									"mx-auto mt-6 max-w-2xl text-sm leading-relaxed",
-								)}
-								style={{ color: COLORS.muted }}
-							>
-								{data.announcement.formalText}
-							</p>
-						</div>
-					</Reveal>
-
-					<BotanicalDivider className="mt-10" />
-				</div>
-			</SectionShell>
-
-			{/* ════════════════════════════════════════════
-			    4. COUPLE — Botanical portrait frames
+			    2. COUPLE — Asymmetric layout (60/40 offset)
 			    ════════════════════════════════════════════ */}
 			<SectionShell
 				sectionId="couple"
@@ -338,106 +245,77 @@ export default function BotanicalGardenInvitation({
 						accentFont={accentFont}
 					/>
 
-					<Stagger
-						interval={0.15}
-						direction="up"
-						className="mt-14 grid gap-12 sm:grid-cols-2"
-					>
-						{/* Partner One */}
-						<div className="text-center">
-							<div className="bg-portrait-frame mx-auto h-72 w-56 overflow-hidden">
-								<img
-									src={data.couple.partnerOne.photoUrl || PLACEHOLDER_PHOTO}
-									alt={`${data.couple.partnerOne.fullName}`}
-									loading="lazy"
-									decoding="async"
-									className="h-full w-full object-cover"
-									onError={(e) => {
-										const img = e.target as HTMLImageElement;
-										if (!img.dataset.fallback) {
-											img.dataset.fallback = "true";
-											img.src = PLACEHOLDER_PHOTO;
-										}
-									}}
-								/>
-							</div>
-							<div
-								className="mx-auto mt-4 flex justify-center"
-								aria-hidden="true"
+					<div className="mx-auto mt-14 max-w-3xl">
+						<div className="flex flex-col items-center gap-8 sm:flex-row sm:items-start">
+							<Reveal direction="left" className="sm:w-3/5">
+								<div className="overflow-hidden rounded-2xl">
+									<img
+										src={data.couple.partnerOne.photoUrl || PLACEHOLDER_PHOTO}
+										alt={data.couple.partnerOne.fullName}
+										className="aspect-[3/4] w-full object-cover"
+										loading="lazy"
+										decoding="async"
+									/>
+								</div>
+								<h3
+									{...editableProps(
+										"couple.partnerOne.fullName",
+										"mt-4 text-2xl",
+									)}
+									style={{ ...headingFont, color: COLORS.dark }}
+								>
+									{data.couple.partnerOne.fullName}
+								</h3>
+								<p
+									{...editableProps(
+										"couple.partnerOne.bio",
+										"mt-1 text-sm leading-relaxed whitespace-pre-line",
+									)}
+									style={{ color: COLORS.muted }}
+								>
+									{data.couple.partnerOne.bio}
+								</p>
+							</Reveal>
+							<Reveal
+								direction="right"
+								delay={0.2}
+								className="sm:mt-20 sm:w-2/5"
 							>
-								<BotanicalDivider />
-							</div>
-							<h3
-								{...editableProps(
-									"couple.partnerOne.fullName",
-									"mt-2 text-2xl",
-								)}
-								style={{ ...accentFont, color: COLORS.dark }}
-							>
-								{data.couple.partnerOne.fullName}
-							</h3>
-							<p
-								{...editableProps(
-									"couple.partnerOne.bio",
-									"mt-2 whitespace-pre-line text-sm leading-relaxed",
-								)}
-								style={{ color: COLORS.muted }}
-								lang="en"
-							>
-								{data.couple.partnerOne.bio}
-							</p>
+								<div className="overflow-hidden rounded-2xl">
+									<img
+										src={data.couple.partnerTwo.photoUrl || PLACEHOLDER_PHOTO}
+										alt={data.couple.partnerTwo.fullName}
+										className="aspect-[3/4] w-full object-cover"
+										loading="lazy"
+										decoding="async"
+									/>
+								</div>
+								<h3
+									{...editableProps(
+										"couple.partnerTwo.fullName",
+										"mt-4 text-2xl",
+									)}
+									style={{ ...headingFont, color: COLORS.dark }}
+								>
+									{data.couple.partnerTwo.fullName}
+								</h3>
+								<p
+									{...editableProps(
+										"couple.partnerTwo.bio",
+										"mt-1 text-sm leading-relaxed whitespace-pre-line",
+									)}
+									style={{ color: COLORS.muted }}
+								>
+									{data.couple.partnerTwo.bio}
+								</p>
+							</Reveal>
 						</div>
-
-						{/* Partner Two */}
-						<div className="text-center">
-							<div className="bg-portrait-frame mx-auto h-72 w-56 overflow-hidden">
-								<img
-									src={data.couple.partnerTwo.photoUrl || PLACEHOLDER_PHOTO}
-									alt={`${data.couple.partnerTwo.fullName}`}
-									loading="lazy"
-									decoding="async"
-									className="h-full w-full object-cover"
-									onError={(e) => {
-										const img = e.target as HTMLImageElement;
-										if (!img.dataset.fallback) {
-											img.dataset.fallback = "true";
-											img.src = PLACEHOLDER_PHOTO;
-										}
-									}}
-								/>
-							</div>
-							<div
-								className="mx-auto mt-4 flex justify-center"
-								aria-hidden="true"
-							>
-								<BotanicalDivider />
-							</div>
-							<h3
-								{...editableProps(
-									"couple.partnerTwo.fullName",
-									"mt-2 text-2xl",
-								)}
-								style={{ ...accentFont, color: COLORS.dark }}
-							>
-								{data.couple.partnerTwo.fullName}
-							</h3>
-							<p
-								{...editableProps(
-									"couple.partnerTwo.bio",
-									"mt-2 whitespace-pre-line text-sm leading-relaxed",
-								)}
-								style={{ color: COLORS.muted }}
-								lang="en"
-							>
-								{data.couple.partnerTwo.bio}
-							</p>
-						</div>
-					</Stagger>
+					</div>
 				</div>
 			</SectionShell>
 
 			{/* ════════════════════════════════════════════
-			    5. STORY — Timeline with botanical styling
+			    3. STORY — Timeline with botanical styling
 			    ════════════════════════════════════════════ */}
 			<SectionShell
 				sectionId="story"
@@ -513,7 +391,7 @@ export default function BotanicalGardenInvitation({
 			</SectionShell>
 
 			{/* ════════════════════════════════════════════
-			    6. GALLERY — Swiper with bloom-in stagger
+			    4. GALLERY — Polaroid scattered photos
 			    ════════════════════════════════════════════ */}
 			<SectionShell
 				sectionId="gallery"
@@ -533,20 +411,143 @@ export default function BotanicalGardenInvitation({
 						accentFont={accentFont}
 					/>
 
-					<Reveal direction="scale" duration={0.9} className="mt-12">
-						<SwiperGallery
-							photos={data.gallery.photos.map((p) => ({
-								url: p.url,
-								caption: p.caption,
-							}))}
-							primaryColor={COLORS.primary}
-						/>
-					</Reveal>
+					<div className="mx-auto mt-12 grid max-w-4xl grid-cols-2 gap-6 sm:grid-cols-3">
+						{data.gallery.photos.map((photo, i) => {
+							const rotations = [-2, 1.5, -1, 2, -1.5, 0.5];
+							const rotation = rotations[i % rotations.length];
+							return (
+								<Reveal key={photo.url} direction="scale" delay={i * 0.08}>
+									<div
+										className="bg-white p-2 shadow-md transition-transform duration-300"
+										style={{ transform: `rotate(${rotation}deg)` }}
+									>
+										<img
+											src={photo.url || PLACEHOLDER_PHOTO}
+											alt={photo.caption || "Wedding photo"}
+											className="aspect-square w-full object-cover"
+											loading="lazy"
+											decoding="async"
+										/>
+										{photo.caption && (
+											<p
+												className="pb-1 pt-2 text-center text-xs"
+												style={{
+													...headingFont,
+													color: COLORS.muted,
+												}}
+											>
+												{photo.caption}
+											</p>
+										)}
+									</div>
+								</Reveal>
+							);
+						})}
+					</div>
 				</div>
 			</SectionShell>
 
 			{/* ════════════════════════════════════════════
-			    7. SCHEDULE — Event cards with emerald left border
+			    5. DRESS CODE — Visual guide with color swatches
+			    ════════════════════════════════════════════ */}
+			{data.dressCode && (
+				<SectionShell
+					sectionId="extra"
+					mode={mode}
+					hidden={hiddenSections?.extra}
+					onSelect={onSectionSelect}
+					onAiClick={onAiClick}
+					className="bg-section-sage relative overflow-hidden px-6 py-20 sm:px-10"
+				>
+					<div className="mx-auto max-w-lg text-center">
+						<SectionTitle
+							zhLabel="着装指南"
+							enHeading="Dress Code"
+							primaryColor={COLORS.primary}
+							darkColor={COLORS.dark}
+							headingFont={headingFont}
+							accentFont={accentFont}
+						/>
+						<BotanicalDivider className="my-8" />
+						<Reveal direction="up">
+							<p
+								className="text-base leading-relaxed"
+								style={{ color: COLORS.dark }}
+							>
+								{data.dressCode.guidelines}
+							</p>
+						</Reveal>
+						<div className="mt-8 grid grid-cols-2 gap-6">
+							<Reveal direction="left">
+								<div>
+									<p
+										className="text-sm font-medium"
+										style={{ color: COLORS.primary }}
+									>
+										Wear these colours
+									</p>
+									<div className="mt-3 flex flex-wrap justify-center gap-2">
+										{data.dressCode.doColors.map((c) => (
+											<span
+												key={c}
+												className="rounded-full border bg-white px-3 py-1 text-xs"
+												style={{
+													borderColor: "rgba(6,78,59,0.15)",
+													color: COLORS.dark,
+												}}
+											>
+												{c}
+											</span>
+										))}
+									</div>
+								</div>
+							</Reveal>
+							<Reveal direction="right">
+								<div>
+									<p
+										className="text-sm font-medium"
+										style={{ color: COLORS.accent }}
+									>
+										Please avoid
+									</p>
+									<div className="mt-3 flex flex-wrap justify-center gap-2">
+										{data.dressCode.dontColors.map((c) => (
+											<span
+												key={c}
+												className="rounded-full border bg-white px-3 py-1 text-xs line-through opacity-60"
+												style={{
+													borderColor: "rgba(194,87,26,0.15)",
+													color: COLORS.dark,
+												}}
+											>
+												{c}
+											</span>
+										))}
+									</div>
+								</div>
+							</Reveal>
+						</div>
+						{data.dressCode.tips.length > 0 && (
+							<Reveal direction="up" delay={0.2}>
+								<ul
+									className="mt-8 space-y-2 text-left text-sm"
+									style={{ color: COLORS.muted }}
+								>
+									{data.dressCode.tips.map((tip) => (
+										<li key={tip} className="flex gap-2">
+											<span style={{ color: COLORS.primary }}>&#10022;</span>
+											{tip}
+										</li>
+									))}
+								</ul>
+							</Reveal>
+						)}
+					</div>
+				</SectionShell>
+			)}
+
+			{/* ════════════════════════════════════════════
+			    6. SCHEDULE — Event cards with emerald left border
 			    ════════════════════════════════════════════ */}
 			<SectionShell
 				sectionId="schedule"
@@ -611,7 +612,7 @@ export default function BotanicalGardenInvitation({
 			</SectionShell>
 
 			{/* ════════════════════════════════════════════
-			    8. VENUE — Clean card with emerald buttons
+			    7. VENUE — Clean card with emerald buttons
 			    ════════════════════════════════════════════ */}
 			<SectionShell
 				sectionId="venue"
@@ -737,6 +738,30 @@ export default function BotanicalGardenInvitation({
 							) : null}
 						</div>
 					</Reveal>
+				</div>
+			</SectionShell>
+
+			{/* ════════════════════════════════════════════
+			    8. COUNTDOWN
+			    ════════════════════════════════════════════ */}
+			<SectionShell
+				sectionId="countdown"
+				mode={mode}
+				hidden={hiddenSections?.countdown}
+				onSelect={onSectionSelect}
+				onAiClick={onAiClick}
+				className="bg-section-sand relative overflow-hidden px-6 py-16 sm:px-10"
+			>
+				<div className="mx-auto max-w-sm">
+					<BotanicalDivider className="mb-8" />
+					<Reveal direction="up" duration={0.9}>
+						<CountdownWidget
+							targetDate={data.hero.date}
+							eventTime={data.schedule.events[0]?.time}
+							displayDate={data.hero.date}
+						/>
+					</Reveal>
+					<BotanicalDivider className="mt-8" />
 				</div>
 			</SectionShell>
 
@@ -1156,39 +1181,7 @@ export default function BotanicalGardenInvitation({
 			</SectionShell>
 
 			{/* ════════════════════════════════════════════
-			    10. GIFT — Digital angpow
-			    ════════════════════════════════════════════ */}
-			{data.gift && (
-				<SectionShell
-					sectionId="gift"
-					mode={mode}
-					hidden={hiddenSections?.gift}
-					onSelect={onSectionSelect}
-					onAiClick={onAiClick}
-					className="bg-section-sage px-6 py-24 sm:px-10"
-				>
-					<div className="mx-auto max-w-md text-center">
-						<SectionTitle
-							zhLabel="礼 金 祝 福"
-							enHeading="Digital Angpow"
-							primaryColor={COLORS.primary}
-							darkColor={COLORS.dark}
-							headingFont={headingFont}
-							accentFont={accentFont}
-						/>
-						<Reveal direction="up" duration={0.9} className="mt-8">
-							<AngpowQRCode
-								paymentUrl={data.gift.paymentUrl}
-								paymentMethod={data.gift.paymentMethod}
-								recipientName={data.gift.recipientName}
-							/>
-						</Reveal>
-					</div>
-				</SectionShell>
-			)}
-
-			{/* ════════════════════════════════════════════
-			    11. FOOTER — Botanical closing
+			    10. FOOTER — Botanical closing (gift merged)
 			    ════════════════════════════════════════════ */}
 			<SectionShell
 				sectionId="footer"
@@ -1220,6 +1213,18 @@ export default function BotanicalGardenInvitation({
 						</p>
 					</Reveal>
 
+					{data.gift && (
+						<Reveal direction="up" delay={0.15} duration={0.9}>
+							<div className="mt-10">
+								<AngpowQRCode
+									paymentUrl={data.gift.paymentUrl}
+									paymentMethod={data.gift.paymentMethod}
+									recipientName={data.gift.recipientName}
+								/>
+							</div>
+						</Reveal>
+					)}
+
 					{data.footer.socialLinks?.hashtag ? (
 						<Reveal direction="up" delay={0.2} duration={0.9}>
 							<p
@@ -1242,7 +1247,7 @@ export default function BotanicalGardenInvitation({
 					primaryColor={COLORS.primary}
 					onGiftClick={() =>
 						document
-							.getElementById("gift")
+							.getElementById("footer")
 							?.scrollIntoView({ behavior: "smooth" })
 					}
 					onMessageClick={() =>

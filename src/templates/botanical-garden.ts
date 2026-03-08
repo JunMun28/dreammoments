@@ -74,39 +74,10 @@ export const botanicalGardenTemplate: TemplateConfig = {
 			],
 		},
 		{
-			id: "announcement",
-			type: "announcement",
-			defaultVisible: true,
-			notes: "Bilingual formal invitation copy with botanical accents.",
-			fields: [
-				{
-					id: "title",
-					label: "Title",
-					type: "text",
-					sample: "You're Invited",
-					required: true,
-				},
-				{
-					id: "message",
-					label: "Invitation message",
-					type: "textarea",
-					sample:
-						"Together with our families, we joyfully invite you to celebrate our union.",
-				},
-				{
-					id: "formalText",
-					label: "Formal text (Chinese)",
-					type: "textarea",
-					sample: "诚挚邀请您来见证我们的幸福时刻。",
-				},
-			],
-		},
-		{
 			id: "couple",
 			type: "couple",
 			defaultVisible: true,
-			notes:
-				"Side-by-side portraits with terracotta double-border botanical frames.",
+			notes: "Asymmetric layout (60/40 offset) with rounded portrait photos.",
 			fields: [
 				{
 					id: "partnerOne.fullName",
@@ -163,11 +134,41 @@ export const botanicalGardenTemplate: TemplateConfig = {
 			id: "gallery",
 			type: "gallery",
 			defaultVisible: true,
-			notes: "Swiper gallery with staggered bloom-in reveals.",
+			notes: "Polaroid scattered photos with random rotations.",
 			fields: [
 				{
 					id: "photos",
 					label: "Gallery photos",
+					type: "list",
+				},
+			],
+		},
+		{
+			id: "extra",
+			type: "extra",
+			defaultVisible: true,
+			notes:
+				"Dress Code section with visual guide, color swatches, and styling tips.",
+			fields: [
+				{
+					id: "guidelines",
+					label: "Dress code guidelines",
+					type: "textarea",
+					sample: "Garden semi-formal. Think flowy fabrics and earthy tones.",
+				},
+				{
+					id: "doColors",
+					label: "Recommended colours",
+					type: "list",
+				},
+				{
+					id: "dontColors",
+					label: "Colours to avoid",
+					type: "list",
+				},
+				{
+					id: "tips",
+					label: "Styling tips",
 					type: "list",
 				},
 			],
