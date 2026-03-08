@@ -119,6 +119,34 @@ export interface InvitationContent {
 		paymentMethod: "duitnow" | "paynow" | "tng";
 		recipientName?: string;
 	};
+	/** Template-specific: Double Happiness entourage/wedding party */
+	weddingParty?: {
+		groomsmen: Array<{ name: string; role: string; photoUrl?: string }>;
+		bridesmaids: Array<{ name: string; role: string; photoUrl?: string }>;
+	};
+	/** Template-specific: Romantic Cinematic love letter */
+	loveLetter?: {
+		from: string;
+		message: string;
+	};
+	/** Template-specific: Romantic Cinematic highlights */
+	highlightsReel?: {
+		videoUrl?: string;
+		photos: Array<{ url: string; caption?: string }>;
+	};
+	/** Template-specific: Classical Chinese parents' honor */
+	parentsHonor?: {
+		groomParents: { father: string; mother: string };
+		brideParents: { father: string; mother: string };
+		hostingLine: string;
+	};
+	/** Template-specific: Botanical Garden dress code */
+	dressCode?: {
+		guidelines: string;
+		doColors: string[];
+		dontColors: string[];
+		tips: string[];
+	};
 	musicUrl?: string;
 }
 
