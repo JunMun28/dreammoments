@@ -144,8 +144,8 @@ export function buildSampleContent(templateId: string): InvitationContent {
 	const base = structuredClone(baseSampleContent);
 	if (templateId === "double-happiness") {
 		base.hero.tagline = "始于初见，止于终老";
-		base.hero.partnerOneName = "陈嘉伟";
-		base.hero.partnerTwoName = "林诗琪";
+		base.hero.partnerOneName = "俊明";
+		base.hero.partnerTwoName = "诗婷";
 		base.hero.heroImageUrl = "/photos/hero-couple.jpg";
 		base.announcement.title = "我们结婚啦";
 		base.announcement.message =
@@ -153,12 +153,12 @@ export function buildSampleContent(templateId: string): InvitationContent {
 		base.announcement.formalText =
 			"Together with our families, we joyfully invite you to share in our happiness as we exchange wedding vows.";
 		base.couple.partnerOne = {
-			fullName: "陈嘉伟",
+			fullName: "俊明",
 			bio: "温柔踏实，热爱摄影与旅行。\n喜欢用镜头记录每一个心动瞬间。",
 			photoUrl: "/photos/groom-portrait.jpg",
 		};
 		base.couple.partnerTwo = {
-			fullName: "林诗琪",
+			fullName: "诗婷",
 			bio: "浪漫细腻，喜欢花艺与烘焙。\n相信每一天都值得用心经营。",
 			photoUrl: "/photos/bride-portrait.jpg",
 		};
@@ -168,21 +168,20 @@ export function buildSampleContent(templateId: string): InvitationContent {
 				date: "2020",
 				title: "相遇 · First Meeting",
 				description:
-					"总有些惊奇的际遇，比方说当我遇见你。\n那年秋天的咖啡馆，一场偶然，一个微笑，从此心里多了一个人。",
+					"那年秋天的鸡尾酒吧开幕夜，一杯Old Fashioned，一段爵士乐，从此心里多了一个人。",
 				photoUrl: "/photos/candid-laugh.jpg",
 			},
 			{
 				date: "2022",
 				title: "相恋 · Falling in Love",
 				description:
-					"和你在一起就是最好的日子。\n三餐四季，柴米油盐，平凡的日常因为有你而闪闪发光。",
+					"从Art Deco建筑巡礼到深夜爵士酒吧，每一次约会都是一场精心策划的冒险。",
 				photoUrl: "/photos/couple-walking.jpg",
 			},
 			{
 				date: "2024",
 				title: "相守 · The Promise",
-				description:
-					"人生其实只要两次幸运就好，一次遇见你，一次是走到底。\n以岁月为证，以白首为期。",
+				description: "在我们最爱的那家酒吧，萨克斯风响起的瞬间，他单膝跪下。",
 				photoUrl: "/photos/ceremony-moment.jpg",
 			},
 			{
@@ -193,6 +192,18 @@ export function buildSampleContent(templateId: string): InvitationContent {
 				photoUrl: "/photos/couple-sunset.jpg",
 			},
 		];
+		base.weddingParty = {
+			groomsmen: [
+				{ name: "张伟豪", role: "Best Man" },
+				{ name: "李建国", role: "Groomsman" },
+				{ name: "王志强", role: "Groomsman" },
+			],
+			bridesmaids: [
+				{ name: "陈美玲", role: "Maid of Honor" },
+				{ name: "黄雅琳", role: "Bridesmaid" },
+				{ name: "刘诗雨", role: "Bridesmaid" },
+			],
+		};
 		base.gallery.photos = [
 			{ url: "/photos/hero-couple.jpg", caption: "执手偕老" },
 			{ url: "/photos/couple-walking.jpg", caption: "并肩同行" },
@@ -232,12 +243,12 @@ export function buildSampleContent(templateId: string): InvitationContent {
 			"往后余生，四季与你。\nFor the rest of our lives, every season with you.";
 		base.footer.socialLinks = {
 			instagram: "@dreammoments",
-			hashtag: "#嘉伟诗琪大婚",
+			hashtag: "#俊明诗婷大婚",
 		};
 	}
 	if (templateId === "classical-chinese") {
-		base.hero.partnerOneName = "张明辉";
-		base.hero.partnerTwoName = "王婉仪";
+		base.hero.partnerOneName = "文杰";
+		base.hero.partnerTwoName = "雅琴";
 		base.hero.tagline = "百年好合 · 永结同心";
 		base.hero.heroImageUrl = "/photos/hero-couple.jpg";
 		base.announcement.title = "谨定于良辰吉日";
@@ -246,12 +257,12 @@ export function buildSampleContent(templateId: string): InvitationContent {
 		base.announcement.formalText =
 			"We respectfully invite you to witness and celebrate our union on this auspicious day.";
 		base.couple.partnerOne = {
-			fullName: "张明辉",
+			fullName: "文杰",
 			bio: "温文尔雅，精于书画，志在四方。\n以诗书为伴，以山水为友。",
 			photoUrl: "/photos/groom-portrait.jpg",
 		};
 		base.couple.partnerTwo = {
-			fullName: "王婉仪",
+			fullName: "雅琴",
 			bio: "端庄贤淑，才华横溢，琴棋书画皆通。\n以花为媒，以茶会友。",
 			photoUrl: "/photos/bride-portrait.jpg",
 		};
@@ -278,21 +289,14 @@ export function buildSampleContent(templateId: string): InvitationContent {
 					"愿得一心人，白首不相离。\n以天地为证，以日月为鉴，许下一生一世的承诺。",
 				photoUrl: "/photos/ceremony-moment.jpg",
 			},
-			{
-				date: "2025",
-				title: "佳期 · The Day",
-				description: "龙凤呈祥，百年好合。\n良辰吉日，共结连理，开启永恒篇章。",
-				photoUrl: "/photos/couple-sunset.jpg",
-			},
 		];
-		base.gallery.photos = [
-			{ url: "/photos/hero-couple.jpg", caption: "琴瑟和鸣" },
-			{ url: "/photos/couple-walking.jpg", caption: "执手偕行" },
-			{ url: "/photos/candid-laugh.jpg", caption: "相视而笑" },
-			{ url: "/photos/garden-portrait.jpg", caption: "花好月圆" },
-			{ url: "/photos/couple-sunset.jpg", caption: "夕阳相伴" },
-			{ url: "/photos/reception-toast.jpg", caption: "举杯同庆" },
-		];
+		base.gallery.photos = [];
+		base.parentsHonor = {
+			groomParents: { father: "张建国", mother: "李淑芬" },
+			brideParents: { father: "王明华", mother: "陈秀英" },
+			hostingLine:
+				"谨订于公历二〇二五年六月十五日（农历五月二十），假座新加坡君悦大酒店，敬备喜筵，恭请光临。",
+		};
 		base.schedule.events = [
 			{
 				time: "5:00 PM",
@@ -324,60 +328,79 @@ export function buildSampleContent(templateId: string): InvitationContent {
 			"百年好合，永结同心。\nA hundred years of harmony, hearts forever entwined.";
 		base.footer.socialLinks = {
 			instagram: "@dreammoments",
-			hashtag: "#明辉婉仪喜结良缘",
+			hashtag: "#文杰雅琴喜结良缘",
 		};
 	}
 	if (templateId === "romantic-cinematic") {
-		base.hero.partnerOneName = "Wei Jun";
-		base.hero.partnerTwoName = "Mei Ling";
+		base.hero.partnerOneName = "Zhi Hao";
+		base.hero.partnerTwoName = "Mei Lin";
 		base.hero.tagline = "A love story written in the stars";
 		base.hero.heroImageUrl = "/photos/hero-couple.jpg";
 		base.announcement.title = "We're Getting Married";
 		base.announcement.message =
-			"Together with our families, we joyfully invite you to share in our happiness as we exchange wedding vows.\nYour presence would mean the world to us on this special day.";
+			"Like the best films, our love story began with a chance encounter and grew into something extraordinary.\nWe invite you to the next chapter.";
 		base.announcement.formalText =
 			"诚挚邀请您见证我们的幸福时刻。\n愿与您共同分享这份喜悦与感动。";
 		base.couple.partnerOne = {
-			fullName: "Wei Jun",
-			bio: "Steady and thoughtful, always chasing sunsets.\nA dreamer who believes in forever.",
+			fullName: "Tan Zhi Hao",
+			bio: "A filmmaker at heart who found his leading lady.\nBelieves every sunset deserves an audience.",
 			photoUrl: "/photos/groom-portrait.jpg",
 		};
 		base.couple.partnerTwo = {
-			fullName: "Mei Ling",
-			bio: "Warm-hearted, loves travel and photography.\nFinds beauty in every little moment.",
+			fullName: "Wong Mei Lin",
+			bio: "Warm-hearted storyteller, chaser of golden hour.\nFinds poetry in the everyday.",
 			photoUrl: "/photos/bride-portrait.jpg",
 		};
 		base.couple.contactPhone = "60123456789";
 		base.story.milestones = [
 			{
 				date: "2019",
-				title: "First Glance \u00B7 \u521D\u89C1",
+				title: "First Glance · 初见",
 				description:
-					"A chance encounter at a rooftop cafe.\nOne smile, and the world stood still.",
+					"A film festival in George Town. Two strangers reaching for the same Wong Kar-wai poster. One smile, and the credits rolled on everything before.",
 				photoUrl: "/photos/candid-laugh.jpg",
 			},
 			{
 				date: "2021",
-				title: "Falling Deep \u00B7 \u76F8\u604B",
+				title: "Falling Deep · 相恋",
 				description:
-					"Late-night conversations, sunrise hikes, and a love that grew with every shared moment.",
+					"Rooftop cinema dates, 3AM conversations about Chungking Express, and a love that developed like film — slowly, beautifully, in the dark.",
 				photoUrl: "/photos/couple-walking.jpg",
 			},
 			{
 				date: "2024",
-				title: "The Promise \u00B7 \u627F\u8BFA",
+				title: "The Promise · 承诺",
 				description:
-					"Under a canopy of stars, he asked. She said yes.\nForever begins now.",
+					"A Taipei sunrise, a vintage ring, and the only question that ever mattered. She said yes before he finished asking.",
 				photoUrl: "/photos/ceremony-moment.jpg",
 			},
 			{
 				date: "2025",
-				title: "Forever After \u00B7 \u6C38\u8FDC",
+				title: "Forever After · 永远",
 				description:
-					"Every love story is beautiful, but ours is our favourite.\n\u5F80\u540E\u4F59\u751F\uFF0C\u56DB\u5B63\u4E0E\u4F60\u3002",
+					"Every love story is beautiful, but ours is our favourite.\n往后余生，四季与你。",
 				photoUrl: "/photos/couple-sunset.jpg",
 			},
 		];
+		base.loveLetter = {
+			from: "Zhi Hao",
+			message:
+				"Mei Lin,\n\nI used to think the best stories were on screen. Then I met you, and realised ours was the one I'd been waiting to tell.\n\nYou are my favourite scene, my best take, my forever reel.\n\nSee you at the altar.\n\n— Z.H.",
+		};
+		base.highlightsReel = {
+			photos: [
+				{ url: "/photos/candid-laugh.jpg", caption: "The way she laughs" },
+				{ url: "/photos/couple-walking.jpg", caption: "Sunday strolls" },
+				{
+					url: "/photos/ceremony-moment.jpg",
+					caption: "That golden hour",
+				},
+				{
+					url: "/photos/couple-sunset.jpg",
+					caption: "Our favourite ending",
+				},
+			],
+		};
 		base.gallery.photos = [
 			{ url: "/photos/hero-couple.jpg", caption: "Together always" },
 			{ url: "/photos/couple-walking.jpg", caption: "Side by side" },
@@ -414,15 +437,15 @@ export function buildSampleContent(templateId: string): InvitationContent {
 			},
 		];
 		base.footer.message =
-			"Thank you for celebrating with us.\n\u611F\u8C22\u60A8\u7684\u795D\u798F\uFF0C\u671F\u5F85\u4E0E\u60A8\u5728\u5A5A\u793C\u76F8\u89C1\u3002";
+			"Thank you for celebrating with us.\n感谢您的祝福，期待与您在婚礼相见。";
 		base.footer.socialLinks = {
 			instagram: "@dreammoments",
-			hashtag: "#WeiJunMeiLing",
+			hashtag: "#ZhiHaoMeiLin",
 		};
 	}
 	if (templateId === "botanical-garden") {
-		base.hero.partnerOneName = "Emily";
-		base.hero.partnerTwoName = "James";
+		base.hero.partnerOneName = "Wei Lun";
+		base.hero.partnerTwoName = "Mei Xin";
 		base.hero.tagline = "Where love blooms eternal";
 		base.hero.heroImageUrl = "/photos/hero-couple.jpg";
 		base.announcement.title = "You're Invited";
@@ -431,40 +454,78 @@ export function buildSampleContent(templateId: string): InvitationContent {
 		base.announcement.formalText =
 			"诚挚邀请您来见证我们的幸福时刻，与我们共同庆祝爱的花开。";
 		base.couple.partnerOne = {
-			fullName: "Emily Chen",
-			bio: "Loves nature walks, watercolour painting, and Sunday brunch.\nBelieves every garden tells a story.",
+			fullName: "Lim Wei Lun",
+			bio: "Weekend hiker, weekday engineer.\nBelieves the best views are earned, not given.",
 			photoUrl: "/photos/groom-portrait.jpg",
 		};
 		base.couple.partnerTwo = {
-			fullName: "James Wong",
-			bio: "An adventurer at heart who finds peace in the garden.\nAlways chasing the next sunrise.",
+			fullName: "Chen Mei Xin",
+			bio: "Botanical garden volunteer, watercolour painter.\nFinds magic in morning dew and wildflowers.",
 			photoUrl: "/photos/bride-portrait.jpg",
 		};
+		base.couple.contactPhone = "60123456789";
 		base.story.milestones = [
 			{
 				date: "2019",
 				title: "First Meeting",
 				description:
-					"A chance encounter at the botanical gardens turned a Sunday stroll into the beginning of forever.",
+					"A Saturday morning volunteer shift at the botanical gardens. She was sketching orchids. He was lost looking for the herb garden. Neither left alone.",
 			},
 			{
 				date: "2021",
 				title: "Growing Together",
 				description:
-					"Through seasons and adventures, our love took root and blossomed into something beautiful.",
+					"Waterfall hikes, farmers' market Sundays, and a balcony garden that somehow survived two moves. Our love took root.",
 			},
 			{
 				date: "2024",
 				title: "The Proposal",
 				description:
-					"Under a canopy of wisteria, surrounded by the scent of jasmine, he asked and she said yes.",
+					"A sunrise hike to our favourite hilltop. The mist cleared, the valley glowed gold, and he asked the only question that mattered.",
+			},
+		];
+		base.dressCode = {
+			guidelines: "Garden semi-formal. Think flowy fabrics and earthy tones.",
+			doColors: ["Sage green", "Dusty rose", "Terracotta", "Cream", "Lavender"],
+			dontColors: ["White", "Black", "Bright red"],
+			tips: [
+				"Wear comfortable shoes — the ceremony is on grass",
+				"Bring a light layer for the evening breeze",
+				"Hats and fascinators welcome",
+			],
+		};
+		base.schedule.events = [
+			{
+				time: "4:00 PM",
+				title: "Garden Welcome",
+				description: "Drinks under the pergola",
+			},
+			{
+				time: "4:30 PM",
+				title: "Garden Ceremony",
+				description: "Exchange of vows",
+			},
+			{
+				time: "5:30 PM",
+				title: "Golden Hour Photos",
+				description: "Capture the light",
+			},
+			{
+				time: "6:30 PM",
+				title: "Garden Dinner",
+				description: "Farm-to-table feast",
+			},
+			{
+				time: "9:00 PM",
+				title: "Sparkler Send-Off",
+				description: "Light the way home",
 			},
 		];
 		base.footer.message =
 			"Thank you for being part of our story.\nLove grows where you plant it.";
 		base.footer.socialLinks = {
 			instagram: "@dreammoments",
-			hashtag: "#EmilyAndJames",
+			hashtag: "#WeiLunMeiXin",
 		};
 	}
 	return base;

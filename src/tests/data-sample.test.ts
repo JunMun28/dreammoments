@@ -92,8 +92,8 @@ describe("buildSampleContent", () => {
 	test("customizes for double-happiness template", () => {
 		const content = buildSampleContent("double-happiness");
 		expect(content.hero.tagline).toBe("始于初见，止于终老");
-		expect(content.hero.partnerOneName).toBe("陈嘉伟");
-		expect(content.hero.partnerTwoName).toBe("林诗琪");
+		expect(content.hero.partnerOneName).toBe("俊明");
+		expect(content.hero.partnerTwoName).toBe("诗婷");
 		expect(content.announcement.title).toBe("我们结婚啦");
 	});
 
@@ -103,6 +103,6 @@ describe("buildSampleContent", () => {
 
 		// Modifying one should not affect the other
 		content1.hero.partnerOneName = "Modified";
-		expect(content2.hero.partnerOneName).toBe("陈嘉伟");
+		expect(content2.hero.partnerOneName).toBe("俊明");
 	});
 });
