@@ -16,6 +16,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as UpgradeIndexRouteImport } from './routes/upgrade/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as UpgradeSuccessRouteImport } from './routes/upgrade/success'
+import { Route as PreviewTemplateIdRouteImport } from './routes/preview/$templateId'
 import { Route as InviteSlugRouteImport } from './routes/invite/$slug'
 import { Route as EditorNewRouteImport } from './routes/editor/new'
 import { Route as EditorInvitationIdRouteImport } from './routes/editor/$invitationId'
@@ -57,6 +58,11 @@ const UpgradeSuccessRoute = UpgradeSuccessRouteImport.update({
   path: '/success',
   getParentRoute: () => UpgradeRoute,
 } as any)
+const PreviewTemplateIdRoute = PreviewTemplateIdRouteImport.update({
+  id: '/preview/$templateId',
+  path: '/preview/$templateId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InviteSlugRoute = InviteSlugRouteImport.update({
   id: '/invite/$slug',
   path: '/invite/$slug',
@@ -93,6 +99,7 @@ export interface FileRoutesByFullPath {
   '/editor/$invitationId': typeof EditorInvitationIdRoute
   '/editor/new': typeof EditorNewRoute
   '/invite/$slug': typeof InviteSlugRoute
+  '/preview/$templateId': typeof PreviewTemplateIdRoute
   '/upgrade/success': typeof UpgradeSuccessRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/upgrade/': typeof UpgradeIndexRoute
@@ -106,6 +113,7 @@ export interface FileRoutesByTo {
   '/editor/$invitationId': typeof EditorInvitationIdRoute
   '/editor/new': typeof EditorNewRoute
   '/invite/$slug': typeof InviteSlugRoute
+  '/preview/$templateId': typeof PreviewTemplateIdRoute
   '/upgrade/success': typeof UpgradeSuccessRoute
   '/dashboard': typeof DashboardIndexRoute
   '/upgrade': typeof UpgradeIndexRoute
@@ -121,6 +129,7 @@ export interface FileRoutesById {
   '/editor/$invitationId': typeof EditorInvitationIdRoute
   '/editor/new': typeof EditorNewRoute
   '/invite/$slug': typeof InviteSlugRoute
+  '/preview/$templateId': typeof PreviewTemplateIdRoute
   '/upgrade/success': typeof UpgradeSuccessRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/upgrade/': typeof UpgradeIndexRoute
@@ -137,6 +146,7 @@ export interface FileRouteTypes {
     | '/editor/$invitationId'
     | '/editor/new'
     | '/invite/$slug'
+    | '/preview/$templateId'
     | '/upgrade/success'
     | '/dashboard/'
     | '/upgrade/'
@@ -150,6 +160,7 @@ export interface FileRouteTypes {
     | '/editor/$invitationId'
     | '/editor/new'
     | '/invite/$slug'
+    | '/preview/$templateId'
     | '/upgrade/success'
     | '/dashboard'
     | '/upgrade'
@@ -164,6 +175,7 @@ export interface FileRouteTypes {
     | '/editor/$invitationId'
     | '/editor/new'
     | '/invite/$slug'
+    | '/preview/$templateId'
     | '/upgrade/success'
     | '/dashboard/'
     | '/upgrade/'
@@ -179,6 +191,7 @@ export interface RootRouteChildren {
   EditorInvitationIdRoute: typeof EditorInvitationIdRoute
   EditorNewRoute: typeof EditorNewRoute
   InviteSlugRoute: typeof InviteSlugRoute
+  PreviewTemplateIdRoute: typeof PreviewTemplateIdRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
   EditorCanvasInvitationIdRoute: typeof EditorCanvasInvitationIdRoute
   DashboardInvitationIdIndexRoute: typeof DashboardInvitationIdIndexRoute
@@ -234,6 +247,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/upgrade/success'
       preLoaderRoute: typeof UpgradeSuccessRouteImport
       parentRoute: typeof UpgradeRoute
+    }
+    '/preview/$templateId': {
+      id: '/preview/$templateId'
+      path: '/preview/$templateId'
+      fullPath: '/preview/$templateId'
+      preLoaderRoute: typeof PreviewTemplateIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/invite/$slug': {
       id: '/invite/$slug'
@@ -294,6 +314,7 @@ const rootRouteChildren: RootRouteChildren = {
   EditorInvitationIdRoute: EditorInvitationIdRoute,
   EditorNewRoute: EditorNewRoute,
   InviteSlugRoute: InviteSlugRoute,
+  PreviewTemplateIdRoute: PreviewTemplateIdRoute,
   DashboardIndexRoute: DashboardIndexRoute,
   EditorCanvasInvitationIdRoute: EditorCanvasInvitationIdRoute,
   DashboardInvitationIdIndexRoute: DashboardInvitationIdIndexRoute,

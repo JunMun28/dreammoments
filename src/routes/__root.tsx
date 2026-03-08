@@ -137,7 +137,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 	const { pathname } = useLocation();
 	const router = useRouter();
 	const isFullScreen =
-		pathname.startsWith("/editor/") || pathname.startsWith("/invite/");
+		pathname.startsWith("/editor/") ||
+		pathname.startsWith("/invite/") ||
+		pathname.startsWith("/preview/");
 	const isHome = pathname === "/";
 
 	useEffect(() => {

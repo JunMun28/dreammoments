@@ -126,7 +126,7 @@ export default function BotanicalGardenInvitation({
 				hidden={hiddenSections?.hero}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="relative min-h-[100svh] overflow-hidden"
+				className="relative min-h-[100svh] overflow-hidden bg-[#1C1917]"
 			>
 				<ClipReveal shape="diagonal" className="absolute inset-0">
 					{/* Background image */}

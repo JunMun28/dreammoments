@@ -128,7 +128,7 @@ export default function RomanticCinematicInvitation({
 				hidden={hiddenSections?.hero}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="relative min-h-[100svh] overflow-hidden"
+				className="relative min-h-[100svh] overflow-hidden bg-[#1A1225]"
 			>
 				<ClipReveal shape="curtain" duration={1.4}>
 					{/* Background media */}

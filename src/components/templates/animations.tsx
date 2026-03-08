@@ -525,7 +525,7 @@ export function ClipReveal({
 			className={className}
 			initial={{ clipPath: from, opacity: 0.3 }}
 			whileInView={{ clipPath: to, opacity: 1 }}
-			viewport={{ once: true, amount: 0.2 }}
+			viewport={{ once: true, amount: 0, margin: "50px" }}
 			transition={{
 				clipPath: { duration, ease: [0.16, 1, 0.3, 1], delay },
 				opacity: { duration: duration * 0.5, delay },
