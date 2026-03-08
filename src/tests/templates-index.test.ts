@@ -77,7 +77,7 @@ describe("templates array", () => {
 	});
 
 	test("all categories are valid", () => {
-		const validCategories = ["chinese", "garden", "western"];
+		const validCategories = ["chinese", "garden", "modern", "western"];
 		for (const template of templates) {
 			expect(validCategories).toContain(template.category);
 		}

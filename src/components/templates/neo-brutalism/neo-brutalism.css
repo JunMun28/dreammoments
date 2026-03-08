@@ -1,0 +1,452 @@
+/* ─── Neo Brutalism Template (大胆之爱) ─── */
+/* Template: Neo Brutalism – Soft neo-brutal wedding with warm coral palette */
+
+/* Root wrapper scopes all template styles */
+.neo-brutalism {
+	--t-primary: #ff6b6b;
+	--t-secondary: #1a1a1a;
+	--t-accent: #ffe500;
+	--t-bg: #fff5e6;
+	--t-text: #1a1a1a;
+	--t-muted: #666666;
+	--t-bg-alt: #ffe5e5;
+	--t-accent-light: #fff9c4;
+	--t-accent-deep: #e85d50;
+	--t-accent-glow: rgba(255, 107, 107, 0.18);
+	--t-shadow: #1a1a1a;
+	max-width: 430px;
+	margin-left: auto;
+	margin-right: auto;
+	color: var(--t-text);
+	background-color: var(--t-bg);
+	font-size: 16px;
+	line-height: 1.7;
+	overflow-x: hidden;
+}
+
+@media (min-width: 431px) {
+	.neo-brutalism {
+		box-shadow: 4px 4px 0px var(--t-shadow);
+		border: 2px solid var(--t-secondary);
+	}
+}
+
+/* ── Off-screen rendering optimization ── */
+.neo-brutalism section {
+	content-visibility: auto;
+	contain-intrinsic-size: auto 300px;
+}
+.neo-brutalism section:first-of-type {
+	content-visibility: visible;
+}
+
+/* ── Section backgrounds ── */
+.nb-section-cream {
+	background-color: var(--t-bg);
+}
+.nb-section-pink {
+	background-color: var(--t-bg-alt);
+}
+.nb-section-yellow {
+	background-color: var(--t-accent);
+	color: var(--t-text);
+}
+.nb-section-dark {
+	background-color: var(--t-secondary);
+	color: var(--t-bg);
+}
+.nb-section-white {
+	background-color: #ffffff;
+}
+
+/* ── Grid background for hero ── */
+.nb-grid-bg {
+	background-image:
+		linear-gradient(rgba(26, 26, 26, 0.06) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(26, 26, 26, 0.06) 1px, transparent 1px);
+	background-size: 24px 24px;
+}
+
+/* ── Neo brutal card ── */
+.nb-card {
+	background-color: #ffffff;
+	border: 2px solid var(--t-secondary);
+	border-radius: 6px;
+	box-shadow: 4px 4px 0px var(--t-shadow);
+	transition:
+		transform 150ms ease,
+		box-shadow 150ms ease;
+}
+@media (hover: hover) {
+	.nb-card:hover {
+		transform: translate(-2px, -2px);
+		box-shadow: 6px 6px 0px var(--t-shadow);
+	}
+}
+
+/* ── Neo brutal button ── */
+.nb-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	padding: 0.75rem 1.5rem;
+	font-weight: 700;
+	background-color: var(--t-primary);
+	color: #ffffff;
+	border: 2px solid var(--t-secondary);
+	border-radius: 6px;
+	box-shadow: 4px 4px 0px var(--t-shadow);
+	cursor: pointer;
+	transition:
+		transform 150ms ease,
+		box-shadow 150ms ease;
+}
+@media (hover: hover) {
+	.nb-btn:hover {
+		transform: translate(-2px, -2px);
+		box-shadow: 6px 6px 0px var(--t-shadow);
+	}
+}
+.nb-btn:active {
+	transform: translate(2px, 2px);
+	box-shadow: 0px 0px 0px var(--t-shadow);
+}
+
+/* ── Sticker effect ── */
+.nb-sticker {
+	background-color: #ffffff;
+	border: 2px solid var(--t-secondary);
+	border-radius: 6px;
+	box-shadow: 4px 4px 0px var(--t-shadow);
+	transition:
+		transform 150ms ease,
+		box-shadow 150ms ease;
+}
+.nb-sticker:nth-child(odd) {
+	transform: rotate(-1.5deg);
+}
+.nb-sticker:nth-child(even) {
+	transform: rotate(1.5deg);
+}
+.nb-sticker:nth-child(3n) {
+	transform: rotate(-2.5deg);
+}
+.nb-sticker:nth-child(4n) {
+	transform: rotate(2deg);
+}
+@media (hover: hover) {
+	.nb-sticker:hover {
+		/* biome-ignore lint/complexity/noImportantStyles: override inline rotate */
+		transform: rotate(0deg) translate(-2px, -2px) !important;
+		box-shadow: 6px 6px 0px var(--t-shadow);
+		z-index: 10;
+	}
+}
+
+/* ── Photo frame ── */
+.nb-photo-frame {
+	border: 3px solid var(--t-secondary);
+	border-radius: 4px;
+	box-shadow: 4px 4px 0px var(--t-shadow);
+	overflow: hidden;
+}
+
+/* ── Portrait frame ── */
+.nb-portrait-frame {
+	border: 3px solid var(--t-secondary);
+	border-radius: 12px;
+	box-shadow: 4px 4px 0px var(--t-shadow);
+	overflow: hidden;
+}
+
+/* ── Section divider ── */
+.nb-divider {
+	position: relative;
+	height: 3px;
+	background-color: var(--t-secondary);
+	margin: 0 auto;
+}
+.nb-divider::after {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 10px;
+	height: 10px;
+	background-color: var(--t-primary);
+	border: 2px solid var(--t-secondary);
+}
+
+/* ── Accent divider (coral) ── */
+.nb-accent-divider {
+	height: 3px;
+	background-color: var(--t-primary);
+	margin: 0 auto;
+}
+
+/* ── Blockquote ── */
+.nb-blockquote {
+	border-left: 4px solid var(--t-primary);
+	padding-left: 1.5rem;
+}
+
+/* ── Timeline vertical line ── */
+.nb-timeline-line {
+	width: 3px;
+	background-color: var(--t-secondary);
+}
+
+/* ── Timeline dot ── */
+.nb-timeline-dot {
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+	background-color: var(--t-primary);
+	border: 3px solid var(--t-secondary);
+	box-shadow: 3px 3px 0px var(--t-shadow);
+}
+
+/* ── Milestone card ── */
+.nb-milestone-card {
+	background-color: #ffffff;
+	border: 2px solid var(--t-secondary);
+	border-radius: 6px;
+	padding: 1.25rem;
+	box-shadow: 4px 4px 0px var(--t-shadow);
+}
+
+/* ── Event card (colored left border) ── */
+.nb-event-card {
+	background-color: #ffffff;
+	border: 2px solid var(--t-secondary);
+	border-left: 4px solid var(--t-primary);
+	border-radius: 6px;
+	padding: 1.25rem;
+	box-shadow: 4px 4px 0px var(--t-shadow);
+	display: flex;
+	gap: 1rem;
+	transition:
+		transform 150ms ease,
+		box-shadow 150ms ease;
+}
+@media (hover: hover) {
+	.nb-event-card:hover {
+		transform: translate(-2px, -2px);
+		box-shadow: 6px 6px 0px var(--t-shadow);
+	}
+}
+
+/* ── Schedule card ── */
+.nb-schedule-card {
+	background-color: #ffffff;
+	border: 2px solid var(--t-secondary);
+	border-left: 4px solid var(--t-primary);
+	border-radius: 6px;
+	padding: 1.25rem;
+	box-shadow: 4px 4px 0px var(--t-shadow);
+	transition:
+		transform 150ms ease,
+		box-shadow 150ms ease;
+}
+@media (hover: hover) {
+	.nb-schedule-card:hover {
+		transform: translate(-2px, -2px);
+		box-shadow: 6px 6px 0px var(--t-shadow);
+	}
+}
+
+/* ── Gallery item ── */
+.nb-gallery-item {
+	border: 3px solid var(--t-secondary);
+	border-radius: 4px;
+	box-shadow: 4px 4px 0px var(--t-shadow);
+	overflow: hidden;
+	transition:
+		transform 150ms ease,
+		box-shadow 150ms ease;
+}
+@media (hover: hover) {
+	.nb-gallery-item:hover {
+		/* biome-ignore lint/complexity/noImportantStyles: override inline rotate */
+		transform: rotate(0deg) translate(-2px, -2px) !important;
+		box-shadow: 6px 6px 0px var(--t-shadow);
+		z-index: 10;
+	}
+}
+
+/* ── Form inputs ── */
+.nb-form-input {
+	border: 2px solid var(--t-secondary);
+	border-radius: 6px;
+	padding: 0.75rem 1rem;
+	background-color: #ffffff;
+	transition:
+		box-shadow 150ms ease,
+		border-color 150ms ease;
+}
+.nb-form-input:focus {
+	outline: none;
+	border-color: var(--t-primary);
+	box-shadow: 4px 4px 0px var(--t-primary);
+}
+
+/* ── RSVP form focus indicators ── */
+.neo-brutalism input:focus-visible,
+.neo-brutalism select:focus-visible,
+.neo-brutalism textarea:focus-visible {
+	outline: 2px solid #ffffff;
+	outline-offset: 2px;
+	box-shadow: 4px 4px 0px var(--t-primary);
+}
+
+/* ── Dress code color swatches ── */
+.nb-color-swatch {
+	width: 40px;
+	height: 40px;
+	border-radius: 4px;
+	border: 2px solid var(--t-secondary);
+	box-shadow: 2px 2px 0px var(--t-shadow);
+	transition: transform 150ms ease;
+}
+@media (hover: hover) {
+	.nb-color-swatch:hover {
+		transform: translate(-2px, -2px);
+	}
+}
+
+/* ── Solid accent text (no shimmer — flat neo brutal style) ── */
+.nb-accent-text {
+	color: var(--t-primary);
+	font-weight: 800;
+}
+
+/* ── Couple photos ── */
+.nb-couple-photo {
+	border: 3px solid var(--t-secondary);
+	border-radius: 6px;
+	box-shadow: 4px 4px 0px var(--t-shadow);
+	transition:
+		transform 150ms ease,
+		box-shadow 150ms ease;
+}
+@media (hover: hover) {
+	.nb-couple-photo:hover {
+		transform: translate(-2px, -2px);
+		box-shadow: 6px 6px 0px var(--t-shadow);
+	}
+}
+
+/* ── Venue map ── */
+.nb-venue-hero {
+	border: 3px solid var(--t-secondary);
+	border-radius: 6px;
+	overflow: hidden;
+	box-shadow: 4px 4px 0px var(--t-shadow);
+}
+
+/* ── Countdown styling ── */
+.neo-brutalism .countdown-widget {
+	text-align: center;
+	padding: 2rem 1.5rem;
+}
+
+.neo-brutalism .countdown-date {
+	font-size: 0.875rem;
+	letter-spacing: 0.25em;
+	color: var(--t-muted);
+	margin-bottom: 1.5rem;
+	text-transform: uppercase;
+}
+
+.neo-brutalism .countdown-date-zh {
+	font-size: 1rem;
+	letter-spacing: 0.3em;
+	color: var(--t-text);
+	margin-bottom: 0.5rem;
+}
+
+.neo-brutalism .countdown-units {
+	display: flex;
+	justify-content: center;
+	align-items: flex-start;
+	gap: 0.25rem;
+}
+
+.neo-brutalism .countdown-unit-wrapper {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.25rem;
+}
+
+.neo-brutalism .countdown-unit {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	min-width: 4.5rem;
+}
+
+.neo-brutalism .countdown-value {
+	font-size: 2.5rem;
+	font-weight: 800;
+	line-height: 1.1;
+	color: var(--t-text);
+	font-variant-numeric: tabular-nums;
+	background-color: #ffffff;
+	border: 2px solid var(--t-secondary);
+	border-radius: 6px;
+	box-shadow: 3px 3px 0px var(--t-shadow);
+	padding: 0.5rem 0.75rem;
+}
+
+.neo-brutalism .countdown-label {
+	font-size: 0.5625rem;
+	text-transform: uppercase;
+	letter-spacing: 0.3em;
+	color: var(--t-muted);
+	margin-top: 0.5rem;
+	font-weight: 700;
+}
+
+.neo-brutalism .countdown-separator {
+	font-size: 1.75rem;
+	color: var(--t-primary);
+	font-weight: 800;
+	margin-top: 0.25rem;
+}
+
+.neo-brutalism .countdown-message {
+	font-size: 1.5rem;
+	font-weight: 800;
+	color: var(--t-text);
+}
+
+.neo-brutalism .countdown-timezone {
+	font-size: 0.5625rem;
+	text-transform: uppercase;
+	letter-spacing: 0.2em;
+	color: var(--t-muted);
+	margin-top: 1.25rem;
+	font-weight: 700;
+}
+
+/* ── Story milestone path dots ── */
+.nb-path-dot {
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+	background-color: var(--t-primary);
+	border: 3px solid var(--t-secondary);
+	box-shadow: 2px 2px 0px var(--t-shadow);
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+	.neo-brutalism * {
+		/* biome-ignore lint/complexity/noImportantStyles: required for a11y override */
+		animation-duration: 0.01ms !important;
+		/* biome-ignore lint/complexity/noImportantStyles: required for a11y override */
+		transition-duration: 0.01ms !important;
+	}
+}

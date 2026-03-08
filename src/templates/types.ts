@@ -1,4 +1,4 @@
-export type TemplateCategory = "chinese" | "garden" | "western";
+export type TemplateCategory = "chinese" | "garden" | "modern" | "western";
 
 /** Human-readable display names for section IDs */
 export const sectionDisplayNames: Record<string, string> = {

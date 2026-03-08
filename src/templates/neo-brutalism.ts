@@ -1,12 +1,12 @@
 import type { TemplateConfig } from "./types";
 
-export const botanicalGardenTemplate: TemplateConfig = {
-	id: "botanical-garden",
-	name: "Botanical Garden",
-	nameZh: "花园物语",
+export const neoBrutalismTemplate: TemplateConfig = {
+	id: "neo-brutalism",
+	name: "Bold Love",
+	nameZh: "大胆之爱",
 	description:
-		"Earthy emerald and burnt terracotta with botanical line-art and organic reveals.",
-	category: "garden",
+		"Playful neo-brutalist design with warm coral, hard shadows, thick borders, and sticker-card aesthetics.",
+	category: "modern",
 	version: "1.0.0",
 	aiConfig: {
 		defaultTone: "romantic",
@@ -14,21 +14,21 @@ export const botanicalGardenTemplate: TemplateConfig = {
 	},
 	tokens: {
 		colors: {
-			primary: "#064E3B",
-			secondary: "#1C1917",
-			accent: "#C2571A",
-			background: "#F5E6D3",
-			text: "#1C1917",
-			muted: "#6B5E50",
+			primary: "#FF6B6B",
+			secondary: "#1A1A1A",
+			accent: "#FFE500",
+			background: "#FFF5E6",
+			text: "#1A1A1A",
+			muted: "#666666",
 		},
 		typography: {
-			headingFont: "'Cormorant Garamond', 'Noto Serif SC', Georgia, serif",
-			bodyFont: "'Outfit', 'Noto Sans SC', sans-serif",
-			accentFont: "'Cormorant Garamond', 'Noto Serif SC', serif",
+			headingFont: "'Space Grotesk', 'Noto Sans SC', system-ui, sans-serif",
+			bodyFont: "'Inter', 'Noto Sans SC', system-ui, sans-serif",
+			accentFont: "'Space Grotesk', 'Noto Sans SC', sans-serif",
 		},
 		animations: {
 			scrollTriggerOffset: 100,
-			defaultDuration: 0.9,
+			defaultDuration: 0.6,
 			easing: "easeOutCubic",
 		},
 	},
@@ -38,7 +38,7 @@ export const botanicalGardenTemplate: TemplateConfig = {
 			type: "hero",
 			defaultVisible: true,
 			notes:
-				"Diagonal clipPath reveal, emerald overlay, terracotta ember particles, oversized Cormorant Garamond names.",
+				"Grid-pattern background, oversized Space Grotesk names, hard-shadow title card, coral accent badge, snappy reveal.",
 			fields: [
 				{
 					id: "partnerOneName",
@@ -77,7 +77,8 @@ export const botanicalGardenTemplate: TemplateConfig = {
 			id: "couple",
 			type: "couple",
 			defaultVisible: true,
-			notes: "Asymmetric layout (60/40 offset) with rounded portrait photos.",
+			notes:
+				"Side-by-side sticker cards with thick borders, hard shadows, and slight rotations on portrait frames.",
 			fields: [
 				{
 					id: "partnerOne.fullName",
@@ -121,7 +122,7 @@ export const botanicalGardenTemplate: TemplateConfig = {
 			type: "story",
 			defaultVisible: true,
 			notes:
-				"Staggered timeline with DrawPath vine line, terracotta dots, botanical card styling.",
+				"Thick timeline line with bold coral dots, milestone sticker cards with alternating slight rotations.",
 			fields: [
 				{
 					id: "milestones",
@@ -134,7 +135,8 @@ export const botanicalGardenTemplate: TemplateConfig = {
 			id: "gallery",
 			type: "gallery",
 			defaultVisible: true,
-			notes: "Polaroid scattered photos with random rotations.",
+			notes:
+				"Scattered sticker-style photos with thick borders, hard shadows, and random rotations on hover-lift.",
 			fields: [
 				{
 					id: "photos",
@@ -148,7 +150,7 @@ export const botanicalGardenTemplate: TemplateConfig = {
 			type: "extra",
 			defaultVisible: true,
 			notes:
-				"Dress Code section with visual guide, color swatches, and styling tips.",
+				"Dress code section with neo-brutal cards, square color swatches with hard shadows, and bold tip badges.",
 			fields: [
 				{
 					id: "guidelines",
@@ -177,7 +179,8 @@ export const botanicalGardenTemplate: TemplateConfig = {
 			id: "countdown",
 			type: "countdown",
 			defaultVisible: true,
-			notes: "Countdown timer using CountdownWidget.",
+			notes:
+				"Countdown digits in individual bordered boxes with hard shadows, bold separators.",
 			fields: [],
 		},
 		{
@@ -185,7 +188,7 @@ export const botanicalGardenTemplate: TemplateConfig = {
 			type: "schedule",
 			defaultVisible: true,
 			notes:
-				"Event cards with emerald left border, terracotta time accent, staggered reveals.",
+				"Event cards with coral left border, thick outlines, hard shadows, hover-lift interaction.",
 			fields: [
 				{
 					id: "events",
@@ -198,7 +201,8 @@ export const botanicalGardenTemplate: TemplateConfig = {
 			id: "venue",
 			type: "venue",
 			defaultVisible: true,
-			notes: "Venue name, address, Google Maps link, parking info.",
+			notes:
+				"Venue name in bold type, address in a bordered card, map with thick frame and hard shadow.",
 			fields: [
 				{
 					id: "name",
@@ -223,7 +227,8 @@ export const botanicalGardenTemplate: TemplateConfig = {
 			id: "rsvp",
 			type: "rsvp",
 			defaultVisible: true,
-			notes: "Full RSVP form with dietary select and WhatsApp fallback.",
+			notes:
+				"Full RSVP form with thick-bordered inputs, coral focus shadows, and neo-brutal submit button with press-down effect.",
 			fields: [
 				{
 					id: "deadline",
@@ -246,7 +251,8 @@ export const botanicalGardenTemplate: TemplateConfig = {
 			id: "gift",
 			type: "gift",
 			defaultVisible: false,
-			notes: "Digital angpow with AngpowQRCode.",
+			notes:
+				"Digital angpow with AngpowQRCode in a bold bordered card, yellow accent background.",
 			fields: [
 				{
 					id: "paymentUrl",
@@ -270,7 +276,8 @@ export const botanicalGardenTemplate: TemplateConfig = {
 			id: "footer",
 			type: "footer",
 			defaultVisible: true,
-			notes: "Bilingual thank you with botanical divider.",
+			notes:
+				"Bold thank-you text with thick coral divider and dark section background.",
 			fields: [
 				{
 					id: "message",

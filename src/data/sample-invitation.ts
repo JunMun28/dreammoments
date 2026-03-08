@@ -443,89 +443,98 @@ export function buildSampleContent(templateId: string): InvitationContent {
 			hashtag: "#ZhiHaoMeiLin",
 		};
 	}
-	if (templateId === "botanical-garden") {
-		base.hero.partnerOneName = "Wei Lun";
-		base.hero.partnerTwoName = "Mei Xin";
-		base.hero.tagline = "Where love blooms eternal";
+	if (templateId === "neo-brutalism") {
+		base.hero.partnerOneName = "Jun Wei";
+		base.hero.partnerTwoName = "Xin Yi";
+		base.hero.tagline = "Let's do this thing called forever";
 		base.hero.heroImageUrl = "/photos/hero-couple.jpg";
-		base.announcement.title = "You're Invited";
+		base.announcement.title = "We're Tying the Knot!";
 		base.announcement.message =
-			"Together with our families, we joyfully invite you to celebrate our union in a garden of love and laughter.";
+			"No fancy words needed — we found each other, fell hard, and now we're making it official.\nCome celebrate with us. It's going to be a good time.";
 		base.announcement.formalText =
-			"诚挚邀请您来见证我们的幸福时刻，与我们共同庆祝爱的花开。";
+			"诚挚邀请您来见证我们的幸福时刻，一起吃好、喝好、玩好。";
 		base.couple.partnerOne = {
-			fullName: "Lim Wei Lun",
-			bio: "Weekend hiker, weekday engineer.\nBelieves the best views are earned, not given.",
+			fullName: "Lee Jun Wei",
+			bio: "Coffee snob, weekend basketball warrior.\nBuilds apps by day, playlists by night.",
 			photoUrl: "/photos/groom-portrait.jpg",
 		};
 		base.couple.partnerTwo = {
-			fullName: "Chen Mei Xin",
-			bio: "Botanical garden volunteer, watercolour painter.\nFinds magic in morning dew and wildflowers.",
+			fullName: "Ng Xin Yi",
+			bio: "Design nerd, brunch enthusiast.\nBelieves life's too short for boring invitations.",
 			photoUrl: "/photos/bride-portrait.jpg",
 		};
 		base.couple.contactPhone = "60123456789";
 		base.story.milestones = [
 			{
-				date: "2019",
-				title: "First Meeting",
+				date: "2020",
+				title: "The Match · 匹配成功",
 				description:
-					"A Saturday morning volunteer shift at the botanical gardens. She was sketching orchids. He was lost looking for the herb garden. Neither left alone.",
+					"Swiped right on a Tuesday. Met for ramen on a Thursday. By Sunday, we both knew this was different.",
+				photoUrl: "/photos/candid-laugh.jpg",
 			},
 			{
-				date: "2021",
-				title: "Growing Together",
+				date: "2022",
+				title: "All In · 认真了",
 				description:
-					"Waterfall hikes, farmers' market Sundays, and a balcony garden that somehow survived two moves. Our love took root.",
+					"Survived a IKEA trip, adopted a cat named Mochi, and said 'I love you' over burnt toast. The real stuff.",
+				photoUrl: "/photos/couple-walking.jpg",
 			},
 			{
 				date: "2024",
-				title: "The Proposal",
+				title: "The Big Ask · 求婚",
 				description:
-					"A sunrise hike to our favourite hilltop. The mist cleared, the valley glowed gold, and he asked the only question that mattered.",
+					"A rooftop, fairy lights, and a ring hidden in a bowl of laksa. She found it before dessert. Typical.",
+				photoUrl: "/photos/ceremony-moment.jpg",
 			},
 		];
 		base.dressCode = {
-			guidelines: "Garden semi-formal. Think flowy fabrics and earthy tones.",
-			doColors: ["Sage green", "Dusty rose", "Terracotta", "Cream", "Lavender"],
-			dontColors: ["White", "Black", "Bright red"],
+			guidelines:
+				"Smart casual — dress like you're going to a really fun party.",
+			doColors: [
+				"Bold colours",
+				"Pastels",
+				"Prints",
+				"Whatever makes you happy",
+			],
+			dontColors: ["White", "All black"],
 			tips: [
-				"Wear comfortable shoes — the ceremony is on grass",
-				"Bring a light layer for the evening breeze",
-				"Hats and fascinators welcome",
+				"Wear something you can dance in",
+				"Flats are totally cool — there will be dancing",
+				"Bring your best energy",
 			],
 		};
 		base.schedule.events = [
 			{
 				time: "4:00 PM",
-				title: "Garden Welcome",
-				description: "Drinks under the pergola",
+				title: "Doors Open",
+				description: "Welcome drinks & good vibes",
 			},
 			{
 				time: "4:30 PM",
-				title: "Garden Ceremony",
-				description: "Exchange of vows",
+				title: "The Ceremony",
+				description: "The part where we say 'I do'",
 			},
 			{
 				time: "5:30 PM",
-				title: "Golden Hour Photos",
-				description: "Capture the light",
+				title: "Photo Time",
+				description: "Strike a pose",
 			},
 			{
 				time: "6:30 PM",
-				title: "Garden Dinner",
-				description: "Farm-to-table feast",
+				title: "Dinner & Toasts",
+				description: "Eat, drink, be merry",
 			},
 			{
 				time: "9:00 PM",
-				title: "Sparkler Send-Off",
-				description: "Light the way home",
+				title: "Dance Floor",
+				description: "Let's party",
 			},
 		];
 		base.footer.message =
-			"Thank you for being part of our story.\nLove grows where you plant it.";
+			"Thanks for being part of our story.\n我们的故事，因你而精彩。";
 		base.footer.socialLinks = {
 			instagram: "@dreammoments",
-			hashtag: "#WeiLunMeiXin",
+			hashtag: "#JunWeiXinYi",
 		};
 	}
 	return base;

@@ -10,8 +10,7 @@ const templateImports: Record<
 		import("./double-happiness/DoubleHappinessInvitation"),
 	"romantic-cinematic": () =>
 		import("./romantic-cinematic/RomanticCinematicInvitation"),
-	"botanical-garden": () =>
-		import("./botanical-garden/BotanicalGardenInvitation"),
+	"neo-brutalism": () => import("./neo-brutalism/NeoBrutalismInvitation"),
 	"classical-chinese": () =>
 		import("./classical-chinese/ClassicalChineseInvitation"),
 };

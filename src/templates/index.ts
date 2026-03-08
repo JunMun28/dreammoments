@@ -1,18 +1,18 @@
-import { botanicalGardenTemplate } from "./botanical-garden";
 import { classicalChineseTemplate } from "./classical-chinese";
 import { doubleHappinessTemplate } from "./double-happiness";
+import { neoBrutalismTemplate } from "./neo-brutalism";
 import { romanticCinematicTemplate } from "./romantic-cinematic";
 
 export const templates = [
 	doubleHappinessTemplate,
 	classicalChineseTemplate,
 	romanticCinematicTemplate,
-	botanicalGardenTemplate,
+	neoBrutalismTemplate,
 ];
 
 export {
-	botanicalGardenTemplate,
 	classicalChineseTemplate,
 	doubleHappinessTemplate,
+	neoBrutalismTemplate,
 	romanticCinematicTemplate,
 };
