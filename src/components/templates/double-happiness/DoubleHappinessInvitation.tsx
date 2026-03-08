@@ -23,7 +23,6 @@ import {
 } from "../RsvpConfirmation";
 import SectionShell from "../SectionShell";
 import SectionTitle from "../SectionTitle";
-import SwiperGallery from "../SwiperGallery";
 import type { TemplateInvitationProps } from "../types";
 import { HeroMedia } from "./HeroMedia";
 import "./double-happiness.css";
@@ -233,31 +232,7 @@ export default function DoubleHappinessInvitation({
 			</SectionShell>
 
 			{/* ════════════════════════════════════════════
-			    2. COUNTDOWN — Clean centered layout
-			    ════════════════════════════════════════════ */}
-			<SectionShell
-				sectionId="countdown"
-				mode={mode}
-				hidden={hiddenSections?.countdown}
-				onSelect={onSectionSelect}
-				onAiClick={onAiClick}
-				className="dh-section-cream relative overflow-hidden px-6 py-16 sm:px-10"
-			>
-				<div className="mx-auto max-w-sm">
-					<ArtDecoDivider className="mb-8" />
-					<Reveal direction="up">
-						<CountdownWidget
-							targetDate={data.hero.date}
-							eventTime={data.schedule.events[0]?.time}
-							displayDate={data.hero.date}
-						/>
-					</Reveal>
-					<ArtDecoDivider className="mt-8" />
-				</div>
-			</SectionShell>
-
-			{/* ════════════════════════════════════════════
-			    3. ANNOUNCEMENT — Bilingual formal greeting
+			    2. ANNOUNCEMENT — Bilingual formal greeting
 			    ════════════════════════════════════════════ */}
 			<SectionShell
 				sectionId="announcement"
@@ -330,7 +305,7 @@ export default function DoubleHappinessInvitation({
 			</SectionShell>
 
 			{/* ════════════════════════════════════════════
-			    4. COUPLE — Rounded-rectangle portraits
+			    3. COUPLE — Rounded-rectangle portraits
 			    ════════════════════════════════════════════ */}
 			<SectionShell
 				sectionId="couple"
@@ -444,8 +419,90 @@ export default function DoubleHappinessInvitation({
 				</div>
 			</SectionShell>
 
+			{/* ════ ENTOURAGE — Wedding Party Grid ════ */}
+			<SectionShell
+				sectionId="entourage"
+				mode={mode}
+				hidden={hiddenSections?.entourage}
+				onSelect={onSectionSelect}
+				onAiClick={onAiClick}
+				className="dh-section-dark relative overflow-hidden px-6 py-20 sm:px-10"
+			>
+				<div className="mx-auto max-w-4xl text-center">
+					<SectionTitle
+						zhLabel="伴郎伴娘"
+						enHeading="Wedding Party"
+						primaryColor={COLORS.accent}
+						darkColor="#FAF7F2"
+						headingFont={headingFont}
+						accentFont={accentFont}
+					/>
+					<ArtDecoDivider className="my-8" />
+					{data.weddingParty && (
+						<div className="grid grid-cols-1 gap-12 sm:grid-cols-2">
+							<Reveal direction="left">
+								<div>
+									<p
+										className="mb-4 text-sm tracking-widest"
+										style={{
+											...accentFont,
+											color: COLORS.accent,
+										}}
+									>
+										GROOMSMEN
+									</p>
+									<div className="space-y-3">
+										{data.weddingParty.groomsmen.map((g) => (
+											<div key={g.name} className="py-1">
+												<p
+													className="text-base text-[#FAF7F2]"
+													style={headingFont}
+												>
+													{g.name}
+												</p>
+												<p className="text-xs text-[#FAF7F2]/60" lang="en">
+													{g.role}
+												</p>
+											</div>
+										))}
+									</div>
+								</div>
+							</Reveal>
+							<Reveal direction="right">
+								<div>
+									<p
+										className="mb-4 text-sm tracking-widest"
+										style={{
+											...accentFont,
+											color: COLORS.accent,
+										}}
+									>
+										BRIDESMAIDS
+									</p>
+									<div className="space-y-3">
+										{data.weddingParty.bridesmaids.map((b) => (
+											<div key={b.name} className="py-1">
+												<p
+													className="text-base text-[#FAF7F2]"
+													style={headingFont}
+												>
+													{b.name}
+												</p>
+												<p className="text-xs text-[#FAF7F2]/60" lang="en">
+													{b.role}
+												</p>
+											</div>
+										))}
+									</div>
+								</div>
+							</Reveal>
+						</div>
+					)}
+				</div>
+			</SectionShell>
+
 			{/* ════════════════════════════════════════════
-			    5. STORY — Timeline with champagne gradient
+			    5. STORY — Horizontal scroll timeline
 			    ════════════════════════════════════════════ */}
 			<SectionShell
 				sectionId="story"
@@ -453,64 +510,64 @@ export default function DoubleHappinessInvitation({
 				hidden={hiddenSections?.story}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="dh-section-white relative overflow-hidden px-6 py-24 sm:px-10"
+				className="dh-section-cream relative overflow-hidden px-6 py-20 sm:px-10"
 			>
-				<div className="mx-auto max-w-4xl">
+				<div className="mx-auto max-w-5xl">
 					<SectionTitle
-						zhLabel="爱 情 故 事"
+						zhLabel="我们的故事"
 						enHeading="Our Story"
 						primaryColor={COLORS.primary}
 						darkColor={COLORS.dark}
 						headingFont={headingFont}
 						accentFont={accentFont}
 					/>
-
-					<div className="relative mt-16 pl-8 sm:pl-12">
-						{/* Timeline line */}
-						<div className="dh-timeline-line absolute left-1 top-0 h-full sm:left-3" />
-
-						<Stagger interval={0.12} className="space-y-16">
-							{data.story.milestones.map((milestone, index) => (
-								<article
-									key={`${milestone.date}-${index}`}
-									className="relative"
-								>
-									<div className="dh-timeline-dot-premium dh-timeline-dot-pulse absolute -left-[2.45rem] top-5 sm:-left-[3.45rem]" />
-									<div className="dh-milestone-card">
-										<p
-											className="inline-block rounded-full px-3 py-1 text-xs uppercase tracking-[0.25em]"
-											style={{
-												color: COLORS.primary,
-												backgroundColor: "rgba(201,169,110,0.1)",
-											}}
-										>
-											{milestone.date}
-										</p>
-										<h3
-											className="mt-3 text-2xl"
-											style={{
-												...headingFont,
-												color: COLORS.dark,
-											}}
-										>
-											{milestone.title}
-										</h3>
-										<p
-											className="mt-2 whitespace-pre-line text-sm leading-relaxed"
-											style={{ color: COLORS.muted }}
-										>
-											{milestone.description}
-										</p>
-									</div>
-								</article>
-							))}
-						</Stagger>
+					<ArtDecoDivider className="my-8" />
+					<div className="dh-story-scroll -mx-6 flex snap-x snap-mandatory gap-6 overflow-x-auto px-6 pb-4 sm:-mx-10 sm:px-10">
+						{data.story.milestones.map((m, i) => (
+							<Reveal key={m.date} direction="up" delay={i * 0.1}>
+								<div className="dh-story-card min-w-[280px] max-w-[320px] flex-shrink-0 snap-center rounded-lg border border-[rgba(201,169,110,0.2)] bg-white p-6 shadow-sm sm:min-w-[340px]">
+									<p
+										className="text-sm tracking-widest"
+										style={{
+											...accentFont,
+											color: COLORS.primary,
+										}}
+									>
+										{m.date}
+									</p>
+									<h3
+										className="mt-2 text-xl"
+										style={{
+											...headingFont,
+											color: COLORS.dark,
+										}}
+									>
+										{m.title}
+									</h3>
+									{m.photoUrl && (
+										<img
+											src={m.photoUrl || PLACEHOLDER_PHOTO}
+											alt={m.title}
+											className="mt-4 aspect-[4/3] w-full rounded object-cover"
+											loading="lazy"
+											decoding="async"
+										/>
+									)}
+									<p
+										className="mt-3 text-sm leading-relaxed whitespace-pre-line"
+										style={{ color: COLORS.dark }}
+									>
+										{m.description}
+									</p>
+								</div>
+							</Reveal>
+						))}
 					</div>
 				</div>
 			</SectionShell>
 
 			{/* ════════════════════════════════════════════
-			    6. GALLERY — Staggered layout with clean shadows
+			    6. GALLERY — Masonry grid
 			    ════════════════════════════════════════════ */}
 			<SectionShell
 				sectionId="gallery"
@@ -518,32 +575,73 @@ export default function DoubleHappinessInvitation({
 				hidden={hiddenSections?.gallery}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="dh-section-cream px-6 py-24 sm:px-10"
+				className="dh-section-white relative overflow-hidden px-6 py-20 sm:px-10"
 			>
-				<div className="mx-auto max-w-5xl">
+				<div className="mx-auto max-w-4xl">
 					<SectionTitle
-						zhLabel="幸 福 留 影"
+						zhLabel="甜蜜瞬间"
 						enHeading="Gallery"
 						primaryColor={COLORS.primary}
 						darkColor={COLORS.dark}
 						headingFont={headingFont}
 						accentFont={accentFont}
 					/>
-
-					<Reveal direction="scale" className="mt-12">
-						<SwiperGallery
-							photos={data.gallery.photos.map((p) => ({
-								url: p.url,
-								caption: p.caption,
-							}))}
-							primaryColor={COLORS.primary}
-						/>
-					</Reveal>
+					<ArtDecoDivider className="my-8" />
+					<div className="columns-2 gap-4 sm:columns-3">
+						{data.gallery.photos.map((photo, i) => (
+							<Reveal key={photo.url} direction="scale" delay={i * 0.08}>
+								<div className="mb-4 break-inside-avoid overflow-hidden rounded-lg border border-[rgba(201,169,110,0.15)]">
+									<img
+										src={photo.url || PLACEHOLDER_PHOTO}
+										alt={photo.caption || "Wedding photo"}
+										className="w-full object-cover"
+										loading="lazy"
+										decoding="async"
+									/>
+									{photo.caption && (
+										<p
+											className="bg-white px-3 py-2 text-center text-xs"
+											style={{
+												...headingFont,
+												color: COLORS.muted,
+											}}
+										>
+											{photo.caption}
+										</p>
+									)}
+								</div>
+							</Reveal>
+						))}
+					</div>
 				</div>
 			</SectionShell>
 
 			{/* ════════════════════════════════════════════
-			    7. SCHEDULE — Event cards with champagne left border
+			    7. COUNTDOWN — Clean centered layout
+			    ════════════════════════════════════════════ */}
+			<SectionShell
+				sectionId="countdown"
+				mode={mode}
+				hidden={hiddenSections?.countdown}
+				onSelect={onSectionSelect}
+				onAiClick={onAiClick}
+				className="dh-section-cream relative overflow-hidden px-6 py-16 sm:px-10"
+			>
+				<div className="mx-auto max-w-sm">
+					<ArtDecoDivider className="mb-8" />
+					<Reveal direction="up">
+						<CountdownWidget
+							targetDate={data.hero.date}
+							eventTime={data.schedule.events[0]?.time}
+							displayDate={data.hero.date}
+						/>
+					</Reveal>
+					<ArtDecoDivider className="mt-8" />
+				</div>
+			</SectionShell>
+
+			{/* ════════════════════════════════════════════
+			    8. SCHEDULE — Event cards with champagne left border
 			    ════════════════════════════════════════════ */}
 			<SectionShell
 				sectionId="schedule"
@@ -608,7 +706,7 @@ export default function DoubleHappinessInvitation({
 			</SectionShell>
 
 			{/* ════════════════════════════════════════════
-			    8. VENUE — Clean card with champagne buttons
+			    9. VENUE — Clean card with champagne buttons
 			    ════════════════════════════════════════════ */}
 			<SectionShell
 				sectionId="venue"
@@ -726,7 +824,7 @@ export default function DoubleHappinessInvitation({
 			</SectionShell>
 
 			{/* ════════════════════════════════════════════
-			    9. RSVP — Espresso background with champagne form
+			    10. RSVP — Espresso background with champagne form
 			    ════════════════════════════════════════════ */}
 			<SectionShell
 				sectionId="rsvp"
@@ -1136,39 +1234,7 @@ export default function DoubleHappinessInvitation({
 			</SectionShell>
 
 			{/* ════════════════════════════════════════════
-			    10. GIFT — Digital angpow
-			    ════════════════════════════════════════════ */}
-			{data.gift && (
-				<SectionShell
-					sectionId="gift"
-					mode={mode}
-					hidden={hiddenSections?.gift}
-					onSelect={onSectionSelect}
-					onAiClick={onAiClick}
-					className="dh-section-cream px-6 py-24 sm:px-10"
-				>
-					<div className="mx-auto max-w-md text-center">
-						<SectionTitle
-							zhLabel="礼 金 祝 福"
-							enHeading="Digital Angpow"
-							primaryColor={COLORS.primary}
-							darkColor={COLORS.dark}
-							headingFont={headingFont}
-							accentFont={accentFont}
-						/>
-						<Reveal direction="up" className="mt-8">
-							<AngpowQRCode
-								paymentUrl={data.gift.paymentUrl}
-								paymentMethod={data.gift.paymentMethod}
-								recipientName={data.gift.recipientName}
-							/>
-						</Reveal>
-					</div>
-				</SectionShell>
-			)}
-
-			{/* ════════════════════════════════════════════
-			    11. FOOTER — Minimal champagne closing
+			    11. FOOTER — Closing with gift merged in
 			    ════════════════════════════════════════════ */}
 			<SectionShell
 				sectionId="footer"
@@ -1180,6 +1246,18 @@ export default function DoubleHappinessInvitation({
 			>
 				<div className="mx-auto max-w-3xl">
 					<ArtDecoDivider className="mb-10" />
+
+					{data.gift && (
+						<Reveal direction="up">
+							<div className="mx-auto mb-10 max-w-md">
+								<AngpowQRCode
+									paymentUrl={data.gift.paymentUrl}
+									paymentMethod={data.gift.paymentMethod}
+									recipientName={data.gift.recipientName}
+								/>
+							</div>
+						</Reveal>
+					)}
 
 					<Reveal direction="blur">
 						<Shimmer>
@@ -1227,7 +1305,7 @@ export default function DoubleHappinessInvitation({
 					primaryColor={COLORS.primary}
 					onGiftClick={() =>
 						document
-							.getElementById("gift")
+							.getElementById("footer")
 							?.scrollIntoView({ behavior: "smooth" })
 					}
 					onMessageClick={() =>

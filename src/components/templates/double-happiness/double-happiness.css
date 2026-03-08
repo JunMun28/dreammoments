@@ -346,6 +346,22 @@
 	}
 }
 
+/* ── Horizontal story scroll ── */
+.dh-story-scroll {
+	scrollbar-width: none;
+}
+.dh-story-scroll::-webkit-scrollbar {
+	display: none;
+}
+.dh-story-card {
+	transition: box-shadow 0.3s ease;
+}
+@media (hover: hover) {
+	.dh-story-card:hover {
+		box-shadow: 0 8px 32px rgba(201, 169, 110, 0.15);
+	}
+}
+
 /* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
 	.double-happiness .dm-reveal {

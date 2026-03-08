@@ -144,6 +144,13 @@ export const doubleHappinessTemplate: TemplateConfig = {
 			],
 		},
 		{
+			id: "entourage",
+			type: "entourage",
+			defaultVisible: true,
+			notes: "Wedding party grid with Art Deco styling.",
+			fields: [{ id: "members", label: "Wedding party", type: "list" }],
+		},
+		{
 			id: "story",
 			type: "story",
 			defaultVisible: true,
