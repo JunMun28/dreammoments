@@ -235,7 +235,7 @@ export default function RomanticCinematicInvitation({
 					hidden={hiddenSections?.extra}
 					onSelect={onSectionSelect}
 					onAiClick={onAiClick}
-					className="rc-section-parchment relative overflow-hidden px-6 py-24 sm:px-10"
+					className="rc-section-parchment relative overflow-hidden px-6 py-16 sm:py-24 sm:px-10"
 				>
 					<Reveal direction="blur" duration={1.2}>
 						<div className="mx-auto max-w-lg text-center">
@@ -270,7 +270,7 @@ export default function RomanticCinematicInvitation({
 				hidden={hiddenSections?.couple}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="rc-section-parchment px-6 py-24 sm:px-10"
+				className="rc-section-parchment px-6 py-16 sm:py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-4xl">
 					<SectionTitle
@@ -448,7 +448,7 @@ export default function RomanticCinematicInvitation({
 				hidden={hiddenSections?.gallery}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="rc-section-parchment px-6 py-24 sm:px-10"
+				className="rc-section-parchment px-6 py-16 sm:py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-5xl">
 					<SectionTitle
@@ -484,7 +484,7 @@ export default function RomanticCinematicInvitation({
 					hidden={hiddenSections?.details}
 					onSelect={onSectionSelect}
 					onAiClick={onAiClick}
-					className="rc-section-aubergine relative overflow-hidden px-6 py-20 sm:px-10"
+					className="rc-section-aubergine relative overflow-hidden px-6 py-14 sm:py-20 sm:px-10"
 				>
 					<div className="mx-auto max-w-5xl text-center">
 						<SectionTitle
@@ -537,7 +537,7 @@ export default function RomanticCinematicInvitation({
 				hidden={hiddenSections?.schedule}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="rc-section-aubergine relative overflow-hidden px-6 py-24 sm:px-10"
+				className="rc-section-aubergine relative overflow-hidden px-6 py-16 sm:py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-4xl">
 					<SectionTitle
@@ -607,7 +607,7 @@ export default function RomanticCinematicInvitation({
 				hidden={hiddenSections?.venue}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="rc-section-parchment px-6 py-24 sm:px-10"
+				className="rc-section-parchment px-6 py-16 sm:py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-3xl text-center">
 					<SectionTitle
@@ -756,7 +756,7 @@ export default function RomanticCinematicInvitation({
 				hidden={hiddenSections?.rsvp}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="rc-section-aubergine px-6 py-24 sm:px-10"
+				className="rc-section-aubergine px-6 py-16 sm:py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-md text-center">
 					<SectionTitle

@@ -257,7 +257,7 @@ export default function ClassicalChineseInvitation({
 					hidden={hiddenSections?.extra}
 					onSelect={onSectionSelect}
 					onAiClick={onAiClick}
-					className="cc-section-obsidian cc-ink-texture relative overflow-hidden px-6 py-20 sm:px-10"
+					className="cc-section-obsidian cc-ink-texture relative overflow-hidden px-6 py-14 sm:py-20 sm:px-10"
 				>
 					<Reveal direction="up">
 						<div className="mx-auto max-w-lg text-center">
@@ -331,7 +331,7 @@ export default function ClassicalChineseInvitation({
 				hidden={hiddenSections?.announcement}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="cc-section-obsidian relative overflow-hidden px-6 py-24 sm:px-10"
+				className="cc-section-obsidian relative overflow-hidden px-6 py-16 sm:py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-3xl text-center">
 					<div className="cc-divider-luxury mb-10 w-40 mx-auto" />
@@ -410,7 +410,7 @@ export default function ClassicalChineseInvitation({
 				hidden={hiddenSections?.couple}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="cc-section-ivory cc-ink-texture cc-ink-wash-bg px-6 py-24 sm:px-10"
+				className="cc-section-ivory cc-ink-texture cc-ink-wash-bg px-6 py-16 sm:py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-4xl">
 					<SectionTitle
@@ -482,7 +482,7 @@ export default function ClassicalChineseInvitation({
 				hidden={hiddenSections?.story}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="cc-section-obsidian relative overflow-hidden px-6 py-24 sm:px-10"
+				className="cc-section-obsidian relative overflow-hidden px-6 py-16 sm:py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-4xl">
 					<SectionTitle
@@ -550,7 +550,7 @@ export default function ClassicalChineseInvitation({
 				hidden={hiddenSections?.schedule}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="cc-section-ivory cc-ink-texture px-6 py-24 sm:px-10"
+				className="cc-section-ivory cc-ink-texture px-6 py-16 sm:py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-4xl">
 					<SectionTitle
@@ -614,7 +614,7 @@ export default function ClassicalChineseInvitation({
 				hidden={hiddenSections?.venue}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="cc-section-ivory cc-ink-texture px-6 py-24 sm:px-10"
+				className="cc-section-ivory cc-ink-texture px-6 py-16 sm:py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-3xl text-center">
 					<SectionTitle
@@ -743,7 +743,7 @@ export default function ClassicalChineseInvitation({
 				hidden={hiddenSections?.rsvp}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="cc-section-obsidian px-6 py-24 sm:px-10"
+				className="cc-section-obsidian px-6 py-16 sm:py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-md">
 					<Reveal direction="up" className="mb-8 text-center">

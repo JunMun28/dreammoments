@@ -70,7 +70,7 @@ export function Reveal({
 				transform: "translate3d(0, 0, 0) scale(1)",
 				filter: direction === "blur" ? "blur(0)" : undefined,
 			}}
-			viewport={{ once: true, amount: 0.15, margin: "0px 0px -50px 0px" }}
+			viewport={{ once: true, amount: 0.1, margin: "0px 0px 50px 0px" }}
 			transition={{
 				duration,
 				ease: [0.16, 1, 0.3, 1],

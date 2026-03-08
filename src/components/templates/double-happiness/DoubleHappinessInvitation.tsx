@@ -242,7 +242,7 @@ export default function DoubleHappinessInvitation({
 				hidden={hiddenSections?.announcement}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="dh-section-white relative overflow-hidden px-6 py-24 sm:px-10"
+				className="dh-section-white relative overflow-hidden px-6 py-16 sm:py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-3xl text-center">
 					<ArtDecoDivider className="mb-10" />
@@ -317,7 +317,7 @@ export default function DoubleHappinessInvitation({
 				hidden={hiddenSections?.couple}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="dh-section-cream px-6 py-24 sm:px-10"
+				className="dh-section-cream px-6 py-16 sm:py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-4xl">
 					<SectionTitle
@@ -436,7 +436,7 @@ export default function DoubleHappinessInvitation({
 				hidden={hiddenSections?.entourage}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="dh-section-dark relative overflow-hidden px-6 py-20 sm:px-10"
+				className="dh-section-dark relative overflow-hidden px-6 py-14 sm:py-20 sm:px-10"
 			>
 				<div className="mx-auto max-w-4xl text-center">
 					<SectionTitle
@@ -522,7 +522,7 @@ export default function DoubleHappinessInvitation({
 				hidden={hiddenSections?.story}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="dh-section-cream relative overflow-hidden px-6 py-20 sm:px-10"
+				className="dh-section-cream relative overflow-hidden px-6 py-14 sm:py-20 sm:px-10"
 			>
 				<div className="mx-auto max-w-5xl">
 					<SectionTitle
@@ -537,7 +537,7 @@ export default function DoubleHappinessInvitation({
 					<div className="dh-story-scroll -mx-6 flex snap-x snap-mandatory gap-6 overflow-x-auto px-6 pb-4 sm:-mx-10 sm:px-10">
 						{data.story.milestones.map((m, i) => (
 							<Reveal key={m.date} direction="up" delay={i * 0.1}>
-								<div className="dh-story-card min-w-[280px] max-w-[320px] flex-shrink-0 snap-center rounded-lg border border-[rgba(201,169,110,0.2)] bg-white p-6 shadow-sm sm:min-w-[340px]">
+								<div className="dh-story-card min-w-[260px] max-w-[320px] flex-shrink-0 snap-center rounded-lg border border-[rgba(201,169,110,0.2)] bg-white p-6 shadow-sm sm:min-w-[340px]">
 									<p
 										className="text-sm tracking-widest"
 										style={{
@@ -589,7 +589,7 @@ export default function DoubleHappinessInvitation({
 				hidden={hiddenSections?.gallery}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="dh-section-white relative overflow-hidden px-6 py-20 sm:px-10"
+				className="dh-section-white relative overflow-hidden px-6 py-14 sm:py-20 sm:px-10"
 			>
 				<div className="mx-auto max-w-4xl">
 					<SectionTitle
@@ -667,7 +667,7 @@ export default function DoubleHappinessInvitation({
 				hidden={hiddenSections?.schedule}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="dh-section-white relative overflow-hidden px-6 py-24 sm:px-10"
+				className="dh-section-white relative overflow-hidden px-6 py-16 sm:py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-4xl">
 					<SectionTitle
@@ -737,7 +737,7 @@ export default function DoubleHappinessInvitation({
 				hidden={hiddenSections?.venue}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="dh-section-cream px-6 py-24 sm:px-10"
+				className="dh-section-cream px-6 py-16 sm:py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-3xl text-center">
 					<SectionTitle
@@ -857,7 +857,7 @@ export default function DoubleHappinessInvitation({
 				hidden={hiddenSections?.rsvp}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="dh-section-dark px-6 py-24 sm:px-10"
+				className="dh-section-dark px-6 py-16 sm:py-24 sm:px-10"
 			>
 				<div className="mx-auto grid max-w-5xl gap-10 lg:grid-cols-[0.9fr_auto_1.1fr]">
 					{/* Left: info */}

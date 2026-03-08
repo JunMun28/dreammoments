@@ -27,7 +27,7 @@
 /* ── Off-screen rendering optimization ── */
 .double-happiness section {
 	content-visibility: auto;
-	contain-intrinsic-size: 0 500px;
+	contain-intrinsic-size: auto 300px;
 }
 .double-happiness section:first-of-type {
 	content-visibility: visible;

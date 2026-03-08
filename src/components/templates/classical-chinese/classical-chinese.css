@@ -27,7 +27,7 @@
 /* ── Off-screen rendering optimization ── */
 .classical-chinese section {
 	content-visibility: auto;
-	contain-intrinsic-size: 0 500px;
+	contain-intrinsic-size: auto 300px;
 }
 .classical-chinese section:first-of-type {
 	content-visibility: visible;

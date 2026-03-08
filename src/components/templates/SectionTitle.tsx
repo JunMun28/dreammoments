@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import { cn } from "@/lib/utils";
+import { Reveal } from "./animations";
 
 interface SectionTitleProps {
 	zhLabel: string;
@@ -24,23 +25,21 @@ export default function SectionTitle({
 	className,
 }: SectionTitleProps) {
 	return (
-		<div className={cn("text-center", className)}>
+		<Reveal direction="up" className={cn("text-center", className)}>
 			<p
-				data-reveal
 				lang="zh-Hans"
-				className="dm-reveal text-sm tracking-[0.5em]"
+				className="text-sm tracking-[0.5em]"
 				style={{ ...headingFont, color: primaryColor }}
 			>
 				{zhLabel}
 			</p>
 			<h2
-				data-reveal
-				className="dm-reveal mt-3 text-4xl sm:text-5xl"
+				className="mt-3 text-4xl sm:text-5xl"
 				style={{ ...accentFont, color: darkColor }}
 				lang="en"
 			>
 				{enHeading}
 			</h2>
-		</div>
+		</Reveal>
 	);
 }

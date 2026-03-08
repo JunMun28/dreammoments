@@ -238,7 +238,7 @@ export default function BotanicalGardenInvitation({
 				hidden={hiddenSections?.couple}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="bg-section-sand px-6 py-24 sm:px-10"
+				className="bg-section-sand px-6 py-16 sm:py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-4xl">
 					<SectionTitle
@@ -333,7 +333,7 @@ export default function BotanicalGardenInvitation({
 				hidden={hiddenSections?.story}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="bg-section-sage bg-watercolor-wash relative overflow-hidden px-6 py-24 sm:px-10"
+				className="bg-section-sage bg-watercolor-wash relative overflow-hidden px-6 py-16 sm:py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-4xl">
 					<SectionTitle
@@ -414,7 +414,7 @@ export default function BotanicalGardenInvitation({
 				hidden={hiddenSections?.gallery}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="bg-section-sand px-6 py-24 sm:px-10"
+				className="bg-section-sand px-6 py-16 sm:py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-5xl">
 					<SectionTitle
@@ -477,7 +477,7 @@ export default function BotanicalGardenInvitation({
 					hidden={hiddenSections?.extra}
 					onSelect={onSectionSelect}
 					onAiClick={onAiClick}
-					className="bg-section-sage relative overflow-hidden px-6 py-20 sm:px-10"
+					className="bg-section-sage relative overflow-hidden px-6 py-14 sm:py-20 sm:px-10"
 				>
 					<div className="mx-auto max-w-lg text-center">
 						<SectionTitle
@@ -580,7 +580,7 @@ export default function BotanicalGardenInvitation({
 				hidden={hiddenSections?.schedule}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="bg-section-sage relative overflow-hidden px-6 py-24 sm:px-10"
+				className="bg-section-sage relative overflow-hidden px-6 py-16 sm:py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-4xl">
 					<SectionTitle
@@ -653,7 +653,7 @@ export default function BotanicalGardenInvitation({
 				hidden={hiddenSections?.venue}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="bg-section-sand px-6 py-24 sm:px-10"
+				className="bg-section-sand px-6 py-16 sm:py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-3xl text-center">
 					<SectionTitle
@@ -817,7 +817,7 @@ export default function BotanicalGardenInvitation({
 				hidden={hiddenSections?.rsvp}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="bg-section-charcoal px-6 py-24 sm:px-10"
+				className="bg-section-charcoal px-6 py-16 sm:py-24 sm:px-10"
 			>
 				<div className="mx-auto grid max-w-5xl gap-10 lg:grid-cols-[0.9fr_auto_1.1fr]">
 					{/* Left: info */}
