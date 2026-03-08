@@ -74,31 +74,23 @@ export const romanticCinematicTemplate: TemplateConfig = {
 			],
 		},
 		{
-			id: "announcement",
-			type: "announcement",
+			id: "extra",
+			type: "extra",
 			defaultVisible: true,
-			notes:
-				"Bilingual formal invitation copy with rosewood blockquote border.",
+			notes: "Love Letter — italic serif on parchment card.",
 			fields: [
 				{
-					id: "title",
-					label: "Title",
+					id: "loveLetter.from",
+					label: "Letter from",
 					type: "text",
-					sample: "We're Getting Married",
-					required: true,
+					sample: "Wei Jun",
 				},
 				{
-					id: "message",
-					label: "Invitation message",
+					id: "loveLetter.message",
+					label: "Letter message",
 					type: "textarea",
 					sample:
-						"Together with our families, we joyfully invite you to share in our happiness as we exchange wedding vows.",
-				},
-				{
-					id: "formalText",
-					label: "Formal text (Chinese)",
-					type: "textarea",
-					sample: "诚挚邀请您见证我们的幸福时刻。",
+						"From the moment I met you, I knew my life would never be the same.",
 				},
 			],
 		},
@@ -106,7 +98,7 @@ export const romanticCinematicTemplate: TemplateConfig = {
 			id: "couple",
 			type: "couple",
 			defaultVisible: true,
-			notes: "Side-by-side portraits with bilingual labels.",
+			notes: "Overlapping portrait frames with staggered reveal.",
 			fields: [
 				{
 					id: "partnerOne.fullName",
@@ -148,7 +140,7 @@ export const romanticCinematicTemplate: TemplateConfig = {
 			id: "story",
 			type: "story",
 			defaultVisible: true,
-			notes: "Staggered timeline with rosewood line, frosted lavender dots.",
+			notes: "Full-bleed alternating photo/text layout on dark background.",
 			fields: [
 				{
 					id: "milestones",
@@ -166,6 +158,20 @@ export const romanticCinematicTemplate: TemplateConfig = {
 				{
 					id: "photos",
 					label: "Gallery photos",
+					type: "list",
+				},
+			],
+		},
+		{
+			id: "details",
+			type: "details",
+			defaultVisible: true,
+			notes:
+				"Highlights Reel — cinematic photo montage grid on aubergine background.",
+			fields: [
+				{
+					id: "highlightsReel.photos",
+					label: "Highlights photos",
 					type: "list",
 				},
 			],

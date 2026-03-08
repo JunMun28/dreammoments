@@ -4,6 +4,7 @@ import type { ComponentPropsWithoutRef, ComponentType, ReactNode } from "react";
 import { renderToString } from "react-dom/server";
 import { describe, expect, test, vi } from "vitest";
 import DoubleHappinessInvitation from "../components/templates/double-happiness/DoubleHappinessInvitation";
+import RomanticCinematicInvitation from "../components/templates/romantic-cinematic/RomanticCinematicInvitation";
 import SectionTitle from "../components/templates/SectionTitle";
 import type { TemplateInvitationProps } from "../components/templates/types";
 import { buildSampleContent } from "../data/sample-invitation";
@@ -21,6 +22,7 @@ const templateComponents: Record<
 	ComponentType<TemplateInvitationProps>
 > = {
 	"double-happiness": DoubleHappinessInvitation,
+	"romantic-cinematic": RomanticCinematicInvitation,
 };
 
 describe("template render coverage", () => {

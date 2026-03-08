@@ -226,103 +226,41 @@ export default function RomanticCinematicInvitation({
 			</SectionShell>
 
 			{/* ════════════════════════════════════════════
-			    2. COUNTDOWN — Parchment section
+			    2. LOVE LETTER — Italic serif on parchment card
 			    ════════════════════════════════════════════ */}
-			<SectionShell
-				sectionId="countdown"
-				mode={mode}
-				hidden={hiddenSections?.countdown}
-				onSelect={onSectionSelect}
-				onAiClick={onAiClick}
-				className="rc-section-parchment relative overflow-hidden px-6 py-16 sm:px-10"
-			>
-				<Reveal direction="up" duration={0.9}>
-					<div className="mx-auto max-w-sm">
-						<DiamondDivider className="mb-8" />
-						<CountdownWidget
-							targetDate={data.hero.date}
-							eventTime={data.schedule.events[0]?.time}
-							displayDate={data.hero.date}
-						/>
-						<DiamondDivider className="mt-8" />
-					</div>
-				</Reveal>
-			</SectionShell>
-
-			{/* ════════════════════════════════════════════
-			    3. ANNOUNCEMENT — Deep aubergine section
-			    ════════════════════════════════════════════ */}
-			<SectionShell
-				sectionId="announcement"
-				mode={mode}
-				hidden={hiddenSections?.announcement}
-				onSelect={onSectionSelect}
-				onAiClick={onAiClick}
-				className="rc-section-aubergine relative overflow-hidden px-6 py-24 sm:px-10"
-			>
-				<div className="mx-auto max-w-3xl text-center">
-					<DiamondDivider className="mb-10" />
-
-					<Reveal direction="up" duration={0.9}>
-						<p
-							className="text-sm tracking-[0.5em]"
-							style={{ ...headingFont, color: COLORS.accent }}
-						>
-							CORDIALLY INVITED
-						</p>
-						<p
-							className="mt-1 text-xs tracking-[0.3em]"
-							style={{ color: COLORS.muted }}
-						>
-							诚 挚 邀 请
-						</p>
-					</Reveal>
-
-					<Reveal direction="up" delay={0.1} duration={0.9}>
-						<h2
-							{...editableProps(
-								"announcement.title",
-								"mt-6 text-4xl sm:text-5xl",
-							)}
-							style={{ ...accentFont, color: COLORS.cream }}
-						>
-							{data.announcement.title}
-						</h2>
-					</Reveal>
-
-					<Reveal direction="up" delay={0.2} duration={0.9}>
-						<div className="mx-auto mt-8 max-w-2xl rounded-lg border border-[rgba(194,86,107,0.2)] bg-[rgba(255,255,255,0.05)] p-8">
-							<div className="rc-blockquote mx-auto max-w-2xl text-left">
+			{data.loveLetter && (
+				<SectionShell
+					sectionId="extra"
+					mode={mode}
+					hidden={hiddenSections?.extra}
+					onSelect={onSectionSelect}
+					onAiClick={onAiClick}
+					className="rc-section-parchment relative overflow-hidden px-6 py-24 sm:px-10"
+				>
+					<Reveal direction="blur" duration={1.2}>
+						<div className="mx-auto max-w-lg text-center">
+							<div className="rounded-xl border border-[rgba(194,86,107,0.15)] bg-white/60 px-8 py-12 shadow-sm backdrop-blur-sm">
 								<p
-									{...editableProps(
-										"announcement.message",
-										"whitespace-pre-line text-base leading-relaxed",
-									)}
-									style={{ color: COLORS.cream }}
-									lang="en"
+									className="text-sm tracking-widest"
+									style={{ ...accentFont, color: COLORS.primary }}
 								>
-									{data.announcement.message}
+									A LETTER FROM {data.loveLetter.from.toUpperCase()}
+								</p>
+								<DiamondDivider className="my-6" />
+								<p
+									className="whitespace-pre-line text-base leading-loose italic"
+									style={{ ...headingFont, color: COLORS.dark }}
+								>
+									{data.loveLetter.message}
 								</p>
 							</div>
-
-							<p
-								{...editableProps(
-									"announcement.formalText",
-									"mx-auto mt-6 max-w-2xl text-sm leading-relaxed",
-								)}
-								style={{ color: COLORS.muted }}
-							>
-								{data.announcement.formalText}
-							</p>
 						</div>
 					</Reveal>
-
-					<DiamondDivider className="mt-10" />
-				</div>
-			</SectionShell>
+				</SectionShell>
+			)}
 
 			{/* ════════════════════════════════════════════
-			    4. COUPLE — Warm parchment section
+			    3. COUPLE — Overlapping portrait frames
 			    ════════════════════════════════════════════ */}
 			<SectionShell
 				sectionId="couple"
@@ -342,102 +280,74 @@ export default function RomanticCinematicInvitation({
 						accentFont={accentFont}
 					/>
 
-					<Stagger className="mt-14 grid gap-12 sm:grid-cols-2" interval={0.15}>
-						{/* Partner One */}
-						<div className="text-center">
-							<div className="rc-portrait-frame mx-auto h-72 w-56 overflow-hidden">
+					<div className="relative mx-auto mt-14 max-w-md">
+						<Reveal direction="left">
+							<div className="relative z-10 ml-0 w-3/5 overflow-hidden rounded-lg shadow-lg">
 								<img
 									src={data.couple.partnerOne.photoUrl || PLACEHOLDER_PHOTO}
-									alt={`${data.couple.partnerOne.fullName}`}
+									alt={data.couple.partnerOne.fullName}
+									className="aspect-[3/4] w-full object-cover"
 									loading="lazy"
 									decoding="async"
-									className="h-full w-full object-cover"
-									onError={(e) => {
-										const img = e.target as HTMLImageElement;
-										if (!img.dataset.fallback) {
-											img.dataset.fallback = "true";
-											img.src = PLACEHOLDER_PHOTO;
-										}
-									}}
 								/>
 							</div>
-							<p
-								className="mt-4 text-xs uppercase tracking-[0.3em]"
-								style={{ color: COLORS.primary }}
-							>
-								<span>新郎</span> <span lang="en">/ THE GROOM</span>
-							</p>
-							<div className="mx-auto mt-2 h-px w-12 bg-gradient-to-r from-transparent via-[rgba(194,86,107,0.4)] to-transparent" />
+						</Reveal>
+						<Reveal direction="right" delay={0.2}>
+							<div className="relative z-20 -mt-24 ml-auto mr-0 w-3/5 overflow-hidden rounded-lg border-2 border-white shadow-lg">
+								<img
+									src={data.couple.partnerTwo.photoUrl || PLACEHOLDER_PHOTO}
+									alt={data.couple.partnerTwo.fullName}
+									className="aspect-[3/4] w-full object-cover"
+									loading="lazy"
+									decoding="async"
+								/>
+							</div>
+						</Reveal>
+						<div className="mt-8 text-center">
 							<h3
-								{...editableProps(
-									"couple.partnerOne.fullName",
-									"mt-2 text-2xl",
-								)}
-								style={{ ...accentFont, color: COLORS.dark }}
+								style={{ ...headingFont, color: COLORS.dark }}
+								className="text-2xl sm:text-3xl"
 							>
-								{data.couple.partnerOne.fullName}
+								<span
+									{...editableProps("couple.partnerOne.fullName", "inline")}
+								>
+									{data.couple.partnerOne.fullName}
+								</span>{" "}
+								<span style={{ color: COLORS.primary }}>&amp;</span>{" "}
+								<span
+									{...editableProps("couple.partnerTwo.fullName", "inline")}
+								>
+									{data.couple.partnerTwo.fullName}
+								</span>
 							</h3>
+						</div>
+						{/* Bios below */}
+						<div className="mt-6 grid grid-cols-1 gap-4 text-center sm:grid-cols-2">
 							<p
 								{...editableProps(
 									"couple.partnerOne.bio",
-									"mt-2 whitespace-pre-line text-sm leading-relaxed",
+									"text-sm leading-relaxed whitespace-pre-line",
 								)}
 								style={{ color: COLORS.muted }}
 							>
 								{data.couple.partnerOne.bio}
 							</p>
-						</div>
-
-						{/* Partner Two */}
-						<div className="text-center">
-							<div className="rc-portrait-frame mx-auto h-72 w-56 overflow-hidden">
-								<img
-									src={data.couple.partnerTwo.photoUrl || PLACEHOLDER_PHOTO}
-									alt={`${data.couple.partnerTwo.fullName}`}
-									loading="lazy"
-									decoding="async"
-									className="h-full w-full object-cover"
-									onError={(e) => {
-										const img = e.target as HTMLImageElement;
-										if (!img.dataset.fallback) {
-											img.dataset.fallback = "true";
-											img.src = PLACEHOLDER_PHOTO;
-										}
-									}}
-								/>
-							</div>
-							<p
-								className="mt-4 text-xs uppercase tracking-[0.3em]"
-								style={{ color: COLORS.primary }}
-							>
-								<span>新娘</span> <span lang="en">/ THE BRIDE</span>
-							</p>
-							<div className="mx-auto mt-2 h-px w-12 bg-gradient-to-r from-transparent via-[rgba(194,86,107,0.4)] to-transparent" />
-							<h3
-								{...editableProps(
-									"couple.partnerTwo.fullName",
-									"mt-2 text-2xl",
-								)}
-								style={{ ...accentFont, color: COLORS.dark }}
-							>
-								{data.couple.partnerTwo.fullName}
-							</h3>
 							<p
 								{...editableProps(
 									"couple.partnerTwo.bio",
-									"mt-2 whitespace-pre-line text-sm leading-relaxed",
+									"text-sm leading-relaxed whitespace-pre-line",
 								)}
 								style={{ color: COLORS.muted }}
 							>
 								{data.couple.partnerTwo.bio}
 							</p>
 						</div>
-					</Stagger>
+					</div>
 				</div>
 			</SectionShell>
 
 			{/* ════════════════════════════════════════════
-			    5. STORY — Aubergine section with timeline
+			    4. STORY — Full-bleed alternating photo/text layout
 			    ════════════════════════════════════════════ */}
 			<SectionShell
 				sectionId="story"
@@ -445,70 +355,74 @@ export default function RomanticCinematicInvitation({
 				hidden={hiddenSections?.story}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="rc-section-aubergine relative overflow-hidden px-6 py-24 sm:px-10"
+				className="relative overflow-hidden"
 			>
-				<div className="mx-auto max-w-4xl">
-					<SectionTitle
-						zhLabel="爱 情 故 事"
-						enHeading="Our Story"
-						primaryColor={COLORS.primary}
-						darkColor={COLORS.cream}
-						headingFont={headingFont}
-						accentFont={accentFont}
-					/>
-
-					<div className="relative mt-16 pl-8 sm:pl-12">
-						{/* Timeline line */}
-						<div className="rc-timeline-line absolute left-1 top-0 h-full sm:left-3" />
-
-						<Stagger className="space-y-16" interval={0.1} direction="up">
-							{data.story.milestones.map((milestone, index) => (
-								<article
-									key={`${milestone.date}-${index}`}
-									className="relative"
+				<div>
+					<div className="px-6 py-12 text-center sm:px-10">
+						<SectionTitle
+							zhLabel="爱 情 故 事"
+							enHeading="Our Story"
+							primaryColor={COLORS.primary}
+							darkColor={COLORS.dark}
+							headingFont={headingFont}
+							accentFont={accentFont}
+						/>
+						<DiamondDivider className="my-8" />
+					</div>
+					<div className="space-y-0">
+						{data.story.milestones.map((m, i) => (
+							<Reveal
+								key={`${m.date}-${i}`}
+								direction="up"
+								duration={0.9}
+								delay={i * 0.1}
+							>
+								<div
+									className={`flex flex-col ${i % 2 === 1 ? "sm:flex-row-reverse" : "sm:flex-row"}`}
 								>
-									<div className="rc-timeline-dot absolute -left-[2.45rem] top-5 sm:-left-[3.45rem]" />
+									{m.photoUrl && (
+										<div className="sm:w-1/2">
+											<img
+												src={m.photoUrl || PLACEHOLDER_PHOTO}
+												alt={m.title}
+												className="aspect-[16/9] w-full object-cover"
+												loading="lazy"
+												decoding="async"
+											/>
+										</div>
+									)}
 									<div
-										className="rc-milestone-card"
+										className="flex flex-col justify-center px-8 py-10 sm:w-1/2"
 										style={{
-											background: "rgba(255,255,255,0.06)",
-											borderColor: "rgba(194,86,107,0.2)",
+											backgroundColor: COLORS.dark,
+											color: "#F8F5F0",
 										}}
 									>
 										<p
-											className="inline-block rounded-full px-3 py-1 text-xs uppercase tracking-[0.25em]"
+											className="text-sm tracking-widest"
 											style={{
+												...accentFont,
 												color: COLORS.accent,
-												backgroundColor: "rgba(194,86,107,0.15)",
 											}}
 										>
-											{milestone.date}
+											{m.date}
 										</p>
-										<h3
-											className="mt-3 text-2xl"
-											style={{
-												...headingFont,
-												color: COLORS.cream,
-											}}
-										>
-											{milestone.title}
+										<h3 className="mt-2 text-2xl" style={headingFont}>
+											{m.title}
 										</h3>
-										<p
-											className="mt-2 whitespace-pre-line text-sm leading-relaxed"
-											style={{ color: COLORS.muted }}
-										>
-											{milestone.description}
+										<p className="mt-3 whitespace-pre-line text-sm leading-relaxed opacity-80">
+											{m.description}
 										</p>
 									</div>
-								</article>
-							))}
-						</Stagger>
+								</div>
+							</Reveal>
+						))}
 					</div>
 				</div>
 			</SectionShell>
 
 			{/* ════════════════════════════════════════════
-			    6. GALLERY — Parchment section with film-strip
+			    5. GALLERY — Parchment section with film-strip
 			    ════════════════════════════════════════════ */}
 			<SectionShell
 				sectionId="gallery"
@@ -541,6 +455,60 @@ export default function RomanticCinematicInvitation({
 					</Reveal>
 				</div>
 			</SectionShell>
+
+			{/* ════════════════════════════════════════════
+			    6. HIGHLIGHTS REEL — Cinematic photo montage
+			    ════════════════════════════════════════════ */}
+			{data.highlightsReel && (
+				<SectionShell
+					sectionId="details"
+					mode={mode}
+					hidden={hiddenSections?.details}
+					onSelect={onSectionSelect}
+					onAiClick={onAiClick}
+					className="rc-section-aubergine relative overflow-hidden px-6 py-20 sm:px-10"
+				>
+					<div className="mx-auto max-w-5xl text-center">
+						<SectionTitle
+							zhLabel="精 彩 瞬 间"
+							enHeading="Highlights"
+							primaryColor={COLORS.primary}
+							darkColor={COLORS.cream}
+							headingFont={headingFont}
+							accentFont={accentFont}
+						/>
+						<DiamondDivider className="my-8" />
+						<Stagger interval={0.1}>
+							<div className="grid grid-cols-2 gap-3 sm:gap-4">
+								{data.highlightsReel.photos.map((photo) => (
+									<div
+										key={photo.url}
+										className="group relative overflow-hidden rounded-lg"
+									>
+										<img
+											src={photo.url || PLACEHOLDER_PHOTO}
+											alt={photo.caption || "Highlight"}
+											className="aspect-[16/10] w-full object-cover"
+											loading="lazy"
+											decoding="async"
+										/>
+										{photo.caption && (
+											<div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#1A1225]/80 to-transparent p-3">
+												<p
+													className="text-xs text-[#F8F5F0]"
+													style={headingFont}
+												>
+													{photo.caption}
+												</p>
+											</div>
+										)}
+									</div>
+								))}
+							</div>
+						</Stagger>
+					</div>
+				</SectionShell>
+			)}
 
 			{/* ════════════════════════════════════════════
 			    7. SCHEDULE — Aubergine section with event cards
@@ -738,7 +706,31 @@ export default function RomanticCinematicInvitation({
 			</SectionShell>
 
 			{/* ════════════════════════════════════════════
-			    9. RSVP — Deep aubergine background with form
+			    9. COUNTDOWN — Minimal centered
+			    ════════════════════════════════════════════ */}
+			<SectionShell
+				sectionId="countdown"
+				mode={mode}
+				hidden={hiddenSections?.countdown}
+				onSelect={onSectionSelect}
+				onAiClick={onAiClick}
+				className="rc-section-parchment relative overflow-hidden px-6 py-16 sm:px-10"
+			>
+				<Reveal direction="up" duration={0.9}>
+					<div className="mx-auto max-w-sm">
+						<DiamondDivider className="mb-8" />
+						<CountdownWidget
+							targetDate={data.hero.date}
+							eventTime={data.schedule.events[0]?.time}
+							displayDate={data.hero.date}
+						/>
+						<DiamondDivider className="mt-8" />
+					</div>
+				</Reveal>
+			</SectionShell>
+
+			{/* ════════════════════════════════════════════
+			    10. RSVP — Single-column centered on dark bg
 			    ════════════════════════════════════════════ */}
 			<SectionShell
 				sectionId="rsvp"
@@ -748,89 +740,34 @@ export default function RomanticCinematicInvitation({
 				onAiClick={onAiClick}
 				className="rc-section-aubergine px-6 py-24 sm:px-10"
 			>
-				<div className="mx-auto grid max-w-5xl gap-10 lg:grid-cols-[0.9fr_auto_1.1fr]">
-					{/* Left: info */}
-					<Reveal direction="up" duration={0.9}>
-						<div className="space-y-5">
-							<p
-								className="text-sm tracking-[0.5em]"
-								style={{
-									...headingFont,
-									color: COLORS.accentLight,
-								}}
-							>
-								敬 请 回 复
-							</p>
-							<h2
-								className="text-4xl sm:text-5xl"
-								style={{
-									...accentFont,
-									color: COLORS.cream,
-								}}
-								lang="en"
-							>
-								RSVP
-							</h2>
-							<p
-								className="max-w-md text-sm leading-relaxed"
-								style={{
-									color: "rgba(248,245,240,0.7)",
-								}}
-								lang="en"
-							>
-								{data.rsvp.customMessage ||
-									`Please let us know by ${rsvpDeadlineEn}`}
-							</p>
+				<div className="mx-auto max-w-md text-center">
+					<SectionTitle
+						zhLabel="敬 请 回 复"
+						enHeading="RSVP"
+						primaryColor={COLORS.primary}
+						darkColor={COLORS.cream}
+						headingFont={headingFont}
+						accentFont={accentFont}
+					/>
 
-							<div
-								className="rounded-xl border border-white/10 p-5"
-								style={{
-									background: "rgba(255,255,255,0.06)",
-								}}
-							>
-								<p
-									className="text-[0.6rem] uppercase tracking-[0.3em]"
-									style={{ color: COLORS.accentLight }}
-									lang="en"
-								>
-									RSVP Deadline
-								</p>
-								<p
-									className="mt-2 text-sm"
-									style={{ color: COLORS.cream }}
-									lang="en"
-								>
-									{rsvpDeadlineEn}
-								</p>
-								<p
-									className="mt-3 text-xs uppercase tracking-[0.2em]"
-									style={{
-										color: "rgba(248,245,240,0.5)",
-									}}
-									lang="en"
-								>
-									{data.rsvp.allowPlusOnes
-										? `Up to ${maxGuests} ${maxGuests > 1 ? "guests" : "guest"} on this invite`
-										: "This invitation is for one guest"}
-								</p>
-							</div>
-						</div>
+					<Reveal direction="up" duration={0.9}>
+						<p
+							className="mt-4 text-sm leading-relaxed"
+							style={{ color: "rgba(248,245,240,0.7)" }}
+							lang="en"
+						>
+							{data.rsvp.customMessage ||
+								`Please let us know by ${rsvpDeadlineEn}`}
+						</p>
 					</Reveal>
 
-					{/* Vertical lavender line */}
-					<div className="hidden self-stretch lg:block">
-						<div className="h-full w-px bg-gradient-to-b from-transparent via-[rgba(221,213,233,0.3)] to-transparent" />
-					</div>
-
-					{/* Right: form or confirmation */}
+					{/* Form or confirmation */}
 					{rsvpData ? (
 						<Reveal direction="up" duration={0.9}>
-							<div className="relative">
+							<div className="mt-8">
 								<div
 									className="flex items-center justify-center rounded-2xl border border-[rgba(194,86,107,0.15)] p-6 sm:p-8"
-									style={{
-										background: COLORS.cream,
-									}}
+									style={{ background: COLORS.cream }}
 								>
 									<RsvpConfirmation
 										{...rsvpData}
@@ -841,12 +778,10 @@ export default function RomanticCinematicInvitation({
 						</Reveal>
 					) : (
 						<Reveal direction="up" duration={0.9}>
-							<div className="relative">
+							<div className="mt-8">
 								<form
-									className="rounded-2xl border border-[rgba(194,86,107,0.15)] p-6 sm:p-10"
-									style={{
-										background: COLORS.cream,
-									}}
+									className="rounded-2xl border border-[rgba(194,86,107,0.15)] p-6 text-left sm:p-10"
+									style={{ background: COLORS.cream }}
 									onSubmit={async (event) => {
 										event.preventDefault();
 										if (!onRsvpSubmit || submittingRef.current) return;
@@ -1159,41 +1094,7 @@ export default function RomanticCinematicInvitation({
 			</SectionShell>
 
 			{/* ════════════════════════════════════════════
-			    10. GIFT — Digital angpow (parchment)
-			    ════════════════════════════════════════════ */}
-			{data.gift && (
-				<SectionShell
-					sectionId="gift"
-					mode={mode}
-					hidden={hiddenSections?.gift}
-					onSelect={onSectionSelect}
-					onAiClick={onAiClick}
-					className="rc-section-parchment px-6 py-24 sm:px-10"
-				>
-					<div className="mx-auto max-w-md text-center">
-						<SectionTitle
-							zhLabel="礼 金 祝 福"
-							enHeading="Digital Angpow"
-							primaryColor={COLORS.primary}
-							darkColor={COLORS.dark}
-							headingFont={headingFont}
-							accentFont={accentFont}
-						/>
-						<Reveal direction="up" duration={0.9}>
-							<div className="mt-8">
-								<AngpowQRCode
-									paymentUrl={data.gift.paymentUrl}
-									paymentMethod={data.gift.paymentMethod}
-									recipientName={data.gift.recipientName}
-								/>
-							</div>
-						</Reveal>
-					</div>
-				</SectionShell>
-			)}
-
-			{/* ════════════════════════════════════════════
-			    11. FOOTER — Aubergine closing
+			    11. FOOTER — Aubergine closing (with gift merged in)
 			    ════════════════════════════════════════════ */}
 			<SectionShell
 				sectionId="footer"
@@ -1238,6 +1139,28 @@ export default function RomanticCinematicInvitation({
 							</p>
 						</Reveal>
 					) : null}
+
+					{/* Gift merged into footer */}
+					{data.gift && (
+						<Reveal direction="up" delay={0.4} duration={0.9}>
+							<div className="mt-10">
+								<DiamondDivider className="mb-6" />
+								<p
+									className="mb-4 text-sm tracking-[0.3em]"
+									style={{ ...headingFont, color: COLORS.accent }}
+								>
+									礼 金 祝 福
+								</p>
+								<div className="mx-auto max-w-xs">
+									<AngpowQRCode
+										paymentUrl={data.gift.paymentUrl}
+										paymentMethod={data.gift.paymentMethod}
+										recipientName={data.gift.recipientName}
+									/>
+								</div>
+							</div>
+						</Reveal>
+					)}
 				</div>
 			</SectionShell>
 
@@ -1250,7 +1173,7 @@ export default function RomanticCinematicInvitation({
 					primaryColor={COLORS.primary}
 					onGiftClick={() =>
 						document
-							.getElementById("gift")
+							.getElementById("footer")
 							?.scrollIntoView({ behavior: "smooth" })
 					}
 					onMessageClick={() =>
