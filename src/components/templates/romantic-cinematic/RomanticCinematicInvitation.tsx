@@ -239,7 +239,7 @@ export default function RomanticCinematicInvitation({
 				>
 					<Reveal direction="blur" duration={1.2}>
 						<div className="mx-auto max-w-lg text-center">
-							<div className="rounded-xl border border-[rgba(194,86,107,0.15)] bg-white/60 px-8 py-12 shadow-sm backdrop-blur-sm">
+							<div className="rc-love-letter rounded-xl p-8 backdrop-blur-sm sm:p-12">
 								<p
 									className="text-sm tracking-widest"
 									style={{ ...accentFont, color: COLORS.primary }}
@@ -258,6 +258,8 @@ export default function RomanticCinematicInvitation({
 					</Reveal>
 				</SectionShell>
 			)}
+
+			<div className="rc-rose-divider mx-auto w-32 my-1" aria-hidden="true" />
 
 			{/* ════════════════════════════════════════════
 			    3. COUPLE — Overlapping portrait frames
@@ -282,7 +284,13 @@ export default function RomanticCinematicInvitation({
 
 					<div className="relative mx-auto mt-14 max-w-md">
 						<Reveal direction="left">
-							<div className="relative z-10 ml-0 w-3/5 overflow-hidden rounded-lg shadow-lg">
+							<div
+								className="relative z-10 ml-0 w-3/5 overflow-hidden rounded-lg"
+								style={{
+									boxShadow:
+										"0 8px 30px rgba(26, 18, 37, 0.2), 0 2px 8px rgba(26, 18, 37, 0.1)",
+								}}
+							>
 								<img
 									src={data.couple.partnerOne.photoUrl || PLACEHOLDER_PHOTO}
 									alt={data.couple.partnerOne.fullName}
@@ -293,7 +301,13 @@ export default function RomanticCinematicInvitation({
 							</div>
 						</Reveal>
 						<Reveal direction="right" delay={0.2}>
-							<div className="relative z-20 -mt-24 ml-auto mr-0 w-3/5 overflow-hidden rounded-lg border-2 border-white shadow-lg">
+							<div
+								className="relative z-20 -mt-24 ml-auto mr-0 w-3/5 overflow-hidden rounded-lg border-2 border-white"
+								style={{
+									boxShadow:
+										"0 12px 40px rgba(26, 18, 37, 0.25), 0 4px 12px rgba(26, 18, 37, 0.12)",
+								}}
+							>
 								<img
 									src={data.couple.partnerTwo.photoUrl || PLACEHOLDER_PHOTO}
 									alt={data.couple.partnerTwo.fullName}
@@ -346,6 +360,8 @@ export default function RomanticCinematicInvitation({
 				</div>
 			</SectionShell>
 
+			<div className="rc-rose-divider mx-auto w-32 my-1" aria-hidden="true" />
+
 			{/* ════════════════════════════════════════════
 			    4. STORY — Full-bleed alternating photo/text layout
 			    ════════════════════════════════════════════ */}
@@ -381,7 +397,7 @@ export default function RomanticCinematicInvitation({
 									className={`flex flex-col ${i % 2 === 1 ? "sm:flex-row-reverse" : "sm:flex-row"}`}
 								>
 									{m.photoUrl && (
-										<div className="sm:w-1/2">
+										<div className="rc-photo-frame sm:w-1/2">
 											<img
 												src={m.photoUrl || PLACEHOLDER_PHOTO}
 												alt={m.title}
@@ -420,6 +436,8 @@ export default function RomanticCinematicInvitation({
 					</div>
 				</div>
 			</SectionShell>
+
+			<div className="rc-rose-divider mx-auto w-32 my-1" aria-hidden="true" />
 
 			{/* ════════════════════════════════════════════
 			    5. GALLERY — Parchment section with film-strip
@@ -483,7 +501,7 @@ export default function RomanticCinematicInvitation({
 								{data.highlightsReel.photos.map((photo) => (
 									<div
 										key={photo.url}
-										className="group relative overflow-hidden rounded-lg"
+										className="rc-highlight-photo group relative"
 									>
 										<img
 											src={photo.url || PLACEHOLDER_PHOTO}
@@ -535,11 +553,7 @@ export default function RomanticCinematicInvitation({
 						{data.schedule.events.map((event, index) => (
 							<article
 								key={`${event.time}-${index}`}
-								className="rc-event-card"
-								style={{
-									background: "rgba(255,255,255,0.06)",
-									borderColor: "rgba(194,86,107,0.2)",
-								}}
+								className="rc-event-card rc-schedule-card"
 							>
 								<div className="rc-event-card-stripe" />
 								<div>
@@ -581,6 +595,8 @@ export default function RomanticCinematicInvitation({
 					</Stagger>
 				</div>
 			</SectionShell>
+
+			<div className="rc-rose-divider mx-auto w-32 my-1" aria-hidden="true" />
 
 			{/* ════════════════════════════════════════════
 			    8. VENUE — Parchment section
@@ -704,6 +720,8 @@ export default function RomanticCinematicInvitation({
 					</Reveal>
 				</div>
 			</SectionShell>
+
+			<div className="rc-rose-divider mx-auto w-32 my-1" aria-hidden="true" />
 
 			{/* ════════════════════════════════════════════
 			    9. COUNTDOWN — Minimal centered
@@ -858,7 +876,7 @@ export default function RomanticCinematicInvitation({
 												maxLength={100}
 												aria-required="true"
 												aria-invalid={!!errors.name}
-												className="rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
+												className="rc-form-input rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
 												style={{
 													borderColor: "rgba(194,86,107,0.2)",
 													color: COLORS.dark,
@@ -896,7 +914,7 @@ export default function RomanticCinematicInvitation({
 												autoComplete="email"
 												spellCheck={false}
 												aria-invalid={!!errors.email}
-												className="rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
+												className="rc-form-input rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
 												style={{
 													borderColor: "rgba(194,86,107,0.2)",
 													color: COLORS.dark,
@@ -931,7 +949,7 @@ export default function RomanticCinematicInvitation({
 											<select
 												name="attendance"
 												defaultValue="attending"
-												className="rounded-lg border bg-white px-4 py-3 text-sm"
+												className="rc-form-input rounded-lg border bg-white px-4 py-3 text-sm"
 												style={{
 													borderColor: "rgba(194,86,107,0.2)",
 													color: COLORS.dark,
@@ -954,7 +972,7 @@ export default function RomanticCinematicInvitation({
 												max={maxGuests}
 												defaultValue={1}
 												inputMode="numeric"
-												className="rounded-lg border bg-white px-4 py-3 text-sm"
+												className="rc-form-input rounded-lg border bg-white px-4 py-3 text-sm"
 												style={{
 													borderColor: "rgba(194,86,107,0.2)",
 													color: COLORS.dark,
@@ -972,7 +990,7 @@ export default function RomanticCinematicInvitation({
 											<select
 												name="dietary"
 												defaultValue=""
-												className="rounded-lg border bg-white px-4 py-3 text-sm"
+												className="rc-form-input rounded-lg border bg-white px-4 py-3 text-sm"
 												style={{
 													borderColor: "rgba(194,86,107,0.2)",
 													color: COLORS.dark,
@@ -998,7 +1016,7 @@ export default function RomanticCinematicInvitation({
 												placeholder="Send your wishes to the couple"
 												autoComplete="off"
 												maxLength={500}
-												className="min-h-24 rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
+												className="rc-form-input min-h-24 rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
 												style={{
 													borderColor: "rgba(194,86,107,0.2)",
 													color: COLORS.dark,

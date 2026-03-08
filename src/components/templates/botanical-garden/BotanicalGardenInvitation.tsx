@@ -224,6 +224,11 @@ export default function BotanicalGardenInvitation({
 				</div>
 			</SectionShell>
 
+			<div
+				className="bg-emerald-divider mx-auto w-32 my-1"
+				aria-hidden="true"
+			/>
+
 			{/* ════════════════════════════════════════════
 			    2. COUPLE — Asymmetric layout (60/40 offset)
 			    ════════════════════════════════════════════ */}
@@ -248,7 +253,7 @@ export default function BotanicalGardenInvitation({
 					<div className="mx-auto mt-14 max-w-3xl">
 						<div className="flex flex-col items-center gap-8 sm:flex-row sm:items-start">
 							<Reveal direction="left" className="sm:w-3/5">
-								<div className="overflow-hidden rounded-2xl">
+								<div className="bg-couple-photo overflow-hidden rounded-2xl">
 									<img
 										src={data.couple.partnerOne.photoUrl || PLACEHOLDER_PHOTO}
 										alt={data.couple.partnerOne.fullName}
@@ -281,7 +286,7 @@ export default function BotanicalGardenInvitation({
 								delay={0.2}
 								className="sm:mt-20 sm:w-2/5"
 							>
-								<div className="overflow-hidden rounded-2xl">
+								<div className="bg-couple-photo overflow-hidden rounded-2xl">
 									<img
 										src={data.couple.partnerTwo.photoUrl || PLACEHOLDER_PHOTO}
 										alt={data.couple.partnerTwo.fullName}
@@ -313,6 +318,11 @@ export default function BotanicalGardenInvitation({
 					</div>
 				</div>
 			</SectionShell>
+
+			<div
+				className="bg-emerald-divider mx-auto w-32 my-1"
+				aria-hidden="true"
+			/>
 
 			{/* ════════════════════════════════════════════
 			    3. STORY — Timeline with botanical styling
@@ -356,7 +366,7 @@ export default function BotanicalGardenInvitation({
 									key={`${milestone.date}-${index}`}
 									className="relative"
 								>
-									<div className="bg-timeline-dot absolute -left-[2.45rem] top-5 sm:-left-[3.45rem]" />
+									<div className="bg-timeline-dot bg-path-dot absolute -left-[2.45rem] top-5 sm:-left-[3.45rem]" />
 									<div className="bg-milestone-card">
 										<p
 											className="inline-block rounded-full px-3 py-1 text-xs uppercase tracking-[0.25em]"
@@ -390,6 +400,11 @@ export default function BotanicalGardenInvitation({
 				</div>
 			</SectionShell>
 
+			<div
+				className="bg-emerald-divider mx-auto w-32 my-1"
+				aria-hidden="true"
+			/>
+
 			{/* ════════════════════════════════════════════
 			    4. GALLERY — Polaroid scattered photos
 			    ════════════════════════════════════════════ */}
@@ -418,7 +433,7 @@ export default function BotanicalGardenInvitation({
 							return (
 								<Reveal key={photo.url} direction="scale" delay={i * 0.08}>
 									<div
-										className="bg-white p-2 shadow-md transition-transform duration-300"
+										className="bg-polaroid bg-white p-2 shadow-md transition-transform duration-300"
 										style={{ transform: `rotate(${rotation}deg)` }}
 									>
 										<img
@@ -446,6 +461,11 @@ export default function BotanicalGardenInvitation({
 					</div>
 				</div>
 			</SectionShell>
+
+			<div
+				className="bg-emerald-divider mx-auto w-32 my-1"
+				aria-hidden="true"
+			/>
 
 			{/* ════════════════════════════════════════════
 			    5. DRESS CODE — Visual guide with color swatches
@@ -490,7 +510,7 @@ export default function BotanicalGardenInvitation({
 										{data.dressCode.doColors.map((c) => (
 											<span
 												key={c}
-												className="rounded-full border bg-white px-3 py-1 text-xs"
+												className="bg-color-swatch rounded-full border bg-white px-3 py-1 text-xs"
 												style={{
 													borderColor: "rgba(6,78,59,0.15)",
 													color: COLORS.dark,
@@ -514,7 +534,7 @@ export default function BotanicalGardenInvitation({
 										{data.dressCode.dontColors.map((c) => (
 											<span
 												key={c}
-												className="rounded-full border bg-white px-3 py-1 text-xs line-through opacity-60"
+												className="bg-color-swatch rounded-full border bg-white px-3 py-1 text-xs line-through opacity-60"
 												style={{
 													borderColor: "rgba(194,87,26,0.15)",
 													color: COLORS.dark,
@@ -546,6 +566,11 @@ export default function BotanicalGardenInvitation({
 				</SectionShell>
 			)}
 
+			<div
+				className="bg-emerald-divider mx-auto w-32 my-1"
+				aria-hidden="true"
+			/>
+
 			{/* ════════════════════════════════════════════
 			    6. SCHEDULE — Event cards with emerald left border
 			    ════════════════════════════════════════════ */}
@@ -569,7 +594,10 @@ export default function BotanicalGardenInvitation({
 
 					<Stagger interval={0.1} direction="up" className="mt-14 space-y-4">
 						{data.schedule.events.map((event, index) => (
-							<article key={`${event.time}-${index}`} className="bg-event-card">
+							<article
+								key={`${event.time}-${index}`}
+								className="bg-event-card bg-schedule-card"
+							>
 								<div className="bg-event-card-stripe" />
 								<div>
 									<p
@@ -610,6 +638,11 @@ export default function BotanicalGardenInvitation({
 					</Stagger>
 				</div>
 			</SectionShell>
+
+			<div
+				className="bg-emerald-divider mx-auto w-32 my-1"
+				aria-hidden="true"
+			/>
 
 			{/* ════════════════════════════════════════════
 			    7. VENUE — Clean card with emerald buttons
@@ -741,6 +774,11 @@ export default function BotanicalGardenInvitation({
 				</div>
 			</SectionShell>
 
+			<div
+				className="bg-emerald-divider mx-auto w-32 my-1"
+				aria-hidden="true"
+			/>
+
 			{/* ════════════════════════════════════════════
 			    8. COUNTDOWN
 			    ════════════════════════════════════════════ */}
@@ -764,6 +802,11 @@ export default function BotanicalGardenInvitation({
 					<BotanicalDivider className="mt-8" />
 				</div>
 			</SectionShell>
+
+			<div
+				className="bg-emerald-divider mx-auto w-32 my-1"
+				aria-hidden="true"
+			/>
 
 			{/* ════════════════════════════════════════════
 			    9. RSVP — Dark charcoal background
@@ -945,7 +988,7 @@ export default function BotanicalGardenInvitation({
 												maxLength={100}
 												aria-required="true"
 												aria-invalid={!!errors.name}
-												className="rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
+												className="bg-form-input rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
 												style={{
 													borderColor: "rgba(6,78,59,0.3)",
 													color: COLORS.dark,
@@ -983,7 +1026,7 @@ export default function BotanicalGardenInvitation({
 												autoComplete="email"
 												spellCheck={false}
 												aria-invalid={!!errors.email}
-												className="rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
+												className="bg-form-input rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
 												style={{
 													borderColor: "rgba(6,78,59,0.3)",
 													color: COLORS.dark,
@@ -1018,7 +1061,7 @@ export default function BotanicalGardenInvitation({
 											<select
 												name="attendance"
 												defaultValue="attending"
-												className="rounded-lg border bg-white px-4 py-3 text-sm"
+												className="bg-form-input rounded-lg border bg-white px-4 py-3 text-sm"
 												style={{
 													borderColor: "rgba(6,78,59,0.3)",
 													color: COLORS.dark,
@@ -1041,7 +1084,7 @@ export default function BotanicalGardenInvitation({
 												max={maxGuests}
 												defaultValue={1}
 												inputMode="numeric"
-												className="rounded-lg border bg-white px-4 py-3 text-sm"
+												className="bg-form-input rounded-lg border bg-white px-4 py-3 text-sm"
 												style={{
 													borderColor: "rgba(6,78,59,0.3)",
 													color: COLORS.dark,
@@ -1059,7 +1102,7 @@ export default function BotanicalGardenInvitation({
 											<select
 												name="dietary"
 												defaultValue=""
-												className="rounded-lg border bg-white px-4 py-3 text-sm"
+												className="bg-form-input rounded-lg border bg-white px-4 py-3 text-sm"
 												style={{
 													borderColor: "rgba(6,78,59,0.3)",
 													color: COLORS.dark,
@@ -1085,7 +1128,7 @@ export default function BotanicalGardenInvitation({
 												placeholder="Send your wishes to the couple"
 												autoComplete="off"
 												maxLength={500}
-												className="min-h-24 rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
+												className="bg-form-input min-h-24 rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
 												style={{
 													borderColor: "rgba(6,78,59,0.3)",
 													color: COLORS.dark,
@@ -1179,6 +1222,11 @@ export default function BotanicalGardenInvitation({
 					)}
 				</div>
 			</SectionShell>
+
+			<div
+				className="bg-emerald-divider mx-auto w-32 my-1"
+				aria-hidden="true"
+			/>
 
 			{/* ════════════════════════════════════════════
 			    10. FOOTER — Botanical closing (gift merged)

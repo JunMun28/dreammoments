@@ -231,6 +231,8 @@ export default function DoubleHappinessInvitation({
 				</LetterboxReveal>
 			</SectionShell>
 
+			<div className="dh-gold-divider mx-auto w-48 my-1" />
+
 			{/* ════════════════════════════════════════════
 			    2. ANNOUNCEMENT — Bilingual formal greeting
 			    ════════════════════════════════════════════ */}
@@ -304,6 +306,8 @@ export default function DoubleHappinessInvitation({
 				</div>
 			</SectionShell>
 
+			<div className="dh-gold-divider mx-auto w-48 my-1" />
+
 			{/* ════════════════════════════════════════════
 			    3. COUPLE — Rounded-rectangle portraits
 			    ════════════════════════════════════════════ */}
@@ -328,22 +332,24 @@ export default function DoubleHappinessInvitation({
 					<Stagger interval={0.15} className="mt-14 grid gap-12 sm:grid-cols-2">
 						{/* Groom */}
 						<div className="text-center">
-							<div className="dh-portrait-frame mx-auto h-72 w-56 overflow-hidden">
-								<img
-									src={data.couple.partnerOne.photoUrl || PLACEHOLDER_PHOTO}
-									alt={`${data.couple.partnerOne.fullName}`}
-									loading="lazy"
-									decoding="async"
-									className="h-full w-full object-cover"
-									onError={(e) => {
-										const img = e.target as HTMLImageElement;
-										if (!img.dataset.fallback) {
-											img.dataset.fallback = "true";
-											img.src = PLACEHOLDER_PHOTO;
-										}
-									}}
-								/>
-							</div>
+							<Reveal direction="scale">
+								<div className="dh-portrait-frame mx-auto h-72 w-56 overflow-hidden">
+									<img
+										src={data.couple.partnerOne.photoUrl || PLACEHOLDER_PHOTO}
+										alt={`${data.couple.partnerOne.fullName}`}
+										loading="lazy"
+										decoding="async"
+										className="h-full w-full object-cover"
+										onError={(e) => {
+											const img = e.target as HTMLImageElement;
+											if (!img.dataset.fallback) {
+												img.dataset.fallback = "true";
+												img.src = PLACEHOLDER_PHOTO;
+											}
+										}}
+									/>
+								</div>
+							</Reveal>
 							<p
 								className="mt-4 text-xs uppercase tracking-[0.3em]"
 								style={{ color: COLORS.accent }}
@@ -373,22 +379,24 @@ export default function DoubleHappinessInvitation({
 
 						{/* Bride */}
 						<div className="text-center">
-							<div className="dh-portrait-frame mx-auto h-72 w-56 overflow-hidden">
-								<img
-									src={data.couple.partnerTwo.photoUrl || PLACEHOLDER_PHOTO}
-									alt={`${data.couple.partnerTwo.fullName}`}
-									loading="lazy"
-									decoding="async"
-									className="h-full w-full object-cover"
-									onError={(e) => {
-										const img = e.target as HTMLImageElement;
-										if (!img.dataset.fallback) {
-											img.dataset.fallback = "true";
-											img.src = PLACEHOLDER_PHOTO;
-										}
-									}}
-								/>
-							</div>
+							<Reveal direction="scale">
+								<div className="dh-portrait-frame mx-auto h-72 w-56 overflow-hidden">
+									<img
+										src={data.couple.partnerTwo.photoUrl || PLACEHOLDER_PHOTO}
+										alt={`${data.couple.partnerTwo.fullName}`}
+										loading="lazy"
+										decoding="async"
+										className="h-full w-full object-cover"
+										onError={(e) => {
+											const img = e.target as HTMLImageElement;
+											if (!img.dataset.fallback) {
+												img.dataset.fallback = "true";
+												img.src = PLACEHOLDER_PHOTO;
+											}
+										}}
+									/>
+								</div>
+							</Reveal>
 							<p
 								className="mt-4 text-xs uppercase tracking-[0.3em]"
 								style={{ color: COLORS.accent }}
@@ -418,6 +426,8 @@ export default function DoubleHappinessInvitation({
 					</Stagger>
 				</div>
 			</SectionShell>
+
+			<div className="dh-gold-divider mx-auto w-48 my-1" />
 
 			{/* ════ ENTOURAGE — Wedding Party Grid ════ */}
 			<SectionShell
@@ -455,7 +465,7 @@ export default function DoubleHappinessInvitation({
 										{data.weddingParty.groomsmen.map((g) => (
 											<div key={g.name} className="py-1">
 												<p
-													className="text-base text-[#FAF7F2]"
+													className="dh-entourage-name text-base"
 													style={headingFont}
 												>
 													{g.name}
@@ -483,7 +493,7 @@ export default function DoubleHappinessInvitation({
 										{data.weddingParty.bridesmaids.map((b) => (
 											<div key={b.name} className="py-1">
 												<p
-													className="text-base text-[#FAF7F2]"
+													className="dh-entourage-name text-base"
 													style={headingFont}
 												>
 													{b.name}
@@ -500,6 +510,8 @@ export default function DoubleHappinessInvitation({
 					)}
 				</div>
 			</SectionShell>
+
+			<div className="dh-gold-divider mx-auto w-48 my-1" />
 
 			{/* ════════════════════════════════════════════
 			    5. STORY — Horizontal scroll timeline
@@ -566,6 +578,8 @@ export default function DoubleHappinessInvitation({
 				</div>
 			</SectionShell>
 
+			<div className="dh-gold-divider mx-auto w-48 my-1" />
+
 			{/* ════════════════════════════════════════════
 			    6. GALLERY — Masonry grid
 			    ════════════════════════════════════════════ */}
@@ -589,8 +603,8 @@ export default function DoubleHappinessInvitation({
 					<ArtDecoDivider className="my-8" />
 					<div className="columns-2 gap-4 sm:columns-3">
 						{data.gallery.photos.map((photo, i) => (
-							<Reveal key={photo.url} direction="scale" delay={i * 0.08}>
-								<div className="mb-4 break-inside-avoid overflow-hidden rounded-lg border border-[rgba(201,169,110,0.15)]">
+							<Reveal key={photo.url} direction="up" delay={i * 0.08}>
+								<div className="dh-gallery-item mb-4 break-inside-avoid overflow-hidden rounded-lg border border-[rgba(201,169,110,0.15)]">
 									<img
 										src={photo.url || PLACEHOLDER_PHOTO}
 										alt={photo.caption || "Wedding photo"}
@@ -616,6 +630,8 @@ export default function DoubleHappinessInvitation({
 				</div>
 			</SectionShell>
 
+			<div className="dh-gold-divider mx-auto w-48 my-1" />
+
 			{/* ════════════════════════════════════════════
 			    7. COUNTDOWN — Clean centered layout
 			    ════════════════════════════════════════════ */}
@@ -640,6 +656,8 @@ export default function DoubleHappinessInvitation({
 				</div>
 			</SectionShell>
 
+			<div className="dh-gold-divider mx-auto w-48 my-1" />
+
 			{/* ════════════════════════════════════════════
 			    8. SCHEDULE — Event cards with champagne left border
 			    ════════════════════════════════════════════ */}
@@ -663,7 +681,10 @@ export default function DoubleHappinessInvitation({
 
 					<Stagger interval={0.1} className="mt-14 space-y-4">
 						{data.schedule.events.map((event, index) => (
-							<article key={`${event.time}-${index}`} className="dh-event-card">
+							<article
+								key={`${event.time}-${index}`}
+								className="dh-event-card dh-schedule-card"
+							>
 								<div className="dh-event-card-stripe" />
 								<div>
 									<p
@@ -704,6 +725,8 @@ export default function DoubleHappinessInvitation({
 					</Stagger>
 				</div>
 			</SectionShell>
+
+			<div className="dh-gold-divider mx-auto w-48 my-1" />
 
 			{/* ════════════════════════════════════════════
 			    9. VENUE — Clean card with champagne buttons
@@ -822,6 +845,8 @@ export default function DoubleHappinessInvitation({
 					</Reveal>
 				</div>
 			</SectionShell>
+
+			<div className="dh-gold-divider mx-auto w-48 my-1" />
 
 			{/* ════════════════════════════════════════════
 			    10. RSVP — Espresso background with champagne form
@@ -1000,7 +1025,7 @@ export default function DoubleHappinessInvitation({
 												maxLength={100}
 												aria-required="true"
 												aria-invalid={!!errors.name}
-												className="rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
+												className="dh-form-input rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
 												style={{
 													borderColor: "rgba(201,169,110,0.3)",
 													color: COLORS.dark,
@@ -1038,7 +1063,7 @@ export default function DoubleHappinessInvitation({
 												autoComplete="email"
 												spellCheck={false}
 												aria-invalid={!!errors.email}
-												className="rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
+												className="dh-form-input rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
 												style={{
 													borderColor: "rgba(201,169,110,0.3)",
 													color: COLORS.dark,
@@ -1073,7 +1098,7 @@ export default function DoubleHappinessInvitation({
 											<select
 												name="attendance"
 												defaultValue="attending"
-												className="rounded-lg border bg-white px-4 py-3 text-sm"
+												className="dh-form-input rounded-lg border bg-white px-4 py-3 text-sm"
 												style={{
 													borderColor: "rgba(201,169,110,0.3)",
 													color: COLORS.dark,
@@ -1096,7 +1121,7 @@ export default function DoubleHappinessInvitation({
 												max={maxGuests}
 												defaultValue={1}
 												inputMode="numeric"
-												className="rounded-lg border bg-white px-4 py-3 text-sm"
+												className="dh-form-input rounded-lg border bg-white px-4 py-3 text-sm"
 												style={{
 													borderColor: "rgba(201,169,110,0.3)",
 													color: COLORS.dark,
@@ -1114,7 +1139,7 @@ export default function DoubleHappinessInvitation({
 											<select
 												name="dietary"
 												defaultValue=""
-												className="rounded-lg border bg-white px-4 py-3 text-sm"
+												className="dh-form-input rounded-lg border bg-white px-4 py-3 text-sm"
 												style={{
 													borderColor: "rgba(201,169,110,0.3)",
 													color: COLORS.dark,
@@ -1140,7 +1165,7 @@ export default function DoubleHappinessInvitation({
 												placeholder="Send your wishes to the couple"
 												autoComplete="off"
 												maxLength={500}
-												className="min-h-24 rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
+												className="dh-form-input min-h-24 rounded-lg border bg-white px-4 py-3 text-sm placeholder:text-gray-400"
 												style={{
 													borderColor: "rgba(201,169,110,0.3)",
 													color: COLORS.dark,
@@ -1232,6 +1257,8 @@ export default function DoubleHappinessInvitation({
 					)}
 				</div>
 			</SectionShell>
+
+			<div className="dh-gold-divider mx-auto w-48 my-1" />
 
 			{/* ════════════════════════════════════════════
 			    11. FOOTER — Closing with gift merged in

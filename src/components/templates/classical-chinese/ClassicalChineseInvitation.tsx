@@ -283,12 +283,12 @@ export default function ClassicalChineseInvitation({
 										新郎方
 									</p>
 									<p
-										className="mt-3 text-lg text-[#F5F0E8]"
+										className="cc-parent-name mt-3 text-lg"
 										style={headingFont}
 									>
 										{data.parentsHonor.groomParents.father}
 									</p>
-									<p className="text-lg text-[#F5F0E8]" style={headingFont}>
+									<p className="cc-parent-name text-lg" style={headingFont}>
 										{data.parentsHonor.groomParents.mother}
 									</p>
 								</div>
@@ -300,12 +300,12 @@ export default function ClassicalChineseInvitation({
 										新娘方
 									</p>
 									<p
-										className="mt-3 text-lg text-[#F5F0E8]"
+										className="cc-parent-name mt-3 text-lg"
 										style={headingFont}
 									>
 										{data.parentsHonor.brideParents.father}
 									</p>
-									<p className="text-lg text-[#F5F0E8]" style={headingFont}>
+									<p className="cc-parent-name text-lg" style={headingFont}>
 										{data.parentsHonor.brideParents.mother}
 									</p>
 								</div>
@@ -410,7 +410,7 @@ export default function ClassicalChineseInvitation({
 				hidden={hiddenSections?.couple}
 				onSelect={onSectionSelect}
 				onAiClick={onAiClick}
-				className="cc-section-ivory cc-ink-texture px-6 py-24 sm:px-10"
+				className="cc-section-ivory cc-ink-texture cc-ink-wash-bg px-6 py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-4xl">
 					<SectionTitle
@@ -468,6 +468,11 @@ export default function ClassicalChineseInvitation({
 				</div>
 			</SectionShell>
 
+			<div
+				className="cc-vermillion-divider mx-auto w-24 my-1"
+				aria-hidden="true"
+			/>
+
 			{/* ════════════════════════════════════════════
 			    5. STORY — Obsidian bg, staggered timeline
 			    ════════════════════════════════════════════ */}
@@ -514,14 +519,14 @@ export default function ClassicalChineseInvitation({
 											className="mt-3 text-2xl"
 											style={{
 												...headingFont,
-												color: COLORS.dark,
+												color: COLORS.cream,
 											}}
 										>
 											{milestone.title}
 										</h3>
 										<p
 											className="mt-2 whitespace-pre-line text-sm leading-relaxed"
-											style={{ color: COLORS.muted }}
+											style={{ color: "rgba(245,240,232,0.7)" }}
 										>
 											{milestone.description}
 										</p>
@@ -562,7 +567,7 @@ export default function ClassicalChineseInvitation({
 							{data.schedule.events.map((event, index) => (
 								<div
 									key={`${event.time}-${index}`}
-									className="flex items-baseline border-b py-4"
+									className="cc-schedule-row flex items-baseline border-b py-4"
 									style={{
 										borderColor: "rgba(184,134,11,0.15)",
 									}}
@@ -594,6 +599,11 @@ export default function ClassicalChineseInvitation({
 					</div>
 				</div>
 			</SectionShell>
+
+			<div
+				className="cc-vermillion-divider mx-auto w-24 my-1"
+				aria-hidden="true"
+			/>
 
 			{/* ════════════════════════════════════════════
 			    7. VENUE — Parchment bg, minimal with vermillion border
@@ -718,6 +728,11 @@ export default function ClassicalChineseInvitation({
 					</Reveal>
 				</div>
 			</SectionShell>
+
+			<div
+				className="cc-vermillion-divider mx-auto w-24 my-1"
+				aria-hidden="true"
+			/>
 
 			{/* ════════════════════════════════════════════
 			    8. RSVP — Obsidian bg, compact single-column
@@ -856,7 +871,7 @@ export default function ClassicalChineseInvitation({
 											maxLength={100}
 											aria-required="true"
 											aria-invalid={!!errors.name}
-											className="rounded-lg border px-4 py-3 text-sm placeholder:text-gray-400"
+											className="cc-form-input rounded-lg border px-4 py-3 text-sm placeholder:text-gray-400"
 											style={{
 												borderColor: "rgba(184,134,11,0.3)",
 												color: COLORS.dark,
@@ -895,7 +910,7 @@ export default function ClassicalChineseInvitation({
 											autoComplete="email"
 											spellCheck={false}
 											aria-invalid={!!errors.email}
-											className="rounded-lg border px-4 py-3 text-sm placeholder:text-gray-400"
+											className="cc-form-input rounded-lg border px-4 py-3 text-sm placeholder:text-gray-400"
 											style={{
 												borderColor: "rgba(184,134,11,0.3)",
 												color: COLORS.dark,
@@ -931,7 +946,7 @@ export default function ClassicalChineseInvitation({
 										<select
 											name="attendance"
 											defaultValue="attending"
-											className="rounded-lg border px-4 py-3 text-sm"
+											className="cc-form-input rounded-lg border px-4 py-3 text-sm"
 											style={{
 												borderColor: "rgba(184,134,11,0.3)",
 												color: COLORS.dark,
@@ -955,7 +970,7 @@ export default function ClassicalChineseInvitation({
 											max={maxGuests}
 											defaultValue={1}
 											inputMode="numeric"
-											className="rounded-lg border px-4 py-3 text-sm"
+											className="cc-form-input rounded-lg border px-4 py-3 text-sm"
 											style={{
 												borderColor: "rgba(184,134,11,0.3)",
 												color: COLORS.dark,
@@ -974,7 +989,7 @@ export default function ClassicalChineseInvitation({
 										<select
 											name="dietary"
 											defaultValue=""
-											className="rounded-lg border px-4 py-3 text-sm"
+											className="cc-form-input rounded-lg border px-4 py-3 text-sm"
 											style={{
 												borderColor: "rgba(184,134,11,0.3)",
 												color: COLORS.dark,
@@ -999,7 +1014,7 @@ export default function ClassicalChineseInvitation({
 											placeholder="Send your wishes to the couple"
 											autoComplete="off"
 											maxLength={500}
-											className="min-h-24 rounded-lg border px-4 py-3 text-sm placeholder:text-gray-400"
+											className="cc-form-input min-h-24 rounded-lg border px-4 py-3 text-sm placeholder:text-gray-400"
 											style={{
 												borderColor: "rgba(184,134,11,0.3)",
 												color: COLORS.dark,

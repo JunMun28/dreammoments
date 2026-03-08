@@ -84,6 +84,12 @@
 	border: 2px solid rgba(184, 134, 11, 0.4);
 	transform: rotate(-3deg);
 	box-shadow: 0 2px 12px rgba(212, 56, 13, 0.3);
+	transition: box-shadow 0.6s ease;
+}
+@media (hover: hover) {
+	.cc-seal:hover {
+		box-shadow: 0 0 16px rgba(212, 56, 13, 0.25);
+	}
 }
 
 /* ── Brush stroke divider ── */
@@ -220,11 +226,19 @@
 
 /* ── Milestone card ── */
 .cc-milestone-card {
-	background: #f5f0e8;
-	border: 1px solid rgba(184, 134, 11, 0.2);
-	border-radius: 12px;
+	background: rgba(12, 12, 12, 0.85);
+	border: 1px solid rgba(184, 134, 11, 0.15);
+	border-radius: 8px;
 	padding: 1.25rem;
-	box-shadow: 0 2px 8px rgba(12, 12, 12, 0.05);
+	transition:
+		border-color 0.3s ease,
+		transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@media (hover: hover) {
+	.cc-milestone-card:hover {
+		border-color: rgba(184, 134, 11, 0.35);
+		transform: translateY(-2px);
+	}
 }
 
 /* ── Schedule event card ── */
@@ -252,6 +266,12 @@
 	outline: 2px solid #f5f0e8;
 	outline-offset: 2px;
 	box-shadow: 0 0 0 4px rgba(212, 56, 13, 0.4);
+}
+
+.cc-form-input:focus {
+	outline: 2px solid #d4380d;
+	outline-offset: 2px;
+	box-shadow: 0 0 0 4px rgba(212, 56, 13, 0.1);
 }
 
 /* ── Countdown styling ── */
@@ -329,6 +349,58 @@
 	letter-spacing: 0.2em;
 	color: var(--t-muted);
 	margin-top: 1.25rem;
+}
+
+/* ── Vermillion gradient divider ── */
+.cc-vermillion-divider {
+	height: 1px;
+	background: linear-gradient(
+		to right,
+		transparent,
+		rgba(212, 56, 13, 0.4),
+		transparent
+	);
+}
+
+/* ── Ink wash background texture ── */
+.cc-ink-wash-bg {
+	background-image:
+		radial-gradient(
+			ellipse at 20% 50%,
+			rgba(184, 134, 11, 0.03) 0%,
+			transparent 50%
+		),
+		radial-gradient(
+			ellipse at 80% 20%,
+			rgba(212, 56, 13, 0.02) 0%,
+			transparent 50%
+		);
+}
+
+/* ── Schedule table row hover ── */
+.cc-schedule-row {
+	transition: background-color 0.3s ease;
+}
+@media (hover: hover) {
+	.cc-schedule-row:hover {
+		background-color: rgba(184, 134, 11, 0.04);
+	}
+}
+
+/* ── Parents' name gold gradient ── */
+.cc-parent-name {
+	background: linear-gradient(135deg, #b8860b, #d4a845, #b8860b);
+	background-size: 200% 100%;
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+}
+
+/* ── Vertical text (classical Chinese feel) ── */
+.cc-vertical-text {
+	writing-mode: vertical-rl;
+	text-orientation: mixed;
+	letter-spacing: 0.3em;
 }
 
 /* ── Reduced motion ── */

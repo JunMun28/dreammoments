@@ -58,10 +58,10 @@
 .rc-film-grain {
 	position: absolute;
 	inset: 0;
-	background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-	mix-blend-mode: overlay;
-	opacity: 0.15;
+	opacity: 0.04;
+	background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
 	pointer-events: none;
+	mix-blend-mode: overlay;
 	z-index: 1;
 }
 
@@ -188,6 +188,18 @@
 	box-shadow: 0 2px 8px rgba(26, 18, 37, 0.08);
 }
 
+@media (hover: hover) {
+	.rc-photo-frame {
+		transition:
+			transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+			box-shadow 0.5s ease;
+	}
+	.rc-photo-frame:hover {
+		transform: scale(1.02);
+		box-shadow: 0 16px 40px rgba(26, 18, 37, 0.25);
+	}
+}
+
 /* ── Countdown styling ── */
 .romantic-cinematic .countdown-widget {
 	text-align: center;
@@ -265,6 +277,61 @@
 	margin-top: 1.25rem;
 }
 
+/* ── Rose/aubergine gradient divider ── */
+.rc-rose-divider {
+	height: 1px;
+	background: linear-gradient(
+		to right,
+		transparent,
+		rgba(194, 86, 107, 0.4),
+		transparent
+	);
+}
+
+/* ── Love letter parchment card ── */
+.rc-love-letter {
+	background: linear-gradient(135deg, #fdf8f0 0%, #f5ede0 100%);
+	border: 1px solid rgba(194, 86, 107, 0.15);
+	box-shadow:
+		0 4px 20px rgba(26, 18, 37, 0.08),
+		inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+/* ── Highlights reel photos ── */
+.rc-highlight-photo {
+	border-radius: 8px;
+	overflow: hidden;
+	position: relative;
+}
+.rc-highlight-photo::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(
+		to top,
+		rgba(26, 18, 37, 0.6) 0%,
+		transparent 50%
+	);
+	pointer-events: none;
+}
+
+/* ── Schedule cards — dark glass effect ── */
+.rc-schedule-card {
+	background: rgba(26, 18, 37, 0.6);
+	backdrop-filter: blur(8px);
+	border: 1px solid rgba(221, 213, 233, 0.1);
+	border-radius: 12px;
+	transition:
+		transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+		border-color 0.3s ease;
+}
+@media (hover: hover) {
+	.rc-schedule-card:hover {
+		transform: translateY(-2px);
+		border-color: rgba(194, 86, 107, 0.3);
+	}
+}
+
 /* ── RSVP form focus indicators ── */
 .romantic-cinematic input:focus-visible,
 .romantic-cinematic select:focus-visible,
@@ -272,6 +339,13 @@
 	outline: 2px solid #ffffff;
 	outline-offset: 2px;
 	box-shadow: 0 0 0 4px rgba(194, 86, 107, 0.5);
+}
+
+/* ── Form input focus — aubergine accent ── */
+.rc-form-input:focus {
+	outline: 2px solid var(--rc-primary, #c2566b);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 4px rgba(194, 86, 107, 0.12);
 }
 
 /* ── Reduced motion ── */

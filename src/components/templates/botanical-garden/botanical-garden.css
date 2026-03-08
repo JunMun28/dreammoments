@@ -295,6 +295,106 @@
 	}
 }
 
+/* ── Emerald gradient divider ── */
+.bg-emerald-divider {
+	height: 1px;
+	background: linear-gradient(
+		to right,
+		transparent,
+		rgba(6, 78, 59, 0.35),
+		transparent
+	);
+}
+
+/* ── Polaroid gallery hover ── */
+@media (hover: hover) {
+	.bg-polaroid {
+		transition:
+			transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+			box-shadow 0.5s ease;
+	}
+	.bg-polaroid:hover {
+		/* biome-ignore lint/complexity/noImportantStyles: override inline rotate */
+		transform: rotate(0deg) translateY(-6px) !important;
+		box-shadow: 0 16px 40px rgba(28, 25, 23, 0.15);
+		z-index: 10;
+	}
+}
+
+/* ── Story milestone path dots ── */
+.bg-path-dot {
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	background: #064e3b;
+	box-shadow: 0 0 0 4px rgba(6, 78, 59, 0.15);
+	transition: box-shadow 0.3s ease;
+}
+@media (hover: hover) {
+	.bg-path-dot:hover {
+		box-shadow: 0 0 0 8px rgba(6, 78, 59, 0.2);
+	}
+}
+
+/* ── Schedule event cards ── */
+.bg-schedule-card {
+	background: rgba(245, 230, 211, 0.7);
+	border: 1px solid rgba(6, 78, 59, 0.1);
+	border-left: 3px solid #c2571a;
+	border-radius: 12px;
+	transition:
+		transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+		box-shadow 0.3s ease;
+}
+@media (hover: hover) {
+	.bg-schedule-card:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 8px 24px rgba(28, 25, 23, 0.1);
+	}
+}
+
+/* ── Dress code color swatches ── */
+.bg-color-swatch {
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	border: 2px solid rgba(255, 255, 255, 0.6);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	transition: transform 0.3s ease;
+}
+@media (hover: hover) {
+	.bg-color-swatch:hover {
+		transform: scale(1.15);
+	}
+}
+
+/* ── Form focus states ── */
+.bg-form-input:focus {
+	outline: 2px solid #064e3b;
+	outline-offset: 2px;
+	box-shadow: 0 0 0 4px rgba(6, 78, 59, 0.1);
+}
+
+/* ── Couple asymmetric photos ── */
+.bg-couple-photo {
+	border-radius: 16px;
+	box-shadow: 0 8px 32px rgba(28, 25, 23, 0.12);
+	transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@media (hover: hover) {
+	.bg-couple-photo:hover {
+		transform: translateY(-4px);
+	}
+}
+
+/* ── Venue map hero ── */
+.bg-venue-hero {
+	border: 2px solid rgba(6, 78, 59, 0.2);
+	border-radius: 16px;
+	overflow: hidden;
+	box-shadow: 0 8px 32px rgba(28, 25, 23, 0.1);
+}
+
 /* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
 	.botanical-garden * {
