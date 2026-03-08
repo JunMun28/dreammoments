@@ -74,6 +74,46 @@ export const classicalChineseTemplate: TemplateConfig = {
 			],
 		},
 		{
+			id: "extra",
+			type: "extra",
+			defaultVisible: true,
+			notes:
+				"Parents' Honor — family names with honorifics on obsidian background.",
+			fields: [
+				{
+					id: "groomParents.father",
+					label: "Groom's father",
+					type: "text",
+					sample: "张建国",
+				},
+				{
+					id: "groomParents.mother",
+					label: "Groom's mother",
+					type: "text",
+					sample: "李淑芬",
+				},
+				{
+					id: "brideParents.father",
+					label: "Bride's father",
+					type: "text",
+					sample: "王明华",
+				},
+				{
+					id: "brideParents.mother",
+					label: "Bride's mother",
+					type: "text",
+					sample: "陈秀英",
+				},
+				{
+					id: "hostingLine",
+					label: "Hosting line",
+					type: "textarea",
+					sample:
+						"谨订于公历二〇二五年六月十五日（农历五月二十），假座新加坡君悦大酒店，敬备喜筵，恭请光临。",
+				},
+			],
+		},
+		{
 			id: "announcement",
 			type: "announcement",
 			defaultVisible: true,
@@ -106,7 +146,8 @@ export const classicalChineseTemplate: TemplateConfig = {
 			id: "couple",
 			type: "couple",
 			defaultVisible: true,
-			notes: "Side-by-side portraits with traditional gold double-line frame.",
+			notes:
+				"Stacked vertically with seal stamps — deliberate, minimal layout.",
 			fields: [
 				{
 					id: "partnerOne.fullName",
@@ -159,30 +200,10 @@ export const classicalChineseTemplate: TemplateConfig = {
 			],
 		},
 		{
-			id: "gallery",
-			type: "gallery",
-			defaultVisible: true,
-			notes: "Photo gallery with traditional gold frames.",
-			fields: [
-				{
-					id: "photos",
-					label: "Gallery photos",
-					type: "list",
-				},
-			],
-		},
-		{
-			id: "countdown",
-			type: "countdown",
-			defaultVisible: true,
-			notes: "Countdown timer using CountdownWidget, reads from hero.date.",
-			fields: [],
-		},
-		{
 			id: "schedule",
 			type: "schedule",
 			defaultVisible: true,
-			notes: "Event cards with red left border, time in gold accent.",
+			notes: "Clean table layout — time on left, event details on right.",
 			fields: [
 				{
 					id: "events",
@@ -221,7 +242,7 @@ export const classicalChineseTemplate: TemplateConfig = {
 			type: "rsvp",
 			defaultVisible: true,
 			notes:
-				"Full RSVP form on dark lacquer background: name, email, attendance, guests, dietary, message, consent.",
+				"Compact single-column RSVP form with vermillion buttons on obsidian background.",
 			fields: [
 				{
 					id: "deadline",
@@ -236,30 +257,6 @@ export const classicalChineseTemplate: TemplateConfig = {
 				{
 					id: "maxPlusOnes",
 					label: "Max plus ones",
-					type: "text",
-				},
-			],
-		},
-		{
-			id: "gift",
-			type: "gift",
-			defaultVisible: false,
-			notes: "Digital angpow with AngpowQRCode, gold border card.",
-			fields: [
-				{
-					id: "paymentUrl",
-					label: "Payment URL",
-					type: "text",
-				},
-				{
-					id: "paymentMethod",
-					label: "Payment method",
-					type: "text",
-					sample: "paynow",
-				},
-				{
-					id: "recipientName",
-					label: "Recipient name",
 					type: "text",
 				},
 			],
