@@ -1,4 +1,5 @@
 import type { InvitationContent } from "../../lib/types";
+import type { DesignTokens } from "../../templates/types";
 
 export type TemplateRenderMode = "public" | "editor" | "preview";
 
@@ -15,6 +16,7 @@ export type TemplateInvitationProps = {
 	content: InvitationContent;
 	hiddenSections?: Record<string, boolean>;
 	mode?: TemplateRenderMode;
+	tokens?: DesignTokens;
 	onSectionSelect?: (sectionId: string) => void;
 	onAiClick?: (sectionId: string) => void;
 	onInlineEdit?: (fieldPath: string, element?: HTMLElement) => void;

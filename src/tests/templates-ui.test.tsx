@@ -6,6 +6,7 @@ import { describe, expect, test, vi } from "vitest";
 import DoubleHappinessInvitation from "../components/templates/double-happiness/DoubleHappinessInvitation";
 import RomanticCinematicInvitation from "../components/templates/romantic-cinematic/RomanticCinematicInvitation";
 import SectionTitle from "../components/templates/SectionTitle";
+import SuperDesignInvitation from "../components/templates/superdesign/SuperDesignInvitation";
 import type { TemplateInvitationProps } from "../components/templates/types";
 import { buildSampleContent } from "../data/sample-invitation";
 import { templates } from "../templates";
@@ -35,11 +36,15 @@ describe("template render coverage", () => {
 				]),
 			);
 			const Template =
-				templateComponents[template.id] ?? DoubleHappinessInvitation;
+				templateComponents[template.id] ??
+				(template.id.startsWith("sd-")
+					? SuperDesignInvitation
+					: DoubleHappinessInvitation);
 			const markup = renderToString(
 				<Template
 					content={buildSampleContent(template.id)}
 					hiddenSections={hiddenSections}
+					tokens={template.tokens}
 				/>,
 			);
 			const matches = markup.match(/data-section=/g) ?? [];

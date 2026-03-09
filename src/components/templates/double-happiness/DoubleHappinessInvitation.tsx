@@ -29,7 +29,7 @@ import "./double-happiness.css";
 
 /* ─── Design Tokens ─── */
 
-const COLORS = {
+const DEFAULT_COLORS = {
 	primary: "#D4622A",
 	accent: "#B8862D",
 	cream: "#FAF7F2",
@@ -39,28 +39,64 @@ const COLORS = {
 	muted: "#4A5568",
 } as const;
 
+function useColors(props: TemplateInvitationProps) {
+	const t = props.tokens?.colors;
+	if (!t) return DEFAULT_COLORS;
+	return {
+		primary: t.primary,
+		accent: t.accent,
+		cream: t.background,
+		dark: t.secondary,
+		espresso: t.secondary,
+		accentLight: t.muted,
+		muted: t.muted,
+	};
+}
+
 /* ─── Typography ─── */
 
-const headingFont: CSSProperties = {
+const DEFAULT_HEADING: CSSProperties = {
 	fontFamily: "'Cinzel', 'Noto Serif SC', Georgia, serif",
 };
 
-const bodyFont: CSSProperties = {
+const DEFAULT_BODY: CSSProperties = {
 	fontFamily: "'Josefin Sans', 'Noto Sans SC', system-ui, sans-serif",
 };
 
-const accentFont: CSSProperties = {
+const DEFAULT_ACCENT: CSSProperties = {
 	fontFamily: "'Cinzel', 'Noto Serif SC', serif",
 	fontWeight: 700,
 };
 
+function useFonts(props: TemplateInvitationProps) {
+	const t = props.tokens?.typography;
+	if (!t) {
+		return {
+			headingFont: DEFAULT_HEADING,
+			bodyFont: DEFAULT_BODY,
+			accentFont: DEFAULT_ACCENT,
+		};
+	}
+	return {
+		headingFont: { fontFamily: t.headingFont } as CSSProperties,
+		bodyFont: { fontFamily: t.bodyFont } as CSSProperties,
+		accentFont: { fontFamily: t.accentFont, fontWeight: 700 } as CSSProperties,
+	};
+}
+
 /* ─── Art Deco Divider ─── */
 
-function ArtDecoDivider({ className = "" }: { className?: string }) {
+function ArtDecoDivider({
+	className = "",
+	color = DEFAULT_COLORS.accent,
+}: {
+	className?: string;
+	color?: string;
+}) {
 	return (
 		<DrawPath
 			d="M0,30 L20,10 L40,30 L60,10 L80,30 L100,10 L120,30"
-			stroke={COLORS.accent}
+			stroke={color}
 			strokeWidth={1.5}
 			width={160}
 			height={40}
@@ -88,16 +124,23 @@ const PLACEHOLDER_PHOTO =
 
 /* ─── Main Component ─── */
 
-export default function DoubleHappinessInvitation({
-	content,
-	hiddenSections,
-	mode = "public",
-	onSectionSelect,
-	onAiClick,
-	onInlineEdit,
-	onRsvpSubmit,
-	rsvpStatus,
-}: TemplateInvitationProps) {
+export default function DoubleHappinessInvitation(
+	props: TemplateInvitationProps,
+) {
+	const {
+		content,
+		hiddenSections,
+		mode = "public",
+		onSectionSelect,
+		onAiClick,
+		onInlineEdit,
+		onRsvpSubmit,
+		rsvpStatus,
+	} = props;
+
+	const COLORS = useColors(props);
+	const { headingFont, bodyFont, accentFont } = useFonts(props);
+
 	const consentDescriptionId = useId();
 	const data = content;
 	const editableProps = makeEditableProps(mode, onInlineEdit);
@@ -245,7 +288,7 @@ export default function DoubleHappinessInvitation({
 				className="dh-section-white relative overflow-hidden px-6 py-16 sm:py-24 sm:px-10"
 			>
 				<div className="mx-auto max-w-3xl text-center">
-					<ArtDecoDivider className="mb-10" />
+					<ArtDecoDivider className="mb-10" color={COLORS.accent} />
 
 					<Reveal direction="up">
 						<p
@@ -302,7 +345,7 @@ export default function DoubleHappinessInvitation({
 						</div>
 					</Reveal>
 
-					<ArtDecoDivider className="mt-10" />
+					<ArtDecoDivider className="mt-10" color={COLORS.accent} />
 				</div>
 			</SectionShell>
 
@@ -447,7 +490,7 @@ export default function DoubleHappinessInvitation({
 						headingFont={headingFont}
 						accentFont={accentFont}
 					/>
-					<ArtDecoDivider className="my-8" />
+					<ArtDecoDivider className="my-8" color={COLORS.accent} />
 					{data.weddingParty && (
 						<div className="grid grid-cols-1 gap-12 sm:grid-cols-2">
 							<Reveal direction="left">
@@ -533,7 +576,7 @@ export default function DoubleHappinessInvitation({
 						headingFont={headingFont}
 						accentFont={accentFont}
 					/>
-					<ArtDecoDivider className="my-8" />
+					<ArtDecoDivider className="my-8" color={COLORS.accent} />
 					<div className="dh-story-scroll -mx-6 flex snap-x snap-mandatory gap-6 overflow-x-auto px-6 pb-4 sm:-mx-10 sm:px-10">
 						{data.story.milestones.map((m, i) => (
 							<Reveal key={m.date} direction="up" delay={i * 0.1}>
@@ -600,7 +643,7 @@ export default function DoubleHappinessInvitation({
 						headingFont={headingFont}
 						accentFont={accentFont}
 					/>
-					<ArtDecoDivider className="my-8" />
+					<ArtDecoDivider className="my-8" color={COLORS.accent} />
 					<div className="columns-2 gap-4 sm:columns-3">
 						{data.gallery.photos.map((photo, i) => (
 							<Reveal key={photo.url} direction="up" delay={i * 0.08}>
@@ -644,7 +687,7 @@ export default function DoubleHappinessInvitation({
 				className="dh-section-cream relative overflow-hidden px-6 py-16 sm:px-10"
 			>
 				<div className="mx-auto max-w-sm">
-					<ArtDecoDivider className="mb-8" />
+					<ArtDecoDivider className="mb-8" color={COLORS.accent} />
 					<Reveal direction="up">
 						<CountdownWidget
 							targetDate={data.hero.date}
@@ -652,7 +695,7 @@ export default function DoubleHappinessInvitation({
 							displayDate={data.hero.date}
 						/>
 					</Reveal>
-					<ArtDecoDivider className="mt-8" />
+					<ArtDecoDivider className="mt-8" color={COLORS.accent} />
 				</div>
 			</SectionShell>
 
@@ -1272,7 +1315,7 @@ export default function DoubleHappinessInvitation({
 				className="dh-section-cream relative overflow-hidden px-6 pb-20 pt-16 text-center sm:px-10"
 			>
 				<div className="mx-auto max-w-3xl">
-					<ArtDecoDivider className="mb-10" />
+					<ArtDecoDivider className="mb-10" color={COLORS.accent} />
 
 					{data.gift && (
 						<Reveal direction="up">

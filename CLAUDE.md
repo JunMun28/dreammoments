@@ -25,7 +25,7 @@ pnpm build                  # 4. Production build
 pnpm db:generate            # 5. Migration drift check — commit new drizzle/ files if generated
 ```
 
-CI also runs `pnpm exec playwright test --project=chromium` for E2E.
+CI also runs `pnpm exec playwright test --project=chromium-authed --project=chromium-public` for E2E.
 
 ## Conventions
 

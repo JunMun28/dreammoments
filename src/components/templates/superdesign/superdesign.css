@@ -1,0 +1,315 @@
+/* ─── SuperDesign Template ───
+   Fully token-driven: all colors from CSS custom properties.
+   --t-primary, --t-secondary, --t-accent, --t-bg, --t-text, --t-muted
+*/
+
+.sd-template {
+	--sd-border: color-mix(in srgb, var(--t-accent) 20%, transparent);
+	--sd-border-strong: color-mix(in srgb, var(--t-accent) 40%, transparent);
+	--sd-glass: color-mix(in srgb, var(--t-bg) 60%, transparent);
+	--sd-overlay: color-mix(in srgb, var(--t-secondary) 50%, transparent);
+	--sd-overlay-strong: color-mix(in srgb, var(--t-secondary) 70%, transparent);
+	--sd-surface: color-mix(in srgb, var(--t-bg) 95%, var(--t-accent));
+	--sd-surface-alt: color-mix(in srgb, var(--t-secondary) 95%, var(--t-bg));
+	background-color: var(--t-bg);
+	color: var(--t-text);
+}
+
+/* ─── Sections ─── */
+
+.sd-section {
+	padding: 4rem 1.5rem;
+}
+@media (min-width: 640px) {
+	.sd-section {
+		padding: 6rem 2.5rem;
+	}
+}
+
+.sd-section-alt {
+	background: var(--sd-surface-alt);
+}
+
+/* ─── Divider ─── */
+
+.sd-divider {
+	height: 1px;
+	max-width: 12rem;
+	margin: 0 auto;
+	background: linear-gradient(
+		to right,
+		transparent,
+		var(--t-accent),
+		transparent
+	);
+	opacity: 0.5;
+}
+
+/* ─── Hero ─── */
+
+.sd-hero {
+	position: relative;
+	min-height: 100svh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+}
+
+.sd-hero-overlay {
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(
+		to bottom,
+		var(--sd-overlay),
+		var(--sd-overlay-strong)
+	);
+}
+
+.sd-hero-content {
+	position: relative;
+	z-index: 10;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	max-width: 48rem;
+	padding: 5rem 1.5rem;
+	text-align: center;
+}
+
+.sd-hero-names {
+	font-size: clamp(2rem, 8vw, 4rem);
+	letter-spacing: 0.02em;
+	line-height: 1.1;
+}
+
+.sd-hero-separator {
+	display: inline-block;
+	margin: 0 0.5rem;
+	opacity: 0.6;
+	font-size: 0.7em;
+}
+
+.sd-hero-tagline {
+	margin-top: 1.5rem;
+	font-size: clamp(0.875rem, 2vw, 1.125rem);
+	line-height: 1.6;
+	opacity: 0.8;
+}
+
+.sd-hero-pills {
+	margin-top: 2rem;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 0.75rem;
+}
+
+.sd-hero-pill {
+	padding: 0.5rem 1rem;
+	border-radius: 9999px;
+	border: 1px solid var(--sd-border);
+	font-size: 0.75rem;
+	letter-spacing: 0.05em;
+	backdrop-filter: blur(4px);
+}
+
+/* ─── Cards ─── */
+
+.sd-card {
+	border-radius: 1rem;
+	border: 1px solid var(--sd-border);
+	background: var(--sd-glass);
+	backdrop-filter: blur(8px);
+	padding: 1.5rem;
+}
+
+.sd-card-solid {
+	border-radius: 1rem;
+	border: 1px solid var(--sd-border);
+	background: var(--sd-surface);
+	padding: 1.5rem;
+}
+
+/* ─── Portrait ─── */
+
+.sd-portrait {
+	width: 14rem;
+	height: 18rem;
+	overflow: hidden;
+	border-radius: 1rem;
+	border: 2px solid var(--sd-border-strong);
+}
+
+.sd-portrait img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* ─── Story Cards ─── */
+
+.sd-story-scroll {
+	display: flex;
+	gap: 1.5rem;
+	overflow-x: auto;
+	scroll-snap-type: x mandatory;
+	padding-bottom: 1rem;
+	-webkit-overflow-scrolling: touch;
+}
+
+.sd-story-card {
+	min-width: 260px;
+	max-width: 320px;
+	flex-shrink: 0;
+	scroll-snap-align: center;
+}
+@media (min-width: 640px) {
+	.sd-story-card {
+		min-width: 340px;
+	}
+}
+
+/* ─── Gallery ─── */
+
+.sd-gallery {
+	columns: 2;
+	gap: 1rem;
+}
+@media (min-width: 640px) {
+	.sd-gallery {
+		columns: 3;
+	}
+}
+
+.sd-gallery-item {
+	break-inside: avoid;
+	margin-bottom: 1rem;
+	overflow: hidden;
+	border-radius: 0.75rem;
+	border: 1px solid var(--sd-border);
+}
+
+.sd-gallery-item img {
+	width: 100%;
+	object-fit: cover;
+}
+
+/* ─── Schedule ─── */
+
+.sd-event-card {
+	display: flex;
+	gap: 1rem;
+	border-radius: 1rem;
+	border: 1px solid var(--sd-border);
+	background: var(--sd-surface);
+	padding: 1.25rem 1.5rem;
+	transition: border-color 0.2s;
+}
+
+.sd-event-card:hover {
+	border-color: var(--sd-border-strong);
+}
+
+.sd-event-stripe {
+	width: 3px;
+	flex-shrink: 0;
+	border-radius: 9999px;
+	background: var(--t-primary);
+}
+
+/* ─── Venue ─── */
+
+.sd-venue-card {
+	border-radius: 1rem;
+	border: 1px solid var(--sd-border);
+	background: var(--sd-surface);
+	padding: 2rem;
+	text-align: center;
+	max-width: 28rem;
+	margin: 0 auto;
+}
+
+.sd-map-link {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.375rem;
+	padding: 0.625rem 1.25rem;
+	border-radius: 9999px;
+	border: 1px solid var(--sd-border);
+	font-size: 0.75rem;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	transition: background 0.2s;
+	color: var(--t-primary);
+}
+
+.sd-map-link:hover {
+	background: color-mix(in srgb, var(--t-primary) 8%, transparent);
+}
+
+/* ─── Form ─── */
+
+.sd-form {
+	border-radius: 1rem;
+	border: 1px solid var(--sd-border);
+	background: var(--sd-surface);
+	padding: 1.5rem;
+}
+@media (min-width: 640px) {
+	.sd-form {
+		padding: 2.5rem;
+	}
+}
+
+.sd-form-input {
+	width: 100%;
+	border-radius: 0.5rem;
+	border: 1px solid var(--sd-border-strong);
+	background: var(--t-bg);
+	padding: 0.75rem 1rem;
+	font-size: 0.875rem;
+	color: var(--t-text);
+	transition: border-color 0.2s;
+}
+
+.sd-form-input:focus {
+	outline: 2px solid var(--t-primary);
+	outline-offset: 1px;
+	border-color: var(--t-primary);
+}
+
+.sd-form-input::placeholder {
+	color: var(--t-muted);
+	opacity: 0.6;
+}
+
+.sd-submit-btn {
+	display: inline-flex;
+	width: 100%;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	padding: 0.875rem 1.25rem;
+	border-radius: 9999px;
+	font-size: 0.75rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.2em;
+	background: var(--t-primary);
+	color: var(--t-bg);
+	transition: opacity 0.2s;
+}
+
+.sd-submit-btn:hover {
+	opacity: 0.9;
+}
+
+.sd-submit-btn:active {
+	transform: scale(0.98);
+}
+
+.sd-submit-btn:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
