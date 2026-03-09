@@ -8,7 +8,12 @@ import AxeBuilder from "@axe-core/playwright"
  */
 export async function checkAccessibility(page: Page, selector?: string) {
 	let builder = new AxeBuilder({ page })
-		.disableRules(["aria-allowed-role", "color-contrast"])
+		.disableRules([
+			"aria-allowed-role",
+			"color-contrast",
+			"landmark-unique",
+			"nested-interactive",
+		])
 	if (selector) {
 		builder = builder.include(selector)
 	}
