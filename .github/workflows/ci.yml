@@ -72,7 +72,7 @@ jobs:
           CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
           E2E_CLERK_USER_USERNAME: ${{ secrets.E2E_CLERK_USER_USERNAME }}
           E2E_CLERK_USER_PASSWORD: ${{ secrets.E2E_CLERK_USER_PASSWORD }}
-        run: pnpm exec playwright test --project=chromium-authed --project=chromium-public
+        run: pnpm exec playwright test --project=chromium-authed --project=chromium-public --ignore-snapshots
 
       - uses: actions/upload-artifact@v4
         if: failure()

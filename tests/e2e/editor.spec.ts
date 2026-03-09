@@ -107,7 +107,7 @@ test.describe("Canvas editor", () => {
 		await page.waitForTimeout(3000)
 
 		const previewBtn = page.getByRole("button", {
-			name: /preview/i,
+			name: "Preview invitation",
 		})
 		if (await previewBtn.isVisible()) {
 			await previewBtn.click()

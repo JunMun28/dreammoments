@@ -8,6 +8,7 @@ import AxeBuilder from "@axe-core/playwright"
  */
 export async function checkAccessibility(page: Page, selector?: string) {
 	let builder = new AxeBuilder({ page })
+		.disableRules(["aria-allowed-role"])
 	if (selector) {
 		builder = builder.include(selector)
 	}

@@ -70,7 +70,7 @@ test.describe("editor responsive viewports", () => {
 
 				// Open preview mode via button (desktop) or overflow menu (mobile)
 				if (viewport.width >= 768) {
-					const previewBtn = page.getByRole("button", { name: /preview/i })
+					const previewBtn = page.getByRole("button", { name: "Preview invitation" })
 					if (await previewBtn.isVisible()) {
 						await previewBtn.click()
 					}
@@ -78,7 +78,7 @@ test.describe("editor responsive viewports", () => {
 					const moreBtn = page.getByRole("button", { name: "More actions" })
 					if (await moreBtn.isVisible()) {
 						await moreBtn.click()
-						await page.getByRole("button", { name: /preview/i }).click()
+						await page.getByRole("button", { name: "Preview invitation" }).click()
 					}
 				}
 
