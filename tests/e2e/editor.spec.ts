@@ -101,7 +101,7 @@ test.describe("Canvas editor", () => {
 		}
 	})
 
-	test("preview mode shows the invitation", async ({ page }) => {
+	test("preview mode shows the invitation", async ({ page, context }) => {
 		await page.goto(`/editor/canvas/${invitationId}`)
 		await page.waitForLoadState("domcontentloaded")
 		await page.waitForTimeout(3000)
@@ -110,13 +110,14 @@ test.describe("Canvas editor", () => {
 			name: "Preview invitation",
 		})
 		if (await previewBtn.isVisible()) {
-			await previewBtn.click()
-
-			const preview = page
-				.locator("[role='dialog']")
-				.or(page.locator("iframe"))
-				.or(page.locator("[data-testid*='preview']"))
-			await expect(preview.first()).toBeVisible({ timeout: 5000 })
+			// Preview opens in a new tab via window.open
+			const [newPage] = await Promise.all([
+				context.waitForEvent("page"),
+				previewBtn.click(),
+			])
+			await newPage.waitForLoadState("domcontentloaded")
+			expect(newPage.url()).toContain("/invite/")
+			await newPage.close()
 		}
 	})
 })
