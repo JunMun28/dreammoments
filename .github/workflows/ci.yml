@@ -66,7 +66,7 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
 
       - name: Run E2E tests
-        run: pnpm exec playwright test --project=chromium
+        run: pnpm exec playwright test --project=chromium-authed --project=chromium-public
 
       - uses: actions/upload-artifact@v4
         if: failure()
